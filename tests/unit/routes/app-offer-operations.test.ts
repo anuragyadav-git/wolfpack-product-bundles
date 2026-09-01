@@ -1,4 +1,16 @@
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+
 export {};
+
+const useFetcher = jest.fn();
+jest.mock('@remix-run/react', () => ({
+  useFetcher,
+}));
+
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 const authenticateAdmin = jest.fn();
 jest.mock('../../../app/shopify.server', () => ({
@@ -12,18 +24,28 @@ jest.mock('../../../app/services/offer-policy-csv.server', () => ({
   applyOfferPolicyCsvImport,
 }));
 
-const { action, loader } = require('../../../app/routes/app/app.offer-operations') as {
+const { action, loader, default: OfferOperationsRoute } = require('../../../app/routes/app/app.offer-operations') as {
   action: (args: any) => Promise<Response>;
   loader: (args: any) => Promise<Response>;
+  default: React.ComponentType;
 };
 
 describe('offer operations route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useFetcher.mockReturnValue({ data: undefined, state: 'idle', submit: jest.fn() });
     authenticateAdmin.mockResolvedValue({
       session: { shop: 'test.myshopify.com' },
       admin: { graphql: jest.fn() },
     });
+  });
+
+  it('lets merchants dismiss the informational import safety banner', () => {
+    const view = renderToStaticMarkup(React.createElement(OfferOperationsRoute));
+
+    expect(view).toContain(
+      '<s-banner tone="info" heading="offerPolicyCsv.import.safetyTitle" dismissible="true"',
+    );
   });
 
   it('renders the authenticated operations surface without serving file bytes', async () => {

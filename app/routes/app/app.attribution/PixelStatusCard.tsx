@@ -56,26 +56,28 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
 
   return (
     <>
-      <s-banner
-        tone={active ? "success" : "warning"}
-        heading="UTM Pixel Tracking"
-        dismissible={active}
-        hidden={false}
-        onDismiss={active && hydrated ? dismiss : undefined}
-      >
-        <s-stack direction="inline" justifyContent="space-between" alignItems="center" gap="base">
-          <s-text>{model.description}</s-text>
-          {model.actionLabel ? (
-            <s-button
-              variant="tertiary"
-              commandFor="utm-pixel-tracking-disclosure"
-              command="--show"
-            >
-              {model.actionLabel}
-            </s-button>
-          ) : null}
-        </s-stack>
-      </s-banner>
+      <s-box paddingBlockEnd="small-200">
+        <s-banner
+          tone={active ? "success" : "warning"}
+          heading="UTM Pixel Tracking"
+          dismissible={active}
+          hidden={false}
+          onDismiss={active && hydrated ? dismiss : undefined}
+        >
+          <s-stack direction="inline" justifyContent="space-between" alignItems="center" gap="base">
+            <s-text>{model.description}</s-text>
+            {model.actionLabel ? (
+              <s-button
+                variant="tertiary"
+                commandFor="utm-pixel-tracking-disclosure"
+                command="--show"
+              >
+                {model.actionLabel}
+              </s-button>
+            ) : null}
+          </s-stack>
+        </s-banner>
+      </s-box>
 
       {!active ? (
         <s-modal

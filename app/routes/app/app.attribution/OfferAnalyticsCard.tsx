@@ -28,16 +28,12 @@ export function OfferAnalyticsCard({
   const selected = model.options.find((option) => (
     option.id === model.selectedOfferPolicyId
   ));
-  const revenue = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(model.funnelSnapshot.revenueCents / 100);
-
   return (
     <s-section heading={t("analyticsPage.offers.title")}>
-      <s-stack direction="block" gap="base">
-        <s-text color="subdued">{t("analyticsPage.offers.description")}</s-text>
+      <s-grid
+        gridTemplateColumns="@container (inline-size > 700px) minmax(16rem, 28rem) minmax(0, 1fr), 1fr"
+        gap="base"
+      >
         <s-select
           label={t("analyticsPage.offers.filterLabel")}
           value={model.selectedOfferPolicyId ?? ""}
@@ -66,25 +62,7 @@ export function OfferAnalyticsCard({
             ) : null}
           </s-stack>
         ) : null}
-        <s-grid
-          gridTemplateColumns="repeat(auto-fit, minmax(12rem, 1fr))"
-          gap="base"
-        >
-          {[
-            [t("analyticsPage.offers.engaged"), model.funnelSnapshot.engaged.toLocaleString()],
-            [t("analyticsPage.offers.addedToCart"), model.funnelSnapshot.addedToCart.toLocaleString()],
-            [t("analyticsPage.offers.checkedOut"), model.funnelSnapshot.checkedOut.toLocaleString()],
-            [t("analyticsPage.offers.revenue"), revenue],
-          ].map(([label, value]) => (
-            <s-box key={label} padding="base" border="base" borderRadius="base">
-              <s-stack direction="block" gap="small-100">
-                <s-text color="subdued">{label}</s-text>
-                <s-heading>{value}</s-heading>
-              </s-stack>
-            </s-box>
-          ))}
-        </s-grid>
-      </s-stack>
+      </s-grid>
     </s-section>
   );
 }

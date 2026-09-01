@@ -47,7 +47,18 @@ describe("Analytics chart loading boundary", () => {
           bundleMatrix: [],
           topCampaignsRows: [],
           customUtmParameters: [],
+          offerAnalytics: {
+            selectedOfferPolicyId: null,
+            options: [],
+            funnelSnapshot: {
+              engaged: 0,
+              addedToCart: 0,
+              checkedOut: 0,
+              revenueCents: 0,
+            },
+          },
         } as any,
+        onOfferSelectionChange: jest.fn(),
       }),
     );
 

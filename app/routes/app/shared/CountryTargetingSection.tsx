@@ -51,7 +51,7 @@ export function CountryTargetingSection({
           <ConfigureHelpPopover tooltipKey="countryTargeting" />
         </s-stack>
         <s-paragraph>{i18n.t('countryTargeting.description')}</s-paragraph>
-        <s-banner tone="info">
+        <s-banner tone="info" dismissible>
           <s-paragraph>{i18n.t('countryTargeting.shopifyOwnership')}</s-paragraph>
         </s-banner>
         <s-switch

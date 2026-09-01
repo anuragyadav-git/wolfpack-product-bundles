@@ -74,7 +74,7 @@ export function OfferOperationsSection({
           <ConfigureHelpPopover tooltipKey="offerOperations" />
         </s-stack>
         <s-paragraph>{i18n.t('offerOperations.description')}</s-paragraph>
-        <s-banner tone="info">
+        <s-banner tone="info" dismissible>
           <s-paragraph>{i18n.t('offerOperations.shopifyOwnership')}</s-paragraph>
         </s-banner>
         <s-number-field
@@ -143,7 +143,7 @@ export function OfferOperationsSection({
         ) : null}
         {state.scheduleMode === 'recurring' ? (
           <>
-            <s-banner tone="info">
+            <s-banner tone="info" dismissible>
               <s-paragraph>{i18n.t('offerOperations.recurrenceTimezone', {
                 timezone: state.recurrenceTimezone,
               })}</s-paragraph>

@@ -79,7 +79,11 @@ describe("page builder embed service", () => {
     db.bundle.findFirst.mockResolvedValue({
       id: "scheduled",
       bundleType: "product_page",
-      offerPolicy: { startsAt: "2026-09-01T00:00:00.000Z", endsAt: null },
+      offerPolicy: {
+        scheduleMode: "one_time",
+        startsAt: "2026-09-01T00:00:00.000Z",
+        endsAt: null,
+      },
     });
     await expect(resolvePageBuilderEmbed(db as any, "shop.myshopify.com", {
       bundleType: "product_page",

@@ -78,9 +78,11 @@ describe('CountryTargetingSection', () => {
     const toggle = container.querySelector('s-switch');
     const mode = container.querySelector('s-select');
     const selectedCountry = container.querySelector('s-clickable-chip');
+    const ownershipBanner = container.querySelector('s-banner[tone="info"]');
 
     expect(toggle?.hasAttribute('checked')).toBe(true);
     expect(mode?.getAttribute('value')).toBe('include');
     expect(selectedCountry?.textContent).toBe('India');
+    expect(ownershipBanner?.hasAttribute('dismissible')).toBe(true);
   });
 });

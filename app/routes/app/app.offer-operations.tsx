@@ -96,7 +96,7 @@ export default function OfferOperationsRoute() {
 
   return (
     <s-page heading={t('offerPolicyCsv.title')} inlineSize="large">
-      <s-box paddingBlockEnd="large-100">
+      <s-box paddingInline="base" paddingBlockEnd="large-100">
         <s-stack direction="block" gap="large">
           <s-section heading={t('offerPolicyCsv.export.title')}>
             <s-stack direction="block" gap="base">
@@ -113,7 +113,7 @@ export default function OfferOperationsRoute() {
           <s-section heading={t('offerPolicyCsv.import.title')}>
             <s-stack direction="block" gap="base">
               <s-paragraph>{t('offerPolicyCsv.import.description')}</s-paragraph>
-              <s-banner tone="info" heading={t('offerPolicyCsv.import.safetyTitle')}>
+              <s-banner tone="info" heading={t('offerPolicyCsv.import.safetyTitle')} dismissible>
                 <s-paragraph>{t('offerPolicyCsv.import.safetyBody')}</s-paragraph>
               </s-banner>
               <s-drop-zone

@@ -61,6 +61,7 @@ describe('OfferOperationsSection', () => {
     expect(html).toContain('2026-09-01T10:00:00.000Z');
     expect(html).toContain('2026-09-02T10:00:00.000Z');
     expect(html).toContain('Shopify controls checkout discount dates and combinations');
+    expect(html).toContain('<s-banner tone="info" dismissible="true"');
   });
 
   it('renders recurrence controls only for recurring mode', () => {
@@ -78,5 +79,6 @@ describe('OfferOperationsSection', () => {
     expect(html).toContain('2026-09-06');
     expect(html).toContain('Monthly');
     expect(html).not.toContain('Enter an ISO 8601 instant');
+    expect(html.match(/<s-banner tone="info" dismissible="true"/g)).toHaveLength(2);
   });
 });

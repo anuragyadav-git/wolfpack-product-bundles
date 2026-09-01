@@ -13,6 +13,7 @@ import styles from "../../../styles/routes/app-attribution.module.css";
 import type { AttributionDashboardData } from "../app.attribution";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
 import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
+import { OfferAnalyticsCard } from "./OfferAnalyticsCard";
 
 type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to" | "accessMode"> & {
   from?: string;
@@ -433,14 +434,16 @@ export function CustomUtmTrackingCard({
               When a shopper reaches checkout from a matching link, the saved values are stored with the order attribution record and included in analytics exports.
             </p>
           </div>
-          <s-banner
-            heading="Privacy check"
-            tone="warning"
-            dismissible={false}
-            hidden={false}
-          >
-            Do not track shopper identifiers such as email addresses, phone numbers, customer IDs, or any value that can identify a person.
-          </s-banner>
+          <s-box paddingBlockEnd="small-200">
+            <s-banner
+              heading="Privacy check"
+              tone="warning"
+              dismissible={false}
+              hidden={false}
+            >
+              Do not track shopper identifiers such as email addresses, phone numbers, customer IDs, or any value that can identify a person.
+            </s-banner>
+          </s-box>
         </s-stack>
       </s-modal>
     </section>
@@ -449,8 +452,10 @@ export function CustomUtmTrackingCard({
 
 function AttributionDashboardContent({
   data,
+  onOfferSelectionChange,
 }: {
   data: AttributionDashboardViewData;
+  onOfferSelectionChange: (offerPolicyId: string | null) => void;
 }) {
   const { t } = useTranslation();
   const {
@@ -534,11 +539,19 @@ function AttributionDashboardContent({
   return (
     <div className={styles.dashboardShell}>
         <div className={styles.dashboardStack}>
+          {accessMode === "ADVANCED" && (
+            <OfferAnalyticsCard
+              model={offerAnalytics}
+              onSelectionChange={onOfferSelectionChange}
+            />
+          )}
           {/* Date range selector + Compare toggle + Export */}
           {accessMode === "SUMMARY" && (
-            <s-banner tone="info">
-              {t("subscription.analytics.summaryNotice")}
-            </s-banner>
+            <s-box paddingBlockEnd="small-200">
+              <s-banner tone="info">
+                {t("subscription.analytics.summaryNotice")}
+              </s-banner>
+            </s-box>
           )}
           {accessMode === "ADVANCED" && <div className={styles.headerRow}>
             <div className={styles.comparePillSlot}>
@@ -630,8 +643,15 @@ function AttributionDashboardContent({
 
 export default function AttributionDashboard({
   data,
+  onOfferSelectionChange,
 }: {
   data: AttributionDashboardViewData;
+  onOfferSelectionChange: (offerPolicyId: string | null) => void;
 }) {
-  return <AttributionDashboardContent data={data} />;
+  return (
+    <AttributionDashboardContent
+      data={data}
+      onOfferSelectionChange={onOfferSelectionChange}
+    />
+  );
 }

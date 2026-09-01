@@ -11,7 +11,6 @@ import {
 } from "../../../components/AdminPageNavigation";
 import { PixelStatusCard } from "./PixelStatusCard";
 import AttributionDashboard from "./AttributionDashboard";
-import { OfferAnalyticsCard } from "./OfferAnalyticsCard";
 
 function AttributionCriticalFunnelHeader() {
   return (
@@ -90,15 +89,10 @@ export default function AttributionRouteShell() {
         <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
           <Await resolve={analytics}>
             {(resolvedAnalytics: any) => (
-              <>
-                {resolvedAnalytics.accessMode === "ADVANCED" ? (
-                  <OfferAnalyticsCard
-                    model={resolvedAnalytics.offerAnalytics}
-                    onSelectionChange={handleOfferSelectionChange}
-                  />
-                ) : null}
-                <AttributionDashboard data={resolvedAnalytics} />
-              </>
+              <AttributionDashboard
+                data={resolvedAnalytics}
+                onOfferSelectionChange={handleOfferSelectionChange}
+              />
             )}
           </Await>
         </Suspense>
