@@ -386,6 +386,29 @@ Responsive analytics behavior:
 
 ---
 
+### 2.3a Offer operations — `/app/offer-operations`
+
+**Route file:** `app/routes/app/app.offer-operations.tsx`
+
+```
+Offer operations
+├── Export offer policies
+│   └── [Export CSV] → authenticated version 1 CSV attachment
+└── Validate and import
+    ├── Polaris CSV drop zone (1 MiB and 500-row bounds)
+    ├── [Validate CSV] → read-only row validation
+    ├── [Apply valid changes] → atomic policy writes, then storefront sync
+    └── Result summary → row errors and per-bundle storefront sync errors
+```
+
+The CSV addresses existing bundles by authenticated-shop bundle ID. Bundle
+name, type, and status are export context only: import never creates, changes,
+or publishes a bundle. Campaign tokens and token digests are excluded. Enabling
+link-only delivery requires an existing active campaign link managed by the
+bundle Configure action.
+
+---
+
 ### 2.4 Pricing — `/app/pricing`
 
 **Route file:** `app/routes/app/app.pricing.tsx`

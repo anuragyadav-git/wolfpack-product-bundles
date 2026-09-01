@@ -66,6 +66,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
 - [[Shopify Integration/Admin API]] — Rate limits, native Prisma session storage, expiring-token migration gates
+- [[Shopify Integration/Embedded Admin Resource Authentication]] — App Bridge ID-token fetch ownership for authenticated backend requests and file downloads
 - [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, product description HTML, and Shop Brand color-pair inheritance
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules

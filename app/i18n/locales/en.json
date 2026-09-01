@@ -5,6 +5,7 @@
     "settings": "Settings",
     "integrations": "Integrations",
     "analytics": "Analytics",
+    "offerOperations": "Offer operations",
     "billing": "Billing",
     "events": "Updates & FAQs"
   },
@@ -533,6 +534,51 @@
       "addedToCart": "Added to cart",
       "checkedOut": "Completed orders",
       "revenue": "Revenue"
+    }
+  },
+  "offerPolicyCsv": {
+    "title": "Offer operations",
+    "export": {
+      "title": "Export offer policies",
+      "description": "Download a versioned CSV of offer priority, scheduling, link eligibility, and country targeting for every existing bundle.",
+      "action": "Export CSV",
+      "error": "The CSV could not be exported. Try again."
+    },
+    "import": {
+      "title": "Validate and import",
+      "description": "Upload the versioned CSV, review validation, then apply policy changes to existing bundles.",
+      "safetyTitle": "Bundle publishing is unchanged",
+      "safetyBody": "Import never creates or publishes bundles and never accepts campaign tokens. Link-only delivery can be enabled only for a bundle that already has an active campaign link.",
+      "dropLabel": "Offer policy CSV",
+      "dropAccessibility": "Upload a version 1 offer policy CSV",
+      "validate": "Validate CSV",
+      "apply": "Apply valid changes"
+    },
+    "result": {
+      "title": "Import result",
+      "valid": "CSV validation passed",
+      "invalid": "CSV needs review",
+      "summary": "Rows: {{rows}}. Changed: {{changed}}. Applied: {{applied}}. Storefront synced: {{synced}}.",
+      "rowError": "Row {{row}}, {{field}}: {{message}}",
+      "syncError": "Bundle {{bundleId}} was saved but its storefront sync failed. Use Sync Bundle after Shopify is available."
+    },
+    "errors": {
+      "file_too_large": "The CSV must be 1 MiB or smaller.",
+      "too_many_rows": "The CSV can contain at most 500 offer rows.",
+      "invalid_csv": "Choose a valid CSV file.",
+      "invalid_headers": "Use the unchanged version 1 CSV headers.",
+      "unsupported_schema_version": "Only schema version 1 is supported.",
+      "duplicate_bundle_id": "Each bundle ID must appear exactly once.",
+      "bundle_not_found": "The bundle does not exist in this shop.",
+      "invalid_boolean": "Use true or false.",
+      "invalid_priority": "Priority must be a whole number from 1 to 9999.",
+      "invalid_date": "Use an ISO 8601 timestamp or leave the field empty.",
+      "invalid_date_range": "The end must be later than the start.",
+      "invalid_country_mode": "Country targeting mode must be include or exclude.",
+      "invalid_country_codes": "Use semicolon-separated two-letter country codes and select at least one when targeting is enabled.",
+      "invalid_rule_version": "Rule version must be a non-negative whole number.",
+      "stale_rule_version": "Export a fresh CSV before overwriting a newer policy.",
+      "campaign_link_required": "Generate an active campaign link before enabling link-only delivery."
     }
   },
   "subscription": {
