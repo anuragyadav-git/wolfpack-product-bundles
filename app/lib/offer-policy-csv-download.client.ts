@@ -11,11 +11,14 @@ export async function downloadOfferPolicyCsv(
     },
   },
 ): Promise<void> {
-  const response = await fetcher('/app/offer-operations?download=1');
+  const response = await fetcher('/app/offer-operations/export');
   if (!response.ok) throw new Error('offer_policy_export_failed');
+  if (!response.headers.get('content-type')?.toLowerCase().startsWith('text/csv')) {
+    throw new Error('offer_policy_export_invalid_content_type');
+  }
   const objectUrl = environment.createObjectUrl(await response.blob());
   try {
-    environment.clickDownload(objectUrl, 'offer-policies-v1.csv');
+    environment.clickDownload(objectUrl, 'offer-policies-v2.csv');
   } finally {
     environment.revokeObjectUrl(objectUrl);
   }

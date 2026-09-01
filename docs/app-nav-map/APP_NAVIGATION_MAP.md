@@ -393,7 +393,8 @@ Responsive analytics behavior:
 ```
 Offer operations
 ├── Export offer policies
-│   └── [Export CSV] → authenticated version 2 CSV attachment with one-time and recurring schedules
+│   └── [Export CSV] → App Bridge-authenticated GET /app/offer-operations/export resource response
+│       └── version 2 CSV attachment with one-time and recurring schedules
 └── Validate and import
     ├── Polaris CSV drop zone (1 MiB and 500-row bounds)
     ├── [Validate CSV] → read-only row validation

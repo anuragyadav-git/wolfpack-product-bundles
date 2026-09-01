@@ -1,13 +1,13 @@
+export {};
+
 const authenticateAdmin = jest.fn();
 jest.mock('../../../app/shopify.server', () => ({
   authenticate: { admin: authenticateAdmin },
 }));
 
-const exportOfferPolicyCsv = jest.fn();
 const validateOfferPolicyCsvImport = jest.fn();
 const applyOfferPolicyCsvImport = jest.fn();
 jest.mock('../../../app/services/offer-policy-csv.server', () => ({
-  exportOfferPolicyCsv,
   validateOfferPolicyCsvImport,
   applyOfferPolicyCsvImport,
 }));
@@ -26,24 +26,14 @@ describe('offer operations route', () => {
     });
   });
 
-  it('renders the authenticated operations surface without loading bundle rows', async () => {
-    const response = await loader({
-      request: new Request('https://app.test/app/offer-operations'),
-      params: {}, context: {},
-    } as any) as Response;
-    expect(response.status).toBe(200);
-    expect(exportOfferPolicyCsv).not.toHaveBeenCalled();
-  });
-
-  it('downloads the authenticated shop export as a CSV attachment', async () => {
-    exportOfferPolicyCsv.mockResolvedValue('schema_version,bundle_id\n1,bundle-1\n');
+  it('renders the authenticated operations surface without serving file bytes', async () => {
     const response = await loader({
       request: new Request('https://app.test/app/offer-operations?download=1'),
       params: {}, context: {},
     } as any) as Response;
-    expect(exportOfferPolicyCsv).toHaveBeenCalledWith('test.myshopify.com');
-    expect(response.headers.get('content-type')).toContain('text/csv');
-    expect(response.headers.get('content-disposition')).toContain('offer-policies-v2.csv');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('application/json');
+    await expect(response.json()).resolves.toEqual({ ready: true });
   });
 
   it.each([
