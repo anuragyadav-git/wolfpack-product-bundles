@@ -1,6 +1,7 @@
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { getConfigureActionIcon } from "../../../lib/bundle-config/configure-action-icons";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 
 const TARGETS = [
   { value: "all_products", label: "All products in bundle" },
@@ -33,6 +34,7 @@ export function PpbBundleEmbedSection() {
             <s-stack direction="inline" justifyContent="space-between" alignItems="center" gap="base">
               <s-stack direction="inline" alignItems="center" gap="small">
                 <s-heading>Embed Bundle Builder on Product Pages</s-heading>
+                <ConfigureHelpPopover tooltipKey="bundleEmbed" />
                 <s-switch
                   accessibilityLabel="Embed Bundle Builder on Product Pages"
                   checked={flow.bundleEmbedEnabled || undefined}

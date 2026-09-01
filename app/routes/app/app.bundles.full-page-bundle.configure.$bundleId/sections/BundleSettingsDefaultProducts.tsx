@@ -1,6 +1,7 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DefaultProductDiscountTipBanner } from "../../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
 
 export function FpbDefaultProductsSettings({
   flow,
@@ -76,6 +77,7 @@ export function FpbDefaultProductsSettings({
                   }}
                 >
                   Pre Selected Product
+                  <ConfigureHelpPopover tooltipKey="preselectedProducts" />
                 </h3>
                 <s-switch
                   accessibilityLabel="Enable pre selected product"

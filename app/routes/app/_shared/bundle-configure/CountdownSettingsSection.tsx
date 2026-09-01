@@ -5,6 +5,7 @@ import type {
   CountdownPosition,
 } from "../../../../lib/bundle-countdown";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
+import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
 
 export function CountdownSettingsSection({
   enabled,
@@ -47,7 +48,10 @@ export function CountdownSettingsSection({
           gap="base"
         >
           <s-stack direction="block" gap="small-100">
-            <s-heading>{i18n.t("countdown.title")}</s-heading>
+            <s-stack direction="inline" gap="small" alignItems="center">
+              <s-heading>{i18n.t("countdown.title")}</s-heading>
+              <ConfigureHelpPopover tooltipKey="countdownTimer" />
+            </s-stack>
             <s-text color="subdued">{i18n.t("countdown.description")}</s-text>
           </s-stack>
           <s-switch

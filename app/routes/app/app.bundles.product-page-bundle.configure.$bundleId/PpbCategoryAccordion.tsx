@@ -4,6 +4,7 @@ import {
   type VariantSelectorMode,
 } from "../../../lib/bundle-config/variant-selector-config";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 
 export function PpbCategoryAccordion({
   step,
@@ -95,16 +96,19 @@ export function PpbCategoryAccordion({
             <s-option value="image_swatch">Image swatches</s-option>
           </s-select>
           {selectorMode === "color_swatch" ? (
-            <s-switch
-              label="Show color name on hover and focus"
-              checked={cat.swatchTooltipEnabled || undefined}
-              disabled={cat.displayVariantsAsIndividualProducts || undefined}
-              onChange={(event) =>
-                updateCategory({
-                  swatchTooltipEnabled: event.currentTarget.checked,
-                })
-              }
-            />
+            <s-stack direction="inline" gap="small" alignItems="center">
+              <s-switch
+                label="Show color name on hover and focus"
+                checked={cat.swatchTooltipEnabled || undefined}
+                disabled={cat.displayVariantsAsIndividualProducts || undefined}
+                onChange={(event) =>
+                  updateCategory({
+                    swatchTooltipEnabled: event.currentTarget.checked,
+                  })
+                }
+              />
+              <ConfigureHelpPopover tooltipKey="swatchTooltip" />
+            </s-stack>
           ) : null}
           {selectorMode === "color_swatch" || selectorMode === "image_swatch" ? (
             <s-paragraph>

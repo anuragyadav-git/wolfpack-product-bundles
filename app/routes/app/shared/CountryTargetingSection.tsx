@@ -8,6 +8,7 @@ import {
   buildShopifyCountryOptions,
 } from '../../../lib/shopify-country-options';
 import type { SpecificLinkOfferAdminState } from '../../../lib/specific-link-offer-admin';
+import { ConfigureHelpPopover } from '../_shared/bundle-configure/ConfigureHelpPopover';
 
 interface CountryTargetingSectionProps {
   active: boolean;
@@ -43,8 +44,12 @@ export function CountryTargetingSection({
   );
 
   return (
-    <s-section heading={i18n.t('countryTargeting.title')}>
+    <s-section>
       <s-stack direction="block" gap="base">
+        <s-stack direction="inline" gap="small" alignItems="center">
+          <s-heading>{i18n.t('countryTargeting.title')}</s-heading>
+          <ConfigureHelpPopover tooltipKey="countryTargeting" />
+        </s-stack>
         <s-paragraph>{i18n.t('countryTargeting.description')}</s-paragraph>
         <s-banner tone="info">
           <s-paragraph>{i18n.t('countryTargeting.shopifyOwnership')}</s-paragraph>

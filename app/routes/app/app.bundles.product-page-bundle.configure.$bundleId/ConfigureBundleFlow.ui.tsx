@@ -1,13 +1,10 @@
 import React, { memo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { HelpTooltipImage } from "../../../components/HelpTooltipImage";
-import {
-  HELP_TOOLTIPS,
-  type HelpTooltipKey,
-} from "../../../constants/help-tooltips";
-import { suppressInfoIconPointerActivation } from "../../../lib/admin-info-icon-interaction";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import type { BundleProductCardProps } from "./types";
+
+export const QuestionHelpTooltip = ConfigureHelpPopover;
 
 export const BundleProductCard = memo(
   ({
@@ -82,93 +79,6 @@ export const BundleProductCard = memo(
 );
 
 BundleProductCard.displayName = "BundleProductCard";
-
-export function QuestionHelpTooltip({
-  tooltipKey,
-}: {
-  tooltipKey: HelpTooltipKey;
-}) {
-  const { t } = useTranslation();
-  const tooltip = HELP_TOOLTIPS[tooltipKey];
-  const title = t(`tooltips.${tooltipKey}.title`, "");
-  const description = t(`tooltips.${tooltipKey}.description`);
-  const wrapperRef = useRef<HTMLSpanElement>(null);
-  const [tooltipPos, setTooltipPos] = useState<{
-    top: number;
-    left: number;
-    arrowLeft: number;
-  } | null>(null);
-
-  const showTooltip = () => {
-    if (!wrapperRef.current) return;
-    const width = Math.min(320, window.innerWidth - 32);
-    const rect = wrapperRef.current.getBoundingClientRect();
-    const left = Math.min(
-      Math.max(rect.left + rect.width / 2 - width / 2, 16),
-      window.innerWidth - width - 16,
-    );
-    setTooltipPos({
-      top: rect.bottom + 10,
-      left,
-      arrowLeft: rect.left + rect.width / 2 - left,
-    });
-  };
-  const hideTooltip = () => setTooltipPos(null);
-
-  return (
-    <span
-      ref={wrapperRef}
-      className={productPageBundleStyles.richHelp}
-      onMouseEnter={showTooltip}
-      onMouseLeave={hideTooltip}
-      onFocus={showTooltip}
-      onBlur={hideTooltip}
-    >
-      <span
-        className={productPageBundleStyles.questionHelpButton}
-        role="img"
-        tabIndex={0}
-        aria-label={title || description}
-        onPointerDown={suppressInfoIconPointerActivation}
-        onClick={suppressInfoIconPointerActivation}
-      >
-        <s-icon type="info" />
-      </span>
-      <span
-        className={`${productPageBundleStyles.richHelpCard} ${productPageBundleStyles.richHelpCardFloating}`}
-        role="tooltip"
-        style={
-          tooltipPos
-            ? ({
-                position: "fixed",
-                top: tooltipPos.top,
-                left: tooltipPos.left,
-                width: Math.min(320, window.innerWidth - 32),
-                transform: "none",
-                opacity: 1,
-                visibility: "visible",
-                pointerEvents: "auto",
-                "--rich-help-arrow-left": `${tooltipPos.arrowLeft}px`,
-              } as React.CSSProperties)
-            : undefined
-        }
-      >
-        {tooltip.imageSrc && (
-          <HelpTooltipImage
-            src={tooltip.imageSrc}
-            alt={title || tooltip.accessibilityLabel || description}
-          />
-        )}
-        {title && (
-          <span className={productPageBundleStyles.richHelpTitle}>{title}</span>
-        )}
-        <span className={productPageBundleStyles.richHelpDescription}>
-          {description}
-        </span>
-      </span>
-    </span>
-  );
-}
 
 export function VisibilityBadge({ isOptimised }: { isOptimised: boolean }) {
   const { t } = useTranslation();

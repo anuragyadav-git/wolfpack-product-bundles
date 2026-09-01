@@ -560,6 +560,7 @@ Responsive configure behavior:
 - The compact readiness trigger remains floating without covering editor actions. Opening it uses a labelled native modal dialog: a bounded floating checklist on desktop and a full-width, safe-area-aware bottom sheet on phones.
 - The readiness dialog supports Escape, safe backdrop dismissal, focus trapping, internal scrolling, and focus restoration without changing the existing readiness calculation or route adapter props.
 - Configure multi-language workflows share one staged Polaris `s-modal`; Apply updates route-owned draft state and Cancel/Escape/backdrop-close discard edits.
+- FPB and PPB expose curated visual help beside non-obvious setup, pricing, visibility, storefront, urgency, and subscription controls. Each info action opens the shared Polaris popover without changing configure state or activating the SaveBar.
 
 ---
 

@@ -50,6 +50,7 @@ export function FpbSummaryTextSettings({
           <SettingsRow
             title="Low-stock alert"
             description="Show Shopify's sellable component-variant quantity when it reaches the configured threshold."
+            tooltipKey="lowStockAlert"
           >
             <s-switch
               accessibilityLabel="Low-stock alert"

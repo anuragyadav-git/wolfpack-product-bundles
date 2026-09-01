@@ -1,6 +1,7 @@
 import React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
+import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 
 export function PpbFreeGiftAddonsSection() {
   const {
@@ -49,6 +50,7 @@ export function PpbFreeGiftAddonsSection() {
                   <div className={productPageBundleStyles.panelHeader}>
                     <h3 className={productPageBundleStyles.panelTitle}>
                       Add-Ons and Gifting Step
+                      <ConfigureHelpPopover tooltipKey="freeGiftAddons" />
                     </h3>
                     <s-checkbox
                       accessibilityLabel="Enable add-ons and gifting step"

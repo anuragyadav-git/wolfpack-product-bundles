@@ -1,6 +1,7 @@
 import { i18n } from '../../../i18n/config';
 import type { OfferOperationsAdminState } from '../../../lib/offer-policy-admin';
 import { resolveOfferSchedule } from '../../../lib/offer-policy-decision';
+import { ConfigureHelpPopover } from '../_shared/bundle-configure/ConfigureHelpPopover';
 
 interface OfferOperationsSectionProps {
   active: boolean;
@@ -66,8 +67,12 @@ export function OfferOperationsSection({
       : 'info';
 
   return (
-    <s-section heading={i18n.t('offerOperations.title')}>
+    <s-section>
       <s-stack direction="block" gap="base">
+        <s-stack direction="inline" gap="small" alignItems="center">
+          <s-heading>{i18n.t('offerOperations.title')}</s-heading>
+          <ConfigureHelpPopover tooltipKey="offerOperations" />
+        </s-stack>
         <s-paragraph>{i18n.t('offerOperations.description')}</s-paragraph>
         <s-banner tone="info">
           <s-paragraph>{i18n.t('offerOperations.shopifyOwnership')}</s-paragraph>

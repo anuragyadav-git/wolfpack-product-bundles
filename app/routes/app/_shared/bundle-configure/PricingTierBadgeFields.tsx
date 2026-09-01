@@ -4,6 +4,7 @@ import type {
   PricingTierBadgeShape,
   PricingTierBadgeVisibility,
 } from "../../../../lib/pricing-tier-badge";
+import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
 
 const DEFAULT_BADGE: PricingTierBadge = {
   enabled: false,
@@ -32,7 +33,10 @@ export function PricingTierBadgeFields({
       <s-divider />
       <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
         <s-stack direction="block" gap="small-100">
-          <s-heading>Tier badge</s-heading>
+          <s-stack direction="inline" gap="small" alignItems="center">
+            <s-heading>Tier badge</s-heading>
+            <ConfigureHelpPopover tooltipKey="tierBadge" />
+          </s-stack>
           <s-text>Highlight this pricing tier on the storefront.</s-text>
         </s-stack>
         <s-switch

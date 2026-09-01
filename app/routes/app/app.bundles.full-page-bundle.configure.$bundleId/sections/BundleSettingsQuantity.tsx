@@ -47,6 +47,7 @@ export function FpbQuantitySettings({
               }}
             >
               Enable Quantity Validation
+              <QuestionHelpTooltip tooltipKey="quantityValidation" />
             </h3>
             <s-switch
               accessibilityLabel="Enable quantity validation"

@@ -1,5 +1,6 @@
 import React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 
 export function PpbImagesGifsSection() {
   const {
@@ -155,9 +156,12 @@ export function PpbImagesGifsSection() {
                   <s-stack direction="inline" gap="small" alignItems="center">
                     <s-icon type="clock" />
                     <s-stack direction="block" gap="small-400">
-                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                        Loading Animation
-                      </p>
+                      <s-stack direction="inline" gap="small" alignItems="center">
+                        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                          Loading Animation
+                        </p>
+                        <ConfigureHelpPopover tooltipKey="loadingAnimation" />
+                      </s-stack>
                       <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
                         Overlay shown while bundle content is loading
                       </p>

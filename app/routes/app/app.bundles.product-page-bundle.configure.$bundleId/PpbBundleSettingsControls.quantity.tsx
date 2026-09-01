@@ -28,6 +28,7 @@ export function PpbQuantitySettings() {
         <div className={productPageBundleStyles.settingTitleRow}>
           <h3 className={productPageBundleStyles.settingTitle}>
             Enable Quantity Validation
+            <QuestionHelpTooltip tooltipKey="quantityValidation" />
           </h3>
           <span className={productPageBundleStyles.settingInlineSwitch}>
             <s-switch
@@ -87,6 +88,7 @@ export function PpbQuantitySettings() {
           <div>
             <h3 className={productPageBundleStyles.settingTitle}>
               Low-stock alert
+              <QuestionHelpTooltip tooltipKey="lowStockAlert" />
             </h3>
             <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
               Show Shopify's sellable component-variant quantity at or below a threshold.

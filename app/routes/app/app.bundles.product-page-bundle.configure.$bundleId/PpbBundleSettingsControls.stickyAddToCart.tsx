@@ -1,5 +1,6 @@
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 
 export function PpbStickyAddToCartSettings() {
   const {
@@ -24,7 +25,10 @@ export function PpbStickyAddToCartSettings() {
           gap="base"
         >
           <s-stack direction="block" gap="small-100">
-            <s-heading>Sticky add to cart</s-heading>
+            <s-stack direction="inline" gap="small" alignItems="center">
+              <s-heading>Sticky add to cart</s-heading>
+              <ConfigureHelpPopover tooltipKey="stickyAddToCart" />
+            </s-stack>
             <s-text color="subdued">
               Keep a bundle action available after the main bundle button leaves the viewport.
             </s-text>

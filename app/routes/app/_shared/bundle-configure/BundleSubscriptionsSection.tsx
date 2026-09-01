@@ -16,6 +16,7 @@ import { MultiLanguageTextModal } from "../../../../components/bundle-configure/
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
 import { AdminWarningGroup } from "../../../../components/AdminWarningGroup";
+import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
 
 type SubscriptionValidationResponse = {
   success?: boolean;
@@ -220,6 +221,7 @@ export function BundleSubscriptionsSection(
               >
                 <s-stack direction="inline" alignItems="center" gap="small">
                   <s-heading>Bundle Subscriptions</s-heading>
+                  <ConfigureHelpPopover tooltipKey="bundleSubscriptions" />
                   <s-switch
                     accessibilityLabel="Enable bundle subscriptions"
                     checked={subscriptionConfig.enabled || undefined}

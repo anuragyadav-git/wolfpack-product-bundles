@@ -296,52 +296,134 @@
     }
   },
   "tooltips": {
+    "helpLabel": "About {{title}}",
     "stepFlow": {
       "title": "Step Flow",
-      "description": "Steps will render as navigation items on top of the bundle builder"
+      "description": "Steps will render as navigation items on top of the bundle builder",
+      "imageAlt": "A storefront bundle builder with multiple navigation steps"
     },
     "category": {
       "title": "Category",
-      "description": "Categories will appear as tabs inside each step"
+      "description": "Categories will appear as tabs inside each step",
+      "imageAlt": "Category tabs displayed inside a bundle step"
     },
     "rulesConfiguration": {
       "title": "Rules guide shopper selections",
-      "description": "Use step rules for one selection limit, or category rules when each category needs its own rule."
+      "description": "Use step rules for one selection limit, or category rules when each category needs its own rule.",
+      "imageAlt": "Selection rules applied to a bundle step and its categories"
     },
     "bundleQuantityOptions": {
       "title": "Bundle Quantity Options",
-      "description": "Show quantity-based discount rules as selectable bundle boxes. Each box can have its own label, subtext, and default rule."
+      "description": "Show quantity-based discount rules as selectable bundle boxes. Each box can have its own label, subtext, and default rule.",
+      "imageAlt": "Selectable bundle quantity boxes on a storefront"
     },
     "discountProgressBar": {
       "title": "Progress Bar",
-      "description": "Show shoppers how close they are to the next discount. Simple uses one bar, while Step Based shows discount milestones."
+      "description": "Show shoppers how close they are to the next discount. Simple uses one bar, while Step Based shows discount milestones.",
+      "imageAlt": "A bundle discount progress bar with milestones"
     },
     "discountMessaging": {
       "title": "Discount Messaging",
-      "description": "Customize the messages shown before a discount unlocks and after shoppers qualify."
+      "description": "Customize the messages shown before a discount unlocks and after shoppers qualify.",
+      "imageAlt": "Storefront bundle discount messages before and after qualification"
     },
     "loadingAnimation": {
       "title": "Storefront Loading Animation",
-      "description": "Shown while Only Bundles loads bundle content on the storefront."
+      "description": "Shown while Only Bundles loads bundle content on the storefront.",
+      "imageAlt": "A loading state displayed while bundle content is prepared"
     },
     "bundleVisibilityPending": {
       "description": "Tracks whether your bundle is discoverable by shoppers. Optimises when you copy your bundle link and place it on your store, enable the Bundle Widget, or set up the Bundle Embed."
     },
     "productSlots": {
       "title": "Product Slots",
-      "description": "Display empty slots on the storefront and use the configured Slot Icon for those empty slots."
+      "description": "Display empty slots on the storefront and use the configured Slot Icon for those empty slots.",
+      "imageAlt": "Empty product slots filling as shoppers build a bundle"
     },
     "variantSelector": {
       "title": "Variant Selector",
-      "description": "Show a variant dropdown on each product card so shoppers can pick options without opening quick look."
+      "description": "Show a variant dropdown on each product card so shoppers can pick options without opening quick look.",
+      "imageAlt": "A variant selector displayed inside a bundle product card"
     },
     "showTextOnAddButton": {
       "title": "Show Text on + Button",
-      "description": "Replace the + icon with a text Add to Cart button placed below the product price."
+      "description": "Replace the + icon with a text Add to Cart button placed below the product price.",
+      "imageAlt": "A text add button shown below a bundle product price"
     },
     "cartLineItemDiscountDisplay": {
       "title": "Cart Line Item Discount Display",
-      "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging."
+      "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging.",
+      "imageAlt": "Bundle savings displayed on a cart line item"
+    },
+    "swatchTooltip": {
+      "title": "Color swatch names",
+      "description": "Show the Shopify option value when shoppers hover over or focus a color swatch. The label is intentionally hidden on touch-only devices.",
+      "imageAlt": "A focused color swatch displaying its color name"
+    },
+    "tierBadge": {
+      "title": "Tier badge",
+      "description": "Highlight a pricing tier with a configurable badge on the storefront.",
+      "imageAlt": "A highlighted bundle pricing tier with a badge"
+    },
+    "freeGiftAddons": {
+      "title": "Free Gift and Add-Ons",
+      "description": "Add an optional gifting step or offer add-on products when shoppers meet a configured bundle condition.",
+      "imageAlt": "A bundle unlocking a gift and optional add-on products"
+    },
+    "specificLinkAccess": {
+      "title": "Specific link access",
+      "description": "Require shoppers to open the bundle through its generated private link before the offer is eligible.",
+      "imageAlt": "A private link opening an eligible bundle offer"
+    },
+    "offerOperations": {
+      "title": "Offer scheduling and priority",
+      "description": "Control when the bundle can appear and which matching Only Bundles offer is considered first.",
+      "imageAlt": "Prioritized bundle offers arranged across a scheduled time window"
+    },
+    "countryTargeting": {
+      "title": "Country targeting",
+      "description": "Include or exclude the bundle using the shopper's country selected through Shopify Markets.",
+      "imageAlt": "A storefront country selector controlling bundle eligibility"
+    },
+    "bundleWidget": {
+      "title": "Bundle Widget",
+      "description": "Place a bundle upsell button or content block on eligible product pages.",
+      "imageAlt": "A bundle upsell widget displayed on a product page"
+    },
+    "bundleEmbed": {
+      "title": "Bundle Embed",
+      "description": "Embed the product-page bundle builder directly into selected product templates.",
+      "imageAlt": "A bundle builder embedded within a product page"
+    },
+    "preselectedProducts": {
+      "title": "Pre Selected Product",
+      "description": "Start the bundle with configured products already selected for the shopper.",
+      "imageAlt": "A bundle builder with a product already selected"
+    },
+    "quantityValidation": {
+      "title": "Quantity Validation",
+      "description": "Limit how many units of one product a shopper can add to the bundle.",
+      "imageAlt": "A bundle product quantity control showing its allowed limit"
+    },
+    "lowStockAlert": {
+      "title": "Low-stock alert",
+      "description": "Show Shopify's sellable variant quantity when stock reaches the configured threshold.",
+      "imageAlt": "A bundle product card displaying a low-stock message"
+    },
+    "stickyAddToCart": {
+      "title": "Sticky add to cart",
+      "description": "Keep a bundle action visible while shoppers scroll on supported desktop or mobile layouts.",
+      "imageAlt": "A sticky bundle action bar fixed to the edge of a storefront"
+    },
+    "countdownTimer": {
+      "title": "Countdown timer",
+      "description": "Show the time remaining until the bundle's existing scheduled offer end.",
+      "imageAlt": "A countdown timer displayed above a bundle builder"
+    },
+    "bundleSubscriptions": {
+      "title": "Bundle Subscriptions",
+      "description": "Let shoppers choose from compatible Shopify selling plans shared by the bundle products.",
+      "imageAlt": "One-time and subscription purchase options for a bundle"
     }
   },
   "specificLinkOffer": {

@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
+import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
 import styles from "./CommonBundleVisibilityOverview.module.css";
 
 type WidgetDisplayMode = "block" | "button";
@@ -70,7 +71,10 @@ export function CommonBundleWidgetSection(props: CommonBundleWidgetSectionProps)
         <s-stack direction="block" gap="base">
           <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
             <s-stack direction="block" gap="small-100">
-              <s-heading>Product Page Bundle Upsell Widgets</s-heading>
+              <s-stack direction="inline" gap="small" alignItems="center">
+                <s-heading>Product Page Bundle Upsell Widgets</s-heading>
+                <ConfigureHelpPopover tooltipKey="bundleWidget" />
+              </s-stack>
               <s-text color="subdued">This will display an upsell block or button on the product pages of your choice.</s-text>
             </s-stack>
             <s-switch

@@ -1,5 +1,6 @@
 import { i18n } from '../../../i18n/config';
 import type { SpecificLinkOfferAdminState } from '../../../lib/specific-link-offer-admin';
+import { ConfigureHelpPopover } from '../_shared/bundle-configure/ConfigureHelpPopover';
 
 interface SpecificLinkOfferSectionProps {
   active: boolean;
@@ -38,8 +39,12 @@ export function SpecificLinkOfferSection({
     : i18n.t('specificLinkOffer.regenerate');
 
   return (
-    <s-section heading={i18n.t('specificLinkOffer.title')}>
+    <s-section>
       <s-stack direction="block" gap="base">
+        <s-stack direction="inline" gap="small" alignItems="center">
+          <s-heading>{i18n.t('specificLinkOffer.title')}</s-heading>
+          <ConfigureHelpPopover tooltipKey="specificLinkAccess" />
+        </s-stack>
         <s-paragraph>{i18n.t('specificLinkOffer.description')}</s-paragraph>
         <s-stack direction="inline" gap="small" alignItems="center">
           <s-text>{i18n.t('specificLinkOffer.statusLabel')}</s-text>

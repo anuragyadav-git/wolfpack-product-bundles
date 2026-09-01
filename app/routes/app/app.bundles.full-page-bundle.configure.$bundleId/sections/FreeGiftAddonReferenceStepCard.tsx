@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
 
 export function FpbAddonReferenceStepCard({
   flow,
@@ -27,6 +28,7 @@ export function FpbAddonReferenceStepCard({
           <div className={fullPageBundleStyles.addonsTitleCluster}>
             <h3 className={fullPageBundleStyles.panelTitle}>
               Add-Ons and Gifting Step
+              <ConfigureHelpPopover tooltipKey="freeGiftAddons" />
             </h3>
             <s-switch
               accessibilityLabel="Enable add-ons and gifting step"

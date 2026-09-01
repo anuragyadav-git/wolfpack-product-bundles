@@ -18,6 +18,7 @@ export function PpbDefaultProductsSettings() {
     defaultProductsData,
     markAsDirty,
     productPageBundleStyles,
+    QuestionHelpTooltip,
     setDefaultProductsData,
     shopify,
     validationErrors = {},
@@ -71,6 +72,7 @@ export function PpbDefaultProductsSettings() {
         <div className={productPageBundleStyles.settingTitleRow}>
           <h3 className={productPageBundleStyles.settingTitle}>
             Pre Selected Product
+            <QuestionHelpTooltip tooltipKey="preselectedProducts" />
           </h3>
           <span className={productPageBundleStyles.settingInlineSwitch}>
             <s-switch
