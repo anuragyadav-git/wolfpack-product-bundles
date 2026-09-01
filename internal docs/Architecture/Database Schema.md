@@ -5,7 +5,7 @@ title: Database Schema
 type: architecture
 status: authoritative
 summary: Documents the canonical Prisma models, enums, ownership boundaries, and migration rules for Wolfpack persistence.
-last_audited: 2026-08-31
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -47,6 +47,10 @@ Core model. Key fields beyond basics:
 - `tierConfig`: JSON — tiered pricing configuration
 - `showStepTimeline`: Boolean — step progress indicator
 - `inventorySyncedAt`: DateTime — debounce for inventory sync (skip if < 60s ago)
+- Countdown presentation is stored directly on `Bundle` through
+  `countdownEnabled`, `countdownLayout`, `countdownPosition`,
+  `countdownTitle`, `countdownExpiryAction`, and
+  `countdownExpiredMessage`. These fields do not own a deadline.
 
 ### BundleStep
 
@@ -102,6 +106,12 @@ selection. It records a monotonically increasing `ruleVersion`, owns normalized
 These fields govern Wolfpack merchandising surfaces only. Shopify automatic app
 discounts remain the canonical owner of checkout discount `startsAt`, `endsAt`,
 and combination settings whenever a Shopify discount node exists.
+
+When countdown presentation is enabled, `OfferPolicy.endsAt` is its sole
+server-authoritative deadline. Wolfpack does not persist a second countdown end
+instant, visitor-relative duration, shopper-midnight schedule, or transition
+job. A bundle without a valid future `endsAt` cannot display an active
+countdown.
 
 The initial normalized condition type is `specific_link`.
 

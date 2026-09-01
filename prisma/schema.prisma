@@ -111,6 +111,12 @@ model Bundle {
   stickyAddToCartShowDesktop           Boolean           @default(true)
   stickyAddToCartShowMobile            Boolean           @default(true)
   stickyAddToCartAction                String            @default("scroll_to_offers") // scroll_to_offers | add_selected_offer
+  countdownEnabled                     Boolean           @default(false) // Presentation only; deadline is OfferPolicy.endsAt
+  countdownLayout                      String            @default("compact") // compact | full
+  countdownPosition                    String            @default("above") // above | below
+  countdownTitle                       String            @default("")
+  countdownExpiryAction                String            @default("hide") // hide | show_zeros | show_message
+  countdownExpiredMessage              String            @default("")
   // Per-bundle text overrides
   textOverrides                        Json? // { addToCartButton, nextButton, doneButton, freeBadge, includedBadge, yourBundle, addingToCart, completeSteps }
   textOverridesByLocale                Json? // { "fr": { addToCartButton: "Ajouter au panier", ... }, ... }

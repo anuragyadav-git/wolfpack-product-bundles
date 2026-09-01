@@ -1,4 +1,5 @@
 import { processCss } from "../../../../lib/css-sanitizer";
+import { parseCountdownSettings } from "../../../../lib/bundle-countdown";
 import { parseLowStockAlertSettings } from "../../../../lib/low-stock-alert";
 
 function str(formData: FormData, key: string): string | null {
@@ -117,6 +118,7 @@ export function parsePPBBundleSettings(formData: FormData) {
       true,
     ),
     stickyAddToCartAction: stickyAddToCartAction(formData),
+    ...parseCountdownSettings(formData),
     ...parseLowStockAlertSettings(formData),
   };
 }

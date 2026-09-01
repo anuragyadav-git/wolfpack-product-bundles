@@ -818,6 +818,35 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists direct countdown presentation settings", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        countdownEnabled: "true",
+        countdownLayout: "full",
+        countdownPosition: "below",
+        countdownTitle: "Ends soon",
+        countdownExpiryAction: "show_zeros",
+        countdownExpiredMessage: "This offer has ended",
+      }),
+    );
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          countdownEnabled: true,
+          countdownLayout: "full",
+          countdownPosition: "below",
+          countdownTitle: "Ends soon",
+          countdownExpiryAction: "show_zeros",
+          countdownExpiredMessage: "This offer has ended",
+        }),
+      }),
+    );
+  });
+
   it("preserves an explicit draft when a step has StepProduct", async () => {
     const stepsData = makeStepsData({
       StepProduct: [

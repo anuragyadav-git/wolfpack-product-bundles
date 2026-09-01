@@ -66,4 +66,23 @@ describe("FPB Show Text on + Button persistence", () => {
       lowStockAlertMessage: "Hurry, {{stock}} remaining",
     });
   });
+
+  it("parses direct countdown presentation settings", () => {
+    const formData = buildSaveForm(true);
+    formData.set("countdownEnabled", "true");
+    formData.set("countdownLayout", "full");
+    formData.set("countdownPosition", "below");
+    formData.set("countdownTitle", "Ends soon");
+    formData.set("countdownExpiryAction", "show_zeros");
+    formData.set("countdownExpiredMessage", "This offer has ended");
+
+    expect(parseFpbSaveBundleForm(formData)).toMatchObject({
+      countdownEnabled: true,
+      countdownLayout: "full",
+      countdownPosition: "below",
+      countdownTitle: "Ends soon",
+      countdownExpiryAction: "show_zeros",
+      countdownExpiredMessage: "This offer has ended",
+    });
+  });
 });

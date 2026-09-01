@@ -801,6 +801,33 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists direct countdown presentation without creating a deadline", async () => {
+    const fd = makeFormData({
+      countdownEnabled: "true",
+      countdownLayout: "full",
+      countdownPosition: "below",
+      countdownTitle: "Ends soon",
+      countdownExpiryAction: "show_message",
+      countdownExpiredMessage: "This offer has ended",
+    });
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          countdownEnabled: true,
+          countdownLayout: "full",
+          countdownPosition: "below",
+          countdownTitle: "Ends soon",
+          countdownExpiryAction: "show_message",
+          countdownExpiredMessage: "This offer has ended",
+        }),
+      }),
+    );
+    const updateInput = getDb().bundle.update.mock.calls[0][0];
+    expect(updateInput.data).not.toHaveProperty("countdownEndsAt");
+  });
+
   it("creates StepCategory records in DB with correct shape", async () => {
     const categoryCondition = { type: "quantity", condition: "greaterThanOrEqualTo", value: "01" };
     const categoryProduct = {
