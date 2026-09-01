@@ -780,6 +780,27 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists direct sticky add-to-cart settings", async () => {
+    const fd = makeFormData({
+      stickyAddToCartEnabled: "true",
+      stickyAddToCartShowDesktop: "false",
+      stickyAddToCartShowMobile: "true",
+      stickyAddToCartAction: "add_selected_offer",
+    });
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          stickyAddToCartEnabled: true,
+          stickyAddToCartShowDesktop: false,
+          stickyAddToCartShowMobile: true,
+          stickyAddToCartAction: "add_selected_offer",
+        }),
+      }),
+    );
+  });
+
   it("creates StepCategory records in DB with correct shape", async () => {
     const categoryCondition = { type: "quantity", condition: "greaterThanOrEqualTo", value: "01" };
     const categoryProduct = {

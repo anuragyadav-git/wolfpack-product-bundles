@@ -20,6 +20,11 @@ function int(formData: FormData, key: string): number | null {
   return isNaN(parsed) ? null : parsed;
 }
 
+function stickyAddToCartAction(formData: FormData) {
+  const action = str(formData, "stickyAddToCartAction");
+  return action === "add_selected_offer" ? action : "scroll_to_offers";
+}
+
 function jsonObject<T extends Record<string, unknown> | null>(
   formData: FormData,
   key: string,
@@ -96,6 +101,22 @@ export function parsePPBBundleSettings(formData: FormData) {
       "useSingleStepCategoriesAsBundleSteps",
       false,
     ),
+    stickyAddToCartEnabled: bool(
+      formData,
+      "stickyAddToCartEnabled",
+      false,
+    ),
+    stickyAddToCartShowDesktop: bool(
+      formData,
+      "stickyAddToCartShowDesktop",
+      true,
+    ),
+    stickyAddToCartShowMobile: bool(
+      formData,
+      "stickyAddToCartShowMobile",
+      true,
+    ),
+    stickyAddToCartAction: stickyAddToCartAction(formData),
     ...parseLowStockAlertSettings(formData),
   };
 }

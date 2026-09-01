@@ -107,6 +107,10 @@ model Bundle {
   lowStockAlertEnabled                 Boolean           @default(false) // Show truthful component-variant low-stock messaging
   lowStockAlertThreshold               Int               @default(5) // Inclusive Shopify sellable-quantity threshold
   lowStockAlertMessage                 String            @default("Only {{stock}} left") // Merchant copy; must include {{stock}}
+  stickyAddToCartEnabled               Boolean           @default(false) // Show the PPB floating bundle action
+  stickyAddToCartShowDesktop           Boolean           @default(true)
+  stickyAddToCartShowMobile            Boolean           @default(true)
+  stickyAddToCartAction                String            @default("scroll_to_offers") // scroll_to_offers | add_selected_offer
   // Per-bundle text overrides
   textOverrides                        Json? // { addToCartButton, nextButton, doneButton, freeBadge, includedBadge, yourBundle, addingToCart, completeSteps }
   textOverridesByLocale                Json? // { "fr": { addToCartButton: "Ajouter au panier", ... }, ... }

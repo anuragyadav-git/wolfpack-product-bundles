@@ -45,6 +45,24 @@ describe("parsePPBBundleSettings", () => {
     expect(result.lowStockAlertEnabled).toBe(false);
     expect(result.lowStockAlertThreshold).toBe(5);
     expect(result.lowStockAlertMessage).toBe("Only {{stock}} left");
+    expect(result.stickyAddToCartEnabled).toBe(false);
+    expect(result.stickyAddToCartShowDesktop).toBe(true);
+    expect(result.stickyAddToCartShowMobile).toBe(true);
+    expect(result.stickyAddToCartAction).toBe("scroll_to_offers");
+  });
+
+  it("parses direct sticky add-to-cart settings", () => {
+    const result = parsePPBBundleSettings(makeForm({
+      stickyAddToCartEnabled: "true",
+      stickyAddToCartShowDesktop: "false",
+      stickyAddToCartShowMobile: "true",
+      stickyAddToCartAction: "add_selected_offer",
+    }));
+
+    expect(result.stickyAddToCartEnabled).toBe(true);
+    expect(result.stickyAddToCartShowDesktop).toBe(false);
+    expect(result.stickyAddToCartShowMobile).toBe(true);
+    expect(result.stickyAddToCartAction).toBe("add_selected_offer");
   });
 
   it("parses direct low-stock alert settings", () => {
