@@ -36,6 +36,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     availableBundles,
     shop,
     apiKey,
+    storefrontProxyRoot,
     shopLocales = [],
     shopCurrencyCode,
   } = loaderData as any;
@@ -253,6 +254,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     shopify,
     shopLocales,
     shopCurrencyCode,
+    storefrontProxyRoot,
     stepsState,
     themeEditorUrl: currentThemeEditorUrl,
     triggerAppEmbedBannerFeedback,

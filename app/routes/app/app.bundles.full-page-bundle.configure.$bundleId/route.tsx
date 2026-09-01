@@ -30,6 +30,7 @@ import {
   handleGenerateSpecificLinkOffer,
   handleRevokeSpecificLinkOffer,
 } from "../shared/specific-link-offer-action.server";
+import { resolveStorefrontProxyRoot } from "../../../config/storefront-proxy-routes";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -86,6 +87,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // Per Shopify docs: addAppBlockId={api_key}/{handle}
   // Reference: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration
   const apiKey = process.env.SHOPIFY_API_KEY || "";
+  const storefrontProxyRoot = resolveStorefrontProxyRoot({
+    configuredRoot: process.env.STOREFRONT_PROXY_ROOT,
+  });
 
   const [shopifyData, availableBundles] = await Promise.all([
       fetchBundleConfigureShopifyData(admin, bundle.shopifyProductId, bundleId),
@@ -110,6 +114,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     configureMode,
     showFirstLoadTour,
     apiKey,
+    storefrontProxyRoot,
     shopLocales: shopifyData.shopLocales,
     shopCurrencyCode: shopifyData.shopCurrencyCode,
   });

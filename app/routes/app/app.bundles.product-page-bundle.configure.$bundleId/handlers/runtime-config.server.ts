@@ -459,7 +459,11 @@ export function buildSyncBundleConfiguration(
       isEnabled: false,
       allowedQuantity: 1,
     },
-  useSingleStepCategoriesAsBundleSteps:
+    lowStockAlertEnabled: bundle.lowStockAlertEnabled ?? false,
+    lowStockAlertThreshold: bundle.lowStockAlertThreshold ?? 5,
+    lowStockAlertMessage:
+      bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    useSingleStepCategoriesAsBundleSteps:
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
     steps: buildSyncOptimizedSteps(bundle.steps || []),
     pricing: buildSyncPricingConfig(bundle.pricing),

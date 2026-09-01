@@ -350,7 +350,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       count: validProducts.length
     }, {
       headers: {
-        "Cache-Control": "public, max-age=300, s-maxage=600",
+        "Cache-Control": "no-store",
         "Vary": "Accept-Encoding"
       }
     });

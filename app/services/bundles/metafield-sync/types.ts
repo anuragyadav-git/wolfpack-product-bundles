@@ -77,6 +77,11 @@ export interface BundleUiConfig {
   productSlotIconUrl?: string | null;
   useSingleStepCategoriesAsBundleSteps?: boolean;
   showProductComparedAtPrice?: boolean;
+  lowStockAlert?: {
+    enabled: boolean;
+    threshold: number;
+    message: string;
+  };
   bundleVariantId: string;
   steps: BundleUiStep[];
   pricing: BundleUiPricing | null;

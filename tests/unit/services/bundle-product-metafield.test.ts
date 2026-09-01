@@ -588,6 +588,31 @@ describe("updateBundleProductMetafields", () => {
     expect(parsed.productSlotIconUrl).toBeNull();
   });
 
+  it("emits the low-stock contract into Shopify's product-page bundle_ui_config", async () => {
+    const admin = makeAdmin();
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE, {
+        lowStockAlertEnabled: true,
+        lowStockAlertThreshold: 8,
+        lowStockAlertMessage: "Hurry, {{stock}} remaining",
+      }),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const parsed = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+
+    expect(parsed.lowStockAlert).toEqual({
+      enabled: true,
+      threshold: 8,
+      message: "Hurry, {{stock}} remaining",
+    });
+  });
+
   it("emits direct full-page Add-ons personalization contract into bundle_ui_config", async () => {
     const admin = makeAdmin();
     const personalizationData = {

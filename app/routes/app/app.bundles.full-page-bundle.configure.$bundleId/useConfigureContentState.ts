@@ -22,8 +22,9 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
       : buildFpbStorefrontUrl(
           `${shopDomain}.myshopify.com`,
           bundle.publicNumber,
+          flow.storefrontProxyRoot,
         ),
-    [shopDomain, bundle.publicNumber],
+    [shopDomain, bundle.publicNumber, flow.storefrontProxyRoot],
   );
 
   const [promoBannerBgImage, setPromoBannerBgImage] = useState<string | null>(

@@ -548,6 +548,11 @@ export async function updateBundleProductMetafields(
   productSlotIconUrl: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotIconUrl ?? null : null,
   useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
   showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
+    lowStockAlert: {
+      enabled: bundleConfiguration.lowStockAlertEnabled ?? false,
+      threshold: bundleConfiguration.lowStockAlertThreshold ?? 5,
+      message: bundleConfiguration.lowStockAlertMessage ?? "Only {{stock}} left",
+    },
     bundleVariantId: bundleVariantId, // Bundle parent variant ID for cart transform EXPAND operation
     steps: (bundleConfiguration.steps || []).map((step: any, stepIndex: number) => {
       const stepKey = String(step.id ?? stepIndex);
