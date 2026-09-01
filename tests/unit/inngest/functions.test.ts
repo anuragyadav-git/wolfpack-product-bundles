@@ -2,7 +2,7 @@
  * Unit Tests: Inngest shopify-webhook function
  *
  * Verifies:
- *  - Processor is called with the correct reconstructed PubSubMessage
+ *  - Processor is called with the correct reconstructed webhook message
  *  - Function throws when processor returns success: false (triggers Inngest retry)
  *  - Function completes without throw when processor returns success: true
  */
@@ -12,7 +12,7 @@ import { webhookFunction } from "../../../app/inngest/functions";
 
 jest.mock("../../../app/services/webhooks/processor.server", () => ({
   WebhookProcessor: {
-    processPubSubMessage: jest.fn(),
+    processWebhookMessage: jest.fn(),
   },
 }));
 
@@ -33,12 +33,12 @@ jest.mock("../../../app/inngest/client", () => ({
   },
 }));
 
-const mockProcess = WebhookProcessor.processPubSubMessage as jest.Mock;
+const mockProcess = WebhookProcessor.processWebhookMessage as jest.Mock;
 const fn = webhookFunction as any;
 
 const sampleData = {
-  rawPayload: Buffer.from(JSON.stringify({ inventory_item_id: 123 })).toString("base64"),
-  topic: "inventory_levels/update",
+  rawPayload: Buffer.from(JSON.stringify({ current: ["read_products"] })).toString("base64"),
+  topic: "app/scopes_update",
   shopDomain: "test.myshopify.com",
   webhookId: "abc-123",
   apiVersion: "2025-10",
@@ -55,7 +55,7 @@ describe("shopify-webhook Inngest function", () => {
     expect(fn.__trigger.event).toBe("shopify/webhook");
   });
 
-  it("calls WebhookProcessor with a correctly reconstructed PubSubMessage", async () => {
+  it("calls WebhookProcessor with a correctly reconstructed webhook message", async () => {
     mockProcess.mockResolvedValue({ success: true, message: "ok" });
 
     await fn.__handler({ event: { data: sampleData } });
@@ -63,7 +63,7 @@ describe("shopify-webhook Inngest function", () => {
     expect(mockProcess).toHaveBeenCalledTimes(1);
     const [msg] = mockProcess.mock.calls[0];
     expect(msg.data).toBe(sampleData.rawPayload);
-    expect(msg.attributes["X-Shopify-Topic"]).toBe("inventory_levels/update");
+    expect(msg.attributes["X-Shopify-Topic"]).toBe("app/scopes_update");
     expect(msg.attributes["X-Shopify-Shop-Domain"]).toBe("test.myshopify.com");
     expect(msg.attributes["X-Shopify-Webhook-Id"]).toBe("abc-123");
     expect(msg.attributes["X-Shopify-API-Version"]).toBe("2025-10");

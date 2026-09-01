@@ -4,7 +4,6 @@
 
 // Product handlers
 export {
-  handleProductUpdate,
   handleProductDelete,
 } from './product.server';
 

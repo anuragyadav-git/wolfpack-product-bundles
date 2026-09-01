@@ -7,7 +7,7 @@ export { WebhookProcessor } from './processor.server';
 
 // Types
 export type {
-  PubSubMessage,
+  WebhookMessage,
   WebhookProcessResult,
   ProductPayload,
   CustomerDataRequestPayload,
@@ -17,7 +17,6 @@ export type {
 
 // Handlers (for testing/direct access)
 export {
-  handleProductUpdate,
   handleProductDelete,
   handleCustomerDataRequest,
   handleCustomerRedact,

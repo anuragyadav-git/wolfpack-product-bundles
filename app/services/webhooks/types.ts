@@ -4,7 +4,7 @@
  * Extracted from the main processor file for better organization.
  */
 
-export interface PubSubMessage {
+export interface WebhookMessage {
   data: string; // base64 encoded JSON
   attributes: {
     "X-Shopify-Topic": string;

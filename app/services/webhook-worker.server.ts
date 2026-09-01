@@ -2,7 +2,7 @@
  * HTTP Webhook Worker Server
  *
  * Receives Shopify webhook POSTs directly via HTTP, validates the HMAC
- * signature, adapts the payload to the existing PubSubMessage format,
+ * signature, adapts the payload to the webhook processor format,
  * and delegates to WebhookProcessor — with zero changes to the processor.
  *
  * Replaces the Google Cloud Pub/Sub subscriber (pubsub-worker.server.ts).
@@ -24,6 +24,8 @@ import { AppLogger } from "../lib/logger";
 import { inngest } from "../inngest/client";
 import { WebhookProcessor } from "./webhooks/processor.server";
 import type { ShopifyWebhookEventData } from "../inngest/types";
+import { isTrackedBundleProductDelete } from "./webhooks/product-delete-relevance.server";
+import { isActiveWebhookTopic } from "./webhooks/topics";
 
 // ---------------------------------------------------------------------------
 // Inngest availability check — when event key is missing and not in dev mode,
@@ -71,7 +73,7 @@ function validateHmac(rawBody: Buffer, hmacHeader: string, secret: string): bool
 }
 
 // ---------------------------------------------------------------------------
-// PubSubMessage adapter
+// Inngest payload adapter
 // ---------------------------------------------------------------------------
 
 /**
@@ -218,6 +220,39 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse): 
       bodyBytes: rawBody.length,
     });
 
+    if (!isActiveWebhookTopic(topic)) {
+      AppLogger.info("Ignored inactive webhook before Inngest", {
+        component: "webhook-worker",
+        operation: "requestHandler",
+      }, { topic, shop: shopDomain });
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ received: true, ignored: true }));
+      return;
+    }
+
+    if (topic === "products/delete") {
+      let isTracked = true;
+
+      try {
+        isTracked = await isTrackedBundleProductDelete({ rawBody, shopDomain });
+      } catch (error: unknown) {
+        AppLogger.error("Failed to check product deletion relevance; enqueueing for safety", {
+          component: "webhook-worker",
+          operation: "requestHandler",
+        }, error);
+      }
+
+      if (!isTracked) {
+        AppLogger.info("Ignored unreferenced product deletion before Inngest", {
+          component: "webhook-worker",
+          operation: "requestHandler",
+        }, { topic, shop: shopDomain });
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ received: true, ignored: true }));
+        return;
+      }
+    }
+
     // Acknowledge Shopify immediately (must be within 5-second window).
     // Inngest receives the event durably; retries are managed by Inngest Cloud.
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -248,7 +283,7 @@ export async function handleRequest(req: IncomingMessage, res: ServerResponse): 
         component: "webhook-worker",
         operation: "requestHandler",
       }, { topic, shop: shopDomain });
-      WebhookProcessor.processPubSubMessage({
+      WebhookProcessor.processWebhookMessage({
         data: payload.rawPayload,
         attributes: {
           "X-Shopify-Topic": payload.topic,
