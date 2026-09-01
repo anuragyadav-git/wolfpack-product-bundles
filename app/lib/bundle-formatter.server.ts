@@ -65,6 +65,12 @@ export interface FormattedBundle {
     threshold: number;
     message: string;
   };
+  stickyAddToCart: {
+    enabled: boolean;
+    showDesktop: boolean;
+    showMobile: boolean;
+    action: "scroll_to_offers" | "add_selected_offer";
+  };
   showTextOnAddButton: boolean;
   // Per-bundle text overrides
   textOverrides: Record<string, string> | null;
@@ -336,6 +342,17 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
       enabled: bundle.lowStockAlertEnabled ?? false,
       threshold: bundle.lowStockAlertThreshold ?? 5,
       message: bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    },
+    stickyAddToCart: {
+      enabled:
+        bundle.bundleType === "product_page" &&
+        (bundle.stickyAddToCartEnabled ?? false),
+      showDesktop: bundle.stickyAddToCartShowDesktop ?? true,
+      showMobile: bundle.stickyAddToCartShowMobile ?? true,
+      action:
+        bundle.stickyAddToCartAction === "add_selected_offer"
+          ? "add_selected_offer"
+          : "scroll_to_offers",
     },
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,
     textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,

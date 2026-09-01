@@ -93,6 +93,7 @@ import { ProductPageDomMethods } from './widgets/product-page/methods/dom-method
 import { ProductPageFooterModalStateMethods } from './widgets/product-page/methods/footer-modal-state-methods.js';
 import { ProductPageModalStateMethods } from './widgets/product-page/methods/modal-state-methods.js';
 import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/widget-misc-methods.js';
+import { ProductPageStickyAddToCartMethods } from './widgets/product-page/methods/sticky-add-to-cart-methods.js';
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
@@ -142,6 +143,7 @@ export class BundleWidgetProductPage {
       ProductPageFooterModalStateMethods,
       ProductPageModalStateMethods,
       ProductPageWidgetMiscMethods,
+      ProductPageStickyAddToCartMethods,
       ProductPageLayoutShellMethods,
       ProductPageInpageRenderMethods,
       ProductPageProductDataMethods,
@@ -296,6 +298,7 @@ export class BundleWidgetProductPage {
 
       // Attach event listeners
       this.attachEventListeners();
+      this.setupStickyAddToCart();
 
       // Mark as initialized
       this.container.dataset.initialized = 'true';

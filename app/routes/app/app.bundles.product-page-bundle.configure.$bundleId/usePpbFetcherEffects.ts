@@ -85,6 +85,14 @@ export function usePpbFetcherEffects({
             settings.lowStockAlertThreshold;
           settings.originalLowStockAlertMessageRef.current =
             settings.lowStockAlertMessage;
+          settings.originalStickyAddToCartEnabledRef.current =
+            settings.stickyAddToCartEnabled;
+          settings.originalStickyAddToCartShowDesktopRef.current =
+            settings.stickyAddToCartShowDesktop;
+          settings.originalStickyAddToCartShowMobileRef.current =
+            settings.stickyAddToCartShowMobile;
+          settings.originalStickyAddToCartActionRef.current =
+            settings.stickyAddToCartAction;
           visibility.originalUpsellWidgetEnabledRef.current =
             visibility.upsellWidgetEnabled;
           visibility.originalUpsellWidgetDisplayModeRef.current =

@@ -42,6 +42,35 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   const originalLowStockAlertMessageRef = useRef<string>(
     (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
   );
+  const [stickyAddToCartEnabled, setStickyAddToCartEnabled] =
+    useState<boolean>((bundle as any).stickyAddToCartEnabled ?? false);
+  const [stickyAddToCartShowDesktop, setStickyAddToCartShowDesktop] =
+    useState<boolean>((bundle as any).stickyAddToCartShowDesktop ?? true);
+  const [stickyAddToCartShowMobile, setStickyAddToCartShowMobile] =
+    useState<boolean>((bundle as any).stickyAddToCartShowMobile ?? true);
+  const [stickyAddToCartAction, setStickyAddToCartAction] = useState<
+    "scroll_to_offers" | "add_selected_offer"
+  >(
+    (bundle as any).stickyAddToCartAction === "add_selected_offer"
+      ? "add_selected_offer"
+      : "scroll_to_offers",
+  );
+  const originalStickyAddToCartEnabledRef = useRef(
+    (bundle as any).stickyAddToCartEnabled ?? false,
+  );
+  const originalStickyAddToCartShowDesktopRef = useRef(
+    (bundle as any).stickyAddToCartShowDesktop ?? true,
+  );
+  const originalStickyAddToCartShowMobileRef = useRef(
+    (bundle as any).stickyAddToCartShowMobile ?? true,
+  );
+  const originalStickyAddToCartActionRef = useRef<
+    "scroll_to_offers" | "add_selected_offer"
+  >(
+    (bundle as any).stickyAddToCartAction === "add_selected_offer"
+      ? "add_selected_offer"
+      : "scroll_to_offers",
+  );
   const [showTextOnAddButton, setShowTextOnAddButton] = useState<boolean>(
     (bundle as any).showTextOnAddButton ?? false,
   );
@@ -94,6 +123,18 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
     originalLowStockAlertEnabledRef,
     originalLowStockAlertThresholdRef,
     originalLowStockAlertMessageRef,
+    stickyAddToCartEnabled,
+    setStickyAddToCartEnabled,
+    stickyAddToCartShowDesktop,
+    setStickyAddToCartShowDesktop,
+    stickyAddToCartShowMobile,
+    setStickyAddToCartShowMobile,
+    stickyAddToCartAction,
+    setStickyAddToCartAction,
+    originalStickyAddToCartEnabledRef,
+    originalStickyAddToCartShowDesktopRef,
+    originalStickyAddToCartShowMobileRef,
+    originalStickyAddToCartActionRef,
     showTextOnAddButton,
     setShowTextOnAddButton,
     bundleCartTitle,

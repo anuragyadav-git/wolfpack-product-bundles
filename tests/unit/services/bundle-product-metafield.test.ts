@@ -613,6 +613,33 @@ describe("updateBundleProductMetafields", () => {
     });
   });
 
+  it("emits the sticky add-to-cart contract into Shopify's product-page bundle_ui_config", async () => {
+    const admin = makeAdmin();
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE, {
+        stickyAddToCartEnabled: true,
+        stickyAddToCartShowDesktop: false,
+        stickyAddToCartShowMobile: true,
+        stickyAddToCartAction: "add_selected_offer",
+      }),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const parsed = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+
+    expect(parsed.stickyAddToCart).toEqual({
+      enabled: true,
+      showDesktop: false,
+      showMobile: true,
+      action: "add_selected_offer",
+    });
+  });
+
   it("emits direct full-page Add-ons personalization contract into bundle_ui_config", async () => {
     const admin = makeAdmin();
     const personalizationData = {

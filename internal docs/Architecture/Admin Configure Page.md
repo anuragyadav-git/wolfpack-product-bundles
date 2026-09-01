@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-31
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -102,6 +102,19 @@ clearing their saved values. Bundle Settings follows the same ownership rule:
 shared rows cover overlapping settings, while FPB-only Product Slots / Slot
 Icon and PPB-only discount display, banner, CSS, Bundle Embed, and Place Widget
 controls remain route-owned slots.
+
+PPB Bundle Settings also owns the low-stock and sticky bundle-action controls.
+The sticky section uses Polaris web components for its master switch, desktop
+and mobile gates, and action selector. Its direct-add choice delegates to the
+existing storefront bundle CTA; Configure does not expose a second cart or
+checkout integration.
+
+During SIT development, adding or removing React hooks in a configure-state
+hook can leave an already-mounted iframe on an incompatible Vite HMR hook
+shape. The resulting React `Should have a queue` error is not by itself API or
+database evidence. Check that the route `_data` request returned successfully,
+then perform a cache-bypassed reload of the embedded Admin URL to acquire a
+fresh session token and remount the hook tree before diagnosing the server.
 
 The former `Pre-order & Subscription Integration` Bundle Settings row is absent
 from both FPB and PPB. Its `individualSellingPlanSelection` state and form field

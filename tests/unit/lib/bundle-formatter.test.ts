@@ -194,6 +194,32 @@ describe("formatBundleForWidget", () => {
     });
   });
 
+  it("emits the direct sticky add-to-cart storefront contract", () => {
+    const configured = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+      stickyAddToCartEnabled: true,
+      stickyAddToCartShowDesktop: false,
+      stickyAddToCartShowMobile: true,
+      stickyAddToCartAction: "add_selected_offer",
+    }) as any);
+    const defaults = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+    }) as any);
+
+    expect(configured.stickyAddToCart).toEqual({
+      enabled: true,
+      showDesktop: false,
+      showMobile: true,
+      action: "add_selected_offer",
+    });
+    expect(defaults.stickyAddToCart).toEqual({
+      enabled: false,
+      showDesktop: true,
+      showMobile: true,
+      action: "scroll_to_offers",
+    });
+  });
+
   it("keeps product-page compare-at visibility enabled despite a stale persisted setting", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",

@@ -27,4 +27,33 @@ describe("PPB low-stock runtime configuration", () => {
       }),
     );
   });
+
+  it("preserves the direct sticky add-to-cart fields for Shopify metafield sync", () => {
+    const config = buildSyncBundleConfiguration(
+      {
+        id: "bundle-1",
+        shopId: "test.myshopify.com",
+        name: "Bundle",
+        description: "",
+        status: "active",
+        bundleType: "product_page",
+        steps: [],
+        pricing: null,
+        stickyAddToCartEnabled: true,
+        stickyAddToCartShowDesktop: false,
+        stickyAddToCartShowMobile: true,
+        stickyAddToCartAction: "add_selected_offer",
+      },
+      "gid://shopify/Product/1",
+    );
+
+    expect(config).toEqual(
+      expect.objectContaining({
+        stickyAddToCartEnabled: true,
+        stickyAddToCartShowDesktop: false,
+        stickyAddToCartShowMobile: true,
+        stickyAddToCartAction: "add_selected_offer",
+      }),
+    );
+  });
 });

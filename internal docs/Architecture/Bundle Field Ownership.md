@@ -48,7 +48,7 @@ second persisted owner. The app's Sync Bundle action is the upgrade path.
 
 | Classification | Fields or contract | Owner and reason |
 | --- | --- | --- |
-| `KEEP_USED` | Bundle identity, status, type, Shopify parent linkage, FPB design template/preset, steps, `StepProduct`, canonical `StepCategory` including PPB `variantSelectorMode` and `swatchTooltipEnabled`, pricing rules, direct `BundlePricing.displayOptions`, low-stock alert settings, box selection, defaults, text, media, add-ons, visibility | Current Admin save, storefront formatter, widget, Cart Transform, or Shopify sync reads the field. |
+| `KEEP_USED` | Bundle identity, status, type, Shopify parent linkage, FPB design template/preset, steps, `StepProduct`, canonical `StepCategory` including PPB `variantSelectorMode` and `swatchTooltipEnabled`, pricing rules, direct `BundlePricing.displayOptions`, low-stock alert settings, PPB sticky add-to-cart settings, box selection, defaults, text, media, add-ons, visibility | Current Admin save, storefront formatter, widget, Cart Transform, or Shopify sync reads the field. |
 | `KEEP_PLATFORM` | Shopify product/variant IDs and handles, publication state, inventory settings, analytics/event identifiers | Required to address Shopify resources or provide an explicit platform capability. |
 | `KEEP_FOR_IMPLEMENTATION` | `showProductPrices`, `cartRedirectToCheckout`, `allowQuantityChanges`, `discountDisplayOverride`, and other merchant-visible controls whose runtime wiring is incomplete | The contract is approved or merchant-visible and its Admin/storefront wiring is incomplete. It must be wired or removed as a product decision; it must not be silently deleted as database debris. |
 | `DERIVED` | Public `bundle_ui_config`, runtime `messaging`, compact product/category records, component references/quantities/pricing, signed runtime token payload | Generated at the server/Shopify boundary. Never write these shapes back as a second bundle source. |
@@ -120,6 +120,14 @@ Low-stock merchandising has exactly three direct Bundle owners:
 `lowStockAlertMessage`. Runtime `lowStockAlert` is derived from those fields.
 Inventory values remain Shopify-owned variant context and are never persisted
 as a bundle-level stock total.
+
+PPB sticky action presentation has exactly four direct Bundle owners:
+`stickyAddToCartEnabled`, `stickyAddToCartShowDesktop`,
+`stickyAddToCartShowMobile`, and `stickyAddToCartAction`. Runtime
+`stickyAddToCart` is derived from those fields only for Product Page Bundles.
+The action is presentation state, not a second cart contract: direct add
+delegates to the canonical PPB CTA and incomplete selections return to that
+existing validation surface.
 
 ## FPB Page ownership
 

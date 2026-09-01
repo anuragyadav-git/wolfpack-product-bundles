@@ -82,6 +82,12 @@ export interface BundleUiConfig {
     threshold: number;
     message: string;
   };
+  stickyAddToCart?: {
+    enabled: boolean;
+    showDesktop: boolean;
+    showMobile: boolean;
+    action: 'scroll_to_offers' | 'add_selected_offer';
+  };
   bundleVariantId: string;
   steps: BundleUiStep[];
   pricing: BundleUiPricing | null;

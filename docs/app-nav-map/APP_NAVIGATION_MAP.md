@@ -643,6 +643,14 @@ PPB Configure Page
 │   │   ├── FPB only: Slot Icon [Change Icon] opens bundle-level image picker; [Reset] clears icon
 │   │   ├── Settings -> Design: store-level FPB/PPB Slot Icon and Centered badge / Cover / Fit presentation control
 │   │   └── FPB only note: only applies when rules are quantity-based
+│   ├── PPB only: Low-stock alert
+│   │   ├── Enable toggle
+│   │   ├── Sellable component-variant threshold
+│   │   └── Tokenized message using {{stock}}
+│   ├── PPB only: Sticky add to cart
+│   │   ├── Enable toggle
+│   │   ├── Show on desktop / Show on mobile
+│   │   └── Action: Scroll to bundle offers / Add selected bundle
 │   ├── Cart line item discount display
 │   │   └── [Button] "Edit Defaults" → /app/settings
 │   ├── Bundle Banners (bundleBannerDesktopUrl + bundleBannerMobileUrl)

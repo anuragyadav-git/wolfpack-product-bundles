@@ -463,6 +463,13 @@ export function buildSyncBundleConfiguration(
     lowStockAlertThreshold: bundle.lowStockAlertThreshold ?? 5,
     lowStockAlertMessage:
       bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    stickyAddToCartEnabled: bundle.stickyAddToCartEnabled ?? false,
+    stickyAddToCartShowDesktop: bundle.stickyAddToCartShowDesktop ?? true,
+    stickyAddToCartShowMobile: bundle.stickyAddToCartShowMobile ?? true,
+    stickyAddToCartAction:
+      bundle.stickyAddToCartAction === "add_selected_offer"
+        ? "add_selected_offer"
+        : "scroll_to_offers",
     useSingleStepCategoriesAsBundleSteps:
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
     steps: buildSyncOptimizedSteps(bundle.steps || []),

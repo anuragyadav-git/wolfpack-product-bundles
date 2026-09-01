@@ -34,6 +34,8 @@ source_paths:
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
+  - app/assets/widgets/product-page/methods/sticky-add-to-cart-methods.ts
+  - app/assets/widgets/product-page-css/base/sticky-add-to-cart.css
   - app/assets/widgets/product-page/ppb-modal-card-presentation.ts
   - app/assets/widgets/product-page/methods/modal-methods.ts
   - app/assets/widgets/product-page/methods/modal-state-methods.ts
@@ -457,6 +459,16 @@ authorization. It therefore cannot be reused as the PPB bundle action. The
 bundle widget's existing validated add path remains the only cart mutation
 owner. Theme-specific event interception or product-form rewriting is not a
 supported integration path.
+
+The optional PPB sticky action is app-owned because Shopify does not provide a
+native sticky control that understands buyer-selected bundle components. It is
+mounted only for the persisted desktop/mobile targets and hidden while the
+canonical PPB CTA intersects the viewport. `scroll_to_offers` returns the
+shopper to the existing bundle selection surface. `add_selected_offer`
+delegates exactly once to the canonical PPB CTA when that CTA is enabled; when
+it is disabled, the action returns to the incomplete bundle surface instead.
+It owns no cart payload, request, validation, inventory, pending, error, or
+redirect logic.
 
 ### Product-Page Block Stage — Shopify-Hosted Snapshot
 

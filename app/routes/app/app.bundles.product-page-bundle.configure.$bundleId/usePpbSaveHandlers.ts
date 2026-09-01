@@ -300,6 +300,22 @@ export function usePpbSaveHandlers({
       );
       formData.append("lowStockAlertMessage", settings.lowStockAlertMessage);
       formData.append(
+        "stickyAddToCartEnabled",
+        String(settings.stickyAddToCartEnabled),
+      );
+      formData.append(
+        "stickyAddToCartShowDesktop",
+        String(settings.stickyAddToCartShowDesktop),
+      );
+      formData.append(
+        "stickyAddToCartShowMobile",
+        String(settings.stickyAddToCartShowMobile),
+      );
+      formData.append(
+        "stickyAddToCartAction",
+        settings.stickyAddToCartAction,
+      );
+      formData.append(
         "showTextOnAddButton",
         String(settings.showTextOnAddButton),
       );
@@ -413,6 +429,18 @@ export function usePpbSaveHandlers({
     );
     settings.setLowStockAlertMessage(
       settings.originalLowStockAlertMessageRef.current,
+    );
+    settings.setStickyAddToCartEnabled(
+      settings.originalStickyAddToCartEnabledRef.current,
+    );
+    settings.setStickyAddToCartShowDesktop(
+      settings.originalStickyAddToCartShowDesktopRef.current,
+    );
+    settings.setStickyAddToCartShowMobile(
+      settings.originalStickyAddToCartShowMobileRef.current,
+    );
+    settings.setStickyAddToCartAction(
+      settings.originalStickyAddToCartActionRef.current,
     );
     visibility.setUpsellWidgetEnabled(
       visibility.originalUpsellWidgetEnabledRef.current,

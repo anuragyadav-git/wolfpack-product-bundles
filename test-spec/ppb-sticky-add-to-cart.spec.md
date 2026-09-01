@@ -17,7 +17,9 @@ source_paths:
   - prisma/schema.prisma
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/parsers.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
-  - app/assets/widgets/product-page/
+  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleSettingsControls.stickyAddToCart.tsx
+  - app/assets/widgets/product-page/methods/sticky-add-to-cart-methods.ts
+  - app/assets/widgets/product-page-css/base/sticky-add-to-cart.css
 related_docs:
   - docs/competitor-analysis/21-bundlex-urgency-swatches-tier-badges.md
   - docs/competitor-analysis/22-bogos-bundlex-wolfpack-feasibility.md
@@ -60,7 +62,7 @@ Verify that the PPB floating action is direct bundle configuration and remains a
 ## Acceptance Criteria
 
 - [x] Direct Prisma fields use documented defaults.
-- [ ] PPB save and sync preserve one canonical configuration.
-- [ ] The floating action never submits the neutral parent product.
-- [ ] The existing PPB add path remains the only cart mutation owner.
-- [ ] Desktop and mobile Chrome QA pass after the Prisma restart.
+- [x] PPB save and sync preserve one canonical configuration.
+- [x] The floating action never submits the neutral parent product.
+- [x] The existing PPB add path remains the only cart mutation owner.
+- [x] Desktop and mobile Chrome QA pass after the Prisma restart.
