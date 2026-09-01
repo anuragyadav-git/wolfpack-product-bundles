@@ -229,6 +229,17 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       );
       formData.append("offerStartsAt", flow.offerDeliveryState.startsAt ?? "");
       formData.append("offerEndsAt", flow.offerDeliveryState.endsAt ?? "");
+      formData.append(
+        "countryTargetingEnabled",
+        String(flow.offerDeliveryState.countryTargetingEnabled),
+      );
+      formData.append(
+        "countryTargetingMode",
+        flow.offerDeliveryState.countryTargetingMode,
+      );
+      flow.offerDeliveryState.countryCodes.forEach((countryCode: string) => {
+        formData.append("countryCodes", countryCode);
+      });
       validation.validateConfigureForm(formData, (validFormData) => {
         flow.fetcher.submit(validFormData, { method: "post" });
       });

@@ -13,6 +13,9 @@ describe('specific-link offer Admin state', () => {
       stopLowerPriority: true,
       startsAt: null,
       endsAt: null,
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'exclude',
+      countryCodes: ['US', 'CA'],
       ruleVersion: 4,
       conditions: [{
         expiresAt: new Date('2026-09-30T12:00:00.000Z'),
@@ -26,6 +29,9 @@ describe('specific-link offer Admin state', () => {
       stopLowerPriority: true,
       startsAt: null,
       endsAt: null,
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'exclude',
+      countryCodes: ['CA', 'US'],
       status: 'active',
       expiresAt: '2026-09-30T12:00:00.000Z',
       ruleVersion: 4,
@@ -39,13 +45,16 @@ describe('specific-link offer Admin state', () => {
       'stopLowerPriority',
       'startsAt',
       'endsAt',
+      'countryTargetingEnabled',
+      'countryTargetingMode',
+      'countryCodes',
     ]);
   });
 
   it.each([
     [null, 'not_generated'],
-    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 2, conditions: [{ expiresAt: null, revokedAt: now }] }, 'revoked'],
-    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 3, conditions: [{ expiresAt: now, revokedAt: null }] }, 'expired'],
+    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include', countryCodes: [], ruleVersion: 2, conditions: [{ expiresAt: null, revokedAt: now }] }, 'revoked'],
+    [{ specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include', countryCodes: [], ruleVersion: 3, conditions: [{ expiresAt: now, revokedAt: null }] }, 'expired'],
   ] as const)('reports unusable link state', (policy, status) => {
     expect(buildSpecificLinkOfferAdminState(policy, now).status).toBe(status);
   });
@@ -58,6 +67,9 @@ describe('specific-link offer Save Bar persistence', () => {
     stopLowerPriority: false,
     startsAt: null,
     endsAt: null,
+    countryTargetingEnabled: false,
+    countryTargetingMode: 'include' as const,
+    countryCodes: [],
     ruleVersion: 3,
     conditions: [{ expiresAt: null, revokedAt: null }],
   };
@@ -77,9 +89,9 @@ describe('specific-link offer Save Bar persistence', () => {
 
   it.each([
     null,
-    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 1, conditions: [] },
-    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 1, conditions: [{ expiresAt: null, revokedAt: now }] },
-    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, ruleVersion: 1, conditions: [{ expiresAt: now, revokedAt: null }] },
+    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include' as const, countryCodes: [], ruleVersion: 1, conditions: [] },
+    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include' as const, countryCodes: [], ruleVersion: 1, conditions: [{ expiresAt: null, revokedAt: now }] },
+    { specificLinkRequired: false, priority: 100, stopLowerPriority: false, startsAt: null, endsAt: null, countryTargetingEnabled: false, countryTargetingMode: 'include' as const, countryCodes: [], ruleVersion: 1, conditions: [{ expiresAt: now, revokedAt: null }] },
   ])('rejects enabling without a usable link', (policy) => {
     expect(resolveSpecificLinkOfferSave('true', policy, now)).toEqual({
       issue: {

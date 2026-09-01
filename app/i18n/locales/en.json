@@ -384,6 +384,20 @@
     }
   },
   "countryTargeting": {
+    "title": "Country targeting",
+    "description": "Show this bundle only for, or everywhere except, selected Shopify storefront countries.",
+    "shopifyOwnership": "Uses Shopify's selected storefront country. No IP lookup or customer data is used.",
+    "enableLabel": "Target by country",
+    "enableDetails": "Country choices remain saved when targeting is turned off.",
+    "modeLabel": "Country rule",
+    "modeInclude": "Show only in selected countries",
+    "modeExclude": "Hide in selected countries",
+    "searchLabel": "Find countries",
+    "searchPlaceholder": "Search by country name or code",
+    "resultsLabel": "Matching countries",
+    "noCountries": "No countries selected.",
+    "noResults": "No matching countries found.",
+    "removeCountry": "Remove {{country}}",
     "validation": {
       "mode": "Choose whether the selected countries are included or excluded.",
       "countries": "Select at least one valid country when country targeting is enabled."

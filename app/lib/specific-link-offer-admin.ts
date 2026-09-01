@@ -2,6 +2,11 @@ import {
   buildOfferOperationsAdminState,
   type OfferOperationsAdminState,
 } from './offer-policy-admin';
+import {
+  buildOfferCountryTargetingAdminState,
+  type OfferCountryTargetingAdminState,
+  type OfferCountryTargetingPolicyState,
+} from './offer-country-targeting';
 
 export type SpecificLinkOfferStatus =
   | 'not_generated'
@@ -9,7 +14,8 @@ export type SpecificLinkOfferStatus =
   | 'revoked'
   | 'expired';
 
-export interface SpecificLinkOfferAdminState extends OfferOperationsAdminState {
+export interface SpecificLinkOfferAdminState
+  extends OfferOperationsAdminState, OfferCountryTargetingAdminState {
   enabled: boolean;
   status: SpecificLinkOfferStatus;
   expiresAt: string | null;
@@ -21,7 +27,7 @@ interface SpecificLinkConditionState {
   revokedAt: Date | string | null;
 }
 
-export interface SpecificLinkPolicyState {
+export interface SpecificLinkPolicyState extends OfferCountryTargetingPolicyState {
   specificLinkRequired: boolean;
   priority: number;
   stopLowerPriority: boolean;
@@ -76,6 +82,7 @@ export function buildSpecificLinkOfferAdminState(
     expiresAt: expiresAt?.toISOString() ?? null,
     ruleVersion: policy?.ruleVersion ?? null,
     ...buildOfferOperationsAdminState(policy),
+    ...buildOfferCountryTargetingAdminState(policy),
   };
 }
 

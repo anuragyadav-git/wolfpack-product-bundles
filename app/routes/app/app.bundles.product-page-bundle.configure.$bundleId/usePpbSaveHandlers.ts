@@ -388,6 +388,17 @@ export function usePpbSaveHandlers({
       );
       formData.append("offerStartsAt", base.offerDeliveryState.startsAt ?? "");
       formData.append("offerEndsAt", base.offerDeliveryState.endsAt ?? "");
+      formData.append(
+        "countryTargetingEnabled",
+        String(base.offerDeliveryState.countryTargetingEnabled),
+      );
+      formData.append(
+        "countryTargetingMode",
+        base.offerDeliveryState.countryTargetingMode,
+      );
+      base.offerDeliveryState.countryCodes.forEach((countryCode: string) => {
+        formData.append("countryCodes", countryCode);
+      });
       validation.validateConfigureForm(formData, (validFormData) => {
         base.fetcher.submit(validFormData, { method: "post" });
       });

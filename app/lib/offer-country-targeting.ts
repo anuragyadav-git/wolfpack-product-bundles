@@ -3,15 +3,15 @@ import { i18n } from '../i18n/config';
 export type OfferCountryTargetingMode = 'include' | 'exclude';
 
 export type OfferCountryTargetingAdminState = {
-  enabled: boolean;
-  mode: OfferCountryTargetingMode;
-  countryCodes: string[];
-};
-
-type OfferCountryTargetingPolicyState = {
   countryTargetingEnabled: boolean;
   countryTargetingMode: OfferCountryTargetingMode;
   countryCodes: string[];
+};
+
+export type OfferCountryTargetingPolicyState = {
+  countryTargetingEnabled: boolean;
+  countryTargetingMode: OfferCountryTargetingMode;
+  countryCodes: readonly string[];
 };
 
 type RawOfferCountryTargeting = {
@@ -20,7 +20,7 @@ type RawOfferCountryTargeting = {
   countryCodes: FormDataEntryValue[];
 };
 
-type OfferCountryTargetingData = {
+export type OfferCountryTargetingData = {
   countryTargetingEnabled: boolean;
   countryTargetingMode: OfferCountryTargetingMode;
   countryCodes: string[];
@@ -31,8 +31,8 @@ type OfferCountryTargetingSaveResult =
   | { issue: { path: string; message: string } };
 
 const DEFAULT_STATE: OfferCountryTargetingAdminState = {
-  enabled: false,
-  mode: 'include',
+  countryTargetingEnabled: false,
+  countryTargetingMode: 'include',
   countryCodes: [],
 };
 
@@ -42,16 +42,33 @@ function normalizeCountryCodes(values: readonly FormDataEntryValue[]): string[] 
     .sort();
 }
 
+export function mergeVisibleCountrySelection({
+  currentCountryCodes,
+  visibleCountryCodes,
+  selectedVisibleCountryCodes,
+}: {
+  currentCountryCodes: readonly string[];
+  visibleCountryCodes: readonly string[];
+  selectedVisibleCountryCodes: readonly string[];
+}): string[] {
+  const visible = new Set(visibleCountryCodes);
+  return normalizeCountryCodes([
+    ...currentCountryCodes.filter((countryCode) => !visible.has(countryCode)),
+    ...selectedVisibleCountryCodes,
+  ]);
+}
+
 export function buildOfferCountryTargetingAdminState(
   policy: OfferCountryTargetingPolicyState | null,
 ): OfferCountryTargetingAdminState {
   if (!policy) return { ...DEFAULT_STATE, countryCodes: [] };
   return {
-    enabled: policy.countryTargetingEnabled,
-    mode: policy.countryTargetingMode,
+    countryTargetingEnabled: policy.countryTargetingEnabled,
+    countryTargetingMode: policy.countryTargetingMode,
     countryCodes: normalizeCountryCodes(policy.countryCodes),
   };
 }
+
 export function resolveOfferCountryTargetingSave(
   raw: RawOfferCountryTargeting,
   currentPolicy: OfferCountryTargetingPolicyState | null,
@@ -61,8 +78,8 @@ export function resolveOfferCountryTargetingSave(
     return {
       changed: false,
       data: {
-        countryTargetingEnabled: current.enabled,
-        countryTargetingMode: current.mode,
+        countryTargetingEnabled: current.countryTargetingEnabled,
+        countryTargetingMode: current.countryTargetingMode,
         countryCodes: current.countryCodes,
       },
     };
@@ -98,8 +115,8 @@ export function resolveOfferCountryTargetingSave(
     countryCodes,
   };
   return {
-    changed: current.enabled !== enabled
-      || current.mode !== mode
+    changed: current.countryTargetingEnabled !== enabled
+      || current.countryTargetingMode !== mode
       || current.countryCodes.join(',') !== countryCodes.join(','),
     data,
   };

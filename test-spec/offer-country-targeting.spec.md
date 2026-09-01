@@ -18,6 +18,7 @@ systems:
 source_paths:
   - prisma/schema.prisma
   - app/lib/offer-country-targeting.ts
+  - app/routes/app/shared/CountryTargetingSection.tsx
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
 related_docs:
   - docs/competitor-analysis/20-bogos-personalization-analytics-offer-operations.md
@@ -67,7 +68,7 @@ introduce protected customer-data access.
 ## Acceptance Criteria
 
 - [x] Prisma migration defines direct country-targeting fields with inert defaults.
-- [ ] Admin persistence normalizes and validates ISO country codes.
+- [x] Admin persistence normalizes and validates ISO country codes.
 - [ ] FPB and PPB read Shopify Liquid localization after a hard reload.
 - [ ] Cart Transform independently enforces country targeting within complexity 30.
 - [ ] No market identifier, IP service, new Shopify scope, or customer record is used.

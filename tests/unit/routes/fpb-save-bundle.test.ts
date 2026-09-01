@@ -847,6 +847,32 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists normalized Shopify country targeting on the offer policy", async () => {
+    const fd = makeFormData({
+      countryTargetingEnabled: "true",
+      countryTargetingMode: "include",
+    });
+    fd.append("countryCodes", " gb ");
+    fd.append("countryCodes", "IN");
+    fd.append("countryCodes", "GB");
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          offerPolicy: {
+            create: expect.objectContaining({
+              countryTargetingEnabled: true,
+              countryTargetingMode: "include",
+              countryCodes: ["GB", "IN"],
+            }),
+          },
+        }),
+      }),
+    );
+  });
+
   it("preserves an explicit draft when a step has StepProduct", async () => {
     const stepsData = makeStepsData({
       StepProduct: [
@@ -1445,6 +1471,13 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
       shopifyProductId: PRODUCT_ID,
       offerPolicy: {
         specificLinkRequired: false,
+        priority: 100,
+        stopLowerPriority: false,
+        startsAt: null,
+        endsAt: null,
+        countryTargetingEnabled: false,
+        countryTargetingMode: "include",
+        countryCodes: [],
         ruleVersion: 1,
         conditions: [{ expiresAt: null, revokedAt: null }],
       },

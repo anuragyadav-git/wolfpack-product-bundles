@@ -67,6 +67,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
           stopLowerPriority: true,
           startsAt: true,
           endsAt: true,
+          countryTargetingEnabled: true,
+          countryTargetingMode: true,
+          countryCodes: true,
           ruleVersion: true,
           conditions: {
             where: { type: "specific_link" },

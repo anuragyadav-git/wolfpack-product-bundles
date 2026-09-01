@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFetcher } from '@remix-run/react';
 import { i18n } from '../../../i18n/config';
 import type { SpecificLinkOfferAdminState } from '../../../lib/specific-link-offer-admin';
+import type { OfferCountryTargetingMode } from '../../../lib/offer-country-targeting';
 
 interface SpecificLinkOfferActionResponse {
   success: boolean;
@@ -108,6 +109,21 @@ export function useSpecificLinkOfferAdmin({
     markAsDirty();
   }, [markAsDirty]);
 
+  const setCountryTargetingEnabled = useCallback((countryTargetingEnabled: boolean) => {
+    setOfferDeliveryState((current) => ({ ...current, countryTargetingEnabled }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setCountryTargetingMode = useCallback((countryTargetingMode: OfferCountryTargetingMode) => {
+    setOfferDeliveryState((current) => ({ ...current, countryTargetingMode }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setCountryCodes = useCallback((countryCodes: string[]) => {
+    setOfferDeliveryState((current) => ({ ...current, countryCodes }));
+    markAsDirty();
+  }, [markAsDirty]);
+
   const generateSpecificLinkOffer = useCallback(() => {
     const formData = new FormData();
     formData.set('intent', 'generateSpecificLinkOffer');
@@ -142,6 +158,9 @@ export function useSpecificLinkOfferAdmin({
     setOfferStopLowerPriority,
     setOfferStartsAt,
     setOfferEndsAt,
+    setCountryTargetingEnabled,
+    setCountryTargetingMode,
+    setCountryCodes,
     generateSpecificLinkOffer,
     revokeSpecificLinkOffer,
     copySpecificLinkOffer,

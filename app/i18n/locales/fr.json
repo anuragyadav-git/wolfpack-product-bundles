@@ -368,6 +368,20 @@
     "validation": { "priority": "Enter a whole-number priority from 1 to 9999.", "startsAt": "Enter a valid ISO 8601 start instant.", "endsAt": "Enter a valid ISO 8601 end instant.", "range": "The end instant must be later than the start instant." }
   },
   "countryTargeting": {
+    "title": "Ciblage par pays",
+    "description": "Affichez ce lot uniquement dans les pays sélectionnés de la boutique Shopify, ou partout sauf dans ces pays.",
+    "shopifyOwnership": "Utilise le pays de boutique sélectionné par Shopify. Aucune recherche IP ni donnée client n'est utilisée.",
+    "enableLabel": "Cibler par pays",
+    "enableDetails": "Les pays sélectionnés restent enregistrés lorsque le ciblage est désactivé.",
+    "modeLabel": "Règle de pays",
+    "modeInclude": "Afficher uniquement dans les pays sélectionnés",
+    "modeExclude": "Masquer dans les pays sélectionnés",
+    "searchLabel": "Rechercher des pays",
+    "searchPlaceholder": "Rechercher par nom ou code de pays",
+    "resultsLabel": "Pays correspondants",
+    "noCountries": "Aucun pays sélectionné.",
+    "noResults": "Aucun pays correspondant trouvé.",
+    "removeCountry": "Supprimer {{country}}",
     "validation": {
       "mode": "Choisissez si les pays sélectionnés sont inclus ou exclus.",
       "countries": "Sélectionnez au moins un pays valide lorsque le ciblage par pays est activé."

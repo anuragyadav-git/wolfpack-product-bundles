@@ -39,6 +39,14 @@ describe('buildOfferPolicyMutation', () => {
       endsAt: null,
     },
   };
+  const countryTargeting = {
+    changed: false,
+    data: {
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include' as const,
+      countryCodes: [],
+    },
+  };
 
   it('creates a policy for operations on a bundle without one', () => {
     expect(buildOfferPolicyMutation({
@@ -46,6 +54,7 @@ describe('buildOfferPolicyMutation', () => {
       policyExists: false,
       specificLinkUpdate: null,
       operations,
+      countryTargeting,
     })).toEqual({
       offerPolicy: {
         create: {
@@ -63,6 +72,7 @@ describe('buildOfferPolicyMutation', () => {
       policyExists: true,
       specificLinkUpdate: { specificLinkRequired: true },
       operations,
+      countryTargeting,
     })).toEqual({
       offerPolicy: {
         update: {
@@ -80,7 +90,34 @@ describe('buildOfferPolicyMutation', () => {
       policyExists: true,
       specificLinkUpdate: null,
       operations: { ...operations, changed: false },
+      countryTargeting,
     })).toEqual({});
+  });
+
+  it('combines country targeting with other policy changes under one revision', () => {
+    expect(buildOfferPolicyMutation({
+      shopId: 'test.myshopify.com',
+      policyExists: true,
+      specificLinkUpdate: null,
+      operations: { ...operations, changed: false },
+      countryTargeting: {
+        changed: true,
+        data: {
+          countryTargetingEnabled: true,
+          countryTargetingMode: 'exclude',
+          countryCodes: ['CA', 'US'],
+        },
+      },
+    })).toEqual({
+      offerPolicy: {
+        update: {
+          countryTargetingEnabled: true,
+          countryTargetingMode: 'exclude',
+          countryCodes: ['CA', 'US'],
+          ruleVersion: { increment: 1 },
+        },
+      },
+    });
   });
 });
 

@@ -828,6 +828,32 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(updateInput.data).not.toHaveProperty("countdownEndsAt");
   });
 
+  it("persists normalized Shopify country targeting on the offer policy", async () => {
+    const fd = makeFormData({
+      countryTargetingEnabled: "true",
+      countryTargetingMode: "exclude",
+    });
+    fd.append("countryCodes", " us ");
+    fd.append("countryCodes", "CA");
+    fd.append("countryCodes", "US");
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          offerPolicy: {
+            create: expect.objectContaining({
+              countryTargetingEnabled: true,
+              countryTargetingMode: "exclude",
+              countryCodes: ["CA", "US"],
+            }),
+          },
+        }),
+      }),
+    );
+  });
+
   it("creates StepCategory records in DB with correct shape", async () => {
     const categoryCondition = { type: "quantity", condition: "greaterThanOrEqualTo", value: "01" };
     const categoryProduct = {
@@ -1364,6 +1390,13 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
       shopifyProductHandle: "bundle-123",
       offerPolicy: {
         specificLinkRequired: false,
+        priority: 100,
+        stopLowerPriority: false,
+        startsAt: null,
+        endsAt: null,
+        countryTargetingEnabled: false,
+        countryTargetingMode: "include",
+        countryCodes: [],
         ruleVersion: 1,
         conditions: [{ expiresAt: null, revokedAt: null }],
       },

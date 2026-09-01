@@ -366,6 +366,20 @@
     "title": "Offer scheduling and priority", "description": "Control when this bundle can appear in Only Bundles storefront placements and which matching offer is shown first.", "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Only Bundles storefront visibility and offer selection.", "priorityLabel": "Storefront priority", "priorityDetails": "Lower numbers are considered first when multiple Only Bundles offers match the same placement.", "stopLowerLabel": "Stop lower-priority storefront offers", "stopLowerDetails": "After this offer is selected, hide matching Only Bundles offers with a larger priority number.", "startsAtLabel": "Starts at", "endsAtLabel": "Ends at", "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.", "datePlaceholder": "2026-09-01T10:00:00Z", "validation": { "priority": "Enter a whole-number priority from 1 to 9999.", "startsAt": "Enter a valid ISO 8601 start instant.", "endsAt": "Enter a valid ISO 8601 end instant.", "range": "The end instant must be later than the start instant." }
   },
   "countryTargeting": {
+    "title": "Länder-Targeting",
+    "description": "Zeige dieses Bundle nur in ausgewählten Shopify-Storefront-Ländern oder überall außer dort.",
+    "shopifyOwnership": "Verwendet das von Shopify ausgewählte Storefront-Land. Es werden weder IP-Abfragen noch Kundendaten verwendet.",
+    "enableLabel": "Nach Land ausrichten",
+    "enableDetails": "Die Länderauswahl bleibt gespeichert, wenn das Targeting deaktiviert wird.",
+    "modeLabel": "Länderregel",
+    "modeInclude": "Nur in ausgewählten Ländern anzeigen",
+    "modeExclude": "In ausgewählten Ländern ausblenden",
+    "searchLabel": "Länder suchen",
+    "searchPlaceholder": "Nach Ländername oder Code suchen",
+    "resultsLabel": "Passende Länder",
+    "noCountries": "Keine Länder ausgewählt.",
+    "noResults": "Keine passenden Länder gefunden.",
+    "removeCountry": "{{country}} entfernen",
     "validation": {
       "mode": "Wähle aus, ob die ausgewählten Länder ein- oder ausgeschlossen werden.",
       "countries": "Wähle mindestens ein gültiges Land aus, wenn das Länder-Targeting aktiviert ist."

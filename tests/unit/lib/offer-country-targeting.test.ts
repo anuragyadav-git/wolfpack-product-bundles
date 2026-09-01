@@ -1,13 +1,14 @@
 import {
   buildOfferCountryTargetingAdminState,
+  mergeVisibleCountrySelection,
   resolveOfferCountryTargetingSave,
 } from '../../../app/lib/offer-country-targeting';
 
 describe('offer country targeting', () => {
   it('uses inert defaults when no policy exists', () => {
     expect(buildOfferCountryTargetingAdminState(null)).toEqual({
-      enabled: false,
-      mode: 'include',
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
       countryCodes: [],
     });
   });
@@ -18,8 +19,8 @@ describe('offer country targeting', () => {
       countryTargetingMode: 'exclude',
       countryCodes: ['US', 'CA'],
     })).toEqual({
-      enabled: false,
-      mode: 'exclude',
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'exclude',
       countryCodes: ['CA', 'US'],
     });
   });
@@ -66,5 +67,13 @@ describe('offer country targeting', () => {
     expect(resolveOfferCountryTargetingSave(raw, null)).toEqual({
       issue: expect.objectContaining({ path }),
     });
+  });
+
+  it('merges filtered choice-list changes without dropping hidden selections', () => {
+    expect(mergeVisibleCountrySelection({
+      currentCountryCodes: ['CA', 'GB'],
+      visibleCountryCodes: ['CA', 'US'],
+      selectedVisibleCountryCodes: ['US'],
+    })).toEqual(['GB', 'US']);
   });
 });

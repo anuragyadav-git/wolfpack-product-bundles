@@ -366,6 +366,20 @@
     "title": "Offer scheduling and priority", "description": "Control when this bundle can appear in Only Bundles storefront placements and which matching offer is shown first.", "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Only Bundles storefront visibility and offer selection.", "priorityLabel": "Storefront priority", "priorityDetails": "Lower numbers are considered first when multiple Only Bundles offers match the same placement.", "stopLowerLabel": "Stop lower-priority storefront offers", "stopLowerDetails": "After this offer is selected, hide matching Only Bundles offers with a larger priority number.", "startsAtLabel": "Starts at", "endsAtLabel": "Ends at", "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.", "datePlaceholder": "2026-09-01T10:00:00Z", "validation": { "priority": "Enter a whole-number priority from 1 to 9999.", "startsAt": "Enter a valid ISO 8601 start instant.", "endsAt": "Enter a valid ISO 8601 end instant.", "range": "The end instant must be later than the start instant." }
   },
   "countryTargeting": {
+    "title": "Segmentação por país",
+    "description": "Mostre este pacote somente nos países selecionados da loja Shopify ou em todos, exceto nesses países.",
+    "shopifyOwnership": "Usa o país da loja selecionado pela Shopify. Nenhuma consulta de IP ou dado de cliente é utilizado.",
+    "enableLabel": "Segmentar por país",
+    "enableDetails": "Os países selecionados permanecem salvos quando a segmentação é desativada.",
+    "modeLabel": "Regra de país",
+    "modeInclude": "Mostrar somente nos países selecionados",
+    "modeExclude": "Ocultar nos países selecionados",
+    "searchLabel": "Buscar países",
+    "searchPlaceholder": "Buscar por nome ou código do país",
+    "resultsLabel": "Países correspondentes",
+    "noCountries": "Nenhum país selecionado.",
+    "noResults": "Nenhum país correspondente encontrado.",
+    "removeCountry": "Remover {{country}}",
     "validation": {
       "mode": "Escolha se os países selecionados serão incluídos ou excluídos.",
       "countries": "Selecione pelo menos um país válido quando a segmentação por país estiver ativada."

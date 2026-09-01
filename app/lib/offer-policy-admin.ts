@@ -1,4 +1,5 @@
 import { i18n } from '../i18n/config';
+import type { OfferCountryTargetingData } from './offer-country-targeting';
 
 export type OfferOperationsAdminState = {
   priority: number;
@@ -70,13 +71,20 @@ export function buildOfferPolicyMutation(input: {
       endsAt: Date | null;
     };
   };
+  countryTargeting: {
+    changed: boolean;
+    data: OfferCountryTargetingData;
+  };
 }) {
-  const changed = input.specificLinkUpdate !== null || input.operations.changed;
+  const changed = input.specificLinkUpdate !== null
+    || input.operations.changed
+    || input.countryTargeting.changed;
   if (!changed) return {};
 
   const data = {
     ...(input.specificLinkUpdate ?? {}),
     ...(input.operations.changed ? input.operations.data : {}),
+    ...(input.countryTargeting.changed ? input.countryTargeting.data : {}),
   };
   if (input.policyExists) {
     return {

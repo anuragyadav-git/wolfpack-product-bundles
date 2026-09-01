@@ -3,6 +3,7 @@ import { FpbBundleVisibilityPanel } from "./BundleVisibilityPanel";
 import { FpbImagesGifsPanel } from "./ImagesGifsPanel";
 import { SpecificLinkOfferSection } from "../../shared/SpecificLinkOfferSection";
 import { OfferOperationsSection } from "../../shared/OfferOperationsSection";
+import { CountryTargetingSection } from "../../shared/CountryTargetingSection";
 
 export function ImagesVisibilitySection({
   flow,
@@ -39,6 +40,13 @@ export function ImagesVisibilitySection({
           onStopLowerPriorityChange={flow.setOfferStopLowerPriority}
           onStartsAtChange={flow.setOfferStartsAt}
           onEndsAtChange={flow.setOfferEndsAt}
+        />
+        <CountryTargetingSection
+          active={activeSection === "bundle_visibility"}
+          state={flow.offerDeliveryState}
+          onEnabledChange={flow.setCountryTargetingEnabled}
+          onModeChange={flow.setCountryTargetingMode}
+          onCountryCodesChange={flow.setCountryCodes}
         />
         <FpbImagesGifsPanel flow={flow} />
       </s-stack>

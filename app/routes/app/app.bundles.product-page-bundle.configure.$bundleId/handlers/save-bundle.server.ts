@@ -47,6 +47,7 @@ import {
   buildOfferPolicyMutation,
   resolveOfferOperationsSave,
 } from "../../../../lib/offer-policy-admin";
+import { resolveOfferCountryTargetingSave } from "../../../../lib/offer-country-targeting";
 
 type ParsedVariantRef = string | number;
 
@@ -462,6 +463,9 @@ export async function handleSaveBundle(
             stopLowerPriority: true,
             startsAt: true,
             endsAt: true,
+            countryTargetingEnabled: true,
+            countryTargetingMode: true,
+            countryCodes: true,
             ruleVersion: true,
             conditions: {
               where: { type: "specific_link" },
@@ -497,6 +501,18 @@ export async function handleSaveBundle(
         fieldErrors: [offerOperationsSave.issue],
       }, { status: 400 });
     }
+    const countryTargetingSave = resolveOfferCountryTargetingSave({
+      enabled: formData.get("countryTargetingEnabled"),
+      mode: formData.get("countryTargetingMode"),
+      countryCodes: formData.getAll("countryCodes"),
+    }, existingBundle?.offerPolicy ?? null);
+    if ("issue" in countryTargetingSave) {
+      return json({
+        success: false,
+        error: countryTargetingSave.issue.message,
+        fieldErrors: [countryTargetingSave.issue],
+      }, { status: 400 });
+    }
     const specificLinkUpdate = specificLinkOfferSave.updateData.offerPolicy
       ? {
           specificLinkRequired:
@@ -508,6 +524,7 @@ export async function handleSaveBundle(
       policyExists: existingBundle?.offerPolicy != null,
       specificLinkUpdate,
       operations: offerOperationsSave,
+      countryTargeting: countryTargetingSave,
     });
     const offerPolicyChanged = offerPolicyMutation.offerPolicy !== undefined;
     if (subscriptionConfig?.enabled && existingBundle?.personalizationData) {

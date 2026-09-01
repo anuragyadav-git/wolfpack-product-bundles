@@ -465,6 +465,7 @@ FPB Configure Page
 │   │       ├── Require the specific link uses the global configure SaveBar
 │   │       └── Revoke immediately disables link-only delivery and invalidates the link
 │   │       └── Offer Operations → priority, stop-lower-priority, and optional storefront visibility window
+│   │       └── Country Targeting → Shopify storefront-country include/exclude rule with searchable ISO country choices
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
@@ -606,6 +607,10 @@ PPB Configure Page
 │   │   ├── Stop lower-priority offers after this eligible offer
 │   │   ├── Optional inclusive start and exclusive end instants in ISO 8601 format
 │   │   └── Shopify remains the owner of checkout discount dates and combinations
+│   ├── Country Targeting
+│   │   ├── Shopify-selected storefront country is the only geography signal
+│   │   ├── Include or exclude selected ISO countries using searchable localized names
+│   │   └── Disabling targeting retains the configured mode and countries for later activation
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
 │       ├── Disabled state keeps all saved settings visible, subdued, and inert
