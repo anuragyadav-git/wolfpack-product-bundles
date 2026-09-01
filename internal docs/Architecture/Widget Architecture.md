@@ -446,6 +446,18 @@ If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle
 
 ## PPB Load Strategy
 
+### Native product-form actions
+
+When the PPB block's **Hide native buttons** setting is enabled, the block hides
+the theme product form, accelerated checkout controls, and Horizon's native
+`sticky-add-to-cart` element. Horizon's sticky control submits the neutral
+bundle-parent variant through the theme product form; it does not know the
+shopper's selected component variants or Wolfpack's Cart Transform
+authorization. It therefore cannot be reused as the PPB bundle action. The
+bundle widget's existing validated add path remains the only cart mutation
+owner. Theme-specific event interception or product-form rewriting is not a
+supported integration path.
+
 ### Product-Page Block Stage — Shopify-Hosted Snapshot
 
 The PPB app block serializes only a complete schema-v3
