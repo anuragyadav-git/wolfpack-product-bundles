@@ -1,5 +1,5 @@
 /**
- * Pricing Page Route
+ * Billing Plans Page Route
  *
  * Displays pricing plans and handles plan selection/upgrade.
  * Uses shared billing components from app/components/billing.
@@ -81,7 +81,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       } satisfies PricingSubscriptionData;
     } catch (error: any) {
       AppLogger.error("Error loading pricing page", {
-        component: "app.pricing",
+        component: "app.billing.plans",
         operation: "loader"
       }, error);
 
@@ -126,7 +126,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     } catch (error: any) {
       AppLogger.error("Error creating subscription from pricing page", {
-        component: "app.pricing",
+        component: "app.billing.plans",
         operation: "action-upgrade"
       }, error);
 

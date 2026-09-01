@@ -69,7 +69,8 @@ Wolfpack Bundles SIT
 ├── Settings            → /app/settings
 ├── Integrations        → /app/integrations
 ├── Analytics           → /app/attribution
-├── Billing             → /app/pricing          (Subscription & Billing)
+├── Offer operations    → /app/offer-operations
+├── Billing             → /app/billing          (Subscription & Billing)
 └── Updates & FAQs      → /app/events
 ```
 
@@ -231,14 +232,14 @@ Settings
 ├── Card: Language
 │   └── Shows multilanguage mode, 39 add/remove locale choices, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
 └── Card: Controls
-    └── Navigates to /app/additional-configurations
+    └── Navigates to /app/settings/controls
 ```
 
 Primary action:
 
 - The complete Design, Language, and Controls cards are the actions; they do not render separate `Configure` affordances.
 - Selecting Design opens the Settings -> Design subpage.
-- Selecting Controls keeps the landing cards visible while Shopify's native Admin loading indicator reports navigation to `/app/additional-configurations`.
+- Selecting Controls keeps the landing cards visible while Shopify's native Admin loading indicator reports navigation to `/app/settings/controls`.
 - While the lazy Design or Language workspace loads after selection, the destination title and a small Polaris spinner render without card skeletons or an artificial delay.
 - The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the gutterless preview stage and its selectors sit beside one contextual inspector. On desktop, a vertically centered notch with a Polaris chevron straddles the preview/inspector boundary, remains centered in the visible sidebar edge while scrolling, and collapses the inspector so the width-driven storefront canvas grows without clearing unsaved settings or preview context. Canvas fitting is applied once per browser frame without React resize state or scale transitions. The canvas shows a centered Polaris spinner card and remains visually withheld until the isolated preview frame sends its trusted `READY` event. Mobile selection preserves the full 390 x 844 storefront viewport inside a decorative iPhone body whose chrome sits outside the iframe. At phone Admin widths the notch is hidden and a Preview / Customize segmented control remains the authoritative one-pane-at-a-time navigation.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
@@ -259,9 +260,9 @@ Primary action:
 
 ---
 
-### 2.2a Additional Configurations — `/app/additional-configurations`
+### 2.2a Settings Controls — `/app/settings/controls`
 
-**Route file:** `app/routes/app/app.additional-configurations.tsx`
+**Route file:** `app/routes/app/app.settings_.controls.tsx`
 
 Dedicated Controls workspace:
 
@@ -411,13 +412,21 @@ timezone; validation rejects a different or invalid timezone before any write.
 
 ---
 
-### 2.4 Pricing — `/app/pricing`
+### 2.4 Billing — `/app/billing`
 
-**Route file:** `app/routes/app/app.pricing.tsx`
+**Route file:** `app/routes/app/app.billing.tsx`
+
+The Billing parent shows the current plan, usage, features, and Shopify-hosted
+plan management. Free merchants continue to the plans child route before
+starting Shopify-hosted plan selection.
+
+#### Billing Plans — `/app/billing/plans`
+
+**Route file:** `app/routes/app/app.billing_.plans.tsx`
 **Screenshot:** `screenshots/04-pricing.png`
 
 ```
-Pricing Page
+Billing Plans Page
 ├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
 │   └── Threshold prompt → Dismiss removes it for the current page mount
@@ -836,12 +845,13 @@ Dirty Admin form
 ### Flow D: Billing Upgrade
 
 ```
-/app/pricing
-  └── [Choose Growth monthly / annual]
-      └── Upgrade Confirmation Modal → confirm
-          └── POST /app/pricing → configured Shopify-hosted plan URL
-              └── Merchant selects or approves plan → /app/billing/return?plan_handle=...
-                  └── Partner API verification → /app/billing?upgraded=true
+/app/billing
+  └── [Upgrade now] → /app/billing/plans
+      └── [Choose Growth monthly / annual]
+          └── Upgrade Confirmation Modal → confirm
+              └── POST /app/billing/plans → configured Shopify-hosted plan URL
+                  └── Merchant selects or approves plan → /app/billing/return?plan_handle=...
+                      └── Partner API verification → /app/billing?upgraded=true
 ```
 
 ### Flow E: Bundle Checkout Pricing Safety

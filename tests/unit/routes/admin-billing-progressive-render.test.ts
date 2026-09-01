@@ -41,7 +41,7 @@ jest.mock("../../../app/services/subscriptions/subscription-service.server", () 
 describe("Admin Billing progressive render", () => {
   it("renders the visible Billing heading while subscription data is pending", async () => {
     const { default: PricingPage } = await import(
-      "../../../app/routes/app/app.pricing"
+      "../../../app/routes/app/app.billing_.plans"
     );
 
     const view = renderToStaticMarkup(React.createElement(PricingPage));

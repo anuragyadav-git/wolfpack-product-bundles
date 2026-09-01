@@ -35,14 +35,14 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn(),
 }));
 
-describe("Additional Configurations direct load", () => {
+describe("Settings Controls direct load", () => {
   it("provides the application store to the directly loaded Settings workspace", async () => {
-    const { default: AdditionalConfigurationsRoute } = await import(
-      "../../../app/routes/app/app.additional-configurations"
+    const { default: SettingsControlsRoute } = await import(
+      "../../../app/routes/app/app.settings_.controls"
     );
 
     expect(() => renderToStaticMarkup(
-      React.createElement(AdditionalConfigurationsRoute),
+      React.createElement(SettingsControlsRoute),
     )).not.toThrow();
   });
 });

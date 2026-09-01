@@ -102,23 +102,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
 
-  if (intent === "upgrade") {
-    try {
-      const app = await getCurrentShopifyAppIdentity(admin);
-      return json({
-        success: true,
-        hostedPlanUrl: getShopifyAppPricingUrl(session.shop, app.handle),
-      });
-    } catch (error: any) {
-      AppLogger.error("Error opening the hosted Growth plan", {
-        component: "app.billing",
-        operation: "action-upgrade"
-      }, error);
-
-      return json({ error: "Failed to open the hosted Growth plan" }, { status: 500 });
-    }
-  }
-
   if (intent === "cancel") {
     try {
       const app = await getCurrentShopifyAppIdentity(admin);
@@ -174,13 +157,6 @@ export default function BillingPage() {
   } = billingState;
 
   const isCancelling = fetcher.state === "submitting" && fetcher.formData?.get("intent") === "cancel";
-  const isOpeningPlanManagement = fetcher.state === "submitting"
-    && fetcher.formData?.get("intent") === "upgrade";
-
-  const handleUpgradeSubscription = useCallback(() => {
-    fetcher.submit({ intent: "upgrade" }, { method: "post" });
-  }, [fetcher]);
-
   const handleCancelSubscription = useCallback(() => {
     fetcher.submit({ intent: "cancel" }, { method: "post" });
     closeCancelConfirm();
@@ -284,15 +260,17 @@ export default function BillingPage() {
                 </s-stack>
                 {isFreePlan && <CustomProgressBar progress={usagePercentage} tone={progressBarTone} />}
                 {!data.subscription?.canCreateBundle && (
-                  <s-banner
-                    tone="warning"
-                    heading={t("common.upgradePrompt.limitReachedTitle")}
-                    dismissible={false}
-                    hidden={false}
-                  >
-                    {t("billing.route.limitReached")}
-                    {isFreePlan && ` ${t("billing.route.limitUpgrade")}`}
-                  </s-banner>
+                  <s-box paddingBlockEnd="small-200">
+                    <s-banner
+                      tone="warning"
+                      heading={t("common.upgradePrompt.limitReachedTitle")}
+                      dismissible={false}
+                      hidden={false}
+                    >
+                      {t("billing.route.limitReached")}
+                      {isFreePlan && ` ${t("billing.route.limitUpgrade")}`}
+                    </s-banner>
+                  </s-box>
                 )}
               </s-stack>
 
@@ -301,8 +279,7 @@ export default function BillingPage() {
                   <s-divider />
                   <s-button
                     variant="primary"
-                    onClick={handleUpgradeSubscription}
-                    loading={isOpeningPlanManagement || undefined}
+                    href="/app/billing/plans"
                   >
                     {t("common.actions.upgradeNow")}
                   </s-button>
@@ -355,35 +332,37 @@ export default function BillingPage() {
               {showCancelConfirm && (
                 <>
                   <s-divider />
-                  <s-banner
-                    tone="warning"
-                    heading={t("billing.route.cancelHeading")}
-                    dismissible={false}
-                    hidden={false}
-                  >
-                    <s-stack direction="block" gap="small">
-                      <p style={{ margin: 0, fontSize: 14 }}>
-                        {t("billing.route.downgradeBody", { limit: PLANS.free.bundleLimit })}
-                      </p>
-                      {data.subscription && data.subscription.currentBundleCount > PLANS.free.bundleLimit && (
-                        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                          {t("billing.route.archiveWarning", { current: data.subscription.currentBundleCount, excess: data.subscription.currentBundleCount - PLANS.free.bundleLimit })}
+                  <s-box paddingBlockEnd="small-200">
+                    <s-banner
+                      tone="warning"
+                      heading={t("billing.route.cancelHeading")}
+                      dismissible={false}
+                      hidden={false}
+                    >
+                      <s-stack direction="block" gap="small">
+                        <p style={{ margin: 0, fontSize: 14 }}>
+                          {t("billing.route.downgradeBody", { limit: PLANS.free.bundleLimit })}
                         </p>
-                      )}
-                      <s-stack direction="inline" gap="small-100">
-                        <s-button
-                          variant="primary"
-                          onClick={handleCancelSubscription}
-                          loading={isCancelling || undefined}
-                        >
-                          {t("billing.route.confirmCancellation")}
-                        </s-button>
-                        <s-button onClick={closeCancelConfirm}>
-                          {t("billing.route.keepSubscription")}
-                        </s-button>
+                        {data.subscription && data.subscription.currentBundleCount > PLANS.free.bundleLimit && (
+                          <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                            {t("billing.route.archiveWarning", { current: data.subscription.currentBundleCount, excess: data.subscription.currentBundleCount - PLANS.free.bundleLimit })}
+                          </p>
+                        )}
+                        <s-stack direction="inline" gap="small-100">
+                          <s-button
+                            variant="primary"
+                            onClick={handleCancelSubscription}
+                            loading={isCancelling || undefined}
+                          >
+                            {t("billing.route.confirmCancellation")}
+                          </s-button>
+                          <s-button onClick={closeCancelConfirm}>
+                            {t("billing.route.keepSubscription")}
+                          </s-button>
+                        </s-stack>
                       </s-stack>
-                    </s-stack>
-                  </s-banner>
+                    </s-banner>
+                  </s-box>
                 </>
               )}
             </s-stack>

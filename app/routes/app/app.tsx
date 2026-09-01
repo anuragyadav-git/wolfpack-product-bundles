@@ -4,7 +4,7 @@ import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../../shopify.server";
 import { ErrorPage } from "../../components/ErrorPage";
 import { I18nextProvider, useTranslation } from "react-i18next";
-import { useEffect, type MouseEvent } from "react";
+import { useEffect } from "react";
 import { changeAdminI18nLanguage, i18n, loadAdminLocaleResources } from "../../i18n/config";
 import { loadShopAdminLocale } from "../../services/admin-locale.server";
 
@@ -43,8 +43,9 @@ function AdminNavigation() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const handleNavigation = (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const handleNavigation = (href: string) => (event: Event) => {
+    const mouseEvent = event as MouseEvent;
+    if (mouseEvent.metaKey || mouseEvent.ctrlKey || mouseEvent.shiftKey || mouseEvent.altKey) return;
     event.preventDefault();
     const shopify = (
       typeof window === "undefined"
@@ -61,14 +62,15 @@ function AdminNavigation() {
   };
 
   return (
-    <ui-nav-menu>
-      <a href="/app/dashboard" rel="home" onClick={handleNavigation("/app/dashboard")}>{t("nav.dashboard")}</a>
-      <a href="/app/settings" onClick={handleNavigation("/app/settings")}>{t("nav.settings")}</a>
-      <a href="/app/integrations" onClick={handleNavigation("/app/integrations")}>{t("nav.integrations")}</a>
-      <a href="/app/attribution" onClick={handleNavigation("/app/attribution")}>{t("nav.analytics")}</a>
-      <a href="/app/pricing" onClick={handleNavigation("/app/pricing")}>{t("nav.billing")}</a>
-      <a href="/app/events" onClick={handleNavigation("/app/events")}>{t("nav.events")}</a>
-    </ui-nav-menu>
+    <s-app-nav>
+      <s-link href="/app/dashboard" onClick={handleNavigation("/app/dashboard")}>{t("nav.dashboard")}</s-link>
+      <s-link href="/app/settings" onClick={handleNavigation("/app/settings")}>{t("nav.settings")}</s-link>
+      <s-link href="/app/integrations" onClick={handleNavigation("/app/integrations")}>{t("nav.integrations")}</s-link>
+      <s-link href="/app/attribution" onClick={handleNavigation("/app/attribution")}>{t("nav.analytics")}</s-link>
+      <s-link href="/app/offer-operations" onClick={handleNavigation("/app/offer-operations")}>{t("nav.offerOperations")}</s-link>
+      <s-link href="/app/billing" onClick={handleNavigation("/app/billing")}>{t("nav.billing")}</s-link>
+      <s-link href="/app/events" onClick={handleNavigation("/app/events")}>{t("nav.events")}</s-link>
+    </s-app-nav>
   );
 }
 

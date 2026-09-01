@@ -86,17 +86,35 @@
     width: 100%;
     box-sizing: border-box;
     padding: 18px 16px 88px;
-    overflow-x: clip;
+  }
+
+  .pageHeader {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .pageHeader > s-button {
+    justify-self: start;
   }
 
   .bundleTypeGrid {
     grid-template-columns: 1fr;
   }
 
-  .pageHeaderLeft,
+  .pageHeaderLeft {
+    min-width: 0;
+    align-items: flex-start;
+  }
+
   .bundleCardBody,
   .layoutCardBody {
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bundleCardBody > s-button,
+  .layoutCardBody > s-button {
+    inline-size: 100%;
   }
 
   .modalActions,

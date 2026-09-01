@@ -45,8 +45,9 @@ export function LanguageSettingsView({
     : LANGUAGE_CONFIGURATION.templateSections;
 
   return (
-    <s-page inlineSize="large">
-      <s-stack gap="@container (inline-size > 600px) large, base">
+    <s-box paddingInline="base">
+      <s-page inlineSize="large">
+        <s-stack gap="@container (inline-size > 600px) large, base">
         <s-stack direction="inline" gap="small" alignItems="center">
           <s-button
             variant="tertiary"
@@ -198,7 +199,8 @@ export function LanguageSettingsView({
             })}
           </s-stack>
         </div>
-      </s-stack>
-    </s-page>
+        </s-stack>
+      </s-page>
+    </s-box>
   );
 }

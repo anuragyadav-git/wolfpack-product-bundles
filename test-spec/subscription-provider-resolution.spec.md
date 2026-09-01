@@ -5,7 +5,7 @@ title: "Test Spec: Subscription Provider Resolution"
 type: test-spec
 status: active
 summary: Verification precedence, outage grace, and Shopify App Pricing mapping for subscription state.
-last_audited: 2026-08-30
+last_audited: 2026-09-01
 owners:
   - wolfpack-engineering
 domains:
@@ -16,7 +16,7 @@ systems:
 source_paths:
   - app/services/subscriptions/subscription-resolution.server.ts
   - app/services/subscriptions/shopify-app-pricing.server.ts
-  - app/routes/app/app.pricing.tsx
+  - app/routes/app/app.billing_.plans.tsx
 related_docs:
   - internal docs/Subscriptions/04-subscription-architecture-adr.md
 tags:

@@ -81,7 +81,7 @@ describe("app Admin shell provider", () => {
     expect(markup).toContain("<main>outlet</main>");
   });
 
-  it("links Subscription and Billing from the main app navigation", async () => {
+  it("renders canonical App Bridge navigation with parent route links", async () => {
     useLoaderData.mockReturnValue({
       apiKey: "shopify-api-key",
       locale: "en",
@@ -91,7 +91,14 @@ describe("app Admin shell provider", () => {
 
     const view = renderToStaticMarkup(React.createElement(App));
 
-    expect(view).toContain('<a href="/app/pricing">nav.billing</a>');
+    expect(view).toContain("<s-app-nav>");
+    expect(view).toContain('<s-link href="/app/dashboard">nav.dashboard</s-link>');
+    expect(view).toContain('<s-link href="/app/settings">nav.settings</s-link>');
+    expect(view).toContain('<s-link href="/app/integrations">nav.integrations</s-link>');
+    expect(view).toContain('<s-link href="/app/attribution">nav.analytics</s-link>');
+    expect(view).toContain('<s-link href="/app/billing">nav.billing</s-link>');
+    expect(view).toContain('<s-link href="/app/events">nav.events</s-link>');
+    expect(view).not.toContain("<ui-nav-menu>");
   });
 
   it("keeps the current Admin page rendered while another page is loading", async () => {

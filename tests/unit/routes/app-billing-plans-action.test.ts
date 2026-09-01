@@ -1,6 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { action, loader, PricingBody } from "../../../app/routes/app/app.pricing";
+import { action, loader, PricingBody } from "../../../app/routes/app/app.billing_.plans";
 import { authenticate } from "../../../app/shopify.server";
 import { getShopifyAppPricingUrl } from "../../../app/services/subscriptions/app-pricing-navigation.server";
 import { recordBusinessEvent } from "../../../app/services/app-events.server";
@@ -54,14 +54,14 @@ const getDb = () => require("../../../app/db.server").default;
 const useFetcher = () => (require("@remix-run/react") as { useFetcher: jest.Mock }).useFetcher;
 
 function makeRequest(plan: string): Request {
-  return new Request("https://app.example.com/app/pricing", {
+  return new Request("https://app.example.com/app/billing/plans", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ plan }),
   });
 }
 
-describe("app pricing action", () => {
+describe("app Billing Plans action", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     authenticateAdmin.mockResolvedValue({
@@ -87,7 +87,7 @@ describe("app pricing action", () => {
 
   it("loads verified Free usage and limit data", async () => {
     const response = await loader({
-      request: new Request("https://app.example.com/app/pricing"),
+      request: new Request("https://app.example.com/app/billing/plans"),
       params: {},
       context: {},
     });
@@ -105,7 +105,7 @@ describe("app pricing action", () => {
     resolveEntitlements.mockRejectedValueOnce(new Error("provider unavailable"));
 
     const response = await loader({
-      request: new Request("https://app.example.com/app/pricing"),
+      request: new Request("https://app.example.com/app/billing/plans"),
       params: {},
       context: {},
     });

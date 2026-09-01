@@ -5,7 +5,7 @@ title: State Management
 type: architecture
 status: authoritative
 summary: Defines route-owned Redux boundaries and the client state that remains outside Remix loaders and actions.
-last_audited: 2026-08-27
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -17,7 +17,7 @@ source_paths:
   - app/store/
   - app/routes/app/app.dashboard/route.tsx
   - app/routes/app/app.settings.tsx
-  - app/routes/app/app.additional-configurations.tsx
+  - app/routes/app/app.settings_.controls.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx
 related_docs:

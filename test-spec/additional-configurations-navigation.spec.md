@@ -5,7 +5,7 @@ title: Additional Configurations Navigation Test Spec
 type: test-spec
 status: active
 summary: Verifies dedicated-route layout, tab, and group deep-link state for Additional Configurations.
-last_audited: 2026-07-30
+last_audited: 2026-09-01
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -14,7 +14,7 @@ systems:
   - additional-configurations
 source_paths:
   - app/lib/additional-configurations-navigation.ts
-  - app/routes/app/app.additional-configurations.tsx
+  - app/routes/app/app.settings_.controls.tsx
 related_docs:
   - docs/competitor-analysis/checkout-integrations-additional-configurations-parity-plan.md
   - docs/app-nav-map/APP_NAVIGATION_MAP.md

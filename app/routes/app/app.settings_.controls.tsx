@@ -15,7 +15,7 @@ import { ReduxProvider } from "../../store/ReduxProvider";
 
 export { action, loader } from "./app.settings";
 
-export default function AdditionalConfigurationsRoute() {
+export default function SettingsControlsRoute() {
   const { settingsPage, previewBundles } = useLoaderData<typeof settingsLoader>();
   const { t } = useTranslation();
   const navigate = useNavigate();

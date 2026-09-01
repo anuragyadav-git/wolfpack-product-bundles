@@ -417,7 +417,7 @@ export default function SettingsRouteDefault() {
           }
           onSelect={(view) => {
             if (view === "controls") {
-              navigate("/app/additional-configurations");
+              navigate("/app/settings/controls");
               return;
             }
             setWorkspaceView(view);
