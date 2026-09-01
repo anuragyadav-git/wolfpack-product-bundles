@@ -100,12 +100,30 @@ selection. It records a monotonically increasing `ruleVersion`, owns normalized
 - `priority`: deterministic ascending selection order; the default is `100`
 - `stopLowerPriority`: when true, eligible lower-priority discovery results are
   omitted after this offer
+- `scheduleMode`: exactly one of `always`, `one_time`, or `recurring`
 - `startsAt` / `endsAt`: optional UTC instants for storefront visibility;
-  `startsAt` is inclusive and `endsAt` is exclusive
+  `startsAt` is inclusive and `endsAt` is exclusive in `one_time` mode
+- `recurrenceFrequency`: `weekly` or `monthly`
+- `recurrenceTimezone`: the IANA shop timezone used to interpret the local
+  calendar rule
+- `recurrenceAnchorDate`: the local start date, which also owns the weekday or
+  day-of-month cadence
+- `recurrenceWindowStartMinute` / `recurrenceWindowEndMinute`: start-inclusive
+  and end-exclusive local minutes within each run
+- `recurrenceTermination`: `never`, `on_date`, or `after_runs`, with the
+  matching typed value in `recurrenceEndsOn` or `recurrenceRunCount`
 
-These fields govern Wolfpack merchandising surfaces only. Shopify automatic app
-discounts remain the canonical owner of checkout discount `startsAt`, `endsAt`,
-and combination settings whenever a Shopify discount node exists.
+The migration explicitly assigns `one_time` to existing policies that already
+have a start or end instant. Runtime code must use `scheduleMode`; it must not
+infer mode from populated legacy fields. Recurrence is represented by typed
+columns rather than an RRULE/JSON blob or an unbounded series of queued jobs.
+
+These fields govern Wolfpack offer delivery. Shopify automatic app discounts
+remain the canonical owner of checkout discount `startsAt`, `endsAt`, and
+combination settings whenever one discount node maps to that offer. Wolfpack's
+current add-on Discount Function activation is shop-wide, so its single node
+cannot represent independent per-bundle calendars. Do not claim that node
+enforces an individual bundle schedule.
 
 When countdown presentation is enabled, `OfferPolicy.endsAt` is its sole
 server-authoritative deadline. Wolfpack does not persist a second countdown end
