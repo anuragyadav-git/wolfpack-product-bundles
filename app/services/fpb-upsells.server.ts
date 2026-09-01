@@ -1,4 +1,5 @@
 import { applyOfferPriority } from "../lib/offer-policy-decision";
+import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility";
 
 export type FpbUpsellOfferDto = {
   bundleId: string;
@@ -73,7 +74,13 @@ function copyForLocale(bundle: AnyRecord, locale: string) {
 
 export function selectEligibleFpbUpsells(
   bundles: AnyRecord[],
-  context: { productId: string; collectionIds: string[]; locale: string; now?: Date },
+  context: {
+    productId: string;
+    collectionIds: string[];
+    locale: string;
+    countryCode?: string | null;
+    now?: Date;
+  },
 ): FpbUpsellOfferDto[] {
   const productId = id(context.productId);
   const collectionIds = new Set(context.collectionIds.map((value) => id(value)).filter(Boolean));
@@ -83,6 +90,10 @@ export function selectEligibleFpbUpsells(
     .filter((bundle) => bundle.status === "active" || bundle.status === "unlisted")
     .filter((bundle) => bundle.upsellWidgetEnabled === true)
     .filter((bundle) => bundle.offerPolicy?.specificLinkRequired !== true)
+    .filter((bundle) => resolveOfferCountryEligibility(
+      bundle.offerPolicy,
+      context.countryCode,
+    ))
     .filter((bundle) => Number.isInteger(bundle.publicNumber) && bundle.publicNumber > 0)
     .filter((bundle) => selectedTargetMatches(bundle, productId, collectionIds));
   return applyOfferPriority<AnyRecord & { id: string }>(

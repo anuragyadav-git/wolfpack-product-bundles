@@ -129,6 +129,7 @@ describe('buildCartItems', () => {
     const displayProperties = JSON.parse(items[0].properties['_bundle_display_properties']);
     expect(displayProperties).toEqual({
       box: '1',
+      bundleName: 'Test Bundle',
       items: '2 x Product A, 1 x Product B (Gift)',
       retailPrice: '$20.00',
       offerAnalytics: {

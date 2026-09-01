@@ -54,4 +54,29 @@ describe("selectEligiblePpbBundleEmbed", () => {
     ], { productId: "123", productHandle: "sample", collectionIds: [], locale: "fr-CA", now: new Date("2026-08-31T12:00:00.000Z") });
     expect(result).toMatchObject({ title: "Construisez", subTitle: "Choisissez", preselectBrowsedProduct: true, bundle: { id: "bundle-a" } });
   });
+
+  it("filters embeds against the Shopify-selected country", () => {
+    const targeted = bundle({
+      offerPolicy: {
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: "exclude",
+        countryCodes: ["US"],
+      },
+    });
+    expect(selectEligiblePpbBundleEmbed([targeted], {
+      productId: "123",
+      productHandle: "sample",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "US",
+    })).toBeNull();
+    expect(selectEligiblePpbBundleEmbed([targeted], {
+      productId: "123",
+      productHandle: "sample",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "CA",
+    })).not.toBeNull();
+  });
 });

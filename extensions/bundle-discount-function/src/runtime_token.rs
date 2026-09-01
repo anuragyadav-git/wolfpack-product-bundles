@@ -11,6 +11,25 @@ pub struct RuntimeTokenPayload {
     pub price_adjustment: serde_json::Value,
     #[serde(default)]
     pub subscription: Option<RuntimeTokenSubscription>,
+    #[serde(default)]
+    pub country_rule: String,
+}
+
+pub fn country_is_eligible(rule: &str, current_country: &str) -> bool {
+    if rule.is_empty() {
+        return true;
+    }
+    let Some((mode, countries)) = rule.split_once(':') else {
+        return false;
+    };
+    let matches = countries
+        .split(',')
+        .any(|country| country == current_country);
+    match mode {
+        "include" => matches,
+        "exclude" => !matches,
+        _ => false,
+    }
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]
@@ -60,6 +79,8 @@ pub struct PpbBundleTokenV2 {
     pub subscription: Option<serde_json::Value>,
     #[serde(default)]
     pub groups: Vec<PpbSelectionGroupV2>,
+    #[serde(default)]
+    pub country_rule: String,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]

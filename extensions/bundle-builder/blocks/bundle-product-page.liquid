@@ -48,6 +48,7 @@
   data-is-container-product="{{ is_bundle_product }}"
   data-container-bundle-id="{{ bundle_id }}"
   data-bundle-config='{{ bundle_config_json | escape }}'
+  data-country-code="{{ localization.country.iso_code }}"
   data-hide-default-buttons="{{ is_bundle_product }}"
   data-show-step-numbers="{{ block.settings.show_step_numbers }}"
   {% if bundle_ui_config.sdkMode == true %}data-sdk-mode="true"{% endif %}
@@ -105,6 +106,7 @@
     "currentProductCollections": {{ product.collections | json }},
     "shopCurrency": {{ shop.currency | json }},
     "shopMoneyFormat": {{ shop.money_format | json }},
+    "currentCountryCode": {{ localization.country.iso_code | json }},
     "shopifyMultiCurrency": {
       "shopBaseCurrency": {{ shop.currency | json }},
       "shopMoneyFormat": {{ shop.money_format | json }},

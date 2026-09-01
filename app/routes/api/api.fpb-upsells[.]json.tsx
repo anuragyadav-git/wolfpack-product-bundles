@@ -15,6 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const productId = url.searchParams.get("productId")?.trim() ?? "";
   const locale = url.searchParams.get("locale")?.trim() ?? "";
+  const countryCode = url.searchParams.get("country");
   const collectionIds = url.searchParams.getAll("collectionId").map((value) => value.trim()).filter(Boolean);
   if (!productId || !locale) return json({ offers: [] }, { status: 400, headers: { "Cache-Control": "private, no-store" } });
 
@@ -39,12 +40,20 @@ export async function loader({ request }: LoaderFunctionArgs) {
             stopLowerPriority: true,
             startsAt: true,
             endsAt: true,
+            countryTargetingEnabled: true,
+            countryTargetingMode: true,
+            countryCodes: true,
           },
         },
       },
       orderBy: { publicNumber: "asc" },
     });
-    const offers = selectEligibleFpbUpsells(bundles as any[], { productId, collectionIds, locale });
+    const offers = selectEligibleFpbUpsells(bundles as any[], {
+      productId,
+      collectionIds,
+      locale,
+      countryCode,
+    });
     const etag = `"${createHash("sha256").update(JSON.stringify(offers)).digest("base64url")}"`;
     const headers = { "Cache-Control": CACHE_CONTROL, ETag: etag, Vary: "Accept-Encoding" };
     if (request.headers.get("If-None-Match") === etag) return new Response(null, { status: 304, headers });

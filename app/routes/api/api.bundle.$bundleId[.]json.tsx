@@ -148,6 +148,7 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
       : resolveSpecificLinkOfferEligibility({
         policy: bundle.offerPolicy,
         token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
+        countryCode: url.searchParams.get('country'),
       });
     if (!offerDecision.eligible) {
       return json({

@@ -86,7 +86,11 @@ describe('buildOfferDecisionMarker', () => {
   it('requires a decision for a specific link or a bounded schedule', () => {
     expect(buildOfferDecisionMarker(null)).toEqual({
       decisionRequired: false,
+      serverDecisionRequired: false,
       specificLinkRequired: false,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       offerPolicyId: null,
       ruleVersion: null,
       eligibilitySource: null,
@@ -95,11 +99,18 @@ describe('buildOfferDecisionMarker', () => {
       id: 'policy-scheduled',
       ruleVersion: 4,
       specificLinkRequired: false,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       startsAt: now,
       endsAt: null,
     })).toEqual({
       decisionRequired: true,
+      serverDecisionRequired: true,
       specificLinkRequired: false,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       offerPolicyId: 'policy-scheduled',
       ruleVersion: 4,
       eligibilitySource: 'schedule',
@@ -108,14 +119,44 @@ describe('buildOfferDecisionMarker', () => {
       id: 'policy-link',
       ruleVersion: 5,
       specificLinkRequired: true,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       startsAt: null,
       endsAt: null,
     })).toEqual({
       decisionRequired: true,
+      serverDecisionRequired: true,
       specificLinkRequired: true,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       offerPolicyId: 'policy-link',
       ruleVersion: 5,
       eligibilitySource: 'specific_link',
+    });
+  });
+
+  it('exposes a country-only decision without requiring an app-proxy round trip', () => {
+    expect(buildOfferDecisionMarker({
+      id: 'policy-country',
+      ruleVersion: 6,
+      specificLinkRequired: false,
+      startsAt: null,
+      endsAt: null,
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'exclude',
+      countryCodes: ['US', 'CA'],
+    })).toEqual({
+      decisionRequired: true,
+      serverDecisionRequired: false,
+      specificLinkRequired: false,
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'exclude',
+      countryCodes: ['CA', 'US'],
+      offerPolicyId: 'policy-country',
+      ruleVersion: 6,
+      eligibilitySource: 'country',
     });
   });
 

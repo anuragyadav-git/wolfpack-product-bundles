@@ -235,6 +235,7 @@ export class BundleWidgetProductPage {
       const eligible = await resolveSpecificLinkOfferStorefrontEligibility({
         bundle: storefrontBundle,
         locationSearch: window.location.search,
+        countryCode: (window as Window & { currentCountryCode?: string }).currentCountryCode ?? null,
       });
       if (!eligible) {
         this.hideLoadingOverlay();

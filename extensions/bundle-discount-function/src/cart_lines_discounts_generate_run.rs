@@ -1,7 +1,7 @@
 use super::schema;
 use crate::runtime_token::{
-    token_components_match, verify_ppb_bundle_token, verify_ppb_line_token, verify_runtime_token,
-    PpbBundleTokenV2, PpbLineTokenV2,
+    country_is_eligible, token_components_match, verify_ppb_bundle_token, verify_ppb_line_token,
+    verify_runtime_token, PpbBundleTokenV2, PpbLineTokenV2,
 };
 use shopify_function::prelude::*;
 use shopify_function::Result;
@@ -10,6 +10,15 @@ use std::collections::HashMap;
 const ADDON_DISCOUNT_MESSAGE: &str = "Add On";
 const BUNDLE_DISCOUNT_MESSAGE: &str = "Bundle Discount";
 const CHECKOUT_INTEGRATION_CODE_PREFIX: &str = "WPB-";
+
+fn current_country(input: &schema::cart_lines_discounts_generate_run::Input) -> String {
+    input
+        .localization()
+        .country()
+        .iso_code()
+        .to_string()
+        .to_ascii_uppercase()
+}
 
 fn parse_addon_percentage(step_type_value: Option<&str>) -> Option<f64> {
     let value = step_type_value?.trim();
@@ -106,10 +115,14 @@ fn validate_ppb_line(
     line: &schema::cart_lines_discounts_generate_run::input::cart::Lines,
     secret: &str,
     policy_revisions: Option<&str>,
+    current_country: &str,
 ) -> Option<(PpbBundleTokenV2, PpbLineTokenV2)> {
     let bundle_token = line.runtime_token()?.value()?;
     let bundle = verify_ppb_bundle_token(bundle_token, secret)?;
     if !ppb_policy_matches(policy_revisions, &bundle.bundle_id, &bundle.revision) {
+        return None;
+    }
+    if !country_is_eligible(&bundle.country_rule, current_country) {
         return None;
     }
     let authorization = line.line_authorization()?.value()?;
@@ -363,12 +376,13 @@ fn build_automatic_addon_candidates(
         .shop()
         .ppb_policy_revisions()
         .map(|metafield| metafield.value().as_str());
+    let current_country = current_country(input);
 
     let mut authorized_quantities: HashMap<(String, String, String), i64> = HashMap::new();
     let mut line_authorized_quantities: HashMap<String, i64> = HashMap::new();
     for line in input.cart().lines() {
         if let Some((bundle, line_token)) =
-            validate_ppb_line(line, runtime_secret, policy_revisions)
+            validate_ppb_line(line, runtime_secret, policy_revisions, &current_country)
         {
             *authorized_quantities
                 .entry((bundle.bundle_id, bundle.revision, line_token.group_id))
@@ -405,7 +419,8 @@ fn build_automatic_addon_candidates(
                 _ => return None,
             };
             let authorized = verify_runtime_token(token, runtime_secret)
-                .map(|payload| payload.addons.iter().any(|addon| {
+                .map(|payload| country_is_eligible(&payload.country_rule, &current_country)
+                    && payload.addons.iter().any(|addon| {
                     addon.variant_id == variant_id
                         && addon.quantity == *line.quantity() as i64
                         && addon.discount.as_ref().map(|discount| {
@@ -413,7 +428,12 @@ fn build_automatic_addon_candidates(
                                 && (discount.value - percentage).abs() < 0.0001
                         }).unwrap_or(false)
                 }))
-                .or_else(|| validate_ppb_line(line, runtime_secret, policy_revisions).map(|(bundle, line_token)| {
+                .or_else(|| validate_ppb_line(
+                    line,
+                    runtime_secret,
+                    policy_revisions,
+                    &current_country,
+                ).map(|(bundle, line_token)| {
                     let group = bundle.groups.iter().find(|group| group.id == line_token.group_id);
                     let line_quantity_is_authorized = line
                         .line_authorization()
@@ -457,6 +477,7 @@ fn build_subscription_candidates(
         .shop()
         .ppb_policy_revisions()
         .map(|metafield| metafield.value().as_str());
+    let current_country = current_country(input);
     let mut groups: HashMap<String, Vec<usize>> = HashMap::new();
     for (index, line) in input.cart().lines().iter().enumerate() {
         if line.selling_plan_allocation().is_none() {
@@ -489,6 +510,7 @@ fn build_subscription_candidates(
                     &input.cart().lines()[index],
                     runtime_secret,
                     policy_revisions,
+                    &current_country,
                 )
                 .map(|value| value.0)
             })
@@ -496,6 +518,15 @@ fn build_subscription_candidates(
             None
         };
         if v1_payload.is_none() && v2_bundle.is_none() {
+            continue;
+        }
+        if v1_payload
+            .as_ref()
+            .is_some_and(|payload| !country_is_eligible(&payload.country_rule, &current_country))
+            || v2_bundle
+                .as_ref()
+                .is_some_and(|bundle| !country_is_eligible(&bundle.country_rule, &current_country))
+        {
             continue;
         }
         let plan_matches = if let Some(payload) = v1_payload.as_ref() {
@@ -527,7 +558,7 @@ fn build_subscription_candidates(
                 else {
                     return false;
                 };
-                validate_ppb_line(line, runtime_secret, policy_revisions)
+                validate_ppb_line(line, runtime_secret, policy_revisions, &current_country)
                     .map(|(candidate, line_token)| {
                         let Some(authorization) = line
                             .line_authorization()
@@ -634,6 +665,7 @@ fn build_checkout_integration_candidates(
     presentment_currency_rate: f64,
 ) -> Vec<schema::ProductDiscountCandidate> {
     let lines = input.cart().lines();
+    let current_country = current_country(input);
     let runtime_secret = input
         .discount()
         .runtime_token_secret()
@@ -659,18 +691,21 @@ fn build_checkout_integration_candidates(
                 let authorized = token
                     .and_then(|runtime_token| verify_runtime_token(runtime_token, secret))
                     .map(|payload| {
-                        payload.addons.iter().any(|addon| {
-                            addon.variant_id == variant_id
-                                && addon.quantity == *line.quantity() as i64
-                                && addon
-                                    .discount
-                                    .as_ref()
-                                    .map(|discount| {
-                                        discount.discount_type.eq_ignore_ascii_case("PERCENTAGE")
-                                            && (discount.value - percentage).abs() < 0.0001
-                                    })
-                                    .unwrap_or(false)
-                        })
+                        country_is_eligible(&payload.country_rule, &current_country)
+                            && payload.addons.iter().any(|addon| {
+                                addon.variant_id == variant_id
+                                    && addon.quantity == *line.quantity() as i64
+                                    && addon
+                                        .discount
+                                        .as_ref()
+                                        .map(|discount| {
+                                            discount
+                                                .discount_type
+                                                .eq_ignore_ascii_case("PERCENTAGE")
+                                                && (discount.value - percentage).abs() < 0.0001
+                                        })
+                                        .unwrap_or(false)
+                            })
                     })
                     .unwrap_or(false);
                 if authorized {
@@ -756,6 +791,9 @@ fn build_checkout_integration_candidates(
                 continue;
             };
             if !token_components_match(&payload, &group_id, &actual_components) {
+                continue;
+            }
+            if !country_is_eligible(&payload.country_rule, &current_country) {
                 continue;
             }
             serde_json::to_string(&payload.price_adjustment).unwrap_or_default()

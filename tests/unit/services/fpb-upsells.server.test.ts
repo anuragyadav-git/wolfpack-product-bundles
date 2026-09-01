@@ -67,4 +67,27 @@ describe("selectEligibleFpbUpsells", () => {
     });
     expect(offers.map((offer) => offer.bundleId)).toEqual(["first", "winner"]);
   });
+
+  it("filters offers against the Shopify-selected country", () => {
+    const targeted = bundle({
+      offerPolicy: {
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: "include",
+        countryCodes: ["CA"],
+      },
+    });
+    expect(selectEligibleFpbUpsells([targeted], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "US",
+    })).toEqual([]);
+    expect(selectEligibleFpbUpsells([targeted], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "CA",
+    })).toHaveLength(1);
+  });
 });

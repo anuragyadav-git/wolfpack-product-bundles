@@ -661,7 +661,11 @@ export async function updateBundleProductMetafields(
     sdkMode: bundleConfiguration.sdkMode ?? false,
     offerDelivery: bundleConfiguration.offerDelivery ?? {
       decisionRequired: false,
+      serverDecisionRequired: false,
       specificLinkRequired: false,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       ruleVersion: null,
     },
   };

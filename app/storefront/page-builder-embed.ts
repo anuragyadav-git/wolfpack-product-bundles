@@ -21,6 +21,7 @@ type DirectContext = {
   mode: Exclude<PageBuilderEmbedMode, "eligible-product">;
   parentProductHandle: string;
   publicNumber: string;
+  countryCode: string;
 };
 
 let directState: { key: string; payload: PageBuilderEmbedPayload | null } | null = null;
@@ -99,6 +100,7 @@ function createDirectContext(
     mode,
     parentProductHandle: marker.dataset.parentProductHandle?.trim().toLowerCase() ?? "",
     publicNumber: marker.dataset.publicNumber?.trim() ?? "",
+    countryCode: appEmbed.dataset.countryCode ?? "",
   };
   if (!context.endpointUrl || !context.locale) return null;
   return { ...context, key: JSON.stringify(context) };
@@ -111,6 +113,7 @@ async function fetchDirectEmbed(context: DirectContext) {
     context.mode === "product-page-bundle" ? "product_page" : "full_page",
   );
   url.searchParams.set("locale", context.locale);
+  if (context.countryCode) url.searchParams.set("country", context.countryCode);
   if (context.mode === "product-page-bundle") {
     url.searchParams.set("parentProductHandle", context.parentProductHandle);
   } else {

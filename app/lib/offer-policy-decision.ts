@@ -29,6 +29,21 @@ type OfferDecisionPolicy = OfferPolicyTiming & {
   specificLinkRequired: boolean;
   priority?: number | null;
   stopLowerPriority?: boolean | null;
+  countryTargetingEnabled?: boolean | null;
+  countryTargetingMode?: 'include' | 'exclude' | null;
+  countryCodes?: readonly string[] | null;
+};
+
+export type OfferDecisionMarker = {
+  decisionRequired: boolean;
+  serverDecisionRequired: boolean;
+  specificLinkRequired: boolean;
+  countryTargetingEnabled: boolean;
+  countryTargetingMode: 'include' | 'exclude';
+  countryCodes: string[];
+  offerPolicyId: string | null;
+  ruleVersion: number | null;
+  eligibilitySource: OfferEligibilitySource | null;
 };
 
 function instant(value: Date | string | null | undefined): Date | null {
@@ -85,22 +100,36 @@ export function applyOfferPriority<T extends PrioritizedOffer>(
   return stopIndex === -1 ? ordered : ordered.slice(0, stopIndex + 1);
 }
 
-export function buildOfferDecisionMarker(policy: OfferDecisionPolicy | null) {
+export function buildOfferDecisionMarker(
+  policy: OfferDecisionPolicy | null,
+): OfferDecisionMarker {
   const specificLinkRequired = policy?.specificLinkRequired === true;
+  const countryTargetingEnabled = policy?.countryTargetingEnabled === true;
+  const serverDecisionRequired = specificLinkRequired
+    || policy?.startsAt != null
+    || policy?.endsAt != null;
+  const countryCodes = [...new Set((policy?.countryCodes ?? [])
+    .map((countryCode) => countryCode.trim().toUpperCase())
+    .filter((countryCode) => /^[A-Z]{2}$/.test(countryCode)))]
+    .sort();
   const eligibilitySource: OfferEligibilitySource | null = !policy
     ? null
     : specificLinkRequired
       ? 'specific_link'
       : policy.startsAt != null || policy.endsAt != null
         ? 'schedule'
+        : countryTargetingEnabled
+          ? 'country'
         : (policy.priority ?? 100) !== 100 || policy.stopLowerPriority === true
           ? 'priority'
           : 'always';
   return {
-    decisionRequired: specificLinkRequired
-      || policy?.startsAt != null
-      || policy?.endsAt != null,
+    decisionRequired: serverDecisionRequired || countryTargetingEnabled,
+    serverDecisionRequired,
     specificLinkRequired,
+    countryTargetingEnabled,
+    countryTargetingMode: policy?.countryTargetingMode === 'exclude' ? 'exclude' : 'include',
+    countryCodes,
     offerPolicyId: policy?.id ?? null,
     ruleVersion: policy?.ruleVersion ?? null,
     eligibilitySource,

@@ -23,6 +23,10 @@ const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
 if (embed?.dataset.storefrontProxyRoot) {
   setStorefrontProxyRoot(embed.dataset.storefrontProxyRoot);
 }
+if (embed) {
+  (window as Window & { currentCountryCode?: string }).currentCountryCode =
+    embed.dataset.countryCode ?? '';
+}
 
 export function ensureStylesheet(href: string | undefined): void {
   if (!href) return;
@@ -78,6 +82,7 @@ function hydrateMarker(): void {
     shop: marker.dataset.shop || '',
     fpbLoadingGif: marker.dataset.fpbLoadingGif || '',
     fpbLoadingBackground: marker.dataset.fpbLoadingBackground || '#ffffff',
+    countryCode: marker.dataset.countryCode || embed.dataset.countryCode || '',
   });
   transferBootstrapLoadingScreen(marker, container);
   marker.before(container);

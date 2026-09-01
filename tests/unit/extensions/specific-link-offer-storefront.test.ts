@@ -8,6 +8,7 @@ describe('specific-link offer storefront eligibility', () => {
     await expect(resolveSpecificLinkOfferStorefrontEligibility({
       bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: false, specificLinkRequired: false } },
       locationSearch: '',
+      countryCode: 'CA',
       fetchImpl,
     })).resolves.toBe(true);
     expect(fetchImpl).not.toHaveBeenCalled();
@@ -19,13 +20,14 @@ describe('specific-link offer storefront eligibility', () => {
       json: jest.fn().mockResolvedValue({ eligible: true }),
     });
     await expect(resolveSpecificLinkOfferStorefrontEligibility({
-      bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: true, specificLinkRequired: true } },
+      bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: true, serverDecisionRequired: true, specificLinkRequired: true } },
       locationSearch: '?wpb_offer=opaque-token&ignored=value',
+      countryCode: 'CA',
       fetchImpl,
     })).resolves.toBe(true);
 
     expect(fetchImpl).toHaveBeenCalledWith(
-      '/apps/product-bundles/api/offer-eligibility.json?bundleId=bundle-1&wpb_offer=opaque-token',
+      '/apps/product-bundles/api/offer-eligibility.json?bundleId=bundle-1&country=CA&wpb_offer=opaque-token',
       { credentials: 'same-origin', cache: 'no-store' },
     );
   });
@@ -36,8 +38,9 @@ describe('specific-link offer storefront eligibility', () => {
     ['?wpb_offer=invalid', jest.fn().mockRejectedValue(new Error('offline'))],
   ])('fails closed when a required decision is unavailable', async (locationSearch, fetchImpl) => {
     await expect(resolveSpecificLinkOfferStorefrontEligibility({
-      bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: true, specificLinkRequired: true } },
+      bundle: { id: 'bundle-1', offerDelivery: { decisionRequired: true, serverDecisionRequired: true, specificLinkRequired: true } },
       locationSearch,
+      countryCode: 'CA',
       fetchImpl,
     })).resolves.toBe(false);
   });
@@ -50,14 +53,44 @@ describe('specific-link offer storefront eligibility', () => {
     await expect(resolveSpecificLinkOfferStorefrontEligibility({
       bundle: {
         id: 'bundle-1',
-        offerDelivery: { decisionRequired: true, specificLinkRequired: false },
+        offerDelivery: { decisionRequired: true, serverDecisionRequired: true, specificLinkRequired: false },
       },
       locationSearch: '',
+      countryCode: 'CA',
       fetchImpl,
     })).resolves.toBe(true);
     expect(fetchImpl).toHaveBeenCalledWith(
-      '/apps/product-bundles/api/offer-eligibility.json?bundleId=bundle-1',
+      '/apps/product-bundles/api/offer-eligibility.json?bundleId=bundle-1&country=CA',
       { credentials: 'same-origin', cache: 'no-store' },
     );
+  });
+
+  it('resolves a country-only decision locally from Shopify Liquid context', async () => {
+    const fetchImpl = jest.fn();
+    const bundle = {
+      id: 'bundle-1',
+      offerDelivery: {
+        decisionRequired: true,
+        serverDecisionRequired: false,
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: 'include',
+        countryCodes: ['CA'],
+      },
+    };
+
+    await expect(resolveSpecificLinkOfferStorefrontEligibility({
+      bundle,
+      locationSearch: '',
+      countryCode: 'CA',
+      fetchImpl,
+    })).resolves.toBe(true);
+    await expect(resolveSpecificLinkOfferStorefrontEligibility({
+      bundle,
+      locationSearch: '',
+      countryCode: 'US',
+      fetchImpl,
+    })).resolves.toBe(false);
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 });

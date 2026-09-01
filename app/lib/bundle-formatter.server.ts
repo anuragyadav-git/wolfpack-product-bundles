@@ -54,10 +54,14 @@ export interface FormattedBundle {
   pricing: FormattedPricing | null;
   offerDelivery: {
     decisionRequired: boolean;
+    serverDecisionRequired: boolean;
     specificLinkRequired: boolean;
+    countryTargetingEnabled: boolean;
+    countryTargetingMode: 'include' | 'exclude';
+    countryCodes: string[];
     offerPolicyId: string | null;
     ruleVersion: number | null;
-    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'priority' | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'country' | 'priority' | null;
   };
   // Per-bundle behavioral settings
   showProductPrices: boolean;

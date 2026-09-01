@@ -113,10 +113,14 @@ export interface BundleUiConfig {
   sdkMode?: boolean;
   offerDelivery?: {
     decisionRequired: boolean;
+    serverDecisionRequired: boolean;
     specificLinkRequired: boolean;
+    countryTargetingEnabled: boolean;
+    countryTargetingMode: 'include' | 'exclude';
+    countryCodes: string[];
     offerPolicyId: string | null;
     ruleVersion: number | null;
-    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'priority' | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'country' | 'priority' | null;
   };
   runtimeAuthorization?: {
     version: 2;

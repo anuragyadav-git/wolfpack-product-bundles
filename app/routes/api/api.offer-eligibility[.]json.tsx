@@ -41,6 +41,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
             specificLinkRequired: true,
             startsAt: true,
             endsAt: true,
+            countryTargetingEnabled: true,
+            countryTargetingMode: true,
+            countryCodes: true,
             ruleVersion: true,
             conditions: {
               select: {
@@ -65,6 +68,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const decision = resolveSpecificLinkOfferEligibility({
       policy: bundle.offerPolicy,
       token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
+      countryCode: url.searchParams.get('country'),
     });
 
     if (bundle.offerPolicy) {
@@ -77,6 +81,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
             metadata: {
               eligibilitySource: bundle.offerPolicy.specificLinkRequired
                 ? 'specific_link'
+                : bundle.offerPolicy.countryTargetingEnabled
+                  ? 'country'
                 : 'schedule',
               reasonCode: decision.reasonCode,
               ruleVersion: bundle.offerPolicy.ruleVersion,

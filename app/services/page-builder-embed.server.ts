@@ -4,6 +4,7 @@ import {
 } from "../lib/fpb-loading-screen";
 import type { PageBuilderEmbedRequest } from "../lib/page-builder-embed";
 import { resolveOfferSchedule } from "../lib/offer-policy-decision";
+import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility";
 
 type Database = {
   bundle: {
@@ -61,6 +62,7 @@ export async function resolvePageBuilderEmbed(
   const bundle = await database.bundle.findFirst({ where, include: bundleInclude });
   if (!bundle) return null;
   if (!resolveOfferSchedule(bundle.offerPolicy ?? {}, now).effective) return null;
+  if (!resolveOfferCountryEligibility(bundle.offerPolicy, request.countryCode)) return null;
 
   if (request.bundleType === "product_page") {
     return { bundle, loadingScreen: null };

@@ -51,13 +51,19 @@ const mockFindFirst = () => getDb().bundle.findFirst as jest.MockedFunction<any>
 const mockFindDesignSettings = () => getDb().designSettings.findUnique as jest.MockedFunction<any>;
 const mockAppProxy = authenticate.public.appProxy as jest.MockedFunction<any>;
 
-function makeApiRequest(bundleId: string, previewToken?: string, offerToken?: string) {
+function makeApiRequest(
+  bundleId: string,
+  previewToken?: string,
+  offerToken?: string,
+  countryCode?: string,
+) {
   const params = new URLSearchParams({
     shop: 'test.myshopify.com',
     timestamp: '1234567890',
   });
   if (previewToken) params.set('wpb_preview', previewToken);
   if (offerToken) params.set('wpb_offer', offerToken);
+  if (countryCode) params.set('country', countryCode);
   const message = [...params.entries()]
     .map(([k, v]: any) => `${k}=${v}`)
     .sort()
@@ -213,6 +219,30 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
     expect(hidden.status).toBe(404);
     expect(visible.status).toBe(200);
     expect(visible.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+
+  it('gates a public API bundle against the forwarded Shopify country', async () => {
+    mockFindFirst().mockResolvedValue({
+      ...draftBundle,
+      status: BundleStatus.ACTIVE,
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: 'include',
+        countryCodes: ['CA'],
+        ruleVersion: 2,
+        conditions: [],
+      },
+    });
+
+    const response = await apiBundleLoader({
+      request: makeApiRequest('bundle-1', undefined, undefined, 'US'),
+      params: { bundleId: 'bundle-1' },
+      context: {},
+    } as any) as Response;
+
+    expect(response.status).toBe(404);
   });
 });
 

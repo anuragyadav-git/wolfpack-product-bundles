@@ -64,11 +64,13 @@ introduce protected customer-data access.
 | 2 | Unknown country | Missing Shopify country context | Include rule fails closed; exclude rule remains eligible | Explicit deterministic behavior |
 | 3 | Checkout enforcement | Signed rule plus Function localization country | Direct cart bypass cannot receive the configured bundle transformation/discount | Browser result is not trusted |
 | 4 | Query budget | Cart Transform input | Calculated complexity remains at most 30 | Consolidate an existing line envelope before adding a leaf |
+| 5 | Function binary budget | Shopify CLI optimized Cart Transform WASM | Less than 256,000 bytes | Conservative threshold; measure the post-optimizer artifact, not raw Cargo output |
+| 6 | Signed rule encoding | Normalized include, exclude, or disabled rule | Compact `countryRule` string consumed by both Functions | Avoid a second nested Rust JSON deserializer |
 
 ## Acceptance Criteria
 
 - [x] Prisma migration defines direct country-targeting fields with inert defaults.
 - [x] Admin persistence normalizes and validates ISO country codes.
-- [ ] FPB and PPB read Shopify Liquid localization after a hard reload.
-- [ ] Cart Transform independently enforces country targeting within complexity 30.
-- [ ] No market identifier, IP service, new Shopify scope, or customer record is used.
+- [x] FPB and PPB read Shopify Liquid localization after a hard reload.
+- [x] Cart Transform independently enforces country targeting within complexity 30.
+- [x] No market identifier, IP service, new Shopify scope, or customer record is used.

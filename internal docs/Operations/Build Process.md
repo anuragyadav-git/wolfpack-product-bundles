@@ -5,7 +5,7 @@ title: Build Process
 type: operations
 status: authoritative
 summary: Build, minification, lint, and pre-commit requirements for deployable application and storefront assets.
-last_audited: 2026-08-24
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -14,6 +14,8 @@ systems:
   - asset-pipeline
 source_paths:
   - scripts/build-storefront.mjs
+  - scripts/build-cart-transform-function.mjs
+  - extensions/bundle-cart-transform-rs/Cargo.toml
   - scripts/minify-assets.js
   - scripts/rebuild-graphify.mjs
   - scripts/rebuild-graphify-core.cjs
@@ -62,9 +64,23 @@ Keep split source modules semantically named by responsibility. Mechanical split
 ## Cart Transform WASM
 
 ```bash
-cd extensions/bundle-cart-transform-ts && npm run build
+npm run build:cart-transform
+npx shopify app function build --path extensions/bundle-cart-transform-rs
+wc -c extensions/bundle-cart-transform-rs/target/wasm32-unknown-unknown/release/bundle_cart_transform_rs.wasm
 ```
-`dist/` is gitignored — WASM output is NOT committed.
+
+Shopify requires the final Function WASM to be under 256 kB. This repository
+uses a conservative acceptance threshold of 256,000 bytes so the check does
+not depend on decimal-versus-binary unit interpretation. Use the size left by
+`shopify app function build`, because Shopify CLI applies
+its compatible final optimizer after the Cargo build. The larger raw Cargo
+size printed by `npm run build:cart-transform` is not the upload artifact.
+WASM output is not committed.
+
+Do not use panic snipping or replace Shopify CLI's optimizer. The supported
+size controls are the release profile, narrow GraphQL input, compact signed
+authorization fields, and avoiding heavyweight collections when bounded
+Function inputs already have stable cart-line indices or small lists.
 
 ## CSS Size Limit
 

@@ -18,6 +18,7 @@ function normalizeBundleId(value: unknown) {
 export function buildOfferAnalyticsCartProperties({
   sourceProperties = {},
   bundleId,
+  bundleName,
   offerDelivery,
   tierId = null,
 }: any = {}) {
@@ -33,6 +34,8 @@ export function buildOfferAnalyticsCartProperties({
     ? JSON.parse(rawDisplayProperties)
     : {};
   const offerAnalytics: Record<string, string | number> = {};
+  const normalizedBundleName = typeof bundleName === 'string' ? bundleName.trim() : '';
+  if (normalizedBundleName) displayProperties.bundleName = normalizedBundleName;
   if (normalizedBundleId) offerAnalytics.bundleId = normalizedBundleId;
   if (dimensions.offerPolicyId) offerAnalytics.offerPolicyId = dimensions.offerPolicyId;
   if (dimensions.offerRuleVersion) offerAnalytics.offerRuleVersion = dimensions.offerRuleVersion;

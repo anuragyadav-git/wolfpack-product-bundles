@@ -89,6 +89,35 @@ describe("FPB app proxy page", () => {
     expect(text).not.toContain("/apps/product-bundles/assets/");
   });
 
+  it("lets Shopify Liquid enforce country targeting before rendering the marker", async () => {
+    getDb().bundle.findFirst.mockResolvedValue({
+      id: "bundle-1",
+      name: "Build a Box",
+      shopId: "test-shop.myshopify.com",
+      bundleType: "full_page",
+      status: "active",
+      steps: [],
+      pricing: null,
+      offerPolicy: {
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: "include",
+        countryCodes: ["CA"],
+      },
+    });
+
+    const response = await loader({
+      request: makeSignedRequest(),
+      params: { bundleId: "1" },
+      context: {},
+    } as any) as Response;
+    const text = await response.text();
+
+    expect(text).toContain("localization.country.iso_code");
+    expect(text).toContain("{% if wpb_offer_countries contains wpb_country %}");
+    expect(text).toContain('data-country-code="{{ localization.country.iso_code }}"');
+  });
+
   it("renders a customizable first-paint loading screen without skeleton cards", async () => {
     getDb().bundle.findFirst.mockResolvedValue({
       id: "bundle-1",

@@ -3,6 +3,7 @@ import {
   normalizePpbBundleEmbedConfig,
 } from "../lib/ppb-bundle-embed";
 import { applyOfferPriority } from "../lib/offer-policy-decision";
+import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility";
 
 type AnyRecord = Record<string, any>;
 
@@ -94,6 +95,7 @@ export type PpbBundleEmbedContext = {
   productHandle: string;
   collectionIds: string[];
   locale: string;
+  countryCode?: string | null;
   now?: Date;
 };
 
@@ -105,6 +107,10 @@ export function selectEligiblePpbBundleEmbed(
     .filter((bundle) => bundle.bundleType === "product_page")
     .filter((bundle) => bundle.status === "active" || bundle.status === "unlisted")
     .filter((bundle) => bundle.offerPolicy?.specificLinkRequired !== true)
+    .filter((bundle) => resolveOfferCountryEligibility(
+      bundle.offerPolicy,
+      context.countryCode,
+    ))
     .filter((bundle) => bundleMatches(bundle, context));
   const selected = applyOfferPriority<AnyRecord & { id: string }>(
     candidates as Array<AnyRecord & { id: string }>,

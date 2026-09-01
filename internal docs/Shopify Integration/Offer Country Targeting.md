@@ -18,7 +18,11 @@ systems:
 source_paths:
   - prisma/schema.prisma
   - app/lib/offer-country-targeting.ts
+  - app/lib/offer-country-eligibility.ts
+  - app/lib/offer-country-liquid-guard.server.ts
   - extensions/bundle-builder/blocks/bundle-app-embed.liquid
+  - extensions/bundle-cart-transform-rs/src/run.graphql
+  - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.graphql
 related_docs:
   - internal docs/Shopify Integration/Cart Transform API.md
   - internal docs/Architecture/Widget Architecture.md
@@ -76,6 +80,18 @@ Transform input query is already at Shopify's calculated complexity limit of
 30, so an existing selected line attribute must be consolidated before adding
 the country leaf. Do not exceed the limit or introduce an unsigned cart-line
 eligibility flag.
+
+The signed Function token encodes the normalized rule as one internal
+`countryRule` string (`include:CA,US`, `exclude:US`, or empty when disabled).
+This is a size-conscious authorization ABI, not the merchant persistence
+model. Both Functions fail closed for malformed non-empty rules.
+
+The Cart Transform query obtains the canonical country from
+`localization.country.isoCode`. To keep the query at complexity 30, the bundle
+name travels inside the existing signed `_bundle_display_properties` envelope
+instead of consuming a separate `_bundleName` attribute leaf. Shopify CLI must
+successfully build both Functions after any change to this contract; a local
+GraphQL parser alone does not prove Shopify accepts the query complexity.
 
 ## Identity Boundary
 

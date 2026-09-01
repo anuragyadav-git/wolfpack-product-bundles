@@ -1,16 +1,24 @@
 import { buildStorefrontApiPath } from '../../../config/storefront-proxy-routes.js';
 import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from '../../../lib/specific-link-offer.js';
+import { resolveOfferCountryEligibility } from '../../../lib/offer-country-eligibility.js';
 
 export async function resolveSpecificLinkOfferStorefrontEligibility({
   bundle,
   locationSearch,
+  countryCode,
   fetchImpl = fetch,
 }: {
   bundle: any;
   locationSearch: string;
+  countryCode: string | null;
   fetchImpl?: typeof fetch;
 }): Promise<boolean> {
   if (bundle?.offerDelivery?.decisionRequired !== true) return true;
+
+  if (!resolveOfferCountryEligibility(bundle.offerDelivery, countryCode)) {
+    return false;
+  }
+  if (bundle.offerDelivery.serverDecisionRequired !== true) return true;
 
   const bundleId = String(bundle?.id ?? bundle?.bundleId ?? '').trim();
   const token = new URLSearchParams(locationSearch).get(
@@ -21,6 +29,10 @@ export async function resolveSpecificLinkOfferStorefrontEligibility({
   }
 
   const params = new URLSearchParams({ bundleId });
+  const normalizedCountryCode = String(countryCode ?? '').trim().toUpperCase();
+  if (/^[A-Z]{2}$/.test(normalizedCountryCode)) {
+    params.set('country', normalizedCountryCode);
+  }
   if (token) params.set(SPECIFIC_LINK_OFFER_QUERY_PARAM, token);
   try {
     const response = await fetchImpl(

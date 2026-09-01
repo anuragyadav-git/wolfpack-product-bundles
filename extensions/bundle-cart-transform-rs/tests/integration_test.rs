@@ -27,6 +27,7 @@ mod tests {
                 { "variantId": "gid://shopify/ProductVariant/102", "quantity": 1 }
             ],
             "addons": [],
+            "countryRule": "include:CA",
             "priceAdjustment": { "method": "percentage_off", "value": 20 }
         })
         .to_string()
@@ -139,6 +140,32 @@ mod tests {
 
     fn with_runtime_tokens(input: &str) -> String {
         let mut root: Value = serde_json::from_str(input).expect("test input should be valid JSON");
+        root["localization"] = serde_json::json!({ "country": { "isoCode": "CA" } });
+        if let Some(lines) = root
+            .get_mut("cart")
+            .and_then(|cart| cart.get_mut("lines"))
+            .and_then(|lines| lines.as_array_mut())
+        {
+            for line in lines {
+                let bundle_name = line
+                    .get("wolfpackProductBundleName")
+                    .and_then(|attribute| attribute.get("value"))
+                    .and_then(|value| value.as_str())
+                    .map(str::to_string);
+                if let Some(bundle_name) = bundle_name {
+                    let mut display = line
+                        .get("bundleDisplayProperties")
+                        .and_then(|attribute| attribute.get("value"))
+                        .and_then(|value| value.as_str())
+                        .and_then(|value| serde_json::from_str::<Value>(value).ok())
+                        .unwrap_or_else(|| serde_json::json!({}));
+                    display["bundleName"] = Value::String(bundle_name);
+                    line["bundleDisplayProperties"] = serde_json::json!({
+                        "value": display.to_string(),
+                    });
+                }
+            }
+        }
         let existing_runtime_secret = root
             .get("cartTransform")
             .and_then(|cart_transform| cart_transform.get("runtimeTokenSecret"))
@@ -229,6 +256,7 @@ mod tests {
                 "bundleName": bundle_name,
                 "components": components,
                 "addons": [],
+                "countryRule": "include:CA",
                 "priceAdjustment": price_adjustment,
             });
             let runtime_secret = test_runtime_secret();
@@ -483,7 +511,7 @@ mod tests {
             "\"sellingPlanAllocation\":{\"sellingPlan\":{\"id\":\"gid://shopify/SellingPlan/1\"}},\"merchandise\"",
             1,
         );
-        let output = run_function_with_input(cart_transform_run, &input).unwrap();
+        let output = run_cart_transform(&input);
         assert!(output.operations.is_empty());
     }
 
@@ -534,6 +562,18 @@ mod tests {
     }
 
     #[test]
+    fn test_runtime_token_rejects_ineligible_shopify_country() {
+        let mut input: Value =
+            serde_json::from_str(&with_runtime_tokens(&messaging_merge_input("")))
+                .expect("authorized input should be valid JSON");
+        input["localization"] = serde_json::json!({ "country": { "isoCode": "US" } });
+
+        let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
+
+        assert!(output.operations.is_empty());
+    }
+
+    #[test]
     fn test_ppb_v2_shopify_hosted_authorization_merges_current_policy() {
         let runtime_secret = test_runtime_secret();
         let bundle_token = sign_runtime_token_for_test(&serde_json::json!({
@@ -541,6 +581,7 @@ mod tests {
             "bundleId": "bundle-1", "revision": "rev-1",
             "groups": [{ "id": "step-1", "role": "component", "minQuantity": 1, "maxQuantity": 2 }],
             "parentVariantId": "gid://shopify/ProductVariant/999",
+            "countryRule": "include:CA",
             "priceAdjustment": { "method": "percentage_off", "value": 20 }
         }).to_string(), &runtime_secret);
         let line_token = sign_runtime_token_for_test(
@@ -555,6 +596,7 @@ mod tests {
             &runtime_secret,
         );
         let input = serde_json::json!({
+            "localization": { "country": { "isoCode": "CA" } },
             "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
             "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
                 "runtimeTokenSecret": runtime_secret
@@ -602,6 +644,7 @@ mod tests {
             &runtime_secret,
         );
         let input = serde_json::json!({
+            "localization": { "country": { "isoCode": "CA" } },
             "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
             "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
             "cart": { "lines": [{
@@ -663,6 +706,7 @@ mod tests {
             })
         };
         let input = serde_json::json!({
+            "localization": { "country": { "isoCode": "CA" } },
             "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
             "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
             "cart": { "lines": [line("line1"), line("line2")] }

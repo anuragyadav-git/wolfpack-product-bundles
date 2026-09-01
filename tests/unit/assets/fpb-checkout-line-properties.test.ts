@@ -463,6 +463,7 @@ describe("FPB checkout cart-line properties", () => {
       expect(item.properties).not.toHaveProperty("Box");
       expect(item.properties).toHaveProperty("_bundle_display_properties");
       expect(JSON.parse(item.properties._bundle_display_properties)).toEqual({
+        bundleName: "Daily Essentials",
         items: "1 x First product, 1 x Second product",
         retailPrice: "$1448.00",
         offerAnalytics: {
@@ -1010,6 +1011,7 @@ describe("FPB checkout cart-line properties", () => {
     expect(addonLine.properties._bundle_step_type).not.toBe("free_gift");
     expect(JSON.parse(paidLine.properties._bundle_display_properties)).toEqual({
       box: "1",
+      bundleName: "Daily Essentials",
       items: "1 x Paid product",
       retailPrice: "$829.00",
       labels: {
@@ -1267,6 +1269,7 @@ describe("FPB checkout cart-line properties", () => {
     expect(body.items[0].properties._bundle_price_adjustment_mode).toBeUndefined();
     expect(displayProperties).toEqual({
       box: "1",
+      bundleName: "Daily Essentials",
       items: "1 x First product, 1 x Second product",
       retailPrice: "",
       labels: {

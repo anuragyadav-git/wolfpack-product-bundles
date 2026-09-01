@@ -42,6 +42,7 @@ describe("PPB static purchase authorization", () => {
       bundleId: "bundle-1",
       revision: result.policy.revision,
       groups: result.authorization.groups,
+      countryRule: "",
     });
     expect(verifyPpbStaticToken(result.authorization.lines[0].token, "secret")).toMatchObject({
       version: 2,
@@ -51,6 +52,38 @@ describe("PPB static purchase authorization", () => {
       role: "component",
       maxQuantity: 3,
     });
+  });
+
+  it("signs country targeting and changes the policy revision when the rule changes", () => {
+    const targetedBundle = {
+      ...bundle,
+      offerPolicy: {
+        countryTargetingEnabled: true,
+        countryTargetingMode: "include",
+        countryCodes: ["us", "CA", "ca"],
+      },
+    };
+    const targeted = buildPpbStaticAuthorization({
+      bundle: targetedBundle,
+      shop: "shop.myshopify.com",
+      parentVariantId: "gid://shopify/ProductVariant/99",
+      secret: "secret",
+    });
+    const untargeted = buildPpbStaticAuthorization({
+      bundle,
+      shop: "shop.myshopify.com",
+      parentVariantId: "gid://shopify/ProductVariant/99",
+      secret: "secret",
+    });
+
+    expect(targeted.policy.countryTargeting).toEqual({
+      enabled: true,
+      mode: "include",
+      countryCodes: ["CA", "US"],
+    });
+    expect(verifyPpbStaticToken(targeted.authorization.bundleToken, "secret"))
+      .toMatchObject({ countryRule: "include:CA,US" });
+    expect(targeted.policy.revision).not.toBe(untargeted.policy.revision);
   });
 
   it("rejects a tampered signature", () => {
