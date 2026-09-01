@@ -1,8 +1,11 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+const mockLinks = jest.fn(() => null);
+const mockCrispChat = jest.fn(() => null);
+
 jest.mock("@remix-run/react", () => ({
-  Links: () => null,
+  Links: () => mockLinks(),
   Meta: () => null,
   Outlet: () => null,
   Scripts: () => null,
@@ -14,7 +17,7 @@ jest.mock("@remix-run/react", () => ({
 
 jest.mock("../../../app/components/CrispChat", () => ({
   __esModule: true,
-  default: () => null,
+  default: () => mockCrispChat(),
 }));
 
 jest.mock("../../../app/components/ErrorPage", () => ({
@@ -82,6 +85,31 @@ jest.mock("../../../app/routes/app/app.dashboard/dashboard.module.css", () => ({
 });
 
 describe("admin root link warnings", () => {
+  it("installs support chat in the root error document", async () => {
+    mockCrispChat.mockClear();
+    const { ErrorBoundary } = await import("../../../app/root");
+
+    renderToStaticMarkup(React.createElement(ErrorBoundary));
+
+    expect(mockCrispChat).toHaveBeenCalledTimes(1);
+  });
+
+  it("registers the shared error-page stylesheet with Remix", async () => {
+    const { links } = await import("../../../app/root");
+
+    expect(links()).toContainEqual({
+      rel: "stylesheet",
+      href: "/test-stylesheet.css",
+    });
+  });
+
+  it("renders the error stylesheet directly in the root error document", async () => {
+    const { ErrorBoundary } = await import("../../../app/root");
+    const view = renderToStaticMarkup(React.createElement(ErrorBoundary));
+
+    expect(view).toContain('rel="stylesheet" href="/test-stylesheet.css"');
+  });
+
   it("does not render the font stylesheet onLoad handler as a string listener", async () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     const { default: App } = await import("../../../app/root");
