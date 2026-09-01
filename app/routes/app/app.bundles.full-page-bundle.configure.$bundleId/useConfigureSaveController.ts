@@ -125,6 +125,12 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "allowQuantityChanges",
         String(flow.allowQuantityChanges),
       );
+      formData.append(
+        "lowStockAlertEnabled",
+        String(flow.lowStockAlertEnabled),
+      );
+      formData.append("lowStockAlertThreshold", flow.lowStockAlertThreshold);
+      formData.append("lowStockAlertMessage", flow.lowStockAlertMessage);
       formData.append("searchBarEnabled", String(flow.searchBarEnabled));
       formData.append(
         "variantSelectorEnabled",
@@ -203,6 +209,17 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "defaultProductsData",
         JSON.stringify(buildDefaultProductsData()),
       );
+      formData.append(
+        "specificLinkOfferEnabled",
+        String(flow.offerDeliveryState.enabled),
+      );
+      formData.append("offerPriority", String(flow.offerDeliveryState.priority));
+      formData.append(
+        "offerStopLowerPriority",
+        String(flow.offerDeliveryState.stopLowerPriority),
+      );
+      formData.append("offerStartsAt", flow.offerDeliveryState.startsAt ?? "");
+      formData.append("offerEndsAt", flow.offerDeliveryState.endsAt ?? "");
       validation.validateConfigureForm(formData, (validFormData) => {
         flow.fetcher.submit(validFormData, { method: "post" });
       });
@@ -267,6 +284,12 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.cartRedirectToCheckout;
           flow.originalAllowQuantityChangesRef.current =
             flow.allowQuantityChanges;
+          flow.originalLowStockAlertEnabledRef.current =
+            flow.lowStockAlertEnabled;
+          flow.originalLowStockAlertThresholdRef.current =
+            flow.lowStockAlertThreshold;
+          flow.originalLowStockAlertMessageRef.current =
+            flow.lowStockAlertMessage;
           flow.originalTextOverridesRef.current = flow.textOverrides;
           flow.originalTextOverridesByLocaleRef.current =
             flow.textOverridesByLocale;
@@ -287,6 +310,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.autoSelectBrowsedProduct;
           flow.originalSubscriptionConfigRef.current =
             flow.subscriptionConfig;
+          flow.markSpecificLinkOfferSaved();
           flow.setIsDirty(false);
           flow.clearOperationAlert();
           flow.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });
@@ -360,6 +384,15 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       flow.originalCartRedirectToCheckoutRef.current,
     );
     flow.setAllowQuantityChanges(flow.originalAllowQuantityChangesRef.current);
+    flow.setLowStockAlertEnabled(
+      flow.originalLowStockAlertEnabledRef.current,
+    );
+    flow.setLowStockAlertThreshold(
+      flow.originalLowStockAlertThresholdRef.current,
+    );
+    flow.setLowStockAlertMessage(
+      flow.originalLowStockAlertMessageRef.current,
+    );
     flow.setTextOverrides(flow.originalTextOverridesRef.current);
     flow.setTextOverridesByLocale(
       flow.originalTextOverridesByLocaleRef.current,
@@ -385,6 +418,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     flow.resetSubscriptionConfig(
       flow.originalSubscriptionConfigRef.current,
     );
+    flow.discardSpecificLinkOfferChanges();
     validation.clearValidationErrors();
   }, [flow, validation]);
   const handleConfirmDiscard = useCallback(() => {

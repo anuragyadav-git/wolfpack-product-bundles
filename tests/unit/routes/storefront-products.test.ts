@@ -55,6 +55,15 @@ describe("signed storefront products loader", () => {
             descriptionHtml: "<p>Description</p>",
             featuredImage: null,
             images: { edges: [] },
+            options: [{
+              id: "gid://shopify/ProductOption/1",
+              name: "Color",
+              optionValues: [{
+                id: "gid://shopify/ProductOptionValue/1",
+                name: "Gold",
+                swatch: { color: "#D4AF37", image: null },
+              }],
+            }],
             variants: {
               pageInfo: { hasNextPage: false, endCursor: null },
               edges: [{ node: {
@@ -68,6 +77,7 @@ describe("signed storefront products loader", () => {
               weight: 0,
               weightUnit: "GRAMS",
               image: null,
+              selectedOptions: [{ name: "Color", value: "Gold" }],
               } }],
             },
           }] },
@@ -91,6 +101,16 @@ describe("signed storefront products loader", () => {
       quantityAvailable: null,
       currentlyNotInStock: false,
     });
+    expect(mockGraphql.mock.calls[0][0]).toContain("optionValues");
+    expect(mockGraphql.mock.calls[0][0]).toContain("swatch");
+    expect(payload.products[0].options[0].optionValues[0]).toEqual({
+      id: "gid://shopify/ProductOptionValue/1",
+      name: "Gold",
+      swatch: { color: "#D4AF37", image: null },
+    });
+    expect(payload.products[0].variants[0].selectedOptions).toEqual([
+      { name: "Color", value: "Gold" },
+    ]);
   });
 
   it("requests only variant overflow pages after the initial product batch", async () => {

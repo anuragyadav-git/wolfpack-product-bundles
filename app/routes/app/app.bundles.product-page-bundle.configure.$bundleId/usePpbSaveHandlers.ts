@@ -291,6 +291,15 @@ export function usePpbSaveHandlers({
         String(settings.variantSelectorEnabled),
       );
       formData.append(
+        "lowStockAlertEnabled",
+        String(settings.lowStockAlertEnabled),
+      );
+      formData.append(
+        "lowStockAlertThreshold",
+        settings.lowStockAlertThreshold,
+      );
+      formData.append("lowStockAlertMessage", settings.lowStockAlertMessage);
+      formData.append(
         "showTextOnAddButton",
         String(settings.showTextOnAddButton),
       );
@@ -343,6 +352,17 @@ export function usePpbSaveHandlers({
         "useSingleStepCategoriesAsBundleSteps",
         String(settings.useSingleStepCategoriesAsBundleSteps),
       );
+      formData.append(
+        "specificLinkOfferEnabled",
+        String(base.offerDeliveryState.enabled),
+      );
+      formData.append("offerPriority", String(base.offerDeliveryState.priority));
+      formData.append(
+        "offerStopLowerPriority",
+        String(base.offerDeliveryState.stopLowerPriority),
+      );
+      formData.append("offerStartsAt", base.offerDeliveryState.startsAt ?? "");
+      formData.append("offerEndsAt", base.offerDeliveryState.endsAt ?? "");
       validation.validateConfigureForm(formData, (validFormData) => {
         base.fetcher.submit(validFormData, { method: "post" });
       });
@@ -381,8 +401,18 @@ export function usePpbSaveHandlers({
     base.setTextOverridesByLocale(
       base.originalTextOverridesByLocaleRef.current,
     );
+    base.discardSpecificLinkOfferChanges();
     settings.setDefaultProductsData(
       settings.originalDefaultProductsDataRef.current,
+    );
+    settings.setLowStockAlertEnabled(
+      settings.originalLowStockAlertEnabledRef.current,
+    );
+    settings.setLowStockAlertThreshold(
+      settings.originalLowStockAlertThresholdRef.current,
+    );
+    settings.setLowStockAlertMessage(
+      settings.originalLowStockAlertMessageRef.current,
     );
     visibility.setUpsellWidgetEnabled(
       visibility.originalUpsellWidgetEnabledRef.current,

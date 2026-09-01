@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-08-30
+last_audited: 2026-08-31
 owners:
   - engineering
 domains:
@@ -38,6 +38,17 @@ The FPB configure page is the canonical Admin configure design. FPB and PPB keep
 The only bundle configuration routes are the type-specific FPB and PPB configure pages. Bundle creation, cloning, and editing navigate directly to the appropriate configure route. The retired `/app/bundles/create/configure/:bundleId` configuration wizard and its route-specific state, actions, preview helper, and modal controllers are not part of the supported architecture.
 
 Shared configure primitives should accept adapter props for route-owned state and actions. FPB continues to use `useConfigureBundleFlow()`, and PPB continues to use `usePpbConfigureFlow()`. Shared components must not read route loaders or submit forms directly.
+
+Discount and Pricing rule cards share `PricingTierBadgeFields`. Each rule owns
+an optional `tierBadge` object inside the canonical `BundlePricing.rules` JSON,
+so the fields participate in the existing route-owned dirty state, SaveBar,
+discard, and save flows without a separate persistence boundary. The Polaris
+surface exposes an enable switch, merchant-authored badge text, supported
+template variables, shape, visibility, and validated foreground/background hex
+colors. Dependent fields remain visible but disabled while the badge is off.
+Save validation rejects blank enabled badges, unsupported variables, unsafe
+colors, and variables that cannot be truthfully resolved for the selected
+pricing method.
 
 Feature switches follow one shared disabled-configuration contract across FPB
 and PPB. The master switch remains interactive, while every dependent setting
@@ -78,7 +89,19 @@ Step Name, Category, Rules Configuration, and Step Config content is visually
 muted and inert until the merchant enables the step again. The save boundary
 also enforces Step 1 as enabled rather than relying only on the Admin control.
 
-PPB-only controls are explicit slots inside the shared rhythm. Category-level variant display controls update PPB `StepCategory.displayVariantsAsIndividualProducts` and `StepCategory.displayVariantsAsSwatches` fields; they are not step-wide FPB controls. Bundle Settings follows the same rule: shared rows cover overlapping settings, while FPB-only Product Slots / Slot Icon and PPB-only Variant Selector, discount display, banner, CSS, Bundle Embed, and Place Widget controls remain route-owned slots.
+PPB-only controls are explicit slots inside the shared rhythm. Category-level
+variant controls update `StepCategory.displayVariantsAsIndividualProducts`,
+`variantSelectorMode`, and `swatchTooltipEnabled`; they are
+not step-wide FPB controls. Grouped variants support Dropdown, Pills, Color
+swatches, and Image swatches. Color mode alone exposes the tooltip switch.
+Color and image values are managed in Shopify's product option swatches and
+consumed through the Storefront API; Configure does not persist or edit a
+parallel color map.
+Individual-variant mode disables these grouped-variant controls without
+clearing their saved values. Bundle Settings follows the same ownership rule:
+shared rows cover overlapping settings, while FPB-only Product Slots / Slot
+Icon and PPB-only discount display, banner, CSS, Bundle Embed, and Place Widget
+controls remain route-owned slots.
 
 The former `Pre-order & Subscription Integration` Bundle Settings row is absent
 from both FPB and PPB. Its `individualSellingPlanSelection` state and form field

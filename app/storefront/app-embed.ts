@@ -17,8 +17,12 @@ import {
   suppressesAutomaticPpbEmbed,
 } from './page-builder-embed.js';
 import { loadAndApplyGlobalSettingsControls } from './settings-controls.js';
+import { setStorefrontProxyRoot } from '../config/storefront-proxy-routes.js';
 
 const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
+if (embed?.dataset.storefrontProxyRoot) {
+  setStorefrontProxyRoot(embed.dataset.storefrontProxyRoot);
+}
 
 export function ensureStylesheet(href: string | undefined): void {
   if (!href) return;

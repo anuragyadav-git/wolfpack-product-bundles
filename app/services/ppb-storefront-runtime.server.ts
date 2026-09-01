@@ -7,6 +7,7 @@ import { buildSettingsLanguageResponse } from "../lib/settings-language-runtime"
 import { buildSettingsDesignRuntime } from "../lib/settings-design-runtime";
 import { isShopBrandColors } from "../lib/shop-brand-colors";
 import { prisma } from "../db.server";
+import { resolveStorefrontProxyRoot } from "../config/storefront-proxy-routes";
 
 export const PPB_STOREFRONT_TOKEN_TITLE = "Wolfpack PPB Storefront Runtime";
 export const PPB_JSON_LIMIT_BYTES = 128 * 1024;
@@ -79,6 +80,7 @@ function buildPpbLanguageSnapshot(settingsLanguage: unknown, locale: string) {
 
 export function buildPpbStorefrontRuntime(input: {
   storefrontAccessToken: string;
+  storefrontProxyRoot: string;
   generalSettings: Record<string, unknown>;
 }) {
   const controls = buildSettingsControlsResponse(
@@ -90,9 +92,12 @@ export function buildPpbStorefrontRuntime(input: {
     buildPpbLanguageSnapshot(input.generalSettings.settingsLanguage, locale),
   ]));
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     storefrontApiVersion: "2026-07",
     storefrontAccessToken: input.storefrontAccessToken,
+    storefrontProxyRoot: resolveStorefrontProxyRoot({
+      configuredRoot: input.storefrontProxyRoot,
+    }),
     controls,
     languages,
   };
@@ -138,7 +143,14 @@ async function resolveShopGid(admin: Admin) {
   return id;
 }
 
-export async function syncPpbStorefrontRuntime(admin: Admin, shopDomain: string) {
+export async function syncPpbStorefrontRuntime(
+  admin: Admin,
+  shopDomain: string,
+  configuredProxyRoot = process.env.STOREFRONT_PROXY_ROOT,
+) {
+  const storefrontProxyRoot = resolveStorefrontProxyRoot({
+    configuredRoot: configuredProxyRoot,
+  });
   const [storefrontAccessToken, shopId, settings] = await Promise.all([
     ensurePpbStorefrontAccessToken(admin),
     resolveShopGid(admin),
@@ -149,7 +161,11 @@ export async function syncPpbStorefrontRuntime(admin: Admin, shopDomain: string)
   const generalSettings = settings?.generalSettings && typeof settings.generalSettings === "object"
     ? settings.generalSettings as Record<string, unknown>
     : {};
-  const runtime = buildPpbStorefrontRuntime({ storefrontAccessToken, generalSettings });
+  const runtime = buildPpbStorefrontRuntime({
+    storefrontAccessToken,
+    storefrontProxyRoot,
+    generalSettings,
+  });
   const css = buildPpbDesignCss(settings);
   assertPpbStorefrontSnapshotSize("ppb_storefront_runtime", runtime);
   assertPpbStorefrontSnapshotSize("ppb_storefront_css", css, PPB_CSS_LIMIT_BYTES);

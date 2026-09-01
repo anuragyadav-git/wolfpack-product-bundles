@@ -53,6 +53,7 @@ function createModal({
   closeButtons = [closeButton],
   prevButton,
   nextButton,
+  variantRadio = null,
   footerDiscountText,
   discountSection,
 }: {
@@ -60,11 +61,17 @@ function createModal({
   closeButtons?: any[];
   prevButton: any;
   nextButton: any;
+  variantRadio?: any;
   footerDiscountText: any;
   discountSection: any;
 }) {
   const classes = new Set<string>();
-  const contains = (node: any) => closeButtons.includes(node) || node === prevButton || node === nextButton;
+  const contains = (node: any) => (
+    closeButtons.includes(node)
+    || node === prevButton
+    || node === nextButton
+    || node === variantRadio
+  );
   const modal = {
     classList: {
       add: (value: string) => { classes.add(value); },
@@ -108,6 +115,9 @@ function createModal({
       if (selector === '.prev-button') return [prevButton];
       if (selector === '.next-button') return [nextButton];
       if (selector === 'button:not([disabled])') return [closeButton, prevButton, nextButton];
+      if (selector.includes(',')) {
+        return [...closeButtons, prevButton, variantRadio, nextButton].filter(Boolean);
+      }
       return [];
     },
     contains: contains,
@@ -121,6 +131,7 @@ function createContext({
   closeButtons = [closeButton],
   prevButton = createFocusableButton('prev'),
   nextButton = createFocusableButton('next'),
+  variantRadio = null,
   footerDiscountText = { textContent: '' },
   discountSection = {
     style: {},
@@ -135,6 +146,7 @@ function createContext({
     closeButtons,
     prevButton,
     nextButton,
+    variantRadio,
     footerDiscountText,
     discountSection,
   });
@@ -372,6 +384,17 @@ describe('PPB modal accessibility keyboard and focus management', () => {
 
     expect(preventReverse).toHaveBeenCalledTimes(1);
     expect(nextButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes enabled variant radios in the modal keyboard focus path', () => {
+    const variantRadio = {
+      ...createFocusableButton('variant-radio'),
+      tagName: 'INPUT',
+      type: 'radio',
+    };
+    const { context } = createContext({ variantRadio });
+
+    expect(context._getModalFocusableControls()).toContain(variantRadio);
   });
 
   it('leaves Tab handling to a nested drawer when the picker is not topmost', () => {

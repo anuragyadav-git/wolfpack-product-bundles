@@ -64,4 +64,117 @@ describe("api.attribution", () => {
       }),
     });
   });
+
+  it("persists offer dimensions from Shopify checkout line properties for the matched bundle", async () => {
+    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-123"]);
+
+    const response = await action({
+      request: makeRequest({
+        orderId: "456",
+        shopId: "test.myshopify.com",
+        totalPrice: "25.00",
+        currencyCode: "USD",
+        lineItems: [{
+          productId: "gid://shopify/Product/1",
+          properties: [
+            {
+              key: "_wpb_offer_analytics",
+              value: JSON.stringify({
+                bundleId: "bundle-123",
+                offerPolicyId: "policy-1",
+                offerRuleVersion: 8,
+                offerTierId: "tier-3",
+                offerEligibilitySource: "schedule",
+              }),
+            },
+          ],
+        }],
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(response.status).toBe(200);
+    expect(getDb().orderAttribution.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        bundleId: "bundle-123",
+        offerPolicyId: "policy-1",
+        offerRuleVersion: 8,
+        offerTierId: "tier-3",
+        offerEligibilitySource: "schedule",
+      })],
+    });
+  });
+
+  it("does not attach offer dimensions from an unrelated or invalid cart line", async () => {
+    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-123"]);
+
+    await action({
+      request: makeRequest({
+        orderId: "789",
+        shopId: "test.myshopify.com",
+        lineItems: [{
+          productId: "gid://shopify/Product/1",
+          properties: {
+            _bundle_display_properties: JSON.stringify({
+              offerAnalytics: {
+                bundleId: "bundle-other",
+                offerPolicyId: "policy-private",
+                offerEligibilitySource: "customer_email",
+              },
+            }),
+          },
+        }],
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(getDb().orderAttribution.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        bundleId: "bundle-123",
+        offerPolicyId: null,
+        offerRuleVersion: null,
+        offerTierId: null,
+        offerEligibilitySource: null,
+      })],
+    });
+  });
+
+  it("reads offer dimensions from the component display envelope when Cart Transform is skipped", async () => {
+    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-123"]);
+
+    await action({
+      request: makeRequest({
+        orderId: "790",
+        shopId: "test.myshopify.com",
+        lineItems: [{
+          productId: "gid://shopify/Product/1",
+          properties: {
+            _bundle_display_properties: JSON.stringify({
+              offerAnalytics: {
+                bundleId: "bundle-123",
+                offerPolicyId: "policy-2",
+                offerRuleVersion: 9,
+                offerTierId: "tier-4",
+                offerEligibilitySource: "priority",
+              },
+            }),
+          },
+        }],
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(getDb().orderAttribution.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        bundleId: "bundle-123",
+        offerPolicyId: "policy-2",
+        offerRuleVersion: 9,
+        offerTierId: "tier-4",
+        offerEligibilitySource: "priority",
+      })],
+    });
+  });
 });

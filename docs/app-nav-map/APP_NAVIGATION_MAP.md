@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-08-30
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-08-30
+**Last Updated:** 2026-09-01
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -334,6 +334,10 @@ Analytics Page (revamped — issue wpb-analytics-revamp-1)
 │   ├── Dismissal persists in sessionStorage for the current browser tab
 │   └── Learn more modal → enable UTM tracking pixel
 ├── Toolbar: Compare-period chip · [Export CSV] · [Compare on/off] · Date range selector
+├── Offer performance (Polaris section)
+│   ├── Offer-policy selector persisted in the `offerPolicyId` URL query
+│   ├── Safe rule-version, eligibility-source, and reached-tier context
+│   └── Engaged → Added-to-Cart → Completed Orders → Revenue metrics
 ├── Custom UTM card → App Bridge contextual Save Bar with Save and Discard
 ├── Attribution backfill → Shopify success/error toast
 │
@@ -377,7 +381,7 @@ Responsive analytics behavior:
 
 **Server helpers:** `app/lib/analytics/engagement-helpers.ts`
 
-- `computeBundleFunnel`, `buildEngagementTrendSeries`, `buildBundlePerformanceMatrix`
+- `computeBundleFunnel`, `computeOfferFunnel`, `buildEngagementTrendSeries`, `buildBundlePerformanceMatrix`
 - Pure-fn, unit-tested at `tests/unit/lib/engagement-helpers.test.ts`
 
 ---
@@ -456,7 +460,11 @@ FPB Configure Page
 │   │   ├── Bundle name / description
 │   │   ├── Status selector → opens Status Modal
 │   │   ├── Product selector → opens Product Picker Modal
-│   │   └── Bundle Visibility → app-embed status + read-only proxy URL + Copy Link
+│   │   └── Bundle Visibility → app-embed status + proxy URL + storefront offer controls
+│   │       ├── Generate/regenerate returns one copyable private link for the current response only
+│   │       ├── Require the specific link uses the global configure SaveBar
+│   │       └── Revoke immediately disables link-only delivery and invalidates the link
+│   │       └── Offer Operations → priority, stop-lower-priority, and optional storefront visibility window
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
@@ -466,6 +474,7 @@ FPB Configure Page
 │   ├── Discount & Pricing
 │   │   ├── Discount type selector: Fixed Amount Off / Percentage Off / Fixed Bundle Price / Buy X, get Y
 │   │   ├── Rule cards; Buy X, get Y uses Customer buys/gets, Discount value/type, and Apply Discount to
+│   │   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
 │   │   ├── Bundle Quantity Options: Box Label/Subtext per eligible rule + Multi Language modal
 │   │   ├── Progress Bar: Simple Bar / Step-Based Bar + Multi Language modal
 │   │   └── Discount Messaging: per-rule Discount Text, one Success Message, Variables modal
@@ -560,6 +569,8 @@ PPB Configure Page
 │   │   ├── Step name, min/max qty
 │   │   ├── Multi Language actions for step and category copy
 │   │   ├── Products / Collections pickers
+│   │   ├── Per-category grouped variant style: Dropdown / Pills / Color swatches / Image swatches
+│   │   ├── Color swatches: optional hover/focus tooltip; color/image values come from Shopify product option swatches
 │   │   ├── Step conditions
 │   │   └── isFreeGift toggle + add-on fields and Multi Language actions for step, section, and footer copy
 │   └── [+ Add Step] button
@@ -569,6 +580,7 @@ PPB Configure Page
 │   ├── Buy X, get Y rule builder (shown when selected)
 │   │   └── Per-rule: Customer buys, Customer gets, Discount value/type, Apply Discount to
 │   ├── Standard and Fixed Bundle Price rule builders (shown for other types)
+│   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
 │   ├── Bundle Quantity Options sub-section
 │   │   ├── Per-rule: Box Label + Box Subtext inputs + Make this rule default action
 │   │   └── Multi Language modal: Select Language, Box Label, Box Subtext
@@ -584,6 +596,16 @@ PPB Configure Page
 │   ├── App Embed Status (inline enable action and status badge)
 │   ├── Publishing Best Practices (responsive placement cards with expandable setup guides)
 │   ├── Your Bundle Link (read-only field + copy action)
+│   ├── Specific Link Access
+│   │   ├── Status: Not generated / Active / Revoked / Expired
+│   │   ├── Generate or regenerate returns one copyable private link for the current response only
+│   │   ├── Require the specific link uses the global configure SaveBar
+│   │   └── Revoke immediately disables link-only delivery and invalidates the link
+│   ├── Offer Operations
+│   │   ├── Priority: lower values are evaluated first across discovery results
+│   │   ├── Stop lower-priority offers after this eligible offer
+│   │   ├── Optional inclusive start and exclusive end instants in ISO 8601 format
+│   │   └── Shopify remains the owner of checkout discount dates and combinations
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
 │       ├── Disabled state keeps all saved settings visible, subdued, and inert
@@ -666,6 +688,11 @@ items.
 - Product details and the magnifying-glass image affordance are FPB-only. PPB
   product images and titles are informational; explicit Add, quantity, and
   variant controls own PPB product selection.
+- PPB grouped products use each active category's Dropdown, Pills, Color
+  swatches, or Image swatches selector. Color and image values come from
+  Shopify `ProductOptionValue.swatch`; optional tooltips support desktop hover
+  and keyboard focus,
+  while mobile/coarse pointers retain a persistent selected-value label.
 - PPB Horizontal Slots and Vertical Slots retain the bundle-picker modal opened
   from empty/replacement slots; this picker is distinct from product details.
 - Step slot cards (empty/filled/locked states) with `addonLabel` for free gift tabs
@@ -813,9 +840,10 @@ Checkout order summary → Bundle & Save
 | URL Pattern                                                    | Purpose                                                                                                                                                                                                         |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/apps/product-bundles/api/bundle/:id.json`                    | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape                                                                      |
+| `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy decision for app-owned pre-cart schedule and specific-link visibility; requires an opaque bearer token only for link-restricted offers and never returns its stored SHA-256 digest             |
 | `/apps/product-bundles/api/bundles.json`                       | All active bundles for shop                                                                                                                                                                                     |
-| `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; returns eligible minimal DTOs with private ETag caching                                                                  |
-| `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; returns the first eligible formatted PPB with localized copy and private ETag caching                                 |
+| `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; filters storefront schedules and returns priority-ordered eligible DTOs with private ETag caching                        |
+| `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; filters storefront schedules and returns the highest-priority eligible formatted PPB with private ETag caching       |
 | `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
 | `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that merges EB-style cart `bundle_details` metafield entries                                                                                                                            |
 | `/apps/product-bundles/api/storefront-products`                | Signed Storefront-context product hydration with ID validation and inventory normalization                                                                                                                       |
@@ -830,9 +858,9 @@ Checkout order summary → Bundle & Save
 | `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
 | `/apps/product-bundles/api/proxy-health`                       | Proxy health check                                                                                                                                                                                              |
 | `/health`                                                      | Public Render HTTP health check; returns 2xx only when the app and DB are ready                                                                                                                                 |
-| `/api/attribution`                                             | UTM attribution analytics data                                                                                                                                                                                  |
+| `/apps/product-bundles/api/attribution/engagement`             | Signed storefront engagement ingestion; records normalized offer policy, rule-version, tier, and safe eligibility-source dimensions when present                                                               |
+| `/api/attribution`                                             | Web Pixel checkout attribution; consumes Shopify checkout line/component properties and persists normalized offer dimensions only for the matching bundle                                                      |
 | `/api/widget-error`                                            | Widget runtime error logging                                                                                                                                                                                    |
-| `/api/webhooks/pubsub`                                         | Pub/Sub webhook handler                                                                                                                                                                                         |
 | `/api/inngest`                                                 | Inngest background job handler                                                                                                                                                                                  |
 
 ---

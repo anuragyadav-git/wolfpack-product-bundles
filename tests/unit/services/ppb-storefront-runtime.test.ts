@@ -4,12 +4,21 @@ import {
   assertPpbStorefrontSnapshotSize,
   buildPpbStorefrontRuntime,
   ensurePpbStorefrontAccessToken,
+  syncPpbStorefrontRuntime,
 } from "../../../app/services/ppb-storefront-runtime.server";
 import {
   SETTINGS_LANGUAGE_LOCALES,
   buildSettingsLanguageRuntime,
 } from "../../../app/lib/settings-language-runtime";
 import { getInitialLanguageFieldValues } from "../../../app/routes/app/app.settings/settings-state";
+
+jest.mock("../../../app/db.server", () => ({
+  prisma: {
+    designSettings: {
+      findUnique: jest.fn().mockResolvedValue(null),
+    },
+  },
+}));
 
 function response(data: unknown) {
   return { json: async () => data };
@@ -45,13 +54,15 @@ describe("PPB Shopify-hosted storefront runtime", () => {
   it("builds locale-keyed language and Product Page controls without an origin URL", () => {
     const runtime = buildPpbStorefrontRuntime({
       storefrontAccessToken: "public-token",
+      storefrontProxyRoot: "/apps/product-bundles-sit",
       generalSettings: {},
     });
 
     expect(runtime).toMatchObject({
-      schemaVersion: 1,
+      schemaVersion: 2,
       storefrontApiVersion: "2026-07",
       storefrontAccessToken: "public-token",
+      storefrontProxyRoot: "/apps/product-bundles-sit",
       controls: { bundleType: "product_page" },
     });
     expect(runtime.languages.en.activeLocale).toBe("en");
@@ -69,6 +80,7 @@ describe("PPB Shopify-hosted storefront runtime", () => {
 
     const runtime = buildPpbStorefrontRuntime({
       storefrontAccessToken: "public-token",
+      storefrontProxyRoot: "/apps/product-bundles-sit",
       generalSettings: { settingsLanguage },
     });
 
@@ -96,6 +108,7 @@ describe("PPB Shopify-hosted storefront runtime", () => {
     }).settingsLanguage;
     const runtime = buildPpbStorefrontRuntime({
       storefrontAccessToken: "public-token",
+      storefrontProxyRoot: "/apps/product-bundles-sit",
       generalSettings: { settingsLanguage },
     });
     const bytes = Buffer.byteLength(JSON.stringify(runtime), "utf8");
@@ -104,5 +117,43 @@ describe("PPB Shopify-hosted storefront runtime", () => {
     expect(bytes).toBeLessThanOrEqual(PPB_JSON_LIMIT_BYTES);
     expect(runtime.languages.fr).not.toHaveProperty("languageData");
     expect(runtime.languages.fr).not.toHaveProperty("activeLanguageData");
+  });
+
+  it("writes the configured proxy root into the Shopify-hosted runtime", async () => {
+    const admin = {
+      graphql: jest.fn()
+        .mockResolvedValueOnce(response({
+          data: { shop: { storefrontAccessTokens: { nodes: [
+            { id: "gid://shopify/StorefrontAccessToken/1", title: PPB_STOREFRONT_TOKEN_TITLE, accessToken: "public-token" },
+          ] } } },
+        }))
+        .mockResolvedValueOnce(response({ data: { shop: { id: "gid://shopify/Shop/1" } } }))
+        .mockResolvedValueOnce(response({
+          data: { metafieldsSet: { metafields: [{ id: "gid://shopify/Metafield/1" }], userErrors: [] } },
+        })),
+    };
+
+    await syncPpbStorefrontRuntime(
+      admin as any,
+      "test.myshopify.com",
+      "/apps/product-bundles-sit",
+    );
+
+    const metafields = admin.graphql.mock.calls[2][1].variables.metafields;
+    const runtimeField = metafields.find((field: any) => field.key === "ppb_storefront_runtime");
+    expect(JSON.parse(runtimeField.value).storefrontProxyRoot).toBe(
+      "/apps/product-bundles-sit",
+    );
+  });
+
+  it("rejects a malformed proxy root before writing Shopify metafields", async () => {
+    const admin = { graphql: jest.fn() };
+
+    await expect(syncPpbStorefrontRuntime(
+      admin as any,
+      "test.myshopify.com",
+      "https://example.test/apps/product-bundles-sit",
+    )).rejects.toThrow("Invalid storefront proxy root");
+    expect(admin.graphql).not.toHaveBeenCalled();
   });
 });

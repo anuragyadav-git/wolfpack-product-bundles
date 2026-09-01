@@ -5,6 +5,7 @@ import {
 } from "../../../lib/pricing-progress-tier-defaults";
 import { DiscountPricingTipBanner } from "../_shared/bundle-configure/DiscountPricingTipBanner";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
+import { PricingTierBadgeFields } from "../_shared/bundle-configure/PricingTierBadgeFields";
 
 export function PpbDiscountRulesPanel() {
   const {
@@ -245,6 +246,11 @@ function PpbBuyXGetYRules() {
                 </s-select>
               </div>
             </div>
+            <PricingTierBadgeFields
+              rule={rule}
+              validationErrors={validationErrors}
+              onChange={(updates) => pricingState.updateDiscountRule(rule.id, updates)}
+            />
           </s-stack>
         </div>
       ))}
@@ -416,6 +422,11 @@ function PpbStandardDiscountRules() {
                 />
               </div>
             )}
+            <PricingTierBadgeFields
+              rule={rule}
+              validationErrors={validationErrors}
+              onChange={(updates) => pricingState.updateDiscountRule(rule.id, updates)}
+            />
           </s-stack>
         </div>
       ))}

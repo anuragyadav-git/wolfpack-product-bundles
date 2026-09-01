@@ -24,6 +24,24 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   const [variantSelectorEnabled, setVariantSelectorEnabled] = useState<boolean>(
     (bundle as any).variantSelectorEnabled ?? true,
   );
+  const [lowStockAlertEnabled, setLowStockAlertEnabled] = useState<boolean>(
+    (bundle as any).lowStockAlertEnabled ?? false,
+  );
+  const [lowStockAlertThreshold, setLowStockAlertThreshold] = useState<string>(
+    String((bundle as any).lowStockAlertThreshold ?? 5),
+  );
+  const [lowStockAlertMessage, setLowStockAlertMessage] = useState<string>(
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+  );
+  const originalLowStockAlertEnabledRef = useRef<boolean>(
+    (bundle as any).lowStockAlertEnabled ?? false,
+  );
+  const originalLowStockAlertThresholdRef = useRef<string>(
+    String((bundle as any).lowStockAlertThreshold ?? 5),
+  );
+  const originalLowStockAlertMessageRef = useRef<string>(
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+  );
   const [showTextOnAddButton, setShowTextOnAddButton] = useState<boolean>(
     (bundle as any).showTextOnAddButton ?? false,
   );
@@ -67,6 +85,15 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
     setMaxQtyPerProduct,
     variantSelectorEnabled,
     setVariantSelectorEnabled,
+    lowStockAlertEnabled,
+    setLowStockAlertEnabled,
+    lowStockAlertThreshold,
+    setLowStockAlertThreshold,
+    lowStockAlertMessage,
+    setLowStockAlertMessage,
+    originalLowStockAlertEnabledRef,
+    originalLowStockAlertThresholdRef,
+    originalLowStockAlertMessageRef,
     showTextOnAddButton,
     setShowTextOnAddButton,
     bundleCartTitle,

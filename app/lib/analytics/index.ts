@@ -46,6 +46,7 @@ export { filterAndSortCampaignResults } from "./campaign-results";
 
 export {
   computeBundleFunnel,
+  computeOfferFunnel,
   buildEngagementTrendSeries,
   buildBundlePerformanceMatrix,
 } from "./engagement-helpers";

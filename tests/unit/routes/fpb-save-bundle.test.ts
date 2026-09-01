@@ -795,6 +795,29 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists direct low-stock alert settings", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        lowStockAlertEnabled: "true",
+        lowStockAlertThreshold: "8",
+        lowStockAlertMessage: "Hurry, {{stock}} remaining",
+      }),
+    );
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          lowStockAlertEnabled: true,
+          lowStockAlertThreshold: 8,
+          lowStockAlertMessage: "Hurry, {{stock}} remaining",
+        }),
+      }),
+    );
+  });
+
   it("preserves an explicit draft when a step has StepProduct", async () => {
     const stepsData = makeStepsData({
       StepProduct: [
@@ -1386,6 +1409,33 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
         ],
       })
     );
+  });
+
+  it("syncs an existing draft product when specific-link delivery changes", async () => {
+    getDb().bundle.findUnique.mockResolvedValue({
+      shopifyProductId: PRODUCT_ID,
+      offerPolicy: {
+        specificLinkRequired: false,
+        ruleVersion: 1,
+        conditions: [{ expiresAt: null, revokedAt: null }],
+      },
+    });
+
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ specificLinkOfferEnabled: "true" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
+      admin: MOCK_ADMIN,
+      shopDomain: MOCK_SESSION.shop,
+      bundleId: "bundle-1",
+      bundleType: "full_page",
+      reason: "save",
+    });
   });
 
   it("saves the bundle and syncs storefront data through the shared service", async () => {

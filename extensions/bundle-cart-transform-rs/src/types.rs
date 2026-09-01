@@ -169,6 +169,23 @@ pub struct CartLineDisplayProperties {
     pub you_save: CartLineDisplaySavings,
     #[serde(default)]
     pub labels: CartLineDisplayLabels,
+    #[serde(default)]
+    pub offer_analytics: Option<CartLineOfferAnalytics>,
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CartLineOfferAnalytics {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bundle_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_policy_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_rule_version: Option<i64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_tier_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub offer_eligibility_source: Option<String>,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]

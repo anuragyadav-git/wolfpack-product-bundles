@@ -25,6 +25,29 @@ function normalizeWeightToGrams(weight: any, unit: any) {
   }
 }
 
+export function requiresPpbCanonicalSwatchHydration(step: any, products: any[]) {
+  const categories = Array.isArray(step?.categories) ? step.categories : [];
+  const usesShopifySwatches = categories.some((category: any) => (
+    category?.variantSelectorMode === 'color_swatch'
+    || category?.variantSelectorMode === 'image_swatch'
+  ));
+  if (!usesShopifySwatches) return false;
+
+  return products.some((product: any) => {
+    const options = Array.isArray(product?.options) ? product.options : [];
+    const variants = Array.isArray(product?.variants) ? product.variants : [];
+    const hasCanonicalOptions = options.length > 0 && options.every((option: any) => (
+      option
+      && typeof option === 'object'
+      && Array.isArray(option.optionValues)
+    ));
+    const hasCanonicalSelections = variants.every(
+      (variant: any) => Array.isArray(variant?.selectedOptions),
+    );
+    return !hasCanonicalOptions || !hasCanonicalSelections;
+  });
+}
+
 export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> = {
   normalizeProductSelectionId(product: any = {}) {
     const candidate = this.extractId(product?.selectionId);
@@ -78,8 +101,12 @@ async loadStepProducts(stepIndex: string|number) {
     || (Array.isArray(product?.variants) && product.variants.length > 0)
     || typeof product?.price === 'number'
   );
+  const requiresSwatchHydration = requiresPpbCanonicalSwatchHydration(
+    step,
+    cachedProducts,
+  );
 
-  if (cachedProducts.length > 0 && hasHydratedProducts) {
+  if (cachedProducts.length > 0 && hasHydratedProducts && !requiresSwatchHydration) {
     return;
   }
 
@@ -179,6 +206,9 @@ processProductsForStep(products: any[], step: any) {
     option1: v.option1 || null,
     option2: v.option2 || null,
     option3: v.option3 || null,
+    selectedOptions: Array.isArray(v.selectedOptions)
+      ? v.selectedOptions.map((option: any) => ({ name: option.name, value: option.value }))
+      : [],
     image: v.image || null
   });
 
@@ -197,10 +227,20 @@ processProductsForStep(products: any[], step: any) {
       // Preserve parent product reference for variant selection and tracking
       const processedVariants = customerVisibleVariants.map(normalizeVariant);
 
-      const processedOptions = (product.options || []).map((opt: any)  => {
-        if (typeof opt === 'string') return opt;
-        return opt.name || opt;
-      });
+      const processedOptions = (product.options || []).map((option: any) => (
+        typeof option === 'string' ? option : {
+          ...option,
+          optionValues: Array.isArray(option.optionValues)
+            ? option.optionValues.map((optionValue: any) => ({
+              ...optionValue,
+              swatch: optionValue.swatch ? {
+                color: optionValue.swatch.color ?? null,
+                image: optionValue.swatch.image ? { ...optionValue.swatch.image } : null,
+              } : null,
+            }))
+            : [],
+        }
+      ));
 
       return customerVisibleVariants
         .map((variant: any)  => {
@@ -246,10 +286,20 @@ processProductsForStep(products: any[], step: any) {
       const processedVariants = customerVisibleVariants.map(normalizeVariant);
 
       // Process options array for variant selector labels
-      const processedOptions = (product.options || []).map((opt: any)  => {
-        if (typeof opt === 'string') return opt;
-        return opt.name || opt;
-      });
+      const processedOptions = (product.options || []).map((option: any) => (
+        typeof option === 'string' ? option : {
+          ...option,
+          optionValues: Array.isArray(option.optionValues)
+            ? option.optionValues.map((optionValue: any) => ({
+              ...optionValue,
+              swatch: optionValue.swatch ? {
+                color: optionValue.swatch.color ?? null,
+                image: optionValue.swatch.image ? { ...optionValue.swatch.image } : null,
+              } : null,
+            }))
+            : [],
+        }
+      ));
 
       return [{
           id: this.extractId(product.id),

@@ -27,6 +27,14 @@ async function loadBundleForStorefrontSync(shopDomain: string, bundleId: string)
         orderBy: { position: "asc" },
       },
       pricing: true,
+      offerPolicy: {
+        select: {
+          specificLinkRequired: true,
+          startsAt: true,
+          endsAt: true,
+          ruleVersion: true,
+        },
+      },
     },
   });
 }

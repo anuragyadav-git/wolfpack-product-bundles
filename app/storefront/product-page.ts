@@ -1,7 +1,13 @@
 import { initializeProductPageWidget } from '../assets/bundle-widget-product-page.js';
+import { setStorefrontProxyRoot } from '../config/storefront-proxy-routes.js';
 
 const contextElement = document.querySelector<HTMLScriptElement>('[data-wpb-context="product-page"]');
-if (contextElement?.textContent) Object.assign(window, JSON.parse(contextElement.textContent));
+if (contextElement?.textContent) {
+  const context = JSON.parse(contextElement.textContent);
+  Object.assign(window, context);
+  const proxyRoot = context.__WOLFPACK_PPB_STOREFRONT_RUNTIME__?.storefrontProxyRoot;
+  if (proxyRoot) setStorefrontProxyRoot(proxyRoot);
+}
 
 function mount(): void {
   initializeProductPageWidget(document);

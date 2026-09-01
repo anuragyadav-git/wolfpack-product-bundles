@@ -79,6 +79,12 @@ export function usePpbFetcherEffects({
             canonicalTextOverridesByLocale;
           settings.originalDefaultProductsDataRef.current =
             settings.defaultProductsData;
+          settings.originalLowStockAlertEnabledRef.current =
+            settings.lowStockAlertEnabled;
+          settings.originalLowStockAlertThresholdRef.current =
+            settings.lowStockAlertThreshold;
+          settings.originalLowStockAlertMessageRef.current =
+            settings.lowStockAlertMessage;
           visibility.originalUpsellWidgetEnabledRef.current =
             visibility.upsellWidgetEnabled;
           visibility.originalUpsellWidgetDisplayModeRef.current =
@@ -115,6 +121,7 @@ export function usePpbFetcherEffects({
             visibility.bundleEmbedSpecificCollectionPages;
           visibility.originalBundleEmbedMultiLangTextRef.current =
             visibility.bundleEmbedMultiLangText;
+          base.markSpecificLinkOfferSaved();
           base.markAsSaved();
           base.clearOperationAlert();
           base.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });

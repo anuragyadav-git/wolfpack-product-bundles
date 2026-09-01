@@ -7,6 +7,8 @@ import {
 import { Prisma } from "@prisma/client";
 import db from "../../db.server";
 
+const PUBLICATION_TRANSACTION_TIMEOUT_MS = 10_000;
+
 export interface BundlePublicationGateInput {
   candidate: BundleEntitlementCandidate;
   entitlements: PlanEntitlements | null;
@@ -149,5 +151,7 @@ export async function updateBundleWithPublicationGate<T = unknown>(
       data: { ...input.data, publishedAt },
       ...(input.include ? { include: input.include } : {}),
     } as any) as unknown as Promise<T>;
+  }, {
+    timeout: PUBLICATION_TRANSACTION_TIMEOUT_MS,
   }) as Promise<T>;
 }

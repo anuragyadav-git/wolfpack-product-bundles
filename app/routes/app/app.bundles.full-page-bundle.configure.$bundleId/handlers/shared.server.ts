@@ -11,6 +11,7 @@ import {
   normalizePricingDisplayOptions,
   serializePricingDisplayOptions,
 } from "../../../../lib/pricing-display-options";
+import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
 
 const DEFAULT_PROGRESS_MESSAGE = "Add {conditionText} to get {discountText}";
 const DEFAULT_SUCCESS_MESSAGE = "Congratulations! You got {discountText}";
@@ -51,6 +52,7 @@ function buildFullPageBundlePricing(pricing: any) {
         flat.bxyApplyMode = rule.bxyApplyMode;
       if (rule.fixedBundlePrice !== undefined)
         flat.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
+      if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
       return flat;
     }),
     display: {
@@ -229,6 +231,7 @@ export function buildFullPageBundleMetafieldConfig(
     type: "cart_transform",
     steps: buildFullPageBundleMetafieldSteps(bundle.steps || []),
     pricing: buildFullPageBundlePricing(bundle.pricing),
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
     boxSelection: bundle.boxSelection ?? null,
     updatedAt: new Date().toISOString(),
     ...overrides,
@@ -342,6 +345,7 @@ export function buildFpbBaseConfig(
           flat.bxyApplyMode = rule.bxyApplyMode;
         if (rule.fixedBundlePrice !== undefined)
           flat.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
+        if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
         return flat;
       }),
       display: {

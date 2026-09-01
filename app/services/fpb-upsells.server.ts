@@ -1,3 +1,5 @@
+import { applyOfferPriority } from "../lib/offer-policy-decision";
+
 export type FpbUpsellOfferDto = {
   bundleId: string;
   publicNumber: number;
@@ -71,18 +73,22 @@ function copyForLocale(bundle: AnyRecord, locale: string) {
 
 export function selectEligibleFpbUpsells(
   bundles: AnyRecord[],
-  context: { productId: string; collectionIds: string[]; locale: string },
+  context: { productId: string; collectionIds: string[]; locale: string; now?: Date },
 ): FpbUpsellOfferDto[] {
   const productId = id(context.productId);
   const collectionIds = new Set(context.collectionIds.map((value) => id(value)).filter(Boolean));
   const seen = new Set<string>();
-  return bundles
+  const candidates = bundles
     .filter((bundle) => bundle.bundleType === "full_page")
     .filter((bundle) => bundle.status === "active" || bundle.status === "unlisted")
     .filter((bundle) => bundle.upsellWidgetEnabled === true)
+    .filter((bundle) => bundle.offerPolicy?.specificLinkRequired !== true)
     .filter((bundle) => Number.isInteger(bundle.publicNumber) && bundle.publicNumber > 0)
-    .filter((bundle) => selectedTargetMatches(bundle, productId, collectionIds))
-    .sort((a, b) => a.publicNumber - b.publicNumber)
+    .filter((bundle) => selectedTargetMatches(bundle, productId, collectionIds));
+  return applyOfferPriority<AnyRecord & { id: string }>(
+    candidates as Array<AnyRecord & { id: string }>,
+    context.now,
+  )
     .flatMap((bundle) => {
       if (seen.has(bundle.id)) return [];
       seen.add(bundle.id);

@@ -31,6 +31,10 @@ function normalizeProductId(productId: string): string | null {
 }
 
 function mapStorefrontVariant(edge: any) {
+  const selectedOptions = (edge.node.selectedOptions ?? []).map((option: any) => ({
+    name: option.name,
+    value: option.value,
+  }));
   return {
     id: edge.node.id,
     title: edge.node.title,
@@ -41,8 +45,30 @@ function mapStorefrontVariant(edge: any) {
     currentlyNotInStock: edge.node.currentlyNotInStock === true,
     weight: edge.node.weight ?? 0,
     weightUnit: edge.node.weightUnit ?? 'GRAMS',
-    image: edge.node.image ? { src: edge.node.image.url } : null
+    image: edge.node.image ? { src: edge.node.image.url } : null,
+    selectedOptions,
+    option1: selectedOptions[0]?.value ?? null,
+    option2: selectedOptions[1]?.value ?? null,
+    option3: selectedOptions[2]?.value ?? null,
   };
+}
+
+function mapProductOptions(options: any[] = []) {
+  return options.map((option: any) => ({
+    id: option.id,
+    name: option.name,
+    optionValues: (option.optionValues ?? []).map((optionValue: any) => ({
+      id: optionValue.id,
+      name: optionValue.name,
+      swatch: optionValue.swatch ? {
+        color: optionValue.swatch.color ?? null,
+        image: optionValue.swatch.image?.image ? {
+          src: optionValue.swatch.image.image.url,
+          altText: optionValue.swatch.image.image.altText ?? null,
+        } : null,
+      } : null,
+    })),
+  }));
 }
 
 /**
@@ -73,6 +99,7 @@ async function fetchAllVariants(
                 weight
                 weightUnit
                 image { url }
+                selectedOptions { name value }
               }
             }
           }
@@ -90,6 +117,7 @@ async function fetchAllVariants(
                 weight
                 weightUnit
                 image { url }
+                selectedOptions { name value }
               }
             }
           }
@@ -140,6 +168,16 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
             images(first: ${PRODUCT_IMAGE_LIMIT}) {
               edges { node { url } }
             }
+            options {
+              id name
+              optionValues {
+                id name
+                swatch {
+                  color
+                  image { ... on MediaImage { image { url altText } } }
+                }
+              }
+            }
             variants(first: ${VARIANT_PAGE_SIZE}) {
               pageInfo { hasNextPage endCursor }
               edges {
@@ -150,6 +188,7 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
                   weight
                   weightUnit
                   image { url }
+                  selectedOptions { name value }
                 }
               }
             }
@@ -163,6 +202,16 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
             images(first: ${PRODUCT_IMAGE_LIMIT}) {
               edges { node { url } }
             }
+            options {
+              id name
+              optionValues {
+                id name
+                swatch {
+                  color
+                  image { ... on MediaImage { image { url altText } } }
+                }
+              }
+            }
             variants(first: ${VARIANT_PAGE_SIZE}) {
               pageInfo { hasNextPage endCursor }
               edges {
@@ -173,6 +222,7 @@ function buildProductsQuery(country: string | null, hasInventoryScope: boolean) 
                   weight
                   weightUnit
                   image { url }
+                  selectedOptions { name value }
                 }
               }
             }
@@ -265,6 +315,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           descriptionHtml: product.descriptionHtml || '',
           imageUrl: product.featuredImage?.url || '',
           images,
+          options: mapProductOptions(product.options),
           variants: variantEdges.map(
             (value: Parameters<typeof mapStorefrontVariant>[0]) =>
               mapStorefrontVariant(value),
@@ -280,6 +331,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
           descriptionHtml: product.descriptionHtml || '',
           imageUrl: product.featuredImage?.url || '',
           images,
+          options: mapProductOptions(product.options),
           variants: initialVariants.map(
             (value: Parameters<typeof mapStorefrontVariant>[0]) =>
               mapStorefrontVariant(value),

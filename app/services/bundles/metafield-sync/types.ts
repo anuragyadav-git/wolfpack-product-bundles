@@ -98,6 +98,13 @@ export interface BundleUiConfig {
   textOverridesByLocale?: Record<string, Partial<BundleTextOverrides>> | null;
   /** When true, loads the headless SDK instead of the pre-built widget (product-page bundles only). */
   sdkMode?: boolean;
+  offerDelivery?: {
+    decisionRequired: boolean;
+    specificLinkRequired: boolean;
+    offerPolicyId: string | null;
+    ruleVersion: number | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'priority' | null;
+  };
   runtimeAuthorization?: {
     version: 2;
     revision: string;

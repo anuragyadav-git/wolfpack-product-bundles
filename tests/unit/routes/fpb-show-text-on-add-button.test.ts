@@ -53,4 +53,17 @@ describe("FPB Show Text on + Button persistence", () => {
     expect(result.showTextOnAddButton).toBe(true);
     expect(result.textOverrides).toBeNull();
   });
+
+  it("parses direct low-stock alert settings", () => {
+    const formData = buildSaveForm(true);
+    formData.set("lowStockAlertEnabled", "true");
+    formData.set("lowStockAlertThreshold", "8");
+    formData.set("lowStockAlertMessage", "Hurry, {{stock}} remaining");
+
+    expect(parseFpbSaveBundleForm(formData)).toMatchObject({
+      lowStockAlertEnabled: true,
+      lowStockAlertThreshold: 8,
+      lowStockAlertMessage: "Hurry, {{stock}} remaining",
+    });
+  });
 });

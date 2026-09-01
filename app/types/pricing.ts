@@ -14,6 +14,11 @@
  * - Always use smallest units (cents for money, count for items)
  */
 
+import {
+  parsePricingTierBadge,
+  type PricingTierBadge,
+} from "../lib/pricing-tier-badge";
+
 /**
  * Discount method types
  */
@@ -58,6 +63,7 @@ export interface PricingRule {
   customerGets?: number;                   // Qty of items receiving the discount
   bxyDiscountType?: 'percentage' | 'fixed_amount';  // % off or ₹ off
   bxyApplyMode?: 'lowest_priced' | 'latest_added';  // Which items get the discount
+  tierBadge?: PricingTierBadge;
 }
 
 /**
@@ -158,6 +164,12 @@ export function validatePricingRule(rule: any): rule is PricingRule {
 
   const discVal = Number(rule.discountValue);
   if (!isFinite(discVal) || discVal < 0) {
+    return false;
+  }
+
+  try {
+    parsePricingTierBadge(rule.tierBadge);
+  } catch {
     return false;
   }
 

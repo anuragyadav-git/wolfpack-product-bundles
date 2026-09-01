@@ -94,7 +94,6 @@ describe('Full Page widget category hydration behavior', () => {
         handles: [],
         productIds: ['gid://shopify/Product/1'],
         displayVariantsAsIndividualProducts: false,
-        displayVariantsAsSwatches: false,
       },
       {
         id: 'cat-collection',
@@ -102,7 +101,6 @@ describe('Full Page widget category hydration behavior', () => {
         handles: ['automated-collection'],
         productIds: [],
         displayVariantsAsIndividualProducts: false,
-        displayVariantsAsSwatches: false,
       },
     ]);
   });
@@ -126,7 +124,6 @@ describe('Full Page widget category hydration behavior', () => {
         handles: [],
         productIds: [],
         displayVariantsAsIndividualProducts: false,
-        displayVariantsAsSwatches: false,
       },
     ]);
   });

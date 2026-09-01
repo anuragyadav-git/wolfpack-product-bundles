@@ -6,6 +6,7 @@
 
 import {
   computeBundleFunnel,
+  computeOfferFunnel,
   buildEngagementTrendSeries,
   buildBundlePerformanceMatrix,
   type BundleEngagementRow,
@@ -77,6 +78,38 @@ describe("computeBundleFunnel", () => {
     ]);
     expect(snap.addedToCart).toBe(0);
     expect(snap.revenueCents).toBe(0);
+  });
+});
+
+describe("computeOfferFunnel", () => {
+  const engagementRows: BundleEngagementRow[] = [
+    { bundleId: "b1", offerPolicyId: "p1", sessionId: "s1", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+    { bundleId: "b1", offerPolicyId: "p1", sessionId: "s1", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01") },
+    { bundleId: "b2", offerPolicyId: "p2", sessionId: "s2", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+    { bundleId: "b3", offerPolicyId: null, sessionId: "s3", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+  ];
+  const attributionRows: OrderAttributionRow[] = [
+    { bundleId: "b1", offerPolicyId: "p1", revenue: 1200, createdAt: D("2026-06-01") },
+    { bundleId: "b2", offerPolicyId: "p2", revenue: 800, createdAt: D("2026-06-01") },
+    { bundleId: "b3", offerPolicyId: null, revenue: 500, createdAt: D("2026-06-01") },
+  ];
+
+  it("filters one policy before computing the decision-to-revenue funnel", () => {
+    expect(computeOfferFunnel(engagementRows, attributionRows, "p1")).toMatchObject({
+      engaged: 1,
+      addedToCart: 1,
+      checkedOut: 1,
+      revenueCents: 1200,
+    });
+  });
+
+  it("aggregates offer rows while excluding bundle-only rows when no policy is selected", () => {
+    expect(computeOfferFunnel(engagementRows, attributionRows, null)).toMatchObject({
+      engaged: 2,
+      addedToCart: 1,
+      checkedOut: 2,
+      revenueCents: 2000,
+    });
   });
 });
 

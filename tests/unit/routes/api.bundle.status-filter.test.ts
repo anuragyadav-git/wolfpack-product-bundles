@@ -44,18 +44,20 @@ import { loader as wpbProxyLoader } from '../../../app/routes/root/wpb.$bundleId
 import { authenticate } from '../../../app/shopify.server';
 import { BundleStatus } from '../../../app/constants/bundle';
 import { createBundlePreviewToken } from '../../../app/lib/bundle-preview-token.server';
+import { createSpecificLinkOfferToken } from '../../../app/lib/specific-link-offer-token.server';
 
 const getDb = () => require('../../../app/db.server').default;
 const mockFindFirst = () => getDb().bundle.findFirst as jest.MockedFunction<any>;
 const mockFindDesignSettings = () => getDb().designSettings.findUnique as jest.MockedFunction<any>;
 const mockAppProxy = authenticate.public.appProxy as jest.MockedFunction<any>;
 
-function makeApiRequest(bundleId: string, previewToken?: string) {
+function makeApiRequest(bundleId: string, previewToken?: string, offerToken?: string) {
   const params = new URLSearchParams({
     shop: 'test.myshopify.com',
     timestamp: '1234567890',
   });
   if (previewToken) params.set('wpb_preview', previewToken);
+  if (offerToken) params.set('wpb_offer', offerToken);
   const message = [...params.entries()]
     .map(([k, v]: any) => `${k}=${v}`)
     .sort()
@@ -64,12 +66,13 @@ function makeApiRequest(bundleId: string, previewToken?: string) {
   return new Request(`https://test.myshopify.com/apps/product-bundles/api/bundle/${bundleId}.json?${params.toString()}`);
 }
 
-function makeProxyRequest(bundleId: string) {
+function makeProxyRequest(bundleId: string, offerToken?: string) {
   const params = new URLSearchParams({
     shop: 'test-shop.myshopify.com',
     path_prefix: '/apps/product-bundles',
     timestamp: '1770000000',
   });
+  if (offerToken) params.set('wpb_offer', offerToken);
   const message = [...params.entries()]
     .map(([k, v]: any) => `${k}=${v}`)
     .sort()
@@ -175,6 +178,42 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
 
     expect(response.status).toBe(404);
   });
+
+  it('gates a public API bundle behind its matching specific-link token', async () => {
+    const created = createSpecificLinkOfferToken({
+      token: 'a'.repeat(43),
+    });
+    mockFindFirst().mockResolvedValue({
+      ...draftBundle,
+      status: BundleStatus.ACTIVE,
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: true,
+        ruleVersion: 1,
+        conditions: [{
+          type: 'specific_link',
+          tokenHash: created.tokenHash,
+          expiresAt: null,
+          revokedAt: null,
+        }],
+      },
+    });
+
+    const hidden = await apiBundleLoader({
+      request: makeApiRequest('bundle-1'),
+      params: { bundleId: 'bundle-1' },
+      context: {},
+    } as any) as Response;
+    const visible = await apiBundleLoader({
+      request: makeApiRequest('bundle-1', undefined, created.token),
+      params: { bundleId: 'bundle-1' },
+      context: {},
+    } as any) as Response;
+
+    expect(hidden.status).toBe(404);
+    expect(visible.status).toBe(200);
+    expect(visible.headers.get('Cache-Control')).toBe('private, no-store');
+  });
 });
 
 describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
@@ -224,5 +263,46 @@ describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
     } as any);
 
     expect(response.status).toBe(404);
+  });
+
+  it('gates a public FPB page behind its matching specific-link token', async () => {
+    const created = createSpecificLinkOfferToken({
+      token: 'a'.repeat(43),
+    });
+    mockFindFirst().mockResolvedValue({
+      id: 'bundle-1',
+      publicNumber: 1,
+      shopId: 'test-shop.myshopify.com',
+      bundleType: 'full_page',
+      status: BundleStatus.ACTIVE,
+      steps: [],
+      pricing: null,
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: true,
+        ruleVersion: 1,
+        conditions: [{
+          type: 'specific_link',
+          tokenHash: created.tokenHash,
+          expiresAt: null,
+          revokedAt: null,
+        }],
+      },
+    });
+
+    const hidden = await wpbProxyLoader({
+      request: makeProxyRequest('1'),
+      params: { bundleId: '1' },
+      context: {},
+    } as any);
+    const visible = await wpbProxyLoader({
+      request: makeProxyRequest('1', created.token),
+      params: { bundleId: '1' },
+      context: {},
+    } as any);
+
+    expect(hidden.status).toBe(404);
+    expect(visible.status).toBe(200);
+    expect(visible.headers.get('Cache-Control')).toBe('no-store');
   });
 });

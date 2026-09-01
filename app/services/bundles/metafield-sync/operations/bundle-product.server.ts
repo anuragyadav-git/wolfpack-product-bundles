@@ -614,6 +614,7 @@ export async function updateBundleProductMetafields(
         if (rule.customerGets !== undefined) flat.customerGets = Number(rule.customerGets);
         if (rule.bxyDiscountType !== undefined) flat.bxyDiscountType = rule.bxyDiscountType;
         if (rule.bxyApplyMode !== undefined) flat.bxyApplyMode = rule.bxyApplyMode;
+        if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
         return flat;
       }),
       messages: {
@@ -641,6 +642,11 @@ export async function updateBundleProductMetafields(
     textOverrides: bundleConfiguration.textOverrides ?? null,
     textOverridesByLocale: bundleConfiguration.textOverridesByLocale ?? null,
     sdkMode: bundleConfiguration.sdkMode ?? false,
+    offerDelivery: bundleConfiguration.offerDelivery ?? {
+      decisionRequired: false,
+      specificLinkRequired: false,
+      ruleVersion: null,
+    },
   };
 
   let ppbPolicyRevisionMetafield: Record<string, unknown> | null = null;

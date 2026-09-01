@@ -5,7 +5,7 @@ title: FPB App Proxy Host
 type: architecture-decision
 status: accepted
 summary: Full Page Bundles use the signed app proxy as their sole storefront document host.
-last_audited: 2026-08-30
+last_audited: 2026-08-31
 owners:
   - engineering
 domains:
@@ -72,9 +72,17 @@ Shopify configuration and QA-store installation use
 `STOREFRONT_PROXY_ROOT=/apps/product-bundles-sit`. This prevents PROD and SIT
 from competing for one store-owned proxy path when both apps are installed on
 the same QA store. Production does not set an override and therefore continues
-to use `/apps/product-bundles`. An FPB document also infers its active proxy
-root from the current `/wpb/` pathname so subsequent same-page requests remain
-on the signed path that served the document.
+to use `/apps/product-bundles`. Both configurations retain Shopify's `apps`
+prefix; only the installation-specific subpath differs.
+
+The server writes the resolved complete root into the existing app-owned shop
+`$app.ppb_storefront_runtime` JSON. Theme Liquid reads that Shopify-hosted value,
+the app embed exposes it to its compiled runtime, and direct Product Page and SDK
+entrypoints initialize the shared proxy-path builder from the same value. A
+malformed configured value is rejected rather than silently sending requests to
+the production app. An FPB document can also infer its active proxy root from
+the current `/wpb/` pathname so subsequent same-page requests remain on the
+signed path that served the document.
 
 The storefront proxy resolver is bundled into the generated widget and SDK
 assets. Any change to `app/config/storefront-proxy-routes.ts` must therefore be

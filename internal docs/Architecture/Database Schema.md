@@ -1,8 +1,32 @@
 ---
+schema_version: 1
+id: database-schema
 title: Database Schema
 type: architecture
-audited: 2026-07-11
-source: prisma/schema.prisma
+status: authoritative
+summary: Documents the canonical Prisma models, enums, ownership boundaries, and migration rules for Wolfpack persistence.
+last_audited: 2026-08-31
+owners:
+  - engineering
+domains:
+  - architecture
+  - persistence
+systems:
+  - prisma
+  - postgresql
+source_paths:
+  - prisma/schema.prisma
+  - prisma/migrations/
+related_docs:
+  - internal docs/Architecture/System Overview.md
+  - docs/competitor-analysis/22-bogos-bundlex-wolfpack-feasibility.md
+tags:
+  - database
+  - schema
+keywords:
+  - prisma
+  - offer-policy
+  - offer-condition
 ---
 
 # Database Schema
@@ -41,6 +65,14 @@ Product variant selections per step.
 **Not documented in APPLICATION_ARCHITECTURE.md.** Tracks order → bundle attribution for analytics.
 Includes standard UTM columns (`utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`) plus `customUtmAttributes` JSON for merchant-configured URL parameters captured by the Web Pixel.
 
+Offer-aware analytics adds nullable `offerPolicyId`, `offerRuleVersion`,
+`offerTierId`, and `offerEligibilitySource` columns to `OrderAttribution` and
+`BundleEngagement`. These are historical scalar dimensions rather than foreign
+keys, so deleting or replacing an offer policy does not rewrite completed
+analytics. Both models index `(shopId, offerPolicyId, createdAt)` for the
+offer-filtered dashboard and CSV paths. Bundle-only rows keep all four values
+null.
+
 ### Shop
 
 Tracks installed-shop metadata and app-level settings. `customUtmParameters` JSON stores the merchant-configured allowlist of extra URL parameter names the UTM Web Pixel should capture.
@@ -52,6 +84,40 @@ Tracks installed-shop metadata and app-level settings. `customUtmParameters` JSO
 ### DiscountSettings
 
 Discount configuration linked to `Bundle`. Fields: `discountMethod`, `discountValue`, `discountType`.
+
+### OfferPolicy and OfferCondition
+
+`OfferPolicy` is the optional one-to-one owner for app-managed storefront offer
+selection. It records a monotonically increasing `ruleVersion`, owns normalized
+`OfferCondition` rows, and stores direct operational fields:
+
+- `specificLinkRequired`: whether storefront delivery requires the generated
+  opaque link token
+- `priority`: deterministic ascending selection order; the default is `100`
+- `stopLowerPriority`: when true, eligible lower-priority discovery results are
+  omitted after this offer
+- `startsAt` / `endsAt`: optional UTC instants for storefront visibility;
+  `startsAt` is inclusive and `endsAt` is exclusive
+
+These fields govern Wolfpack merchandising surfaces only. Shopify automatic app
+discounts remain the canonical owner of checkout discount `startsAt`, `endsAt`,
+and combination settings whenever a Shopify discount node exists.
+
+The initial normalized condition type is `specific_link`.
+
+A specific-link condition stores one SHA-256 token digest, never the raw
+campaign token. The generated Admin response is the only surface that returns
+the random bearer token. Optional `expiresAt` and `revokedAt` instants make
+expiry and revocation server-enforceable. A compound unique constraint on
+`(offerPolicyId, type)` permits one specific-link condition per policy in the
+initial contract. Bundle deletion cascades through the policy and conditions.
+
+The shared SIT database currently reports that the already-applied
+`20260828090000_growth_subscription_architecture` migration differs from its
+checked-in file because the live `Subscription` columns already exist. Do not
+run `prisma migrate reset` against SIT. New schema changes must remain additive,
+use a new forward migration, and be applied with `prisma migrate deploy` until
+that historical drift is reconciled separately.
 
 ### Session
 

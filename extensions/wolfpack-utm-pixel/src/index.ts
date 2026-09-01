@@ -121,6 +121,12 @@ register(({ analytics, browser, settings }: any) => {
           title: item.title ?? null,
           quantity: item.quantity ?? 0,
           price: item.variant?.price?.amount ?? null,
+          properties: item.properties ?? [],
+          lineComponents: (item.lineComponents ?? []).map((component: any) => ({
+            productId: component.variant?.product?.id ?? null,
+            variantId: component.variant?.id ?? null,
+            properties: component.properties ?? [],
+          })),
         })),
         utmSource: utmParams.utm_source ?? null,
         utmMedium: utmParams.utm_medium ?? null,

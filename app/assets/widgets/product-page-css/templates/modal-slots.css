@@ -1,3 +1,5 @@
+@import "../base/variant-selector-modes.css";
+
 #bundle-builder-app[data-ppb-template-type="PDP_MODAL"] {
   --bw-ppb-slot-surface: var(--bundle-surface-color, #ffffff);
   --bw-ppb-slot-accent: var(--bundle-global-primary-button, #1e3a8a);

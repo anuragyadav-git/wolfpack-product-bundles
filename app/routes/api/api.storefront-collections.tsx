@@ -61,8 +61,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
                       }
                     }
                     options {
+                      id
                       name
-                      values
+                      optionValues {
+                        id
+                        name
+                        swatch {
+                          color
+                          image { ... on MediaImage { image { url altText } } }
+                        }
+                      }
                     }
                     variants(first: 100) {
                       edges {
@@ -137,8 +145,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
               .map((edge: any) => edge.node?.url ? { src: edge.node.url } : null)
               .filter(Boolean),
             options: (product.options || []).map((option: any) => ({
+              id: option.id,
               name: option.name,
-              values: Array.isArray(option.values) ? option.values : [],
+              optionValues: (option.optionValues || []).map((optionValue: any) => ({
+                id: optionValue.id,
+                name: optionValue.name,
+                swatch: optionValue.swatch ? {
+                  color: optionValue.swatch.color ?? null,
+                  image: optionValue.swatch.image?.image ? {
+                    src: optionValue.swatch.image.image.url,
+                    altText: optionValue.swatch.image.image.altText ?? null,
+                  } : null,
+                } : null,
+              })),
             })),
             variants: (product.variants?.edges || []).map((edge: any) => ({
               id: edge.node.id,
@@ -146,6 +165,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
               option1: edge.node.selectedOptions?.[0]?.value ?? null,
               option2: edge.node.selectedOptions?.[1]?.value ?? null,
               option3: edge.node.selectedOptions?.[2]?.value ?? null,
+              selectedOptions: (edge.node.selectedOptions ?? []).map((option: any) => ({
+                name: option.name,
+                value: option.value,
+              })),
               price: edge.node.price?.amount || '0',
               compareAtPrice: edge.node.compareAtPrice?.amount || null,
               weight: edge.node.weight ?? 0,

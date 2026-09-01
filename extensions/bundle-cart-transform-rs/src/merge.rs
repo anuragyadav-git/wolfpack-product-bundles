@@ -537,6 +537,15 @@ pub fn process_merge_operations(
                     .map(|value| value.as_str())
             }));
 
+        if let Some(offer_analytics) = &source_display_properties.offer_analytics {
+            if let Ok(value) = serde_json::to_string(offer_analytics) {
+                attributes.push(schema::AttributeOutput {
+                    key: "_wpb_offer_analytics".into(),
+                    value,
+                });
+            }
+        }
+
         attributes.push(schema::AttributeOutput {
             key: "_Items".into(),
             value: "".into(),

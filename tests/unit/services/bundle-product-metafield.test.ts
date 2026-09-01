@@ -356,7 +356,8 @@ describe("updateBundleProductMetafields", () => {
               collections: [selectedCollection],
               categoryBanner: "https://cdn.example/category.png",
               displayVariantsAsIndividualProducts: true,
-              displayVariantsAsSwatches: false,
+              variantSelectorMode: "color_swatch",
+              swatchTooltipEnabled: true,
               multiLangData: { en: { title: "Pick audit items" } },
               products: [
                 {
@@ -406,7 +407,8 @@ describe("updateBundleProductMetafields", () => {
         categoryImg: "",
         autoNextStepOnConditionMet: false,
         displayVariantsAsIndividualProducts: true,
-        displayVariantsAsSwatches: false,
+        variantSelectorMode: "color_swatch",
+        swatchTooltipEnabled: true,
         multiLangData: { en: { title: "Pick audit items" } },
       },
     ]);

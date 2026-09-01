@@ -1,4 +1,5 @@
 import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
 import { AppLogger } from "../../../../lib/logger";
 import {
   updateBundleProductMetafields,
@@ -30,6 +31,9 @@ function buildRuntimePricingRule(rule: any): Record<string, unknown> {
   }
   if (rule.bxyApplyMode !== undefined) {
     flatRule.bxyApplyMode = rule.bxyApplyMode;
+  }
+  if (rule.tierBadge !== undefined) {
+    flatRule.tierBadge = rule.tierBadge;
   }
 
   return flatRule;
@@ -465,6 +469,7 @@ export function buildSyncBundleConfiguration(
     textOverrides: bundle.textOverrides ?? null,
     textOverridesByLocale: bundle.textOverridesByLocale ?? null,
     sdkMode: bundle.sdkMode ?? false,
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
     updatedAt: new Date().toISOString(),
     ...extra,
   };

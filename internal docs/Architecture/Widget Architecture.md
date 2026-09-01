@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-08-28
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -21,6 +21,7 @@ source_paths:
   - app/storefront/page-builder-embed.ts
   - app/assets/bundle-modal-component.ts
   - app/assets/widgets/shared
+  - app/assets/widgets/shared/specific-link-offer-eligibility.ts
   - app/assets/widgets/shared/localized-bundle-config.ts
   - app/assets/sdk/config-loader.ts
   - app/assets/widgets/shared/discount-tier-feedback.ts
@@ -34,6 +35,8 @@ source_paths:
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
   - app/assets/widgets/product-page/ppb-modal-card-presentation.ts
+  - app/assets/widgets/product-page/methods/modal-methods.ts
+  - app/assets/widgets/product-page/methods/modal-state-methods.ts
   - app/routes/api/api.storefront-products.tsx
   - app/routes/api/api.storefront-collections.tsx
   - app/routes/api/api.fpb-upsells[.]json.tsx
@@ -101,7 +104,32 @@ PPB Horizontal Slots (`PDP_MODAL/MODAL`) and Vertical Slots (`PDP_MODAL/SIMPLIFI
 
 The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
 
-Horizontal/Vertical modal cards keep native grouped-variant selectors inline at every viewport. A selector change updates only active card context; Add remains the selection mutation. Product images and titles are informational and do not open a nested product-details surface. A pure PPB modal-card presentation helper resolves `add`, `quantity`, or `maximum-reached` from per-product quantity validation. At maximum the localized `Added xN` action removes the full selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for modal cards; Product List/Grid retain their in-page behavior.
+All four PPB templates resolve grouped-variant presentation from the active
+category's canonical `variantSelectorMode`: Dropdown, Pills, Color swatches, or
+Image swatches. Non-dropdown modes are semantic radio groups with unavailable
+values disabled. Color and image swatches use Shopify Storefront API
+`ProductOptionValue.swatch` data matched through each variant's
+`selectedOptions`. Missing Shopify swatches retain a neutral labeled
+presentation; the runtime does not infer colors or substitute variant images.
+Cached product snapshots that lack canonical option values and selected options
+are rehydrated before a swatch selector renders. Optional color tooltips are
+described to keyboard focus, clamp/flip at viewport edges on precise pointers,
+and are replaced by a
+persistent selected-value label on coarse/mobile pointers. The existing
+delegated change path updates the active card variant, price, image, and
+inventory context; Add remains the bundle-selection mutation. The modal focus
+trap queries native interactive controls as one combined selector so results
+stay in document order and variant radios remain keyboard reachable. A variant
+rerender restores focus to the replacement selected radio without scrolling,
+preserving arrow-key exploration and its focus tooltip.
+
+Horizontal/Vertical modal cards keep these grouped-variant selectors inline at
+every viewport. Product images and titles are informational and do not open a
+nested product-details surface. A pure PPB modal-card presentation helper
+resolves `add`, `quantity`, or `maximum-reached` from per-product quantity
+validation. At maximum the localized `Added xN` action removes the full
+selected quantity. These overrides ignore `showQuantitySelectorOnCard` only for
+modal cards; Product List/Grid retain their in-page behavior.
 
 Filled Horizontal slots remain bounded by the existing responsive tile block-size token, while filled Vertical slots use the existing responsive row block-size as both their minimum and maximum. Product names wrap and visually clamp only within that boundary; their complete value remains in the DOM and the product-specific accessible name of the overlaid cross-badge remove control. The cross badge keeps a 44px interaction target, stops propagation so it cannot open replacement, and uses the existing single-removal and same-index focus-recovery paths.
 
@@ -276,6 +304,19 @@ Before PPB category-as-step expansion, the runtime removes steps whose persisted
 
 Product Page inventory normalization preserves `sourceVariantCount` after unavailable variants are filtered. Product List uses that metadata only when a grouped product originally had multiple variants but now has one sellable variant: the shared row shows the surviving variant title as static identity while keeping the selector absent. Fully unavailable products and unavailable options remain filtered.
 
+FPB and PPB low-stock alerts consume the same Shopify Storefront API variant
+fields already used by selection and cart guards: `quantityAvailable`,
+`currentlyNotInStock`, and `availableForSale`. The public bundle DTO exposes one
+per-bundle `lowStockAlert` object with `enabled`, `threshold`, and tokenized
+`message`. The shared decision helper shows a claim only for a positive exact
+sellable quantity at or below the threshold. Unknown quantity, zero stock,
+unavailable variants, continue-selling/backorder variants, and failed or stale
+reads suppress the claim. Out-of-stock UI remains a separate state, and Shopify
+cart/checkout validation remains authoritative. Aggregate calculations use the
+minimum `floor(quantityAvailable / requiredQuantity)` across required selected
+component variants; optional components are ignored. Parent bundle inventory is
+never read or synthesized.
+
 ---
 
 ## Storefront Surfaces
@@ -370,12 +411,15 @@ the marker exists.
 
 Proxy URL ownership is centralized at each build boundary. TypeScript callers use
 `app/config/storefront-proxy-routes.ts` for the installed proxy root and API or
-document path composition. Theme-extension blocks use the canonical relative
-proxy root directly. Do not capture a theme-app-extension snippet to construct a
-URL: Shopify wraps rendered extension snippets in diagnostic HTML comments, and
-capturing that output corrupts URL attributes. The production and SIT TOMLs
-retain their required literal `subpath` values because Shopify reads those
-deployment manifests directly.
+document path composition. Theme-extension blocks read `storefrontProxyRoot`
+from the existing Shopify-hosted `$app.ppb_storefront_runtime` JSON. The app
+embed, direct Product Page entrypoint, and SDK initialize the bundled resolver
+from that value before issuing proxy requests. Do not capture a
+theme-app-extension snippet to construct a URL: Shopify wraps rendered extension
+snippets in diagnostic HTML comments, and capturing that output corrupts URL
+attributes. The production and SIT TOMLs retain the same `apps` prefix and their
+required literal environment-specific `subpath` values because Shopify reads
+those deployment manifests directly.
 
 ## FPB Load Strategy
 
@@ -419,6 +463,24 @@ Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-me
 4. If the snapshot is missing/invalid:
    - show theme editor preview when in editor mode and `bundleId` exists
    - otherwise hide the container on storefront
+
+The schema-v3 snapshot also carries a safe `offerDelivery` marker containing
+`decisionRequired`, `specificLinkRequired`, and `ruleVersion`. When a link or
+schedule requires a decision, both the standard PPB widget and SDK mode call the
+signed app-proxy eligibility endpoint before exposing bundle state. The opaque
+`wpb_offer` URL token is forwarded only when present and is mandatory only for a
+specific-link policy. Missing required tokens, inactive schedules, rejected
+decisions, and endpoint failures hide the widget. When no decision is required,
+initialization remains network-free.
+
+Server discovery for PPB embeds and FPB upsells filters inactive schedules,
+orders effective offers by ascending `OfferPolicy.priority` with bundle ID as a
+stable tie-break, and truncates after the first eligible
+`stopLowerPriority=true` policy. Page-builder delivery enforces the same
+schedule decision. Link-only bundles remain excluded from discovery surfaces so
+the generated direct link is their sole entry point. These rules govern
+Wolfpack storefront visibility and selection; Shopify discount dates and
+combination rules remain owned by Shopify discount APIs.
 
 There is no Wolfpack fallback for this surface. Storefront API failure fails
 closed rather than rendering stale catalog or price data. See
@@ -532,7 +594,7 @@ ordinary component rendering.
 
 Static layout and presentation belong in source CSS. Runtime styling is limited
 to values that are inherently data-driven, such as measured timeline progress,
-timeline entry counts, validated variant swatch color, and merchant-authored
+timeline entry counts, Shopify-provided variant swatch color, and merchant-authored
 Custom CSS. The runtime must not inject structural widths, heights, spacing,
 display state, or template stylesheets. Native attributes such as `hidden` and
 state markers such as `data-fpb-summary-mode` own visibility and responsive
@@ -596,6 +658,25 @@ published as `--bundle-discount-feedback-tier-bg`,
 `--bundle-discount-feedback-tier-text`,
 `--bundle-discount-feedback-complete-bg`, and
 `--bundle-discount-feedback-complete-text`.
+
+### Merchant Pricing Tier Badges
+
+Widget version `16.0.2` projects the optional canonical
+`pricing.rules[].tierBadge` object to FPB and PPB. The shared renderer supports
+`pill`, `folded`, and `banner_rounded` shapes and either `always` or `selected`
+visibility. PPB attaches badges to its bundle-quantity tier pills; FPB attaches
+them to stepped progress milestones. Badge presentation is owned by the shared
+raw stylesheet and uses validated CSS custom properties for merchant-selected
+foreground and background colors.
+
+Static badge copy is valid for every pricing method. The
+`{{saved_percentage}}` variable is valid only for percentage rules and
+percentage Buy X, get Y rules; `{{saved_total}}` is valid only for fixed-amount
+rules. The Admin and runtime share this truthfulness boundary. Missing or
+invalid values suppress the badge instead of presenting fabricated savings.
+The rendered text remains part of the tier's accessible description, and
+selected-only badges follow the existing keyboard-operable tier-selection
+state.
 
 ---
 

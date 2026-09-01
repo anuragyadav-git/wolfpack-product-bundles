@@ -38,8 +38,29 @@ describe("signed storefront collections loader", () => {
       descriptionHtml: "",
       featuredImage: null,
       images: { edges: [] },
-      options: [],
-      variants: { edges: [] },
+      options: [{
+        id: "gid://shopify/ProductOption/1",
+        name: "Color",
+        optionValues: [{
+          id: "gid://shopify/ProductOptionValue/1",
+          name: "Gold",
+          swatch: {
+            color: null,
+            image: { image: { url: "https://cdn.example/gold.jpg", altText: "Gold" } },
+          },
+        }],
+      }],
+      variants: { edges: [{ node: {
+        id: "gid://shopify/ProductVariant/1",
+        title: "Gold",
+        selectedOptions: [{ name: "Color", value: "Gold" }],
+        price: { amount: "10.00" },
+        compareAtPrice: null,
+        weight: 0,
+        weightUnit: "GRAMS",
+        availableForSale: true,
+        image: null,
+      } }] },
     };
     mockGraphql.mockResolvedValue({ json: async () => ({
       data: { collections: { edges: [
@@ -61,5 +82,13 @@ describe("signed storefront collections loader", () => {
       featured: ["gid://shopify/Product/1"],
     });
     expect(mockGraphql.mock.calls[0][0]).not.toContain("quantityAvailable");
+    expect(mockGraphql.mock.calls[0][0]).toContain("optionValues");
+    expect(payload.products[0].options[0].optionValues[0].swatch).toEqual({
+      color: null,
+      image: { src: "https://cdn.example/gold.jpg", altText: "Gold" },
+    });
+    expect(payload.products[0].variants[0].selectedOptions).toEqual([
+      { name: "Color", value: "Gold" },
+    ]);
   });
 });

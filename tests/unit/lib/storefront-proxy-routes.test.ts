@@ -2,6 +2,7 @@ import {
   STOREFRONT_PROXY_ROOT,
   buildStorefrontApiPath,
   buildStorefrontProxyPath,
+  setStorefrontProxyRoot,
   resolveStorefrontProxyRoot,
 } from "../../../app/config/storefront-proxy-routes";
 
@@ -35,10 +36,39 @@ describe("storefront proxy routes", () => {
     )).toBe("/apps/product-bundles-sit/wpb/12");
   });
 
+  it("uses the Shopify-hosted browser runtime root for API paths", () => {
+    const previousWindow = (globalThis as any).window;
+    (globalThis as any).window = {};
+
+    try {
+      expect(setStorefrontProxyRoot("/apps/product-bundles-sit")).toBe(
+        "/apps/product-bundles-sit",
+      );
+      expect(buildStorefrontApiPath("offer-eligibility.json")).toBe(
+        "/apps/product-bundles-sit/api/offer-eligibility.json",
+      );
+    } finally {
+      (globalThis as any).window = previousWindow;
+    }
+  });
+
   it("infers the proxy root from an FPB document pathname", () => {
     expect(resolveStorefrontProxyRoot({
       pathname: "/apps/product-bundles-sit/wpb/12",
     })).toBe("/apps/product-bundles-sit");
+  });
+
+  it("fails closed on a browser page without a hosted proxy root", () => {
+    const previousWindow = (globalThis as any).window;
+    (globalThis as any).window = { location: { pathname: "/products/test" } };
+
+    try {
+      expect(() => resolveStorefrontProxyRoot()).toThrow(
+        "Storefront proxy root is not configured",
+      );
+    } finally {
+      (globalThis as any).window = previousWindow;
+    }
   });
 
   it.each([
@@ -46,8 +76,8 @@ describe("storefront proxy routes", () => {
     "/invalid/product-bundles-sit",
     "/apps/product bundles",
   ])("rejects malformed configured root %p", (configuredRoot) => {
-    expect(resolveStorefrontProxyRoot({ configuredRoot })).toBe(
-      STOREFRONT_PROXY_ROOT,
+    expect(() => resolveStorefrontProxyRoot({ configuredRoot })).toThrow(
+      "Invalid storefront proxy root",
     );
   });
 });

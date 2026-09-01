@@ -343,6 +343,46 @@
       "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging."
     }
   },
+  "specificLinkOffer": {
+    "title": "Specific link access",
+    "description": "Show the bundle builder only when shoppers open this product through a generated private link.",
+    "statusLabel": "Link status",
+    "enableLabel": "Require the specific link",
+    "enableDetails": "Save the bundle after changing this setting.",
+    "generate": "Generate link",
+    "regenerate": "Regenerate link",
+    "revoke": "Revoke link",
+    "copy": "Copy link",
+    "oneTimeNotice": "Copy this link now. For security, it cannot be shown again after you leave or reload this page.",
+    "generatedSuccess": "Specific link generated",
+    "revokedSuccess": "Specific link revoked",
+    "copiedSuccess": "Specific link copied",
+    "status": {
+      "not_generated": "Not generated",
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired"
+    }
+  },
+  "offerOperations": {
+    "title": "Offer scheduling and priority",
+    "description": "Control when this bundle can appear in Wolfpack storefront placements and which matching offer is shown first.",
+    "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Wolfpack storefront visibility and offer selection.",
+    "priorityLabel": "Storefront priority",
+    "priorityDetails": "Lower numbers are considered first when multiple Wolfpack offers match the same placement.",
+    "stopLowerLabel": "Stop lower-priority storefront offers",
+    "stopLowerDetails": "After this offer is selected, hide matching Wolfpack offers with a larger priority number.",
+    "startsAtLabel": "Starts at",
+    "endsAtLabel": "Ends at",
+    "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.",
+    "datePlaceholder": "2026-09-01T10:00:00Z",
+    "validation": {
+      "priority": "Enter a whole-number priority from 1 to 9999.",
+      "startsAt": "Enter a valid ISO 8601 start instant.",
+      "endsAt": "Enter a valid ISO 8601 end instant.",
+      "range": "The end instant must be later than the start instant."
+    }
+  },
   "common": {
     "alerts": {
       "actionFailed": "Action failed", "previewUnavailable": "Preview unavailable", "settingsNotSaved": "Settings not saved", "exportUnavailable": "Export unavailable", "backfillUnavailable": "Backfill unavailable", "trackingNotUpdated": "Tracking not updated", "bundleNotSaved": "Bundle not saved", "operationFailed": "Operation failed"
@@ -442,6 +482,21 @@
     "faq": { "heading": "Frequently asked questions", "changeQuestion": "Can I change plans at any time?", "changeAnswer": "Yes. Shopify hosts monthly, annual, and Free plan changes from the Billing page.", "downgradeQuestion": "What happens to my bundles if I change to Free?", "downgradeAnswer": "All bundle configuration is preserved. The most recently published Free-compatible bundle remains public immediately; other public bundles become Draft.", "billingQuestion": "How does billing work?", "billingAnswer": "Growth is available monthly or annually through Shopify App Pricing. Both intervals include the same features.", "refundQuestion": "Do you offer refunds?", "refundAnswer": "Subscriptions are billed through Shopify. Please contact our support team for billing inquiries." },
     "cta": { "heading": "Need more scale and control?", "body": "Choose Growth for unlimited public bundles, all templates, advanced Design and analytics, and priority support.", "highlights": { "bundles": "Unlimited public bundles", "design": "Advanced Design", "support": "Priority Support" }, "upgrade": "View Growth", "cancelAnytime": "Managed by Shopify" },
     "route": { "title": "Subscription & Billing", "dashboard": "Dashboard", "currentPlan": "Current Plan", "active": "Active", "inactive": "Inactive", "bundleUsage": "Public Bundle Usage", "bundleCount": "{{current}} / {{limit}} public bundles", "limitReached": "You've reached the Free public-bundle limit.", "limitUpgrade": "View Growth for unlimited public bundles.", "overview": "Bundle Overview", "activeBundles": "Active Bundles", "totalSteps": "Total Steps", "productPage": "Product Page", "fullPage": "Full Page", "cancelSubscription": "Manage Subscription", "cancelHeading": "Manage subscription in Shopify?", "downgradeBody": "Shopify shows the effective date before a plan change.", "archiveWarning": "All bundle configuration is preserved after a downgrade.", "confirmCancellation": "Open Shopify plan management", "keepSubscription": "Keep Subscription", "features": "Your Plan Features", "needHelp": "Need Help?", "helpBody": "Have questions about billing or need a custom plan? Our team is here to help." }
+  },
+  "analyticsPage": {
+    "offers": {
+      "title": "Offer performance",
+      "description": "Compare privacy-safe offer decisions with bundle engagement, add-to-cart activity, completed orders, and revenue.",
+      "filterLabel": "Offer policy",
+      "allOffers": "All offers",
+      "ruleVersion": "Rule version {{version}}",
+      "tierCount_one": "{{count}} reached tier",
+      "tierCount_other": "{{count}} reached tiers",
+      "engaged": "Engaged sessions",
+      "addedToCart": "Added to cart",
+      "checkedOut": "Completed orders",
+      "revenue": "Revenue"
+    }
   },
   "subscription": {
     "analytics": {

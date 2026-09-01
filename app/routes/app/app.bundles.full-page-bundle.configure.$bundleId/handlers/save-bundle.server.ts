@@ -45,6 +45,11 @@ import { resolveShopEntitlements } from "../../../../services/subscriptions/subs
 import { updateBundleWithPublicationGate } from "../../../../services/subscriptions/bundle-entitlement-gate.server";
 import { shopUsesAdvancedDesign } from "../../../../services/subscriptions/design-entitlement-state.server";
 import { recordSubscriptionEvent } from "../../../../services/subscriptions/subscription-telemetry.server";
+import { resolveSpecificLinkOfferSave } from "../../../../lib/specific-link-offer-admin";
+import {
+  buildOfferPolicyMutation,
+  resolveOfferOperationsSave,
+} from "../../../../lib/offer-policy-admin";
 
 type ParsedVariantRef = string | number;
 
@@ -269,6 +274,9 @@ export async function handleSaveBundle(
       floatingBadgeEnabled,
       floatingBadgeText,
       loadingGif,
+      lowStockAlertEnabled,
+      lowStockAlertMessage,
+      lowStockAlertThreshold,
       maxQtyPerProduct,
       personalizationData,
       productSlotIconUrl,
@@ -467,8 +475,61 @@ export async function handleSaveBundle(
         shopifyProductId: true,
         bundleDesignTemplate: true,
         bundleDesignPresetId: true,
+        offerPolicy: {
+          select: {
+            specificLinkRequired: true,
+            priority: true,
+            stopLowerPriority: true,
+            startsAt: true,
+            endsAt: true,
+            ruleVersion: true,
+            conditions: {
+              where: { type: "specific_link" },
+              orderBy: { position: "asc" },
+              take: 1,
+              select: { expiresAt: true, revokedAt: true },
+            },
+          },
+        },
       },
     });
+    const specificLinkOfferSave = resolveSpecificLinkOfferSave(
+      formData.get("specificLinkOfferEnabled"),
+      existingBundle?.offerPolicy ?? null,
+    );
+    if ("issue" in specificLinkOfferSave) {
+      return json({
+        success: false,
+        error: specificLinkOfferSave.issue.message,
+        fieldErrors: [specificLinkOfferSave.issue],
+      }, { status: 400 });
+    }
+    const offerOperationsSave = resolveOfferOperationsSave({
+      priority: formData.get("offerPriority"),
+      stopLowerPriority: formData.get("offerStopLowerPriority"),
+      startsAt: formData.get("offerStartsAt"),
+      endsAt: formData.get("offerEndsAt"),
+    }, existingBundle?.offerPolicy ?? null);
+    if ("issue" in offerOperationsSave) {
+      return json({
+        success: false,
+        error: offerOperationsSave.issue.message,
+        fieldErrors: [offerOperationsSave.issue],
+      }, { status: 400 });
+    }
+    const specificLinkUpdate = specificLinkOfferSave.updateData.offerPolicy
+      ? {
+          specificLinkRequired:
+            specificLinkOfferSave.updateData.offerPolicy.update.specificLinkRequired,
+        }
+      : null;
+    const offerPolicyMutation = buildOfferPolicyMutation({
+      shopId: session.shop,
+      policyExists: existingBundle?.offerPolicy != null,
+      specificLinkUpdate,
+      operations: offerOperationsSave,
+    });
+    const offerPolicyChanged = offerPolicyMutation.offerPolicy !== undefined;
 
     const isPublicMutation = finalStatus === BundleStatus.ACTIVE
       || finalStatus === BundleStatus.UNLISTED;
@@ -514,6 +575,9 @@ export async function handleSaveBundle(
         templateName: templateName,
         promoBannerBgImage: promoBannerBgImage,
         loadingGif: loadingGif,
+        lowStockAlertEnabled,
+        lowStockAlertMessage,
+        lowStockAlertThreshold,
         showStepTimeline: showStepTimelineParsed,
         floatingBadgeEnabled,
         floatingBadgeText,
@@ -525,6 +589,7 @@ export async function handleSaveBundle(
         searchBarEnabled,
         textOverrides,
         textOverridesByLocale,
+        ...offerPolicyMutation,
         bundleTextConfig,
         ...(bundleSubscriptionConfig ? { bundleSubscriptionConfig } : {}),
         personalizationData,
@@ -700,7 +765,12 @@ export async function handleSaveBundle(
       },
     });
 
-    if (finalStatus === BundleStatus.ACTIVE || finalStatus === BundleStatus.UNLISTED) {
+    if (
+      finalStatus === BundleStatus.ACTIVE
+      || finalStatus === BundleStatus.UNLISTED
+      || (offerPolicyChanged
+        && Boolean(bundleProductData?.id || existingBundle?.shopifyProductId))
+    ) {
       await syncBundleStorefrontNow({
         admin,
         shopDomain: session.shop,

@@ -5,7 +5,7 @@ title: Cart Transform Function
 type: architecture
 status: authoritative
 summary: Runtime-token-verified Shopify Cart Transform architecture and fail-closed bundle pricing contract.
-last_audited: 2026-08-25
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -159,6 +159,19 @@ The token payload contains:
 - price adjustment config copied from current bundle pricing
 
 The HMAC covers the base64url payload string, so Rust verifies the signature before decoding JSON. If `runtimeTokenSecret` is configured inside the CartTransform owner's `$app.runtime_configuration` and a line token is missing, tampered, or mismatched against actual cart line variants/quantities, the function emits no merge or add-on discount. The same JSON also carries `bundleCartLineMessaging`; consolidating those settings keeps the Function input query at Shopify's complexity limit of 30.
+
+Offer analytics must not add separate Cart Transform input attributes. The
+storefront nests its normalized `offerAnalytics` object inside the existing
+`_bundle_display_properties` JSON envelope. MERGE serializes that object into
+one private `_wpb_offer_analytics` JSON property on the parent line, while
+unmerged component lines retain the nested object in
+`_bundle_display_properties`.
+
+On 2026-09-01, selecting five separate `_wpb_*` attributes raised the input
+query complexity from 30 to 35. Shopify rejected the Function build, which also
+prevented the current dev-preview extension assets from being published. Every
+Cart Transform query change must therefore pass the Shopify CLI app build; a
+successful Cargo build alone does not validate Shopify's query budget.
 
 Parent bundle metafields are still written for EXPAND/display paths: `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing`. Component-variant `$app:component_parents` is no longer the configured MERGE source.
 

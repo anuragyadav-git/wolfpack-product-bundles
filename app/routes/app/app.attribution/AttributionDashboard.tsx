@@ -456,7 +456,7 @@ function AttributionDashboardContent({
   const {
     days, from, to, prevFrom, prevTo,
     funnelSnapshot, bundleMetricTrend, bundleMatrix, topCampaignsRows,
-    customUtmParameters, accessMode = "ADVANCED",
+    customUtmParameters, offerAnalytics, accessMode = "ADVANCED",
   } = data;
   const navigate = useNavigate();
   const shopify = useAppBridge();
@@ -522,10 +522,11 @@ function AttributionDashboardContent({
   }
 
   function handleExport() {
+    const offerPolicyId = offerAnalytics?.selectedOfferPolicyId ?? undefined;
     exportFetcher.submit(
       from && to
-        ? { intent: "export", from, to }
-        : { intent: "export", days: String(days) },
+        ? { intent: "export", from, to, ...(offerPolicyId ? { offerPolicyId } : {}) }
+        : { intent: "export", days: String(days), ...(offerPolicyId ? { offerPolicyId } : {}) },
       { method: "post" },
     );
   }

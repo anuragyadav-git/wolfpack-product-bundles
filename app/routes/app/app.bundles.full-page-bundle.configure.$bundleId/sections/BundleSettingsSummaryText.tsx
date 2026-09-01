@@ -8,8 +8,14 @@ export function FpbSummaryTextSettings({
 }) {
   const {
     markAsDirty,
+    lowStockAlertEnabled,
+    lowStockAlertMessage,
+    lowStockAlertThreshold,
     openMultiLanguageModal,
     setShowTextOnAddButton,
+    setLowStockAlertEnabled,
+    setLowStockAlertMessage,
+    setLowStockAlertThreshold,
     setTextOverrides,
     SettingsRow,
     setVariantSelectorEnabled,
@@ -17,6 +23,8 @@ export function FpbSummaryTextSettings({
     shopLocales,
     textOverrides,
     variantSelectorEnabled,
+    validationErrors = {},
+    clearValidationError,
   } = flow;
 
   return (
@@ -38,6 +46,58 @@ export function FpbSummaryTextSettings({
               }}
             />
           </SettingsRow>
+          <SettingsRow
+            title="Low-stock alert"
+            description="Show Shopify's sellable component-variant quantity when it reaches the configured threshold."
+          >
+            <s-switch
+              accessibilityLabel="Low-stock alert"
+              checked={lowStockAlertEnabled || undefined}
+              onChange={(e) => {
+                setLowStockAlertEnabled(
+                  (e.target as HTMLInputElement).checked,
+                );
+                markAsDirty();
+              }}
+            />
+          </SettingsRow>
+          <DisabledConfigurationRegion disabled={!lowStockAlertEnabled}>
+            <s-stack direction="block" gap="small">
+              <s-number-field
+                id="configure-settings-lowStockThreshold"
+                label="Low-stock threshold"
+                min={1}
+                max={1000}
+                value={lowStockAlertThreshold}
+                disabled={!lowStockAlertEnabled}
+                error={validationErrors["settings.lowStockThreshold"]}
+                onInput={(e) => {
+                  setLowStockAlertThreshold(
+                    (e.target as HTMLInputElement).value,
+                  );
+                  clearValidationError("settings.lowStockThreshold");
+                  markAsDirty();
+                }}
+                autocomplete="off"
+              />
+              <s-text-field
+                id="configure-settings-lowStockMessage"
+                label="Low-stock message"
+                value={lowStockAlertMessage}
+                disabled={!lowStockAlertEnabled}
+                error={validationErrors["settings.lowStockMessage"]}
+                details="Include {{stock}} where the sellable quantity should appear."
+                onInput={(e) => {
+                  setLowStockAlertMessage(
+                    (e.target as HTMLInputElement).value,
+                  );
+                  clearValidationError("settings.lowStockMessage");
+                  markAsDirty();
+                }}
+                autocomplete="off"
+              />
+            </s-stack>
+          </DisabledConfigurationRegion>
           <SettingsRow
             title="Show Text on + Button"
             description="Replaces the + icon with a text button and moves it below the price."

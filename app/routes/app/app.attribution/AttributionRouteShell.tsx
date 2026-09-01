@@ -11,6 +11,7 @@ import {
 } from "../../../components/AdminPageNavigation";
 import { PixelStatusCard } from "./PixelStatusCard";
 import AttributionDashboard from "./AttributionDashboard";
+import { OfferAnalyticsCard } from "./OfferAnalyticsCard";
 
 function AttributionCriticalFunnelHeader() {
   return (
@@ -53,6 +54,12 @@ export default function AttributionRouteShell() {
     navigateBackOrFallback(navigate, "/app/dashboard", {
       replaceFallback: true,
     });
+  const handleOfferSelectionChange = (offerPolicyId: string | null) => {
+    const url = new URL(window.location.href);
+    if (offerPolicyId) url.searchParams.set("offerPolicyId", offerPolicyId);
+    else url.searchParams.delete("offerPolicyId");
+    navigate(`${url.pathname}?${url.searchParams.toString()}`);
+  };
 
   return (
     <>
@@ -83,7 +90,15 @@ export default function AttributionRouteShell() {
         <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
           <Await resolve={analytics}>
             {(resolvedAnalytics: any) => (
-              <AttributionDashboard data={resolvedAnalytics} />
+              <>
+                {resolvedAnalytics.accessMode === "ADVANCED" ? (
+                  <OfferAnalyticsCard
+                    model={resolvedAnalytics.offerAnalytics}
+                    onSelectionChange={handleOfferSelectionChange}
+                  />
+                ) : null}
+                <AttributionDashboard data={resolvedAnalytics} />
+              </>
             )}
           </Await>
         </Suspense>
