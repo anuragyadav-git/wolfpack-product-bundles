@@ -49,6 +49,7 @@ graphify-out/.graphify_*.json
 graphify-out/.graphify_*.json.sig
 graphify-out/.graphify_*.txt
 graphify-out/.graphify_root
+graphify-out/.graph.html.stale
 graphify-out/.pending_changes
 graphify-out/.rebuild.lock
 graphify-out/*.lock

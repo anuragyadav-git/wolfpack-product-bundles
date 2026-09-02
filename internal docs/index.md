@@ -50,6 +50,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 
 - [[Audit Report]] — What was stale or incorrect in the original `docs/` folder
 - [[Architecture/System Overview]] — App stack, services, deployment
+- [[Architecture/Repository Layout]] — npm workspace boundaries, root command compatibility, Prisma discovery, and the static website deployment surface
 - [[Architecture/Only Bundles Brand and Compatibility Boundary]] — visible brand identity, preserved runtime identifiers, legacy URL boundary, and parent-tag transition
 - [[Architecture/Database Schema]] — Authoritative Prisma schema summary
 - [[Architecture/Cart Transform Function]] — Rust Shopify Function cart transform and checkout discount contract

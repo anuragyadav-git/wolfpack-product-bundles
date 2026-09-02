@@ -4,8 +4,8 @@ id: only-bundles-readme
 title: Only Bundles
 type: repository-readme
 status: active
-summary: Development and architecture guide for the Only Bundles Shopify application.
-last_audited: 2026-08-28
+summary: Development and architecture guide for the Only Bundles Shopify application and static website monorepo.
+last_audited: 2026-09-02
 owners:
   - engineering
 domains:
@@ -13,8 +13,8 @@ domains:
 systems:
   - repository
 source_paths:
-  - app/
-  - extensions/
+  - apps/OnlyBundles-app/
+  - apps/OnlyBundles-website/
 related_docs:
   - internal docs/index.md
 tags:
@@ -154,8 +154,8 @@ cd product-bundles
 npm install
 
 # 3. Set up environment variables
-cp .env.example .env
-# Edit .env with your credentials
+cp apps/OnlyBundles-app/.env.example apps/OnlyBundles-app/.env
+# Edit apps/OnlyBundles-app/.env with your credentials
 
 # 4. Set up database
 npx prisma migrate dev
@@ -368,37 +368,23 @@ npm run dev
 
 ```
 Only-Bundles/
-├── app/                          # Main application
-│   ├── components/              # React components
-│   │   ├── design-control-panel/  # DCP components
-│   │   ├── bundle/                # Bundle management
-│   │   └── settings/              # Settings UI
-│   ├── routes/                  # Remix routes (pages + API)
-│   │   ├── app.*.tsx           # Admin pages
-│   │   ├── api.*.tsx           # API endpoints
-│   │   └── webhooks.*.tsx      # Webhook handlers
-│   ├── services/                # Business logic
-│   │   ├── bundleService.ts    # Bundle operations
-│   │   ├── shopifyService.ts   # Shopify API
-│   │   └── pricingService.ts   # Pricing logic
-│   ├── lib/                     # Core libraries
-│   └── utils/                   # Helper functions
-│
-├── extensions/                   # Shopify extensions
-│   ├── bundle-builder/          # Theme extension
-│   │   ├── blocks/             # Liquid templates
-│   │   └── assets/             # JS/CSS files
-│   └── bundle-cart-transform-ts/  # Function
-│       └── src/run.ts          # Transform logic
-│
-├── prisma/                       # Database
-│   ├── schema.prisma           # Data models
-│   └── migrations/             # Version history
-│
-└── docs/                         # Documentation
-    ├── TECHNICAL_DOCUMENTATION.md
-    ├── PROMPT_ENGINEERING_GUIDE.md
-    └── API_REFERENCE.md
+├── apps/
+│   ├── OnlyBundles-app/          # Shopify Remix application workspace
+│   │   ├── app/                  # Admin routes, services, and storefront sources
+│   │   ├── extensions/           # Shopify extensions and Functions
+│   │   ├── prisma/               # Schema and migrations
+│   │   ├── scripts/              # App build and operational tooling
+│   │   ├── tests/                # Unit, integration, and E2E tests
+│   │   └── test-spec/            # TDD specifications
+│   └── OnlyBundles-website/      # Pre-rendered Astro website workspace
+├── docs/                         # Project documentation and records
+├── internal docs/                # Authoritative architecture and operations vault
+├── marketing/                    # Listing and marketing artifacts
+├── graphify-out/                 # Generated knowledge graph
+├── package.json                  # npm workspace commands
+├── package-lock.json             # Single dependency lockfile
+├── prisma.config.ts              # Root Prisma schema discovery
+└── Dockerfile                    # Render build from repository root
 ```
 
 ### Database Schema
@@ -498,7 +484,7 @@ npx prisma db seed
 npm run dev:sit
 ```
 
-`npm run dev:sit` starts `shopify app dev --config shopify.app.wolfpack-product-bundles-sit.toml`. Configure Save, Sync Product, Sync Bundle, and Preview publish storefront data synchronously; no local storefront-sync queue is required for those flows.
+`npm run dev:sit` delegates to `apps/OnlyBundles-app` and starts `shopify app dev --config shopify.app.wolfpack-product-bundles-sit.toml`. Configure Save, Sync Product, Sync Bundle, and Preview publish storefront data synchronously; no local storefront-sync queue is required for those flows.
 
 ### Development Workflow
 
@@ -514,6 +500,12 @@ npm run lint
 
 # Build for production
 npm run build
+
+# Verify the static website workspace
+npm run website:verify
+
+# Verify both workspaces
+npm run verify:all
 
 # Deploy Shopify extensions
 npm run deploy:sit
@@ -571,12 +563,9 @@ git push origin main
 ### Deploy Shopify Extensions
 
 ```bash
-# Deploy theme extension (widget)
-shopify app deploy
-
-# Deploy cart transform function
-cd extensions/bundle-cart-transform-ts
-shopify function deploy
+# Deploy with the guarded root scripts only
+npm run deploy:sit
+npm run deploy:prod
 ```
 
 ### Post-Deployment Checklist
