@@ -7,6 +7,7 @@ import { navigateBackOrFallback } from "../../lib/navigation";
 import { openSupportChat } from "../../lib/support-chat.client";
 import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
 import { APP_BRAND } from "../../lib/app-brand";
+import { TUTORIAL_LIBRARY_URL } from "../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
 
 // This route handles /app → shows the Welcome landing screen for intentional visits,
@@ -186,8 +187,10 @@ export default function AppIndex() {
           {translateAdmin("billing.actions.contactSupport")}
         </button>
         <span className={styles.footerDot} />
-        <span className={styles.footerLink} aria-disabled="true">
-          {translateAdmin("adminExtracted.appIndex.documentation")}
+        <span className={styles.footerLink}>
+          <s-link href={TUTORIAL_LIBRARY_URL} target="_blank">
+            {translateAdmin("adminExtracted.appIndex.documentation")}
+          </s-link>
         </span>
       </div>
     </div>

@@ -1,37 +1,12 @@
 ---
-const pageTitle = "Page not found | Only Bundles";
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
-
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="icon" type="image/png" href="/only-bundles-favicon-32.png" />
-    <title>{pageTitle}</title>
-  </head>
-  <body>
-    <main>
-      <p>404</p>
-      <h1>This page could not be found.</h1>
-      <a href="/">Return to Only Bundles</a>
-    </main>
-  </body>
-</html>
+<BaseLayout title="Page not found" description="The requested Only Bundles page was not found." path="/404.html" noindex bare>
+  <section class="missing"><div class="missing-card"><img src="/only-bundles-icon.png" alt="" width="72" height="72" /><p class="eyebrow">404 · Box not found</p><h1>This page could not be found.</h1><p class="lede">The bundle may have moved, or the address may be incomplete. Return home or try the interactive demo.</p><div class="button-row"><a class="button button--primary" href="/">Return home</a><a class="button" href="/demo/">Try the demo</a></div></div></section>
+</BaseLayout>
 <style>
-  :global(*) { box-sizing: border-box; }
-  :global(body) {
-    margin: 0;
-    min-height: 100vh;
-    display: grid;
-    place-items: center;
-    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-    color: #172b4d;
-    background: #f6f7f9;
-  }
-  main { max-width: 34rem; padding: clamp(1.5rem, 5vw, 3rem); text-align: center; }
-  p { margin: 0; font-weight: 700; }
-  h1 { margin-block: 0.75rem 1.5rem; font-size: clamp(1.75rem, 5vw, 2.75rem); }
-  a { color: inherit; font-weight: 650; }
+  .missing { min-height: 100vh; display: grid; place-items: center; padding: 1rem; background: var(--cream); }
+  .missing-card { width: min(100%, 42rem); padding: clamp(2rem, 7vw, 5rem); background: white; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  img { margin-bottom: 2rem; border-radius: 1rem; }
+  h1 { max-width: 12ch; font-size: clamp(3rem, 8vw, 5.5rem); }
 </style>

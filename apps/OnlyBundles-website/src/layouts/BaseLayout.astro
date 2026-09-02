@@ -1,0 +1,54 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE_ORIGIN } from "../data/content";
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  noindex?: boolean;
+  bare?: boolean;
+  image?: string;
+  ogType?: "website" | "article";
+}
+
+const {
+  title,
+  description,
+  path = "/",
+  noindex = false,
+  bare = false,
+  image = "/showcase/guided-bundle.png",
+  ogType = "website",
+} = Astro.props;
+const canonical = new URL(path, SITE_ORIGIN).toString();
+const pageTitle = `${title} | Only Bundles`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+    <meta name="theme-color" content="#1F3D2E" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(image, SITE_ORIGIN).toString()} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/only-bundles-favicon-32.png" />
+    <title>{pageTitle}</title>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    {!bare && <Header />}
+    <main id="main-content"><slot /></main>
+    {!bare && <Footer />}
+  </body>
+</html>

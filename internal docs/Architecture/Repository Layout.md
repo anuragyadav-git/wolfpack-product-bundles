@@ -5,7 +5,7 @@ title: Repository Layout
 type: architecture
 status: authoritative
 summary: Defines the npm workspace boundary between the Shopify application, static website, and repository-level documentation and delivery tooling.
-last_audited: 2026-09-02
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -21,6 +21,7 @@ related_docs:
   - Operations/Development.md
   - Operations/Deployment.md
   - Operations/Build Process.md
+  - Architecture/Public Website.md
 tags:
   - monorepo
 keywords:
@@ -60,4 +61,4 @@ Root commands preserve the established Shopify operator interface. For example, 
 
 `npx prisma generate` from the repository root resolves `apps/OnlyBundles-app/prisma/schema.prisma` through `prisma.config.ts`. Because Prisma config disables its implicit dotenv lookup, the root config uses Node 22's built-in env-file loader when `apps/OnlyBundles-app/.env` exists; process variables supplied by Render remain authoritative. App-local Prisma scripts use the same schema explicitly. Shopify TOML values, routes, webhooks, persistence contracts, and storefront assets are unchanged by the directory boundary.
 
-The website is fully static. `apps/OnlyBundles-website/wrangler.jsonc` has no Worker entry point, bindings, routes, secrets, environments, adapter, or Node compatibility flag. Unknown routes use the generated `404.html`, and indexing stays disabled while the site is limited to its `workers.dev` hostname.
+The website is fully static. `apps/OnlyBundles-website/wrangler.jsonc` has no Worker entry point, bindings, routes, secrets, environments, adapter, Node compatibility flag, or visitor analytics integration. Unknown routes use the generated `404.html`. Public marketing, feature, Help, editorial, tutorial, Privacy, and Terms routes are indexable on the `workers.dev` hostname. The approved legal pages are part of the sitemap, and no analytics environment variable is required for production deployment.

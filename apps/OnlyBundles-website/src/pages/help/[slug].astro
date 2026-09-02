@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinalCta from "../../components/FinalCta.astro";
+import { helpPages } from "../../data/content";
+export function getStaticPaths() { return helpPages.map((guide) => ({ params: { slug: guide.slug }, props: { guide } })); }
+const { guide } = Astro.props;
+---
+<BaseLayout title={guide.title} description={guide.description} path={`/help/${guide.slug}/`}>
+  <section class="page-hero"><div class="shell"><p class="eyebrow">Help guide</p><h1>{guide.title}</h1><p class="lede">{guide.description}</p></div></section>
+  <section class="section"><div class="prose"><p class="intro">{guide.intro}</p><ol>{guide.steps.map(([title, copy]) => <li><div><h2>{title}</h2><p>{copy}</p></div></li>)}</ol><aside class="status-note"><strong>Before publishing</strong><p>Preview the complete selection and cart behavior in the active Shopify theme at desktop and mobile sizes.</p></aside><p><a class="button button--primary" href="/help/">Back to Help</a></p></div></section>
+  <FinalCta />
+</BaseLayout>
+<style>
+  .intro { margin-bottom: 3rem; font-family: Georgia, serif; font-size: clamp(1.45rem, 3vw, 2.2rem); line-height: 1.25; }
+  ol { padding: 0; list-style: none; counter-reset: guide; }
+  li { display: grid; grid-template-columns: auto 1fr; gap: 1.2rem; padding-block: 2rem; border-top: 1px solid var(--line); counter-increment: guide; }
+  li::before { content: counter(guide, decimal-leading-zero); color: var(--coral); font-weight: 900; }
+  li h2 { margin-bottom: 0.7rem; font-size: clamp(1.8rem, 3vw, 2.6rem); }
+  li p { margin: 0; }
+</style>

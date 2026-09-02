@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from "astro:content";
+import TutorialLayout from "../../layouts/TutorialLayout.astro";
+import { getTutorialPresentation } from "../../data/tutorials";
+
+export async function getStaticPaths() {
+  const tutorials = await getCollection("tutorials", ({ data }) => data.status === "published");
+  return tutorials.map((entry) => ({ params: { id: entry.data.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+if (entry.id !== entry.data.id) throw new Error(`Tutorial filename ${entry.id} must match frontmatter id ${entry.data.id}`);
+const { Content } = await render(entry);
+const presentation = getTutorialPresentation(entry.data.id);
+---
+
+<TutorialLayout
+  title={entry.data.title}
+  description={entry.data.summary}
+  slug={entry.data.id}
+  image={presentation.image}
+  imageAlt={presentation.imageAlt}
+  readingTime={presentation.readingTime}
+  lastAudited={entry.data.last_audited}
+>
+  <Content />
+</TutorialLayout>

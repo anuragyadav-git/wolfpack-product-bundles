@@ -7,12 +7,13 @@
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
-    "test": "node --test tests/static-output.test.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "release:check": "node scripts/validate-release.mjs",
     "types": "WRANGLER_LOG_PATH=.wrangler/logs wrangler types worker-configuration.d.ts --include-runtime=false",
     "types:check": "WRANGLER_LOG_PATH=.wrangler/logs wrangler types worker-configuration.d.ts --include-runtime=false --check",
     "deploy:dry-run": "WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy --dry-run",
     "verify": "npm run check && npm run build && npm run test && npm run types:check && npm run deploy:dry-run",
-    "deploy": "WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy",
+    "deploy": "npm run release:check && WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy",
     "preview:upload": "WRANGLER_LOG_PATH=.wrangler/logs wrangler versions upload"
   },
   "devDependencies": {

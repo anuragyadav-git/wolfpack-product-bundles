@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinalCta from "../../components/FinalCta.astro";
+import { blogPages } from "../../data/content";
+---
+<BaseLayout title="Bundle journal" description="Practical Only Bundles guidance for choosing bundle surfaces, designing guided journeys, and using merchandising incentives clearly." path="/blog/">
+  <section class="page-hero"><div class="shell"><p class="eyebrow">The bundle journal</p><h1>Better bundle decisions, before the first product is added.</h1><p class="lede">Practical notes for planning the journey, the offer, and the storefront experience around it.</p></div></section>
+  <section class="section"><div class="shell articles">{blogPages.map((article, index) => <article><span>0{index + 1}</span><div><p class="eyebrow">Bundle strategy</p><h2><a href={`/blog/${article.slug}/`}>{article.title}</a></h2><p>{article.description}</p><a class="text-link" href={`/blog/${article.slug}/`}>Read article →</a></div></article>)}</div></section>
+  <section class="section section--cream"><div class="shell grid-2"><div><p class="eyebrow">Need step-by-step instructions?</p><h2>Visit the production-audited tutorial library.</h2></div><div><p class="lede">The tutorial collection covers setup, publishing, design, subscriptions, analytics, visibility, and page-builder placement in greater depth.</p><a class="button button--primary" href="/blogs/">Browse tutorials</a></div></div></section>
+  <FinalCta />
+</BaseLayout>
+<style>
+  .articles { display: grid; }
+  .articles article { display: grid; grid-template-columns: 5rem 1fr; gap: 2rem; padding-block: 3rem; border-top: 1px solid var(--line); }
+  .articles article > span { color: var(--coral); font-weight: 900; }
+  .articles h2 { max-width: 24ch; font-size: clamp(2.2rem, 5vw, 4.2rem); }
+  .articles h2 a { text-decoration: none; }
+  .articles p:not(.eyebrow) { max-width: 45rem; color: var(--ink-soft); }
+  @media (max-width: 600px) { .articles article { grid-template-columns: 1fr; gap: 0.5rem; } }
+</style>

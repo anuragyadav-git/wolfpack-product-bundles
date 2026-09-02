@@ -1,0 +1,25 @@
+---
+import BrandMark from "./BrandMark.astro";
+import { SHOPIFY_LISTING } from "../data/content";
+---
+<footer>
+  <div class="shell footer-grid">
+    <div><BrandMark /><p>Beautiful bundle journeys for Shopify storefronts.</p></div>
+    <nav aria-label="Product links"><strong>Product</strong><a href="/features/">Features</a><a href="/demo/">Interactive demo</a><a href="/pricing/">Pricing</a><a href={SHOPIFY_LISTING}>Shopify listing ↗</a></nav>
+    <nav aria-label="Resource links"><strong>Resources</strong><a href="/help/">Help</a><a href="/blog/">Blog</a><a href="/changelog/">Changelog</a></nav>
+    <nav aria-label="Legal links"><strong>Legal</strong><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
+  </div>
+  <div class="shell footnote"><span>© 2026 Only Bundles</span><span>Built for Shopify storefronts.</span></div>
+</footer>
+<style>
+  footer { padding-block: 4rem 2rem; color: rgba(255,255,255,0.76); background: var(--forest-dark); }
+  .footer-grid { display: grid; grid-template-columns: 2fr repeat(3, 1fr); gap: 2rem; }
+  p { max-width: 22rem; }
+  nav { display: grid; align-content: start; gap: 0.55rem; }
+  strong { color: white; margin-bottom: 0.35rem; }
+  a { text-decoration: none; }
+  a:hover { color: white; }
+  .footnote { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid rgba(255,255,255,0.14); font-size: 0.84rem; }
+  :global(footer .brand) { color: white; }
+  @media (max-width: 750px) { .footer-grid { grid-template-columns: 1fr 1fr; } .footer-grid > div { grid-column: 1 / -1; } }
+</style>

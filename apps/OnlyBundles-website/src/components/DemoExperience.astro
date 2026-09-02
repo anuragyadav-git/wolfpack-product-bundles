@@ -1,0 +1,242 @@
+---
+const templates = [
+  { key: "standard", label: "Standard", surface: "Full-page" },
+  { key: "classic", label: "Classic", surface: "Full-page" },
+  { key: "compact", label: "Compact", surface: "Full-page" },
+  { key: "horizontal", label: "Horizontal", surface: "Full-page" },
+  { key: "product-list", label: "Product List", surface: "Product-page" },
+  { key: "product-grid", label: "Product Grid", surface: "Product-page" },
+  { key: "horizontal-slots", label: "Horizontal Slots", surface: "Product-page" },
+  { key: "vertical-slots", label: "Vertical Slots", surface: "Product-page" },
+] as const;
+---
+
+<div class="production-demo" data-production-demo>
+  <aside class="demo-controls" aria-label="Production widget template controls">
+    <div>
+      <p class="eyebrow">Actual product renderer</p>
+      <h2>Choose a storefront template</h2>
+      <p>The preview below runs the same production storefront renderer and styles used by Only Bundles.</p>
+    </div>
+    <div class="template-groups">
+      {["Full-page", "Product-page"].map((surface) => (
+        <fieldset>
+          <legend>{surface}</legend>
+          <div class="template-buttons">
+            {templates.filter((template) => template.surface === surface).map((template) => (
+              <button type="button" data-template={template.key} aria-pressed={template.key === "standard"}>{template.label}</button>
+            ))}
+          </div>
+        </fieldset>
+      ))}
+    </div>
+    <div class="truth-note">
+      <strong>Safe production preview</strong>
+      <p>Products and prices are deterministic preview data. Analytics, persistence, external navigation, network requests, and cart actions are disabled, so nothing can be added to a real cart.</p>
+    </div>
+  </aside>
+
+  <section class="store-preview" aria-label="Only Bundles production storefront preview">
+    <header class="store-header">
+      <span class="store-wordmark">Preview store</span>
+      <span data-preview-label>Full-page · Standard</span>
+    </header>
+    <div class="preview-viewport" data-preview-viewport>
+      <div id="bundle-builder-app" data-production-widget-mount data-preview-template="standard" data-bundle-type="full_page"></div>
+    </div>
+    <p class="demo-status" role="status" aria-live="polite" data-demo-status>Production preview ready.</p>
+  </section>
+</div>
+
+<script>
+  import type { TemplateKey } from "../../../OnlyBundles-app/app/lib/bundle-config/template-selection";
+  import {
+    buildStorefrontPreviewFixture,
+    getStorefrontPreviewStylesheetManifest,
+  } from "../../../OnlyBundles-app/app/routes/app/app.settings/storefront-preview-fixtures";
+  import { BundleWidgetFullPage } from "../../../OnlyBundles-app/app/assets/bundle-widget-full-page";
+  import { BundleWidgetProductPage } from "../../../OnlyBundles-app/app/assets/bundle-widget-product-page";
+
+  import fpbBaseUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/bundle-widget-full-page.css?url";
+  import fpbMobileSummaryUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/shared/mobile-summary-footer.css?url";
+  import fpbResponsiveUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/shared/responsive-layout.css?url";
+  import fpbStandardUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/templates/side-footer-standard.css?url";
+  import fpbClassicUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/templates/side-footer-classic.css?url";
+  import fpbCompactUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/templates/side-footer-compact.css?url";
+  import fpbHorizontalUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/templates/side-footer-horizontal.css?url";
+  import ppbBaseUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/bundle-widget.css?url";
+  import ppbListUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/templates/inpage-cascade.css?url";
+  import ppbGridUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/templates/inpage-grid.css?url";
+  import ppbModalUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/templates/modal-slots.css?url";
+  import ppbModalProductGridUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/modal-product-grid.css?url";
+  import ppbModalFooterUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/modal-footer-empty-toast.css?url";
+  import ppbDiscountFooterUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/discount-footer-shared.css?url";
+  import ppbSelectionLoadingUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/footer-selection-loading.css?url";
+  import ppbBottomSheetUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/bottom-sheet-modal.css?url";
+  import ppbSlotCardsUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/slot-cards-default-products.css?url";
+  import ppbQuantityPillsUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/quantity-pills-skeletons.css?url";
+  import ppbPurchaseOptionsUrl from "../../../OnlyBundles-app/app/assets/widgets/shared-css/purchase-options.css?url";
+  import ppbDiscountFeedbackUrl from "../../../OnlyBundles-app/app/assets/widgets/shared-css/discount-tier-feedback.css?url";
+  import ppbMobileDrawersUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/mobile-drawers.css?url";
+  import ppbEmbedHostUrl from "../../../OnlyBundles-app/app/assets/widgets/product-page-css/base/embed-host.css?url";
+  import productModalShellUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/base/product-modal-shell.css?url";
+  import productModalControlsUrl from "../../../OnlyBundles-app/app/assets/widgets/full-page-css/base/product-modal-controls.css?url";
+
+  type PreviewController = Record<string, any>;
+  type StylesheetId = ReturnType<typeof getStorefrontPreviewStylesheetManifest>["stylesheets"][number];
+  const stylesheetUrls: Record<StylesheetId, string> = {
+    "fpb-base": fpbBaseUrl, "fpb-mobile-summary": fpbMobileSummaryUrl, "fpb-responsive": fpbResponsiveUrl,
+    "fpb-standard": fpbStandardUrl, "fpb-classic": fpbClassicUrl, "fpb-compact": fpbCompactUrl, "fpb-horizontal": fpbHorizontalUrl,
+    "ppb-base": ppbBaseUrl, "ppb-list": ppbListUrl, "ppb-grid": ppbGridUrl, "ppb-modal": ppbModalUrl,
+    "ppb-modal-product-grid": ppbModalProductGridUrl, "ppb-modal-footer": ppbModalFooterUrl,
+    "ppb-discount-footer": ppbDiscountFooterUrl, "ppb-selection-loading": ppbSelectionLoadingUrl,
+    "ppb-bottom-sheet": ppbBottomSheetUrl, "ppb-slot-cards": ppbSlotCardsUrl,
+    "ppb-quantity-pills": ppbQuantityPillsUrl, "ppb-purchase-options": ppbPurchaseOptionsUrl,
+    "ppb-discount-feedback": ppbDiscountFeedbackUrl, "ppb-mobile-drawers": ppbMobileDrawersUrl,
+    "ppb-embed-host": ppbEmbedHostUrl, "product-modal-shell": productModalShellUrl,
+    "product-modal-controls": productModalControlsUrl,
+  };
+
+  function disableSideEffects(controller: PreviewController) {
+    controller._initializeFpbUpsellHandoff = () => {};
+    controller._persistSessionSelections = () => {};
+    controller._recordView = () => {};
+    controller._runControlsScript = () => {};
+    controller._handlePostAddToCartAction = async () => false;
+    controller.addToCart = async () => false;
+    controller.addBundleToCart = async () => false;
+  }
+
+  async function initializeController(controller: PreviewController, templateKey: TemplateKey) {
+    const fixture = buildStorefrontPreviewFixture(templateKey);
+    disableSideEffects(controller);
+    controller.config = {
+      bundleId: fixture.bundle.id, showStepTimeline: true, showCategoryTabs: true,
+      showSearch: true, showQuantitySelectorOnCard: true,
+      controlsSettings: { activeControls: {} }, languageSettings: null, textOverrides: {},
+    };
+    controller.selectedBundle = fixture.bundle;
+    controller.initializeDataStructures();
+    controller.stepProductData = fixture.stepProductData;
+    fixture.stepProductData.forEach((products, stepIndex) => {
+      const selected = products[stepIndex % products.length];
+      if (!selected || typeof selected.selectionId !== "string") return;
+      if (typeof controller.setSelectedQuantity === "function") controller.setSelectedQuantity(stepIndex, selected.selectionId, 1);
+      else controller.selectedProducts[stepIndex][selected.selectionId] = 1;
+    });
+    controller.setupDOMElements();
+    controller.applyFullPageDesignPresetMarker?.();
+    controller._markProductPageTemplate?.();
+    controller.applyBundleLevelCss?.(fixture.bundle);
+    await controller.renderUI();
+    controller.attachEventListeners?.();
+    controller.container.dataset.initialized = "true";
+    controller.isInitialized = true;
+  }
+
+  function syncStylesheets(templateKey: TemplateKey) {
+    document.querySelectorAll("link[data-public-demo-widget-style]").forEach((link) => link.remove());
+    const manifest = getStorefrontPreviewStylesheetManifest(templateKey);
+    for (const stylesheetId of manifest.stylesheets) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = stylesheetUrls[stylesheetId];
+      link.dataset.publicDemoWidgetStyle = stylesheetId;
+      document.head.appendChild(link);
+    }
+    (window as any).__WOLFPACK_PPB_TEMPLATE_CSS_URLS__ = {
+      GRID: ppbGridUrl, LIST: ppbListUrl, HORIZONTAL_SLOTS: ppbModalUrl, VERTICAL_SLOTS: ppbModalUrl,
+    };
+    return manifest.bundleType;
+  }
+
+  async function renderProductionPreview(root: HTMLElement, templateKey: TemplateKey) {
+    const widgetRoot = document.createElement("div");
+    const bundleType = syncStylesheets(templateKey);
+    widgetRoot.id = "bundle-builder-app";
+    widgetRoot.dataset.productionWidgetMount = "";
+    widgetRoot.dataset.previewTemplate = templateKey;
+    widgetRoot.dataset.bundleType = bundleType;
+    document.querySelectorAll(".bundle-product-modal-overlay, .bw-modal-overlay, .toast-container").forEach((element) => element.remove());
+    root.querySelector("[data-production-widget-mount]")?.replaceWith(widgetRoot);
+
+    if (bundleType === "full_page") {
+      class PublicDemoFullPageWidget extends BundleWidgetFullPage {
+        override init() { return initializeController(this as unknown as PreviewController, templateKey); }
+      }
+      new PublicDemoFullPageWidget(widgetRoot);
+    } else {
+      class PublicDemoProductPageWidget extends BundleWidgetProductPage {
+        override init() { return initializeController(this as unknown as PreviewController, templateKey); }
+      }
+      new PublicDemoProductPageWidget(widgetRoot);
+    }
+  }
+
+  const demo = document.querySelector("[data-production-demo]");
+  if (demo instanceof HTMLElement) {
+    const allowedTemplates = new Set(["standard", "classic", "compact", "horizontal", "product-list", "product-grid", "horizontal-slots", "vertical-slots"]);
+    const initialQuery = new URLSearchParams(window.location.search).get("template");
+    let activeTemplate = (initialQuery && allowedTemplates.has(initialQuery) ? initialQuery : "standard") as TemplateKey;
+    const status = demo.querySelector("[data-demo-status]");
+    const previewLabel = demo.querySelector("[data-preview-label]");
+    const viewport = demo.querySelector("[data-preview-viewport]");
+    const setStatus = (message: string) => { if (status) status.textContent = message; };
+    const render = async () => {
+      demo.querySelectorAll<HTMLButtonElement>("[data-template]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.template === activeTemplate)));
+      const button = demo.querySelector<HTMLButtonElement>(`[data-template="${activeTemplate}"]`);
+      const surface = activeTemplate.includes("product-") || activeTemplate.includes("slots") ? "Product-page" : "Full-page";
+      if (previewLabel && button) previewLabel.textContent = `${surface} · ${button.textContent}`;
+      setStatus("Loading production preview…");
+      if (viewport instanceof HTMLElement) await renderProductionPreview(viewport, activeTemplate);
+      window.history.replaceState({}, "", `${window.location.pathname}?template=${activeTemplate}`);
+      setStatus("Production preview ready. Cart, analytics, persistence, navigation, and network side effects are disabled.");
+    };
+    demo.addEventListener("click", (event) => {
+      const element = event.target instanceof Element ? event.target : null;
+      const templateButton = element?.closest<HTMLButtonElement>("[data-template]");
+      if (templateButton?.dataset.template && allowedTemplates.has(templateButton.dataset.template)) {
+        activeTemplate = templateButton.dataset.template as TemplateKey;
+        void render();
+        return;
+      }
+      const actionButton = element?.closest<HTMLButtonElement>("button");
+      if (actionButton && /add bundle to cart|buy it now/i.test(actionButton.textContent ?? "")) {
+        event.preventDefault();
+        setStatus("Preview only — nothing was added to a real cart.");
+        return;
+      }
+      if (element?.closest("a, form")) {
+        event.preventDefault();
+        setStatus("Preview only — external navigation is disabled.");
+      }
+    }, true);
+    demo.addEventListener("submit", (event) => {
+      event.preventDefault();
+      setStatus("Preview only — nothing was added to a real cart.");
+    }, true);
+    void render();
+  }
+</script>
+
+<style>
+  .production-demo { display: grid; grid-template-columns: minmax(17rem, 0.6fr) minmax(0, 1.65fr); gap: 1rem; align-items: start; }
+  .demo-controls { position: sticky; top: 1rem; display: grid; gap: 1.5rem; padding: clamp(1.2rem, 3vw, 2rem); background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 1rem 3rem rgba(20,54,39,0.06); }
+  .demo-controls h2 { margin-bottom: 0.6rem; font-size: 2rem; }
+  .demo-controls p { margin-bottom: 0; color: var(--ink-soft); }
+  .template-groups { display: grid; gap: 1.2rem; }
+  fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+  legend { margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 900; }
+  .template-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+  .template-buttons button { min-height: 2.65rem; padding: 0.45rem; border: 1px solid var(--line); border-radius: 0.65rem; color: var(--ink); background: transparent; font-size: 0.78rem; font-weight: 850; }
+  .template-buttons button[aria-pressed="true"] { color: white; background: var(--forest); border-color: var(--forest); }
+  .truth-note { padding: 1rem; background: var(--sage-soft); border-radius: 0.8rem; font-size: 0.78rem; }
+  .truth-note p { margin-top: 0.3rem; }
+  .store-preview { overflow: hidden; background: white; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  .store-header { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; color: white; background: var(--forest-dark); font-size: 0.75rem; }
+  .store-wordmark { font-family: Georgia, serif; font-size: 1rem; font-weight: 900; }
+  .preview-viewport { min-height: 42rem; padding: clamp(0.6rem, 2vw, 1.4rem); overflow: hidden; background: #fff; }
+  .demo-status { min-height: 2.8rem; margin: 0; padding: 0.75rem 1.25rem; color: var(--ink-soft); background: var(--cream); border-top: 1px solid var(--line); font-size: 0.75rem; }
+  @media (max-width: 960px) { .production-demo { grid-template-columns: 1fr; } .demo-controls { position: static; } }
+  @media (max-width: 520px) { .template-buttons { grid-template-columns: 1fr; } .store-header { display: grid; } .preview-viewport { padding-inline: 0.3rem; } }
+</style>

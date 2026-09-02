@@ -1,0 +1,51 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import { SITE_ORIGIN } from "../data/content";
+
+interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  image: string;
+  imageAlt: string;
+  readingTime: string;
+  lastAudited: Date;
+}
+
+const { title, description, slug, image, imageAlt, readingTime, lastAudited } = Astro.props;
+const path = `/blogs/${slug}/`;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: title,
+  description,
+  image: new URL(image, SITE_ORIGIN).toString(),
+  dateModified: lastAudited.toISOString().slice(0, 10),
+  mainEntityOfPage: new URL(path, SITE_ORIGIN).toString(),
+  author: { "@type": "Organization", name: "Only Bundles" },
+  publisher: { "@type": "Organization", name: "Only Bundles" },
+};
+---
+
+<BaseLayout title={title} description={description} path={path} image={image} ogType="article">
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+  <header class="tutorial-hero">
+    <div class="shell tutorial-hero__inner">
+      <div>
+        <p class="eyebrow">Only Bundles tutorial</p>
+        <h1>{title}</h1>
+        <p class="lede">{description}</p>
+        <p class="tutorial-meta">{readingTime} · Verified against the app on {lastAudited.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+      </div>
+      <div class="media-frame"><img src={image} alt={imageAlt} width="1200" height="760" /></div>
+    </div>
+  </header>
+  <article class="tutorial-prose">
+    <slot />
+    <aside class="tutorial-next">
+      <h2>Keep learning</h2>
+      <p>Browse the complete tutorial library for publishing, design, subscriptions, analytics, and integrations.</p>
+      <a class="button button--primary" href="/blogs/">See all tutorials</a>
+    </aside>
+  </article>
+</BaseLayout>

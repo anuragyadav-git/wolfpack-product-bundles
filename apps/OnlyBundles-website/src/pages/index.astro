@@ -1,35 +1,146 @@
 ---
-const pageTitle = "Only Bundles";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroPreview from "../components/HeroPreview.astro";
+import FinalCta from "../components/FinalCta.astro";
+import { featurePages, SHOPIFY_LISTING } from "../data/content";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="icon" type="image/png" href="/only-bundles-favicon-32.png" />
-    <title>{pageTitle}</title>
-  </head>
-  <body>
-    <main>
-      <img src="/only-bundles-icon.png" alt="" width="128" height="128" />
-      <h1>Only Bundles</h1>
-    </main>
-  </body>
-</html>
+<BaseLayout title="Bundle builder for Shopify" description="Build guided full-page and product-page bundles with flexible merchandising, responsive templates, and shopper-ready previews." path="/">
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Bundle experiences for Shopify</p>
+        <h1><span class="visually-hidden">Only Bundles — </span>Two ways to bundle. One beautiful storefront.</h1>
+        <p class="lede">Create guided full-page journeys and product-page mix-and-match offers that feel at home in your Shopify theme.</p>
+        <div class="button-row"><a class="button button--primary" href={SHOPIFY_LISTING}>Install on Shopify ↗</a><a class="button button--secondary" href="/demo/">Try the interactive demo</a></div>
+        <ul class="hero-notes" aria-label="Only Bundles highlights"><li>Full-page bundles</li><li>Product-page bundles</li><li>Eight responsive templates</li></ul>
+      </div>
+      <HeroPreview />
+    </div>
+    <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+  </section>
+
+  <section class="section choice-section">
+    <div class="shell">
+      <p class="eyebrow">Choose the journey first</p>
+      <div class="section-heading"><h2>Meet shoppers where the bundle makes sense.</h2><p class="lede">Use a dedicated destination when the bundle needs a guided story. Keep it on the product page when the offer belongs beside an anchor product.</p></div>
+      <div class="choice-grid">
+        <a class="choice choice--forest" href="/features/full-page-bundles/"><span>01</span><p>Full-page bundles</p><h3>Build a box, one clear step at a time.</h3><small>Steps · categories · quantity rules · live summary</small><b aria-hidden="true">Explore →</b></a>
+        <a class="choice choice--sage" href="/features/product-page-bundles/"><span>02</span><p>Product-page bundles</p><h3>Mix and match without leaving the product.</h3><small>Lists · grids · slots · variant selectors</small><b aria-hidden="true">Explore →</b></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cream">
+    <div class="shell grid-2 journey">
+      <div class="journey-card">
+        <div class="journey-progress"><span class="active">1</span><i></i><span>2</span><i></i><span>3</span></div>
+        <p class="eyebrow">Step 1 · Essentials</p>
+        <h3>Make the next choice obvious.</h3>
+        <div class="mini-products"><div><img src="/products/sage-trail-bottle.webp" alt="Sage Trail Bottle" /><strong>Sage Trail Bottle</strong><button type="button">− &nbsp; 1 &nbsp; +</button></div><div><img src="/products/everyday-balm.webp" alt="Everyday Balm" /><strong>Everyday Balm</strong><button type="button">Add +</button></div></div>
+      </div>
+      <div><p class="eyebrow">Guided, not complicated</p><h2>Turn rules into a journey shoppers can finish.</h2><p class="lede">Organize products into meaningful steps and categories. Show the quantity required, update progress immediately, and keep the running bundle visible.</p><a class="text-link" href="/blog/how-to-build-a-guided-bundle-journey/">Plan a guided journey →</a></div>
+    </div>
+  </section>
+
+  <section class="section merchandising">
+    <div class="shell">
+      <div class="section-heading"><div><p class="eyebrow">Merchandising with clarity</p><h2>Give every incentive a reason to exist.</h2></div><p class="lede">Let shoppers see what they unlock, what costs extra, and how the final total changes.</p></div>
+      <div class="reward-grid">
+        <article><span class="reward-icon">10%</span><h3>Tiered discounts</h3><p>Reward larger bundles and make the next saving visible.</p></article>
+        <article><span class="reward-icon">Gift</span><h3>Gifts</h3><p>Unlock a clearly labelled reward when its real threshold is met.</p></article>
+        <article><span class="reward-icon">+</span><h3>Add-ons &amp; upsells</h3><p>Offer useful extras while keeping paid selections separate.</p></article>
+        <article><span class="reward-icon">↻</span><h3>Selling plans</h3><p>Present one-time and recurring choices from existing Shopify plans.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--forest templates">
+    <div class="shell grid-2">
+      <div><p class="eyebrow">Eight responsive templates</p><h2>One product system. Eight starting points.</h2><p class="lede">Choose Standard, Classic, Compact, or Horizontal for full-page bundles. Use Product List, Product Grid, Horizontal Slots, or Vertical Slots on product pages.</p><div class="button-row"><a class="button button--light" href="/features/design-and-templates/">Explore templates</a><a class="button template-link" href="/demo/">Switch them live</a></div></div>
+      <div class="template-stack" aria-label="Only Bundles template names">
+        {['Standard','Classic','Compact','Horizontal','Product List','Product Grid','Horizontal Slots','Vertical Slots'].map((name, index) => <span style={`--index:${index}`}>{name}<b>{index < 4 ? 'Full page' : 'Product page'}</b></span>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell">
+      <p class="eyebrow">From offer to insight</p><div class="section-heading"><h2>Build deliberately. Learn from the journey.</h2><p class="lede">Control storefront eligibility and real campaign timing, then review engagement, add-to-cart activity, attributed orders, and revenue inside the app.</p></div>
+      <div class="feature-links">{featurePages.slice(4).map((feature) => <a href={`/features/${feature.slug}/`}><small>{feature.eyebrow}</small><strong>{feature.title}</strong><span aria-hidden="true">↗</span></a>)}</div>
+    </div>
+  </section>
+
+  <section class="section section--cream pricing-teaser">
+    <div class="shell grid-2"><div><p class="eyebrow">Start free</p><h2>Build your first public bundle before you scale.</h2><p class="lede">The Free plan includes both bundle types and core merchandising. Growth adds unlimited public bundles, every template, advanced design and analytics, and priority support.</p><a class="button button--primary" href="/pricing/">Compare plans</a></div><div class="price-card"><span>Growth</span><strong>$19.99 <small>/ month</small></strong><p>or $199/year · 14-day free trial</p><a href={SHOPIFY_LISTING}>See current pricing on Shopify ↗</a></div></div>
+  </section>
+
+  <section class="section faq"><div class="shell grid-2"><div><p class="eyebrow">Questions, answered</p><h2>A clear path from install to storefront.</h2><a class="text-link" href="/help/">Visit the Help centre →</a></div><div class="questions"><details><summary>What is the difference between the two bundle types?</summary><p>Full-page bundles guide shoppers through a dedicated multi-step journey. Product-page bundles add a mix-and-match experience to a Shopify product template.</p></details><details><summary>Do I need to create a Shopify Page?</summary><p>No. Full-page bundles use their dedicated storefront route, while product-page bundles use a theme app block.</p></details><details><summary>Can I use selling plans?</summary><p>Yes. Only Bundles can present compatible plans that are already owned by Shopify or your subscription provider.</p></details><details><summary>Does the demo add products to a cart?</summary><p>No. The public demo is a deterministic simulator and never connects to a merchant store or real Shopify cart.</p></details></div></div></section>
+  <section class="section section--forest">
+    <div class="shell grid-2">
+      <div><p class="eyebrow">Merchant learning hub</p><h2>Follow the complete setup, not guesswork.</h2></div>
+      <div><p class="lede">Use eleven production-audited tutorials for your first bundle, storefront placement, discounts, design, subscriptions, visibility, analytics, and page builders.</p><a class="button button--light" href="/blogs/">Browse Only Bundles tutorials</a></div>
+    </div>
+  </section>
+  <FinalCta />
+</BaseLayout>
+
 <style>
-  :global(*) { box-sizing: border-box; }
-  :global(body) {
-    margin: 0;
-    min-height: 100vh;
-    display: grid;
-    place-items: center;
-    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-    color: #172b4d;
-    background: #f6f7f9;
-  }
-  main { text-align: center; }
-  img { display: block; margin-inline: auto; }
-  h1 { margin-block: 1rem 0; font-size: clamp(2rem, 6vw, 3.5rem); }
+  .hero { position: relative; overflow: hidden; padding-block: clamp(4rem, 9vw, 8rem); background: var(--cream); }
+  .hero-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(26rem, 1.1fr); gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .hero h1 { margin-bottom: 1.5rem; }
+  .hero .button-row { margin-top: 2rem; }
+  .hero-notes { display: flex; flex-wrap: wrap; gap: 0.6rem; padding: 0; margin: 2rem 0 0; list-style: none; }
+  .hero-notes li { padding: 0.38rem 0.7rem; background: rgba(255,255,255,0.7); border: 1px solid var(--line); border-radius: 999px; font-size: 0.78rem; font-weight: 800; }
+  .orbit { position: absolute; border-radius: 50%; border: 3rem solid rgba(167,194,154,0.25); }
+  .orbit-a { width: 24rem; height: 24rem; right: -9rem; top: -10rem; }
+  .orbit-b { width: 18rem; height: 18rem; left: 38%; bottom: -14rem; border-color: rgba(254,138,101,0.12); }
+  .section-heading { display: flex; justify-content: space-between; gap: 3rem; align-items: end; margin-bottom: 3rem; }
+  .section-heading h2 { margin-bottom: 0; }
+  .section-heading .lede { max-width: 31rem; }
+  .choice-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 1rem; }
+  .choice { min-height: 28rem; display: flex; flex-direction: column; padding: clamp(1.5rem, 4vw, 3rem); border-radius: var(--radius-lg); text-decoration: none; transition: transform 180ms ease; }
+  .choice:hover { transform: translateY(-4px); }
+  .choice > span { width: 2.6rem; height: 2.6rem; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-weight: 800; }
+  .choice p { margin: auto 0 0.65rem; font-size: 0.8rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; }
+  .choice h3 { max-width: 14ch; margin-bottom: 1rem; font-size: clamp(2.2rem, 4.5vw, 4.4rem); }
+  .choice small { opacity: 0.76; }
+  .choice b { margin-top: 2rem; }
+  .choice--forest { color: white; background: var(--forest); }
+  .choice--forest h3 { color: white; }
+  .choice--sage { background: var(--sage-soft); }
+  .journey-card { padding: clamp(1rem, 3vw, 2rem); background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow); transform: rotate(-1.2deg); }
+  .journey-progress { display: flex; align-items: center; margin-bottom: 2rem; }
+  .journey-progress span { display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid var(--line); border-radius: 50%; font-size: 0.75rem; font-weight: 900; }
+  .journey-progress .active { color: white; background: var(--forest); }
+  .journey-progress i { flex: 1; height: 1px; background: var(--line); }
+  .mini-products { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .mini-products div { display: grid; gap: 0.5rem; padding: 0.6rem; border: 1px solid var(--line); border-radius: 0.9rem; }
+  .mini-products img { aspect-ratio: 1; object-fit: cover; border-radius: 0.65rem; }
+  .mini-products strong { font-size: 0.85rem; }
+  .mini-products button { min-height: 2.5rem; border: 0; border-radius: 0.6rem; color: white; background: var(--forest); font-weight: 800; }
+  .reward-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+  .reward-grid article { padding: 1.6rem; border: 1px solid var(--line); border-radius: var(--radius); }
+  .reward-grid p { color: var(--ink-soft); }
+  .reward-icon { display: grid; width: 3.4rem; height: 3.4rem; place-items: center; margin-bottom: 3rem; border-radius: 1rem; background: var(--cream); font-weight: 900; }
+  .template-link { color: white; border-color: rgba(255,255,255,0.5); }
+  .template-stack { display: grid; gap: 0.55rem; transform: rotate(1deg); }
+  .template-stack span { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.2rem; color: var(--forest-dark); background: var(--cream); border-radius: 0.8rem; font-weight: 900; transform: translateX(calc(var(--index) * 0.25rem)); }
+  .template-stack b { font-size: 0.74rem; opacity: 0.65; }
+  .feature-links { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .feature-links a { display: grid; grid-template-columns: 1fr auto; gap: 0.35rem 2rem; padding: 1.5rem; border-block: 1px solid var(--line); text-decoration: none; }
+  .feature-links small { grid-column: 1; color: var(--coral); font-weight: 800; text-transform: uppercase; }
+  .feature-links strong { max-width: 31rem; font-family: Georgia, serif; font-size: 1.35rem; }
+  .feature-links span { grid-column: 2; grid-row: 1 / 3; align-self: center; font-size: 1.5rem; }
+  .price-card { padding: clamp(2rem, 5vw, 4rem); color: white; background: var(--forest); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  .price-card > span { display: block; margin-bottom: 2rem; color: var(--sage); font-weight: 900; }
+  .price-card strong { display: block; font-family: Georgia, serif; font-size: clamp(3rem, 7vw, 5.5rem); line-height: 1; }
+  .price-card strong small { font-family: Inter, sans-serif; font-size: 1rem; }
+  .price-card a { font-weight: 800; }
+  .questions details { padding-block: 1.25rem; border-bottom: 1px solid var(--line); }
+  .questions summary { cursor: pointer; font-weight: 850; }
+  .questions p { color: var(--ink-soft); }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } .reward-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 700px) { .section-heading { display: block; } .choice-grid, .feature-links { grid-template-columns: 1fr; } .choice { min-height: 23rem; } }
+  @media (max-width: 500px) { .reward-grid { grid-template-columns: 1fr; } .journey-card { transform: none; } }
 </style>

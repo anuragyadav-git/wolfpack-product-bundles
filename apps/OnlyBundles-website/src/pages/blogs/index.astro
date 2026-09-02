@@ -1,0 +1,38 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import TutorialCard from "../../components/TutorialCard.astro";
+import { getTutorialPresentation } from "../../data/tutorials";
+
+const tutorials = (await getCollection("tutorials", ({ data }) => data.status === "published"))
+  .sort((a, b) => getTutorialPresentation(a.data.id).order - getTutorialPresentation(b.data.id).order);
+---
+
+<BaseLayout
+  title="Only Bundles tutorials"
+  description="Detailed, production-verified tutorials for creating, publishing, designing, promoting, and measuring bundles with Only Bundles for Shopify."
+  path="/blogs/"
+>
+  <section class="page-hero">
+    <div class="shell">
+      <p class="eyebrow">Merchant learning hub</p>
+      <h1>Build better bundles, one clear step at a time.</h1>
+      <p class="lede">Use these detailed guides to move from your first bundle to advanced merchandising, subscriptions, analytics, visibility, and page-builder placement.</p>
+    </div>
+  </section>
+  <section class="section shell">
+    <div class="tutorial-grid">
+      {tutorials.map(({ data }) => {
+        const presentation = getTutorialPresentation(data.id);
+        return <TutorialCard
+          href={`/blogs/${data.id}/`}
+          title={data.title}
+          description={data.summary}
+          readingTime={presentation.readingTime}
+          image={presentation.image}
+          imageAlt={presentation.imageAlt}
+        />;
+      })}
+    </div>
+  </section>
+</BaseLayout>

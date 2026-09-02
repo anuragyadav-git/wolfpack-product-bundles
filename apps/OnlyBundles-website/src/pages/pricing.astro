@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FinalCta from "../components/FinalCta.astro";
+import { SHOPIFY_LISTING } from "../data/content";
+---
+<BaseLayout title="Pricing" description="Compare the verified Only Bundles Free and Growth plans for Shopify merchants." path="/pricing/">
+  <section class="page-hero"><div class="shell"><p class="eyebrow">Simple plans</p><h1>Start with a real bundle. Grow when the catalogue does.</h1><p class="lede">Both plans support full-page and product-page bundles. Shopify owns billing, trials, and plan changes.</p></div></section>
+  <section class="section"><div class="shell plans">
+    <article class="plan"><div><span>Free</span><strong>$0</strong><p>Build and publish a focused first offer.</p></div><ul><li>One public bundle</li><li>Two enabled steps or categories</li><li>Product-page and full-page bundles</li><li>Discounts, gifts, add-ons and upsells</li></ul><a class="button" href={SHOPIFY_LISTING}>Install free ↗</a></article>
+    <article class="plan plan--growth"><div><span>Growth</span><strong>$19.99 <small>/ month</small></strong><p>or $199/year · 14-day free trial</p></div><ul><li>Unlimited public bundles and steps</li><li>All eight bundle templates</li><li>Advanced Design and analytics</li><li>Priority support</li><li>Offer targeting and urgency controls</li></ul><a class="button button--light" href={SHOPIFY_LISTING}>Start Growth trial ↗</a></article>
+  </div><p class="verified">Pricing verified September 3, 2026. <a href={SHOPIFY_LISTING}>See current pricing on Shopify ↗</a></p></section>
+  <section class="section section--cream"><div class="shell grid-3"><article class="card"><h3>Shopify-native billing</h3><p>Install and choose a plan through Shopify. Shopify handles trial accounting and billing-period changes.</p></article><article class="card"><h3>Your bundle data stays yours</h3><p>Plan enforcement changes publication access; it does not delete saved bundles, products, design settings, copy, or analytics.</p></article><article class="card"><h3>One Growth plan</h3><p>Monthly and annual billing are two periods for the same Growth plan, not separate feature tiers.</p></article></div></section>
+  <FinalCta title="Start with the bundle you want shoppers to build." />
+</BaseLayout>
+<style>
+  .plans { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 1rem; align-items: stretch; }
+  .plan { display: flex; flex-direction: column; padding: clamp(1.6rem, 4vw, 3rem); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+  .plan span { display: block; margin-bottom: 1.5rem; font-weight: 900; }
+  .plan strong { display: block; font-family: Georgia, serif; font-size: clamp(3.5rem, 7vw, 6rem); line-height: 1; }
+  .plan strong small { font-family: Inter, sans-serif; font-size: 1rem; }
+  .plan ul { display: grid; gap: 0.8rem; padding-left: 1.3rem; margin-block: 2.5rem; }
+  .plan .button { margin-top: auto; align-self: start; }
+  .plan--growth { color: white; background: var(--forest); box-shadow: var(--shadow); }
+  .plan--growth strong, .plan--growth span { color: white; }
+  .verified { margin-top: 1.5rem; color: var(--ink-soft); text-align: center; }
+  .verified a { font-weight: 800; }
+  .card p { color: var(--ink-soft); }
+  @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } }
+</style>

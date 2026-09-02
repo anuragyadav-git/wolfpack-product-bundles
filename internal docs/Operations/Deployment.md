@@ -5,7 +5,7 @@ title: Deployment
 type: operations
 status: active
 summary: Deployment commands, environment configuration, and Shopify-managed installation rules.
-last_audited: 2026-09-02
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -19,6 +19,7 @@ source_paths:
   - apps/OnlyBundles-website/wrangler.jsonc
 related_docs:
   - Operations/Deployment General Sync.md
+  - Architecture/Public Website.md
 tags:
   - deployment
 keywords:
@@ -124,7 +125,7 @@ npm run website:deploy
 npm run website:preview
 ```
 
-The Worker is `only-bundles-website`. It publishes only to `workers.dev`; no custom domain, runtime bindings, build secrets, routes, or Wrangler environments are configured.
+The Worker is `only-bundles-website`. It publishes only to `workers.dev`; no custom domain, runtime bindings, build secrets, routes, Wrangler environments, or visitor analytics are configured. `npm run website:deploy` first runs the website release check. Privacy and Terms are approved, and no analytics token or analytics build variable is required. Preview uploads remain available for review without bypassing the production gate.
 
 Workers Builds uses the repository root so installation consumes the root lockfile:
 
