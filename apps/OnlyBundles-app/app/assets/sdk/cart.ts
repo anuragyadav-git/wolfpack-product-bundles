@@ -2,6 +2,7 @@
 
 import { buildStorefrontApiPath } from '../../config/storefront-proxy-routes.js';
 import { buildOfferAnalyticsCartProperties } from '../widgets/shared/engine/cart-submit.js';
+import { resolvePpbSelectionMetric } from '../widgets/shared/ppb-condition-selections.js';
 
 function _generateBundleInstanceId(bundleId: string) {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -86,12 +87,12 @@ export function buildCartItems(state: any) {
       var qty = stepSelections[variantId];
       if (!qty || qty <= 0) return;
 
-      var product = productsInStep.find(function (p: any) {
-        return String(p.variantId || p.id) === String(variantId);
-      });
-      if (!product) return;
+      var resolved = resolvePpbSelectionMetric(productsInStep, variantId);
+      var product = resolved.product;
+      var variant = resolved.metric;
+      if (!product || !variant) return;
 
-      if (product.available === false) {
+      if (variant.available === false) {
         unavailable.push(product.title || variantId);
         return;
       }
@@ -111,7 +112,7 @@ export function buildCartItems(state: any) {
         quantity: qty,
         properties: properties,
       });
-      selectedLines.push({ product: product, quantity: qty, step: step });
+      selectedLines.push({ product: { ...product, price: variant.price }, quantity: qty, step: step });
     });
   });
 

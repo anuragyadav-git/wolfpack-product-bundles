@@ -20,7 +20,7 @@ export function initDebugMode(state: any, sdk: any) {
   console.groupEnd();
 
   var events: any[] = [
-    'wbp:ready', 'wbp:item-added', 'wbp:item-removed',
+    'wbp:ready', 'wbp:init-failed', 'wbp:item-added', 'wbp:item-removed',
     'wbp:step-cleared', 'wbp:cart-success', 'wbp:cart-failed',
     'wbp:discount-tier-reached',
   ];

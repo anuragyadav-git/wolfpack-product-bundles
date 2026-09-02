@@ -8,6 +8,7 @@ export {};
 const {
   buildCartItems,
   buildBundleDetailsDisplayProperties,
+  addBundleToCart,
 } = require('../../../app/assets/sdk/cart.js');
 
 function makeState(overrides: object = {}) {
@@ -156,5 +157,51 @@ describe('buildCartItems', () => {
       'Retail Price': '$20.00',
       'You Save': '$5.00 (25%)',
     });
+  });
+});
+
+describe('addBundleToCart', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('requests a Cart Transform runtime token before submitting the Shopify cart form', async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      calls.push({ url, init });
+      if (url.includes('cart-transform-runtime-token')) {
+        return { ok: true, json: async () => ({ token: 'signed-runtime-token' }) } as Response;
+      }
+      if (url === '/cart/add') {
+        return { ok: true, text: async () => '{}' } as Response;
+      }
+      if (url === '/cart.js') {
+        return { ok: false, json: async () => null } as Response;
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }) as jest.Mock;
+    const emit = jest.fn();
+
+    await addBundleToCart(makeState(), () => ({ valid: true, errors: {} }), emit);
+
+    expect(calls[0].url).toContain('cart-transform-runtime-token');
+    expect(calls[1].url).toBe('/cart/add');
+    expect(calls[1].init?.body).toBeInstanceOf(FormData);
+    expect((calls[1].init?.body as FormData).get('items[0][properties][_wolfpack_bundle_runtime]')).toBe('signed-runtime-token');
+    expect(emit).toHaveBeenCalledWith('wbp:cart-success', { bundleId: 'bundle_1' });
+  });
+
+  it('emits cart failure and does not submit when runtime authorization fails', async () => {
+    global.fetch = jest.fn(async () => ({
+      ok: false,
+      json: async () => ({ error: 'Not authorized' }),
+    })) as jest.Mock;
+    const emit = jest.fn();
+
+    await addBundleToCart(makeState(), () => ({ valid: true, errors: {} }), emit);
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith('wbp:cart-failed', { error: 'Not authorized' });
   });
 });

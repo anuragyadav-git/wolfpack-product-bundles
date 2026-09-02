@@ -2,7 +2,7 @@
 
 import { localizeBundleConfig } from '../widgets/shared/localized-bundle-config.js';
 
-export function loadBundleConfig(container: HTMLElement, state: any) {
+export function loadBundleConfig(container: HTMLElement, state: any, locale?: string) {
   var configValue = container && container.dataset && container.dataset.bundleConfig;
 
   if (!configValue || configValue.trim() === '' || configValue === 'null' || configValue === 'undefined') {
@@ -13,7 +13,7 @@ export function loadBundleConfig(container: HTMLElement, state: any) {
   try {
     bundleData = localizeBundleConfig(
       JSON.parse(configValue),
-      typeof window !== 'undefined' ? (window as any).Shopify?.locale || '' : '',
+      locale ?? (typeof window !== 'undefined' ? (window as any).Shopify?.locale || '' : ''),
     );
   } catch (e: any) {
     return { success: false, error: 'data-bundle-config is not valid JSON: ' + e.message };
@@ -21,6 +21,14 @@ export function loadBundleConfig(container: HTMLElement, state: any) {
 
   if (!bundleData || typeof bundleData !== 'object' || !bundleData.id) {
     return { success: false, error: 'data-bundle-config is missing required "id" field.' };
+  }
+  if (
+    bundleData.schemaVersion !== 3
+    || bundleData.bundleType !== 'product_page'
+    || !Array.isArray(bundleData.steps)
+    || bundleData.runtimeAuthorization?.version !== 2
+  ) {
+    return { success: false, error: 'data-bundle-config must be a valid schema-v3 Product Page Bundle snapshot.' };
   }
 
   state.bundleId = bundleData.id;
@@ -37,12 +45,7 @@ export function loadBundleConfig(container: HTMLElement, state: any) {
     }
   });
 
-  // stepProductData is populated lazily from bundle step products
-  // (same shape as widget's stepProductData: array of arrays, indexed by step position)
-  state.stepProductData = state.steps.map(function (step: any) {
-    return Array.isArray(step.products) ? step.products : [];
-  });
-
-  state.isReady = true;
+  state.stepProductData = state.steps.map(function () { return []; });
+  state.isReady = false;
   return { success: true };
 }

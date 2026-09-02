@@ -9,6 +9,7 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { createMessageFragment } from '../../shared/message-segments.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
 import { drawerLayerManager } from '../../shared/drawer-layer-manager.js';
+import { buildPpbConditionSelections } from '../../shared/ppb-condition-selections.js';
 
 function normalizeSelectionKey(widget: any, value: string) {
   return typeof widget?.normalizeSelectionKey === 'function'
@@ -347,29 +348,11 @@ validateStepCondition(stepIndex: string|number, productId: any, newQuantity: num
 },
 
   _buildConditionAwareStepSelections(stepProducts: any, currentSelections: any) {
-    const selections = currentSelections || {};
-    const translated: any = {};
-    for (const [selKey, qty] of Object.entries(selections)) {
-      const quantity = Number(qty) || 0;
-      if (quantity <= 0) continue;
-
-      const product = this.findProductBySelectionKey(stepProducts, selKey);
-      const normalizedSelectionId = normalizeSelectionKey(this, selKey);
-      const metric = product && Array.isArray(product.variants)
-        ? product.variants.find((variant: any)  => (
-          normalizeSelectionKey(this, variant?.selectionId || '') === normalizedSelectionId
-        )) || product
-        : product;
-      const unitAmount = Number(metric?.price || 0);
-      const unitWeight = Number(metric?.weight || metric?.weightInGrams || metric?.grams || 0);
-      const current = translated[selKey] || { quantity: 0, amount: 0, weight: 0 };
-      translated[selKey] = {
-        quantity: current.quantity + quantity,
-        amount: current.amount + (unitAmount * quantity),
-        weight: current.weight + (unitWeight * quantity),
-      };
-    }
-    return translated;
+    return buildPpbConditionSelections(
+      { conditionType: 'amount' },
+      stepProducts,
+      currentSelections,
+    );
   },
 
 validateStep(stepIndex: string|number) {
@@ -381,26 +364,7 @@ validateStep(stepIndex: string|number) {
   // each variant-ID key → its parent product ID before the validator runs.
   if (ConditionValidator.isCategoryRuleMode(step)) {
     const products = this.stepProductData[stepIndex] || [];
-    const translated: any = {};
-    for (const [selKey, qty] of Object.entries(currentSelections)) {
-      const product = this.findProductBySelectionKey(products, selKey);
-      const normalizedSelectionId = normalizeSelectionKey(this, selKey);
-      const metric = product && Array.isArray(product.variants)
-        ? product.variants.find((variant: any)  => (
-          normalizeSelectionKey(this, variant?.selectionId || '') === normalizedSelectionId
-        )) || product
-        : product;
-      const productId = String((product && (product.parentProductId || product.id)) || selKey);
-      const quantity = Number(qty) || 0;
-      const price = Number(metric?.price || 0);
-      const weight = Number(metric?.weight || metric?.weightInGrams || metric?.grams || 0);
-      const current = translated[productId] || { quantity: 0, amount: 0, weight: 0 };
-      translated[productId] = {
-        quantity: current.quantity + quantity,
-        amount: current.amount + (price * quantity),
-        weight: current.weight + (weight * quantity),
-      };
-    }
+    const translated = buildPpbConditionSelections(step, products, currentSelections);
     return ConditionValidator.isStepConditionSatisfied(step, translated);
   }
 

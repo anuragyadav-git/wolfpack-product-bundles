@@ -10,68 +10,105 @@
 // ─── Core Entities ────────────────────────────────────────────────────────────
 
 export interface Step {
-  id: string;
-  name: string;
-  conditionType: string | null;
-  conditionOperator: string | null;
-  conditionValue: number | null;
-  conditionOperator2?: string | null;
-  conditionValue2?: number | null;
-  minQuantity?: number | null;
-  isFreeGift: boolean;
-  isDefault: boolean;
-  products?: Product[];
+  readonly id: string;
+  readonly name: string;
+  readonly conditionType: 'quantity' | 'amount' | 'weight' | null;
+  readonly conditionOperator: string | null;
+  readonly conditionValue: number | null;
+  readonly conditionOperator2?: string | null;
+  readonly conditionValue2?: number | null;
+  readonly isFreeGift: boolean;
+  readonly isDefault: boolean;
+  readonly products: readonly Product[];
+  readonly categories?: readonly unknown[];
 }
 
 export interface Product {
-  id?: string | number;
-  variantId?: string | number;
-  title: string;
-  price: number;       // cents
-  available: boolean;
-  variants?: Variant[];
+  readonly id: string;
+  readonly selectionId: string;
+  readonly variantId: string;
+  readonly parentProductId?: string;
+  readonly title: string;
+  readonly imageUrl: string;
+  readonly price: number;
+  readonly compareAtPrice: number | null;
+  readonly available: boolean;
+  readonly quantityAvailable: number | null;
+  readonly currentlyNotInStock: boolean;
+  readonly weight: number;
+  readonly weightUnit: 'GRAMS';
+  readonly description: string;
+  readonly descriptionHtml: string;
+  readonly images: readonly { readonly src: string }[];
+  readonly options: readonly ProductOption[];
+  readonly variants: readonly Variant[];
 }
 
 export interface Variant {
-  id: string | number;
-  title?: string;
-  price: number;       // cents
-  available: boolean;
+  readonly id: string;
+  readonly selectionId: string;
+  readonly title?: string;
+  readonly price: number;
+  readonly compareAtPrice: number | null;
+  readonly available: boolean;
+  readonly quantityAvailable: number | null;
+  readonly currentlyNotInStock: boolean;
+  readonly weight: number;
+  readonly weightUnit: 'GRAMS';
+  readonly option1: string | null;
+  readonly option2: string | null;
+  readonly option3: string | null;
+  readonly selectedOptions: readonly { readonly name: string; readonly value: string }[];
+  readonly image: { readonly src: string } | null;
+}
+
+export interface ProductOption {
+  readonly id?: string;
+  readonly name: string;
+  readonly optionValues: readonly {
+    readonly id?: string;
+    readonly name: string;
+    readonly swatch: {
+      readonly color: string | null;
+      readonly image: { readonly src: string; readonly altText: string | null } | null;
+    } | null;
+  }[];
 }
 
 export interface DiscountRule {
-  condition: {
-    type: 'quantity' | 'amount';
-    operator: 'gte' | 'gt' | 'lte' | 'lt' | 'eq';
-    value: number;
-  };
-  discount: {
-    method: 'percentage_off' | 'fixed_amount_off' | 'fixed_bundle_price';
-    value: number;
-  };
+  readonly id?: string;
+  readonly conditionType: 'quantity' | 'amount';
+  readonly conditionOperator: 'gte' | 'gt' | 'lte' | 'lt' | 'eq' | 'equal_to' | 'greater_than' | 'less_than' | 'greater_than_or_equal_to' | 'less_than_or_equal_to';
+  readonly conditionValue: number;
+  readonly discountValue: number;
+  readonly customerBuys?: number;
+  readonly customerGets?: number;
+  readonly bxyDiscountType?: 'percentage' | 'fixed_amount';
+  readonly bxyApplyMode?: 'lowest_priced' | 'latest_added';
 }
 
 export interface DiscountConfiguration {
-  enabled: boolean;
-  rules: DiscountRule[];
+  readonly enabled: boolean;
+  readonly method: 'percentage_off' | 'fixed_amount_off' | 'fixed_bundle_price' | 'buy_x_get_y';
+  readonly rules: readonly DiscountRule[];
 }
 
 // ─── SDK State ────────────────────────────────────────────────────────────────
 
 /** Read-only snapshot of the current bundle state. */
 export interface WolfpackBundleState {
-  /** True once the SDK has parsed the bundle config and is ready to accept API calls. */
+  /** True once eligibility checks and Shopify product hydration have completed. */
   readonly isReady: boolean;
   readonly bundleId: string | null;
   readonly bundleName: string | null;
   /** All steps configured for this bundle in the App Admin. */
-  readonly steps: Step[];
+  readonly steps: readonly Step[];
   /**
    * Current selections: stepId → variantId (string) → quantity.
    * Example: { "step_abc": { "12345678": 2 } }
    */
   readonly selections: Record<string, Record<string, number>>;
-  readonly discountConfiguration: DiscountConfiguration | null;
+  readonly discountConfiguration: Readonly<DiscountConfiguration> | null;
 }
 
 // ─── Return Types ─────────────────────────────────────────────────────────────
@@ -113,18 +150,18 @@ export interface WolfpackBundleSDK {
   readonly state: WolfpackBundleState;
 
   /**
-   * Add `qty` units of `variantId` to `stepId`.
+   * Add `quantity` units of `variantId` to `stepId`.
    * Validates against the step's min/max condition before mutating state.
    * Fires `wbp:item-added` on success.
    */
-  addItem(stepId: string, variantId: string | number, qty: number): AddRemoveResult;
+  addItem(stepId: string, variantId: string | number, quantity: number): AddRemoveResult;
 
   /**
-   * Remove `qty` units of `variantId` from `stepId`.
+   * Remove `quantity` units of `variantId` from `stepId`.
    * If quantity reaches 0, the variant is removed from selections entirely.
    * Fires `wbp:item-removed` on success.
    */
-  removeItem(stepId: string, variantId: string | number, qty: number): AddRemoveResult;
+  removeItem(stepId: string, variantId: string | number, quantity: number): AddRemoveResult;
 
   /**
    * Clear all selections in `stepId`.
@@ -164,21 +201,24 @@ export interface WolfpackBundleSDK {
 
 export interface WbpReadyDetail {
   bundleId: string;
-  steps: Step[];
+  steps: readonly Step[];
+}
+
+export interface WbpInitFailedDetail {
+  code: 'INVALID_CONFIGURATION' | 'MISSING_STOREFRONT_RUNTIME' | 'PRODUCT_HYDRATION_FAILED';
+  message: string;
 }
 
 export interface WbpItemAddedDetail {
   stepId: string;
   variantId: string;
-  qty: number;
-  selections: Record<string, Record<string, number>>;
+  quantity: number;
 }
 
 export interface WbpItemRemovedDetail {
   stepId: string;
   variantId: string;
-  qty: number;
-  selections: Record<string, Record<string, number>>;
+  quantity: number;
 }
 
 export interface WbpStepClearedDetail {
@@ -212,6 +252,7 @@ declare global {
 
   interface WindowEventMap {
     'wbp:ready': CustomEvent<WbpReadyDetail>;
+    'wbp:init-failed': CustomEvent<WbpInitFailedDetail>;
     'wbp:item-added': CustomEvent<WbpItemAddedDetail>;
     'wbp:item-removed': CustomEvent<WbpItemRemovedDetail>;
     'wbp:step-cleared': CustomEvent<WbpStepClearedDetail>;

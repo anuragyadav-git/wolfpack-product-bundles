@@ -36,7 +36,7 @@ function makeState() {
     bundleName: 'Bundle',
     bundleData,
     steps: [step],
-    stepProductData: [[{ selectionId: 'variant-1', price: 1000 }]],
+    stepProductData: [[{ selectionId: 'variant-1', variantId: 'variant-1', available: true, price: 1000 }]],
     selections: { 'step-1': { 'variant-1': 1 } },
     discountConfiguration: bundleData.pricing,
   };
@@ -53,6 +53,11 @@ describe('SDK discount tier feedback event', () => {
       'wbp:item-added',
       'wbp:discount-tier-reached',
     ]);
+    expect(emitted[0].detail).toEqual({
+      stepId: 'step-1',
+      variantId: 'variant-1',
+      quantity: 1,
+    });
     expect(emitted[1].detail).toEqual({
       bundleId: 'bundle-1',
       tierId: 'tier-1',

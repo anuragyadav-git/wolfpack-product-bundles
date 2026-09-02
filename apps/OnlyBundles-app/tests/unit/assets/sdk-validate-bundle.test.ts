@@ -22,7 +22,7 @@ function makeStep(id: string, operator: string, value: number, isFreeGift = fals
 }
 
 function makeState(steps: object[], selections: Record<string, Record<string, number>>) {
-  return { steps, selections, isReady: true };
+  return { steps, selections, isReady: true, stepProductData: steps.map(() => []) };
 }
 
 describe('validateStep', () => {
@@ -55,6 +55,42 @@ describe('validateStep', () => {
     const result = validateStep('step_99', state, ConditionValidator);
     expect(result.valid).toBe(false);
     expect(result.message).toMatch(/step_99/);
+  });
+
+  it.each([
+    ['amount', 50, 2, 2500, 0],
+    ['weight', 500, 2, 0, 250],
+  ])('validates %s using hydrated variant metrics', (conditionType, conditionValue, quantity, price, weight) => {
+    const step = { ...makeStep('step_1', 'greater_than_or_equal_to', conditionValue), conditionType };
+    const state: any = makeState([step], { step_1: { variant_1: quantity } });
+    state.stepProductData = [[{
+      id: 'product_1',
+      selectionId: 'variant_1',
+      variantId: 'variant_1',
+      price,
+      weight,
+      variants: [{ selectionId: 'variant_1', price, weight }],
+    }]];
+    expect(validateStep('step_1', state)).toEqual({ valid: true, message: '' });
+  });
+
+  it('validates category rules after translating selected variant IDs to product IDs', () => {
+    const step = {
+      id: 'step_1',
+      categories: [{
+        products: [{ selectionId: 'product_1' }],
+        conditions: [{ type: 'amount', condition: 'greaterThanOrEqualTo', value: 50 }],
+      }],
+    };
+    const state: any = makeState([step], { step_1: { variant_1: 1 } });
+    state.stepProductData = [[{
+      id: 'product_1',
+      selectionId: 'variant_1',
+      variantId: 'variant_1',
+      price: 5000,
+      variants: [{ selectionId: 'variant_1', price: 5000 }],
+    }]];
+    expect(validateStep('step_1', state)).toEqual({ valid: true, message: '' });
   });
 
   it('returns valid for step with no selections when no min required', () => {

@@ -1,6 +1,6 @@
 'use strict';
 
-import { ConditionValidator } from '../widgets/shared/condition-validator.js';
+import { isPpbStepConditionSatisfied } from '../widgets/shared/ppb-condition-selections.js';
 
 function _stepIsCategoryRuleMode(step: any) {
   var categories = Array.isArray(step && step.categories) ? step.categories : [];
@@ -17,7 +17,9 @@ export function validateStep(stepId: string, state: any) {
     return { valid: false, message: 'stepId "' + stepId + '" not found in bundle.' };
   }
   var selections = state.selections[stepId] || {};
-  var valid = ConditionValidator.isStepConditionSatisfied(step, selections);
+  var stepIndex = state.steps.indexOf(step);
+  var products = state.stepProductData?.[stepIndex] || [];
+  var valid = isPpbStepConditionSatisfied(step, products, selections);
   if (valid) return { valid: true, message: '' };
 
   // Category-rule mode: surface a generic message. Per-category specifics

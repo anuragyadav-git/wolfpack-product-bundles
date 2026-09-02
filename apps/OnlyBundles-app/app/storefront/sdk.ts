@@ -3,6 +3,7 @@ import { loadBundleConfig } from '../assets/sdk/config-loader.js';
 import { debugLog, initDebugMode } from '../assets/sdk/debug.js';
 import { emit } from '../assets/sdk/events.js';
 import { getDisplayPrice } from '../assets/sdk/get-display-price.js';
+import { hydrateSdkState } from '../assets/sdk/hydration.js';
 import { addItem, clearStep, createState, removeItem } from '../assets/sdk/state.js';
 import { validateBundle, validateStep } from '../assets/sdk/validate-bundle.js';
 import {
@@ -17,10 +18,35 @@ const contextElement = typeof document === 'undefined'
   ? null
   : document.querySelector<HTMLScriptElement>('[data-wpb-context="product-page"]');
 if (contextElement?.textContent) {
-  const context = JSON.parse(contextElement.textContent);
-  Object.assign(window, context);
-  const proxyRoot = context.__WOLFPACK_PPB_STOREFRONT_RUNTIME__?.storefrontProxyRoot;
-  if (proxyRoot) setStorefrontProxyRoot(proxyRoot);
+  try {
+    const context = JSON.parse(contextElement.textContent);
+    Object.assign(window, context);
+    const proxyRoot = context.__WOLFPACK_PPB_STOREFRONT_RUNTIME__?.storefrontProxyRoot;
+    if (proxyRoot) setStorefrontProxyRoot(proxyRoot);
+  } catch (_error) {
+    // Initialization reports a stable configuration failure once an SDK container is found.
+  }
+}
+
+function cloneJson<T>(value: T): T {
+  return value == null ? value : JSON.parse(JSON.stringify(value));
+}
+
+function deepFreeze<T>(value: T): T {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  Object.freeze(value);
+  Object.values(value as Record<string, unknown>).forEach((entry) => deepFreeze(entry));
+  return value;
+}
+
+function copySelections(selections: Record<string, Record<string, number>>) {
+  return Object.fromEntries(
+    Object.entries(selections || {}).map(([stepId, variants]) => [stepId, { ...variants }]),
+  );
+}
+
+function hideSdkContainer(container: HTMLElement) {
+  container.hidden = true;
 }
 
 function captureSdkDiscountTierState(state: any) {
@@ -46,9 +72,9 @@ export function createSdk(state: any) {
         isReady: state.isReady,
         bundleId: state.bundleId,
         bundleName: state.bundleName,
-        steps: state.steps,
-        selections: state.selections,
-        discountConfiguration: state.discountConfiguration,
+        steps: deepFreeze(cloneJson(state.steps)),
+        selections: copySelections(state.selections),
+        discountConfiguration: deepFreeze(cloneJson(state.discountConfiguration)),
       };
     },
     addItem(stepId: string, variantId: string | number, quantity: number) {
@@ -86,27 +112,81 @@ export function createSdk(state: any) {
   };
 }
 
-async function mount(): Promise<void> {
-  const container = document.querySelector<HTMLElement>('[data-sdk-mode="true"]');
-  if (!container) return;
+type InitializeSdkOptions = {
+  targetWindow?: any;
+  runtime?: any;
+  eligibilityResolver?: typeof resolveSpecificLinkOfferStorefrontEligibility;
+  hydrateState?: typeof hydrateSdkState;
+  emitFn?: typeof emit;
+  fetchImpl?: typeof fetch;
+};
 
+export async function initializeSdk(
+  container: HTMLElement,
+  options: InitializeSdkOptions = {},
+): Promise<void> {
+  const targetWindow = options.targetWindow || window;
+  const emitFn = options.emitFn || emit;
   const state = createState();
-  const result = loadBundleConfig(container, state);
-  if (!result.success) throw new Error(result.error);
-  const eligible = await resolveSpecificLinkOfferStorefrontEligibility({
+  const result = loadBundleConfig(container, state, targetWindow.Shopify?.locale || '');
+  if (!result.success) {
+    hideSdkContainer(container);
+    emitFn('wbp:init-failed', { code: 'INVALID_CONFIGURATION', message: result.error });
+    return;
+  }
+
+  const eligibilityResolver = options.eligibilityResolver || resolveSpecificLinkOfferStorefrontEligibility;
+  const eligible = await eligibilityResolver({
     bundle: state.bundleData,
-    locationSearch: window.location.search,
-    countryCode: (window as Window & { currentCountryCode?: string }).currentCountryCode ?? null,
+    locationSearch: targetWindow.location?.search || '',
+    countryCode: targetWindow.currentCountryCode ?? targetWindow.Shopify?.country ?? null,
+    fetchImpl: options.fetchImpl,
   });
   if (!eligible) {
-    container.style.display = 'none';
+    hideSdkContainer(container);
+    return;
+  }
+
+  const runtime = options.runtime ?? targetWindow.__WOLFPACK_PPB_STOREFRONT_RUNTIME__;
+  if (!runtime?.storefrontAccessToken || !runtime?.storefrontApiVersion) {
+    hideSdkContainer(container);
+    emitFn('wbp:init-failed', {
+      code: 'MISSING_STOREFRONT_RUNTIME',
+      message: 'Shopify Storefront runtime is unavailable.',
+    });
+    return;
+  }
+
+  try {
+    const hydrateState = options.hydrateState || hydrateSdkState;
+    await hydrateState(state, {
+      runtime,
+      shop: targetWindow.Shopify?.shop || container.dataset.shop,
+      country: targetWindow.Shopify?.country || targetWindow.currentCountryCode || null,
+      fetchImpl: options.fetchImpl || fetch,
+    });
+  } catch (_error) {
+    hideSdkContainer(container);
+    emitFn('wbp:init-failed', {
+      code: 'PRODUCT_HYDRATION_FAILED',
+      message: 'Shopify product data could not be loaded.',
+    });
     return;
   }
 
   const sdk = createSdk(state);
-  (window as Window & { WolfpackBundles?: ReturnType<typeof createSdk> }).WolfpackBundles = sdk;
+  targetWindow.WolfpackBundles = sdk;
   initDebugMode(state, sdk);
-  emit('wbp:ready', { bundleId: state.bundleId, steps: state.steps });
+  emitFn('wbp:ready', {
+    bundleId: state.bundleId,
+    steps: deepFreeze(cloneJson(state.steps)),
+  });
+}
+
+async function mount(): Promise<void> {
+  const container = document.querySelector<HTMLElement>('[data-sdk-mode="true"]');
+  if (!container) return;
+  await initializeSdk(container);
 }
 
 if (typeof document !== 'undefined') {
