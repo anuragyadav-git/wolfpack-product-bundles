@@ -1,9 +1,44 @@
 {
   "schema_version": 1,
   "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
-  "revision": 1,
+  "revision": 4,
   "status": "complete",
   "items": [
+    {
+      "id": "REF-WPB-STANDARD-STATE-GEOMETRY-R4",
+      "original_filename": "chrome-session-wpb-standard-state-geometry.png",
+      "artifact_path": "",
+      "roles": [
+        "CURRENT",
+        "DESKTOP",
+        "MOBILE",
+        "STATE"
+      ],
+      "component": "FPB Standard product-card price and action row",
+      "state": "default versus selected quantity",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport plus computed bounding rectangles; narrow-window evidence recorded at the Chrome host minimum inner width of 500px",
+      "surrounding_context_included": true,
+      "source": "live Wolfpack draft preview using current SIT extension assets",
+      "provenance": "Direct Chrome DevTools after cache clear and ignore-cache reload; fpb-preset-standard and widget 18.6.0 confirmed",
+      "intended_use": "measured defect evidence",
+      "quality_issues": [
+        "The configured wolfpack-store-test-1 storefront was unavailable",
+        "The Chrome host would not resize below a 500px inner viewport, so exact 390px and 360px verification remains pending"
+      ],
+      "comparable_counterparts": [],
+      "permissions_or_usage_notes": "Read-only draft preview; no cart or order mutation",
+      "approval_status": "approved"
+    },
     {
       "id": "REF-EB-CLASSIC-DESKTOP",
       "original_filename": "chrome-session-eb-classic-1440.png",

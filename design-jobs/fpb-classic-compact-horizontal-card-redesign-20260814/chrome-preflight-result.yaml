@@ -1,146 +1,158 @@
 {
   "schema_version": 1,
   "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
-  "revision": 1,
+  "revision": 4,
   "status": "draft",
-  "checked_at": "",
-  "environment": "",
+  "checked_at": "2026-09-03",
+  "environment": "SIT dev-tunnel app and Shopify development extension on agent-5sfidg3m",
   "selected_page": {
-    "page_id": null,
-    "url": "",
-    "title": ""
+    "page_id": 10,
+    "url": "authenticated SIT preview for FPB bundle cmtbhfi2f0002v0rt4s8kfqoa",
+    "title": "agent"
   },
   "checks": {
     "chrome_mcp_connected": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Direct Chrome DevTools page 7",
       "blocker": "",
       "recovery_action": ""
     },
     "supported_chrome_available": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Snapshot, evaluate, resize, screenshot, console, and network tools responded",
       "blocker": "",
       "recovery_action": ""
     },
     "intended_page_selected": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "FPB bundle 3 draft preview selected",
       "blocker": "",
       "recovery_action": ""
     },
     "app_server_reachable": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "SIT proxy controls, language, products, view, and attribution requests returned 200",
       "blocker": "",
       "recovery_action": ""
     },
     "environment_confirmed": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Shopify dev console reported Wolfpack Bundles SIT connected; served asset URL used the dev extension handle",
       "blocker": "",
       "recovery_action": ""
     },
     "fixture_route_exists": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Authorized SIT fixture Ownership Verify FPB 2026-08-27 was populated with one step and six products, exercised as all four presets, and restored to Standard",
       "blocker": "",
       "recovery_action": ""
     },
     "authentication_intentional": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Preview launched from authenticated Shopify Admin",
       "blocker": "",
       "recovery_action": ""
     },
     "sensitive_tabs_avoided": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "No billing, customer, order, checkout submission, or credentials surface was opened",
       "blocker": "",
       "recovery_action": ""
     },
     "viewport_resize_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
-      "blocker": "",
-      "recovery_action": ""
+      "status": "blocked",
+      "evidence": "1280x800 succeeded; requesting 390x844 produced an actual 500x844 viewport",
+      "blocker": "Chrome host enforces a 500px minimum inner width",
+      "recovery_action": "Repeat 390x844 and 360x800 on a host that permits those real window sizes"
     },
     "accessibility_snapshot_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Direct accessibility snapshots succeeded",
       "blocker": "",
       "recovery_action": ""
     },
     "screenshot_write_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
-      "blocker": "",
-      "recovery_action": ""
+      "status": "blocked",
+      "evidence": "In-session screenshots succeeded; filePath persistence to /private/tmp was denied",
+      "blocker": "Durable screenshot path unavailable",
+      "recovery_action": "Use an approved Chrome artifact root or retain in-session evidence"
     },
     "console_inspection_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Console inspection found only the theme favicon 404",
       "blocker": "",
       "recovery_action": ""
     },
     "network_inspection_supported": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Development-extension preset CSS and required SIT controls, language, products, and view requests returned 200",
       "blocker": "",
       "recovery_action": ""
     },
     "repository_identity_recorded": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "feature/26.05-UI-changes working tree; implementation intentionally uncommitted",
       "blocker": "",
       "recovery_action": ""
     },
     "job_revision_recorded": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Design job revision 4",
       "blocker": "",
       "recovery_action": ""
     },
     "baseline_identified": {
       "mandatory": true,
-      "status": "not-run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "Wolfpack Product Card Layout Contract and revision-4 pre-change geometry",
       "blocker": "",
       "recovery_action": ""
     }
   },
-  "tool_inventory": [],
+  "tool_inventory": [
+    "list_pages",
+    "take_snapshot",
+    "evaluate_script",
+    "navigate_page",
+    "resize_page",
+    "take_screenshot",
+    "list_console_messages",
+    "list_network_requests"
+  ],
   "browser": {
-    "product": "",
-    "version": "",
+    "product": "Chrome",
+    "version": "host-managed",
     "profile_policy": "default-profile-only",
     "isolated_context_used": false
   },
   "repository": {
-    "path": "",
-    "branch": "",
-    "commit": ""
+    "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "uncommitted-working-tree"
   },
   "baseline": {
-    "id": "",
-    "revision": null,
-    "path": ""
+    "id": "REF-WPB-STANDARD-STATE-GEOMETRY-R4",
+    "revision": 4,
+    "path": "screenshot-inventory.yaml"
   },
   "artifact_directory": "qa",
-  "blockers": []
+  "blockers": [
+    "Actual 390px and 360px Chrome window widths are unavailable on this host",
+    "Durable Chrome screenshot file persistence is unavailable"
+  ]
 }

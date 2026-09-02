@@ -5,7 +5,7 @@ title: Remediation List Template
 type: design-job-template
 status: active
 summary: Converts measured QA failures into bounded canonical-owner corrections and retest scope.
-last_audited: 2026-08-03
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -26,16 +26,18 @@ keywords:
 # Remediation List
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 3
+Artifact revision: 4
 Artifact status: complete
 
 | ID | Gate | Region and state | Expected | Actual | Measured delta | Severity | Canonical owner | Correction | Retest cases | Status |
 |---|---|---|---|---|---|---|---|---|---|---|
-| REM-CL-HIERARCHY-01 | Semantic and geometry | Classic desktop card body | EB hierarchy: media, full-width title/variant, full-width price/action | Default Wolfpack title and price/action share a row; selected state reflows into stacked rows | Title width `+115.92px`; action-row y `+52px`; price y `+56.5px` | BLOCKER | Classic preset raw CSS | Give body and descendants invariant row ownership; keep title/variant above price/action in both states | 1440, 1280, 768, 390, 360; default, selected, quantity, restored | Open |
-| REM-CL-MOBILE-02 | Geometry | Classic mobile price/action row | EB preserves price and action bounds | Selected state hides price and expands action across the row | Price width `104.59px -> 0px`; action x `-104.59px`, width `+109.59px` | BLOCKER | Classic preset raw CSS | Reserve a constant price region and constant action region for both controls | 390 and 360; default, selected, quantity, restored | Open |
-| REM-CO-STATE-01 | Geometry | Compact desktop/mobile price/action row | EB keeps price and control allocations constant | Quantity controls consume an additional 68px and push the split left | Price width `-68px`; action x `-68px`, width `+68px` at 1440 and 390 | HIGH | Compact preset raw CSS | Use invariant price/action tracks sized for the quantity control in every state | All five widths; sale price and selected quantity | Open |
-| REM-HO-STATE-01 | Semantic and geometry | Horizontal right-side content tracks | EB keeps title above price/action with identical bounds | Selected state recenters/reflows title and action rows | Desktop title y `+10px`, action-row y `-24px`, price y `-19px`; mobile title y `+10px`, action-row y `-8.95px` | BLOCKER | Horizontal preset raw CSS | Define invariant title/variant and price/action rows; remove state-dependent centering | All five widths; default, selected, quantity, restored | Open |
-| REM-HO-ACTION-02 | Geometry | Horizontal action allocation | EB action bounds do not change | Quantity state shifts action left and expands it | Desktop/mobile action x `-68px`, width `+68px` | BLOCKER | Horizontal preset raw CSS | Reserve the quantity-control width in the unselected state without changing interaction markup | All five widths; add, remove, quantity 1-to-2 | Open |
+| REM-ST-R4-01 | Geometry | Standard price/action row | Wolfpack contract keeps price and action bounds invariant | Before remediation, tracks changed from `203.25px 35px` to `126.25px 112px` at desktop and `144.109px 35px` to `91.109px 88px` at the narrow host width | Price/action allocation shifted `77px` desktop and `53px` narrow | BLOCKER | Standard preset raw CSS | Reserve the responsive quantity width in both states and align the compact Add button to the track end | 1280 and narrow real-window pass | Verified: zero delta at 1280x800 and 500x844 |
+| REM-CL-HIERARCHY-01 | Semantic and geometry | Classic desktop card body | Wolfpack contract keeps media, title/variant, and price/action rows stable | Prior revision reflowed selected state | Title width `+115.92px`; action-row y `+52px`; price y `+56.5px` | BLOCKER | Classic preset raw CSS | Existing hierarchy correction retained | 1280 and narrow real-window pass | Verified: every measured region remained at `0px` delta |
+| REM-CL-MOBILE-02 | Geometry | Classic mobile price/action row | Price and action bounds remain stable | `auto-fit` allowed intrinsic action width to change the track count | Price width `104.59px -> 0px`; action x `-104.59px`, width `+109.59px` | BLOCKER | Classic preset raw CSS | Replace the state-dependent split with explicit price and action tracks | 1280 and narrow real-window pass | Verified: zero delta at 1280x800 and 500x844 |
+| REM-CL-PRICE-03 | Geometry | Classic responsive product grid | Reserve the quantity track without wrapping ordinary prices | Four 193.69px cards left only 58.69px for `$829.00`, which wrapped onto two lines | Card track `193.69px`; price track `58.69px` | HIGH | Shared responsive grid and Classic mobile raw CSS | Use an intrinsic `13rem` card minimum with `auto-fit`; preserve fixed price/action tracks inside each card | 1280 and narrow real-window pass | Verified: desktop uses three 262.25px tracks with a 127.25px price track; 500px uses two ~219.11px tracks with no overflow |
+| REM-CO-STATE-01 | Geometry | Compact desktop/mobile price/action row | Price and control allocations remain constant | Quantity controls consumed an additional 68px and pushed the split left | Price width `-68px`; action x `-68px`, width `+68px` at 1440 and 390 | HIGH | Compact preset raw CSS | Replace `auto-fit` with explicit price and action tracks | 1280 and narrow real-window pass | Verified: zero delta at 1280x800 and 500x844, including sale price |
+| REM-HO-STATE-01 | Semantic and geometry | Horizontal right-side content tracks | Title and price/action rows retain identical bounds | Prior revision had state-dependent movement | Desktop title y `+10px`, action-row y `-24px`, price y `-19px`; mobile title y `+10px`, action-row y `-8.95px` | BLOCKER | Horizontal preset raw CSS | Current source defines the content wrapper as the same grid in every state | 1280 and narrow real-window pass | Verified: every measured region remained at `0px` delta; no revision-4 code change required |
+| REM-HO-ACTION-02 | Geometry | Horizontal action allocation | Action bounds do not change | Prior revision shifted and expanded quantity state | Desktop/mobile action x `-68px`, width `+68px` | BLOCKER | Horizontal preset raw CSS | Current source reserves `--horizontal-action-track` in every state | 1280 and narrow real-window pass | Verified: action bounds remained at `0px` delta; no revision-4 code change required |
 
 ## Infrastructure blockers and product failures
 

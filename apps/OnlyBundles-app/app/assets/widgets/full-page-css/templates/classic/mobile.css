@@ -84,7 +84,10 @@
     .sidebar-content
     .full-page-product-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, 13rem), 1fr)
+    );
     gap: var(--classic-grid-gap);
     justify-content: center;
     margin: 0 0 20px;
@@ -285,10 +288,9 @@
     grid-row: 3;
     grid-column: 1;
     display: grid;
-    grid-template-columns: repeat(
-      auto-fit,
-      minmax(min(100%, var(--fpb-card-quantity-selector-width)), 1fr)
-    );
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--classic-icon-action-track);
     grid-template-rows: none;
     grid-auto-rows: var(--classic-action-visual-height);
     gap: 0.3125rem;

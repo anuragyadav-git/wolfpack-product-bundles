@@ -5,7 +5,7 @@ title: Visual QA Report Template
 type: design-job-template
 status: active
 summary: Records baseline comparisons, masks, thresholds, semantic findings, and region-level differences.
-last_audited: 2026-08-03
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -26,8 +26,21 @@ keywords:
 # Visual QA Report
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 3
+Artifact revision: 4
 Artifact status: complete
+
+## Revision 4 SIT verification
+
+The authorized `Ownership Verify FPB 2026-08-27` SIT fixture was populated with one reusable step and six priced products, carried through all four FPB presets, and restored to Standard. Every pass used a Cache Storage clear plus an ignore-cache reload against the `/apps/product-bundles-sit/` route. The served styles came from the Shopify development extension and the runtime reported widget version `18.7.0`.
+
+| Preset | Desktop 1280x800 | Narrow actual 500x844 | Price and action transition | Overflow | Result |
+|---|---|---|---|---|---|
+| Standard | Three 262.25px cards; price 126.25px; action 112px | Two ~203.11px cards; price 91.11px; action 88px | Card, media, title, row, price, and action all `0px` delta | `0px` | PASS |
+| Classic | Three 262.25px cards; price 127.25px; action 112px | Two ~219.11px cards; price 84.11px; action 112px | Card, media, title, row, price, and action all `0px` delta | `0px` | PASS |
+| Compact | Three 227px cards; price 92px; action 112px | Two ~219.11px cards; price 81.11px; action 112px | Card, media, title, row, price, and action all `0px` delta | `0px` | PASS |
+| Horizontal | Two ~374.38px cards; price 123.88px; action 112px | One 450.23px card; price 176.97px; action 112px | Card, media, title, row, price, and action all `0px` delta | `0px` | PASS |
+
+The requested real 390x844 window remains unavailable because this Chrome host enforces a 500px minimum. In-session desktop and narrow screenshots were reviewed, but durable screenshot-file persistence is unavailable. Required preset CSS and SIT data requests returned 200; console inspection retained one non-widget 404 already attributable to the theme favicon.
 
 | Case | Baseline | Actual | Mask | Dimensions | Threshold | Mismatch | Bounds | Automated | Semantic |
 |---|---|---|---|---|---|---|---|---|---|

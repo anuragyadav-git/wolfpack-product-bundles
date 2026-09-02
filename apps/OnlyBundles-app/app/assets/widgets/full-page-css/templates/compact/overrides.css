@@ -549,10 +549,9 @@
     grid-column: 1 / -1;
     grid-row: 3;
     display: grid;
-    grid-template-columns: repeat(
-      auto-fit,
-      minmax(min(100%, var(--fpb-card-quantity-selector-width)), 1fr)
-    );
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--compact-action-track);
     grid-template-rows: none;
     grid-auto-rows: var(--compact-action-visual-height);
     gap: 5px;
@@ -1043,10 +1042,9 @@
     grid-column: 1 / -1;
     grid-row: 3;
     display: grid;
-    grid-template-columns: repeat(
-      auto-fit,
-      minmax(min(100%, var(--fpb-card-quantity-selector-width)), 1fr)
-    );
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--compact-action-track);
     grid-template-rows: none;
     grid-auto-rows: var(--compact-action-visual-height);
     gap: var(--bundle-summary-control-gap, 0.5rem);
