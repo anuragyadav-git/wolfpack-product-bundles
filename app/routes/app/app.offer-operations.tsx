@@ -8,6 +8,7 @@ import {
   applyOfferPolicyCsvImport,
   validateOfferPolicyCsvImport,
 } from '../../services/offer-policy-csv.server';
+import styles from './_shared/OfferOperations.module.css';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await authenticate.admin(request);
@@ -96,7 +97,7 @@ export default function OfferOperationsRoute() {
 
   return (
     <s-page heading={t('offerPolicyCsv.title')} inlineSize="large">
-      <s-box paddingInline="base" paddingBlockEnd="large-100">
+      <div className={styles.pageShell}>
         <s-stack direction="block" gap="large">
           <s-section heading={t('offerPolicyCsv.export.title')}>
             <s-stack direction="block" gap="base">
@@ -173,7 +174,7 @@ export default function OfferOperationsRoute() {
             </s-section>
           ) : null}
         </s-stack>
-      </s-box>
+      </div>
     </s-page>
   );
 }
