@@ -15,6 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const productId = url.searchParams.get("productId")?.trim() ?? "";
   const productHandle = url.searchParams.get("productHandle")?.trim() ?? "";
   const locale = url.searchParams.get("locale")?.trim() ?? "";
+  const countryCode = url.searchParams.get("country");
   const collectionIds = url.searchParams
     .getAll("collectionId")
     .map((value) => value.trim())
@@ -42,6 +43,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
           },
         },
         pricing: true,
+        offerPolicy: {
+          select: {
+            specificLinkRequired: true,
+            priority: true,
+            stopLowerPriority: true,
+            scheduleMode: true,
+            startsAt: true,
+            endsAt: true,
+            recurrenceFrequency: true,
+            recurrenceTimezone: true,
+            recurrenceAnchorDate: true,
+            recurrenceWindowStartMinute: true,
+            recurrenceWindowEndMinute: true,
+            recurrenceTermination: true,
+            recurrenceEndsOn: true,
+            recurrenceRunCount: true,
+            countryTargetingEnabled: true,
+            countryTargetingMode: true,
+            countryCodes: true,
+          },
+        },
       },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     });
@@ -50,6 +72,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       productHandle,
       collectionIds,
       locale,
+      countryCode,
     });
     const embed = resolution
       ? {

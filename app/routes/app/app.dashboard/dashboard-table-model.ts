@@ -41,12 +41,14 @@ export function buildDashboardTableRows<
 
 export function buildDashboardTablePage<
   TBundle extends {
+    id: string;
     name: string;
     status: string;
     bundleType: string;
   },
 >({
   bundles,
+  excludedBundleIds = new Set<string>(),
   bundleFilter,
   typeFilter,
   statusFilter,
@@ -54,6 +56,7 @@ export function buildDashboardTablePage<
   bundlesPerPage,
 }: {
   bundles: readonly TBundle[];
+  excludedBundleIds?: ReadonlySet<string>;
   bundleFilter: string;
   typeFilter: string;
   statusFilter: string;
@@ -62,6 +65,7 @@ export function buildDashboardTablePage<
 }) {
   const normalizedFilter = bundleFilter.trim().toLocaleLowerCase();
   const filteredBundles = bundles
+    .filter((bundle) => !excludedBundleIds.has(bundle.id))
     .filter((bundle) => typeFilter === "all" || bundle.bundleType === typeFilter)
     .filter((bundle) => statusFilter === "all" || bundle.status === statusFilter)
     .filter(

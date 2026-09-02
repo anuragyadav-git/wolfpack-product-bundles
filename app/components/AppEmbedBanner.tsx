@@ -17,7 +17,7 @@ export function AppEmbedBanner({
   if (appEmbedEnabled) return null;
 
   return (
-    <s-box paddingBlockEnd="large-200">
+    <s-box paddingBlockEnd="small-200">
       <s-banner
         tone="warning"
         heading={t("common.appEmbed.guideTitle")}

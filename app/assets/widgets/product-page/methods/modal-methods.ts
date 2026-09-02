@@ -4,6 +4,11 @@ import { ToastManager } from '../../shared/toast-manager.js';
 import { createSharedProductCardElement } from '../../shared/components/product-card.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
 import { resolvePpbModalCardPresentation } from '../ppb-modal-card-presentation.js';
+import {
+  createPpbVariantSelectorElement,
+  resolvePpbCategoryVariantSelectorConfiguration,
+} from '../variant-selector-modes.js';
+import { resolveLowStockAlert } from '../../../../lib/low-stock-alert.js';
 
 export function resolveProductPageCardButtonText({
   currentQuantity = 0,
@@ -405,10 +410,22 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
     const atMaxStock = available !== null && currentQuantity >= available;
     const atMaxProductQuantity = productQuantityLimit !== null && currentQuantity >= productQuantityLimit;
     const increaseDisabled = outOfStock || atMaxStock || atMaxProductQuantity;
-    const stockBadgeElement = outOfStock ? document.createElement('div') : null;
+    const lowStockAlert = this.selectedBundle?.lowStockAlert
+      ? resolveLowStockAlert(this.selectedBundle.lowStockAlert, [{
+        quantityAvailable: typeof product.quantityAvailable === 'number'
+          ? product.quantityAvailable
+          : null,
+        currentlyNotInStock: product.currentlyNotInStock === true,
+        availableForSale: product.available !== false,
+        requiredQuantity: 1,
+      }])
+      : null;
+    const stockBadgeElement = outOfStock || lowStockAlert ? document.createElement('div') : null;
     if (stockBadgeElement) {
-      stockBadgeElement.className = 'product-stock-badge product-stock-badge--out';
-      stockBadgeElement.textContent = outOfStockText;
+      stockBadgeElement.className = `product-stock-badge ${outOfStock ? 'product-stock-badge--out' : 'product-stock-badge--low'}`;
+      stockBadgeElement.textContent = outOfStock
+        ? outOfStockText
+        : lowStockAlert?.message ?? '';
     }
     return createSharedProductCardElement(
       {
@@ -428,7 +445,7 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
         cardInteractive: false,
         titleInteractive: false,
         className: `${freeGiftCardClass} ${currentQuantity > 0 ? 'bw-product-card--selected' : ''} ${outOfStock ? 'is-out-of-stock' : ''}`.trim(),
-        variantSelectorElement: this.renderVariantSelector(product),
+        variantSelectorElement: this.renderVariantSelector(product, stepIndex, currentStep),
         stockBadgeElement,
         addButtonText: resolveProductPageCardButtonText({
           currentQuantity,
@@ -461,7 +478,7 @@ renderModalProducts(stepIndex: string|number, productsToRender: any = null) {
   this.attachProductEventHandlers(productGrid, stepIndex);
 },
 
-renderVariantSelector(product: any) {
+renderVariantSelector(product: any, stepIndex?: string | number, stepOverride: any = null) {
   if (!product.variants || product.variants.length <= 1) {
     return null;
   }
@@ -470,29 +487,22 @@ renderVariantSelector(product: any) {
     ? this.isInventoryTrackingOnAddToCartEnabled()
     : false;
   const variantLabel = this._resolveText?.('productVariantLabel', 'Select variant') || 'Select variant';
+  const resolvedStepIndex = stepIndex ?? this.currentStepIndex ?? 0;
+  const step = stepOverride ?? this.selectedBundle?.steps?.[resolvedStepIndex] ?? {};
+  const configuration = resolvePpbCategoryVariantSelectorConfiguration(
+    step,
+    resolvedStepIndex,
+    this.activeInpageCategoryIndexes,
+  );
 
-  const wrapper = document.createElement('div');
-  wrapper.className = 'variant-selector-wrapper';
-  const label = document.createElement('label');
-  label.className = 'ppb-modal-variant-label';
-  label.htmlFor = `variant-selector-${product.id}`;
-  label.textContent = variantLabel;
-  const select = document.createElement('select');
-  select.id = `variant-selector-${product.id}`;
-  select.className = 'variant-selector';
-  select.dataset.baseProductId = String(product.id);
-  select.setAttribute('aria-label', variantLabel);
-  product.variants.forEach((variant: any) => {
-    const isHardOOS = shouldDisableProductPageVariantOption(variant, trackInventoryOnAddToCart);
-    const option = document.createElement('option');
-    option.value = String(variant.id);
-    option.textContent = isHardOOS ? `${variant.title} — out of stock` : variant.title;
-    option.selected = variant.id === product.variantId;
-    option.disabled = isHardOOS;
-    select.append(option);
+  return createPpbVariantSelectorElement({
+    product,
+    configuration,
+    label: variantLabel,
+    document,
+    isUnavailable: (variant: any) =>
+      shouldDisableProductPageVariantOption(variant, trackInventoryOnAddToCart),
   });
-  wrapper.append(label, select);
-  return wrapper;
 },
 
 // Render loading animation for modal product grid using merchant-configured GIF or default spinner
@@ -611,7 +621,10 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
 
   // Variant selector handler (for inline dropdown if used)
   newProductGrid.addEventListener('change', (e: any) => {
-    if (e.target.classList.contains('variant-selector')) {
+    if (
+      e.target.classList.contains('variant-selector')
+      || e.target.classList.contains('ppb-variant-selector-input')
+    ) {
       e.stopPropagation();
       const newVariantId = e.target.value;
       const baseProductId = e.target.dataset.baseProductId;
@@ -641,6 +654,13 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
 
           // Re-render the active card context without mutating the bundle selection.
           this.renderModalProducts(stepIndex);
+          const replacementInputs = this.elements?.modal?.querySelectorAll?.(
+            '.ppb-variant-selector-input',
+          ) ?? [];
+          const replacementInput = Array.from(replacementInputs as ArrayLike<any>).find((input: any) => (
+            String(input?.value ?? '') === String(newVariantId)
+          ));
+          replacementInput?.focus?.({ preventScroll: true });
           this.updateModalNavigation();
           this.updateModalFooterMessaging();
         }

@@ -5,6 +5,7 @@ import {
   showPolarisModal,
   useModalHideListener,
 } from "../../routes/app/_shared/bundle-configure/modal-utils";
+import { translateAdmin } from "~/i18n/config";
 
 export function buildTemplatePreviewSupportMessage(previewUrl: string): string {
   return `Having issues seeing the bundle on storefront: ${previewUrl}`;
@@ -35,12 +36,14 @@ export function TemplatePreviewFeedbackModal({
     <s-modal
       ref={modalRef}
       id="template-preview-feedback-modal"
-      heading="Were you able to preview the bundle?"
+      heading={translateAdmin("adminAttributes.wereYouAbleToPreviewTheBundle")}
       size="base"
     >
       <s-grid gridTemplateColumns="1fr 1fr" gap="base">
         <s-clickable
-          accessibilityLabel="Bundle is visible on store"
+          accessibilityLabel={translateAdmin(
+            "adminExtracted.components.bundleConfigure.templatepreviewfeedbackmodal.bundleIsVisibleOnStore"
+          )}
           background="base"
           border="base"
           borderRadius="large"
@@ -49,11 +52,17 @@ export function TemplatePreviewFeedbackModal({
         >
           <s-stack direction="block" gap="small" alignItems="center">
             <s-icon type="check" />
-            <s-text>Bundle is visible on store</s-text>
+            <s-text>
+              {translateAdmin(
+                "adminExtracted.components.bundleConfigure.templatepreviewfeedbackmodal.bundleIsVisibleOnStore"
+              )}
+            </s-text>
           </s-stack>
         </s-clickable>
         <s-clickable
-          accessibilityLabel="Having issues with the bundle? Contact us"
+          accessibilityLabel={translateAdmin(
+            "adminExtracted.components.bundleConfigure.templatepreviewfeedbackmodal.havingIssuesWithTheBundleContactUs"
+          )}
           background="base"
           border="base"
           borderRadius="large"
@@ -62,7 +71,11 @@ export function TemplatePreviewFeedbackModal({
         >
           <s-stack direction="block" gap="small" alignItems="center">
             <s-icon type="info" />
-            <s-text>Having issues with the bundle? Contact us</s-text>
+            <s-text>
+              {translateAdmin(
+                "adminExtracted.components.bundleConfigure.templatepreviewfeedbackmodal.havingIssuesWithTheBundleContactUs"
+              )}
+            </s-text>
           </s-stack>
         </s-clickable>
       </s-grid>

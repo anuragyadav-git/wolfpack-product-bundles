@@ -15,6 +15,9 @@ import {
 import { MultiLanguageTextModal } from "../../../../components/bundle-configure/MultiLanguageTextModal";
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
+import { AdminWarningGroup } from "../../../../components/AdminWarningGroup";
+import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
+import { translateAdmin } from "~/i18n/config";
 
 type SubscriptionValidationResponse = {
   success?: boolean;
@@ -64,7 +67,7 @@ export function BundleSubscriptionsSection(
   } = props;
   const [translationModalOpen, setTranslationModalOpen] = useState(false);
   const [activeTranslationLocale, setActiveTranslationLocale] = useState(
-    selectDefaultTranslationLocale(shopLocales),
+    selectDefaultTranslationLocale(shopLocales)
   );
   const discoveredGroups =
     subscriptionFetcher.data?.success === true &&
@@ -116,6 +119,28 @@ export function BundleSubscriptionsSection(
       : validation?.isValid === false
       ? validation.message ?? SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE
       : null;
+  const subscriptionWarnings = [
+    ...(subscriptionsBlocked
+      ? [
+          {
+            id: "subscription-compatibility",
+            heading: "Subscriptions unavailable",
+            message: compatibilityIssues
+              .map((issue) => issue.message)
+              .join(" "),
+          },
+        ]
+      : []),
+    ...(validationMessage
+      ? [
+          {
+            id: "subscription-validation",
+            heading: "Action required",
+            message: validationMessage,
+          },
+        ]
+      : []),
+  ];
   const setGroup = (groupId: string) => {
     const selectedGroup =
       groups.find((group: any) => group?.id === groupId) ?? null;
@@ -160,7 +185,9 @@ export function BundleSubscriptionsSection(
         {
           key: `plan:${plan.id}:displayName`,
           label: `${plan.sourceName}: plan name in dropdown`,
-          fallback: subscriptionConfig.planCopy[plan.id]?.displayName ?? plan.sourceName,
+          fallback:
+            subscriptionConfig.planCopy[plan.id]?.displayName ??
+            plan.sourceName,
           headingBefore: plan.sourceName,
         },
         {
@@ -202,9 +229,14 @@ export function BundleSubscriptionsSection(
                 alignItems="center"
               >
                 <s-stack direction="inline" alignItems="center" gap="small">
-                  <s-heading>Bundle Subscriptions</s-heading>
+                  <s-heading>
+                    {translateAdmin("tooltips.bundleSubscriptions.title")}
+                  </s-heading>
+                  <ConfigureHelpPopover tooltipKey="bundleSubscriptions" />
                   <s-switch
-                    accessibilityLabel="Enable bundle subscriptions"
+                    accessibilityLabel={translateAdmin(
+                      "adminAttributes.enableBundleSubscriptions"
+                    )}
                     checked={subscriptionConfig.enabled || undefined}
                     disabled={
                       (subscriptionsBlocked && !subscriptionConfig.enabled) ||
@@ -222,7 +254,9 @@ export function BundleSubscriptionsSection(
                     variant="tertiary"
                     tone="neutral"
                     icon="play"
-                    accessibilityLabel="How to setup?"
+                    accessibilityLabel={translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+                    )}
                     pressed={showSubscriptionSetupGuide}
                     onClick={() =>
                       setShowSubscriptionSetupGuide(
@@ -230,46 +264,28 @@ export function BundleSubscriptionsSection(
                       )
                     }
                   >
-                    How to setup?
+                    {translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+                    )}
                   </s-press-button>
                 </s-stack>
               </s-grid>
 
-              {subscriptionsBlocked ? (
-                <s-box paddingBlockEnd="base">
-                  <s-banner
-                    tone="warning"
-                    heading="Subscriptions unavailable"
-                    dismissible={false}
-                    hidden={false}
-                  >
-                    {compatibilityIssues.map((issue) => issue.message).join(" ")}
-                  </s-banner>
-                </s-box>
-              ) : null}
+              <AdminWarningGroup warnings={subscriptionWarnings} />
               {showSubscriptionSetupGuide ? (
                 <s-box padding="base" background="subdued" borderRadius="base">
-                  <s-heading>Subscription setup guide</s-heading>
+                  <s-heading>
+                    {translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.subscriptionSetupGuide"
+                    )}
+                  </s-heading>
                   <s-paragraph>
-                    Configure every bundle product and selectable variant in one
-                    selling-plan group in your subscription app, then return here
-                    and get the shared plans.
+                    {translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.configureEveryBundleProductAndSelectableVariantInOneSellingPlanG"
+                    )}
                   </s-paragraph>
                 </s-box>
               ) : null}
-              {validationMessage ? (
-                <s-box paddingBlockEnd="base">
-                  <s-banner
-                    tone="warning"
-                    heading="Action required"
-                    dismissible={false}
-                    hidden={false}
-                  >
-                    {validationMessage}
-                  </s-banner>
-                </s-box>
-              ) : null}
-
               {groups.length > 0 ? (
                 <DisabledConfigurationRegion
                   disabled={!subscriptionConfig.enabled}
@@ -282,7 +298,9 @@ export function BundleSubscriptionsSection(
                     >
                       {groups.length > 1 ? (
                         <s-choice-list
-                          label="Subscription plan"
+                          label={translateAdmin(
+                            "adminAttributes.subscriptionPlan"
+                          )}
                           values={
                             subscriptionConfig.selectedGroup
                               ? [subscriptionConfig.selectedGroup.id]
@@ -336,7 +354,9 @@ export function BundleSubscriptionsSection(
                           });
                         }}
                       >
-                        Change Plan
+                        {translateAdmin(
+                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.changePlan"
+                        )}
                       </s-button>
                     </s-grid>
                   </s-box>
@@ -359,7 +379,9 @@ export function BundleSubscriptionsSection(
                     subscriptionFetcher.submit(formData, { method: "post" });
                   }}
                 >
-                  Get Subscription Plans
+                  {translateAdmin(
+                    "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.getSubscriptionPlans"
+                  )}
                 </s-button>
               )}
 
@@ -368,7 +390,7 @@ export function BundleSubscriptionsSection(
                   disabled={!subscriptionConfig.enabled}
                 >
                   <s-text-field
-                    label="Subscription Title"
+                    label={translateAdmin("adminAttributes.subscriptionTitle")}
                     value={subscriptionConfig.copy.title}
                     disabled={!subscriptionConfig.enabled || undefined}
                     error={validationErrors["subscriptions.copy.title"]}
@@ -396,7 +418,11 @@ export function BundleSubscriptionsSection(
                     gap="base"
                     alignItems="center"
                   >
-                    <s-heading>Plan Tiers</s-heading>
+                    <s-heading>
+                      {translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.planTiers"
+                      )}
+                    </s-heading>
                     <s-button
                       variant="secondary"
                       icon={getConfigureActionIcon("refresh")}
@@ -416,7 +442,9 @@ export function BundleSubscriptionsSection(
                         });
                       }}
                     >
-                      Refresh Plan
+                      {translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.refreshPlan"
+                      )}
                     </s-button>
                   </s-grid>
 
@@ -439,7 +467,9 @@ export function BundleSubscriptionsSection(
                             gap="base"
                           >
                             <s-text-field
-                              label="Plan Name in Dropdown"
+                              label={translateAdmin(
+                                "adminAttributes.planNameInDropdown"
+                              )}
                               value={planCopy.displayName}
                               error={
                                 validationErrors[
@@ -462,7 +492,9 @@ export function BundleSubscriptionsSection(
                               }
                             />
                             <s-text-field
-                              label="Discount Pill"
+                              label={translateAdmin(
+                                "adminAttributes.discountPill"
+                              )}
                               value={planCopy.discountPill}
                               onInput={(event) =>
                                 setSubscriptionConfig((current: any) => ({
@@ -482,7 +514,9 @@ export function BundleSubscriptionsSection(
                           </s-grid>
                           <s-divider />
                           <s-text-area
-                            label="Subscription Option Description"
+                            label={translateAdmin(
+                              "adminAttributes.subscriptionOptionDescription"
+                            )}
                             value={planCopy.description}
                             onInput={(event) =>
                               setSubscriptionConfig((current: any) => ({
@@ -518,9 +552,15 @@ export function BundleSubscriptionsSection(
                     alignItems="center"
                   >
                     <s-stack direction="block" gap="small">
-                      <s-heading>Configurations</s-heading>
+                      <s-heading>
+                        {translateAdmin(
+                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.configurations"
+                        )}
+                      </s-heading>
                       <s-paragraph>
-                        Configure the settings for the subscription bundle
+                        {translateAdmin(
+                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.configureTheSettingsForTheSubscriptionBundle"
+                        )}
                       </s-paragraph>
                     </s-stack>
                     <s-button
@@ -534,12 +574,16 @@ export function BundleSubscriptionsSection(
                       }
                       onClick={() => setTranslationModalOpen(true)}
                     >
-                      Multi Language
+                      {translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                      )}
                     </s-button>
                   </s-grid>
 
                   <s-switch
-                    label="Enable Recurring Discounts"
+                    label={translateAdmin(
+                      "adminAttributes.enableRecurringDiscounts"
+                    )}
                     checked={
                       subscriptionConfig.recurringBundleDiscount || undefined
                     }
@@ -553,7 +597,7 @@ export function BundleSubscriptionsSection(
                     }
                   />
                   <s-switch
-                    label="One-Time Purchase"
+                    label={translateAdmin("adminAttributes.oneTimePurchase")}
                     checked={
                       subscriptionConfig.oneTimePurchase.enabled || undefined
                     }
@@ -582,7 +626,9 @@ export function BundleSubscriptionsSection(
                   >
                     <s-stack direction="block" gap="base">
                       <s-text-field
-                        label="One-time purchase label"
+                        label={translateAdmin(
+                          "adminAttributes.oneTimePurchaseLabel"
+                        )}
                         value={subscriptionConfig.oneTimePurchase.title}
                         disabled={
                           !subscriptionConfig.oneTimePurchase.enabled ||
@@ -604,7 +650,9 @@ export function BundleSubscriptionsSection(
                         }
                       />
                       <s-text-area
-                        label="One-time purchase description"
+                        label={translateAdmin(
+                          "adminAttributes.oneTimePurchaseDescription"
+                        )}
                         value={subscriptionConfig.oneTimePurchase.description}
                         disabled={
                           !subscriptionConfig.oneTimePurchase.enabled ||
@@ -622,7 +670,9 @@ export function BundleSubscriptionsSection(
                         }
                       />
                       <s-checkbox
-                        label="Make one-time purchase selected by default"
+                        label={translateAdmin(
+                          "adminAttributes.makeOneTimePurchaseSelectedByDefault"
+                        )}
                         disabled={
                           !subscriptionConfig.oneTimePurchase.enabled ||
                           undefined
@@ -650,7 +700,9 @@ export function BundleSubscriptionsSection(
                     </s-stack>
                   </DisabledConfigurationRegion>
                   <s-text-area
-                    label="Purchase options subtitle"
+                    label={translateAdmin(
+                      "adminAttributes.purchaseOptionsSubtitle"
+                    )}
                     value={subscriptionConfig.copy.subtitle}
                     onInput={(event) =>
                       setSubscriptionConfig((current: any) => ({
@@ -663,7 +715,9 @@ export function BundleSubscriptionsSection(
                     }
                   />
                   <s-text-area
-                    label="Unavailable-plan message"
+                    label={translateAdmin(
+                      "adminAttributes.unavailablePlanMessage"
+                    )}
                     value={subscriptionConfig.copy.unavailableMessage}
                     onInput={(event) =>
                       setSubscriptionConfig((current: any) => ({
@@ -678,7 +732,9 @@ export function BundleSubscriptionsSection(
                     }
                   />
                   <s-checkbox
-                    label="Show subscription discount on product cards"
+                    label={translateAdmin(
+                      "adminAttributes.showSubscriptionDiscountOnProductCards"
+                    )}
                     checked={
                       subscriptionConfig.showDiscountOnProductCards || undefined
                     }
@@ -695,7 +751,9 @@ export function BundleSubscriptionsSection(
                     "selling_plan" &&
                   subscriptionConfig.selectedPlanIds.length > 1 ? (
                     <s-choice-list
-                      label="Default subscription plan"
+                      label={translateAdmin(
+                        "adminAttributes.defaultSubscriptionPlan"
+                      )}
                       values={[
                         subscriptionConfig.defaultPurchaseOption.sellingPlanId,
                       ]}
@@ -733,10 +791,15 @@ export function BundleSubscriptionsSection(
 
                   <s-divider />
                   <s-stack direction="block" gap="small">
-                    <s-heading>Bundle discount applies on</s-heading>
+                    <s-heading>
+                      {translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.bundleDiscountAppliesOn"
+                      )}
+                    </s-heading>
                     <s-paragraph>
-                      Apply bundle discounts to subscription purchases only,
-                      one-time purchases only, or both.
+                      {translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.applyBundleDiscountsToSubscriptionPurchasesOnlyOneTimePurchasesO"
+                      )}
                     </s-paragraph>
                   </s-stack>
                   <s-grid
@@ -744,7 +807,9 @@ export function BundleSubscriptionsSection(
                     gap="base"
                   >
                     <s-choice-list
-                      label="Only on subscription purchase"
+                      label={translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnSubscriptionPurchase"
+                      )}
                       labelAccessibilityVisibility="exclusive"
                       values={
                         subscriptionConfig.bundleDiscountAppliesOn ===
@@ -766,11 +831,15 @@ export function BundleSubscriptionsSection(
                       }}
                     >
                       <s-choice value="subscription">
-                        Only on subscription purchase
+                        {translateAdmin(
+                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnSubscriptionPurchase"
+                        )}
                       </s-choice>
                     </s-choice-list>
                     <s-choice-list
-                      label="Only on one-time purchase"
+                      label={translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnOneTimePurchase"
+                      )}
                       labelAccessibilityVisibility="exclusive"
                       values={
                         subscriptionConfig.bundleDiscountAppliesOn ===
@@ -792,11 +861,15 @@ export function BundleSubscriptionsSection(
                       }}
                     >
                       <s-choice value="one_time">
-                        Only on one-time purchase
+                        {translateAdmin(
+                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnOneTimePurchase"
+                        )}
                       </s-choice>
                     </s-choice-list>
                     <s-choice-list
-                      label="On both"
+                      label={translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onBoth"
+                      )}
                       labelAccessibilityVisibility="exclusive"
                       values={
                         subscriptionConfig.bundleDiscountAppliesOn === "both"
@@ -816,7 +889,11 @@ export function BundleSubscriptionsSection(
                         }));
                       }}
                     >
-                      <s-choice value="both">On both</s-choice>
+                      <s-choice value="both">
+                        {translateAdmin(
+                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onBoth"
+                        )}
+                      </s-choice>
                     </s-choice-list>
                   </s-grid>
                   {subscriptionConfig.enabled &&
@@ -824,7 +901,9 @@ export function BundleSubscriptionsSection(
                     path.startsWith("subscriptions.")
                   ) ? (
                     <s-text tone="critical">
-                      Fix the subscription fields before saving.
+                      {translateAdmin(
+                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.fixTheSubscriptionFieldsBeforeSaving"
+                      )}
                     </s-text>
                   ) : null}
                 </s-stack>
@@ -837,12 +916,12 @@ export function BundleSubscriptionsSection(
       <MultiLanguageTextModal
         id="bundle-subscription-language-modal"
         open={translationModalOpen}
-        title="Subscription languages"
+        title={translateAdmin("adminAttributes.subscriptionLanguages")}
         locales={shopLocales}
         activeLocale={activeTranslationLocale}
         fields={translationFields}
         valuesByLocale={flattenSubscriptionTranslations(
-          subscriptionConfig.translations,
+          subscriptionConfig.translations
         )}
         onActiveLocaleChange={setActiveTranslationLocale}
         onSave={(valuesByLocale) =>

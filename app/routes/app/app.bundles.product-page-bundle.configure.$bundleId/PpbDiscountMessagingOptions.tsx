@@ -1,6 +1,7 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PpbDiscountMessageRuleFields } from "./PpbDiscountMessageRuleFields";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbDiscountMessagingOptions() {
   const {
@@ -31,10 +32,12 @@ export function PpbDiscountMessagingOptions() {
         <s-stack direction="inline" gap="small" alignItems="center">
           <div className={productPageBundleStyles.displayOptionText}>
             <p className={productPageBundleStyles.displayOptionTitle}>
-              Discount Messaging
+              {translateAdmin("tooltips.discountMessaging.title")}
             </p>
             <p className={productPageBundleStyles.displayOptionDescription}>
-              Edit how discount messages appear above the subtotal.
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.editHowDiscountMessagesAppearAboveTheSubtotal"
+              )}
             </p>
           </div>
           <QuestionHelpTooltip tooltipKey="discountMessaging" />
@@ -49,7 +52,7 @@ export function PpbDiscountMessagingOptions() {
         </s-stack>
         {shopLocales.length > 0 && (
           <s-checkbox
-            label="Enable multi-language"
+            label={translateAdmin("adminAttributes.enableMultiLanguage")}
             checked={discountMessagingMultiLanguageEnabled || undefined}
             disabled={!pricingState.discountMessagingEnabled || undefined}
             onChange={(e) => {
@@ -63,8 +66,9 @@ export function PpbDiscountMessagingOptions() {
       </s-stack>
       {pricingState.discountType === DiscountMethod.BUY_X_GET_Y && (
         <s-paragraph>
-          Discount messaging displays the Total Quantity to Claim Offer (Buy +
-          Get) to ensure customers add their rewards to the cart
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.discountMessagingDisplaysTheTotalQuantityToClaimOfferBuyGetToEns"
+          )}
         </s-paragraph>
       )}
       <DisabledConfigurationRegion
@@ -93,7 +97,9 @@ export function PpbDiscountMessagingOptions() {
                 icon="code"
                 onClick={() => setIsDiscountVariablesModalOpen(true)}
               >
-                Show Variables
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.showVariables"
+                )}
               </s-button>
             </div>
             <PpbDiscountMessageRuleFields />
@@ -124,7 +130,7 @@ function PpbDiscountLanguageSelector({
   return (
     <s-stack direction="block" gap="small-100">
       <s-select
-        label="Language"
+        label={translateAdmin("dashboard.language.label")}
         value={activeDiscountLocale}
         onChange={(e) => {
           const locale = (e.target as HTMLSelectElement).value;
@@ -149,7 +155,9 @@ function PpbDiscountLanguageSelector({
         ))}
       </s-select>
       <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
-        Active languages
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.activeLanguages"
+        )}
       </p>
       <s-stack direction="inline" gap="small-100">
         {shopLocales

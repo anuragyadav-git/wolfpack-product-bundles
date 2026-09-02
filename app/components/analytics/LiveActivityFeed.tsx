@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { translateAdmin } from "~/i18n/config";
 
 export interface ActivityEvent {
   id: string;
@@ -43,13 +44,17 @@ function shortSession(sessionId: string): string {
   return `S·${tail}`;
 }
 
-export function LiveActivityFeed({ initialEvents, pollMs = 0, pollEndpoint }: LiveActivityFeedProps) {
+export function LiveActivityFeed({
+  initialEvents,
+  pollMs = 0,
+  pollEndpoint,
+}: LiveActivityFeedProps) {
   const [events, setEvents] = useState(initialEvents);
   const [tick, setTick] = useState(0);
 
   // Re-render every 30s so relative times stay fresh even without polling.
   useEffect(() => {
-    const id = window.setInterval(() => setTick(t => t + 1), 30_000);
+    const id = window.setInterval(() => setTick((t) => t + 1), 30_000);
     return () => window.clearInterval(id);
   }, []);
 
@@ -59,7 +64,7 @@ export function LiveActivityFeed({ initialEvents, pollMs = 0, pollEndpoint }: Li
       try {
         const res = await fetch(pollEndpoint);
         if (!res.ok) return;
-        const data = await res.json() as { events?: ActivityEvent[] };
+        const data = (await res.json()) as { events?: ActivityEvent[] };
         if (Array.isArray(data.events)) setEvents(data.events);
       } catch {
         /* swallow */
@@ -72,19 +77,29 @@ export function LiveActivityFeed({ initialEvents, pollMs = 0, pollEndpoint }: Li
     <section className="wpb-card" aria-labelledby="wpb-activity-feed-title">
       <header className="wpb-section-header">
         <div>
-          <h2 id="wpb-activity-feed-title" className="wpb-section-title">Live Activity</h2>
-          <p className="wpb-section-hint">Most recent engagements</p>
+          <h2 id="wpb-activity-feed-title" className="wpb-section-title">
+            {translateAdmin(
+              "adminExtracted.components.analytics.liveactivityfeed.liveActivity"
+            )}
+          </h2>
+          <p className="wpb-section-hint">
+            {translateAdmin(
+              "adminExtracted.components.analytics.liveactivityfeed.mostRecentEngagements"
+            )}
+          </p>
         </div>
         <span aria-hidden className="wpb-live-dot" />
       </header>
 
       {events.length === 0 ? (
         <p className="wpb-empty-copy">
-          Nobody has engaged yet. Activity will stream here as shoppers interact with your bundles.
+          {translateAdmin(
+            "adminExtracted.components.analytics.liveactivityfeed.nobodyHasEngagedYetActivityWillStreamHereAsShoppersInteractWithY"
+          )}
         </p>
       ) : (
         <ul className="wpb-list wpb-list--scroll" aria-live="polite">
-          {events.map(ev => (
+          {events.map((ev) => (
             <li key={ev.id} className="wpb-activity-row">
               <span aria-hidden className="wpb-activity-dot" />
               <div className="wpb-truncate-cell">

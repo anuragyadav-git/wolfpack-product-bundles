@@ -10,6 +10,7 @@ import {
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 import { localizeBundleConfig } from '../../shared/localized-bundle-config.js';
 import { replaceManagedStyle } from '../../shared/managed-style.js';
+import { captureDiscountTierState } from '../../shared/discount-tier-feedback.js';
 
 export const fullPageAnalyticsConfigMethods: Record<string, any> & ThisType<any> = {
 _ensureWpbSessionId() {
@@ -65,6 +66,13 @@ _sendEngagementBeacon(eventName: any) {
       userAgent: navigator.userAgent,
       timestamp: new Date().toISOString(),
     };
+    const tierState = captureDiscountTierState(this);
+    Object.assign(payload, {
+      offerPolicyId: this.selectedBundle?.offerDelivery?.offerPolicyId ?? null,
+      offerRuleVersion: this.selectedBundle?.offerDelivery?.ruleVersion ?? null,
+      offerTierId: tierState.tierId,
+      offerEligibilitySource: this.selectedBundle?.offerDelivery?.eligibilitySource ?? null,
+    });
     sessionStorage.setItem(guardKey, '1');
     fetch(buildStorefrontApiPath('attribution/engagement'), {
       method: 'POST',
@@ -490,9 +498,17 @@ async loadBundleData() {
         // Use Shopify app proxy path - Shopify automatically adds signature and auth params
         // App proxy config: /apps/product-bundles -> https://wolfpack-product-bundle-app.onrender.com
         // CRITICAL: URL-encode bundle ID to handle special characters in cuid() format
-        const apiUrl = buildStorefrontApiPath(
+        const apiPath = buildStorefrontApiPath(
           `bundle/${encodeURIComponent(bundleId)}.json`,
         );
+        const countryCode = String(
+          this.container.dataset.countryCode
+          || (window as Window & { currentCountryCode?: string }).currentCountryCode
+          || '',
+        ).trim().toUpperCase();
+        const apiUrl = countryCode
+          ? `${apiPath}?country=${encodeURIComponent(countryCode)}`
+          : apiPath;
 
         const response = await fetch(apiUrl);
 

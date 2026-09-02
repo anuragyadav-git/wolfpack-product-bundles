@@ -3,6 +3,7 @@ import { FpbStepCategoryCard } from "./StepSetupCategoryCard";
 import { FpbStepConfigCard } from "./StepSetupConfigCard";
 import { FpbStepSetupDetailsCard } from "./StepSetupDetailsCard";
 import { FpbStepRulesCard } from "./StepSetupRulesCard";
+import { translateAdmin } from "~/i18n/config";
 
 export function StepSetupSection({
   flow,
@@ -32,7 +33,7 @@ export function StepSetupSection({
           <div className={fullPageBundleStyles.stepFlowTitleRow}>
             <span className={fullPageBundleStyles.headingWithHelp}>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 650 }}>
-                Step Flow
+                {translateAdmin("tooltips.stepFlow.title")}
               </h3>
               <QuestionHelpTooltip tooltipKey="stepFlow" />
             </span>
@@ -40,21 +41,26 @@ export function StepSetupSection({
               variant="tertiary"
               tone="neutral"
               icon="play"
-              accessibilityLabel="How to setup?"
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+              )}
               onClick={() =>
                 window.open(
                   "https://www.youtube.com/watch?v=5p_B81I7tWE",
                   "_blank",
-                  "noopener,noreferrer",
+                  "noopener,noreferrer"
                 )
               }
             >
-              How to setup?
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+              )}
             </s-press-button>
           </div>
           <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-            Create steps for your multi-step bundle here. Select product options
-            for each step below
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.createStepsForYourMultiStepBundleHereSelectProductOptionsForEach"
+            )}
           </p>
         </s-stack>
         {/* Step Chip Navigation */}
@@ -82,7 +88,14 @@ export function StepSetupSection({
             className={fullPageBundleStyles.addStepBtn}
             onClick={handleAddNewStep}
           >
-            <span aria-hidden="true"><s-icon type="plus" /></span> <span>Add Step</span>
+            <span aria-hidden="true">
+              <s-icon type="plus" />
+            </span>{" "}
+            <span>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
+              )}
+            </span>
           </button>
         </div>
         {stepsState.steps.map(
@@ -94,8 +107,8 @@ export function StepSetupSection({
                   slideDir === "forward"
                     ? fullPageBundleStyles.slideForward
                     : slideDir === "backward"
-                      ? fullPageBundleStyles.slideBackward
-                      : ""
+                    ? fullPageBundleStyles.slideBackward
+                    : ""
                 }
               >
                 <FpbStepSetupDetailsCard
@@ -104,7 +117,7 @@ export function StepSetupSection({
                   isFirstStep={index === 0}
                 />
               </div>
-            ),
+            )
         )}
       </div>
       {stepsState.steps.map(
@@ -116,8 +129,8 @@ export function StepSetupSection({
                 slideDir === "forward"
                   ? fullPageBundleStyles.slideForward
                   : slideDir === "backward"
-                    ? fullPageBundleStyles.slideBackward
-                    : ""
+                  ? fullPageBundleStyles.slideBackward
+                  : ""
               }
             >
               <div
@@ -133,7 +146,7 @@ export function StepSetupSection({
                 <FpbStepConfigCard flow={flow} step={step} />
               </div>
             </div>
-          ),
+          )
       )}
     </div>
   );

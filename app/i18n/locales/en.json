@@ -5,8 +5,8 @@
     "settings": "Settings",
     "integrations": "Integrations",
     "analytics": "Analytics",
-    "billing": "Billing",
-    "events": "Updates & FAQs"
+    "offerOperations": "Offer operations",
+    "billing": "Billing"
   },
   "integrations": {
     "requestMessage": "Hi, I'd like to request support for a new integration."
@@ -16,8 +16,7 @@
     "subtitle": "Access your bundles, Customer support and more.",
     "header": {
       "syncCollections": "Sync Collections",
-      "createBundle": "Create Bundle",
-      "changelog": "Changelog"
+      "createBundle": "Create Bundle"
     },
     "support": {
       "heroTitle": "Unlock your store's full potential.",
@@ -100,7 +99,6 @@
     "resources": {
       "bundleInspiration": "Bundle Inspiration",
       "support": "Support",
-      "exploreUpdate": "Explore Update",
       "sdkDocumentation": "SDK Documentation",
       "bundleGallery": "Bundle Gallery",
       "comingSoon": "Coming soon"
@@ -265,10 +263,26 @@
         "progressCount": "1 of 2 selected",
         "variant": "Standard",
         "products": {
-          "first": { "name": "Everyday essential", "price": "$24.00", "compareAt": "$28.00" },
-          "second": { "name": "Popular addition", "price": "$18.00", "compareAt": "$22.00" },
-          "third": { "name": "Customer favourite", "price": "$16.00", "compareAt": "$20.00" },
-          "fourth": { "name": "Bundle extra", "price": "$12.00", "compareAt": "$15.00" }
+          "first": {
+            "name": "Everyday essential",
+            "price": "$24.00",
+            "compareAt": "$28.00"
+          },
+          "second": {
+            "name": "Popular addition",
+            "price": "$18.00",
+            "compareAt": "$22.00"
+          },
+          "third": {
+            "name": "Customer favourite",
+            "price": "$16.00",
+            "compareAt": "$20.00"
+          },
+          "fourth": {
+            "name": "Bundle extra",
+            "price": "$12.00",
+            "compareAt": "$15.00"
+          }
         },
         "add": "Add",
         "added": "Added ×1",
@@ -295,65 +309,286 @@
     }
   },
   "tooltips": {
+    "helpLabel": "About {{title}}",
     "stepFlow": {
       "title": "Step Flow",
-      "description": "Steps will render as navigation items on top of the bundle builder"
+      "description": "Steps will render as navigation items on top of the bundle builder",
+      "imageAlt": "A storefront bundle builder with multiple navigation steps"
     },
     "category": {
       "title": "Category",
-      "description": "Categories will appear as tabs inside each step"
+      "description": "Categories will appear as tabs inside each step",
+      "imageAlt": "Category tabs displayed inside a bundle step"
     },
     "rulesConfiguration": {
       "title": "Rules guide shopper selections",
-      "description": "Use step rules for one selection limit, or category rules when each category needs its own rule."
+      "description": "Use step rules for one selection limit, or category rules when each category needs its own rule.",
+      "imageAlt": "Selection rules applied to a bundle step and its categories"
     },
     "bundleQuantityOptions": {
       "title": "Bundle Quantity Options",
-      "description": "Show quantity-based discount rules as selectable bundle boxes. Each box can have its own label, subtext, and default rule."
+      "description": "Show quantity-based discount rules as selectable bundle boxes. Each box can have its own label, subtext, and default rule.",
+      "imageAlt": "Selectable bundle quantity boxes on a storefront"
     },
     "discountProgressBar": {
       "title": "Progress Bar",
-      "description": "Show shoppers how close they are to the next discount. Simple uses one bar, while Step Based shows discount milestones."
+      "description": "Show shoppers how close they are to the next discount. Simple uses one bar, while Step Based shows discount milestones.",
+      "imageAlt": "A bundle discount progress bar with milestones"
     },
     "discountMessaging": {
       "title": "Discount Messaging",
-      "description": "Customize the messages shown before a discount unlocks and after shoppers qualify."
+      "description": "Customize the messages shown before a discount unlocks and after shoppers qualify.",
+      "imageAlt": "Storefront bundle discount messages before and after qualification"
     },
     "loadingAnimation": {
       "title": "Storefront Loading Animation",
-      "description": "Shown while Only Bundles loads bundle content on the storefront."
+      "description": "Shown while Only Bundles loads bundle content on the storefront.",
+      "imageAlt": "A loading state displayed while bundle content is prepared"
     },
     "bundleVisibilityPending": {
       "description": "Tracks whether your bundle is discoverable by shoppers. Optimises when you copy your bundle link and place it on your store, enable the Bundle Widget, or set up the Bundle Embed."
     },
     "productSlots": {
       "title": "Product Slots",
-      "description": "Display empty slots on the storefront and use the configured Slot Icon for those empty slots."
+      "description": "Display empty slots on the storefront and use the configured Slot Icon for those empty slots.",
+      "imageAlt": "Empty product slots filling as shoppers build a bundle"
     },
     "variantSelector": {
       "title": "Variant Selector",
-      "description": "Show a variant dropdown on each product card so shoppers can pick options without opening quick look."
+      "description": "Show a variant dropdown on each product card so shoppers can pick options without opening quick look.",
+      "imageAlt": "A variant selector displayed inside a bundle product card"
     },
     "showTextOnAddButton": {
       "title": "Show Text on + Button",
-      "description": "Replace the + icon with a text Add to Cart button placed below the product price."
+      "description": "Replace the + icon with a text Add to Cart button placed below the product price.",
+      "imageAlt": "A text add button shown below a bundle product price"
     },
     "cartLineItemDiscountDisplay": {
       "title": "Cart Line Item Discount Display",
-      "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging."
+      "description": "Control how bundle savings appear on the cart line item, including retail price and You Save messaging.",
+      "imageAlt": "Bundle savings displayed on a cart line item"
+    },
+    "swatchTooltip": {
+      "title": "Color swatch names",
+      "description": "Show the Shopify option value when shoppers hover over or focus a color swatch. The label is intentionally hidden on touch-only devices.",
+      "imageAlt": "A focused color swatch displaying its color name"
+    },
+    "tierBadge": {
+      "title": "Tier badge",
+      "description": "Highlight a pricing tier with a configurable badge on the storefront.",
+      "imageAlt": "A highlighted bundle pricing tier with a badge"
+    },
+    "freeGiftAddons": {
+      "title": "Free Gift and Add-Ons",
+      "description": "Add an optional gifting step or offer add-on products when shoppers meet a configured bundle condition.",
+      "imageAlt": "A bundle unlocking a gift and optional add-on products"
+    },
+    "specificLinkAccess": {
+      "title": "Specific link access",
+      "description": "Require shoppers to open the bundle through its generated private link before the offer is eligible.",
+      "imageAlt": "A private link opening an eligible bundle offer"
+    },
+    "offerOperations": {
+      "title": "Offer scheduling and priority",
+      "description": "Control when the bundle can appear and which matching Only Bundles offer is considered first.",
+      "imageAlt": "Prioritized bundle offers arranged across a scheduled time window"
+    },
+    "countryTargeting": {
+      "title": "Country targeting",
+      "description": "Include or exclude the bundle using the shopper's country selected through Shopify Markets.",
+      "imageAlt": "A storefront country selector controlling bundle eligibility"
+    },
+    "bundleWidget": {
+      "title": "Bundle Widget",
+      "description": "Place a bundle upsell button or content block on eligible product pages.",
+      "imageAlt": "A bundle upsell widget displayed on a product page"
+    },
+    "bundleEmbed": {
+      "title": "Bundle Embed",
+      "description": "Embed the product-page bundle builder directly into selected product templates.",
+      "imageAlt": "A bundle builder embedded within a product page"
+    },
+    "preselectedProducts": {
+      "title": "Pre Selected Product",
+      "description": "Start the bundle with configured products already selected for the shopper.",
+      "imageAlt": "A bundle builder with a product already selected"
+    },
+    "quantityValidation": {
+      "title": "Quantity Validation",
+      "description": "Limit how many units of one product a shopper can add to the bundle.",
+      "imageAlt": "A bundle product quantity control showing its allowed limit"
+    },
+    "lowStockAlert": {
+      "title": "Low-stock alert",
+      "description": "Show Shopify's sellable variant quantity when stock reaches the configured threshold.",
+      "imageAlt": "A bundle product card displaying a low-stock message"
+    },
+    "stickyAddToCart": {
+      "title": "Sticky add to cart",
+      "description": "Keep a bundle action visible while shoppers scroll on supported desktop or mobile layouts.",
+      "imageAlt": "A sticky bundle action bar fixed to the edge of a storefront"
+    },
+    "countdownTimer": {
+      "title": "Countdown timer",
+      "description": "Show the time remaining until the bundle's existing scheduled offer end.",
+      "imageAlt": "A countdown timer displayed above a bundle builder"
+    },
+    "bundleSubscriptions": {
+      "title": "Bundle Subscriptions",
+      "description": "Let shoppers choose from compatible Shopify selling plans shared by the bundle products.",
+      "imageAlt": "One-time and subscription purchase options for a bundle"
     }
+  },
+  "specificLinkOffer": {
+    "title": "Specific link access",
+    "description": "Show the bundle builder only when shoppers open this product through a generated private link.",
+    "statusLabel": "Link status",
+    "enableLabel": "Require the specific link",
+    "enableDetails": "Save the bundle after changing this setting.",
+    "generate": "Generate link",
+    "regenerate": "Regenerate link",
+    "revoke": "Revoke link",
+    "copy": "Copy link",
+    "oneTimeNotice": "Copy this link now. For security, it cannot be shown again after you leave or reload this page.",
+    "generatedSuccess": "Specific link generated",
+    "revokedSuccess": "Specific link revoked",
+    "copiedSuccess": "Specific link copied",
+    "status": {
+      "not_generated": "Not generated",
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired"
+    }
+  },
+  "offerOperations": {
+    "title": "Offer scheduling and priority",
+    "description": "Control when this bundle can appear in Only Bundles storefront placements and which matching offer is shown first.",
+    "shopifyOwnership": "Shopify controls checkout discount dates and combinations. These settings only control Only Bundles storefront visibility and offer selection.",
+    "priorityLabel": "Storefront priority",
+    "priorityDetails": "Lower numbers are considered first when multiple Only Bundles offers match the same placement.",
+    "stopLowerLabel": "Stop lower-priority storefront offers",
+    "stopLowerDetails": "After this offer is selected, hide matching Only Bundles offers with a larger priority number.",
+    "statusLabel": "Current storefront state",
+    "status": {
+      "active": "Active now",
+      "scheduled": "Scheduled",
+      "expired": "Ended",
+      "invalid": "Needs correction"
+    },
+    "nextTransition": "Next state change: {{timestamp}}",
+    "scheduleModeLabel": "Schedule",
+    "scheduleModeAlways": "Always active",
+    "scheduleModeOneTime": "One-time window",
+    "scheduleModeRecurring": "Recurring window",
+    "startsAtLabel": "Starts at",
+    "endsAtLabel": "Ends at",
+    "dateDetails": "Enter an ISO 8601 instant with a time-zone offset. Leave blank for no boundary.",
+    "datePlaceholder": "2026-09-01T10:00:00Z",
+    "recurrenceTimezone": "Times use your Shopify store timezone: {{timezone}}.",
+    "recurrenceFrequencyLabel": "Repeat",
+    "recurrenceWeekly": "Weekly",
+    "recurrenceMonthly": "Monthly",
+    "recurrenceAnchorDateLabel": "First occurrence date",
+    "recurrenceAnchorDateDetails": "Weekly schedules repeat on this weekday. Monthly schedules repeat on this day of the month and skip months that do not contain it.",
+    "recurrenceWindowStartLabel": "Starts at local time",
+    "recurrenceWindowEndLabel": "Ends at local time",
+    "recurrenceTimePlaceholder": "09:00",
+    "recurrenceWindowDetails": "The end time must be later on the same day.",
+    "recurrenceTerminationLabel": "Stop repeating",
+    "recurrenceNever": "Never",
+    "recurrenceOnDate": "On a date",
+    "recurrenceAfterRuns": "After a number of occurrences",
+    "recurrenceEndsOnLabel": "Last occurrence date",
+    "recurrenceRunCountLabel": "Number of occurrences",
+    "validation": {
+      "priority": "Enter a whole-number priority from 1 to 9999.",
+      "scheduleMode": "Choose when this offer is active.",
+      "startsAt": "Enter a valid ISO 8601 start instant.",
+      "endsAt": "Enter a valid ISO 8601 end instant.",
+      "range": "The end instant must be later than the start instant.",
+      "timezone": "Shopify returned an invalid store timezone. Update the store timezone in Shopify and try again.",
+      "frequency": "Choose a weekly or monthly recurrence.",
+      "anchorDate": "Choose the first occurrence date.",
+      "windowStart": "Choose a valid local start time.",
+      "windowEnd": "Choose a local end time later on the same day.",
+      "endsOn": "Choose a last occurrence date on or after the first occurrence.",
+      "runCount": "Enter a whole number of occurrences greater than zero."
+    }
+  },
+  "countryTargeting": {
+    "title": "Country targeting",
+    "description": "Show this bundle only for, or everywhere except, selected Shopify storefront countries.",
+    "shopifyOwnership": "Uses Shopify's selected storefront country. No IP lookup or customer data is used.",
+    "enableLabel": "Target by country",
+    "enableDetails": "Country choices remain saved when targeting is turned off.",
+    "modeLabel": "Country rule",
+    "modeInclude": "Show only in selected countries",
+    "modeExclude": "Hide in selected countries",
+    "searchLabel": "Find countries",
+    "searchPlaceholder": "Search by country name or code",
+    "resultsLabel": "Matching countries",
+    "noCountries": "No countries selected.",
+    "noResults": "No matching countries found.",
+    "removeCountry": "Remove {{country}}",
+    "validation": {
+      "mode": "Choose whether the selected countries are included or excluded.",
+      "countries": "Select at least one valid country when country targeting is enabled."
+    }
+  },
+  "countdown": {
+    "title": "Countdown timer",
+    "description": "Show the time remaining until this bundle's scheduled offer end.",
+    "missingSchedule": "Add an offer schedule end time in Bundle visibility before enabling the countdown.",
+    "layoutLabel": "Layout",
+    "layoutCompact": "Compact time",
+    "layoutFull": "Days, hours, minutes, and seconds",
+    "positionLabel": "Position",
+    "positionAbove": "Above bundle",
+    "positionBelow": "Below bundle",
+    "timerTitleLabel": "Timer title",
+    "expiryActionLabel": "When the countdown ends",
+    "expiryHide": "Hide the countdown",
+    "expiryZeros": "Show zeros",
+    "expiryMessage": "Show a message",
+    "expiredMessageLabel": "Expired message"
   },
   "common": {
     "alerts": {
-      "actionFailed": "Action failed", "previewUnavailable": "Preview unavailable", "settingsNotSaved": "Settings not saved", "exportUnavailable": "Export unavailable", "backfillUnavailable": "Backfill unavailable", "trackingNotUpdated": "Tracking not updated", "bundleNotSaved": "Bundle not saved", "operationFailed": "Operation failed"
+      "actionFailed": "Action failed",
+      "previewUnavailable": "Preview unavailable",
+      "settingsNotSaved": "Settings not saved",
+      "exportUnavailable": "Export unavailable",
+      "backfillUnavailable": "Backfill unavailable",
+      "trackingNotUpdated": "Tracking not updated",
+      "bundleNotSaved": "Bundle not saved",
+      "operationFailed": "Operation failed"
     },
     "success": {
-      "previewOpened": "Preview opened", "csvExported": "CSV exported", "backfillComplete": "Backfill complete", "trackingEnabled": "Tracking enabled", "trackingDisabled": "Tracking disabled", "changesSaved": "Changes saved", "productSynced": "Product synced", "bundleSynced": "Bundle synced", "operationComplete": "Operation complete"
+      "previewOpened": "Preview opened",
+      "csvExported": "CSV exported",
+      "backfillComplete": "Backfill complete",
+      "trackingEnabled": "Tracking enabled",
+      "trackingDisabled": "Tracking disabled",
+      "changesSaved": "Changes saved",
+      "productSynced": "Product synced",
+      "bundleSynced": "Bundle synced",
+      "operationComplete": "Operation complete"
     },
     "actions": {
-      "close": "Close", "cancel": "Cancel", "dismiss": "Dismiss", "manage": "Manage", "enable": "Enable", "enableHere": "Enable Here", "learnMore": "Learn More",
-      "maybeLater": "Maybe Later", "setUpVisibility": "Set Up Visibility", "reinstallApp": "Reinstall app",
-      "upgradeNow": "Upgrade Now", "viewPlans": "View Plans", "discardChanges": "Discard Changes",
+      "close": "Close",
+      "cancel": "Cancel",
+      "dismiss": "Dismiss",
+      "manage": "Manage",
+      "enable": "Enable",
+      "enableHere": "Enable Here",
+      "learnMore": "Learn More",
+      "view": "View",
+      "maybeLater": "Maybe Later",
+      "setUpVisibility": "Set Up Visibility",
+      "reinstallApp": "Reinstall app",
+      "upgradeNow": "Upgrade Now",
+      "viewPlans": "View Plans",
+      "discardChanges": "Discard Changes",
       "continueEditing": "Continue Editing"
     },
     "loading": {
@@ -373,9 +608,14 @@
       "title": "Your bundle is Unlisted",
       "body": "For discoverability, change the bundle product's status to Active in Shopify Products."
     },
+    "warningGroup": {
+      "heading": "Action required",
+      "summary": "Few actions are needed to publish the bundle.",
+      "modalTitle": "Actions needed"
+    },
     "parentProductStatus": {
-      "loadingTitle": "Checking parent product status",
-      "loadingBody": "Getting the latest status from Shopify Products."
+      "loadingTitle": "Scanning bundle status",
+      "loadingBody": "bundle status is being fetched."
     },
     "proxyHealth": {
       "title": "App proxy not connected",
@@ -393,54 +633,1487 @@
       "body": "If you discard changes, you'll delete any edits you made since you last saved."
     },
     "multiLanguage": {
-      "title": "Customize Text for Multiple Languages", "saveAndClose": "Save and Close",
-      "translations": "Translations", "helper": "Use the dropdown in this section to specify which language you would like to edit",
-      "chooseLanguage": "Choose language to edit", "customText": "Custom Text",
-      "inputHelper": "Input Text for the Selected Language", "textSettings": "Text Settings"
+      "title": "Customize Text for Multiple Languages",
+      "saveAndClose": "Save and Close",
+      "translations": "Translations",
+      "helper": "Use the dropdown in this section to specify which language you would like to edit",
+      "chooseLanguage": "Choose language to edit",
+      "customText": "Custom Text",
+      "inputHelper": "Input Text for the Selected Language",
+      "textSettings": "Text Settings"
     },
     "readiness": {
-      "itemAccessibility": "{{label}} readiness item", "points": "+{{points}} Points",
-      "ready": "Your bundle is ready to sell!", "notReady": "Your bundle isn't ready to sell yet.",
-      "toggleAccessibility": "Toggle readiness score", "title": "Readiness Score",
+      "itemAccessibility": "{{label}} readiness item",
+      "points": "+{{points}} Points",
+      "ready": "Your bundle is ready to sell!",
+      "notReady": "Your bundle isn't ready to sell yet.",
+      "toggleAccessibility": "Toggle readiness score",
+      "title": "Readiness Score",
       "helper": "Complete all steps to maximise your bundle's success."
     },
     "bundleStatus": {
       "title": "Bundle Status",
-      "options": { "active": "Active", "draft": "Draft", "archived": "Archived", "unlisted": "Unlisted (Ad Campaigns)" }
+      "options": {
+        "active": "Active",
+        "draft": "Draft",
+        "archived": "Archived",
+        "unlisted": "Unlisted (Ad Campaigns)"
+      }
     }
   },
   "createBundle": {
-    "title": "Create Bundle", "dashboard": "Dashboard", "heading": "Select bundle builder type", "help": "How do bundle builder types work?",
-    "validation": { "required": "Bundle name is required", "minLength": "Bundle name must be at least 3 characters" },
-    "fields": { "name": "Bundle name", "namePlaceholder": "Eg:- T-shirt bundle" },
-    "bundleType": {
-      "productPage": { "title": "Product page bundle builder", "description": "Display bundle builder on existing product pages (recommended for most stores)" },
-      "fullPage": { "title": "Full page bundle builder", "description": "Create a dedicated landing page for your bundle with tabs and full customization" }
+    "title": "Create Bundle",
+    "dashboard": "Dashboard",
+    "heading": "Select bundle builder type",
+    "help": "How do bundle builder types work?",
+    "validation": {
+      "required": "Bundle name is required",
+      "minLength": "Bundle name must be at least 3 characters"
     },
-    "actions": { "selected": "Selected", "select": "Select", "next": "Next" }
+    "fields": {
+      "name": "Bundle name",
+      "namePlaceholder": "Eg:- T-shirt bundle"
+    },
+    "bundleType": {
+      "productPage": {
+        "title": "Product page bundle builder",
+        "description": "Display bundle builder on existing product pages (recommended for most stores)"
+      },
+      "fullPage": {
+        "title": "Full page bundle builder",
+        "description": "Create a dedicated landing page for your bundle with tabs and full customization"
+      }
+    },
+    "actions": {
+      "selected": "Selected",
+      "select": "Select",
+      "next": "Next"
+    }
   },
   "billing": {
     "pricePerMonth": "${{price}}/month",
-    "actions": { "tryAgain": "Try Again", "contactSupport": "Contact Support", "cancel": "Cancel", "back": "Back to previous page" },
-    "error": { "heading": "Subscription Issue", "verificationFailed": "Shopify could not verify the current subscription. Try again.", "unexpected": "An unexpected error occurred during subscription setup." },
-    "upgradeModal": {
-      "heading": "Choose Growth", "confirm": "Continue to Shopify", "redirect": "You'll be redirected to Shopify to choose monthly or annual billing.",
-      "benefitsHeading": "Growth includes:", "managedByShopify": "Plan selection and billing are managed by Shopify",
-      "benefits": { "unlimitedPublicBundles": "Unlimited public bundles and steps", "allTemplatesDesign": "All templates and advanced Design controls", "advancedAnalytics": "Advanced bundle analytics", "prioritySupport": "Priority support" }
+    "actions": {
+      "tryAgain": "Try Again",
+      "contactSupport": "Contact Support",
+      "cancel": "Cancel",
+      "back": "Back to previous page"
     },
-    "success": { "heading": "Growth is active", "body": "Shopify verified your Growth subscription.", "bundleLimit": "Public bundles", "bundleLimitValue": "Unlimited", "designControl": "Advanced Design", "fullAccess": "Included", "support": "Support", "priority": "Priority" },
-    "cards": { "currentPlan": "Current Plan", "freePrice": "$0", "freeDescription": "Create, publish, and sell with one complete bundle", "includes": "Includes:", "freePlan": "Free Plan", "mostPopular": "Most Popular", "perMonth": "/ month", "growthDescription": "Advanced merchandising, customization, analytics, and scale", "growthIncludes": "Everything in Free, plus:", "chooseGrowth": "Choose Growth", "annualPrice": "Or ${{price}} per year", "trialAndBilling": "{{days}}-day free trial. Choose monthly or annual billing in Shopify." },
-    "planFeatures": { "onePublicBundle": "One public bundle", "twoSteps": "Two enabled steps or categories", "productPageBundles": "Product Page Bundles", "fullPageBundles": "Full Page Bundles", "brandTypography": "Brand colors and typography", "summary30": "30-day analytics summary", "merchandising": "All merchandising features", "standardSupport": "Standard support", "unlimitedBundlesSteps": "Unlimited public bundles and steps", "allTemplates": "All bundle templates", "advancedDesign": "Advanced Design controls", "advancedAnalytics": "Advanced bundle analytics", "prioritySupport": "Priority support" },
-    "comparison": { "publicBundles": "Public bundles", "steps": "Enabled steps or categories", "productPageBundles": "Product Page Bundles", "fullPageBundles": "Full Page Bundles", "merchandising": "Discounts, gifts, add-ons, and upsells", "customerSubscriptions": "Customer bundle subscriptions", "customization": "Copy, translations, CSS, and scripts", "templates": "Templates", "design": "Design", "analytics": "Analytics", "prioritySupport": "Priority support" },
-    "values": { "unlimited": "Unlimited", "standard": "Standard", "all": "All", "brandTypography": "Brand colors and typography", "allControls": "All controls", "summary30": "30-day summary", "advanced": "Advanced" },
-    "valueProps": { "scaleTitle": "Scale public bundles", "scaleDescription": "Publish unlimited bundle campaigns and use unlimited steps or categories", "designTitle": "Use every template and advanced Design control", "designDescription": "Unlock all FPB and PPB templates plus component-level visual controls", "analyticsTitle": "Analyze and optimize", "analyticsDescription": "Use custom ranges, bundle and campaign detail, backfill, and CSV export" },
-    "faq": { "heading": "Frequently asked questions", "changeQuestion": "Can I change plans at any time?", "changeAnswer": "Yes. Shopify hosts monthly, annual, and Free plan changes from the Billing page.", "downgradeQuestion": "What happens to my bundles if I change to Free?", "downgradeAnswer": "All bundle configuration is preserved. The most recently published Free-compatible bundle remains public immediately; other public bundles become Draft.", "billingQuestion": "How does billing work?", "billingAnswer": "Growth is available monthly or annually through Shopify App Pricing. Both intervals include the same features.", "refundQuestion": "Do you offer refunds?", "refundAnswer": "Subscriptions are billed through Shopify. Please contact our support team for billing inquiries." },
-    "cta": { "heading": "Need more scale and control?", "body": "Choose Growth for unlimited public bundles, all templates, advanced Design and analytics, and priority support.", "highlights": { "bundles": "Unlimited public bundles", "design": "Advanced Design", "support": "Priority Support" }, "upgrade": "View Growth", "cancelAnytime": "Managed by Shopify" },
-    "route": { "title": "Subscription & Billing", "dashboard": "Dashboard", "currentPlan": "Current Plan", "active": "Active", "inactive": "Inactive", "bundleUsage": "Public Bundle Usage", "bundleCount": "{{current}} / {{limit}} public bundles", "limitReached": "You've reached the Free public-bundle limit.", "limitUpgrade": "View Growth for unlimited public bundles.", "overview": "Bundle Overview", "activeBundles": "Active Bundles", "totalSteps": "Total Steps", "productPage": "Product Page", "fullPage": "Full Page", "cancelSubscription": "Manage Subscription", "cancelHeading": "Manage subscription in Shopify?", "downgradeBody": "Shopify shows the effective date before a plan change.", "archiveWarning": "All bundle configuration is preserved after a downgrade.", "confirmCancellation": "Open Shopify plan management", "keepSubscription": "Keep Subscription", "features": "Your Plan Features", "needHelp": "Need Help?", "helpBody": "Have questions about billing or need a custom plan? Our team is here to help." }
+    "error": {
+      "heading": "Subscription Issue",
+      "verificationFailed": "Shopify could not verify the current subscription. Try again.",
+      "unexpected": "An unexpected error occurred during subscription setup."
+    },
+    "upgradeModal": {
+      "heading": "Choose Growth",
+      "confirm": "Continue to Shopify",
+      "redirect": "You'll be redirected to Shopify to choose monthly or annual billing.",
+      "benefitsHeading": "Growth includes:",
+      "managedByShopify": "Plan selection and billing are managed by Shopify",
+      "benefits": {
+        "unlimitedPublicBundles": "Unlimited public bundles and steps",
+        "allTemplatesDesign": "All templates and advanced Design controls",
+        "advancedAnalytics": "Advanced bundle analytics",
+        "prioritySupport": "Priority support"
+      }
+    },
+    "success": {
+      "heading": "Growth is active",
+      "body": "Shopify verified your Growth subscription.",
+      "bundleLimit": "Public bundles",
+      "bundleLimitValue": "Unlimited",
+      "designControl": "Advanced Design",
+      "fullAccess": "Included",
+      "support": "Support",
+      "priority": "Priority"
+    },
+    "cards": {
+      "currentPlan": "Current Plan",
+      "freePrice": "$0",
+      "freeDescription": "Create, publish, and sell with one complete bundle",
+      "includes": "Includes:",
+      "freePlan": "Free Plan",
+      "mostPopular": "Most Popular",
+      "perMonth": "/ month",
+      "growthDescription": "Advanced merchandising, customization, analytics, and scale",
+      "growthIncludes": "Everything in Free, plus:",
+      "chooseGrowth": "Choose Growth",
+      "annualPrice": "Or ${{price}} per year",
+      "trialAndBilling": "{{days}}-day free trial. Choose monthly or annual billing in Shopify."
+    },
+    "planFeatures": {
+      "onePublicBundle": "One public bundle",
+      "twoSteps": "Two enabled steps or categories",
+      "productPageBundles": "Product Page Bundles",
+      "fullPageBundles": "Full Page Bundles",
+      "brandTypography": "Brand colors and typography",
+      "summary30": "30-day analytics summary",
+      "merchandising": "All merchandising features",
+      "standardSupport": "Standard support",
+      "unlimitedBundlesSteps": "Unlimited public bundles and steps",
+      "allTemplates": "All bundle templates",
+      "advancedDesign": "Advanced Design controls",
+      "advancedAnalytics": "Advanced bundle analytics",
+      "prioritySupport": "Priority support"
+    },
+    "comparison": {
+      "publicBundles": "Public bundles",
+      "steps": "Enabled steps or categories",
+      "productPageBundles": "Product Page Bundles",
+      "fullPageBundles": "Full Page Bundles",
+      "merchandising": "Discounts, gifts, add-ons, and upsells",
+      "customerSubscriptions": "Customer bundle subscriptions",
+      "customization": "Copy, translations, CSS, and scripts",
+      "templates": "Templates",
+      "design": "Design",
+      "analytics": "Analytics",
+      "prioritySupport": "Priority support"
+    },
+    "values": {
+      "unlimited": "Unlimited",
+      "standard": "Standard",
+      "all": "All",
+      "brandTypography": "Brand colors and typography",
+      "allControls": "All controls",
+      "summary30": "30-day summary",
+      "advanced": "Advanced"
+    },
+    "valueProps": {
+      "scaleTitle": "Scale public bundles",
+      "scaleDescription": "Publish unlimited bundle campaigns and use unlimited steps or categories",
+      "designTitle": "Use every template and advanced Design control",
+      "designDescription": "Unlock all FPB and PPB templates plus component-level visual controls",
+      "analyticsTitle": "Analyze and optimize",
+      "analyticsDescription": "Use custom ranges, bundle and campaign detail, backfill, and CSV export"
+    },
+    "faq": {
+      "heading": "Frequently asked questions",
+      "changeQuestion": "Can I change plans at any time?",
+      "changeAnswer": "Yes. Shopify hosts monthly, annual, and Free plan changes from the Billing page.",
+      "downgradeQuestion": "What happens to my bundles if I change to Free?",
+      "downgradeAnswer": "All bundle configuration is preserved. The most recently published Free-compatible bundle remains public immediately; other public bundles become Draft.",
+      "billingQuestion": "How does billing work?",
+      "billingAnswer": "Growth is available monthly or annually through Shopify App Pricing. Both intervals include the same features.",
+      "refundQuestion": "Do you offer refunds?",
+      "refundAnswer": "Subscriptions are billed through Shopify. Please contact our support team for billing inquiries."
+    },
+    "cta": {
+      "heading": "Need more scale and control?",
+      "body": "Choose Growth for unlimited public bundles, all templates, advanced Design and analytics, and priority support.",
+      "highlights": {
+        "bundles": "Unlimited public bundles",
+        "design": "Advanced Design",
+        "support": "Priority Support"
+      },
+      "upgrade": "View Growth",
+      "cancelAnytime": "Managed by Shopify"
+    },
+    "route": {
+      "title": "Subscription & Billing",
+      "dashboard": "Dashboard",
+      "currentPlan": "Current Plan",
+      "active": "Active",
+      "inactive": "Inactive",
+      "bundleUsage": "Public Bundle Usage",
+      "bundleCount": "{{current}} / {{limit}} public bundles",
+      "limitReached": "You've reached the Free public-bundle limit.",
+      "limitUpgrade": "View Growth for unlimited public bundles.",
+      "overview": "Bundle Overview",
+      "activeBundles": "Active Bundles",
+      "totalSteps": "Total Steps",
+      "productPage": "Product Page",
+      "fullPage": "Full Page",
+      "cancelSubscription": "Manage Subscription",
+      "cancelHeading": "Manage subscription in Shopify?",
+      "downgradeBody": "Shopify shows the effective date before a plan change.",
+      "archiveWarning": "All bundle configuration is preserved after a downgrade.",
+      "confirmCancellation": "Open Shopify plan management",
+      "keepSubscription": "Keep Subscription",
+      "features": "Your Plan Features",
+      "needHelp": "Need Help?",
+      "helpBody": "Have questions about billing or need a custom plan? Our team is here to help."
+    }
+  },
+  "analyticsPage": {
+    "offers": {
+      "title": "Offer performance",
+      "description": "Compare privacy-safe offer decisions with bundle engagement, add-to-cart activity, completed orders, and revenue.",
+      "filterLabel": "Offer policy",
+      "allOffers": "All offers",
+      "ruleVersion": "Rule version {{version}}",
+      "tierCount_one": "{{count}} reached tier",
+      "tierCount_other": "{{count}} reached tiers",
+      "engaged": "Engaged sessions",
+      "addedToCart": "Added to cart",
+      "checkedOut": "Completed orders",
+      "revenue": "Revenue"
+    }
+  },
+  "offerPolicyCsv": {
+    "title": "Offer operations",
+    "export": {
+      "title": "Export offer policies",
+      "description": "Download a versioned CSV of offer priority, scheduling, link eligibility, and country targeting for every existing bundle.",
+      "action": "Export CSV",
+      "error": "The CSV could not be exported. Try again."
+    },
+    "import": {
+      "title": "Validate and import",
+      "description": "Upload the versioned CSV, review validation, then apply policy changes to existing bundles.",
+      "safetyTitle": "Bundle publishing is unchanged",
+      "safetyBody": "Import never creates or publishes bundles and never accepts campaign tokens. Link-only delivery can be enabled only for a bundle that already has an active campaign link.",
+      "dropLabel": "Offer policy CSV",
+      "dropAccessibility": "Upload a version 2 offer policy CSV",
+      "validate": "Validate CSV",
+      "apply": "Apply valid changes"
+    },
+    "result": {
+      "title": "Import result",
+      "valid": "CSV validation passed",
+      "invalid": "CSV needs review",
+      "summary": "Rows: {{rows}}. Changed: {{changed}}. Applied: {{applied}}. Storefront synced: {{synced}}.",
+      "rowError": "Row {{row}}, {{field}}: {{message}}",
+      "syncError": "Bundle {{bundleId}} was saved but its storefront sync failed. Use Sync Bundle after Shopify is available."
+    },
+    "errors": {
+      "file_too_large": "The CSV must be 1 MiB or smaller.",
+      "too_many_rows": "The CSV can contain at most 500 offer rows.",
+      "invalid_csv": "Choose a valid CSV file.",
+      "invalid_headers": "Use the unchanged version 2 CSV headers.",
+      "unsupported_schema_version": "Only schema version 2 is supported.",
+      "duplicate_bundle_id": "Each bundle ID must appear exactly once.",
+      "bundle_not_found": "The bundle does not exist in this shop.",
+      "invalid_boolean": "Use true or false.",
+      "invalid_priority": "Priority must be a whole number from 1 to 9999.",
+      "invalid_date": "Use an ISO 8601 timestamp or leave the field empty.",
+      "invalid_date_range": "The end must be later than the start.",
+      "invalid_schedule_mode": "Schedule mode must be always, one_time, or recurring.",
+      "invalid_recurrence_frequency": "Recurrence frequency must be weekly, monthly, or empty.",
+      "recurrence_frequency_required": "Recurring schedules require a weekly or monthly frequency.",
+      "invalid_recurrence_timezone": "Use a valid IANA timezone.",
+      "recurrence_timezone_required": "Recurring schedules require the Shopify store timezone.",
+      "shop_timezone_mismatch": "Recurrence timezone must match the current Shopify store timezone.",
+      "invalid_recurrence_date": "Use a YYYY-MM-DD local date or leave the field empty.",
+      "recurrence_anchor_required": "Recurring schedules require a first occurrence date.",
+      "invalid_recurrence_time": "Use a 24-hour HH:mm local time or leave the field empty.",
+      "recurrence_window_required": "Recurring schedules require a local start time.",
+      "invalid_recurrence_window": "The recurring end time must be later on the same day.",
+      "invalid_recurrence_termination": "Recurrence termination must be never, on_date, or after_runs.",
+      "invalid_recurrence_end_date": "The last occurrence date must be on or after the first occurrence.",
+      "invalid_recurrence_run_count": "Occurrence count must be a whole number greater than zero.",
+      "invalid_country_mode": "Country targeting mode must be include or exclude.",
+      "invalid_country_codes": "Use semicolon-separated two-letter country codes and select at least one when targeting is enabled.",
+      "invalid_rule_version": "Rule version must be a non-negative whole number.",
+      "stale_rule_version": "Export a fresh CSV before overwriting a newer policy.",
+      "campaign_link_required": "Generate an active campaign link before enabling link-only delivery."
+    }
   },
   "subscription": {
     "analytics": {
       "summaryNotice": "Free includes a 30-day activity summary. Growth adds custom ranges, bundle and campaign detail, custom UTM settings, backfill, and CSV export."
     }
+  },
+  "adminExtracted": {
+    "components": {
+      "cartpropertyfixcard": {
+        "ifYourCartPageShowsInternalPropertiesLike": "If your cart page shows internal properties like",
+        "bundleName": "_bundle_name",
+        "or": "or",
+        "isBundleParent": "_is_bundle_parent",
+        "yourThemeNeedsAOneLineFix": ", your theme needs a one-line fix.",
+        "cartItemLiquidUnlessCondition": "cart-item.liquid — unless condition",
+        "propertyFirst": "property.first",
+        "contains": "contains",
+        "appendThisToTheExisting": "Append this to the existing",
+        "unless": "unless",
+        "conditionInsideYourPropertyLoopForExample": "condition inside your property loop — for example:",
+        "unlessPropertyLastEmptyOrPropertyFirstContains": "unless property.last == empty or property.first contains '_'",
+        "mostThemesDonTNeedThis": "Most themes don't need this.",
+        "dawnRefreshAndOtherModernShopifyThemesHideUnderscorePrefixedProp": "Dawn, Refresh, and other modern Shopify themes hide underscore-prefixed properties automatically. Only apply this fix if you can visibly see internal properties on your cart page."
+      },
+      "errorpage": {
+        "technicalDetails": "Technical details",
+        "goToDashboard": "Go to Dashboard"
+      },
+      "analytics": {
+        "bundlemetricchart": {
+          "bundleSplit": "Bundle Split",
+          "performanceAcrossTheSelectedDateRange": "Performance across the selected date range"
+        },
+        "bundleperformancematrix": {
+          "bundlePerformance": "Bundle Performance",
+          "sort": "Sort",
+          "highest": "↑ Highest",
+          "lowest": "↓ Lowest",
+          "noItemsFound": "No Items found",
+          "tryChangingTheFiltersOrSearchTerm": "Try changing the filters or search term",
+          "bundle": "Bundle",
+          "views": "Views",
+          "noOfOrders": "No. of Orders",
+          "totalBundleValue": "Total Bundle Value",
+          "overallConversions": "Overall conversions"
+        },
+        "engagementpulse": {
+          "engagementPulse": "Engagement Pulse",
+          "preCheckoutSignal": "Pre-checkout signal"
+        },
+        "funnelhero": {
+          "bundleFunnel": "Bundle Funnel",
+          "howShoppersMoveThroughYourBundles": "How shoppers move through your bundles"
+        },
+        "liveactivityfeed": {
+          "liveActivity": "Live Activity",
+          "mostRecentEngagements": "Most recent engagements",
+          "nobodyHasEngagedYetActivityWillStreamHereAsShoppersInteractWithY": "Nobody has engaged yet. Activity will stream here as shoppers interact with your bundles."
+        },
+        "revenueattribution": {
+          "revenueAttribution": "Revenue Attribution",
+          "utmTrackedBundleRevenue": "UTM-tracked bundle revenue"
+        },
+        "topcampaigns": {
+          "topCampaigns": "Top Campaigns",
+          "bundleRevenueByUtmCampaign": "Bundle revenue by UTM campaign",
+          "campaignName": "Campaign Name",
+          "tryChangingTheSearchOrSortOptions": "Try changing the search or sort options",
+          "campaign": "Campaign",
+          "orders": "Orders",
+          "bundleRevenue": "Bundle revenue"
+        }
+      },
+      "billing": {
+        "featurecomparisontable": {
+          "feature": "Feature",
+          "free": "Free",
+          "growth": "Growth"
+        }
+      },
+      "bundleConfigure": {
+        "bundleguidedtour": {
+          "dismissGuidedTour": "Dismiss guided tour"
+        },
+        "templatepreviewfeedbackmodal": {
+          "bundleIsVisibleOnStore": "Bundle is visible on store",
+          "havingIssuesWithTheBundleContactUs": "Having issues with the bundle? Contact us"
+        },
+        "templatereadyscreen": {
+          "viewYourBundle": "View your bundle",
+          "viewYourBundleWithYourCustomizations": "View your bundle with your customizations",
+          "yourBundleIsReady": "Your bundle is ready",
+          "previewItNowWithYourCustomizations": "Preview it now with your customizations"
+        }
+      }
+    },
+    "shared": {
+      "filePicker": {
+        "filepickerdialog": {
+          "uploadImage": "Upload image",
+          "uploadSuccessfulImageMayTakeAMomentToAppearInYourLibraryCloseAnd": "Upload successful — image may take a moment to appear in your library. Close and re-open the picker to see it.",
+          "loadMore": "Load more"
+        },
+        "filepickertrigger": {
+          "changeImage": "Change image",
+          "removeImage": "Remove image",
+          "change": "Change",
+          "remove": "Remove"
+        }
+      },
+      "bundleConfigure": {
+        "bundlesubscriptionssection": {
+          "howToSetup": "How to setup?",
+          "subscriptionSetupGuide": "Subscription setup guide",
+          "configureEveryBundleProductAndSelectableVariantInOneSellingPlanG": "Configure every bundle product and selectable variant in one selling-plan group in your subscription app, then return here and get the shared plans.",
+          "changePlan": "Change Plan",
+          "getSubscriptionPlans": "Get Subscription Plans",
+          "planTiers": "Plan Tiers",
+          "refreshPlan": "Refresh Plan",
+          "configurations": "Configurations",
+          "configureTheSettingsForTheSubscriptionBundle": "Configure the settings for the subscription bundle",
+          "multiLanguage": "Multi Language",
+          "bundleDiscountAppliesOn": "Bundle discount applies on",
+          "applyBundleDiscountsToSubscriptionPurchasesOnlyOneTimePurchasesO": "Apply bundle discounts to subscription purchases only, one-time purchases only, or both.",
+          "onlyOnSubscriptionPurchase": "Only on subscription purchase",
+          "onlyOnOneTimePurchase": "Only on one-time purchase",
+          "onBoth": "On both",
+          "fixTheSubscriptionFieldsBeforeSaving": "Fix the subscription fields before saving."
+        },
+        "commonbundlevisibilityoverview": {
+          "publishingBestPractices": "Publishing Best Practices",
+          "pickAPlacementAndFollowTheQuickGuideToMakeYourBundleDiscoverable": "Pick a placement and follow the quick guide to make your bundle discoverable on your store.",
+          "quickSetupGuide": "Quick Setup Guide",
+          "5MinSetup": "5 min setup",
+          "yourBundleLink": "Your Bundle Link",
+          "shareItInYourThemeEmailsAdsOrSocialProfiles": "Share it in your theme, emails, ads, or social profiles.",
+          "copyLink": "Copy Link",
+          "wantMorePlacementOptions": "Want more placement options?"
+        },
+        "commonbundlewidgetsection": {
+          "productPageBundleUpsellWidgets": "Product Page Bundle Upsell Widgets",
+          "thisWillDisplayAnUpsellBlockOrButtonOnTheProductPagesOfYourChoic": "This will display an upsell block or button on the product pages of your choice.",
+          "offerUpsellBlock": "Offer Upsell Block",
+          "offerUpsellButton": "Offer Upsell Button",
+          "selectIfYouWantTheUpsellBlockOrButtonToAppearOnProductPages": "Select if you want the upsell block or button to appear on product pages.",
+          "widgetSettings": "Widget Settings",
+          "displayWidgetOn": "Display Widget on"
+        },
+        "commonconfiguresidebar": {
+          "bundleProduct": "Bundle Product",
+          "replaceProduct": "Replace Product",
+          "syncProduct": "Sync Product",
+          "editProduct": "Edit Product",
+          "parentProductStatus": "Parent Product Status",
+          "bundleSetup": "Bundle Setup",
+          "setUpYourBundleBuilder": "Set-up your bundle builder"
+        },
+        "commonstepcategoryaccordion": {
+          "categoryName": "Category Name",
+          "productsSelectedHereWillBeDisplayedOnThisStep": "Products selected here will be displayed on this step",
+          "addProducts": "Add Products",
+          "noProductsSelectedForThisCategoryYet": "No products selected for this category yet.",
+          "collectionsSelectedHereWillBeDisplayedOnThisStep": "Collections selected here will be displayed on this step",
+          "addCollections": "Add Collections",
+          "noCollectionsSelectedForThisCategoryYet": "No collections selected for this category yet."
+        },
+        "configurecontextualsavebar": {
+          "discard": "Discard"
+        },
+        "configurevalidationsummary": {
+          "fixTheFollowingFieldsBeforeSaving": "Fix the following fields before saving:"
+        },
+        "defaultproductdiscounttipbanner": {
+          "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Tip: Discounts are based on all items in your cart. Don't forget to include the Pre Selected Product's quantity or amount when setting up discounts."
+        },
+        "discountpricingtipbanner": {
+          "tipDiscountsAreCalculatedBasedOnTheProductsInCartMakeSureToAddTh": "Tip: Discounts are calculated based on the products in cart, make sure to add the \"Default Product\" quantity or amount while configuring discounts."
+        },
+        "pricingtierbadgefields": {
+          "highlightThisPricingTierOnTheStorefront": "Highlight this pricing tier on the storefront.",
+          "availableVariables": "Available variables:",
+          "pill": "Pill",
+          "folded": "Folded",
+          "bannerRounded": "Banner rounded",
+          "always": "Always",
+          "selectedTierOnly": "Selected tier only"
+        }
+      }
+    },
+    "appIndex": {
+      "welcomeTo": "Welcome to",
+      "theCompleteBundleSolutionForShopifyBuildCustomizeAndPromoteProdu": "The complete bundle solution for Shopify — build, customize, and promote product bundles that convert.",
+      "getStarted": "✦ Get Started",
+      "goToDashboard": "Go to Dashboard →",
+      "everythingIncluded": "Everything included",
+      "documentation": "Documentation"
+    },
+    "appAttribution": {
+      "attributiondashboard": {
+        "from": "From",
+        "to": "To",
+        "apply": "Apply",
+        "backfillSelectedWindow": "Backfill selected window",
+        "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Matches order line items to bundles and imports available revenue, landing-page, and UTM details.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Existing attribution records are skipped, so running the same window again does not create duplicates.",
+        "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopify orders and storefront tracking are not modified.",
+        "customUtmAttributes": "Custom UTM attributes",
+        "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Enter parameter names separated by commas or new lines. Only Bundles captures matching URL values on future visits and stores them with checkout attribution.",
+        "onlyTheFirst10ValidCustomAttributesWillBeSaved": "Only the first 10 valid custom attributes will be saved.",
+        "howCustomAttributesWork": "How custom attributes work",
+        "customAttributesAreExtraUrlQueryParametersYouAddToCampaignAffili": "Custom attributes are extra URL query parameters you add to campaign, affiliate, influencer, or creator links when the standard UTM fields are not enough.",
+        "howToSetThemUp": "How to set them up",
+        "addParameterNamesOnePerLineOrSeparatedByCommasEnterOnlyTheParame": "Add parameter names one per line or separated by commas. Enter only the parameter name, not the full URL and not the value.",
+        "exampleNames": "Example names:",
+        "utmInfluencerPartnerId": "utm_influencer, partner_id",
+        "exampleLink": "Example link:",
+        "httpsStoreComProductsBundleUtmSourceInstagramUtmInfluencerMayaAm": "https://store.com/products/bundle?utm_source=instagram&utm_influencer=maya&partner_id=summer-drop",
+        "whatHappensAfterSaving": "What happens after saving",
+        "onlyBundlesSavesUpTo10ValidNamesUpdatesTheTrackingPixelSettingsA": "Only Bundles saves up to 10 valid names, updates the tracking pixel settings, and starts capturing those attributes for new visits after you save.",
+        "whenAShopperReachesCheckoutFromAMatchingLinkTheSavedValuesAreSto": "When a shopper reaches checkout from a matching link, the saved values are stored with the order attribution record and included in analytics exports.",
+        "doNotTrackShopperIdentifiersSuchAsEmailAddressesPhoneNumbersCust": "Do not track shopper identifiers such as email addresses, phone numbers, customer IDs, or any value that can identify a person.",
+        "backfillWindow": "Backfill window"
+      },
+      "pixelstatuscard": {
+        "activateTracking": "Activate Tracking",
+        "turnThisOnToConnectAdClicksWithBundleOrdersWhenShoppersVisitThro": "Turn this on to connect ad clicks with bundle orders when shoppers visit through UTM-tagged links.",
+        "shopifyControlsWhenThePixelCanRunSoTrackingFollowsEachShopperSCo": "Shopify controls when the pixel can run, so tracking follows each shopper's consent choices."
+      }
+    },
+    "appBundlesFullPageBundleConfigure": {
+      "configurecanvasheader": {
+        "configureBundleFlow": "Configure Bundle Flow",
+        "previewBundle": "Preview Bundle"
+      },
+      "sections": {
+        "bundlesettingsbundlecart": {
+          "bundleCart": "Bundle Cart"
+        },
+        "bundlesettingscss": {
+          "bundleLevelCss": "Bundle Level CSS"
+        },
+        "bundlesettingsdefaultproducts": {
+          "chooseProductsThatShouldBeAddedToBundleByDefault": "Choose products that should be added to bundle by default",
+          "chooseDefaultProducts": "Choose default products",
+          "browseProducts": "Browse Products"
+        },
+        "bundlesettingsquantity": {
+          "enableQuantityValidation": "Enable Quantity Validation",
+          "thisFeatureDisplaysEmptySlotsOnTheStorefront": "This feature displays empty slots on the storefront.",
+          "slotIcon": "Slot Icon",
+          "youCanChangeTheDefaultIconThatRendersInTheEmptySlots": "You can change the default icon that renders in the empty slots",
+          "changeIcon": "Change Icon",
+          "reset": "Reset",
+          "noteOnlyApplicableWhenRulesAreBasedOnQuantity": "Note: Only applicable when rules are based on quantity"
+        },
+        "bundlesettingstemplate": {
+          "cartLineItemDiscountDisplay": "Cart line item discount display",
+          "editDefaults": "Edit Defaults",
+          "showsHowMuchTheCustomerIsSavingOnTheBundleInCart": "Shows how much the customer is saving on the bundle in cart"
+        },
+        "bundlesettingstimeline": {
+          "bundleBanner": "Bundle Banner",
+          "uploadBannerImagesForDesktopAndMobileViewsThatWillBeDisplayedAtT": "Upload banner images for desktop and mobile views that will be displayed at the top of your bundle page.",
+          "bannerImageDesktop": "Banner Image: Desktop",
+          "recommendedSize": "Recommended Size:",
+          "1900x230": "1900x230",
+          "bannerImageMobile": "Banner Image: Mobile",
+          "1100x500": "1100x500"
+        },
+        "configureselecteditemsmodals": {
+          "product": "Product",
+          "noProductsSelectedForThisStepYet": "No products selected for this step yet.",
+          "x": "x",
+          "noProductsSelectedForThisTierYet": "No products selected for this tier yet.",
+          "collection": "Collection",
+          "noCollectionsSelectedForThisStepYet": "No collections selected for this step yet.",
+          "useTheseVariablesInOnlyBundlesMessagesTheWidgetReplacesThemWithL": "Use these variables in Only Bundles messages. The widget replaces them with live bundle and discount values.",
+          "thisWillDisableTheAddOnsStepAreYouSureYouWantToDisable": "This will disable the add-ons step. Are you sure you want to disable?",
+          "yes": "Yes"
+        },
+        "configuresyncandlanguagemodals": {
+          "syncingRefreshesTheShopifyDataUsedByThisBundleInOnlyBundles": "Syncing refreshes the Shopify data used by this bundle in Only Bundles.",
+          "theShopifyPageWillBeDeletedAndReCreated": "The Shopify page will be deleted and re-created.",
+          "allBundleAndComponentMetafieldsWillBeRewritten": "All bundle and component metafields will be rewritten.",
+          "bundleAnalyticsArePreservedThisActionCannotBeUndone": "Bundle analytics are preserved. This action cannot be undone.",
+          "syncBundle": "Sync bundle"
+        },
+        "configuretemplatedialog": {
+          "customizeYourBundle": "Customize your bundle",
+          "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Choose a design that suits your needs and fits your brand",
+          "customizeColorsAmpLanguage": "Customize Colors & Language",
+          "fineTuneColorsAndCornersBeforePreviewingTheBundle": "Fine tune colors and corners before previewing the bundle",
+          "colorsAndCorners": "Colors and corners",
+          "textAndImages": "Text and images",
+          "useSettingsRarrDesignColorControlsForPrimarySecondaryBackgroundT": "Use Settings &rarr; Design color controls for primary, secondary, background, text, border, and discount accents.",
+          "reviewBorderRadiusAndCardRoundingBeforeApplyingTheSelectedTempla": "Review border radius and card rounding before applying the selected template.",
+          "reviewTemplateLanguageLabelsAndMediaBeforeFinishingCustomization": "Review template language, labels, and media before finishing customization",
+          "reviewProductCardBundleCartBundlePopupsToastsAndAddonsTextFromSe": "Review Product Card, Bundle Cart, Bundle, Popups, Toasts, and Addons text from Settings Language.",
+          "confirmTemplateMediaUploadedImagesAndLoadingGifsBeforeSavingTheT": "Confirm template media, uploaded images, and loading GIFs before saving the template selection.",
+          "enableYourPreview": "Enable your preview",
+          "aSimpleSwitchInYourThemeEditorNothingChangesOnYourStoreUntilYouD": "A simple switch in your theme editor. Nothing changes on your store until you decide.",
+          "openYourThemeEditorEnableTheOnlyBundlesAppEmbedThenReturnHereToP": "Open your theme editor, enable the Only Bundles app embed, then return here to preview your bundle.",
+          "openThemeEditor": "Open theme editor",
+          "iVeEnabledIt": "I've enabled it"
+        },
+        "discountbundlequantityoptions": {
+          "configureThisSectionToEnableQuantityOptions": "Configure this section to enable quantity options.",
+          "note": "Note:",
+          "bundleQuantityOptionsCanOnlyBeEnabledWhenDiscountRulesAreBasedOn": "Bundle Quantity Options can only be enabled when discount rules are based on quantity.",
+          "addQuantityBasedDiscountRulesToConfigureBundleQuantityOptions": "Add quantity-based discount rules to configure bundle quantity options."
+        },
+        "discountdisplayoptions": {
+          "discountDisplayOptions": "Discount Display Options",
+          "chooseHowDiscountsAreDisplayed": "Choose how discounts are displayed"
+        },
+        "discountmessagingoptions": {
+          "editHowDiscountMessagesAppearAboveTheSubtotal": "Edit how discount messages appear above the subtotal.",
+          "discountMessagingDisplaysTheTotalQuantityToClaimOfferBuyGetToEns": "Discount messaging displays the Total Quantity to Claim Offer (Buy + Get) to ensure customers add their rewards to the cart",
+          "activeLanguages": "Active languages",
+          "showVariables": "Show Variables",
+          "addDiscountRulesToConfigureMessaging": "Add discount rules to configure messaging."
+        },
+        "discountpricingrules": {
+          "discountAmpPricing": "Discount & Pricing",
+          "setUpDiscountRulesAppliedFromLowestToHighest": "Set up discount rules, applied from lowest to highest.",
+          "customerBuys": "Customer buys",
+          "customerGets": "Customer gets",
+          "off": "% off",
+          "theLowestPricedItems": "The lowest priced items",
+          "theLatestAddedItems": "The latest added items",
+          "quantity": "Quantity",
+          "amount": "Amount",
+          "addRule": "Add rule",
+          "maximum4DiscountRulesReached": "Maximum 4 discount rules reached"
+        },
+        "discountprogressbaroptions": {
+          "editTheProgressBarContentAndSettings": "Edit the progress bar content and settings.",
+          "simpleBar": "Simple Bar",
+          "stepBasedBar": "Step-Based Bar",
+          "addDiscountRulesToConfigureTierText": "Add discount rules to configure tier text."
+        },
+        "freegiftaddonfootermessaging": {
+          "footerMessaging": "Footer Messaging",
+          "tier1": "Tier 1"
+        },
+        "freegiftaddonproductscard": {
+          "addOnsWithBundles": "Add-Ons with Bundles",
+          "enableCustomersToAddExtraItemsToTheirBundlesAtADiscountedPriceFo": "Enable customers to add extra items to their bundles at a discounted price, for free, or at full price."
+        },
+        "freegiftaddonreferencestepcard": {
+          "addOnsAndGiftingStep": "Add-Ons and Gifting Step",
+          "replace": "Replace"
+        },
+        "freegiftaddontiereditor": {
+          "bundleProductQuantity": "Bundle Product Quantity",
+          "bundleValue": "Bundle Value",
+          "tierRules": "Tier Rules",
+          "createRulesBasedOnQuantityOfProductsAddedOnThisTier": "Create Rules based on quantity of products added on this tier.",
+          "noteRulesAreOnlyValidOnThisTier": "Note: Rules are only valid on this tier.",
+          "addTierRule": "Add Tier Rule",
+          "addAddOnsTier": "Add Add Ons Tier"
+        },
+        "imagesgifspanel": {
+          "mediaAssets": "Media Assets",
+          "addVisualMediaToEnhanceTheBundleExperienceForShoppers": "Add visual media to enhance the bundle experience for shoppers.",
+          "promoBanner": "Promo Banner",
+          "wideBannerDisplayedAtTheTopOfTheFullPageBundle": "Wide banner displayed at the top of the full-page bundle",
+          "pageHeader": "Page header",
+          "jpgPngWebpGifSvgAvif": "JPG, PNG, WebP, GIF, SVG, AVIF",
+          "recommendedSize": "RECOMMENDED SIZE",
+          "1600400Px41Ratio": "1600 × 400 px · 4:1 ratio",
+          "stepImages": "Step Images",
+          "tabIconAndBannerImagePerStepShownInTheWidget": "Tab icon and banner image per step — shown in the widget",
+          "perStep": "Per step",
+          "tabIcon": "Tab Icon",
+          "circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1": "Circular icon in the step tab. Replaces the step number when set. Recommended: 100 × 100 px square.",
+          "stepBannerImage": "Step Banner Image",
+          "fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended": "Full-width image above the product grid when this step is active. Recommended: 1600 × 400 px.",
+          "floatingPromoBadge": "Floating Promo Badge",
+          "fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks": "Fixed badge at bottom-left of the page — session-dismissed when shopper clicks X",
+          "storefront": "Storefront"
+        },
+        "stepsetupcategorycard": {
+          "addAllProductSelectionsInThisStepToASingleCategoryOrSeparateThem": "Add all product selections in this step to a single category or separate them into multiple categories for better segregation.",
+          "noCategoryDefinedYet": "No category defined yet"
+        },
+        "stepsetupcategoryfooter": {
+          "addCategory": "Add Category"
+        },
+        "stepsetupconfigcard": {
+          "stepConfig": "Step Config"
+        },
+        "stepsetupdetailscard": {
+          "stepSetup": "Step Setup",
+          "editYourStepNameOnlyVisibleIfMoreThanOneStepIsPresent": "Edit your step name (Only visible if more than one step is present)"
+        },
+        "stepsetuprulemodecontent": {
+          "createRulesBasedOnAmountOrQuantityOfProductsAddedOnThisCategory": "Create Rules based on amount or quantity of products added on this category.",
+          "noteRulesAreOnlyValidOnThisCategory": "Note: Rules are only valid on this category",
+          "addRule": "Add Rule",
+          "noRulesDefinedYet": "No rules defined yet",
+          "condition": "Condition",
+          "aStepCanHaveAtMost2Rules": "A step can have at most 2 rules."
+        },
+        "stepsetuprulescard": {
+          "rulesConfiguration": "Rules Configuration",
+          "applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom": "Apply rules to the entire step or to specific categories to guide your customer's selections."
+        },
+        "stepsetupsection": {
+          "createStepsForYourMultiStepBundleHereSelectProductOptionsForEach": "Create steps for your multi-step bundle here. Select product options for each step below",
+          "addStep": "Add Step"
+        }
+      }
+    },
+    "appBundlesProductPageBundleConfigure": {
+      "configurebundleflowUi": {
+        "selectBundleProduct": "Select Bundle Product"
+      },
+      "ppbbundleembedsection": {
+        "embedBundleBuilderOnProductPages": "Embed Bundle Builder on Product Pages",
+        "directlyEmbedTheBundleBuilderBlockOnProductPagesToLetCustomersCu": "Directly embed the Bundle Builder block on product pages to let customers curate their bundles right there.",
+        "displayBundleOn": "Display Bundle on",
+        "putTheBundleBuilderAtACustomLocation": "Put the Bundle Builder at a custom location",
+        "placeAppBlockOnTheTheme": "Place app block on the theme",
+        "placeBlock": "Place Block"
+      },
+      "ppbbundlesettingscontrolsCategorysteps": {
+        "useCategoriesAsBundleSteps": "Use categories as bundle steps",
+        "showOneCategoryAtATimeWithStepNavigation": "Show one category at a time with step navigation."
+      },
+      "ppbbundlesettingscontrolsQuantity": {
+        "enableVariantSelectionWithinTheProductCardsInsteadOfTheQuickLook": "Enable variant selection within the product cards instead of the quick look",
+        "showShopifySSellableComponentVariantQuantityAtOrBelowAThreshold": "Show Shopify's sellable component-variant quantity at or below a threshold."
+      },
+      "ppbbundlesettingscontrolsStickyaddtocart": {
+        "keepABundleActionAvailableAfterTheMainBundleButtonLeavesTheViewp": "Keep a bundle action available after the main bundle button leaves the viewport.",
+        "scrollToBundleOffers": "Scroll to bundle offers",
+        "addSelectedBundle": "Add selected bundle"
+      },
+      "ppbcategoryaccordion": {
+        "dropdown": "Dropdown",
+        "pills": "Pills",
+        "colorSwatches": "Color swatches",
+        "imageSwatches": "Image swatches",
+        "colorAndImageValuesComeFromShopifyProductOptionSwatches": "Color and image values come from Shopify product option swatches."
+      },
+      "ppbdiscountmessagerulefields": {
+        "successMessage": "Success Message"
+      },
+      "ppbdiscountrulespanel": {
+        "discountType": "Discount Type"
+      },
+      "ppbfreegiftaddonssection": {
+        "addAtLeastOneStepIn": "Add at least one step in",
+        "toConfigureFreeGiftAmpAddOnsSettings": "to configure Free Gift & Add Ons settings.",
+        "uploadFile": "Upload file"
+      },
+      "ppbimagesgifssection": {
+        "bannerImagePerStepShownAboveTheStepSProductsInTheWidget": "Banner image per step — shown above the step's products in the widget",
+        "fullWidthImageShownAboveThisStepSProductsRecommended1600400Px": "Full-width image shown above this step's products. Recommended: 1600 × 400 px.",
+        "loadingAnimation": "Loading Animation",
+        "overlayShownWhileBundleContentIsLoading": "Overlay shown while bundle content is loading",
+        "gifOnly": "GIF only",
+        "max150150Px": "Max 150 × 150 px"
+      },
+      "ppbpageselectionmodal": {
+        "noTemplatesAvailable": "No templates available",
+        "createPage": "Create page"
+      },
+      "ppbselecttemplatedialog": {
+        "reviewProductCardBundleCartBundlePopupsToastsAddonsAndMessagesTe": "Review Product Card, Bundle Cart, Bundle, Popups, Toasts, Addons, and Messages text from Settings Language."
+      },
+      "ppbstepsetupsection": {
+        "actionNeeded": "Action needed:",
+        "addCategory": "+ Add Category"
+      },
+      "ppbutilitymodals": {
+        "thisWillDeleteAndReCreateAllShopifyDataForThisBundle": "This will delete and re-create all Shopify data for this bundle:",
+        "theShopifyProductWillBeArchivedAndDeletedThenReCreated": "The Shopify product will be archived and deleted, then re-created",
+        "allBundleAndComponentMetafieldsWillBeRewritten": "All bundle and component metafields will be rewritten",
+        "syncBundle": "Sync Bundle"
+      }
+    },
+    "appIntegrations": {
+      "integrationsrouteshell": {
+        "integrationsHub": "Integrations Hub",
+        "connectTheToolsThatSupportYourBundleWorkflow": "Connect the tools that support your bundle workflow.",
+        "requestIntegration": "Request Integration"
+      }
+    },
+    "appSettings": {
+      "designsettingsview": {
+        "controlsUpdateForTheComponentVisibleInThePreview": "Controls update for the component visible in the preview.",
+        "resetVisibleControls": "Reset visible controls"
+      },
+      "languagesettingsview": {
+        "languageSettings": "Language settings",
+        "sharedLabels": "Shared labels",
+        "usedAcrossEveryBundleLayout": "Used across every bundle layout.",
+        "cartAmpCheckout": "Cart & Checkout",
+        "bundleLabels": "Bundle labels",
+        "chooseALayoutThenEditItsLabels": "Choose a layout, then edit its labels.",
+        "landingPageLayout": "Landing Page Layout",
+        "productPageLayout": "Product Page Layout"
+      },
+      "settingscontrols": {
+        "editLanguage": "Edit Language"
+      },
+      "settingsdesignfields": {
+        "shopBrand": "Shop Brand",
+        "visualReference": "Visual reference",
+        "seeWhichStorefrontElementsTheseColorControlsAffect": "See which storefront elements these color controls affect.",
+        "showColourGuide": "Show Colour Guide"
+      },
+      "settingsfeedback": {
+        "productLevelInventoryTracking": "Product-level inventory tracking",
+        "enableTheInventoryTrackingToggleInAdditionalConfigurationsToAppl": "Enable the inventory tracking toggle in Additional Configurations to apply product-level inventory tracking globally to all bundles.",
+        "eachChildProductShouldHaveShopifyTrackQuantityEnabled": "Each child product should have Shopify Track Quantity enabled.",
+        "productsWithZeroInventoryAreNotShownInTheBundle": "Products with zero inventory are not shown in the bundle.",
+        "digitalProductsShouldUseInventory0OrBelowSoTheyAreRecognizedCorr": "Digital products should use inventory 0 or below so they are recognized correctly.",
+        "ifTrackQuantityIsDisabledTheProductMayStillAppearButCannotBeAdde": "If Track Quantity is disabled, the product may still appear but cannot be added to cart when out of stock.",
+        "ifOutOfStockSellingIsEnabledAndInventoryIsAbove0DigitalProductDe": "If out-of-stock selling is enabled and inventory is above 0, digital-product detection can be restricted."
+      },
+      "settingslandingshell": {
+        "reloadThePageOrReturnToSettingsAndTryAgain": "Reload the page or return to Settings and try again.",
+        "returnToSettings": "Return to Settings"
+      },
+      "settingsroute": {
+        "additionalConfigurations": "Additional Configurations",
+        "configurationSection": "Configuration section",
+        "appConfigurations": "App Configurations",
+        "configureYourBundleSettings": "Configure your bundle settings"
+      }
+    }
+  },
+  "adminAttributes": {
+    "searchCampaigns": "Search campaigns",
+    "searchByCampaignName": "Search by campaign name",
+    "sortTopCampaigns": "Sort top campaigns",
+    "sortBy": "Sort by",
+    "direction": "Direction",
+    "topCampaignPerformance": "Top campaign performance",
+    "settingsCouldNotBeLoaded": "Settings could not be loaded",
+    "backToSettings": "Back to Settings",
+    "contextualCustomizationInspector": "Contextual customization inspector",
+    "bundleAOV": "Bundle AOV",
+    "searchByBundleName": "Search by bundle name",
+    "sortBundlePerformance": "Sort bundle performance",
+    "graphMetric": "Graph metric",
+    "engagedCheckout": "Engaged → checkout",
+    "enableMultipleLanguages": "Enable multiple languages",
+    "addOrEditLanguages": "Add or edit languages",
+    "bundleLayout": "Bundle layout",
+    "languageSections": "Language sections",
+    "languageConfigurations": "Language Configurations",
+    "layoutSelector": "Layout selector",
+    "configurationTabs": "Configuration tabs",
+    "variables": "Variables",
+    "dismissHelpModal": "Dismiss help modal",
+    "liveBundlePreview": "Live bundle preview",
+    "planFeatureComparison": "Plan feature comparison",
+    "uploadFailed": "Upload failed",
+    "searchFiles": "Search files",
+    "searchFiles2": "Search files…",
+    "uploadProcessing": "Upload processing",
+    "loadingFiles": "Loading files",
+    "uploading": "Uploading",
+    "bannerImageActions": "Banner image actions",
+    "uploadingImage": "Uploading image",
+    "selectLanguage": "Select Language",
+    "liveWidgetPreview": "Live widget preview",
+    "wereYouAbleToPreviewTheBundle": "Were you able to preview the bundle?",
+    "enableProductPageBundleUpsellWidgets": "Enable product page bundle upsell widgets",
+    "widgetType": "Widget type",
+    "uploadImage": "Upload Image",
+    "widgetTitle": "Widget Title",
+    "widgetDescription": "Widget Description",
+    "widgetButtonText": "Widget Button Text",
+    "productPageTargeting": "Product-page targeting",
+    "addBrowsedProductToBundle": "Add browsed product to bundle",
+    "removeSelectedResource": "Remove selected resource",
+    "discountSetupTip": "Discount setup tip",
+    "discountTip": "Discount tip",
+    "bundleLink": "Bundle link",
+    "bundleLinkUnavailable": "Bundle link unavailable",
+    "badgeText": "Badge text",
+    "shape": "Shape",
+    "visibility": "Visibility",
+    "textColor": "Text color",
+    "ffffff": "#ffffff",
+    "backgroundColor": "Background color",
+    "1f2937": "#1f2937",
+    "clone": "Clone",
+    "categoryName": "Category name",
+    "selectedProducts": "Selected Products",
+    "selectedCollections": "Selected Collections",
+    "enableBundleSubscriptions": "Enable bundle subscriptions",
+    "subscriptionPlan": "Subscription plan",
+    "subscriptionTitle": "Subscription Title",
+    "planNameInDropdown": "Plan Name in Dropdown",
+    "discountPill": "Discount Pill",
+    "subscriptionOptionDescription": "Subscription Option Description",
+    "enableRecurringDiscounts": "Enable Recurring Discounts",
+    "oneTimePurchase": "One-Time Purchase",
+    "oneTimePurchaseLabel": "One-time purchase label",
+    "oneTimePurchaseDescription": "One-time purchase description",
+    "makeOneTimePurchaseSelectedByDefault": "Make one-time purchase selected by default",
+    "purchaseOptionsSubtitle": "Purchase options subtitle",
+    "unavailablePlanMessage": "Unavailable-plan message",
+    "showSubscriptionDiscountOnProductCards": "Show subscription discount on product cards",
+    "defaultSubscriptionPlan": "Default subscription plan",
+    "subscriptionLanguages": "Subscription languages",
+    "bundleProductOptions": "Bundle product options",
+    "availableIntegrations": "Available integrations",
+    "backToDashboard": "Back to dashboard",
+    "enableAddOnsAndGiftingStep": "Enable add-ons and gifting step",
+    "addOnsStepIcon": "Add-ons step icon",
+    "stepName": "Step Name",
+    "addOn": "Add On",
+    "addToCart": "Add to Cart",
+    "stepTitle": "Step Title",
+    "selected": "Selected ✓",
+    "enableAddOnsWithBundles": "Enable add-ons with bundles",
+    "addOnSectionTitle": "Add on Section title",
+    "displayProductsAsFree000": "Display products as free ($0.00)",
+    "messageWhenRuleNotMet": "Message when rule not met",
+    "addAddonsConditionDiffMoreProductSToClaimAddonsDiscountValueAddonsDiscountValueUnit": "Add {{addonsConditionDiff}} more product(s) to claim {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons",
+    "congratsYouAreEligibleForAddonsDiscountValueAddonsDiscountValueUnitOffOn": "Congrats you are eligible for {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons",
+    "enableDiscountPricing": "Enable discount pricing",
+    "minimumQuantityOfItems": "Minimum quantity of items",
+    "discountValue": "Discount value",
+    "discountType": "Discount type",
+    "applyDiscountTo": "Apply Discount to",
+    "numberOfProductsInBundle": "Number of Products in Bundle",
+    "price": "Price",
+    "discountOn": "Discount on",
+    "isGreaterThanOrEqualTo": "is greater than or equal to",
+    "value": "Value",
+    "autoNextWhenRuleIsMet": "Auto Next When rule is met",
+    "enablePreSelectedProduct": "Enable pre selected product",
+    "defaultProductsTitle": "Default products title",
+    "enableStep": "Enable step",
+    "cloneCurrentStep": "Clone current step",
+    "deleteCurrentStep": "Delete current step",
+    "egAddProduct": "Eg:- Add product",
+    "customization": "Customization",
+    "templateNotSaved": "Template not saved",
+    "templateCustomization": "Template customization",
+    "brandColors": "Brand colors",
+    "corners": "Corners",
+    "textAndLanguage": "Text and language",
+    "imagesAndGIFs": "Images and GIFs",
+    "stepIcon": "Step icon",
+    "removeStepIcon": "Remove step icon",
+    "egCustomizedTShirtBundleForYou": "Eg:- Customized T-shirt Bundle for you",
+    "tierTitle": "Tier title",
+    "displayVariantsAsIndividualProducts": "Display Variants as Individual Products",
+    "discountBasedOn": "Discount Based on",
+    "discountOnAddOns": "Discount on Add-ons",
+    "enableQuantityValidation": "Enable quantity validation",
+    "maximumAllowedQuantityPerProduct": "Maximum allowed quantity per product",
+    "enableProductSlotsDisplay": "Enable product slots display",
+    "syncBundleWithOnlyBundles": "Sync bundle with Only Bundles?",
+    "bundleCartTitle": "Bundle Cart Title",
+    "yourBundle": "Your Bundle",
+    "bundleCartSubtitle": "Bundle Cart Subtitle",
+    "reviewYourBundle": "Review your bundle",
+    "addCustomCSSForThisBundle": "/* Add custom CSS for this bundle */",
+    "chooseTabIcon": "Choose tab icon",
+    "chooseBannerImage": "Choose banner image",
+    "showFloatingPromoBadge": "Show floating promo badge",
+    "eGSave20TodayOnly": "e.g. Save 20% today only!",
+    "enableMultiLanguage": "Enable multi-language",
+    "discountText": "Discount Text",
+    "makeThisRuleDefault": "Make this rule default",
+    "boxLabel": "Box Label",
+    "boxSubtext": "Box Subtext",
+    "displayVariantsAsIndividualProducts2": "Display variants as individual products",
+    "selectedProducts2": "Selected products",
+    "selectedCollections2": "Selected collections",
+    "messageVariables": "Message variables",
+    "disablePersonalizationStep": "Disable Personalization Step",
+    "simpleProgressBar": "Simple progress bar",
+    "stepBasedProgressBar": "Step-based progress bar",
+    "tierText": "Tier Text",
+    "tierSubtext": "Tier Subtext",
+    "variantSelector": "Variant selector",
+    "showShopifySSellableComponentVariantQuantityWhenIt": "Show Shopify's sellable component-variant quantity when it reaches the configured threshold.",
+    "lowStockThreshold": "Low-stock threshold",
+    "lowStockMessage": "Low-stock message",
+    "replacesTheIconWithATextButtonAndMoves": "Replaces the + icon with a text button and moves it below the price.",
+    "showTextOnPlusButton": "Show text on plus button",
+    "buttonText": "Button text",
+    "eG20Off": "e.g. 20% off",
+    "progressBarType": "Progress bar type",
+    "title": "Title",
+    "subTitle": "Sub Title",
+    "showOnDesktop": "Show on desktop",
+    "showOnMobile": "Show on mobile",
+    "action": "Action",
+    "variantSelectorStyle": "Variant selector style",
+    "showColorNameOnHoverAndFocus": "Show color name on hover and focus",
+    "changeBundleProduct": "Change bundle product",
+    "syncBundle": "Sync Bundle?",
+    "selectProductPageTemplate": "Select product page template",
+    "thisSettingControlsTheLoadingAnimationVisibleToShoppers": "This setting controls the loading animation visible to shoppers on your storefront",
+    "chooseLoadingGIF": "Choose loading GIF",
+    "backfillAnalyticsWindow": "Backfill analytics window",
+    "savedCustomUTMAttributes": "Saved custom UTM attributes",
+    "parameterNames": "Parameter names",
+    "utmInfluencerPartnerIdCreator": "utm_influencer, partner_id\ncreator",
+    "privacyCheck": "Privacy check",
+    "utmPixelTracking": "UTM Pixel Tracking"
+  },
+  "adminDynamic": {
+    "bundlesInPeriod_one": "{{count}} bundle in period",
+    "bundlesInPeriod_other": "{{count}} bundles in period",
+    "percentageKept": "{{percentage}}% kept",
+    "embedUpsellAtCustomLocation": "Embed the Upsell {{placement}} at a custom location",
+    "upsellDefaultPlacement": "By default, the upsell {{displayMode}} is added below the Buy Button. You can move it to a custom spot on the product page if you prefer.",
+    "embedUpsell": "Embed Upsell {{placement}}",
+    "selectedCount": "{{count}} selected",
+    "ruleNumber": "Rule #{{number}}",
+    "tierNumber": "Tier {{number}}",
+    "amountOff": "{{amount}} off",
+    "categoryRules": "{{category}} rules",
+    "selectedProductsForStep_one": "{{count}} product selected for this step:",
+    "selectedProductsForStep_other": "{{count}} products selected for this step:",
+    "variantsAvailable_one": "{{count}} variant available",
+    "variantsAvailable_other": "{{count}} variants available",
+    "selectedCollectionsForStep_one": "{{count}} collection selected for this step:",
+    "selectedCollectionsForStep_other": "{{count}} collections selected for this step:",
+    "collectionHandle": "Handle: {{handle}}",
+    "lastDays": "Last {{days}} days",
+    "selectedWindow": "Selected window: {{window}}. This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.",
+    "ignoredParameters": "Ignored: {{parameters}}. Use URL parameter names only, not shopper identifiers.",
+    "comparedWith": "vs {{period}}",
+    "compareOn": "Compare on",
+    "compareOff": "Compare off",
+    "legacyStepProducts_one": "This step has {{count}} product from the previous system. Use Add Category below to re-add it to the new category system.",
+    "legacyStepProducts_other": "This step has {{count}} products from the previous system. Use Add Category below to re-add them to the new category system.",
+    "makeRuleDefault": "Make this rule default",
+    "products": "Products",
+    "collections": "Collections",
+    "selectedProductsInStep_one": "{{count}} product selected in this step.",
+    "selectedProductsInStep_other": "{{count}} products selected in this step.",
+    "selectedCollectionsInStep_one": "{{count}} collection selected in this step.",
+    "selectedCollectionsInStep_other": "{{count}} collections selected in this step.",
+    "clickToUploadLoadingGif": "Click to upload a loading GIF",
+    "clickToUploadImage": "Click to upload an image or icon",
+    "chooseGifFile": "Choose a GIF file.",
+    "chooseSupportedImageFile": "Choose a supported image file.",
+    "integrationLogo": "{{name}} logo",
+    "guidedTourProgress": "Guided tour step {{current}} of {{total}}",
+    "guidedTourStep": "Step {{current}} of {{total}}",
+    "gotIt": "Got it",
+    "next": "Next",
+    "defaultSpinner": "Default spinner"
+  },
+  "adminData": {
+    "actionButtonsProgressBarsAndActiveElements": "Action buttons, progress bars, and active elements",
+    "activeTabBackgroundColor": "Active Tab Background Color",
+    "activeTabTextColor": "Active Tab Text Color",
+    "addBundleCartLabel": "Add Bundle Cart label",
+    "addBundleLoadingLabel": "Add Bundle Loading label",
+    "addBundleSuccessLabel": "Add Bundle Success label",
+    "addBundleToCartButton": "Add Bundle to Cart Button",
+    "addButtonText": "Add Button Text",
+    "addEmptyProductCardText": "Add Empty Product Card Text",
+    "addProductButtonColor": "Add Product Button Color",
+    "addProductButtonTextColor": "Add Product Button Text Color",
+    "addProductToBundleButton": "Add Product to Bundle Button",
+    "addAtLeastOneProductOrCollectionToABundle": "Add at least one product or collection to a bundle step so shoppers have options to choose.",
+    "addBundleToCartAfterTheLastStepIsCompleted": "Add bundle to cart after the last step is completed",
+    "addProducts": "Add products",
+    "addToCartButtonSelectors": "Add to Cart Button Selectors",
+    "addToCartWhenProductCardIsClicked": "Add to cart when product card is clicked",
+    "addedLabel": "Added Label",
+    "additionalBundleLevelSettingsApplicableToAllBundlesCreated": "Additional bundle level settings applicable to all bundles created",
+    "additionalConfigurations": "Additional configurations",
+    "addonProductsMandatoryMessage": "Addon Products Mandatory message",
+    "addonSettings": "Addon Settings",
+    "addonProductConfigurationAndValidationMessages": "Addon product configuration and validation messages",
+    "addons": "Addons",
+    "amountAndPercentageEgYouSave730019": "Amount and percentage (Eg: \"You save $73.00 (19%)\")",
+    "amountOnlyEgYouSave7300": "Amount only (Eg: \"You save $73.00\")",
+    "applyAnyRequiredReviewBadgeVisibilityOverrideThroughThemePage": "Apply any required review badge visibility override through theme-page CSS.",
+    "arabic": "Arabic",
+    "backButtonColor": "Back Button Color",
+    "backButtonTextColor": "Back Button Text Color",
+    "backgroundColor": "Background Color",
+    "backgroundColorForBundleCart": "Background color for bundle cart",
+    "backgroundColorForCompletedStepIndicators": "Background color for completed step indicators",
+    "backgroundColorForConditionToast": "Background color for condition toast",
+    "backgroundColorForIncompleteSectionsOfProgressBars": "Background color for incomplete sections of progress bars",
+    "backgroundColorForProductCardsAndCartFooter": "Background color for product cards and cart footer",
+    "backgroundColorForTheBackStepButton": "Background color for the back step button",
+    "backgroundColorForTheCurrentlySelectedCategoryTab": "Background color for the currently selected category tab",
+    "backgroundColorForTheNextStepButton": "Background color for the next step button",
+    "backgroundColorForUnselectedCategoryTabs": "Background color for unselected category tabs",
+    "backgroundColorForUpsellButtons": "Background color for upsell buttons",
+    "backgroundColorOfIndividualProductCards": "Background color of individual product cards",
+    "backgroundColorOfTheFullPageBundleLoadingScreen": "Background color of the full-page bundle loading screen.",
+    "base": "Base",
+    "basicBundleConfiguration": "Basic bundle configuration",
+    "blockForHidingQtySelectorAndOverwritingRemoveButtonFor": "Block for Hiding Qty Selector and Overwriting Remove Button for Bundle Products in Cart: Prevents individual quantity increase for bundle items and enforces removal of all bundle products if one is removed",
+    "bodyFontSize": "Body Font Size",
+    "bodyFontWeight": "Body Font Weight",
+    "bold": "Bold",
+    "borderColorForEmptyProductSlotsWaitingToBeFilled": "Border color for empty product slots waiting to be filled",
+    "boxSelectionEligibilityToast": "Box Selection Eligibility Toast",
+    "brandColors": "Brand Colors",
+    "brandColorsControlPrimaryButtonTextPrimaryTextSecondaryBackground": "Brand colors control primary, button text, primary text, secondary background, and product card background colors.",
+    "bulgarianBG": "Bulgarian (BG)",
+    "bundleButtonsBase": "Bundle Buttons Base",
+    "bundleButtonsCornerStyle": "Bundle Buttons Corner Style",
+    "bundleCartDiscountDisplayLabel": "Bundle Cart Discount Display Label",
+    "bundleContainsLabel": "Bundle Contains Label",
+    "bundleItems": "Bundle Items",
+    "bundleOriginalPriceLabel": "Bundle Original Price Label",
+    "bundleSettings": "Bundle Settings",
+    "bundleVisibility": "Bundle Visibility",
+    "bundleCartNavigationButtonTextAndLabels": "Bundle cart navigation button text and labels",
+    "bundleLinkIsUnavailable": "Bundle link is unavailable.",
+    "bundleProductNotYetLinked": "Bundle product not yet linked.",
+    "buttonConfiguration": "Button Configuration",
+    "buttonTextColor": "Button Text Color",
+    "buyNowButton": "Buy now button",
+    "css": "CSS",
+    "cssScripts": "CSS & Scripts",
+    "callbackAndRedirectIntegrationSettingsForCheckoutAppsSideCarts": "Callback and redirect integration settings for checkout apps, side carts, and cart drawers.",
+    "cartBackgroundColor": "Cart Background Color",
+    "cartInclusionTitle": "Cart Inclusion Title",
+    "cartItemQuantityButtonSelectors": "Cart Item Quantity Button Selectors",
+    "cartItemRemoveParentSelectors": "Cart Item Remove Parent Selectors",
+    "cartItemRemoveSelectors": "Cart Item Remove Selectors",
+    "cartItemSelectors": "Cart Item Selectors",
+    "cartMessaging": "Cart Messaging",
+    "cartTextColor": "Cart Text Color",
+    "cartAndCheckoutSharedLabelsIncludeBundleContainsOriginalPrice": "Cart and checkout shared labels include bundle contains, original price, and cart discount display labels.",
+    "cartPageItemsSectionID": "Cart page items section ID",
+    "cartPageItemsSelector": "Cart page items selector",
+    "catalan": "Catalan",
+    "centeredBadge": "Centered badge",
+    "changeLoadingScreenGifAddCustomCSSModifyCheckoutSettings": "Change loading screen gif, add custom CSS, modify checkout settings and more",
+    "checkMarkColor": "Check Mark Color",
+    "checkAppEmbed": "Check app embed",
+    "checkMarkIconsDisplayedOnCompletedBundleSteps": "Check mark icons displayed on completed bundle steps",
+    "checkout": "Checkout",
+    "checkoutGIF": "Checkout GIF",
+    "checkoutIntegration": "Checkout Integration",
+    "checkoutSettings": "Checkout Settings",
+    "checkoutAndCartBehaviorIsConfiguredThroughExplicitTargetRedirects": "Checkout and cart behavior is configured through explicit target redirects or callback functions.",
+    "chineseCN": "Chinese (CN)",
+    "chineseTW": "Chinese (TW)",
+    "chooseOptionsButton": "Choose Options Button",
+    "chooseTheProductsCustomersCanPickFromInThisProduct": "Choose the products customers can pick from in this product-page bundle.",
+    "chooseWhetherTheImageReplacesTheCenteredPlusIconOr": "Choose whether the image replaces the centered plus icon or scales relative to the full slot.",
+    "clearCartButtonText": "Clear Cart Button Text",
+    "clearCartModal": "Clear Cart Modal",
+    "clearCartConfirmationModalTextAndButtons": "Clear cart confirmation modal text and buttons",
+    "colorBeatShownWhenAShopperReachesAnIntermediateDiscount": "Color beat shown when a shopper reaches an intermediate discount tier",
+    "colorBeatsShownWhenAShopperReachesTheHighestDiscount": "Color beats shown when a shopper reaches the highest discount tier",
+    "colorForTheButtonOnTheProductCard": "Color for the button on the product card",
+    "completedStepColor": "Completed step color",
+    "completionBackground": "Completion background",
+    "completionText": "Completion text",
+    "conditionToastBackgroundColor": "Condition Toast Background Color",
+    "conditionToastTextColor": "Condition Toast Text Color",
+    "configuration": "Configuration",
+    "configureAllTextLabelsAndTranslationsForYourBundleHere": "Configure all text, labels, and translations for your bundle here",
+    "configureTheAuthenticatedPublicTokenInAdditionalConfigurations": "Configure the authenticated public token in Additional Configurations.",
+    "confirmTheThemeAppEmbedIsEnabledSoTheFull": "Confirm the theme app embed is enabled so the full-page bundle can render on the storefront.",
+    "confirmTheThemeAppEmbedIsEnabledSoTheProduct": "Confirm the theme app embed is enabled so the product-page widget can render on the storefront.",
+    "contain": "Contain",
+    "controls": "Controls",
+    "controlsAreGroupedIntoConfigurationCSSScriptsIntegrationsAndAdvanced": "Controls are grouped into Configuration, CSS & Scripts, Integrations, and Advanced tabs.",
+    "cornersExposeSeparateBundleButtonAndProductCardCartRadius": "Corners expose separate bundle button and product-card/cart radius values.",
+    "cover": "Cover",
+    "croatian": "Croatian",
+    "customCSSForMixAndMatchBundles": "Custom CSS for Mix And Match Bundles",
+    "customCSSForBundleBuilderPages": "Custom CSS for bundle builder pages",
+    "customCSSForBundleDummyProductPage": "Custom CSS for bundle dummy product page",
+    "customCSSForThemePages": "Custom CSS for theme pages",
+    "customCartIntegrationScript": "Custom Cart Integration Script",
+    "customFont": "Custom Font",
+    "customJSBundleScript": "Custom JS Bundle Script",
+    "customThemeIntegrationScript": "Custom Theme Integration Script",
+    "customizeTheCheckoutBehaviorForAllTheBundleFlows": "Customize the checkout behavior for all the bundle flows",
+    "customizeTheRedirectOnAddToCart": "Customize the redirect on Add to cart",
+    "czech": "Czech",
+    "danish": "Danish",
+    "designControlPanel": "Design control panel",
+    "designSettingsForBundleColorsTypographyCornersAndMediaControls": "Design settings for bundle colors, typography, corners, and media controls.",
+    "discountBadgeSuffix": "Discount Badge Suffix",
+    "discountDisplay": "Discount Display",
+    "discountProgressBarEmptyColor": "Discount Progress Bar Empty Color",
+    "discountProgressBarFilledColor": "Discount Progress Bar Filled Color",
+    "discountTextColor": "Discount Text Color",
+    "discountFeedback": "Discount feedback",
+    "discountFormat": "Discount format",
+    "displayEmptyStateBoxesBasedOnBundleCondition": "Display empty state boxes based on bundle condition",
+    "displayStarRatingsAndReviewsOnYourBundles": "Display star ratings and reviews on your bundles",
+    "displayedDuringCheckoutLoadingUnlessAMerchantGIFIsConfigured": "Displayed during checkout loading unless a merchant GIF is configured.",
+    "dutch": "Dutch",
+    "emptyStateBorderColor": "Empty State Border Color",
+    "emptyStateTextColor": "Empty State Text Color",
+    "enableCartIntegration": "Enable Cart Integration",
+    "enableCustomThemeIntegrationScript": "Enable Custom Theme Integration Script",
+    "enableJudgeMeIntegration": "Enable Judge Me Integration",
+    "enableTheShopfloCheckoutIntegrationAndConfirmSDKLoadingOn": "Enable the Shopflo checkout integration and confirm SDK loading on storefront pages.",
+    "equalToRuleMessageAmount": "Equal to rule message (Amount)",
+    "equalToRuleMessageQuantity": "Equal to rule message (Quantity)",
+    "equalToRuleMessageWeight": "Equal to rule message (Weight)",
+    "estonian": "Estonian",
+    "executeCustomScript": "Execute Custom Script",
+    "executeDefaultSideCartUpdate": "Execute Default Side Cart Update",
+    "executeScript": "Execute Script",
+    "fpbLoadingGIF": "FPB Loading GIF",
+    "fill": "Fill",
+    "fillColorForCompletedPartOfDiscountProgressBar": "Fill color for completed part of discount progress bar",
+    "fillColorForEmptyPartOfDiscountProgressBar": "Fill color for empty part of discount progress bar",
+    "finnish": "Finnish",
+    "fit": "Fit",
+    "fontSettings": "Font Settings",
+    "footerFinishButton": "Footer Finish Button",
+    "footerNextButton": "Footer Next Button",
+    "footerPreviousButton": "Footer Previous Button",
+    "fullPageBundleControlsForTheAdditionalConfigurationsSurface": "Full-page bundle controls for the Additional Configurations surface.",
+    "gempages": "GemPages",
+    "generalPopupContent": "General Popup Content",
+    "generalSettings": "General Settings",
+    "generalToasts": "General Toasts",
+    "generalToastMessagesAndAlerts": "General toast messages and alerts",
+    "georgian": "Georgian",
+    "globalBrandColorsUsedByBundleCardsSummaryButtonsAnd": "Global brand colors used by bundle cards, summary, buttons, and supporting surfaces.",
+    "gokwik": "GoKwik",
+    "greaterThanRuleMessageAmount": "Greater than rule message (Amount)",
+    "greaterThanRuleMessageQuantity": "Greater than rule message (Quantity)",
+    "greaterThanRuleMessageWeight": "Greater than rule message (Weight)",
+    "greek": "Greek",
+    "guidedSetup": "Guided setup",
+    "hebrew": "Hebrew",
+    "hideIrrelevantVariantImages": "Hide Irrelevant variant images",
+    "hideOutOfStockProducts": "Hide Out Of Stock Products",
+    "hideStepTitlesInCompletedState": "Hide Step Titles in completed state",
+    "hungarian": "Hungarian",
+    "imageFit": "Image Fit",
+    "imageFitSlotIconAndFullPageBundleLoadingScreen": "Image-fit, slot icon, and full-page bundle loading screen controls.",
+    "imagesGIFs": "Images & GIFs",
+    "imagesAndGIFsConfigureProductImageFitPlusLoadingMedia": "Images and GIFs configure product image fit plus loading media for bundle and checkout states.",
+    "inactiveTabBackgroundColor": "Inactive Tab Background Color",
+    "inactiveTabTextColor": "Inactive Tab Text Color",
+    "indonesian": "Indonesian",
+    "inlineAddToCartButtonQuantitySelectionMessage": "Inline Add To Cart Button - Quantity Selection message",
+    "inlineCartDrawerButtonText": "Inline Cart Drawer Button Text",
+    "inlineCartSelectedProductsLabel": "Inline Cart Selected Products Label",
+    "inlineProductAddButtonText": "Inline Product - Add Button Text",
+    "integrateJSBundleScriptWithCartPage": "Integrate JS bundle script with Cart page",
+    "integrateJSWithCustomElementsFromTheStoreTheme": "Integrate JS with custom elements from the store theme",
+    "integrateWithJudgeMe": "Integrate with Judge Me",
+    "inventoryLimitReachedLabel": "Inventory Limit Reached Label",
+    "italian": "Italian",
+    "javascriptSelectors": "JavaScript & Selectors",
+    "judgeMe": "Judge.me",
+    "knowMore": "Know More",
+    "korean": "Korean",
+    "landingPageLayoutAndProductPageLayoutExposeDifferentConfiguration": "Landing Page Layout and Product Page Layout expose different configuration sets.",
+    "landingPageBundleBehaviorTogglesAndCheckoutCartFlowControls": "Landing-page bundle behavior toggles and checkout/cart flow controls.",
+    "languageConfigurations": "Language configurations",
+    "latvian": "Latvian",
+    "layoutSpecificBehaviorControlsAndIntegrationCallbackSettings": "Layout-specific behavior controls and integration callback settings.",
+    "lessThanRuleMessageAmount": "Less than rule message (Amount)",
+    "lessThanRuleMessageQuantity": "Less than rule message (Quantity)",
+    "lessThanRuleMessageWeight": "Less than rule message (Weight)",
+    "lithuanian": "Lithuanian",
+    "loadMoreProductsButton": "Load More Products Button",
+    "loadingScreenBackgroundColor": "Loading Screen Background Color",
+    "maxAddonProductsAllowedMessage": "Max Addon Products Allowed message",
+    "mobileAddOnNotification": "Mobile Add On Notification",
+    "modalCancelButtonText": "Modal - Cancel Button Text",
+    "modalConfirmButtonText": "Modal - Confirm Button Text",
+    "modalDescription": "Modal - Description",
+    "modalTitle": "Modal - Title",
+    "modifyAndCustomizeAllDesignElementsOfTheBundleHere": "Modify and customize all design elements of the bundle here",
+    "multilingualAndTextTemplateConfigurationSurface": "Multilingual and text-template configuration surface.",
+    "multilingualConfigurationIsEnabledAndDefaultsToEnglish": "Multilingual configuration is enabled and defaults to English.",
+    "navigationButtons": "Navigation Buttons",
+    "nextButtonColor": "Next Button Color",
+    "nextButtonText": "Next Button Text",
+    "nextButtonTextColor": "Next Button Text Color",
+    "noProductsAvailableLabel": "No Products Available label",
+    "norwegian": "Norwegian",
+    "norwegianBokmL": "Norwegian Bokmål",
+    "noteByDefaultYourStorefrontThemeFontWillBePicked": "Note: By default, your storefront theme font will be picked.",
+    "noteThisSectionIsOnlyForDevelopers": "Note: This section is only for developers.",
+    "optionalGIFDisplayedInsteadOfTheDefaultSpinnerOnThe": "Optional GIF displayed instead of the default spinner on the full-page bundle loading screen.",
+    "optionalImageDisplayedInEmptyFPBAndPPBProductSlots": "Optional image displayed in empty FPB and PPB product slots.",
+    "originalBundlePrice": "Original Bundle Price",
+    "pageBuilders": "Page Builders",
+    "pagefly": "PageFly",
+    "pasteCustomBundleScriptHere": "Paste Custom Bundle Script here",
+    "percentageOnlyEgYouSave19": "Percentage only (Eg: \"You save 19%\")",
+    "placeProductPageAndFullPageBundlesInCustomStorefront": "Place Product Page and Full Page Bundles in custom storefront layouts.",
+    "placeBundleBuildersInGemPagesStorefrontLayouts": "Place bundle builders in GemPages storefront layouts.",
+    "placeBundleBuildersInPageFlyPagesAndSavedSections": "Place bundle builders in PageFly pages and saved sections.",
+    "placeBundleBuildersInShogunProductAndCustomLayouts": "Place bundle builders in Shogun product and custom layouts.",
+    "placeOrLinkTheFullPageBundleSoShoppersCan": "Place or link the full-page bundle so shoppers can open the bundle page from your storefront.",
+    "placeTheBundle": "Place the bundle",
+    "placeTheWidget": "Place the widget",
+    "polish": "Polish",
+    "popupDialogTextLabelsAndButtonText": "Popup dialog text, labels, and button text",
+    "popups": "Popups",
+    "portuguesePT": "Portuguese (PT)",
+    "preparingBundleLabel": "Preparing Bundle Label",
+    "primaryColor": "Primary Color",
+    "primaryFontSize": "Primary Font Size",
+    "primaryFontWeight": "Primary Font Weight",
+    "primaryTextColor": "Primary Text Color",
+    "productAddToCartButton": "Product Add to Cart Button",
+    "productAddedLabel": "Product Added label",
+    "productBackgroundColor": "Product Background Color",
+    "productCard": "Product Card",
+    "productCardCartBase": "Product Card & Cart Base",
+    "productCardCartCornerStyle": "Product Card & Cart Corner Style",
+    "productOutOfStockButton": "Product Out of Stock Button",
+    "productPageTitleColor": "Product Page Title Color",
+    "productSlotIcon": "Product Slot Icon",
+    "productTitleTextColor": "Product Title Text Color",
+    "productVariantLabel": "Product Variant Label",
+    "productCardButtonTextAndActionLabels": "Product card button text and action labels",
+    "productCardCopyIncludesTheAddToBundleActionLabel": "Product card copy includes the add-to-bundle action label.",
+    "productCardLabelsForProductPageBundles": "Product card labels for product-page bundles",
+    "productNamesPricesLabelsAndMainContentText": "Product names, prices, labels, and main content text",
+    "productPagePriceSelector": "Product page price selector",
+    "productPageBundleBehaviorTogglesAndRedirectControls": "Product-page bundle behavior toggles and redirect controls.",
+    "productPageBundleCartLabelsAndNavigation": "Product-page bundle cart labels and navigation",
+    "productPageBundleControlsForTheAdditionalConfigurationsSurface": "Product-page bundle controls for the Additional Configurations surface.",
+    "productPageBundleStateLabels": "Product-page bundle state labels",
+    "productPageBundleToastMessages": "Product-page bundle toast messages",
+    "productPageCustomCSSScriptAndSelectorConfiguration": "Product-page custom CSS, script, and selector configuration.",
+    "productPageQuantityAmountAndWeightRuleMessages": "Product-page quantity, amount, and weight rule messages",
+    "publicToken": "Public token",
+    "quantityLabel": "Quantity Label",
+    "quantityAmountAndWeightRuleValidationMessages": "Quantity, amount, and weight rule validation messages",
+    "radiusControlsForBundleButtonsAndProductCardCartShells": "Radius controls for bundle buttons and product card/cart shells.",
+    "redirectCollectionPageQuickAddToBundle": "Redirect Collection Page 'Quick Add' to Bundle",
+    "redirectSettings": "Redirect Settings",
+    "redirectToCart": "Redirect to Cart",
+    "redirectToCheckout": "Redirect to Checkout",
+    "redirectingLabel": "Redirecting label",
+    "regular": "Regular",
+    "removeProductFromFooterText": "Remove Product from Footer Text",
+    "reviewButtonText": "Review Button Text",
+    "reviews": "Reviews",
+    "romanian": "Romanian",
+    "round": "Round",
+    "ruleMessages": "Rule Messages",
+    "russian": "Russian",
+    "scriptWrittenHereWouldBeAppliedOnlyOnBundlePages": "Script, written here, would be applied only on bundle pages.",
+    "secondaryColor": "Secondary Color",
+    "secondaryFontSize": "Secondary Font Size",
+    "secondaryFontWeight": "Secondary Font Weight",
+    "secondaryElementsEmptyProgressBarsAndInactiveStates": "Secondary elements, empty progress bars, and inactive states",
+    "selectBundleProductsLabel": "Select Bundle Products label",
+    "selectTemplate": "Select Template",
+    "selectTheCheckoutAppInstalledOnThisStore": "Select the checkout app installed on this store.",
+    "serbian": "Serbian",
+    "setActive": "Set active",
+    "setTheParentProductToActiveAfterTheRequiredSetup": "Set the parent product to Active after the required setup is saved.",
+    "sharp": "Sharp",
+    "shogun": "Shogun",
+    "shopflo": "Shopflo",
+    "showReviewsOnProductCardsThroughIntegrationWithJudgeme": "Show reviews on product cards through integration with judgeme",
+    "showSocialProofByDisplayingProductRatingsWithinYourBundles": "Show social proof by displaying product ratings within your bundles.",
+    "showsHowMuchTheCustomerIsSavingOnTheBundle": "Shows how much the customer is saving on the bundle",
+    "showsTheIndividualItemsWithinABundle": "Shows the individual items within a bundle",
+    "showsTheRetailPriceBeforeBundleDiscount": "Shows the retail price before bundle discount",
+    "sideCartOpenButtonSelector": "Side cart open button selector",
+    "sideCartSectionID": "Side cart section ID",
+    "sideCartSelector": "Side cart selector",
+    "slotIconPresentation": "Slot Icon Presentation",
+    "slovakSK": "Slovak (SK)",
+    "slovenianSI": "Slovenian (SI)",
+    "stepProgressBarEmptyColor": "Step Progress Bar Empty Color",
+    "stepTextColor": "Step Text Color",
+    "stepsDrawerPillText": "Steps Drawer Pill Text",
+    "subscriptionSelectionLabel": "Subscription Selection Label",
+    "subscriptions": "Subscriptions",
+    "subtotalText": "Subtotal Text",
+    "supported": "Supported",
+    "swedish": "Swedish",
+    "templateTextIsGroupedIntoProductCardBundleCartBundle": "Template text is grouped into product card, bundle cart, bundle, popups, toasts, addons, and messages.",
+    "textColorDisplayedOnUpsellButtons": "Text color displayed on upsell buttons",
+    "textColorDisplayedOnUpsellWidget": "Text color displayed on upsell widget",
+    "textColorForCartContentTotalsAndLabels": "Text color for cart content, totals, and labels",
+    "textColorForConditionToast": "Text color for condition toast",
+    "textColorForDiscountMessages": "Text color for discount messages",
+    "textColorForPlaceholderMessagesInEmptyProductSlots": "Text color for placeholder messages in empty product slots",
+    "textColorForProductNamesDisplayedOnCards": "Text color for product names displayed on cards",
+    "textColorForStepNamesAndNavigationLabels": "Text color for step names and navigation labels",
+    "textColorForTheBackStepButton": "Text color for the back step button",
+    "textColorForTheButtonOnTheProductCard": "Text color for the button on the product card",
+    "textColorForTheCurrentlySelectedCategoryTab": "Text color for the currently selected category tab",
+    "textColorForTheNextStepButton": "Text color for the next step button",
+    "textColorForUnselectedCategoryTabs": "Text color for unselected category tabs",
+    "textColorShownDuringHighestTierFeedback": "Text color shown during highest-tier feedback",
+    "textColorShownDuringIntermediateTierFeedback": "Text color shown during intermediate tier feedback",
+    "textDisplayedOnPrimaryButtonsAndActionElements": "Text displayed on primary buttons and action elements",
+    "textTokenDefaultsForPrimarySecondaryAndBodyLabels": "Text token defaults for primary, secondary, and body labels.",
+    "thai": "Thai",
+    "theCSSWrittenHereWillBeAppliedToAllProduct": "The CSS written here will be applied to all product page bundles.",
+    "theCSSWrittenHereWillBeAppliedToBundleBuilder": "The CSS written here will be applied to bundle builder pages.",
+    "theCSSWrittenHereWillBeAppliedToBundleDummy": "The CSS written here will be applied to bundle dummy product page.",
+    "theCSSWrittenHereWillHaveAGlobalImpactOn": "The CSS written here will have a global impact on all store pages. Please choose classes carefully.",
+    "theScriptWrittenHereWillBeAppliedAfterProductPage": "The Script written here will be applied after product page load",
+    "theScriptWrittenHereWillExclusivelyApplyToThemePages": "The script written here will exclusively apply to theme pages and will not affect bundle pages. Please refer to our internal Notion document(Easy Bundles Custom CSS and JS Requests).",
+    "themePageCSSAndScriptsAreConfiguredFromThisSurface": "Theme-page CSS and scripts are configured from this surface rather than from each integration card.",
+    "themePageCustomCSSAndCustomScriptsUsedByTheme": "Theme-page custom CSS and custom scripts used by theme and integration fixes.",
+    "thisScriptRunsGloballyOnThemePagesReviewAndTest": "This script runs globally on theme pages. Review and test it before enabling.",
+    "tierBackground": "Tier background",
+    "tierText": "Tier text",
+    "titleTextColorOnTheBundleBuilderPage": "Title text color on the bundle builder page",
+    "toasts": "Toasts",
+    "totalLabel": "Total Label",
+    "trackInventoryOnAddToCartInBeta": "Track inventory on Add To Cart (in beta)",
+    "turkish": "Turkish",
+    "typography": "Typography",
+    "typographyIsSplitBetweenPrimarySecondaryAndBodyTextTokens": "Typography is split between primary, secondary, and body text tokens with size and weight controls.",
+    "upsellButtonColor": "Upsell Button Color",
+    "upsellButtonTextColor": "Upsell Button Text Color",
+    "upsellWidgetBodyTextColor": "Upsell Widget Body Text Color",
+    "useWpbBundleHTMLAsParentClassForGiftboxBuilderCSS": "Use \".wpbBundle-HTML\" as parent class for giftbox builder CSS to avoid overwriting CSS throughout the site.",
+    "usePageFlySShopifyAppBlockElementWithThePage": "Use PageFly's Shopify App Block element with the Page Builder bundle block on Online Store 2.0 themes.",
+    "useShopifyNativeCheckoutAndCartFlowsForBundleConversion": "Use Shopify-native checkout and cart flows for bundle conversion.",
+    "useAThirdPartyCheckoutHandoffFlowWithGoKwik": "Use a third-party checkout handoff flow with GoKwik.",
+    "useAThirdPartyCheckoutHandoffFlowWithShopflo": "Use a third-party checkout handoff flow with Shopflo.",
+    "useDiscountCodeHandoffFlowSoOrderDiscountingContinuesThrough": "Use discount-code handoff flow so order discounting continues through checkout.",
+    "useTheGemPagesShopifyAppElementWithThePageBuilder": "Use the GemPages Shopify App Element with the Page Builder bundle block.",
+    "useTheLiquidFreeHTMLMarkerForShogunCustomLayouts": "Use the Liquid-free HTML marker for Shogun custom layouts.",
+    "useThePageBuilderBundleAppBlockWithAShopify": "Use the Page Builder bundle app block with a Shopify 2.0 or existing theme layout.",
+    "useTheProviderNeutralCustomCodeMarkerWhenAnApp": "Use the provider-neutral Custom Code marker when an app block is unavailable.",
+    "useTheProviderNeutralHTMLLiquidMarkerWhenAnApp": "Use the provider-neutral HTML/Liquid marker when an app block is unavailable.",
+    "useTheWidgetPlacementControlsSoShoppersCanSeeAnd": "Use the widget placement controls so shoppers can see and open the bundle from the product page.",
+    "useYourStoreSGoKwikCheckoutConfigurationAndKeepNative": "Use your store's GoKwik checkout configuration and keep native fallback routing enabled.",
+    "verifyCallbackSetupForGoKwikCheckoutHandoffInThemeScript": "Verify callback setup for GoKwik checkout handoff in theme script tags.",
+    "vietnamese": "Vietnamese",
+    "viewCartProductsLabel": "View Cart Products Label",
+    "viewSetup": "View Setup",
+    "off": "$ off",
+    "aov": "AOV",
+    "accessDenied": "Access Denied",
+    "addAButtonToYourHomepageHeroToDriveShoppers": "Add a button to your homepage hero to drive shoppers directly to your bundle.",
+    "addThisConditionToTheExistingUnlessGuard": "Add this condition to the existing unless guard",
+    "addYourBundleAsANavLinkSoShoppersCan": "Add your bundle as a nav link so shoppers can find it from anywhere on your store.",
+    "addedToCart": "Added to Cart",
+    "allProductsInBundle": "All products in bundle",
+    "announcementBanner": "Announcement Banner",
+    "bxgy": "BXGY",
+    "badRequest": "Bad Request",
+    "bundleOrders": "Bundle Orders",
+    "bundleRevenue": "Bundle Revenue",
+    "bundleViews": "Bundle Views",
+    "categoryRules": "Category rules",
+    "checkedOut": "Checked Out",
+    "colors": "Colors",
+    "conversion": "Conversion",
+    "customizeForThisBundle": "Customize for this bundle",
+    "engaged": "Engaged",
+    "featureYourBundleProductOnYourHomepageSoShoppersFind": "Feature your bundle product on your homepage so shoppers find it right away.",
+    "featuredProductCard": "Featured Product Card",
+    "findTheCartPropertyLoop": "Find the cart property loop",
+    "fullPageBundles": "Full-Page Bundles",
+    "heroBanner": "Hero Banner",
+    "invalidRequest": "Invalid Request",
+    "mixMatchSteps": "Mix & Match Steps",
+    "navigationMenu": "Navigation Menu",
+    "noRules": "No rules",
+    "none": "None",
+    "notAuthenticated": "Not Authenticated",
+    "openYourThemeCodeEditor": "Open your theme code editor",
+    "optimised": "Optimised",
+    "pageNotFound": "Page Not Found",
+    "pending": "Pending",
+    "placeTheBundleBuilderDirectlyOnSelectedProductPages": "Place the bundle builder directly on selected product pages.",
+    "purchaseOptionsTitle": "Purchase options title",
+    "setADifferentDiscountFormatOrLabelForThisBundle": "Set a different discount format or label for this bundle only.",
+    "settingsDesign": "Settings -> Design",
+    "sharedCartAndCheckoutLabels": "Shared cart and checkout labels",
+    "showAnUpsellButtonOrBlockOnSelectedProductPages": "Show an upsell button or block on selected product pages.",
+    "showYourOfferInTheAnnouncementBarSoVisitorsSee": "Show your offer in the announcement bar so visitors see it instantly.",
+    "smartDiscountRules": "Smart Discount Rules",
+    "somethingWentWrongOnOurEndOurTeamHasBeen": "Something went wrong on our end. Our team has been notified.",
+    "specificCollections": "Specific collections",
+    "specificProducts": "Specific products",
+    "stepRules": "Step rules",
+    "thePageYouReLookingForDoesnTExistOr": "The page you're looking for doesn't exist or may have been moved.",
+    "theRequestCouldnTBeUnderstoodPleaseCheckTheURL": "The request couldn't be understood. Please check the URL and try again.",
+    "theServerCouldnTProcessYourRequestAsSubmitted": "The server couldn't process your request as submitted.",
+    "tooManyRequests": "Too Many Requests",
+    "utmAttributionAnalytics": "UTM Attribution Analytics",
+    "unexpectedError": "Unexpected Error",
+    "useAppDefaults": "Use app defaults",
+    "usesTheDiscountFormatAndLabelConfiguredInYourApp": "Uses the discount format and label configured in your app settings.",
+    "youDonTHavePermissionToViewThisPage": "You don't have permission to view this page.",
+    "youNeedToBeSignedInToAccessThisPage": "You need to be signed in to access this page.",
+    "youVeSentTooManyRequestsInAShortPeriod": "You've sent too many requests in a short period. Please slow down.",
+    "fixed": "fixed",
+    "unknown": "Unknown"
   }
 }

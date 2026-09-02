@@ -26,6 +26,7 @@ describe("selectEligiblePpbBundleEmbed", () => {
       bundle({ id: "draft", status: "draft" }),
       bundle({ id: "fpb", bundleType: "full_page" }),
       bundle({ id: "disabled", bundleUpsellConfig: { upsellConfiguration: { isEnabled: false } } }),
+      bundle({ id: "link-only", offerPolicy: { specificLinkRequired: true } }),
       bundle({ id: "gift", steps: [{ enabled: true, isFreeGift: true, StepProduct: [{ productId: "123" }] }] }),
       bundle({ id: "off-step", steps: [{ enabled: false, StepProduct: [{ productId: "123" }] }] }),
     ], { productId: "123", productHandle: "sample", collectionIds: [], locale: "en" });
@@ -44,12 +45,38 @@ describe("selectEligiblePpbBundleEmbed", () => {
     expect(selectEligiblePpbBundleEmbed([collectionTarget], { productId: "999", productHandle: "sample", collectionIds: ["456"], locale: "en" })).not.toBeNull();
   });
 
-  it("returns the earliest created bundle then ID and localizes its copy", () => {
+  it("uses effective offer priority then stable ID and localizes its copy", () => {
     const result = selectEligiblePpbBundleEmbed([
-      bundle(),
-      bundle({ id: "bundle-z", createdAt: new Date("2026-01-01T00:00:00.000Z") }),
-      bundle({ id: "bundle-a", createdAt: new Date("2026-01-01T00:00:00.000Z") }),
-    ], { productId: "123", productHandle: "sample", collectionIds: [], locale: "fr-CA" });
+      bundle({ offerPolicy: { priority: 20 } }),
+      bundle({ id: "bundle-z", offerPolicy: { priority: 10 } }),
+      bundle({ id: "bundle-a", offerPolicy: { priority: 10 } }),
+      bundle({ id: "future", offerPolicy: { scheduleMode: "one_time", priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
+    ], { productId: "123", productHandle: "sample", collectionIds: [], locale: "fr-CA", now: new Date("2026-08-31T12:00:00.000Z") });
     expect(result).toMatchObject({ title: "Construisez", subTitle: "Choisissez", preselectBrowsedProduct: true, bundle: { id: "bundle-a" } });
+  });
+
+  it("filters embeds against the Shopify-selected country", () => {
+    const targeted = bundle({
+      offerPolicy: {
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: "exclude",
+        countryCodes: ["US"],
+      },
+    });
+    expect(selectEligiblePpbBundleEmbed([targeted], {
+      productId: "123",
+      productHandle: "sample",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "US",
+    })).toBeNull();
+    expect(selectEligiblePpbBundleEmbed([targeted], {
+      productId: "123",
+      productHandle: "sample",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "CA",
+    })).not.toBeNull();
   });
 });

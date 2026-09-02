@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
+import { revealDeferredConfigureOverlays } from "../_shared/bundle-configure/deferred-configure-overlays";
 import {
   PpbConfigureProvider,
   usePpbConfigureContext,
@@ -15,18 +16,22 @@ import { PpbMainSections } from "./PpbMainSections";
 import { PpbSaveForm } from "./PpbSaveForm";
 import { usePpbConfigureFlow } from "./usePpbConfigureFlow";
 
-const PpbConfigureOverlays = lazy(() => import("./PpbConfigureOverlays").then((module) => ({ default: module.PpbConfigureOverlays })));
+const PpbConfigureOverlays = lazy(() =>
+  import("./PpbConfigureOverlays").then((module) => ({
+    default: module.PpbConfigureOverlays,
+  }))
+);
 
 function ConfigureBundleCanvas() {
   const flow = usePpbConfigureContext();
-  const {
-    blockConfigurationChangeWhileSaving,
-    isSaveInFlight,
-  } = flow;
+  const { blockConfigurationChangeWhileSaving, isSaveInFlight } = flow;
   const [showOverlays, setShowOverlays] = useState(false);
 
   useEffect(() => {
-    const show = () => window.requestIdleCallback(() => setShowOverlays(true));
+    const show = () =>
+      window.requestIdleCallback(() => {
+        revealDeferredConfigureOverlays(() => setShowOverlays(true));
+      });
     if (document.readyState === "complete") {
       show();
       return;
@@ -44,11 +49,13 @@ function ConfigureBundleCanvas() {
       header={<PpbCanvasHeader />}
       sidebar={<PpbConfigureSidebar />}
       supplementaryContent={<PpbConfigureSupplement />}
-      overlays={showOverlays ? (
-        <Suspense fallback={null}>
-          <PpbConfigureOverlays />
-        </Suspense>
-      ) : null}
+      overlays={
+        showOverlays ? (
+          <Suspense fallback={null}>
+            <PpbConfigureOverlays />
+          </Suspense>
+        ) : null
+      }
     >
       <PpbMainSections />
     </CommonConfigureShell>

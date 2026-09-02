@@ -5,7 +5,7 @@ title: Only Bundles Brand and Compatibility Boundary
 type: architecture
 status: authoritative
 summary: Defines the Only Bundles visible identity and the legacy technical identifiers intentionally preserved for installed-shop compatibility.
-last_audited: 2026-08-28
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
@@ -34,7 +34,7 @@ keywords:
 
 ## Visible identity
 
-The production application and publisher identity is **Only Bundles**. The approved bundle-box mark lives in `public/branding/only-bundles/` and uses deep green `#1F3D2E`, sage `#A7C29A`, cream `#F4EDE2`, with coral `#FE8A65` reserved for secondary accents. Production and SIT display names are `Only Bundles` and `Only Bundles SIT`.
+The production application and publisher identity is **Only Bundles**. The canonical bundle-box mark is `public/branding/only-bundles/only-bundles-icon.png`; `APP_BRAND.markPath` and `APP_BRAND.wordmarkPath` both resolve to that asset. It uses deep green `#1F3D2E`, sage `#A7C29A`, cream `#F4EDE2`, with coral `#FE8A65` reserved for secondary accents. Production and SIT display names are `Only Bundles` and `Only Bundles SIT`.
 
 All merchant-visible Admin copy, Theme Editor labels, extension descriptions, analytics exports, loading/error states, and product-configuration ownership messages use the current brand.
 

@@ -36,12 +36,9 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/admin-locale.server", () => ({
-  loadShopAdminLocale: jest.fn(),
-}));
-
 jest.mock("react-i18next", () => ({
-  I18nextProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
+  I18nextProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
@@ -52,13 +49,18 @@ jest.mock("../../../app/i18n/config", () => ({
     changeLanguage: jest.fn(),
   },
   loadAdminLocaleResources: jest.fn(),
+  resolveAdminLocaleFromRequest: jest.fn(() => "en"),
 }));
 
 jest.mock("../../../app/components/ErrorPage", () => ({
   ErrorPage: () => null,
 }));
 
-const { useLoaderData, useLocation, useNavigation } = require("@remix-run/react");
+const {
+  useLoaderData,
+  useLocation,
+  useNavigation,
+} = require("@remix-run/react");
 
 describe("app Admin shell provider", () => {
   beforeEach(() => {
@@ -81,7 +83,7 @@ describe("app Admin shell provider", () => {
     expect(markup).toContain("<main>outlet</main>");
   });
 
-  it("links Subscription and Billing from the main app navigation", async () => {
+  it("renders canonical App Bridge navigation with parent route links", async () => {
     useLoaderData.mockReturnValue({
       apiKey: "shopify-api-key",
       locale: "en",
@@ -91,7 +93,22 @@ describe("app Admin shell provider", () => {
 
     const view = renderToStaticMarkup(React.createElement(App));
 
-    expect(view).toContain('<a href="/app/pricing">nav.billing</a>');
+    expect(view).toContain("<s-app-nav>");
+    expect(view).toContain(
+      '<s-link href="/app/dashboard">nav.dashboard</s-link>'
+    );
+    expect(view).toContain(
+      '<s-link href="/app/settings">nav.settings</s-link>'
+    );
+    expect(view).toContain(
+      '<s-link href="/app/integrations">nav.integrations</s-link>'
+    );
+    expect(view).toContain(
+      '<s-link href="/app/attribution">nav.analytics</s-link>'
+    );
+    expect(view).toContain('<s-link href="/app/billing">nav.billing</s-link>');
+    expect(view).not.toContain('/app/events');
+    expect(view).not.toContain("<ui-nav-menu>");
   });
 
   it("keeps the current Admin page rendered while another page is loading", async () => {
@@ -115,30 +132,51 @@ describe("app Admin shell provider", () => {
   it.each([
     ["loading", "/app/dashboard"],
     ["submitting", "/app/settings"],
-  ])("does not render app-owned navigation feedback for %s state", async (state, pathname) => {
-    useLoaderData.mockReturnValue({
-      apiKey: "shopify-api-key",
-      locale: "en",
-      shop: "test-shop.myshopify.com",
-    });
-    useNavigation.mockReturnValue({ state, location: { pathname } });
-    const { default: App } = await import("../../../app/routes/app/app");
+  ])(
+    "does not render app-owned navigation feedback for %s state",
+    async (state, pathname) => {
+      useLoaderData.mockReturnValue({
+        apiKey: "shopify-api-key",
+        locale: "en",
+        shop: "test-shop.myshopify.com",
+      });
+      useNavigation.mockReturnValue({ state, location: { pathname } });
+      const { default: App } = await import("../../../app/routes/app/app");
 
-    const view = renderToStaticMarkup(React.createElement(App));
+      const view = renderToStaticMarkup(React.createElement(App));
 
-    expect(view).not.toContain('aria-label="Loading page"');
-  });
+      expect(view).not.toContain('aria-label="Loading page"');
+    }
+  );
 
   it("identifies only pathname-changing loader navigation", async () => {
-    const { isAdminPageNavigationLoading } = await import("../../../app/routes/app/app");
+    const { isAdminPageNavigationLoading } = await import(
+      "../../../app/routes/app/app"
+    );
 
-    expect(isAdminPageNavigationLoading("loading", "/app/dashboard", "/app/settings")).toBe(true);
-    expect(isAdminPageNavigationLoading("loading", "/app/dashboard", "/app/dashboard")).toBe(false);
-    expect(isAdminPageNavigationLoading("submitting", "/app/dashboard", "/app/settings")).toBe(false);
+    expect(
+      isAdminPageNavigationLoading("loading", "/app/dashboard", "/app/settings")
+    ).toBe(true);
+    expect(
+      isAdminPageNavigationLoading(
+        "loading",
+        "/app/dashboard",
+        "/app/dashboard"
+      )
+    ).toBe(false);
+    expect(
+      isAdminPageNavigationLoading(
+        "submitting",
+        "/app/dashboard",
+        "/app/settings"
+      )
+    ).toBe(false);
   });
 
   it("starts and cleans up Shopify Admin navigation loading", async () => {
-    const { syncAdminNavigationLoading } = await import("../../../app/routes/app/app");
+    const { syncAdminNavigationLoading } = await import(
+      "../../../app/routes/app/app"
+    );
     const loading = jest.fn();
 
     const cleanup = syncAdminNavigationLoading(true, loading);

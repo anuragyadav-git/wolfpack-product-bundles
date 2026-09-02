@@ -2,7 +2,15 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 
-export const SUPPORTED_LOCALES = ["en", "fr", "de", "es", "ja", "pt-BR"] as const;
+export const SUPPORTED_LOCALES = [
+  "en",
+  "fr",
+  "de",
+  "es",
+  "ja",
+  "pt-BR",
+  "zh-CN",
+] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 type LocaleCatalog = Record<string, unknown>;
@@ -14,26 +22,80 @@ const localeLoaders: Partial<Record<SupportedLocale, LocaleLoader>> = {
   es: () => import("./locales/es.json"),
   ja: () => import("./locales/ja.json"),
   "pt-BR": () => import("./locales/pt-BR.json"),
+  "zh-CN": () => import("./locales/zh-CN.json"),
 };
 
 export function isSupportedLocale(locale: string): locale is SupportedLocale {
   return (SUPPORTED_LOCALES as readonly string[]).includes(locale);
 }
 
-export function normalizeAdminLocale(locale: string | null | undefined): SupportedLocale {
-  return locale && isSupportedLocale(locale) ? locale : "en";
+export function normalizeAdminLocale(
+  locale: string | null | undefined
+): SupportedLocale {
+  if (!locale) return "en";
+
+  const normalized = locale.trim().replaceAll("_", "-");
+  const exactMatch = SUPPORTED_LOCALES.find(
+    (supportedLocale) =>
+      supportedLocale.toLowerCase() === normalized.toLowerCase()
+  );
+  if (exactMatch) return exactMatch;
+
+  const lowerLocale = normalized.toLowerCase();
+  if (lowerLocale === "zh" || lowerLocale.startsWith("zh-hans")) return "zh-CN";
+  if (lowerLocale.startsWith("zh-")) return "en";
+
+  const baseLanguage = lowerLocale.split("-")[0];
+  const baseMatch = SUPPORTED_LOCALES.find(
+    (supportedLocale) => supportedLocale.toLowerCase() === baseLanguage
+  );
+  return baseMatch ?? "en";
+}
+
+export function resolveAdminLocaleFromRequest(
+  request: Request
+): SupportedLocale {
+  const url = new URL(request.url);
+  return normalizeAdminLocale(url.searchParams.get("locale"));
 }
 
 function cloneLocaleCatalog(catalog: LocaleCatalog): LocaleCatalog {
   return JSON.parse(JSON.stringify(catalog)) as LocaleCatalog;
 }
 
+function buildEnglishCopyIndex(
+  catalog: LocaleCatalog,
+  prefix = "",
+  index = new Map<string, string>()
+) {
+  for (const [key, value] of Object.entries(catalog)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (typeof value === "string") {
+      if (!index.has(value)) index.set(value, path);
+    } else if (value && typeof value === "object" && !Array.isArray(value)) {
+      buildEnglishCopyIndex(value as LocaleCatalog, path, index);
+    }
+  }
+  return index;
+}
+
+const englishCopyIndex = buildEnglishCopyIndex(en);
+
 function refreshEnglishResourceBundle() {
-  i18n.addResourceBundle("en", "translation", cloneLocaleCatalog(en), true, true);
+  i18n.addResourceBundle(
+    "en",
+    "translation",
+    cloneLocaleCatalog(en),
+    true,
+    true
+  );
 }
 
 if (!i18n.isInitialized) {
-  void i18n.use(initReactI18next).init({
+  const i18nWithReact = initReactI18next
+    ? i18n.use(initReactI18next)
+    : i18n;
+  void i18nWithReact.init({
     resources: {
       en: { translation: cloneLocaleCatalog(en) },
     },
@@ -44,7 +106,9 @@ if (!i18n.isInitialized) {
   });
 }
 
-export async function loadAdminLocaleResources(locale: string | null | undefined) {
+export async function loadAdminLocaleResources(
+  locale: string | null | undefined
+) {
   const normalizedLocale = normalizeAdminLocale(locale);
   if (normalizedLocale === "en") {
     refreshEnglishResourceBundle();
@@ -59,16 +123,36 @@ export async function loadAdminLocaleResources(locale: string | null | undefined
   if (!loadLocale) return "en";
 
   const catalog = await loadLocale();
-  i18n.addResourceBundle(normalizedLocale, "translation", catalog.default, true, true);
+  i18n.addResourceBundle(
+    normalizedLocale,
+    "translation",
+    catalog.default,
+    true,
+    true
+  );
   return normalizedLocale;
 }
 
-export async function changeAdminI18nLanguage(locale: string | null | undefined) {
+export async function changeAdminI18nLanguage(
+  locale: string | null | undefined
+) {
   const normalizedLocale = await loadAdminLocaleResources(locale);
   if (i18n.language !== normalizedLocale) {
     await i18n.changeLanguage(normalizedLocale);
   }
   return normalizedLocale;
+}
+
+export function translateAdmin(
+  key: string,
+  options?: Record<string, unknown>
+): string {
+  return String(i18n.t(key, options));
+}
+
+export function translateAdminCopy(source: string): string {
+  const key = englishCopyIndex.get(source);
+  return key ? String(i18n.t(key)) : source;
 }
 
 export { i18n };

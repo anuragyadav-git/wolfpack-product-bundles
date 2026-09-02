@@ -5,7 +5,7 @@ title: Admin Billing Navigation
 type: test-spec
 status: active
 summary: Verifies that the main embedded app navigation links merchants to Subscription and Billing through a Billing item.
-last_audited: 2026-08-29
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -40,12 +40,12 @@ navigation through an option named Billing.
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Merchant opens the app navigation | Authenticated app shell | Billing item links to `/app/pricing` | `/app/pricing` owns the Subscription and Billing screen |
+| 1 | Merchant opens the app navigation | Authenticated app shell | Billing item links to `/app/billing` | `/app/billing` owns plan management and parents `/app/billing/plans` |
 | 2 | Merchant uses a supported Admin locale | Any supported locale | Billing label resolves from the locale catalog | Catalog keys remain aligned |
 
 ## Acceptance Criteria
 
 - [x] The main app navigation includes Billing.
-- [x] Billing navigates to `/app/pricing`.
+- [x] Billing navigates to `/app/billing`.
 - [x] All supported locale catalogs contain the Billing key.
 - [x] Focused tests and lint pass.

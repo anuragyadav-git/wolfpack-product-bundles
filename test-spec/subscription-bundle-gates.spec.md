@@ -4,8 +4,8 @@ id: subscription-bundle-gates
 title: "Test Spec: Subscription Bundle Gates"
 type: test-spec
 status: active
-summary: Server behavior for Free public-bundle, step, template, and billing-verification enforcement.
-last_audited: 2026-08-29
+summary: Server behavior for Free public-bundle, step, template, billing-verification, and bounded publication transaction enforcement.
+last_audited: 2026-09-01
 owners:
   - wolfpack-engineering
 domains:
@@ -48,10 +48,11 @@ Specify the authoritative decision made before a bundle becomes or remains publi
 | 7 | Unknown billing | Public transition | Billing-unverified error | Existing public state is not auto-demoted |
 | 8 | Growth publication | Any approved candidate | Allowed | Monthly and annual share access |
 | 9 | Save an already-public bundle | Existing publication timestamp | Original timestamp is preserved | Downgrade ordering reflects publication, not later edits |
+| 10 | Save a public bundle with relational configuration | Shop lock, quota check, and nested bundle update | Interactive transaction receives a bounded 10-second timeout | Keeps the atomic publication gate while accommodating the canonical nested write |
 
 ## Acceptance Criteria
 
-- [ ] All listed tests pass.
+- [x] All listed tests pass.
 - [ ] Draft operations remain available.
 - [ ] Public limit errors are typed and include safe usage metadata.
 - [ ] The same gate can be called from routes, jobs, and storefront sync.

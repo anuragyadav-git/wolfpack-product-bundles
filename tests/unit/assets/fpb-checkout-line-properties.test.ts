@@ -9,12 +9,23 @@ const { fullPageValidationAddonsMethods } =
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ToastManager } = require("../../../app/assets/widgets/shared/toast-manager.js");
 
+const originalStorefrontProxyRoot = process.env.STOREFRONT_PROXY_ROOT;
+
 beforeEach(() => {
+  process.env.STOREFRONT_PROXY_ROOT = "/apps/product-bundles";
   jest.spyOn(ToastManager, "show").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
   jest.restoreAllMocks();
+});
+
+afterAll(() => {
+  if (originalStorefrontProxyRoot === undefined) {
+    delete process.env.STOREFRONT_PROXY_ROOT;
+  } else {
+    process.env.STOREFRONT_PROXY_ROOT = originalStorefrontProxyRoot;
+  }
 });
 function createCartAddFetchMock() {
   return jest.fn(async (url: string, _options?: RequestInit) => ({
@@ -69,8 +80,14 @@ describe("FPB checkout cart-line properties", () => {
         _isWidgetActionBusy: false,
         container: null,
         selectedBundle: {
+          id: "bundle-1",
           name: "Daily Essentials",
           steps: [{ id: "paid-step", isFreeGift: false }],
+          offerDelivery: {
+            offerPolicyId: "policy-1",
+            ruleVersion: 5,
+            eligibilitySource: "specific_link",
+          },
         },
         selectedProducts: [{ "gid://shopify/ProductVariant/111": 1 }],
         stepProductData: [[{
@@ -235,6 +252,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -265,8 +283,14 @@ describe("FPB checkout cart-line properties", () => {
         _isWidgetActionBusy: false,
         container: null,
         selectedBundle: {
+          id: "bundle-1",
           name: "Daily Essentials",
           steps: [{ id: "paid-step", isFreeGift: false }],
+          offerDelivery: {
+            offerPolicyId: "policy-1",
+            ruleVersion: 5,
+            eligibilitySource: "specific_link",
+          },
         },
         selectedProducts: [
           { "gid://shopify/ProductVariant/111": 1 },
@@ -312,11 +336,13 @@ describe("FPB checkout cart-line properties", () => {
     const addRequest: any = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
     const body = JSON.parse(String(addRequest[1]?.body));
-    expect(body.items).toEqual([
-      expect.objectContaining({
-        id: "111",
-      }),
-    ]);
+    expect(body.items).toEqual([expect.objectContaining({ id: "111" })]);
+    expect(JSON.parse(body.items[0].properties._bundle_display_properties).offerAnalytics).toEqual({
+      bundleId: "bundle-1",
+      offerPolicyId: "policy-1",
+      offerRuleVersion: 5,
+      offerEligibilitySource: "specific_link",
+    });
   });
 
   it("omits Box cart properties for BXY when bundle quantity options are hidden", async () => {
@@ -328,6 +354,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -436,8 +463,13 @@ describe("FPB checkout cart-line properties", () => {
       expect(item.properties).not.toHaveProperty("Box");
       expect(item.properties).toHaveProperty("_bundle_display_properties");
       expect(JSON.parse(item.properties._bundle_display_properties)).toEqual({
+        bundleName: "Daily Essentials",
         items: "1 x First product, 1 x Second product",
         retailPrice: "$1448.00",
+        offerAnalytics: {
+          bundleId: "bundle-1",
+          offerTierId: "rule-1",
+        },
       });
     });
   });
@@ -451,6 +483,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -762,6 +795,7 @@ describe("FPB checkout cart-line properties", () => {
     const appendedToasts: any[] = [];
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -861,6 +895,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -976,6 +1011,7 @@ describe("FPB checkout cart-line properties", () => {
     expect(addonLine.properties._bundle_step_type).not.toBe("free_gift");
     expect(JSON.parse(paidLine.properties._bundle_display_properties)).toEqual({
       box: "1",
+      bundleName: "Daily Essentials",
       items: "1 x Paid product",
       retailPrice: "$829.00",
       labels: {
@@ -995,6 +1031,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -1119,6 +1156,7 @@ describe("FPB checkout cart-line properties", () => {
     const originalSetTimeout = (global as any).setTimeout;
     (global as any).fetch = fetchMock;
     (global as any).window = {
+      location: { pathname: "/" },
       Shopify: {
         currency: { active: "USD", format: ["$", "{{amount}}"].join("") },
       },
@@ -1231,6 +1269,7 @@ describe("FPB checkout cart-line properties", () => {
     expect(body.items[0].properties._bundle_price_adjustment_mode).toBeUndefined();
     expect(displayProperties).toEqual({
       box: "1",
+      bundleName: "Daily Essentials",
       items: "1 x First product, 1 x Second product",
       retailPrice: "",
       labels: {

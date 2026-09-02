@@ -1,3 +1,9 @@
+# Shopify-Native First — Do Not Reinvent the Wheel
+
+Before planning or implementing anything, check whether Shopify already provides the capability through its canonical APIs, Functions, extensions, Admin components, platform configuration, or documented patterns. Use the Shopify-provided solution when it exists. Do not recreate Shopify behavior with custom models, secrets, endpoints, abstractions, fallback chains, or duplicated business logic merely because a custom implementation is possible.
+
+If existing project logic conflicts with Shopify's current recommended approach, replace the incorrect logic with the canonical Shopify resource or API instead of preserving it through compatibility code. Add custom application logic only after evidence shows that Shopify does not provide the required capability, and keep that logic limited to the demonstrated gap.
+
 # Claude Code Development Guidelines
 
 ## Core Operating Principles

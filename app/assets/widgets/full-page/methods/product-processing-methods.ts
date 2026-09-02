@@ -1066,13 +1066,20 @@ processProductsForStep(products: any, step: any) {
       if (Array.isArray(product?.variants) && product.variants.length > 0 && !defaultVariant) {
         return [];
       }
+      const defaultRuntimeInventory = defaultVariant
+        && typeof this.getRuntimeVariantInventory === 'function'
+        ? this.getRuntimeVariantInventory(defaultVariant)
+        : null;
+      const defaultVariantSource = defaultRuntimeInventory
+        ? { ...defaultVariant, ...defaultRuntimeInventory }
+        : defaultVariant;
 
       // Storefront API: prioritize variant image, fallback to product featured image.
       // product.imageUrl — set by API path; product.featuredImage/images — metafield cache format.
-      const imageUrl = defaultVariant?.image?.src
-        || defaultVariant?.image?.url
-        || (typeof defaultVariant?.image === 'string' ? defaultVariant.image : null)
-        || defaultVariant?.imageUrl
+      const imageUrl = defaultVariantSource?.image?.src
+        || defaultVariantSource?.image?.url
+        || (typeof defaultVariantSource?.image === 'string' ? defaultVariantSource.image : null)
+        || defaultVariantSource?.imageUrl
         || product.imageUrl
         || product.featuredImage?.url
         || product.images?.[0]?.url
@@ -1081,31 +1088,36 @@ processProductsForStep(products: any, step: any) {
         || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
 
       // Process variants array for variant selection in modal
-      const processedVariants = (product.variants || []).map(normalizeVariant);
+      const processedVariants = (product.variants || []).map((variant: any) => {
+        const runtimeInventory = typeof this.getRuntimeVariantInventory === 'function'
+          ? this.getRuntimeVariantInventory(variant)
+          : null;
+        return normalizeVariant(runtimeInventory ? { ...variant, ...runtimeInventory } : variant);
+      });
 
       // Process options array for variant selector labels
       const processedOptions = deriveProductOptionNames(product);
 
       const productId = normalizeProductLookupId(product);
-      const selectionId = variantLookupKey(defaultVariant) || normalizeProductLookupId(product);
+      const selectionId = variantLookupKey(defaultVariantSource) || normalizeProductLookupId(product);
       if (!selectionId) return [];
 
       return [{
         id: productId,
         title: product.title,
         imageUrl,
-        price: defaultVariant
-          ? toCents(defaultVariant.price)
+        price: defaultVariantSource
+          ? toCents(defaultVariantSource.price)
           : toCents(product.price),
-        compareAtPrice: defaultVariant
-          ? normalizeCompareAtPriceToCents(defaultVariant.compareAtPrice) ?? normalizeCompareAtPriceToCents(defaultVariant.compare_at_price)
+        compareAtPrice: defaultVariantSource
+          ? normalizeCompareAtPriceToCents(defaultVariantSource.compareAtPrice) ?? normalizeCompareAtPriceToCents(defaultVariantSource.compare_at_price)
           : null,
         variantId: selectionId,
         selectionId,
-        available: defaultVariant ? this.isVariantSelectableForInventory(defaultVariant) : product.available === true,
-        quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
-        currentlyNotInStock: defaultVariant?.currentlyNotInStock === true,
-        weight: normalizeWeightToGrams(defaultVariant?.weight, defaultVariant?.weightUnit),
+        available: defaultVariantSource ? this.isVariantSelectableForInventory(defaultVariantSource) : product.available === true,
+        quantityAvailable: typeof defaultVariantSource?.quantityAvailable === 'number' ? defaultVariantSource.quantityAvailable : null,
+        currentlyNotInStock: defaultVariantSource?.currentlyNotInStock === true,
+        weight: normalizeWeightToGrams(defaultVariantSource?.weight, defaultVariantSource?.weightUnit),
         weightUnit: 'GRAMS',
         // Preserve variants and options for variant selection in modal
         variants: processedVariants,

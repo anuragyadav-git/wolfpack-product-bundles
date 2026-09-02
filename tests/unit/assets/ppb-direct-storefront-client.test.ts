@@ -22,6 +22,15 @@ describe("PPB direct Shopify Storefront client", () => {
         descriptionHtml: "",
         featuredImage: { url: "https://cdn.example/product.jpg" },
         images: { nodes: [] },
+        options: [{
+          id: "gid://shopify/ProductOption/1",
+          name: "Color",
+          optionValues: [{
+            id: "gid://shopify/ProductOptionValue/1",
+            name: "Navy",
+            swatch: { color: "#001F3F", image: null },
+          }],
+        }],
         variants: { nodes: [{
           id: "gid://shopify/ProductVariant/11",
           title: "Default Title",
@@ -33,7 +42,7 @@ describe("PPB direct Shopify Storefront client", () => {
           weight: 0,
           weightUnit: "GRAMS",
           image: null,
-          selectedOptions: [],
+          selectedOptions: [{ name: "Color", value: "Navy" }],
         }], pageInfo: { hasNextPage: false, endCursor: null } },
       }] } }),
     });
@@ -54,6 +63,18 @@ describe("PPB direct Shopify Storefront client", () => {
       available: true,
       quantityAvailable: 4,
     });
+    expect(products[0].options).toEqual([{
+      id: "gid://shopify/ProductOption/1",
+      name: "Color",
+      optionValues: [{
+        id: "gid://shopify/ProductOptionValue/1",
+        name: "Navy",
+        swatch: { color: "#001F3F", image: null },
+      }],
+    }]);
+    expect(products[0].variants[0].selectedOptions).toEqual([
+      { name: "Color", value: "Navy" },
+    ]);
   });
 
   it("fails on Shopify GraphQL errors without attempting another source", async () => {

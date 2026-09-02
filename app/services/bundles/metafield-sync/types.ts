@@ -1,5 +1,6 @@
 import type { CheckoutOffer } from "../../checkout-bundle-offers.server";
 import type { BundleSubscriptionConfigV1 } from "../../../lib/bundle-subscriptions";
+import type { CountdownRuntimeConfig } from "../../../lib/bundle-countdown";
 
 /**
  * Metafield Sync Types
@@ -77,6 +78,18 @@ export interface BundleUiConfig {
   productSlotIconUrl?: string | null;
   useSingleStepCategoriesAsBundleSteps?: boolean;
   showProductComparedAtPrice?: boolean;
+  lowStockAlert?: {
+    enabled: boolean;
+    threshold: number;
+    message: string;
+  };
+  stickyAddToCart?: {
+    enabled: boolean;
+    showDesktop: boolean;
+    showMobile: boolean;
+    action: 'scroll_to_offers' | 'add_selected_offer';
+  };
+  countdown?: CountdownRuntimeConfig | null;
   bundleVariantId: string;
   steps: BundleUiStep[];
   pricing: BundleUiPricing | null;
@@ -98,6 +111,17 @@ export interface BundleUiConfig {
   textOverridesByLocale?: Record<string, Partial<BundleTextOverrides>> | null;
   /** When true, loads the headless SDK instead of the pre-built widget (product-page bundles only). */
   sdkMode?: boolean;
+  offerDelivery?: {
+    decisionRequired: boolean;
+    serverDecisionRequired: boolean;
+    specificLinkRequired: boolean;
+    countryTargetingEnabled: boolean;
+    countryTargetingMode: 'include' | 'exclude';
+    countryCodes: string[];
+    offerPolicyId: string | null;
+    ruleVersion: number | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'country' | 'priority' | null;
+  };
   runtimeAuthorization?: {
     version: 2;
     revision: string;

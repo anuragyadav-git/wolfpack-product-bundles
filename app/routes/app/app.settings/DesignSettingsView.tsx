@@ -5,16 +5,18 @@ import {
   EXPERT_COLOR_CONTROLS,
   type SettingsField,
 } from "../../../lib/admin-configuration-surfaces";
-import {
-  SETTINGS_DESIGN_DEFAULT_FIELD_VALUES,
-} from "../../../lib/settings-design-contract";
+import { SETTINGS_DESIGN_DEFAULT_FIELD_VALUES } from "../../../lib/settings-design-contract";
 import {
   resolveDesignColor,
   type ShopBrandColors,
 } from "../../../lib/shop-brand-colors";
 import { BundlePreviewModal, DesignFields } from "./SettingsDesignFields";
 import { DesignLivePreview } from "./DesignLivePreview";
-import type { DesignPreviewArea, DesignPreviewContext, DesignPreviewScenario } from "./design-preview-model";
+import type {
+  DesignPreviewArea,
+  DesignPreviewContext,
+  DesignPreviewScenario,
+} from "./design-preview-model";
 import { getDesignFieldsForPreviewContext } from "./design-preview-model";
 import type { TemplateKey } from "../../../lib/bundle-config/template-selection";
 import styles from "./DesignSettingsView.module.css";
@@ -22,6 +24,7 @@ import { SettingsContextualSaveBar } from "./SettingsFeedback";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import type { SettingsPreviewBundle } from "../../../lib/settings-design-storefront-preview.client";
 import { getAdvancedDesignFieldKeys } from "../../../lib/subscriptions/design-entitlements";
+import { translateAdmin } from "~/i18n/config";
 
 type DesignSettingsViewProps = {
   designFieldValues: Record<string, string>;
@@ -40,14 +43,17 @@ type DesignSettingsViewProps = {
   advancedDesignAvailable?: boolean;
 };
 
-const CONTEXTUAL_INSPECTOR_SECTIONS: Array<{ title: string; fields: SettingsField[] }> = [
+const CONTEXTUAL_INSPECTOR_SECTIONS: Array<{
+  title: string;
+  fields: SettingsField[];
+}> = [
   {
     title: "Colors",
     fields: Object.values(EXPERT_COLOR_CONTROLS).flat(),
   },
-  ...DESIGN_CONFIGURATION
-    .filter((tab) => tab.title !== "Brand Colors")
-    .map((tab) => ({ title: tab.title, fields: tab.fields })),
+  ...DESIGN_CONFIGURATION.filter((tab) => tab.title !== "Brand Colors").map(
+    (tab) => ({ title: tab.title, fields: tab.fields })
+  ),
 ];
 
 export function getDesignInspectorDisclosureState(isCollapsed: boolean) {
@@ -78,36 +84,45 @@ export function DesignSettingsView({
   advancedDesignAvailable = true,
 }: DesignSettingsViewProps) {
   const { t } = useTranslation();
-  const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">("preview");
+  const [workspacePane, setWorkspacePane] = useState<"preview" | "customize">(
+    "preview"
+  );
   const [isInspectorCollapsed, setIsInspectorCollapsed] = useState(false);
-  const [activePreviewArea, setActivePreviewArea] = useState<DesignPreviewArea>("product-card");
-  const [activePreviewScenario, setActivePreviewScenario] = useState<DesignPreviewScenario>("default");
-  const [activePreviewTemplate, setActivePreviewTemplate] = useState<TemplateKey>("standard");
+  const [activePreviewArea, setActivePreviewArea] =
+    useState<DesignPreviewArea>("product-card");
+  const [activePreviewScenario, setActivePreviewScenario] =
+    useState<DesignPreviewScenario>("default");
+  const [activePreviewTemplate, setActivePreviewTemplate] =
+    useState<TemplateKey>("standard");
   const hasPreviewableBundle = previewBundles.length > 0;
-  const isStorefrontPreviewDisabled = !hasPreviewableBundle
-    || isActiveSubpageDirty
-    || isDesignSaving;
-  const inspectorDisclosure = getDesignInspectorDisclosureState(isInspectorCollapsed);
+  const isStorefrontPreviewDisabled =
+    !hasPreviewableBundle || isActiveSubpageDirty || isDesignSaving;
+  const inspectorDisclosure =
+    getDesignInspectorDisclosureState(isInspectorCollapsed);
 
   const activePreviewContext = useMemo<DesignPreviewContext>(
-    () => activePreviewScenario === "default"
-      ? { kind: "area", value: activePreviewArea }
-      : { kind: "scenario", value: activePreviewScenario },
-    [activePreviewArea, activePreviewScenario],
+    () =>
+      activePreviewScenario === "default"
+        ? { kind: "area", value: activePreviewArea }
+        : { kind: "scenario", value: activePreviewScenario },
+    [activePreviewArea, activePreviewScenario]
   );
-  const contextualSections = useMemo(() => CONTEXTUAL_INSPECTOR_SECTIONS
-    .map((section) => ({
-      ...section,
-      fields: getDesignFieldsForPreviewContext(
-        section.fields,
-        activePreviewTemplate,
-        activePreviewContext,
-      ),
-    }))
-    .filter((section) => section.fields.length > 0), [activePreviewContext, activePreviewTemplate]);
-  const activeContextLabel = activePreviewScenario === "default"
-    ? t(`settingsDcp.preview.areaSelector.${activePreviewArea}`)
-    : t(`settingsDcp.preview.stateSelector.${activePreviewScenario}`);
+  const contextualSections = useMemo(
+    () =>
+      CONTEXTUAL_INSPECTOR_SECTIONS.map((section) => ({
+        ...section,
+        fields: getDesignFieldsForPreviewContext(
+          section.fields,
+          activePreviewTemplate,
+          activePreviewContext
+        ),
+      })).filter((section) => section.fields.length > 0),
+    [activePreviewContext, activePreviewTemplate]
+  );
+  const activeContextLabel =
+    activePreviewScenario === "default"
+      ? t(`settingsDcp.preview.areaSelector.${activePreviewArea}`)
+      : t(`settingsDcp.preview.stateSelector.${activePreviewScenario}`);
 
   const visibleFields = contextualSections.flatMap((section) => section.fields);
   const resolvedFieldValues = useMemo(() => {
@@ -131,16 +146,18 @@ export function DesignSettingsView({
     const nonColorDefaults = Object.fromEntries(
       visibleFields
         .filter((field) => field.kind !== "color")
-        .map((field) => [field.key ?? field.label, field.value ?? ""]),
+        .map((field) => [field.key ?? field.label, field.value ?? ""])
     );
     setDesignFieldValues((current) => ({ ...current, ...nonColorDefaults }));
-    setInheritedColorFieldKeys((current) => [...new Set([...current, ...colorKeys])]);
+    setInheritedColorFieldKeys((current) => [
+      ...new Set([...current, ...colorKeys]),
+    ]);
   };
 
   return (
     <>
       <AdminPageTitleBar
-        title="Design Control Panel"
+        title={translateAdmin("nav.designControlPanel")}
         breadcrumbLabel="Settings"
         onBack={() => setSettingsView("landing")}
       />
@@ -151,10 +168,12 @@ export function DesignSettingsView({
               <s-button
                 variant="tertiary"
                 icon="arrow-left"
-                accessibilityLabel="Back to Settings"
+                accessibilityLabel={translateAdmin(
+                  "adminAttributes.backToSettings"
+                )}
                 onClick={() => setSettingsView("landing")}
               />
-              <s-heading>Design Control Panel</s-heading>
+              <s-heading>{translateAdmin("nav.designControlPanel")}</s-heading>
             </s-stack>
             <s-stack gap="small" alignItems="end">
               <s-button
@@ -167,12 +186,18 @@ export function DesignSettingsView({
                 {t("settingsDcp.preview.storefront.open")}
               </s-button>
               {isActiveSubpageDirty ? (
-                <s-text color="subdued">{t("settingsDcp.preview.storefront.saveBeforePreview")}</s-text>
+                <s-text color="subdued">
+                  {t("settingsDcp.preview.storefront.saveBeforePreview")}
+                </s-text>
               ) : null}
             </s-stack>
           </header>
 
-          <div className={styles.mobileWorkspaceTabs} role="group" aria-label={t("settingsDcp.preview.workspace.label")}>
+          <div
+            className={styles.mobileWorkspaceTabs}
+            role="group"
+            aria-label={t("settingsDcp.preview.workspace.label")}
+          >
             <s-button
               variant={workspacePane === "preview" ? "primary" : "secondary"}
               aria-pressed={workspacePane === "preview" ? "true" : "false"}
@@ -191,10 +216,15 @@ export function DesignSettingsView({
 
           <section
             className={styles.layout}
-            aria-label="Design"
-            data-inspector-collapsed={inspectorDisclosure.isCollapsed || undefined}
+            aria-label={translateAdmin("billing.comparison.design")}
+            data-inspector-collapsed={
+              inspectorDisclosure.isCollapsed || undefined
+            }
           >
-            <div className={styles.previewPane} data-phone-active={workspacePane === "preview" || undefined}>
+            <div
+              className={styles.previewPane}
+              data-phone-active={workspacePane === "preview" || undefined}
+            >
               <DesignLivePreview
                 fieldValues={designFieldValues}
                 inheritedColorFieldKeys={inheritedColorFieldKeys}
@@ -206,7 +236,10 @@ export function DesignSettingsView({
                 }}
               />
             </div>
-            <aside className={styles.customizePane} data-phone-active={workspacePane === "customize" || undefined}>
+            <aside
+              className={styles.customizePane}
+              data-phone-active={workspacePane === "customize" || undefined}
+            >
               <div className={styles.inspectorToggle}>
                 <s-button
                   variant="tertiary"
@@ -224,18 +257,32 @@ export function DesignSettingsView({
               <section
                 id="settings-design-customization-panel"
                 className={styles.inspectorContent}
-                aria-label="Contextual customization inspector"
+                aria-label={translateAdmin(
+                  "adminAttributes.contextualCustomizationInspector"
+                )}
               >
                 <s-stack gap="base">
                   {!advancedDesignAvailable ? (
-                    <s-banner tone="info" heading={t("settingsDcp.growthGate.heading")}>
-                      {t("settingsDcp.growthGate.body")}
-                    </s-banner>
+                    <s-box paddingBlockEnd="small-200">
+                      <s-banner
+                        tone="info"
+                        heading={t("settingsDcp.growthGate.heading")}
+                        dismissible
+                      >
+                        {t("settingsDcp.growthGate.body")}
+                      </s-banner>
+                    </s-box>
                   ) : null}
                   <s-box>
-                    <s-heading>{t("settingsDcp.preview.inspector.customize", { context: activeContextLabel })}</s-heading>
+                    <s-heading>
+                      {t("settingsDcp.preview.inspector.customize", {
+                        context: activeContextLabel,
+                      })}
+                    </s-heading>
                     <s-paragraph color="subdued">
-                      Controls update for the component visible in the preview.
+                      {translateAdmin(
+                        "adminExtracted.appSettings.designsettingsview.controlsUpdateForTheComponentVisibleInThePreview"
+                      )}
                     </s-paragraph>
                   </s-box>
                   {contextualSections.map((section) => (
@@ -246,17 +293,32 @@ export function DesignSettingsView({
                       values={resolvedFieldValues}
                       inheritedFieldKeys={inheritedColorFieldKeys}
                       disabledFieldKeys={[
-                        ...(activePreviewScenario === "loading" ? ["Image Fit"] : []),
-                        ...(!advancedDesignAvailable ? getAdvancedDesignFieldKeys() : []),
+                        ...(activePreviewScenario === "loading"
+                          ? ["Image Fit"]
+                          : []),
+                        ...(!advancedDesignAvailable
+                          ? getAdvancedDesignFieldKeys()
+                          : []),
                       ]}
                       onFieldChange={(fieldKey, value) => {
-                        setDesignFieldValues((current) => ({ ...current, [fieldKey]: value }));
-                        setInheritedColorFieldKeys((current) => current.filter((key) => key !== fieldKey));
+                        setDesignFieldValues((current) => ({
+                          ...current,
+                          [fieldKey]: value,
+                        }));
+                        setInheritedColorFieldKeys((current) =>
+                          current.filter((key) => key !== fieldKey)
+                        );
                       }}
                     />
                   ))}
-                  <s-button variant="tertiary" tone="critical" onClick={resetVisibleControls}>
-                    Reset visible controls
+                  <s-button
+                    variant="tertiary"
+                    tone="critical"
+                    onClick={resetVisibleControls}
+                  >
+                    {translateAdmin(
+                      "adminExtracted.appSettings.designsettingsview.resetVisibleControls"
+                    )}
                   </s-button>
                 </s-stack>
               </section>
@@ -269,7 +331,10 @@ export function DesignSettingsView({
             onSave={saveActiveSettingsChanges}
           />
           {isPreviewModalOpen ? (
-            <BundlePreviewModal bundles={previewBundles} onClose={() => setIsPreviewModalOpen(false)} />
+            <BundlePreviewModal
+              bundles={previewBundles}
+              onClose={() => setIsPreviewModalOpen(false)}
+            />
           ) : null}
         </main>
       </s-query-container>

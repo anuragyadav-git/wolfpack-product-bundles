@@ -34,10 +34,11 @@ const GET_BUNDLE_PRODUCT = `
   }
 `;
 
-const GET_SHOP_CURRENCY = `
-  query GetShopCurrency {
+const GET_SHOP_CONFIGURATION = `
+  query GetShopConfiguration {
     shop {
       currencyCode
+      ianaTimezone
     }
   }
 `;
@@ -86,16 +87,23 @@ async function fetchBundleProduct(
   }
 }
 
-async function fetchShopCurrencyCode(admin: any): Promise<string> {
-  const response = await admin.graphql(GET_SHOP_CURRENCY);
+export async function fetchShopConfiguration(admin: any): Promise<{
+  shopCurrencyCode: string;
+  shopIanaTimezone: string;
+}> {
+  const response = await admin.graphql(GET_SHOP_CONFIGURATION);
   const result = (await response.json()) as ShopifyGraphqlResult<{
-    shop?: { currencyCode?: string };
+    shop?: { currencyCode?: string; ianaTimezone?: string };
   }>;
   const shopCurrencyCode = result.data?.shop?.currencyCode;
+  const shopIanaTimezone = result.data?.shop?.ianaTimezone;
   if (!shopCurrencyCode) {
     throw new Error("Shop currency is missing from Shopify Admin response");
   }
-  return shopCurrencyCode;
+  if (!shopIanaTimezone) {
+    throw new Error("Shop timezone is missing from Shopify Admin response");
+  }
+  return { shopCurrencyCode, shopIanaTimezone };
 }
 
 async function fetchShopLocales(
@@ -133,17 +141,17 @@ export async function fetchBundleConfigureShopifyData(
   shopifyProductId: string | null,
   bundleId: string,
 ) {
-  const [bundleProduct, shopCurrencyCode, shopLocales] = await Promise.all([
+  const [bundleProduct, shopConfiguration, shopLocales] = await Promise.all([
     shopifyProductId
       ? fetchBundleProduct(admin, shopifyProductId, bundleId)
       : Promise.resolve(null),
-    fetchShopCurrencyCode(admin),
+    fetchShopConfiguration(admin),
     fetchShopLocales(admin),
   ]);
 
   return {
     bundleProduct,
-    shopCurrencyCode,
+    ...shopConfiguration,
     shopLocales,
   };
 }

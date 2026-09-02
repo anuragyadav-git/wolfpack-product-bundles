@@ -559,7 +559,10 @@ _filterProductsForInpageCategory(step: any, products: any[], stepIndex: string|n
     ));
     if (variants.length === 0) return [];
 
-    const selectedVariant = variants.find((variant: any)  => variant?.available !== false) || variants[0];
+    const selectedVariantId = this.extractId(product.variantId);
+    const selectedVariant = variants.find((variant: any) => (
+      this.extractId(variant?.id || variant?.variantId) === selectedVariantId
+    )) || variants.find((variant: any)  => variant?.available !== false) || variants[0];
     const variantImageUrl = selectedVariant?.image?.src
       || selectedVariant?.image?.url
       || selectedVariant?.imageUrl

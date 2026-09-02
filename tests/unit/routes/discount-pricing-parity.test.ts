@@ -57,6 +57,47 @@ describe("parsePricingRule — valid flat format", () => {
     expect(result.bxyApplyMode).toBe("lowest_priced");
   });
 
+  it("preserves a validated tier badge", () => {
+    const result = parsePricingRule({
+      id: "badge-rule",
+      conditionType: "quantity",
+      conditionValue: 3,
+      discountValue: 20,
+      tierBadge: {
+        enabled: true,
+        text: "Save {{saved_percentage}}",
+        shape: "folded",
+        visibility: "selected",
+        foregroundColor: "#ffffff",
+        backgroundColor: "#005bd3",
+      },
+    });
+
+    expect(result.tierBadge).toEqual({
+      enabled: true,
+      text: "Save {{saved_percentage}}",
+      shape: "folded",
+      visibility: "selected",
+      foregroundColor: "#ffffff",
+      backgroundColor: "#005bd3",
+    });
+  });
+
+  it("rejects an invalid tier badge", () => {
+    expect(() => parsePricingRule({
+      id: "badge-rule",
+      conditionType: "quantity",
+      conditionValue: 3,
+      discountValue: 20,
+      tierBadge: {
+        enabled: true,
+        text: "Save {{unknown}}",
+        shape: "pill",
+        visibility: "always",
+      },
+    })).toThrow("tierBadge");
+  });
+
   it("parses BXY rule without optional applyMode", () => {
     const raw = {
       id: "r4",

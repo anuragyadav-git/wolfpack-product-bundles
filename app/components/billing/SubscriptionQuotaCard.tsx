@@ -16,7 +16,13 @@ export interface SubscriptionQuotaCardProps {
   showUpgradePrompt?: boolean;
 }
 
-function CustomProgressBar({ progress, tone }: { progress: number; tone: string }) {
+function CustomProgressBar({
+  progress,
+  tone,
+}: {
+  progress: number;
+  tone: string;
+}) {
   return (
     <div className={brandStyles.progressTrack}>
       <div
@@ -43,20 +49,24 @@ export function SubscriptionQuotaCard({
   const progressBarTone = getProgressBarTone(percentage);
   const usageMessage = isFreePlan
     ? t("common.upgradePrompt.usageBody", {
-      current: currentBundleCount,
-      limit: bundleLimit,
-    })
+        current: currentBundleCount,
+        limit: bundleLimit,
+      })
     : t("billing.planFeatures.unlimitedBundlesSteps");
 
-  const showBanner = showUpgradePrompt
-    && !upgradePromptDismissed
-    && shouldShowUpgradePrompt(percentage, isFreePlan);
-  const bannerMessage = t(percentage >= 80
-    ? "common.upgradePrompt.limitReachedBody"
-    : "common.upgradePrompt.approachingBody", {
-    current: currentBundleCount,
-    limit: bundleLimit,
-  });
+  const showBanner =
+    showUpgradePrompt &&
+    !upgradePromptDismissed &&
+    shouldShowUpgradePrompt(percentage, isFreePlan);
+  const bannerMessage = t(
+    percentage >= 80
+      ? "common.upgradePrompt.limitReachedBody"
+      : "common.upgradePrompt.approachingBody",
+    {
+      current: currentBundleCount,
+      limit: bundleLimit,
+    }
+  );
   const bannerTone = getUpgradePromptTone(percentage);
 
   return (
@@ -64,18 +74,25 @@ export function SubscriptionQuotaCard({
       <s-stack direction="block" gap="base">
         <s-stack direction="block" gap="small-100">
           <div className={brandStyles.sectionHeader}>
-            <h3 className={brandStyles.sectionTitle}>{t("billing.route.bundleUsage")}</h3>
+            <h3 className={brandStyles.sectionTitle}>
+              {t("billing.route.bundleUsage")}
+            </h3>
             <s-badge tone={badgeTone}>
               {isFreePlan
-                ? t("billing.route.bundleCount", { current: currentBundleCount, limit: bundleLimit })
+                ? t("billing.route.bundleCount", {
+                    current: currentBundleCount,
+                    limit: bundleLimit,
+                  })
                 : t("billing.values.unlimited")}
             </s-badge>
           </div>
           <p className={brandStyles.muted}>{usageMessage}</p>
         </s-stack>
-        {isFreePlan && <CustomProgressBar progress={percentage} tone={progressBarTone} />}
+        {isFreePlan && (
+          <CustomProgressBar progress={percentage} tone={progressBarTone} />
+        )}
         {showBanner && (
-          <s-box paddingBlockEnd="base">
+          <s-box paddingBlockEnd="small-200">
             <s-banner
               tone={bannerTone}
               heading={t("billing.route.bundleUsage")}

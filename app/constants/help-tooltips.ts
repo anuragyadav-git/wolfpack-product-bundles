@@ -10,74 +10,73 @@ export type HelpTooltipKey =
   | "bundleVisibilityPending"
   | "variantSelector"
   | "showTextOnAddButton"
-  | "cartLineItemDiscountDisplay";
+  | "cartLineItemDiscountDisplay"
+  | "swatchTooltip"
+  | "tierBadge"
+  | "freeGiftAddons"
+  | "specificLinkAccess"
+  | "offerOperations"
+  | "countryTargeting"
+  | "bundleWidget"
+  | "bundleEmbed"
+  | "preselectedProducts"
+  | "quantityValidation"
+  | "lowStockAlert"
+  | "stickyAddToCart"
+  | "countdownTimer"
+  | "bundleSubscriptions";
 
 export interface HelpTooltipDetails {
   imageSrc?: string;
-  accessibilityLabel?: string;
-  fallbackTitle?: string;
-  fallbackDescription?: string;
 }
 
 export const HELP_TOOLTIPS: Record<HelpTooltipKey, HelpTooltipDetails> = {
-  stepFlow: { 
+  stepFlow: {
     imageSrc: "/tooltip-step-setup.avif",
-    accessibilityLabel: "About Step Setup",
-    fallbackTitle: "Step Flow",
-    fallbackDescription: "Steps will render as navigation items on top of the bundle builder.",
-   },
-  category: { 
+  },
+  category: {
     imageSrc: "/tooltip-category.avif",
-    accessibilityLabel: "About Categories",
-    fallbackTitle: "Category",
-    fallbackDescription: "Categories will appear as tabs inside each step.",
   },
   rulesConfiguration: {
-    accessibilityLabel: "About Rules Configuration",
-    fallbackTitle: "Rules Configuration",
-    fallbackDescription: "Use step rules for one selection limit, or category rules when each category needs its own rule.",
+    imageSrc: "/tooltip-rules-configuration.avif",
   },
   bundleQuantityOptions: {
     imageSrc: "/tooltip-bundle-quantity-options.avif",
-    accessibilityLabel: "About Bundle Quantity Options",
-    fallbackTitle: "Bundle Quantity Options",
-    fallbackDescription: "Show quantity-based discount rules as selectable bundle boxes. Each box can have its own label, subtext, and default rule.",
   },
   productSlots: {
     imageSrc: "/tooltip-product-slots.avif",
-    accessibilityLabel: "About Product Slots",
-    fallbackTitle: "Product Slots",
-    fallbackDescription: "Display empty slots on the storefront and use the configured Slot Icon for those empty slots.",
   },
   discountProgressBar: {
     imageSrc: "/tooltip-discount-progress.avif",
-    accessibilityLabel: "About Progress Bar",
-    fallbackTitle: "Progress Bar",
-    fallbackDescription: "Show shoppers how close they are to the next discount. Simple uses one bar, while Step Based shows discount milestones.",
   },
   discountMessaging: {
     imageSrc: "/tooltip-discount-messaging.avif",
-    accessibilityLabel: "About Discount Messaging",
-    fallbackTitle: "Discount Messaging",
-    fallbackDescription: "Customize the messages shown before a discount unlocks and after shoppers qualify.",
   },
-  loadingAnimation: {},
+  loadingAnimation: {
+    imageSrc: "/tooltip-loading-animation.avif",
+  },
   bundleVisibilityPending: {},
   variantSelector: {
     imageSrc: "/tooltip-variant-selector.avif",
-    accessibilityLabel: "About Variant Selector",
-    fallbackTitle: "Variant Selector",
-    fallbackDescription: "Variant selection will appear as a dropdown on the product card.",
   },
   showTextOnAddButton: {
     imageSrc: "/tooltip-add-to-cart.avif",
-    accessibilityLabel: "About Show Text on Add Button",
-    fallbackTitle: "Product Slots",
-    fallbackDescription: "Display text inside the 'Add to Cart' button on the product card.",
   },
   cartLineItemDiscountDisplay: {
     imageSrc: "/tooltip-cart-line-item.avif",
-    accessibilityLabel: "About Cart Line Item Discount Display",
-    fallbackTitle: "Cart Line Display",
   },
+  swatchTooltip: { imageSrc: "/tooltip-swatch-tooltip.avif" },
+  tierBadge: { imageSrc: "/tooltip-tier-badge.avif" },
+  freeGiftAddons: { imageSrc: "/tooltip-free-gift-addons.avif" },
+  specificLinkAccess: { imageSrc: "/tooltip-specific-link-access.avif" },
+  offerOperations: { imageSrc: "/tooltip-offer-operations.avif" },
+  countryTargeting: { imageSrc: "/tooltip-country-targeting.avif" },
+  bundleWidget: { imageSrc: "/tooltip-bundle-widget.avif" },
+  bundleEmbed: { imageSrc: "/tooltip-bundle-embed.avif" },
+  preselectedProducts: { imageSrc: "/tooltip-preselected-products.avif" },
+  quantityValidation: { imageSrc: "/tooltip-quantity-validation.avif" },
+  lowStockAlert: { imageSrc: "/tooltip-low-stock-alert.avif" },
+  stickyAddToCart: { imageSrc: "/tooltip-sticky-add-to-cart.avif" },
+  countdownTimer: { imageSrc: "/tooltip-countdown-timer.avif" },
+  bundleSubscriptions: { imageSrc: "/tooltip-bundle-subscriptions.avif" },
 };

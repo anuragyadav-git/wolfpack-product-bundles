@@ -1,12 +1,16 @@
 import type { ConfigureBundleFlowContext } from "./useConfigureBundleFlow";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
+import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
 import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
+import { useTranslation } from "react-i18next";
+import { translateAdmin } from "~/i18n/config";
 
 export function ConfigureCanvasHeader({
   flow,
 }: {
   flow: ConfigureBundleFlowContext;
 }) {
+  const { t } = useTranslation();
   const {
     AppEmbedBanner,
     appEmbedEnabled,
@@ -26,11 +30,19 @@ export function ConfigureCanvasHeader({
     themeEditorUrl,
     UnlistedBundleBanner,
   } = flow;
+  const bundleProductId = bundleProduct?.id ?? bundle.shopifyProductId ?? null;
+  const numericProductId = bundleProductId?.split("/").pop() || null;
+  const hasUnlistedWarning =
+    parentProductStatusUi.showUnlistedBanner && Boolean(numericProductId);
+  const hasMultiplePublishWarnings =
+    !appEmbedEnabled && !parentProductStatusUi.isLoading && hasUnlistedWarning;
 
   return (
     <>
       <AdminPageTitleBar
-        title="Configure Bundle Flow"
+        title={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.configureBundleFlow"
+        )}
         breadcrumbLabel="Dashboard"
         onBack={handleBackClick}
       />
@@ -41,12 +53,14 @@ export function ConfigureCanvasHeader({
               type="button"
               className={fullPageBundleStyles.canvasBackButton}
               onClick={handleBackClick}
-              aria-label="Back to dashboard"
+              aria-label={translateAdmin("adminAttributes.backToDashboard")}
             >
               ←
             </button>
             <h1 className={fullPageBundleStyles.canvasTitle}>
-              Configure Bundle Flow
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.configureBundleFlow"
+              )}
             </h1>
           </div>
         </div>
@@ -68,43 +82,72 @@ export function ConfigureCanvasHeader({
                 {readinessScore}
               </span>
               <span className={fullPageBundleStyles.readinessLabel}>
-                Readiness Score
+                {translateAdmin("common.readiness.title")}
               </span>
             </s-press-button>
           </span>
           <s-button
             variant="secondary"
             icon="view"
-            accessibilityLabel="Preview Bundle"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.previewBundle"
+            )}
             onClick={() => {
               void handlePreviewBundle();
             }}
             loading={isPreviewBundleLoading || undefined}
             disabled={fetcher.state !== "idle"}
           >
-            Preview Bundle
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.previewBundle"
+            )}
           </s-button>
         </div>
       </div>
-      <AppEmbedBanner
-        appEmbedEnabled={appEmbedEnabled}
-        themeEditorUrl={themeEditorUrl}
-        onEnableClick={openThemeEditorForAppEmbed}
-      />
-      {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
-        <div className={fullPageBundleStyles.unlistedBannerGap}>
-          <UnlistedBundleBanner
-            shop={shop}
-            bundleProductId={bundleProduct?.id ?? bundle.shopifyProductId ?? null}
-            loading={parentProductStatusUi.isLoading}
-            onManage={() => {
-              const productId =
-                bundleProduct?.id?.split("/").pop() ||
-                bundle.shopifyProductId?.split("/").pop();
-              if (productId) openProductInAdmin(productId);
-            }}
+      {hasMultiplePublishWarnings ? (
+        <AdminWarningGroup
+          warnings={[
+            {
+              id: "app-embed",
+              heading: t("common.appEmbed.guideTitle"),
+              message: t("common.appEmbed.body"),
+              ...(themeEditorUrl
+                ? {
+                    actionLabel: t("common.actions.enableHere"),
+                    onAction: openThemeEditorForAppEmbed,
+                  }
+                : {}),
+            },
+            {
+              id: "unlisted-bundle",
+              heading: t("common.unlistedBundle.title"),
+              message: t("common.unlistedBundle.body"),
+              actionLabel: t("common.actions.manage"),
+              onAction: () => openProductInAdmin(numericProductId!),
+            },
+          ]}
+        />
+      ) : (
+        <>
+          <AppEmbedBanner
+            appEmbedEnabled={appEmbedEnabled}
+            themeEditorUrl={themeEditorUrl}
+            onEnableClick={openThemeEditorForAppEmbed}
           />
-        </div>
+          {(parentProductStatusUi.isLoading ||
+            parentProductStatusUi.showUnlistedBanner) && (
+            <div className={fullPageBundleStyles.unlistedBannerGap}>
+              <UnlistedBundleBanner
+                shop={shop}
+                bundleProductId={bundleProductId}
+                loading={parentProductStatusUi.isLoading}
+                onManage={() => {
+                  if (numericProductId) openProductInAdmin(numericProductId);
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </>
   );

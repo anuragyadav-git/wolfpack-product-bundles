@@ -138,6 +138,83 @@ describe("validateBundleConfigureFormData", () => {
     );
   });
 
+  it("validates the PPB category selector mode", () => {
+    const issues = validateBundleConfigureFormData(
+      form({
+        stepsData: JSON.stringify([
+          {
+            id: "step-1",
+            name: "Step",
+            enabled: true,
+            StepCategory: [
+              {
+                id: "cat-1",
+                name: "Colors",
+                products: [{ id: "gid://shopify/Product/1" }],
+                collections: [],
+                variantSelectorMode: "tiles",
+              },
+            ],
+          },
+        ]),
+      }),
+      "ppb",
+    );
+
+    expect(issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        path: "steps.step-1.categories.cat-1.variantSelectorMode",
+        section: "step_setup",
+      }),
+    ]));
+  });
+
+  it.each(["fpb", "ppb"] as const)(
+    "validates tier badge copy and method-compatible variables for %s",
+    (kind) => {
+      const issues = validateBundleConfigureFormData(
+        form({
+          discountData: JSON.stringify({
+            discountEnabled: true,
+            discountType: "percentage_off",
+            discountRules: [
+              {
+                id: "empty-badge",
+                conditionType: "quantity",
+                conditionValue: 2,
+                discountValue: 10,
+                tierBadge: {
+                  enabled: true,
+                  text: "",
+                  shape: "pill",
+                  visibility: "always",
+                },
+              },
+              {
+                id: "wrong-variable",
+                conditionType: "quantity",
+                conditionValue: 3,
+                discountValue: 20,
+                tierBadge: {
+                  enabled: true,
+                  text: "Save {{saved_total}}",
+                  shape: "folded",
+                  visibility: "always",
+                },
+              },
+            ],
+          }),
+        }),
+        kind,
+      );
+
+      expect(issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ path: "discount.rules.empty-badge.tierBadge.text" }),
+        expect.objectContaining({ path: "discount.rules.wrong-variable.tierBadge.text" }),
+      ]));
+    },
+  );
+
   it("validates enabled widget and PPB embed copy and targeting", () => {
     const issues = validateBundleConfigureFormData(
       form({

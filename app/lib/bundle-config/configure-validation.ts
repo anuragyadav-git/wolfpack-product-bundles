@@ -2,6 +2,15 @@ import {
   getBundleSubscriptionCompatibilityIssues,
   validateBundleSubscriptionConfig,
 } from "../bundle-subscriptions";
+import {
+  parsePricingTierBadge,
+  validatePricingTierBadgeForMethod,
+} from "../pricing-tier-badge";
+import { parseVariantSelectorConfiguration } from "./variant-selector-config";
+import {
+  parseLowStockAlertSettings,
+  validateLowStockAlertSettings,
+} from "../low-stock-alert";
 
 export type BundleConfigureKind = "fpb" | "ppb";
 
@@ -243,6 +252,44 @@ function validateDiscounts(
         { ruleId },
       ));
     }
+
+    if (rule?.tierBadge !== undefined) {
+      try {
+        const tierBadge = parsePricingTierBadge(rule.tierBadge);
+        if (tierBadge) {
+          const methodError = validatePricingTierBadgeForMethod(
+            tierBadge,
+            method,
+            rule?.bxyDiscountType,
+          );
+          if (methodError) {
+            issues.push(issue(
+              `${base}.tierBadge.text`,
+              methodError,
+              "discount_pricing",
+              { ruleId },
+            ));
+          }
+        }
+      } catch (error) {
+        const message = (error as Error).message;
+        const field = message.includes("shape")
+          ? "shape"
+          : message.includes("visibility")
+            ? "visibility"
+            : message.includes("foreground")
+              ? "foregroundColor"
+              : message.includes("background")
+                ? "backgroundColor"
+                : "text";
+        issues.push(issue(
+          `${base}.tierBadge.${field}`,
+          message.replace("pricing tier badge: ", ""),
+          "discount_pricing",
+          { ruleId },
+        ));
+      }
+    }
   });
 
   if (discountData.discountMessagingEnabled === true) {
@@ -317,6 +364,11 @@ function validateSettings(issues: ConfigureValidationIssue[], formData: FormData
       }
     });
   }
+  validateLowStockAlertSettings(parseLowStockAlertSettings(formData)).forEach(
+    ({ path, message }) => {
+      issues.push(issue(path, message, "bundle_settings"));
+    },
+  );
 }
 
 function validateFpbAddons(issues: ConfigureValidationIssue[], formData: FormData) {
@@ -391,6 +443,19 @@ export function validateBundleConfigureFormData(
       }
       if (list(category?.products).length === 0 && list(category?.collections).length === 0) {
         issues.push(issue(`${categoryBase}.resources`, "Add at least one product or collection.", "step_setup", { stepId, categoryId }));
+      }
+      if (kind === "ppb") {
+        try {
+          parseVariantSelectorConfiguration(category ?? {});
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Invalid variant selector configuration";
+          issues.push(issue(
+            `${categoryBase}.variantSelectorMode`,
+            message,
+            "step_setup",
+            { stepId, categoryId },
+          ));
+        }
       }
       validateConditions(issues, stepId, category?.conditions, `${categoryBase}.conditions`, categoryId);
     });

@@ -116,6 +116,10 @@ describe("api.attribution.engagement", () => {
         eventName: "wpb:session-engaged",
         landingPage: "/products/sample",
         userAgent: "test-agent",
+        offerPolicyId: null,
+        offerRuleVersion: null,
+        offerTierId: null,
+        offerEligibilitySource: null,
       }],
       skipDuplicates: true,
     });
@@ -128,6 +132,62 @@ describe("api.attribution.engagement", () => {
       actor: "buyer",
       sendToShopify: false,
     }));
+  });
+
+  it("persists normalized offer dimensions without accepting arbitrary eligibility data", async () => {
+    const response = await action({
+      request: makeSignedRequest({
+        shopId: "test-shop.myshopify.com",
+        bundleId: "bundle-123",
+        sessionId: "session-offer",
+        eventName: "wpb:session-engaged",
+        offerPolicyId: " policy-1 ",
+        offerRuleVersion: 7,
+        offerTierId: " tier-2 ",
+        offerEligibilitySource: "specific_link",
+      }),
+      params: {},
+      context: {},
+    } as any) as Response;
+
+    expect(response.status).toBe(200);
+    expect(mockCreateMany()).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        offerPolicyId: "policy-1",
+        offerRuleVersion: 7,
+        offerTierId: "tier-2",
+        offerEligibilitySource: "specific_link",
+      })],
+      skipDuplicates: true,
+    });
+  });
+
+  it("nulls invalid offer dimensions while preserving a valid bundle event", async () => {
+    const response = await action({
+      request: makeSignedRequest({
+        shopId: "test-shop.myshopify.com",
+        bundleId: "bundle-123",
+        sessionId: "session-invalid-offer",
+        eventName: "wpb:session-engaged",
+        offerPolicyId: "x".repeat(129),
+        offerRuleVersion: 0,
+        offerTierId: { customerId: "private" },
+        offerEligibilitySource: "customer_email",
+      }),
+      params: {},
+      context: {},
+    } as any) as Response;
+
+    expect(response.status).toBe(200);
+    expect(mockCreateMany()).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        offerPolicyId: null,
+        offerRuleVersion: null,
+        offerTierId: null,
+        offerEligibilitySource: null,
+      })],
+      skipDuplicates: true,
+    });
   });
 
   it("records add-to-cart success as a distinct persisted event for the same session", async () => {

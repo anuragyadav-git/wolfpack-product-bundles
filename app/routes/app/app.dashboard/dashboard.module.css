@@ -799,9 +799,14 @@
     padding-inline: 16px;
   }
 
+  .dashboardHeader {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .dashboardActions {
     width: 100%;
     align-items: center;
+    justify-content: flex-start;
     flex-direction: row;
     flex-wrap: nowrap;
     gap: 8px;

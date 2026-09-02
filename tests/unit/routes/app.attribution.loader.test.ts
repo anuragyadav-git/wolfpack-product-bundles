@@ -372,6 +372,69 @@ describe("app.attribution loader — campaign aggregation", () => {
     expect(payload.timeSeries[6].date).toBe("2026-06-07");
   });
 
+  it("builds selectable offer funnels from persisted policy dimensions", async () => {
+    getDb().orderAttribution.findMany.mockReset();
+    getDb().bundleAnalytics.findMany.mockReset();
+    getDb().bundleEngagement.findMany.mockReset();
+    getDb().bundle.findMany.mockReset();
+
+    getDb().orderAttribution.findMany
+      .mockResolvedValueOnce([{
+        bundleId: "bundle-1",
+        offerPolicyId: "policy-1",
+        offerRuleVersion: 6,
+        offerTierId: "tier-2",
+        offerEligibilitySource: "specific_link",
+        revenue: 4200,
+        createdAt: new Date("2026-06-05T00:00:00.000Z"),
+      }])
+      .mockResolvedValueOnce([]);
+    getDb().bundleAnalytics.findMany
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+    getDb().bundleEngagement.findMany.mockResolvedValueOnce([{
+      bundleId: "bundle-1",
+      offerPolicyId: "policy-1",
+      offerRuleVersion: 6,
+      offerTierId: "tier-2",
+      offerEligibilitySource: "specific_link",
+      sessionId: "session-1",
+      presetId: "classic",
+      eventName: "wpb:session-engaged",
+      createdAt: new Date("2026-06-05T00:00:00.000Z"),
+    }]);
+    getDb().bundle.findMany.mockResolvedValueOnce([{
+      id: "bundle-1",
+      name: "Campaign Bundle",
+      status: "active",
+    }]);
+
+    const response = await loader({
+      request: new Request("https://test.myshopify.com/app/attribution?from=2026-06-01&to=2026-06-07&offerPolicyId=policy-1"),
+      params: {},
+      context: {},
+    } as any);
+    const payload = (await getDeferredPayload(response).analytics) as any;
+
+    expect(payload.offerAnalytics).toEqual({
+      selectedOfferPolicyId: "policy-1",
+      options: [{
+        id: "policy-1",
+        bundleId: "bundle-1",
+        label: "Campaign Bundle · policy-1",
+        ruleVersion: 6,
+        eligibilitySource: "specific_link",
+        tierIds: ["tier-2"],
+      }],
+      funnelSnapshot: expect.objectContaining({
+        engaged: 1,
+        addedToCart: 0,
+        checkedOut: 1,
+        revenueCents: 4200,
+      }),
+    });
+  });
+
   it("fails closed to summary analytics when billing cannot be verified", async () => {
     mockResolveShopEntitlements.mockResolvedValueOnce({
       planCode: "FREE",

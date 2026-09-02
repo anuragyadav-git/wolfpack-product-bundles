@@ -21,6 +21,7 @@ import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurati
 import { useEnsureProductTemplateMutation } from "../../../store/api/adminApi";
 import type { LoaderData } from "./types";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import { useSpecificLinkOfferAdmin } from "../shared/useSpecificLinkOfferAdmin";
 
 export function useConfigureBundleController(): ConfigureBundleFlowDraft {
   const loaderData = useLoaderData<LoaderData>();
@@ -35,6 +36,7 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     availableBundles,
     shop,
     apiKey,
+    storefrontProxyRoot,
     shopLocales = [],
     shopCurrencyCode,
   } = loaderData as any;
@@ -182,6 +184,11 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     setCurrentAppEmbedEnabled(appEmbedEnabled);
     return appEmbedEnabled;
   }, [shopify]);
+  const specificLinkOffer = useSpecificLinkOfferAdmin({
+    initialState: loaderData.offerDelivery,
+    markAsDirty,
+    shopify,
+  });
 
   return {
     activeSection,
@@ -247,10 +254,12 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     shopify,
     shopLocales,
     shopCurrencyCode,
+    storefrontProxyRoot,
     stepsState,
     themeEditorUrl: currentThemeEditorUrl,
     triggerAppEmbedBannerFeedback,
     triggerSaveBarIrritation,
     clearOperationAlert,
+    ...specificLinkOffer,
   };
 }

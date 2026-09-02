@@ -1,3 +1,4 @@
+import { translateAdmin } from "~/i18n/config";
 export function MonitorIcon() {
   return (
     <svg
@@ -41,5 +42,10 @@ export function ProgressCircle({ status }: { status: "spinning" | "success" }) {
     return <s-icon type="check" tone="success" size="base" />;
   }
 
-  return <s-spinner size="base" accessibilityLabel="Uploading" />;
+  return (
+    <s-spinner
+      size="base"
+      accessibilityLabel={translateAdmin("adminAttributes.uploading")}
+    />
+  );
 }

@@ -5,7 +5,7 @@ title: Admin LCP Route Optimization
 type: test-spec
 status: active
 summary: Verifies route-level loading and critical-path behavior for Admin performance-sensitive pages.
-last_audited: 2026-08-25
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -37,7 +37,7 @@ Reduce local Admin LCP on routes that exceeded 2500 ms during Shopify Admin ifra
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
 | 1 | Cart-transform Admin list route remains removed | Route file inventory | `/app/bundles/cart-transform` route files are absent; API/function support remains | Existing integration test covers this |
-| 2 | Pricing route can paint before subscription lookup settles | `/app/pricing` loader | Route returns deferred subscription data and renders the stable title with an inline Polaris loading state | Targets local 2592 ms sample |
+| 2 | Billing Plans route can paint before subscription lookup settles | `/app/billing/plans` loader | Route returns deferred subscription data and renders the stable title with an inline Polaris loading state | Targets local 2592 ms sample |
 | 3 | Attribution data stays hidden while analytics queries settle | `/app/attribution` loader | Route renders the critical title and funnel heading while keeping deferred `pixelStatus` and `analytics` behind one inline readiness boundary | Prevents data-dependent partial content |
 | 4 | Dashboard route removes avoidable sequential DB wait | `/app/dashboard` loader | Bundle and shop metadata reads start concurrently before secondary work | Targets local 4476 ms sample |
 | 5 | Support chat does not configure Crisp on the critical path | Admin app root support chat loader | Crisp configures after a delayed fallback, or immediately when a support action explicitly opens chat | Fallback if attribution p75 still exceeds local target after loader split |

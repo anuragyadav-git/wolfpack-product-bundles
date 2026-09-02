@@ -125,6 +125,21 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "allowQuantityChanges",
         String(flow.allowQuantityChanges),
       );
+      formData.append(
+        "lowStockAlertEnabled",
+        String(flow.lowStockAlertEnabled),
+      );
+      formData.append("lowStockAlertThreshold", flow.lowStockAlertThreshold);
+      formData.append("lowStockAlertMessage", flow.lowStockAlertMessage);
+      formData.append("countdownEnabled", String(flow.countdownEnabled));
+      formData.append("countdownLayout", flow.countdownLayout);
+      formData.append("countdownPosition", flow.countdownPosition);
+      formData.append("countdownTitle", flow.countdownTitle);
+      formData.append("countdownExpiryAction", flow.countdownExpiryAction);
+      formData.append(
+        "countdownExpiredMessage",
+        flow.countdownExpiredMessage,
+      );
       formData.append("searchBarEnabled", String(flow.searchBarEnabled));
       formData.append(
         "variantSelectorEnabled",
@@ -203,6 +218,59 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         "defaultProductsData",
         JSON.stringify(buildDefaultProductsData()),
       );
+      formData.append(
+        "specificLinkOfferEnabled",
+        String(flow.offerDeliveryState.enabled),
+      );
+      formData.append("offerPriority", String(flow.offerDeliveryState.priority));
+      formData.append(
+        "offerStopLowerPriority",
+        String(flow.offerDeliveryState.stopLowerPriority),
+      );
+      formData.append("offerScheduleMode", flow.offerDeliveryState.scheduleMode);
+      formData.append("offerStartsAt", flow.offerDeliveryState.startsAt ?? "");
+      formData.append("offerEndsAt", flow.offerDeliveryState.endsAt ?? "");
+      formData.append(
+        "offerRecurrenceFrequency",
+        flow.offerDeliveryState.recurrenceFrequency ?? "",
+      );
+      formData.append(
+        "offerRecurrenceAnchorDate",
+        flow.offerDeliveryState.recurrenceAnchorDate ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowStart",
+        flow.offerDeliveryState.recurrenceWindowStart ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowEnd",
+        flow.offerDeliveryState.recurrenceWindowEnd ?? "",
+      );
+      formData.append(
+        "offerRecurrenceTermination",
+        flow.offerDeliveryState.recurrenceTermination,
+      );
+      formData.append(
+        "offerRecurrenceEndsOn",
+        flow.offerDeliveryState.recurrenceEndsOn ?? "",
+      );
+      formData.append(
+        "offerRecurrenceRunCount",
+        flow.offerDeliveryState.recurrenceRunCount == null
+          ? ""
+          : String(flow.offerDeliveryState.recurrenceRunCount),
+      );
+      formData.append(
+        "countryTargetingEnabled",
+        String(flow.offerDeliveryState.countryTargetingEnabled),
+      );
+      formData.append(
+        "countryTargetingMode",
+        flow.offerDeliveryState.countryTargetingMode,
+      );
+      flow.offerDeliveryState.countryCodes.forEach((countryCode: string) => {
+        formData.append("countryCodes", countryCode);
+      });
       validation.validateConfigureForm(formData, (validFormData) => {
         flow.fetcher.submit(validFormData, { method: "post" });
       });
@@ -267,6 +335,20 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.cartRedirectToCheckout;
           flow.originalAllowQuantityChangesRef.current =
             flow.allowQuantityChanges;
+          flow.originalLowStockAlertEnabledRef.current =
+            flow.lowStockAlertEnabled;
+          flow.originalLowStockAlertThresholdRef.current =
+            flow.lowStockAlertThreshold;
+          flow.originalLowStockAlertMessageRef.current =
+            flow.lowStockAlertMessage;
+          flow.originalCountdownEnabledRef.current = flow.countdownEnabled;
+          flow.originalCountdownLayoutRef.current = flow.countdownLayout;
+          flow.originalCountdownPositionRef.current = flow.countdownPosition;
+          flow.originalCountdownTitleRef.current = flow.countdownTitle;
+          flow.originalCountdownExpiryActionRef.current =
+            flow.countdownExpiryAction;
+          flow.originalCountdownExpiredMessageRef.current =
+            flow.countdownExpiredMessage;
           flow.originalTextOverridesRef.current = flow.textOverrides;
           flow.originalTextOverridesByLocaleRef.current =
             flow.textOverridesByLocale;
@@ -287,6 +369,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.autoSelectBrowsedProduct;
           flow.originalSubscriptionConfigRef.current =
             flow.subscriptionConfig;
+          flow.markSpecificLinkOfferSaved();
           flow.setIsDirty(false);
           flow.clearOperationAlert();
           flow.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });
@@ -360,6 +443,25 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       flow.originalCartRedirectToCheckoutRef.current,
     );
     flow.setAllowQuantityChanges(flow.originalAllowQuantityChangesRef.current);
+    flow.setLowStockAlertEnabled(
+      flow.originalLowStockAlertEnabledRef.current,
+    );
+    flow.setLowStockAlertThreshold(
+      flow.originalLowStockAlertThresholdRef.current,
+    );
+    flow.setLowStockAlertMessage(
+      flow.originalLowStockAlertMessageRef.current,
+    );
+    flow.setCountdownEnabled(flow.originalCountdownEnabledRef.current);
+    flow.setCountdownLayout(flow.originalCountdownLayoutRef.current);
+    flow.setCountdownPosition(flow.originalCountdownPositionRef.current);
+    flow.setCountdownTitle(flow.originalCountdownTitleRef.current);
+    flow.setCountdownExpiryAction(
+      flow.originalCountdownExpiryActionRef.current,
+    );
+    flow.setCountdownExpiredMessage(
+      flow.originalCountdownExpiredMessageRef.current,
+    );
     flow.setTextOverrides(flow.originalTextOverridesRef.current);
     flow.setTextOverridesByLocale(
       flow.originalTextOverridesByLocaleRef.current,
@@ -385,6 +487,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     flow.resetSubscriptionConfig(
       flow.originalSubscriptionConfigRef.current,
     );
+    flow.discardSpecificLinkOfferChanges();
     validation.clearValidationErrors();
   }, [flow, validation]);
   const handleConfirmDiscard = useCallback(() => {

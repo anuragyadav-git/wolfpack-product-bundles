@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 
 import { moveArrayItem } from "../../../../lib/bundle-config/reorder-items";
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
+import { translateAdmin } from "~/i18n/config";
 
 export interface CommonStepCategoryAccordionAdapter {
   categoryActiveTabs: Record<string, number>;
@@ -12,23 +13,25 @@ export interface CommonStepCategoryAccordionAdapter {
   handleCatDragStart: (
     event: React.DragEvent,
     stepId: string,
-    catKey: string,
+    catKey: string
   ) => void;
   handleCatDrop: (
     event: React.DragEvent,
     stepId: string,
-    catKey: string,
+    catKey: string
   ) => void;
   hidePolarisModal: (modalRef: React.RefObject<any>) => void;
   markAsDirty: () => void;
   openStepCategoryMultiLanguageModal: (
     stepId: string,
-    catIndex: number,
+    catIndex: number
   ) => void;
   setCategoryActiveTabs: React.Dispatch<
     React.SetStateAction<Record<string, number>>
   >;
-  setCategoryOpen: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  setCategoryOpen: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
   setDragOverCatKey: (catKey: string | null) => void;
   shopify: unknown;
   showPolarisModal: (modalRef: React.RefObject<any>) => void;
@@ -78,19 +81,24 @@ export function CommonStepCategoryAccordion({
   } = adapter;
   const catKey = `${step.id}__${cat.id ?? catIndex}`;
   const catActiveTab = categoryActiveTabs[catKey] ?? 0;
-  const stepCategories = ((step.StepCategory as any[]) ?? []);
+  const stepCategories = (step.StepCategory as any[]) ?? [];
   const catProducts = (cat.products as any[]) ?? [];
   const catCollections = (cat.collections as any[]) ?? [];
   const isOpen = categoryOpen[catKey] ?? false;
   const shouldRenderCategoryNameField = stepCategories.length > 1;
-  const categoryPath = `steps.${step.id}.categories.${cat.id ?? `category-${catIndex + 1}`}`;
-  const modalIdBase = `configure-category-${catKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+  const categoryPath = `steps.${step.id}.categories.${
+    cat.id ?? `category-${catIndex + 1}`
+  }`;
+  const modalIdBase = `configure-category-${catKey.replace(
+    /[^a-zA-Z0-9_-]/g,
+    "-"
+  )}`;
   const selectedProductsModalId = `${modalIdBase}-selected-products-modal`;
   const selectedCollectionsModalId = `${modalIdBase}-selected-collections-modal`;
   const selectedProductsModalRef = useRef<any>(null);
   const selectedCollectionsModalRef = useRef<any>(null);
   const [draggedProductIndex, setDraggedProductIndex] = useState<number | null>(
-    null,
+    null
   );
   const [draggedCollectionIndex, setDraggedCollectionIndex] = useState<
     number | null
@@ -98,7 +106,7 @@ export function CommonStepCategoryAccordion({
 
   const updateCategory = (updater: (category: any) => any) => {
     const updated = stepCategories.map((category: any, index: number) =>
-      index === catIndex ? updater(category) : category,
+      index === catIndex ? updater(category) : category
     );
     stepsState.updateStepField(step.id, "StepCategory", updated);
     markAsDirty();
@@ -151,7 +159,7 @@ export function CommonStepCategoryAccordion({
     updateCategory((category: any) => ({
       ...category,
       products: ((category.products as any[]) ?? []).filter(
-        (product: any) => product.id !== productId,
+        (product: any) => product.id !== productId
       ),
     }));
   };
@@ -160,7 +168,7 @@ export function CommonStepCategoryAccordion({
     updateCategory((category: any) => ({
       ...category,
       collections: ((category.collections as any[]) ?? []).filter(
-        (collection: any) => collection.id !== collectionId,
+        (collection: any) => collection.id !== collectionId
       ),
     }));
   };
@@ -169,9 +177,9 @@ export function CommonStepCategoryAccordion({
     updateCategory((category: any) => ({
       ...category,
       products: moveArrayItem(
-        ((category.products as any[]) ?? []),
+        (category.products as any[]) ?? [],
         fromIndex,
-        toIndex,
+        toIndex
       ),
     }));
   };
@@ -180,9 +188,9 @@ export function CommonStepCategoryAccordion({
     updateCategory((category: any) => ({
       ...category,
       collections: moveArrayItem(
-        ((category.collections as any[]) ?? []),
+        (category.collections as any[]) ?? [],
         fromIndex,
-        toIndex,
+        toIndex
       ),
     }));
   };
@@ -190,7 +198,9 @@ export function CommonStepCategoryAccordion({
   return (
     <div
       data-cat-key={catKey}
-      className={`${styles.categoryAccordion}${dragOverCatKey === catKey ? ` ${styles.categoryDragOver}` : ""}`}
+      className={`${styles.categoryAccordion}${
+        dragOverCatKey === catKey ? ` ${styles.categoryDragOver}` : ""
+      }`}
       onDragOver={(event: React.DragEvent) => {
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
@@ -247,15 +257,17 @@ export function CommonStepCategoryAccordion({
           <button
             type="button"
             className={styles.categoryIconButton}
-            aria-label="Clone"
-            title="Clone"
+            aria-label={translateAdmin("adminAttributes.clone")}
+            title={translateAdmin("adminAttributes.clone")}
             onClick={() => {
               stepsState.updateStepField(step.id, "StepCategory", [
                 ...stepCategories,
                 {
                   ...stepCategories[catIndex],
                   id: `cat-${Date.now()}`,
-                  name: `${stepCategories[catIndex].name || `Category ${catIndex + 1}`} Copy`,
+                  name: `${
+                    stepCategories[catIndex].name || `Category ${catIndex + 1}`
+                  } Copy`,
                   sortOrder: stepCategories.length,
                 },
               ]);
@@ -267,11 +279,11 @@ export function CommonStepCategoryAccordion({
           <button
             type="button"
             className={styles.categoryDeleteIconButton}
-            aria-label="Delete"
-            title="Delete"
+            aria-label={translateAdmin("dashboard.deleteModal.delete")}
+            title={translateAdmin("dashboard.deleteModal.delete")}
             onClick={() => {
               const updated = stepCategories.filter(
-                (_category: any, index: number) => index !== catIndex,
+                (_category: any, index: number) => index !== catIndex
               );
               stepsState.updateStepField(step.id, "StepCategory", updated);
               markAsDirty();
@@ -303,18 +315,27 @@ export function CommonStepCategoryAccordion({
                 className={styles.categoryFieldLabel}
                 htmlFor={`configure-category-name-${catKey}`}
               >
-                Category Name
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.categoryName"
+                )}
               </label>
               <div className={styles.catNameRow}>
                 <div className={styles.categoryInputStack}>
                   <input
-                    id={`configure-${categoryPath.replace(/[^a-zA-Z0-9_-]/g, "-")}-name`}
+                    id={`configure-${categoryPath.replace(
+                      /[^a-zA-Z0-9_-]/g,
+                      "-"
+                    )}-name`}
                     className={styles.categoryNameInput}
                     type="text"
                     value={cat.name ?? ""}
                     placeholder={`Category ${catIndex + 1}`}
-                    aria-label="Category name"
-                    aria-invalid={validationErrors[`${categoryPath}.name`] ? true : undefined}
+                    aria-label={translateAdmin("adminAttributes.categoryName")}
+                    aria-invalid={
+                      validationErrors[`${categoryPath}.name`]
+                        ? true
+                        : undefined
+                    }
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       const updated = stepCategories.map(
                         (category: any, index: number) =>
@@ -324,12 +345,12 @@ export function CommonStepCategoryAccordion({
                                 name: event.target.value,
                                 title: event.target.value,
                               }
-                            : category,
+                            : category
                       );
                       stepsState.updateStepField(
                         step.id,
                         "StepCategory",
-                        updated,
+                        updated
                       );
                       markAsDirty();
                       clearValidationError?.(`${categoryPath}.name`);
@@ -349,7 +370,9 @@ export function CommonStepCategoryAccordion({
                     openStepCategoryMultiLanguageModal(step.id, catIndex)
                   }
                 >
-                  Multi Language
+                  {translateAdmin(
+                    "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                  )}
                 </s-button>
               </div>
             </div>
@@ -365,7 +388,7 @@ export function CommonStepCategoryAccordion({
                 }))
               }
             >
-              Products
+              {translateAdmin("adminDynamic.products")}
               {catProducts.length > 0 && (
                 <span className={styles.tabBadge}>{catProducts.length}</span>
               )}
@@ -380,7 +403,7 @@ export function CommonStepCategoryAccordion({
                 }))
               }
             >
-              Collections
+              {translateAdmin("adminDynamic.collections")}
               {catCollections.length > 0 && (
                 <span className={styles.tabBadge}>{catCollections.length}</span>
               )}
@@ -419,7 +442,10 @@ export function CommonStepCategoryAccordion({
           {categoryControls}
           {validationErrors[`${categoryPath}.resources`] && (
             <s-text
-              id={`configure-${categoryPath.replace(/[^a-zA-Z0-9_-]/g, "-")}-resources`}
+              id={`configure-${categoryPath.replace(
+                /[^a-zA-Z0-9_-]/g,
+                "-"
+              )}-resources`}
               tone="critical"
             >
               {validationErrors[`${categoryPath}.resources`]}
@@ -459,11 +485,19 @@ function SelectedProductsPanel({
   return (
     <div>
       <p className={styles.categoryPickerHelp}>
-        Products selected here will be displayed on this step
+        {translateAdmin(
+          "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.productsSelectedHereWillBeDisplayedOnThisStep"
+        )}
       </p>
       <div className={styles.productActions}>
-        <s-button variant="primary" icon={getConfigureActionIcon("add-product")} onClick={handlePickProducts}>
-          Add Products
+        <s-button
+          variant="primary"
+          icon={getConfigureActionIcon("add-product")}
+          onClick={handlePickProducts}
+        >
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
+          )}
         </s-button>
         {products.length > 0 && (
           <button
@@ -471,11 +505,17 @@ function SelectedProductsPanel({
             className={styles.categorySelectedItemsChip}
             onClick={() => showPolarisModal(modalRef)}
           >
-            {products.length} Selected
+            {translateAdmin("adminDynamic.selectedCount", {
+              count: products.length,
+            })}
           </button>
         )}
       </div>
-      <s-modal id={modalId} ref={modalRef} heading="Selected Products">
+      <s-modal
+        id={modalId}
+        ref={modalRef}
+        heading={translateAdmin("adminAttributes.selectedProducts")}
+      >
         {products.length > 0 ? (
           <ul className={styles.selectedItemList}>
             {products.map((product: any, index: number) => (
@@ -534,7 +574,9 @@ function SelectedProductsPanel({
           </ul>
         ) : (
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            No products selected for this category yet.
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.noProductsSelectedForThisCategoryYet"
+            )}
           </p>
         )}
         <s-button
@@ -544,10 +586,17 @@ function SelectedProductsPanel({
           command="--hide"
           onClick={() => hidePolarisModal(modalRef)}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
-        <s-button slot="primary-action" variant="primary" icon={getConfigureActionIcon("add-product")} onClick={handlePickProducts}>
-          Add Products
+        <s-button
+          slot="primary-action"
+          variant="primary"
+          icon={getConfigureActionIcon("add-product")}
+          onClick={handlePickProducts}
+        >
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
+          )}
         </s-button>
       </s-modal>
     </div>
@@ -582,11 +631,19 @@ function SelectedCollectionsPanel({
   return (
     <div>
       <p className={styles.categoryPickerHelp}>
-        Collections selected here will be displayed on this step
+        {translateAdmin(
+          "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.collectionsSelectedHereWillBeDisplayedOnThisStep"
+        )}
       </p>
       <div className={styles.productActions}>
-        <s-button variant="primary" icon={getConfigureActionIcon("add-collection")} onClick={handlePickCollections}>
-          Add Collections
+        <s-button
+          variant="primary"
+          icon={getConfigureActionIcon("add-collection")}
+          onClick={handlePickCollections}
+        >
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addCollections"
+          )}
         </s-button>
         {collections.length > 0 && (
           <button
@@ -594,11 +651,17 @@ function SelectedCollectionsPanel({
             className={styles.categorySelectedItemsChip}
             onClick={() => showPolarisModal(modalRef)}
           >
-            {collections.length} Selected
+            {translateAdmin("adminDynamic.selectedCount", {
+              count: collections.length,
+            })}
           </button>
         )}
       </div>
-      <s-modal id={modalId} ref={modalRef} heading="Selected Collections">
+      <s-modal
+        id={modalId}
+        ref={modalRef}
+        heading={translateAdmin("adminAttributes.selectedCollections")}
+      >
         {collections.length > 0 ? (
           <ul className={styles.selectedItemList}>
             {collections.map((collection: any, index: number) => (
@@ -656,7 +719,9 @@ function SelectedCollectionsPanel({
           </ul>
         ) : (
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            No collections selected for this category yet.
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.noCollectionsSelectedForThisCategoryYet"
+            )}
           </p>
         )}
         <s-button
@@ -666,7 +731,7 @@ function SelectedCollectionsPanel({
           command="--hide"
           onClick={() => hidePolarisModal(modalRef)}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
         <s-button
           slot="primary-action"
@@ -674,7 +739,9 @@ function SelectedCollectionsPanel({
           icon={getConfigureActionIcon("add-collection")}
           onClick={handlePickCollections}
         >
-          Add Collections
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addCollections"
+          )}
         </s-button>
       </s-modal>
     </div>
@@ -693,7 +760,13 @@ function getProductImageUrl(product: any) {
 
 function ChevronUpIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M3 9L7 5L11 9"
         stroke="currentColor"
@@ -707,7 +780,13 @@ function ChevronUpIcon() {
 
 function ChevronDownIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M3 5L7 9L11 5"
         stroke="currentColor"

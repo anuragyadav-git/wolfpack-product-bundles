@@ -25,6 +25,7 @@ describe("selectEligibleFpbUpsells", () => {
       bundle({ id: "ppb", bundleType: "product_page", publicNumber: 22 }),
       bundle({ id: "disabled", upsellWidgetEnabled: false, publicNumber: 23 }),
       bundle({ id: "private", publicNumber: null }),
+      bundle({ id: "link-only", publicNumber: 25, offerPolicy: { specificLinkRequired: true } }),
       bundle({ id: "unlisted", status: "unlisted", publicNumber: 24 }),
     ], { productId: "123", collectionIds: [], locale: "en" });
     expect(offers.map((offer) => offer.publicNumber)).toEqual([20, 24]);
@@ -50,5 +51,43 @@ describe("selectEligibleFpbUpsells", () => {
     ], { productId: "123", collectionIds: [], locale: "fr-CA" });
     expect(offers.map((offer) => offer.publicNumber)).toEqual([10, 20]);
     expect(offers[0]).toEqual({ bundleId: "bundle-1", publicNumber: 10, bundleName: "Bundle 10", targetPath: "/apps/product-bundles/wpb/10", mode: "block", copy: { title: "Titre", description: "Base", buttonText: "Voir" }, imageUrl: null, preselectBrowsedProduct: true });
+  });
+
+  it("filters schedules, orders by priority, and stops lower-priority offers", () => {
+    const offers = selectEligibleFpbUpsells([
+      bundle({ id: "lower", publicNumber: 40, offerPolicy: { priority: 40 } }),
+      bundle({ id: "winner", publicNumber: 30, offerPolicy: { priority: 20, stopLowerPriority: true } }),
+      bundle({ id: "first", publicNumber: 20, offerPolicy: { priority: 10 } }),
+      bundle({ id: "future", publicNumber: 10, offerPolicy: { scheduleMode: "one_time", priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
+    ], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+      now: new Date("2026-08-31T12:00:00.000Z"),
+    });
+    expect(offers.map((offer) => offer.bundleId)).toEqual(["first", "winner"]);
+  });
+
+  it("filters offers against the Shopify-selected country", () => {
+    const targeted = bundle({
+      offerPolicy: {
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: "include",
+        countryCodes: ["CA"],
+      },
+    });
+    expect(selectEligibleFpbUpsells([targeted], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "US",
+    })).toEqual([]);
+    expect(selectEligibleFpbUpsells([targeted], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "CA",
+    })).toHaveLength(1);
   });
 });

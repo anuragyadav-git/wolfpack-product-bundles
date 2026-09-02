@@ -9,6 +9,7 @@
 
 import { FunnelStepBar } from "./shared/FunnelStepBar";
 import type { FunnelSnapshot } from "../../lib/analytics";
+import { translateAdmin } from "~/i18n/config";
 
 export interface FunnelHeroProps {
   snapshot: FunnelSnapshot;
@@ -70,7 +71,7 @@ export function FunnelHero({
     accent: "revenue",
   });
 
-  const maxValue = Math.max(...steps.map(s => s.value), 1);
+  const maxValue = Math.max(...steps.map((s) => s.value), 1);
 
   return (
     <section
@@ -81,19 +82,25 @@ export function FunnelHero({
       {showHeader ? (
         <header className="wpb-section-header">
           <div>
-            <p className="wpb-label wpb-section-kicker">Bundle Funnel</p>
-            <h2 id="wpb-funnel-hero-title" className="wpb-section-title wpb-section-title--hero">
-              How shoppers move through your bundles
+            <p className="wpb-label wpb-section-kicker">
+              {translateAdmin(
+                "adminExtracted.components.analytics.funnelhero.bundleFunnel"
+              )}
+            </p>
+            <h2
+              id="wpb-funnel-hero-title"
+              className="wpb-section-title wpb-section-title--hero"
+            >
+              {translateAdmin(
+                "adminExtracted.components.analytics.funnelhero.howShoppersMoveThroughYourBundles"
+              )}
             </h2>
           </div>
           <p className="wpb-section-hint">{windowLabel}</p>
         </header>
       ) : null}
-      <div
-        className="wpb-funnel-grid"
-        data-step-count={steps.length}
-      >
-        {steps.map(s => (
+      <div className="wpb-funnel-grid" data-step-count={steps.length}>
+        {steps.map((s) => (
           <FunnelStepBar key={s.label} {...s} maxValue={maxValue} />
         ))}
       </div>

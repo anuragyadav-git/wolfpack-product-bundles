@@ -2,7 +2,7 @@
  * Pricing Data Constants
  *
  * Shared constants for pricing and billing pages.
- * Extracted from app.pricing.tsx for better maintainability.
+ * Extracted from app.billing_.plans.tsx for better maintainability.
  */
 
 /**

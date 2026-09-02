@@ -1,9 +1,9 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import type { PricingRule } from "../../../types/pricing";
+import { ConfigureContextualSaveBar } from "../_shared/bundle-configure/ConfigureContextualSaveBar";
 
 export function PpbSaveForm() {
   const {
-    SaveBar,
     bundleProduct,
     conditionsState,
     discountMessagingMultiLanguageEnabled,
@@ -32,7 +32,6 @@ export function PpbSaveForm() {
 
   return (
     <>
-      {/* Modern App Bridge SaveBar with declarative React state management */}
       <form
         data-save-lock-allow="true"
         onSubmit={(e) => {
@@ -44,25 +43,13 @@ export function PpbSaveForm() {
           setShowDiscardModal(true);
         }}
       >
-        {/* SaveBar component - visibility controlled declaratively via 'open' prop */}
-        {/* Loading state properly shows spinner during save operation */}
-        <SaveBar ref={saveBarRef} id="bundle-save-bar" open={isDirty}>
-          <button
-            type="submit"
-            variant="primary"
-            loading={fetcher.state !== "idle" ? "" : undefined}
-            disabled={fetcher.state !== "idle"}
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowDiscardModal(true)}
-            disabled={fetcher.state !== "idle"}
-          >
-            Discard
-          </button>
-        </SaveBar>
+        <ConfigureContextualSaveBar
+          isOpen={isDirty}
+          isSaving={fetcher.state !== "idle"}
+          onSave={() => void handleSave()}
+          onDiscard={() => setShowDiscardModal(true)}
+          saveBarRef={saveBarRef}
+        />
         {/* Hidden inputs for form submission - values will be updated by React state changes */}
         <input type="hidden" name="bundleName" value={formState.bundleName} />
         <input
@@ -125,7 +112,7 @@ export function PpbSaveForm() {
                         `Box of ${rule.conditionValue ?? ""}`,
                       subtext: qtyRuleSubtexts[rule.id] ?? "",
                     },
-                  ]),
+                  ])
                 ),
                 optionsByLocaleByRuleId: qtyRuleTextsByLocaleByRuleId,
               },

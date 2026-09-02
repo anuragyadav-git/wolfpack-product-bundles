@@ -356,7 +356,8 @@ describe("updateBundleProductMetafields", () => {
               collections: [selectedCollection],
               categoryBanner: "https://cdn.example/category.png",
               displayVariantsAsIndividualProducts: true,
-              displayVariantsAsSwatches: false,
+              variantSelectorMode: "color_swatch",
+              swatchTooltipEnabled: true,
               multiLangData: { en: { title: "Pick audit items" } },
               products: [
                 {
@@ -406,7 +407,8 @@ describe("updateBundleProductMetafields", () => {
         categoryImg: "",
         autoNextStepOnConditionMet: false,
         displayVariantsAsIndividualProducts: true,
-        displayVariantsAsSwatches: false,
+        variantSelectorMode: "color_swatch",
+        swatchTooltipEnabled: true,
         multiLangData: { en: { title: "Pick audit items" } },
       },
     ]);
@@ -584,6 +586,91 @@ describe("updateBundleProductMetafields", () => {
     expect(parsed).toEqual(expect.objectContaining(directContracts));
     expect(parsed.productSlotsEnabled).toBe(false);
     expect(parsed.productSlotIconUrl).toBeNull();
+  });
+
+  it("emits the low-stock contract into Shopify's product-page bundle_ui_config", async () => {
+    const admin = makeAdmin();
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE, {
+        lowStockAlertEnabled: true,
+        lowStockAlertThreshold: 8,
+        lowStockAlertMessage: "Hurry, {{stock}} remaining",
+      }),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const parsed = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+
+    expect(parsed.lowStockAlert).toEqual({
+      enabled: true,
+      threshold: 8,
+      message: "Hurry, {{stock}} remaining",
+    });
+  });
+
+  it("emits the sticky add-to-cart contract into Shopify's product-page bundle_ui_config", async () => {
+    const admin = makeAdmin();
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE, {
+        stickyAddToCartEnabled: true,
+        stickyAddToCartShowDesktop: false,
+        stickyAddToCartShowMobile: true,
+        stickyAddToCartAction: "add_selected_offer",
+      }),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const parsed = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+
+    expect(parsed.stickyAddToCart).toEqual({
+      enabled: true,
+      showDesktop: false,
+      showMobile: true,
+      action: "add_selected_offer",
+    });
+  });
+
+  it("emits countdown presentation with the scheduled offer end into bundle_ui_config", async () => {
+    const admin = makeAdmin();
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE, {
+        countdown: {
+          layout: "full",
+          position: "below",
+          title: "Ends soon",
+          expiryAction: "show_message",
+          expiredMessage: "This offer has ended",
+          endsAt: "2030-01-02T03:04:05.000Z",
+        },
+      }),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const parsed = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+
+    expect(parsed.countdown).toEqual({
+      layout: "full",
+      position: "below",
+      title: "Ends soon",
+      expiryAction: "show_message",
+      expiredMessage: "This offer has ended",
+      endsAt: "2030-01-02T03:04:05.000Z",
+    });
   });
 
   it("emits direct full-page Add-ons personalization contract into bundle_ui_config", async () => {

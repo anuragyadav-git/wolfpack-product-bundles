@@ -5,7 +5,7 @@ title: "Test Spec: Settings Runtime Defect Remediation"
 type: test-spec
 status: active
 summary: Verifies Language and Controls values from Admin persistence through owned storefront runtime consumers.
-last_audited: 2026-08-27
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -17,7 +17,7 @@ systems:
 source_paths:
   - app/lib/settings-language-runtime.ts
   - app/lib/settings-controls-runtime.ts
-  - app/routes/app/app.additional-configurations.tsx
+  - app/routes/app/app.settings_.controls.tsx
   - app/assets/widgets/
 related_docs:
   - internal docs/EB Implementation Reference.md

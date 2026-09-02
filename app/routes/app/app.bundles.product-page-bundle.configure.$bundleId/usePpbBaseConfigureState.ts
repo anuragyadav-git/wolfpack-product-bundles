@@ -23,6 +23,7 @@ import {
   normalizeBundleSubscriptionConfig,
   type BundleSubscriptionConfigV1,
 } from "../../../lib/bundle-subscriptions";
+import { useSpecificLinkOfferAdmin } from "../shared/useSpecificLinkOfferAdmin";
 
 declare global {
   interface Window {
@@ -277,6 +278,11 @@ export function usePpbBaseConfigureState() {
       Record<string, string>
     >) ?? {}
   );
+  const specificLinkOffer = useSpecificLinkOfferAdmin({
+    initialState: loaderData.offerDelivery,
+    markAsDirty,
+    shopify,
+  });
   return {
     loaderData,
     isCriticalStatusReady,
@@ -380,5 +386,6 @@ export function usePpbBaseConfigureState() {
     textOverridesByLocale,
     setTextOverridesByLocale,
     originalTextOverridesByLocaleRef,
+    ...specificLinkOffer,
   };
 }

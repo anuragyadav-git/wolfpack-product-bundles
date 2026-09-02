@@ -1,8 +1,11 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+const mockLinks = jest.fn(() => null);
+const mockCrispChat = jest.fn(() => null);
+
 jest.mock("@remix-run/react", () => ({
-  Links: () => null,
+  Links: () => mockLinks(),
   Meta: () => null,
   Outlet: () => null,
   Scripts: () => null,
@@ -14,7 +17,7 @@ jest.mock("@remix-run/react", () => ({
 
 jest.mock("../../../app/components/CrispChat", () => ({
   __esModule: true,
-  default: () => null,
+  default: () => mockCrispChat(),
 }));
 
 jest.mock("../../../app/components/ErrorPage", () => ({
@@ -68,32 +71,63 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({}),
 }));
 
-jest.mock("../../../app/services/admin-locale.server", () => ({
-  saveShopAdminLocale: jest.fn(),
-}));
-
 jest.mock("../../../app/routes/app/app.dashboard/handlers", () => ({
   handleCloneBundle: jest.fn(),
   handleDeleteBundle: jest.fn(),
 }));
 
-jest.mock("../../../app/routes/app/app.dashboard/dashboard.module.css", () => ({}), {
-  virtual: true,
-});
+jest.mock(
+  "../../../app/routes/app/app.dashboard/dashboard.module.css",
+  () => ({}),
+  {
+    virtual: true,
+  }
+);
 
 describe("admin root link warnings", () => {
+  it("installs support chat in the root error document", async () => {
+    mockCrispChat.mockClear();
+    const { ErrorBoundary } = await import("../../../app/root");
+
+    renderToStaticMarkup(React.createElement(ErrorBoundary));
+
+    expect(mockCrispChat).toHaveBeenCalledTimes(1);
+  });
+
+  it("registers the shared error-page stylesheet with Remix", async () => {
+    const { links } = await import("../../../app/root");
+
+    expect(links()).toContainEqual({
+      rel: "stylesheet",
+      href: "/test-stylesheet.css",
+    });
+  });
+
+  it("renders the error stylesheet directly in the root error document", async () => {
+    const { ErrorBoundary } = await import("../../../app/root");
+    const view = renderToStaticMarkup(React.createElement(ErrorBoundary));
+
+    expect(view).toContain('rel="stylesheet" href="/test-stylesheet.css"');
+  });
+
   it("does not render the font stylesheet onLoad handler as a string listener", async () => {
-    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { default: App } = await import("../../../app/root");
 
-    expect(renderToStaticMarkup(React.createElement(App))).not.toContain("onLoad=\"this.media='all'\"");
-    expect(renderToStaticMarkup(React.createElement(App))).not.toContain("onload=\"this.media='all'\"");
+    expect(renderToStaticMarkup(React.createElement(App))).not.toContain(
+      "onLoad=\"this.media='all'\""
+    );
+    expect(renderToStaticMarkup(React.createElement(App))).not.toContain(
+      "onload=\"this.media='all'\""
+    );
     expect(consoleError).not.toHaveBeenCalledWith(
       expect.stringContaining("Expected `%s` listener to be a function"),
       expect.anything(),
       expect.anything(),
       expect.anything(),
-      expect.anything(),
+      expect.anything()
     );
     consoleError.mockRestore();
   });
@@ -103,13 +137,15 @@ describe("admin root link warnings", () => {
     const documentMarkup = renderToStaticMarkup(React.createElement(App));
 
     expect(documentMarkup).toMatch(
-      /rel="stylesheet" href="https:\/\/cdn\.shopify\.com\/static\/fonts\/inter\/v4\/styles\.css"/,
+      /rel="stylesheet" href="https:\/\/cdn\.shopify\.com\/static\/fonts\/inter\/v4\/styles\.css"/
     );
     expect(documentMarkup).not.toContain('media="print"');
   });
 
   it("preloads only first-render dashboard media with React-safe responsive image attributes", async () => {
-    const { headers, links } = await import("../../../app/routes/app/app.dashboard/route");
+    const { headers, links } = await import(
+      "../../../app/routes/app/app.dashboard/route"
+    );
     const preloads = links().filter((link) => (link as any).rel === "preload");
 
     expect(preloads).toHaveLength(1);
@@ -130,8 +166,12 @@ describe("admin root link warnings", () => {
   });
 
   it("renders OptimisedImage fetch priority without the React DOM prop warning", async () => {
-    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
-    const { OptimisedImage } = await import("../../../app/components/OptimisedImage");
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const { OptimisedImage } = await import(
+      "../../../app/components/OptimisedImage"
+    );
     const view = renderToStaticMarkup(
       React.createElement(OptimisedImage, {
         src: "/Parth.jpg",
@@ -140,16 +180,18 @@ describe("admin root link warnings", () => {
         height: 120,
         loading: "eager",
         fetchPriority: "high",
-      }),
+      })
     );
 
     expect(view).toContain('fetchpriority="high"');
     expect(view).not.toContain("fetchPriority");
     expect(consoleError).not.toHaveBeenCalledWith(
-      expect.stringContaining("React does not recognize the `%s` prop on a DOM element"),
+      expect.stringContaining(
+        "React does not recognize the `%s` prop on a DOM element"
+      ),
       "fetchPriority",
       "fetchpriority",
-      expect.anything(),
+      expect.anything()
     );
     consoleError.mockRestore();
   });

@@ -51,6 +51,26 @@ describe('buildCartItems', () => {
     expect(itemA.properties).not.toHaveProperty('_step_index');
   });
 
+  it('carries the public offer decision marker in private Shopify line properties', () => {
+    const state = makeState({
+      bundleData: {
+        offerDelivery: {
+          offerPolicyId: 'policy-1',
+          ruleVersion: 4,
+          eligibilitySource: 'priority',
+        },
+      },
+    });
+    const { items } = buildCartItems(state);
+
+    expect(JSON.parse(items[0].properties._bundle_display_properties).offerAnalytics).toEqual({
+      bundleId: 'bundle_1',
+      offerPolicyId: 'policy-1',
+      offerRuleVersion: 4,
+      offerEligibilitySource: 'priority',
+    });
+  });
+
   it('all items in one call share the same EB offer-session key with unique item indexes', () => {
     const state = makeState();
     const { items } = buildCartItems(state);
@@ -109,8 +129,12 @@ describe('buildCartItems', () => {
     const displayProperties = JSON.parse(items[0].properties['_bundle_display_properties']);
     expect(displayProperties).toEqual({
       box: '1',
+      bundleName: 'Test Bundle',
       items: '2 x Product A, 1 x Product B (Gift)',
       retailPrice: '$20.00',
+      offerAnalytics: {
+        bundleId: 'bundle_1',
+      },
       youSave: {
         amount: '$5.00',
         percentage: '25%',

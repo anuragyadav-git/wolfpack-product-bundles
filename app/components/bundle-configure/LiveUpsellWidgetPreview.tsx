@@ -1,3 +1,4 @@
+import { translateAdmin } from "~/i18n/config";
 type LiveUpsellWidgetPreviewProps = {
   mode: "block" | "button";
   title: string;
@@ -19,15 +20,19 @@ export function LiveUpsellWidgetPreview({
       border="base"
       borderRadius="base"
       background="subdued"
-      accessibilityLabel="Live widget preview"
+      accessibilityLabel={translateAdmin("adminAttributes.liveWidgetPreview")}
     >
       <s-stack gap="base">
         {imageUrl ? <s-image src={imageUrl} alt="" aspectRatio="1/1" /> : null}
         <s-stack gap="small">
           {title ? <s-heading>{title}</s-heading> : null}
-          {mode === "block" && description ? <s-paragraph>{description}</s-paragraph> : null}
+          {mode === "block" && description ? (
+            <s-paragraph>{description}</s-paragraph>
+          ) : null}
         </s-stack>
-        {buttonText ? <s-button variant="primary">{buttonText}</s-button> : null}
+        {buttonText ? (
+          <s-button variant="primary">{buttonText}</s-button>
+        ) : null}
       </s-stack>
     </s-box>
   );

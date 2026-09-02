@@ -5,6 +5,8 @@ import { PpbBundleLevelCssSettings } from "./PpbBundleSettingsControls.css";
 import { PpbCartDiscountDisplaySettings } from "./PpbBundleSettingsControls.discount";
 import { PpbDefaultProductsSettings } from "./PpbBundleSettingsControls.defaultProducts";
 import { PpbQuantitySettings } from "./PpbBundleSettingsControls.quantity";
+import { PpbStickyAddToCartSettings } from "./PpbBundleSettingsControls.stickyAddToCart";
+import { PpbCountdownSettings } from "./PpbBundleSettingsControls.countdown";
 
 export function PpbBundleSettingsControls() {
   return (
@@ -12,6 +14,8 @@ export function PpbBundleSettingsControls() {
       <s-stack direction="block" gap="base">
         <PpbDefaultProductsSettings />
         <PpbQuantitySettings />
+        <PpbStickyAddToCartSettings />
+        <PpbCountdownSettings />
         <PpbCategoryStepSettings />
         <PpbCartDiscountDisplaySettings />
         <PpbBundleBannerSettings />

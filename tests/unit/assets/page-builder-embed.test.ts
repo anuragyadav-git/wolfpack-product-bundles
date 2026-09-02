@@ -47,6 +47,7 @@ describe("page builder storefront marker behavior", () => {
       dataset: {
         pageBuilderEmbedEndpoint: "/apps/product-bundles/api/page-builder-embed.json",
         locale: "en",
+        countryCode: "CA",
       },
     };
     const previousWindow = global.window;
@@ -61,6 +62,7 @@ describe("page builder storefront marker behavior", () => {
       await initializePageBuilderEmbed(appEmbed as unknown as HTMLElement, root as unknown as ParentNode);
       await initializePageBuilderEmbed(appEmbed as unknown as HTMLElement, root as unknown as ParentNode);
       expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(String(fetchMock.mock.calls[0][0])).toContain("country=CA");
     } finally {
       global.window = previousWindow;
       global.fetch = previousFetch;

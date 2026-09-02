@@ -133,7 +133,6 @@ getStepCategoryTabEntries(step: any) {
         handles,
         productIds,
         displayVariantsAsIndividualProducts: category.displayVariantsAsIndividualProducts === true,
-        displayVariantsAsSwatches: category.displayVariantsAsSwatches === true,
       };
     })
     .filter(Boolean);

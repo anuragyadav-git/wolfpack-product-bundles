@@ -1,6 +1,7 @@
 import { DefaultProductDiscountTipBanner } from "../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 type DefaultProductSelection = {
   graphqlId?: string;
@@ -18,6 +19,7 @@ export function PpbDefaultProductsSettings() {
     defaultProductsData,
     markAsDirty,
     productPageBundleStyles,
+    QuestionHelpTooltip,
     setDefaultProductsData,
     shopify,
     validationErrors = {},
@@ -45,9 +47,8 @@ export function PpbDefaultProductsSettings() {
     });
     if (!picked) return;
     const defaultProducts = picked
-      .map(
-        (value: Parameters<typeof buildDefaultProductEntryFromPicker>[0]) =>
-          buildDefaultProductEntryFromPicker(value),
+      .map((value: Parameters<typeof buildDefaultProductEntryFromPicker>[0]) =>
+        buildDefaultProductEntryFromPicker(value)
       )
       .filter(
         (
@@ -70,11 +71,14 @@ export function PpbDefaultProductsSettings() {
       <s-stack direction="block" gap="small">
         <div className={productPageBundleStyles.settingTitleRow}>
           <h3 className={productPageBundleStyles.settingTitle}>
-            Pre Selected Product
+            {translateAdmin("tooltips.preselectedProducts.title")}
+            <QuestionHelpTooltip tooltipKey="preselectedProducts" />
           </h3>
           <span className={productPageBundleStyles.settingInlineSwitch}>
             <s-switch
-              accessibilityLabel="Enable pre selected product"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.enablePreSelectedProduct"
+              )}
               checked={defaultProductsEnabled || undefined}
               onChange={(e) => {
                 const checked = (e.target as HTMLInputElement).checked;
@@ -93,7 +97,7 @@ export function PpbDefaultProductsSettings() {
           <s-stack direction="block" gap="small">
             <DefaultProductDiscountTipBanner />
             <s-text-field
-              label="Default products title"
+              label={translateAdmin("adminAttributes.defaultProductsTitle")}
               value={defaultProductsData.defaultProductsTitle ?? ""}
               disabled={!defaultProductsEnabled || undefined}
               onInput={(e) => {
@@ -108,7 +112,9 @@ export function PpbDefaultProductsSettings() {
             />
             <div className={productPageBundleStyles.defaultProductsPickerGroup}>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>
-                Choose default products
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsdefaultproducts.chooseDefaultProducts"
+                )}
               </p>
               <div
                 className={productPageBundleStyles.defaultProductsPickerActions}
@@ -119,11 +125,15 @@ export function PpbDefaultProductsSettings() {
                   disabled={!defaultProductsEnabled || undefined}
                   onClick={handleDefaultProductPicker}
                 >
-                  Browse Products
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsdefaultproducts.browseProducts"
+                  )}
                 </s-button>
                 {defaultProductCount > 0 && (
                   <s-badge tone="success">
-                    {defaultProductCount} selected
+                    {translateAdmin("adminDynamic.selectedCount", {
+                      count: defaultProductCount,
+                    })}
                   </s-badge>
                 )}
               </div>

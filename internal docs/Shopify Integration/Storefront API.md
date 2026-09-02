@@ -5,7 +5,7 @@ title: Shopify Storefront API Notes
 type: reference
 status: authoritative
 summary: Storefront GraphQL contracts used for product data, Shop Brand colors, and bundle runtime behavior.
-last_audited: 2026-08-27
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -33,6 +33,16 @@ keywords:
 ---
 
 # Shopify Storefront API Notes
+
+## Inventory-bearing product responses
+
+The signed `/api/storefront-products` route returns Shopify Storefront API
+availability and `quantityAvailable` alongside product merchandising data.
+Because the same response drives out-of-stock enforcement and low-stock alerts,
+it uses `Cache-Control: no-store`; browser or shared-proxy caching can otherwise
+continue presenting an untracked or stale quantity after Shopify inventory has
+changed. The route still batches product nodes and paginates variants through
+Shopify's native Storefront context.
 
 ## Parent-product PPB direct client
 

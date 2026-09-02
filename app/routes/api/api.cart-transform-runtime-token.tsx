@@ -64,6 +64,7 @@ export async function action({ request }: ActionFunctionArgs) {
         orderBy: { position: "asc" },
       },
       pricing: true,
+      offerPolicy: true,
     },
   });
 

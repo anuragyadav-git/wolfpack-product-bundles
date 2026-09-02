@@ -16,12 +16,13 @@ import {
   useModalHideListener,
 } from "../_shared/bundle-configure/modal-utils";
 import { useTranslation } from "react-i18next";
+import { translateAdmin, translateAdminCopy } from "~/i18n/config";
 
 export const isPolarisHexColorInput = (value: string) => {
   if (value.length !== 7 && value.length !== 9) return false;
   if (!value.startsWith("#")) return false;
   return [...value.slice(1).toLowerCase()].every((character) =>
-    "0123456789abcdef".includes(character),
+    "0123456789abcdef".includes(character)
   );
 };
 
@@ -37,13 +38,18 @@ export const isPolarisNumberInput = (value: string) => {
     if (character < "0" || character > "9") return false;
   }
   const [integer, fraction] = value.split(".");
-  return Boolean(integer)
-    && integer.length <= 3
-    && (fraction === undefined || (fraction.length > 0 && fraction.length <= 3))
-    && Number(value) <= 999;
+  return (
+    Boolean(integer) &&
+    integer.length <= 3 &&
+    (fraction === undefined || (fraction.length > 0 && fraction.length <= 3)) &&
+    Number(value) <= 999
+  );
 };
 
-export function normalizePolarisColorValue(value: string, fallback: string): string {
+export function normalizePolarisColorValue(
+  value: string,
+  fallback: string
+): string {
   if (isPolarisHexColorInput(value)) return value;
   if (isPolarisHexColorInput(fallback)) return fallback;
   const shortHex = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(fallback);
@@ -76,7 +82,9 @@ export function DesignFields({
   onFieldChange: (label: string, value: string) => void;
 }) {
   const defaultGroup = title ?? "";
-  const groupedFields = fields.reduce<Array<{ title: string; fields: SettingsField[] }>>((groups, field) => {
+  const groupedFields = fields.reduce<
+    Array<{ title: string; fields: SettingsField[] }>
+  >((groups, field) => {
     const groupTitle = field.group ?? defaultGroup;
     const existing = groups.find((group) => group.title === groupTitle);
     if (existing) {
@@ -92,15 +100,24 @@ export function DesignFields({
         const guideUrl = group.fields.find((field) => field.guideUrl)?.guideUrl;
 
         return (
-          <s-section key={group.title} heading={group.title || undefined}>
+          <s-section
+            key={group.title}
+            heading={group.title ? translateAdminCopy(group.title) : undefined}
+          >
             <s-stack gap="base">
               {group.fields.map((field) => {
                 const fieldKey = field.key ?? field.label;
                 const disabled = disabledFieldKeys.includes(fieldKey);
                 const value = values[fieldKey] ?? field.value ?? "";
-                const colorValue = normalizePolarisColorValue(value, field.value || "#000000");
+                const colorValue = normalizePolarisColorValue(
+                  value,
+                  field.value || "#000000"
+                );
                 const handleInput = (event: Event) => {
-                  onFieldChange(fieldKey, (event.currentTarget as HTMLInputElement).value);
+                  onFieldChange(
+                    fieldKey,
+                    (event.currentTarget as HTMLInputElement).value
+                  );
                 };
                 const handleColorInput = (event: Event) => {
                   const input = event.currentTarget as HTMLInputElement;
@@ -125,39 +142,61 @@ export function DesignFields({
                   return (
                     <s-stack key={`${group.title}:${field.label}`} gap="small">
                       <s-color-field
-                        label={field.label}
+                        label={translateAdminCopy(field.label)}
                         name={fieldKey}
                         value={colorValue}
-                        details={field.description}
+                        details={
+                          field.description
+                            ? translateAdminCopy(field.description)
+                            : undefined
+                        }
                         alpha
                         disabled={disabled}
                         onChange={handleColorInput}
                       />
                       {inheritedFieldKeys.includes(fieldKey) ? (
-                        <s-badge tone="info">Shop Brand</s-badge>
+                        <s-badge tone="info">
+                          {translateAdmin(
+                            "adminExtracted.appSettings.settingsdesignfields.shopBrand"
+                          )}
+                        </s-badge>
                       ) : null}
                     </s-stack>
                   );
                 }
                 if (field.kind === "select") {
-                  const recommendation = fieldKey === "stylePresets.images.slotIconFit"
-                    ? getSlotIconRecommendation(value)
-                    : null;
+                  const recommendation =
+                    fieldKey === "stylePresets.images.slotIconFit"
+                      ? getSlotIconRecommendation(value)
+                      : null;
                   return (
                     <s-stack key={`${group.title}:${field.label}`} gap="small">
                       <s-select
-                        label={field.label}
+                        label={translateAdminCopy(field.label)}
                         name={fieldKey}
                         value={value || field.options?.[0] || ""}
-                        details={field.description}
+                        details={
+                          field.description
+                            ? translateAdminCopy(field.description)
+                            : undefined
+                        }
                         disabled={disabled}
                         onChange={handleInput}
                       >
-                        {(field.options?.length ? field.options : [field.value ?? ""]).map((option) => (
-                          <s-option key={option} value={option}>{option}</s-option>
+                        {(field.options?.length
+                          ? field.options
+                          : [field.value ?? ""]
+                        ).map((option) => (
+                          <s-option key={option} value={option}>
+                            {translateAdminCopy(option)}
+                          </s-option>
                         ))}
                       </s-select>
-                      {recommendation ? <s-text color="subdued">{recommendation}</s-text> : null}
+                      {recommendation ? (
+                        <s-text color="subdued">
+                          {translateAdminCopy(recommendation)}
+                        </s-text>
+                      ) : null}
                     </s-stack>
                   );
                 }
@@ -165,10 +204,14 @@ export function DesignFields({
                   return (
                     <s-number-field
                       key={`${group.title}:${field.label}`}
-                      label={field.label}
+                      label={translateAdminCopy(field.label)}
                       name={fieldKey}
                       value={numberValue}
-                      details={field.description}
+                      details={
+                        field.description
+                          ? translateAdminCopy(field.description)
+                          : undefined
+                      }
                       min={0}
                       max={999}
                       disabled={disabled}
@@ -176,16 +219,32 @@ export function DesignFields({
                     />
                   );
                 }
-                if (field.kind === "loadingGif" || field.kind === "image" || field.kind === "file") {
+                if (
+                  field.kind === "loadingGif" ||
+                  field.kind === "image" ||
+                  field.kind === "file"
+                ) {
                   const isGif = field.kind === "loadingGif";
                   return (
                     <FilePicker
                       key={`${group.title}:${field.label}`}
-                      label={field.label}
-                      hint={isGif ? "Click to upload a loading GIF" : "Click to upload an image or icon"}
+                      label={translateAdminCopy(field.label)}
+                      hint={
+                        isGif
+                          ? translateAdmin(
+                              "adminDynamic.clickToUploadLoadingGif"
+                            )
+                          : translateAdmin("adminDynamic.clickToUploadImage")
+                      }
                       showUploadButton={false}
                       acceptedTypes={isGif ? "image/gif" : "image/*"}
-                      invalidTypeErrorMessage={isGif ? "Choose a GIF file." : "Choose a supported image file."}
+                      invalidTypeErrorMessage={
+                        isGif
+                          ? translateAdmin("adminDynamic.chooseGifFile")
+                          : translateAdmin(
+                              "adminDynamic.chooseSupportedImageFile"
+                            )
+                      }
                       value={value || null}
                       disabled={disabled}
                       onChange={(url) => onFieldChange(fieldKey, url ?? "")}
@@ -195,10 +254,14 @@ export function DesignFields({
                 return (
                   <s-text-field
                     key={`${group.title}:${field.label}`}
-                    label={field.label}
+                    label={translateAdminCopy(field.label)}
                     name={fieldKey}
                     value={value}
-                    details={field.description}
+                    details={
+                      field.description
+                        ? translateAdminCopy(field.description)
+                        : undefined
+                    }
                     disabled={field.kind === "loadingSpinner" || disabled}
                     onInput={handleInput}
                   />
@@ -209,13 +272,21 @@ export function DesignFields({
                   <s-stack gap="small">
                     <s-stack direction="inline" gap="small" alignItems="center">
                       <s-icon type="view" size="small" />
-                      <s-text type="strong">Visual reference</s-text>
+                      <s-text type="strong">
+                        {translateAdmin(
+                          "adminExtracted.appSettings.settingsdesignfields.visualReference"
+                        )}
+                      </s-text>
                     </s-stack>
                     <s-paragraph color="subdued">
-                      See which storefront elements these color controls affect.
+                      {translateAdmin(
+                        "adminExtracted.appSettings.settingsdesignfields.seeWhichStorefrontElementsTheseColorControlsAffect"
+                      )}
                     </s-paragraph>
                     <s-link href={guideUrl} target="_blank">
-                      Show Colour Guide
+                      {translateAdmin(
+                        "adminExtracted.appSettings.settingsdesignfields.showColourGuide"
+                      )}
                     </s-link>
                   </s-stack>
                 </s-box>
@@ -251,9 +322,10 @@ export function BundlePreviewModal({
     try {
       await openSettingsBundleStorefrontPreview(bundle);
     } catch (error) {
-      const message = error instanceof SettingsPreviewError
-        ? t(`settingsDcp.preview.storefront.errors.${error.code}`)
-        : t("settingsDcp.preview.storefront.errors.notReady");
+      const message =
+        error instanceof SettingsPreviewError
+          ? t(`settingsDcp.preview.storefront.errors.${error.code}`)
+          : t("settingsDcp.preview.storefront.errors.notReady");
       showAdminTransientErrorToast(shopify, message);
     } finally {
       setPendingBundleId(null);
@@ -276,9 +348,15 @@ export function BundlePreviewModal({
         ) : (
           <s-table variant="auto">
             <s-table-header-row>
-              <s-table-header listSlot="primary">{t("settingsDcp.preview.storefront.bundleName")}</s-table-header>
-              <s-table-header listSlot="labeled">{t("settingsDcp.preview.storefront.bundleType")}</s-table-header>
-              <s-table-header listSlot="labeled">{t("settingsDcp.preview.storefront.actions")}</s-table-header>
+              <s-table-header listSlot="primary">
+                {t("settingsDcp.preview.storefront.bundleName")}
+              </s-table-header>
+              <s-table-header listSlot="labeled">
+                {t("settingsDcp.preview.storefront.bundleType")}
+              </s-table-header>
+              <s-table-header listSlot="labeled">
+                {t("settingsDcp.preview.storefront.actions")}
+              </s-table-header>
             </s-table-header-row>
             <s-table-body>
               {bundles.map((bundle) => (

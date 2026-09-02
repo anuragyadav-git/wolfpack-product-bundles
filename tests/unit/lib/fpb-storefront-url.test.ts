@@ -17,6 +17,33 @@ describe("FPB storefront URL", () => {
     )).toBe("https://test-shop.myshopify.com/apps/product-bundles/wpb/27?wpb_preview=preview-token");
   });
 
+  it("builds an isolated SIT app-proxy URL", () => {
+    expect(buildFpbStorefrontUrl(
+      "test-shop.myshopify.com",
+      3,
+      "/apps/product-bundles-sit",
+    )).toBe(
+      "https://test-shop.myshopify.com/apps/product-bundles-sit/wpb/3",
+    );
+  });
+
+  it("uses the configured server proxy root by default", () => {
+    const previousRoot = process.env.STOREFRONT_PROXY_ROOT;
+    process.env.STOREFRONT_PROXY_ROOT = "/apps/product-bundles-sit";
+
+    try {
+      expect(buildFpbStorefrontUrl("test-shop.myshopify.com", 5)).toBe(
+        "https://test-shop.myshopify.com/apps/product-bundles-sit/wpb/5",
+      );
+    } finally {
+      if (previousRoot === undefined) {
+        delete process.env.STOREFRONT_PROXY_ROOT;
+      } else {
+        process.env.STOREFRONT_PROXY_ROOT = previousRoot;
+      }
+    }
+  });
+
   it.each([
     ["1", 1],
     ["27", 27],

@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbBundleCartSettings({
   flow,
@@ -27,7 +28,9 @@ export function FpbBundleCartSettings({
                 flex: 1,
               }}
             >
-              Bundle Cart
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsbundlecart.bundleCart"
+              )}
             </h3>
             <s-button
               variant="secondary"
@@ -49,14 +52,16 @@ export function FpbBundleCartSettings({
                 ])
               }
             >
-              Multi Language
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+              )}
             </s-button>
           </s-stack>
           <div className={fullPageBundleStyles.settingsNestedFields}>
             <s-text-field
-              label="Bundle Cart Title"
+              label={translateAdmin("adminAttributes.bundleCartTitle")}
               value={textOverrides.yourBundle ?? ""}
-              placeholder="Your Bundle"
+              placeholder={translateAdmin("adminAttributes.yourBundle")}
               autocomplete="off"
               onInput={(e) => {
                 setTextOverrides((prev) => ({
@@ -67,9 +72,9 @@ export function FpbBundleCartSettings({
               }}
             />
             <s-text-field
-              label="Bundle Cart Subtitle"
+              label={translateAdmin("adminAttributes.bundleCartSubtitle")}
               value={textOverrides.reviewBundle ?? ""}
-              placeholder="Review your bundle"
+              placeholder={translateAdmin("adminAttributes.reviewYourBundle")}
               autocomplete="off"
               onInput={(e) => {
                 setTextOverrides((prev) => ({

@@ -2,11 +2,58 @@ import { readProductPageWidgetSources } from './widget-source-helpers';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   applySellingPlanToJsonCartItems,
+  buildOfferAnalyticsCartProperties,
   buildProductPageCartFormData,
   extractBundleDetailsSourceProperties,
 } = require('../../../app/assets/widgets/shared/engine/cart-submit.js');
 
 describe('shared cart-submit helpers', () => {
+  it('builds privacy-safe Shopify line properties for offer attribution', () => {
+    expect(buildOfferAnalyticsCartProperties({
+      sourceProperties: {
+        _bundle_display_properties: JSON.stringify({ box: '2', items: '2 x Product A' }),
+      },
+      bundleId: ' bundle-1 ',
+      bundleName: ' Gift Box ',
+      offerDelivery: {
+        offerPolicyId: ' policy-1 ',
+        ruleVersion: 3,
+        eligibilitySource: 'specific_link',
+      },
+      tierId: ' tier-2 ',
+    })).toEqual({
+      _bundle_display_properties: JSON.stringify({
+        box: '2',
+        items: '2 x Product A',
+        bundleName: 'Gift Box',
+        offerAnalytics: {
+          bundleId: 'bundle-1',
+          offerPolicyId: 'policy-1',
+          offerRuleVersion: 3,
+          offerTierId: 'tier-2',
+          offerEligibilitySource: 'specific_link',
+        },
+      }),
+    });
+
+    expect(buildOfferAnalyticsCartProperties({
+      sourceProperties: {
+        _bundle_display_properties: JSON.stringify({ box: '1' }),
+      },
+      bundleId: 'bundle-1',
+      offerDelivery: {
+        offerPolicyId: 'x'.repeat(129),
+        ruleVersion: -1,
+        eligibilitySource: 'customer_email',
+      },
+    })).toEqual({
+      _bundle_display_properties: JSON.stringify({
+        box: '1',
+        offerAnalytics: { bundleId: 'bundle-1' },
+      }),
+    });
+  });
+
   it('builds EB-compatible product-page multipart cart form data', () => {
     const context = buildProductPageCartFormData([
       {
@@ -90,7 +137,7 @@ describe('shared cart-submit helpers', () => {
   it('is used by the product-page widget controller', () => {
     const source = readProductPageWidgetSources();
 
-    expect(source).toContain("import { buildProductPageCartFormData } from '../../shared/engine/cart-submit.js';");
+    expect(source).toContain('buildProductPageCartFormData,');
     expect(source).toContain('return buildProductPageCartFormData(cartItems, {');
   });
 });

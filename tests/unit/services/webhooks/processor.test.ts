@@ -9,8 +9,6 @@ const mockDb = {
 };
 
 const mockHandleProductDelete = jest.fn();
-const mockHandleProductUpdate = jest.fn();
-const mockHandleOrderCreate = jest.fn();
 
 jest.mock("../../../../app/db.server", () => ({
   __esModule: true,
@@ -26,7 +24,6 @@ jest.mock("../../../../app/lib/logger", () => ({
 }));
 
 jest.mock("../../../../app/services/webhooks/handlers/product.server", () => ({
-  handleProductUpdate: mockHandleProductUpdate,
   handleProductDelete: mockHandleProductDelete,
 }));
 
@@ -39,10 +36,6 @@ jest.mock("../../../../app/services/webhooks/handlers/gdpr.server", () => ({
 jest.mock("../../../../app/services/webhooks/handlers/lifecycle.server", () => ({
   handleAppUninstalled: jest.fn(),
   handleScopesUpdate: jest.fn(),
-}));
-
-jest.mock("../../../../app/services/webhooks/handlers/orders.server", () => ({
-  handleOrderCreate: mockHandleOrderCreate,
 }));
 
 function buildMessage(topic: string, payload: unknown, webhookId?: string) {
@@ -68,25 +61,30 @@ describe("WebhookProcessor retired topic ingestion", () => {
     });
   });
 
-  it.each(["products/update", "inventory_levels/update", "orders/create"])(
-    "returns success without storing retired high-volume topic %s",
+  it.each([
+    "app_purchases_one_time/update",
+    "app_subscriptions/update",
+    "products/update",
+    "inventory_levels/update",
+    "orders/create",
+    "unexpected/topic",
+  ])(
+    "returns success without storing inactive topic %s",
     async (topic) => {
       const { WebhookProcessor } = await import(
         "../../../../app/services/webhooks/processor.server"
       );
 
-      const result = await WebhookProcessor.processPubSubMessage(
+      const result = await WebhookProcessor.processWebhookMessage(
         buildMessage(topic, { id: 123, variants: [{ id: 456 }] })
       );
 
       expect(result).toEqual({
         success: true,
-        message: `Ignored retired webhook topic: ${topic}`,
+        message: `Ignored inactive webhook topic: ${topic}`,
       });
       expect(mockDb.webhookEvent.create).not.toHaveBeenCalled();
       expect(mockDb.webhookEvent.updateMany).not.toHaveBeenCalled();
-      expect(mockHandleProductUpdate).not.toHaveBeenCalled();
-      expect(mockHandleOrderCreate).not.toHaveBeenCalled();
     }
   );
 
@@ -95,7 +93,7 @@ describe("WebhookProcessor retired topic ingestion", () => {
       "../../../../app/services/webhooks/processor.server"
     );
 
-    const result = await WebhookProcessor.processPubSubMessage(
+    const result = await WebhookProcessor.processWebhookMessage(
       buildMessage("products/delete", { id: 123 }, "wh-123")
     );
 

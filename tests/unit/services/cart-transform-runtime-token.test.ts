@@ -137,6 +137,7 @@ describe("cart transform runtime token service", () => {
       bundleName: "Daily Essentials",
       components: [{ variantId: "gid://shopify/ProductVariant/101", quantity: 2 }],
       addons: [],
+      countryRule: "",
       priceAdjustment: { method: "percentage_off", value: 15 },
     } satisfies RuntimeTokenPayload;
     const secret = generateCartTransformRuntimeTokenSecret("test-shop.myshopify.com", "api-secret");
@@ -158,6 +159,7 @@ describe("cart transform runtime token service", () => {
       bundleName: "Daily Essentials",
       components: [{ variantId: "gid://shopify/ProductVariant/101", quantity: 1 }],
       addons: [],
+      countryRule: "",
       priceAdjustment: { method: "percentage_off", value: 15 },
     }, secret);
     const [payloadPart, signaturePart] = token.split(".");
@@ -333,6 +335,29 @@ describe("cart transform runtime token service", () => {
       method: "percentage_off",
       value: 15,
     });
+    expect(payload.countryRule).toBe("");
+  });
+
+  it("signs the normalized persisted country rule into the payload", () => {
+    const payload = buildRuntimeTokenPayload({
+      shop: "test-shop.myshopify.com",
+      bundle: makeBundle({
+        offerPolicy: {
+          countryTargetingEnabled: true,
+          countryTargetingMode: "exclude",
+          countryCodes: ["us", "CA", "ca"],
+        },
+      }),
+      parentVariantId: "gid://shopify/ProductVariant/PARENT",
+      offerGroupId: "FBP-bundle-1_ABC",
+      bundleType: "full_page",
+      selection: {
+        components: [{ variantId: "102", quantity: 1 }],
+        addons: [],
+      },
+    });
+
+    expect(payload.countryRule).toBe("exclude:CA,US");
   });
 
   it.each(["full_page", "product_page"])(

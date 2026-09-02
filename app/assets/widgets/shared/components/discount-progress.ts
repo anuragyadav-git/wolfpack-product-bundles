@@ -8,6 +8,7 @@
 'use strict';
 
 import { createMessageFragment } from '../message-segments.js';
+import { createPricingTierBadgeElement } from './pricing-tier-badge.js';
 
 export function createDiscountProgressElement(progressData: any = {}, options: any = {}) {
   const runtimeDocument: Document = options.document || document;
@@ -101,6 +102,15 @@ function createMilestonesElement(milestones: any[], options: any, runtimeDocumen
     marker.setAttribute('aria-hidden', 'true');
     marker.textContent = state === 'reached' ? '✓' : '';
     item.append(title, marker);
+    const tierBadge = createPricingTierBadgeElement(
+      milestone?.tierBadge,
+      milestone?.tierBadgeValues || {},
+      {
+        document: runtimeDocument,
+        selected: milestone?.isSelectedTier === true,
+      },
+    );
+    if (tierBadge) item.append(tierBadge);
     if (includeInlineSubtitle && milestone?.subTitle) {
       const subtitle = runtimeDocument.createElement('span');
       subtitle.className = subtitleClassName;

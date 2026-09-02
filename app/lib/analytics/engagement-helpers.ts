@@ -14,6 +14,7 @@ import type { BundleViewRow } from "./bundle-metrics";
 
 export interface BundleEngagementRow {
   bundleId: string;
+  offerPolicyId?: string | null;
   sessionId: string;
   eventName: string;
   createdAt: Date;
@@ -106,6 +107,20 @@ export function computeBundleFunnel(
     dropOffEngagedToAtc,
     dropOffAtcToCheckout,
   };
+}
+
+export function computeOfferFunnel(
+  engagementRows: BundleEngagementRow[],
+  attributionRows: OrderAttributionRow[],
+  offerPolicyId: string | null,
+): FunnelSnapshot {
+  const includesPolicy = (value: string | null | undefined) => (
+    offerPolicyId ? value === offerPolicyId : Boolean(value)
+  );
+  return computeBundleFunnel(
+    engagementRows.filter((row) => includesPolicy(row.offerPolicyId)),
+    attributionRows.filter((row) => includesPolicy(row.offerPolicyId)),
+  );
 }
 
 // ─── buildEngagementTrendSeries ────────────────────────────────────────────────

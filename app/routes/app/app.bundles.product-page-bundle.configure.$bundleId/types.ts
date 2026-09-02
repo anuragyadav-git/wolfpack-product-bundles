@@ -11,6 +11,7 @@ import type {
   ActionResponse,
   BundleStep,
 } from "../../../types/bundle-configure";
+import type { SpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
 
 export type {
   StepProduct,
@@ -58,6 +59,7 @@ export interface LoaderData {
   showFirstLoadTour?: boolean;
   shopCurrencyCode: string;
   shopLocales: { locale: string; name: string; primary: boolean }[];
+  offerDelivery: SpecificLinkOfferAdminState;
 }
 
 export interface BundleProductCardProps {

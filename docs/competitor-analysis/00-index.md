@@ -1,17 +1,19 @@
 ---
 schema_version: 1
 id: eb-competitor-analysis-index
-title: EB Competitor Analysis Index
+title: Competitor Analysis Index
 type: index
 status: current
-summary: Indexes live EB research, implementation-facing evidence, parity matrices, and storefront verification records.
-last_audited: 2026-07-26
+summary: Indexes live competitor research, implementation-facing evidence, feasibility analysis, parity matrices, and storefront verification records.
+last_audited: 2026-08-30
 owners:
   - engineering
 domains:
   - competitive-research
 systems:
   - eb-reference
+  - bogos
+  - bundlex
 source_paths:
   - docs/competitor-analysis/
 related_docs:
@@ -22,10 +24,12 @@ tags:
   - evidence
 keywords:
   - easy-bundles
+  - bogos
+  - bundlex
   - parity
 ---
 
-# EB | Easy Bundle Builder — Competitor Analysis Index
+# Competitor Analysis Index
 
 **App:** EB | Easy Bundle Builder (by Skai Lama / GiftKart)
 **Initial analysis date:** 2026-04-24
@@ -57,6 +61,9 @@ keywords:
 | [18-category-rules-research.md](18-category-rules-research.md) | Category-rules Admin and storefront evidence |
 | [18-eb-settings-integrations-replication-evidence.md](18-eb-settings-integrations-replication-evidence.md) | Settings and integrations replication evidence |
 | [19-pdp-widget-placement-parity.md](19-pdp-widget-placement-parity.md) | Historical PDP placement interpretation and its documented supersession |
+| [20-bogos-personalization-analytics-offer-operations.md](20-bogos-personalization-analytics-offer-operations.md) | BOGOS personalization, analytics, offer priority, scheduling, and bulk operations evidence |
+| [21-bundlex-urgency-swatches-tier-badges.md](21-bundlex-urgency-swatches-tier-badges.md) | Bundlex urgency, swatch-tooltip, sticky-cart, and tier-badge evidence |
+| [22-bogos-bundlex-wolfpack-feasibility.md](22-bogos-bundlex-wolfpack-feasibility.md) | Wolfpack adoption feasibility, implementation order, and Shopify constraints |
 | [fpb-standard-agentic-parity/SPEC.md](fpb-standard-agentic-parity/SPEC.md) | **Repeatable FPB Standard storefront parity loop: feature matrix, deterministic pairwise run set, stress cases, evidence contract, and verification workflow** |
 | [fpb-classic-agentic-parity/SPEC.md](fpb-classic-agentic-parity/SPEC.md) | Repeatable FPB Classic parity plan and evidence contract |
 | [fpb-compact-horizontal-agentic-parity/SPEC.md](fpb-compact-horizontal-agentic-parity/SPEC.md) | Combined Compact and Horizontal parity plan and evidence contract |

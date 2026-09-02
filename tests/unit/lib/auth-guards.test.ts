@@ -8,7 +8,7 @@
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function makeRequest(headers: Record<string, string> = {}): Request {
-  return new Request('https://test-app.example.com/api/webhooks/pubsub', {
+  return new Request('https://test-app.example.com/api/internal-action', {
     method: 'POST',
     headers,
   });

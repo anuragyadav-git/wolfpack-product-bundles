@@ -1,6 +1,5 @@
 use shopify_function::prelude::*;
 use shopify_function::Result;
-use std::collections::HashSet;
 
 use crate::expand::process_expand_operations;
 use crate::helpers::{decimal_to_f64, parse_json_or_default};
@@ -24,12 +23,11 @@ pub fn cart_transform_run(input: schema::run::Input) -> Result<schema::FunctionR
         0.0
     };
 
-    let mut processed_line_ids: HashSet<String> = input
+    let mut processed_lines: Vec<bool> = input
         .cart()
         .lines()
         .iter()
-        .filter(|line| line.selling_plan_allocation().is_some())
-        .map(|line| line.id().clone())
+        .map(|line| line.selling_plan_allocation().is_some())
         .collect();
     let runtime_configuration: CartTransformRuntimeConfiguration = parse_json_or_default(
         input
@@ -44,7 +42,7 @@ pub fn cart_transform_run(input: schema::run::Input) -> Result<schema::FunctionR
     let mut operations = process_merge_operations(
         &input,
         presentment_currency_rate,
-        &mut processed_line_ids,
+        &mut processed_lines,
         &runtime_configuration.bundle_cart_line_messaging,
         runtime_token_secret,
     );
@@ -52,7 +50,7 @@ pub fn cart_transform_run(input: schema::run::Input) -> Result<schema::FunctionR
     // Pass 2: EXPAND — Flex Bundle parent variants (skips MERGE-processed lines)
     operations.extend(process_expand_operations(
         &input,
-        &processed_line_ids,
+        &processed_lines,
         presentment_currency_rate,
     ));
 

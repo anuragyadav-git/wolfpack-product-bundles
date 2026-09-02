@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { moveArrayItem } from "../../../lib/bundle-config/reorder-items";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { getStepCategories } from "./PpbStepSetupShared";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbCategoryProductsPanel({
   step,
@@ -23,17 +24,18 @@ export function PpbCategoryProductsPanel({
   } = usePpbConfigureContext();
   const selectedProductsModalRef = useRef<any>(null);
   const [draggedProductIndex, setDraggedProductIndex] = useState<number | null>(
-    null,
+    null
   );
 
   const updateCategoryProducts = (products: any[]) => {
-    const updated = getStepCategories(step).map((category: any, index: number) =>
-      index === catIndex
-        ? {
-            ...category,
-            products,
-          }
-        : category,
+    const updated = getStepCategories(step).map(
+      (category: any, index: number) =>
+        index === catIndex
+          ? {
+              ...category,
+              products,
+            }
+          : category
     );
     stepsState.updateStepField(step.id, "StepCategory", updated);
     markAsDirty();
@@ -56,13 +58,13 @@ export function PpbCategoryProductsPanel({
         variants: product.variants || null,
         minQuantity: 0,
         maxQuantity: 10,
-      })),
+      }))
     );
   };
 
   const removeProduct = (productId: string) => {
     updateCategoryProducts(
-      catProducts.filter((product: any) => product.id !== productId),
+      catProducts.filter((product: any) => product.id !== productId)
     );
   };
 
@@ -73,11 +75,19 @@ export function PpbCategoryProductsPanel({
   return (
     <div>
       <p className={productPageBundleStyles.categoryPickerHelp}>
-        Products selected here will be displayed on this step
+        {translateAdmin(
+          "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.productsSelectedHereWillBeDisplayedOnThisStep"
+        )}
       </p>
       <div className={productPageBundleStyles.productActions}>
-        <s-button variant="primary" icon="product-add" onClick={handlePickProducts}>
-          Add Products
+        <s-button
+          variant="primary"
+          icon="product-add"
+          onClick={handlePickProducts}
+        >
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
+          )}
         </s-button>
         {catProducts.length > 0 && (
           <button
@@ -85,11 +95,16 @@ export function PpbCategoryProductsPanel({
             className={productPageBundleStyles.selectedItemsChip}
             onClick={() => showPolarisModal(selectedProductsModalRef)}
           >
-            {catProducts.length} Selected
+            {translateAdmin("adminDynamic.selectedCount", {
+              count: catProducts.length,
+            })}
           </button>
         )}
       </div>
-      <s-modal ref={selectedProductsModalRef} heading="Selected Products">
+      <s-modal
+        ref={selectedProductsModalRef}
+        heading={translateAdmin("adminAttributes.selectedProducts")}
+      >
         {catProducts.length > 0 ? (
           <ul className={productPageBundleStyles.selectedItemList}>
             {catProducts.map((product: any, index: number) => (
@@ -133,23 +148,36 @@ export function PpbCategoryProductsPanel({
                   aria-label={`Remove ${product.title || "selected product"}`}
                   onClick={() => removeProduct(product.id)}
                 >
-                  x
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.x"
+                  )}
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p>No products selected for this category yet.</p>
+          <p>
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.noProductsSelectedForThisCategoryYet"
+            )}
+          </p>
         )}
         <s-button
           slot="secondary-actions"
           variant="secondary"
           onClick={() => hidePolarisModal(selectedProductsModalRef)}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
-        <s-button slot="primary-action" variant="primary" icon="product-add" onClick={handlePickProducts}>
-          Add Products
+        <s-button
+          slot="primary-action"
+          variant="primary"
+          icon="product-add"
+          onClick={handlePickProducts}
+        >
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
+          )}
         </s-button>
       </s-modal>
     </div>

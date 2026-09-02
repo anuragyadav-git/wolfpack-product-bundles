@@ -10,6 +10,9 @@ import {
   renderFpbLoadingScreen,
   resolveFpbLoadingScreenSettings,
 } from "../../lib/fpb-loading-screen";
+import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
+import { buildOfferCountryLiquidGuard } from "../../lib/offer-country-liquid-guard.server";
 
 function escapeHtmlAttribute(value: string): string {
   return value
@@ -81,6 +84,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
           },
         },
         pricing: true,
+        offerPolicy: {
+          include: { conditions: true },
+        },
       },
     }),
     db.designSettings.findUnique({
@@ -134,6 +140,28 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
   }
 
+  const offerDecision = hasValidDraftPreview
+    ? { eligible: true, reasonCode: "not_required" as const }
+    : resolveSpecificLinkOfferEligibility({
+      policy: bundle.offerPolicy,
+      token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
+    });
+  if (!offerDecision.eligible) {
+    AppLogger.info("FPB proxy page hidden by offer eligibility", {
+      component: "wpb.proxy",
+      shop: shopDomain,
+      bundleId: bundle.id,
+      publicNumber,
+      status: 404,
+      failureCategory: offerDecision.reasonCode,
+      renderDurationMs: Date.now() - startedAt,
+    });
+    return new Response("Bundle not found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+
   const formattedBundle = formatBundleForWidget(bundle);
   const templateTypeAttr = formattedBundle.bundleDesignTemplate
     ? ` data-fpb-template-type="${escapeHtmlAttribute(formattedBundle.bundleDesignTemplate)}"`
@@ -147,7 +175,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const loadingGifAttr = loadingScreen.gifUrl
     ? ` data-fpb-loading-gif="${escapeHtmlAttribute(loadingScreen.gifUrl)}"`
     : "";
-  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-fpb-loading-background="${escapeHtmlAttribute(loadingScreen.backgroundColor)}"${loadingGifAttr}${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${loadingScreenMarkup}</div>`;
+  const marker = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-country-code="{{ localization.country.iso_code }}" data-fpb-loading-background="${escapeHtmlAttribute(loadingScreen.backgroundColor)}"${loadingGifAttr}${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${loadingScreenMarkup}</div>`;
+  const liquid = hasValidDraftPreview
+    ? marker
+    : buildOfferCountryLiquidGuard(marker, bundle.offerPolicy);
 
   AppLogger.info("FPB proxy page rendered", {
     component: "wpb.proxy",

@@ -795,6 +795,125 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists direct low-stock alert settings", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        lowStockAlertEnabled: "true",
+        lowStockAlertThreshold: "8",
+        lowStockAlertMessage: "Hurry, {{stock}} remaining",
+      }),
+    );
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          lowStockAlertEnabled: true,
+          lowStockAlertThreshold: 8,
+          lowStockAlertMessage: "Hurry, {{stock}} remaining",
+        }),
+      }),
+    );
+  });
+
+  it("persists direct countdown presentation settings", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        countdownEnabled: "true",
+        countdownLayout: "full",
+        countdownPosition: "below",
+        countdownTitle: "Ends soon",
+        countdownExpiryAction: "show_zeros",
+        countdownExpiredMessage: "This offer has ended",
+      }),
+    );
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          countdownEnabled: true,
+          countdownLayout: "full",
+          countdownPosition: "below",
+          countdownTitle: "Ends soon",
+          countdownExpiryAction: "show_zeros",
+          countdownExpiredMessage: "This offer has ended",
+        }),
+      }),
+    );
+  });
+
+  it("persists normalized Shopify country targeting on the offer policy", async () => {
+    const fd = makeFormData({
+      countryTargetingEnabled: "true",
+      countryTargetingMode: "include",
+    });
+    fd.append("countryCodes", " gb ");
+    fd.append("countryCodes", "IN");
+    fd.append("countryCodes", "GB");
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          offerPolicy: {
+            create: expect.objectContaining({
+              countryTargetingEnabled: true,
+              countryTargetingMode: "include",
+              countryCodes: ["GB", "IN"],
+            }),
+          },
+        }),
+      }),
+    );
+  });
+
+  it("persists a recurring offer in Shopify's store timezone", async () => {
+    MOCK_ADMIN.graphql.mockResolvedValueOnce({
+      json: async () => ({
+        data: { shop: { currencyCode: "USD", ianaTimezone: "America/New_York" } },
+      }),
+    });
+    const fd = makeFormData({
+      offerPriority: "20",
+      offerStopLowerPriority: "false",
+      offerScheduleMode: "recurring",
+      offerStartsAt: "",
+      offerEndsAt: "",
+      offerRecurrenceFrequency: "weekly",
+      offerRecurrenceAnchorDate: "2026-09-06",
+      offerRecurrenceWindowStart: "09:00",
+      offerRecurrenceWindowEnd: "17:00",
+      offerRecurrenceTermination: "after_runs",
+      offerRecurrenceEndsOn: "",
+      offerRecurrenceRunCount: "4",
+    });
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        offerPolicy: {
+          create: expect.objectContaining({
+            scheduleMode: "recurring",
+            recurrenceFrequency: "weekly",
+            recurrenceTimezone: "America/New_York",
+            recurrenceAnchorDate: new Date("2026-09-06T00:00:00.000Z"),
+            recurrenceWindowStartMinute: 540,
+            recurrenceWindowEndMinute: 1020,
+            recurrenceTermination: "after_runs",
+            recurrenceRunCount: 4,
+          }),
+        },
+      }),
+    }));
+  });
+
   it("preserves an explicit draft when a step has StepProduct", async () => {
     const stepsData = makeStepsData({
       StepProduct: [
@@ -1386,6 +1505,40 @@ describe("FPB handleSaveBundle — with shopifyProductId (direct storefront sync
         ],
       })
     );
+  });
+
+  it("syncs an existing draft product when specific-link delivery changes", async () => {
+    getDb().bundle.findUnique.mockResolvedValue({
+      shopifyProductId: PRODUCT_ID,
+      offerPolicy: {
+        specificLinkRequired: false,
+        priority: 100,
+        stopLowerPriority: false,
+        startsAt: null,
+        endsAt: null,
+        countryTargetingEnabled: false,
+        countryTargetingMode: "include",
+        countryCodes: [],
+        ruleVersion: 1,
+        conditions: [{ expiresAt: null, revokedAt: null }],
+      },
+    });
+
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ specificLinkOfferEnabled: "true" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(syncBundleStorefrontNow).toHaveBeenCalledWith({
+      admin: MOCK_ADMIN,
+      shopDomain: MOCK_SESSION.shop,
+      bundleId: "bundle-1",
+      bundleType: "full_page",
+      reason: "save",
+    });
   });
 
   it("saves the bundle and syncs storefront data through the shared service", async () => {

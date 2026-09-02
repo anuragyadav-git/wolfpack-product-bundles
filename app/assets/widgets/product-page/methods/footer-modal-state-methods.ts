@@ -10,6 +10,10 @@ import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js';
 import { createDiscountProgressElement } from '../../shared/components/discount-progress.js';
 import {
+  createPricingTierBadgeElement,
+  getPricingTierBadgeTemplateValues,
+} from '../../shared/components/pricing-tier-badge.js';
+import {
   areRequiredProductPageStepsValid,
   getLastRequiredProductPageStepIndex,
 } from './step-validation.js';
@@ -26,10 +30,19 @@ function getDiscountProgressMilestones(bundle: any, totalPrice = 0, totalQuantit
   const currencyInfo = CurrencyManager.getCurrencyInfo();
   const tierTextByRuleId = pricing?.messages?.tierTextByRuleId || {};
 
-  return rules
+  const reachedRules = rules
     .filter((rule: any) => rule?.conditionType === 'quantity' || rule?.conditionType === 'amount')
-    .sort((a: any, b: any) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0))
-    .map((rule: any) => {
+    .sort((a: any, b: any) => (Number(a.conditionValue || 0) || 0) - (Number(b.conditionValue || 0) || 0));
+  const selectedTierIndex = reachedRules.reduce((selectedIndex: number, rule: any, index: number) => {
+    const threshold = Number(rule?.conditionValue || 0) || 0;
+    const reached = rule.conditionType === 'amount'
+      ? Number(totalPrice || 0) >= threshold
+      : Number(totalQuantity || 0) >= threshold;
+    return reached ? index : selectedIndex;
+  }, -1);
+
+  return reachedRules
+    .map((rule: any, index: number) => {
       const ruleId = String(rule?.id || '');
       const threshold = Number(rule?.conditionValue || 0) || 0;
       if (!ruleId || threshold <= 0) return null;
@@ -63,6 +76,15 @@ function getDiscountProgressMilestones(bundle: any, totalPrice = 0, totalQuantit
         title: boxLabel || fallbackTitle,
         subTitle: boxSubtext || fallbackSubText,
         isReached,
+        ...(rule.tierBadge ? {
+          isSelectedTier: index === selectedTierIndex,
+          tierBadge: rule.tierBadge,
+          tierBadgeValues: getPricingTierBadgeTemplateValues(
+            rule,
+            method,
+            (cents) => CurrencyManager.convertAndFormat(cents, currencyInfo),
+          ),
+        } : {}),
       };
     })
     .filter(Boolean)
@@ -268,6 +290,24 @@ renderQuantityOptionPills() {
     labelEl.textContent = label;
     pill.appendChild(labelEl);
 
+    const badge = createPricingTierBadgeElement(
+      rule?.tierBadge,
+      getPricingTierBadgeTemplateValues(
+        rule,
+        this.selectedBundle?.pricing?.method,
+        (cents) => CurrencyManager.convertAndFormat(cents, CurrencyManager.getCurrencyInfo()),
+      ),
+      {
+        document,
+        id: `wpb-tier-badge-${String(rule?.id || index)}`,
+        selected: isActive,
+      },
+    );
+    if (badge) {
+      pill.appendChild(badge);
+      if (!badge.hidden) pill.setAttribute('aria-describedby', badge.id);
+    }
+
     if (subtext) {
       const subtextEl = document.createElement('span');
       subtextEl.className = 'bw-qty-pill__subtext';
@@ -278,8 +318,16 @@ renderQuantityOptionPills() {
     pill.addEventListener('click', () => {
       el.querySelectorAll('.bw-qty-pill').forEach((p: any)  => {
         p.classList.remove('bw-qty-pill--active');
+        const ownedBadge = p.querySelector('[data-wpb-pricing-tier-badge="true"]') as HTMLElement | null;
+        if (ownedBadge?.dataset.visibility === 'selected') ownedBadge.hidden = true;
+        p.removeAttribute('aria-describedby');
       });
       pill.classList.add('bw-qty-pill--active');
+      const selectedBadge = pill.querySelector('[data-wpb-pricing-tier-badge="true"]') as HTMLElement | null;
+      if (selectedBadge) {
+        selectedBadge.hidden = false;
+        if (selectedBadge.id) pill.setAttribute('aria-describedby', selectedBadge.id);
+      }
       // Re-render footer/ATC to reflect selected tier's discount context
       this.renderFooter();
       this.updateAddToCartButton();

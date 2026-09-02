@@ -1,5 +1,11 @@
 /* Shared configure-page primitives. FPB styles are the source of truth. */
 
+.configureHelpPopover {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
 .richHelpImage {
   display: block;
   width: 100%;

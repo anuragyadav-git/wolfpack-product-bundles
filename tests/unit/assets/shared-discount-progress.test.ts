@@ -100,6 +100,28 @@ describe('shared discount progress renderer', () => {
     expect(view.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('25');
   });
 
+  it('renders a meaningful tier badge without changing the milestone title', () => {
+    const document = new JSDOM('<!doctype html>').window.document;
+    const view = createDiscountProgressElement({
+      progressPercent: 100,
+      milestones: [{
+        title: '4 Pack',
+        subTitle: 'Save 15%',
+        position: 100,
+        state: 'reached',
+        tierBadge: {
+          enabled: true,
+          text: 'Best value',
+          shape: 'banner_rounded',
+          visibility: 'always',
+        },
+      }],
+    }, { mode: 'stepped', document });
+
+    expect(view.textContent).toContain('4 Pack');
+    expect(view.textContent).toContain('Best value');
+  });
+
   it('reads the currently visible fill percentage from rendered geometry', () => {
     const root = {
       querySelector: (selector: string) => selector.includes('fill')

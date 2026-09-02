@@ -20,16 +20,16 @@ export function DiscardChangesModal({
     <LocalAppModal
       title={t("common.discardChanges.title")}
       onClose={onContinue}
-      primaryAction={(
+      primaryAction={
         <s-button tone="critical" variant="primary" onClick={onDiscard}>
           {t("common.actions.discardChanges")}
         </s-button>
-      )}
-      secondaryAction={(
+      }
+      secondaryAction={
         <s-button variant="secondary" onClick={onContinue}>
           {t("common.actions.continueEditing")}
         </s-button>
-      )}
+      }
     >
       <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
         {t("common.discardChanges.body")}

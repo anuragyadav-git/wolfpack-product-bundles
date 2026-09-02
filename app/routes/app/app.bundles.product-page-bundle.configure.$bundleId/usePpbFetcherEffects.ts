@@ -79,6 +79,31 @@ export function usePpbFetcherEffects({
             canonicalTextOverridesByLocale;
           settings.originalDefaultProductsDataRef.current =
             settings.defaultProductsData;
+          settings.originalLowStockAlertEnabledRef.current =
+            settings.lowStockAlertEnabled;
+          settings.originalLowStockAlertThresholdRef.current =
+            settings.lowStockAlertThreshold;
+          settings.originalLowStockAlertMessageRef.current =
+            settings.lowStockAlertMessage;
+          settings.originalCountdownEnabledRef.current =
+            settings.countdownEnabled;
+          settings.originalCountdownLayoutRef.current =
+            settings.countdownLayout;
+          settings.originalCountdownPositionRef.current =
+            settings.countdownPosition;
+          settings.originalCountdownTitleRef.current = settings.countdownTitle;
+          settings.originalCountdownExpiryActionRef.current =
+            settings.countdownExpiryAction;
+          settings.originalCountdownExpiredMessageRef.current =
+            settings.countdownExpiredMessage;
+          settings.originalStickyAddToCartEnabledRef.current =
+            settings.stickyAddToCartEnabled;
+          settings.originalStickyAddToCartShowDesktopRef.current =
+            settings.stickyAddToCartShowDesktop;
+          settings.originalStickyAddToCartShowMobileRef.current =
+            settings.stickyAddToCartShowMobile;
+          settings.originalStickyAddToCartActionRef.current =
+            settings.stickyAddToCartAction;
           visibility.originalUpsellWidgetEnabledRef.current =
             visibility.upsellWidgetEnabled;
           visibility.originalUpsellWidgetDisplayModeRef.current =
@@ -115,6 +140,7 @@ export function usePpbFetcherEffects({
             visibility.bundleEmbedSpecificCollectionPages;
           visibility.originalBundleEmbedMultiLangTextRef.current =
             visibility.bundleEmbedMultiLangText;
+          base.markSpecificLinkOfferSaved();
           base.markAsSaved();
           base.clearOperationAlert();
           base.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });

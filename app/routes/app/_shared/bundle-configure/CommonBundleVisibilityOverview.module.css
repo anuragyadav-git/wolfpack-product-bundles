@@ -90,6 +90,17 @@
   background: #f7f7f7;
 }
 
+.widgetTypeChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.widgetTypeChoices > s-choice-list {
+  flex: none;
+  inline-size: fit-content;
+}
+
 .widgetSettingsGrid {
   display: grid;
   grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
