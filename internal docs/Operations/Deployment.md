@@ -4,7 +4,7 @@ id: deployment
 title: Deployment
 type: operations
 status: active
-summary: Deployment commands, environment configuration, and Shopify-managed installation rules.
+summary: Deployment commands, environment configuration, Shopify-managed installation rules, and SDK release ordering.
 last_audited: 2026-09-03
 owners:
   - engineering
@@ -136,6 +136,14 @@ Workers Builds uses the repository root so installation consumes the root lockfi
 - Include paths: `apps/OnlyBundles-website/*`, `package.json`, `package-lock.json`, `.node-version`, `.nvmrc`
 
 Connect the Git repository only after the monorepo commits exist on `PROD`. Repository ownership is dashboard configuration and must not be hardcoded in source.
+
+For an SDK documentation release, deploy and verify the repaired Shopify
+extension in SIT first, then deploy it to production manually. Only after the
+served SDK version and real Product Page Bundle behavior are verified should
+`npm run website:deploy` publish the matching `/developers/sdk/` guide. Record
+the Cloudflare deployment version ID and verify the guide, header, mobile menu,
+footer, and sitemap on the production `workers.dev` hostname. Website deploy
+does not deploy the Shopify extension or Render application.
 
 ## Note on vercel.json
 

@@ -4,8 +4,8 @@ id: admin-resource-destinations
 title: Admin Resource Destinations
 type: test-spec
 status: active
-summary: Verifies that Admin help and resource actions never send merchants to expired or unrelated destinations.
-last_audited: 2026-08-30
+summary: Verifies that Admin help and resource actions use current public destinations while unavailable gallery resources remain inert.
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -41,13 +41,13 @@ Keep merchant-facing Admin resources on verified destinations and prevent unavai
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
 | 1 | Shared external destination | App brand links | Company and listing URLs use the verified official Shopify App Store surfaces | No dependency on an expired company domain |
-| 2 | Unavailable Dashboard resources | Dashboard resources card | SDK documentation and gallery previews are visibly unavailable and non-interactive | Support and Updates remain functional |
+| 2 | Dashboard resources | Dashboard resources card | SDK documentation opens the public guide; gallery previews remain unavailable and non-interactive | Support remains functional |
 | 3 | Integration setup | Integration catalog | View Setup opens app-owned guide content from `guideSummary` without an external URL | Avoids unrelated external navigation |
 | 4 | Welcome documentation | Intentional `/app` landing | Documentation is non-interactive until a verified public guide exists | No unresolved documentation hostname |
 
 ## Acceptance Criteria
 
-- [ ] No application-owned Admin action references `wolfpackapps.com`.
-- [ ] Unavailable Dashboard resources cannot open a browsing context.
-- [ ] Every integration guide retains at least one app-owned setup instruction.
-- [ ] All listed test cases pass.
+- [x] No application-owned Admin action references `wolfpackapps.com`.
+- [x] SDK documentation opens the canonical public guide and unavailable gallery previews cannot open a browsing context.
+- [x] Every integration guide retains at least one app-owned setup instruction.
+- [x] All listed test cases pass.

@@ -23,7 +23,7 @@ describe("Admin resource destinations", () => {
     );
   });
 
-  it("keeps unavailable Dashboard SDK and gallery resources non-interactive", () => {
+  it("links SDK documentation while keeping gallery resources unavailable", () => {
     const view = renderToStaticMarkup(
       React.createElement(DashboardResourcesCard as any, {
         activeResource: "bundle-inspirations",
@@ -33,10 +33,13 @@ describe("Admin resource destinations", () => {
     );
 
     expect(view).toContain("dashboard.resources.sdkDocumentation");
-    expect(view).toContain("dashboard.resources.comingSoon");
+    expect(view).toContain(
+      'href="https://only-bundles-website.onlybundlesapp.workers.dev/developers/sdk/"',
+    );
+    expect(view).toContain('target="_blank"');
+    expect(view.match(/dashboard.resources.comingSoon/g)).toHaveLength(2);
     expect(view).not.toContain("dashboard.resources.exploreUpdate");
     expect(view).not.toContain("wolfpackapps.com");
-    expect(view).not.toContain("<a ");
   });
 
   it("renders integration setup as app-owned actions without external destinations", () => {

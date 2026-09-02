@@ -2,6 +2,7 @@ const TUTORIAL_WEBSITE_ORIGIN =
   "https://only-bundles-website.onlybundlesapp.workers.dev";
 
 export const TUTORIAL_LIBRARY_URL = `${TUTORIAL_WEBSITE_ORIGIN}/blogs/`;
+export const SDK_DOCUMENTATION_URL = `${TUTORIAL_WEBSITE_ORIGIN}/developers/sdk/`;
 
 export const TUTORIAL_LINKS = {
   createBundle: `${TUTORIAL_LIBRARY_URL}create-your-first-bundle/`,

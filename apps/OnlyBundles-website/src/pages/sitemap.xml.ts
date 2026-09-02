@@ -3,7 +3,7 @@ import { SITE_ORIGIN, blogPages, featurePages, helpPages } from "../data/content
 
 export const prerender = true;
 
-const fixedRoutes = ["/", "/demo/", "/pricing/", "/features/", "/help/", "/blog/", "/changelog/", "/blogs/", "/privacy/", "/terms/"];
+const fixedRoutes = ["/", "/demo/", "/pricing/", "/features/", "/help/", "/blog/", "/changelog/", "/blogs/", "/developers/sdk/", "/privacy/", "/terms/"];
 const routes = [
   ...fixedRoutes,
   ...featurePages.map(({ slug }) => `/features/${slug}/`),

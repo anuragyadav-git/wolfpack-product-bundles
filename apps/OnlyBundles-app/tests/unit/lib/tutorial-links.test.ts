@@ -1,6 +1,7 @@
 import {
   TUTORIAL_LIBRARY_URL,
   TUTORIAL_LINKS,
+  SDK_DOCUMENTATION_URL,
 } from "../../../app/lib/tutorial-links";
 
 describe("Only Bundles tutorial links", () => {
@@ -37,5 +38,11 @@ describe("Only Bundles tutorial links", () => {
     const destinations = JSON.stringify(TUTORIAL_LINKS);
     expect(destinations).not.toContain("youtube.com");
     expect(destinations).not.toContain("apps.shopify.com/partners");
+  });
+
+  it("publishes the canonical SDK documentation destination", () => {
+    expect(SDK_DOCUMENTATION_URL).toBe(
+      "https://only-bundles-website.onlybundlesapp.workers.dev/developers/sdk/",
+    );
   });
 });

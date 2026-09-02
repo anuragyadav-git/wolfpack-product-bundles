@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import dashboardStyles from "./dashboard.module.css";
+import { SDK_DOCUMENTATION_URL } from "../../../lib/tutorial-links";
 
 type DashboardResourcesCardProps = {
   activeResource: string;
@@ -47,10 +48,11 @@ export function DashboardResourcesCard({
               {t("dashboard.resources.support")}
             </span>
           </button>
-          <button
-            type="button"
-            className={dashboardStyles.resourceItem}
-            disabled
+          <s-clickable
+            {...({ className: dashboardStyles.resourceItem } as any)}
+            href={SDK_DOCUMENTATION_URL}
+            target="_blank"
+            accessibilityLabel={t("dashboard.resources.sdkDocumentation")}
           >
             <div className={dashboardStyles.resourceItemIcon}>
               <s-icon type="code" />
@@ -58,8 +60,7 @@ export function DashboardResourcesCard({
             <span className={dashboardStyles.resourceItemLabel}>
               {t("dashboard.resources.sdkDocumentation")}
             </span>
-            <s-badge>{t("dashboard.resources.comingSoon")}</s-badge>
-          </button>
+          </s-clickable>
         </div>
 
         <div className={dashboardStyles.resourcesThumbnails}>

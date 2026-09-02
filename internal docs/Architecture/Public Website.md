@@ -4,7 +4,7 @@ id: public-website
 title: Public Website
 type: architecture
 status: active
-summary: Defines the static Only Bundles public site, production-renderer demo boundary, legal content, and release gate.
+summary: Defines the static Only Bundles public site, production-renderer demo, limited-release SDK guide, legal content, and release gate.
 last_audited: 2026-09-03
 owners:
   - product
@@ -57,6 +57,14 @@ The public information architecture contains marketing, feature, pricing, Help,
 editorial, tutorial, changelog, and legal routes. `/blog/` owns the focused
 strategy journal; `/blogs/` owns the production-audited step-by-step tutorial
 library. Both remain deliberate public paths rather than aliases.
+
+`/developers/sdk/` is the canonical indexable developer guide for the
+limited-release Only Bundles SDK. Header, mobile navigation, footer, sitemap,
+and the embedded Admin Dashboard SDK resource all resolve to this one route.
+The guide must match `window.WolfpackBundles` runtime behavior and explicitly
+retain the support-enabled, Product Page Bundle, Online Store 2.0, single-SDK,
+and no-package-distribution boundaries. Examples construct known DOM elements
+and assign product data through `textContent`.
 
 ## Tutorial content model
 
