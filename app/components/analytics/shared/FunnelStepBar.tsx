@@ -9,6 +9,8 @@
  * Issue: docs/issues-prod/wpb-analytics-revamp-1.md
  */
 
+import { translateAdmin } from "~/i18n/config";
+
 export interface FunnelStepBarProps {
   label: string;
   value: number;
@@ -26,7 +28,8 @@ export function FunnelStepBar({
   accent = "engagement",
   maxValue,
 }: FunnelStepBarProps) {
-  const fillPct = maxValue > 0 ? Math.max(2, Math.round((value / maxValue) * 100)) : 0;
+  const fillPct =
+    maxValue > 0 ? Math.max(2, Math.round((value / maxValue) * 100)) : 0;
   const conversionPct =
     previousValue && previousValue > 0
       ? Math.round((value / previousValue) * 100)
@@ -53,12 +56,12 @@ export function FunnelStepBar({
       {conversionPct !== null && (
         <div className="wpb-funnel-conversion">
           <span className="wpb-muted-micro">
-            {conversionPct}% kept
+            {translateAdmin("adminDynamic.percentageKept", {
+              percentage: conversionPct,
+            })}
           </span>
           {dropOffPct !== null && dropOffPct > 0 && (
-            <span className="wpb-funnel-dropoff">
-              −{dropOffPct}%
-            </span>
+            <span className="wpb-funnel-dropoff">−{dropOffPct}%</span>
           )}
         </div>
       )}

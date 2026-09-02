@@ -1,3 +1,4 @@
+import { translateAdmin } from "~/i18n/config";
 export function TemplateReadyScreen({
   isPreviewLoading,
   onPreview,
@@ -31,7 +32,9 @@ export function TemplateReadyScreen({
             lineHeight: "20px",
           }}
         >
-          View your bundle
+          {translateAdmin(
+            "adminExtracted.components.bundleConfigure.templatereadyscreen.viewYourBundle"
+          )}
         </div>
         <div
           style={{
@@ -41,7 +44,9 @@ export function TemplateReadyScreen({
             lineHeight: "20px",
           }}
         >
-          View your bundle with your customizations
+          {translateAdmin(
+            "adminExtracted.components.bundleConfigure.templatereadyscreen.viewYourBundleWithYourCustomizations"
+          )}
         </div>
       </div>
 
@@ -96,7 +101,9 @@ export function TemplateReadyScreen({
               textAlign: "center",
             }}
           >
-            Your bundle is ready
+            {translateAdmin(
+              "adminExtracted.components.bundleConfigure.templatereadyscreen.yourBundleIsReady"
+            )}
           </h2>
           <p
             style={{
@@ -108,7 +115,9 @@ export function TemplateReadyScreen({
               textAlign: "center",
             }}
           >
-            Preview it now with your customizations
+            {translateAdmin(
+              "adminExtracted.components.bundleConfigure.templatereadyscreen.previewItNowWithYourCustomizations"
+            )}
           </p>
           <button
             type="button"
@@ -131,7 +140,7 @@ export function TemplateReadyScreen({
               opacity: isPreviewLoading ? 0.65 : 1,
             }}
           >
-            Preview bundle
+            {translateAdmin("settingsDcp.preview.storefront.open")}
           </button>
         </div>
       </div>

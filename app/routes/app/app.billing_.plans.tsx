@@ -5,8 +5,18 @@
  * Uses shared billing components from app/components/billing.
  */
 
-import { defer, json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
-import { Await, useLoaderData, useFetcher, useNavigate } from "@remix-run/react";
+import {
+  defer,
+  json,
+  type LoaderFunctionArgs,
+  type ActionFunctionArgs,
+} from "@remix-run/node";
+import {
+  Await,
+  useLoaderData,
+  useFetcher,
+  useNavigate,
+} from "@remix-run/react";
 import { authenticate } from "../../shopify.server";
 import { PLANS } from "../../constants/plans";
 import { AppLogger } from "../../lib/logger";
@@ -45,13 +55,15 @@ type VerifiedPricingSubscriptionData = {
   canCreateBundle: boolean;
 };
 
-type PricingSubscriptionData = VerifiedPricingSubscriptionData | {
-  error: "Failed to load pricing information";
-  currentPlan: null;
-  currentBundleCount: 0;
-  bundleLimit: null;
-  canCreateBundle: false;
-};
+type PricingSubscriptionData =
+  | VerifiedPricingSubscriptionData
+  | {
+      error: "Failed to load pricing information";
+      currentPlan: null;
+      currentBundleCount: 0;
+      bundleLimit: null;
+      canCreateBundle: false;
+    };
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);
@@ -69,21 +81,27 @@ export async function loader({ request }: LoaderFunctionArgs) {
       if (!subscriptionInfo.entitlements) {
         throw new Error("Could not verify subscription information");
       }
-      const bundleLimit = subscriptionInfo.entitlements.limits.publicBundles
-        ?? Number.MAX_SAFE_INTEGER;
+      const bundleLimit =
+        subscriptionInfo.entitlements.limits.publicBundles ??
+        Number.MAX_SAFE_INTEGER;
 
       return {
         currentPlan: subscriptionInfo.planCode === "GROWTH" ? "growth" : "free",
         currentBundleCount,
         bundleLimit,
-        canCreateBundle: bundleLimit === Number.MAX_SAFE_INTEGER
-          || currentBundleCount < bundleLimit,
+        canCreateBundle:
+          bundleLimit === Number.MAX_SAFE_INTEGER ||
+          currentBundleCount < bundleLimit,
       } satisfies PricingSubscriptionData;
     } catch (error: any) {
-      AppLogger.error("Error loading pricing page", {
-        component: "app.billing.plans",
-        operation: "loader"
-      }, error);
+      AppLogger.error(
+        "Error loading pricing page",
+        {
+          component: "app.billing.plans",
+          operation: "loader",
+        },
+        error
+      );
 
       return {
         error: "Failed to load pricing information" as const,
@@ -123,12 +141,15 @@ export async function action({ request }: ActionFunctionArgs) {
         success: true,
         hostedPlanUrl,
       });
-
     } catch (error: any) {
-      AppLogger.error("Error creating subscription from pricing page", {
-        component: "app.billing.plans",
-        operation: "action-upgrade"
-      }, error);
+      AppLogger.error(
+        "Error creating subscription from pricing page",
+        {
+          component: "app.billing.plans",
+          operation: "action-upgrade",
+        },
+        error
+      );
 
       return json(
         { error: "Failed to open Shopify plan selection" },
@@ -140,11 +161,7 @@ export async function action({ request }: ActionFunctionArgs) {
   return json({ error: "Invalid plan" }, { status: 400 });
 }
 
-export function PricingBody({
-  data,
-}: {
-  data: PricingSubscriptionData;
-}) {
+export function PricingBody({ data }: { data: PricingSubscriptionData }) {
   const fetcher = useFetcher<typeof action>();
 
   // Upgrade confirmation modal state
@@ -158,16 +175,17 @@ export function PricingBody({
 
   const handleConfirmUpgrade = useCallback(() => {
     setShowUpgradeModal(false);
-    fetcher.submit(
-      { plan: "growth" },
-      { method: "post" }
-    );
+    fetcher.submit({ plan: "growth" }, { method: "post" });
   }, [fetcher]);
 
   // Handle redirect to Shopify billing confirmation
   useEffect(() => {
-    if (fetcher.data && "hostedPlanUrl" in fetcher.data && fetcher.data.hostedPlanUrl) {
-      open(fetcher.data.hostedPlanUrl, '_top');
+    if (
+      fetcher.data &&
+      "hostedPlanUrl" in fetcher.data &&
+      fetcher.data.hostedPlanUrl
+    ) {
+      open(fetcher.data.hostedPlanUrl, "_top");
     }
   }, [fetcher.data]);
 
@@ -251,7 +269,11 @@ export default function PricingPage() {
             backLabel={t("billing.actions.back")}
             onBack={handleBack}
           />
-          <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
+          <Suspense
+            fallback={
+              <AdminSectionLoadingState label={t("common.loading.workspace")} />
+            }
+          >
             <Await resolve={subscription}>
               {(data) => <PricingBody data={data} />}
             </Await>

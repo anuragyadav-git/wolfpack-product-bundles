@@ -35,10 +35,7 @@ export function SubscriptionErrorBanner({
         {getErrorMessage(errorCode, t)}
         <div style={{ marginTop: 8 }}>
           <s-stack direction="inline" gap="small">
-            <s-button
-              variant="tertiary"
-              onClick={() => openSupportChat()}
-            >
+            <s-button variant="tertiary" onClick={() => openSupportChat()}>
               {t("billing.actions.contactSupport")}
             </s-button>
             <s-button variant="tertiary" onClick={onDismiss}>

@@ -1,6 +1,7 @@
 import { isRouteErrorResponse, useNavigate } from "@remix-run/react";
 import { APP_BRAND } from "../lib/app-brand";
 import { openSupportChat } from "../lib/support-chat.client";
+import { translateAdmin } from "~/i18n/config";
 
 interface ErrorPageProps {
   error: unknown;
@@ -75,7 +76,8 @@ export function ErrorPage({ error }: ErrorPageProps) {
       hint = cfg.hint;
     } else if (status >= 400 && status < 500) {
       title = "Something Went Wrong";
-      description = "An unexpected error occurred. Please try again or return to the dashboard.";
+      description =
+        "An unexpected error occurred. Please try again or return to the dashboard.";
       hint = "If this keeps happening, contact support.";
     }
   } else if (error instanceof Error) {
@@ -103,22 +105,30 @@ export function ErrorPage({ error }: ErrorPageProps) {
         <div className="ob-error-page__copy">
           <s-heading id="error-page-title">{title}</s-heading>
           <s-paragraph>{description}</s-paragraph>
-          <s-paragraph tone="neutral" color="subdued">{hint}</s-paragraph>
+          <s-paragraph tone="neutral" color="subdued">
+            {hint}
+          </s-paragraph>
         </div>
 
         {detail && !is4xx ? (
           <details className="ob-error-page__details">
-            <summary>Technical details</summary>
+            <summary>
+              {translateAdmin(
+                "adminExtracted.components.errorpage.technicalDetails"
+              )}
+            </summary>
             <pre>{detail}</pre>
           </details>
         ) : null}
 
         <div className="ob-error-page__actions">
           <s-button variant="primary" onClick={handleGoToDashboard}>
-            Go to Dashboard
+            {translateAdmin(
+              "adminExtracted.components.errorpage.goToDashboard"
+            )}
           </s-button>
           <s-button variant="secondary" onClick={() => openSupportChat()}>
-            Contact Support
+            {translateAdmin("billing.actions.contactSupport")}
           </s-button>
         </div>
       </section>

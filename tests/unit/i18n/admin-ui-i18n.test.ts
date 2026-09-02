@@ -17,12 +17,33 @@ function flattenKeys(value: unknown, prefix = ""): string[] {
   }
 
   return Object.entries(value)
-    .flatMap(([key, child]: any) => flattenKeys(child, prefix ? `${prefix}.${key}` : key))
+    .flatMap(([key, child]: any) =>
+      flattenKeys(child, prefix ? `${prefix}.${key}` : key)
+    )
     .sort();
 }
 
+function flattenStrings(
+  value: unknown,
+  prefix = "",
+  output: Record<string, string> = {}
+) {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return output;
+  for (const [key, child] of Object.entries(value)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (typeof child === "string") output[path] = child;
+    else flattenStrings(child, path, output);
+  }
+  return output;
+}
+
+function interpolationTokens(value: string): string[] {
+  return (value.match(/\{\{[^{}]+\}\}/g) ?? []).sort();
+}
+
 describe("embedded Admin locale configuration", () => {
-  it("supports the Polaris-compatible dashboard locales", () => {
+  it("supports the Polaris-compatible Admin locales including Simplified Chinese", () => {
     expect(SUPPORTED_LOCALES).toEqual([
       "en",
       "fr",
@@ -30,18 +51,26 @@ describe("embedded Admin locale configuration", () => {
       "es",
       "ja",
       "pt-BR",
+      "zh-CN",
     ]);
   });
 
   it("preserves supported locales and defaults unsupported locales to English", () => {
-    expect(normalizeAdminLocale("fr")).toBe("fr");
+    expect(normalizeAdminLocale("fr-FR")).toBe("fr");
+    expect(normalizeAdminLocale("de-DE")).toBe("de");
+    expect(normalizeAdminLocale("zh")).toBe("zh-CN");
+    expect(normalizeAdminLocale("zh-Hans")).toBe("zh-CN");
+    expect(normalizeAdminLocale("zh-CN")).toBe("zh-CN");
+    expect(normalizeAdminLocale("zh-TW")).toBe("en");
     expect(normalizeAdminLocale("xx")).toBe("en");
     expect(normalizeAdminLocale(null)).toBe("en");
   });
 
   it("keeps every supported locale catalog key-compatible with English", () => {
     const localeDir = path.join(process.cwd(), "app/i18n/locales");
-    const english = JSON.parse(fs.readFileSync(path.join(localeDir, "en.json"), "utf8"));
+    const english = JSON.parse(
+      fs.readFileSync(path.join(localeDir, "en.json"), "utf8")
+    );
     const englishKeys = flattenKeys(english);
 
     for (const locale of SUPPORTED_LOCALES) {
@@ -52,12 +81,32 @@ describe("embedded Admin locale configuration", () => {
     }
   });
 
+  it("preserves every i18next interpolation token across locale catalogs", () => {
+    const localeDir = path.join(process.cwd(), "app/i18n/locales");
+    const english = flattenStrings(
+      JSON.parse(fs.readFileSync(path.join(localeDir, "en.json"), "utf8"))
+    );
+
+    for (const locale of SUPPORTED_LOCALES) {
+      const catalog = flattenStrings(
+        JSON.parse(
+          fs.readFileSync(path.join(localeDir, `${locale}.json`), "utf8")
+        )
+      );
+      for (const [key, source] of Object.entries(english)) {
+        expect(interpolationTokens(catalog[key])).toEqual(
+          interpolationTokens(source)
+        );
+      }
+    }
+  });
+
   it("uses Only Bundles for every merchant-visible brand reference", () => {
     const localeDir = path.join(process.cwd(), "app/i18n/locales");
 
     for (const locale of SUPPORTED_LOCALES) {
       const catalog = JSON.parse(
-        fs.readFileSync(path.join(localeDir, `${locale}.json`), "utf8"),
+        fs.readFileSync(path.join(localeDir, `${locale}.json`), "utf8")
       );
       const serialized = JSON.stringify(catalog);
       expect(serialized).toContain("Only Bundles");
@@ -70,38 +119,39 @@ describe("embedded Admin locale configuration", () => {
 
     for (const locale of SUPPORTED_LOCALES) {
       const catalog = JSON.parse(
-        fs.readFileSync(path.join(localeDir, `${locale}.json`), "utf8"),
+        fs.readFileSync(path.join(localeDir, `${locale}.json`), "utf8")
       );
       expect(catalog.nav.billing).toEqual(expect.any(String));
       expect(catalog.nav.billing).not.toHaveLength(0);
     }
   });
-
 });
 
-describe("shop-wide Admin locale wiring contract", () => {
-  const schema = fs.readFileSync(path.join(process.cwd(), "prisma/schema.prisma"), "utf8");
-  const appShell = fs.readFileSync(path.join(process.cwd(), "app/routes/app/app.tsx"), "utf8");
+describe("Shopify-native Admin locale wiring contract", () => {
+  const schema = fs.readFileSync(
+    path.join(process.cwd(), "prisma/schema.prisma"),
+    "utf8"
+  );
+  const appShell = fs.readFileSync(
+    path.join(process.cwd(), "app/routes/app/app.tsx"),
+    "utf8"
+  );
   const dashboard = fs.readFileSync(
     path.join(process.cwd(), "app/routes/app/app.dashboard/route.tsx"),
-    "utf8",
+    "utf8"
   );
   const dashboardPage = fs.readFileSync(
     path.join(process.cwd(), "app/routes/app/app.dashboard/DashboardPage.tsx"),
-    "utf8",
+    "utf8"
   );
-  const dashboardLocaleState = fs.readFileSync(
-    path.join(process.cwd(), "app/routes/app/app.dashboard/dashboard-locale-state.ts"),
-    "utf8",
-  );
-
-  it("stores the Admin locale on Shop rather than Session", () => {
-    expect(schema).toMatch(/model Shop \{[\s\S]*?adminLocale\s+String\?/);
+  it("does not duplicate Shopify's Admin locale in the Shop model", () => {
+    expect(schema).not.toContain("adminLocale");
   });
 
-  it("loads the authoritative shop-wide locale in the app shell", () => {
-    expect(appShell).toContain("loadShopAdminLocale");
-    expect(appShell).toContain("loadShopAdminLocale(session.shop)");
+  it("loads the authoritative Shopify request locale in the app shell", () => {
+    expect(appShell).toContain("resolveAdminLocaleFromRequest(request)");
+    expect(appShell).toContain("shopify.config.locale");
+    expect(appShell).not.toContain("loadShopAdminLocale");
   });
 
   it("translates the global embedded Admin navigation", () => {
@@ -113,30 +163,9 @@ describe("shop-wide Admin locale wiring contract", () => {
     expect(appShell).toContain('t("nav.events")');
   });
 
-  it("adds a dashboard save intent for shop-wide locale persistence", () => {
-    expect(dashboard).toContain('intent === "saveAdminLocale"');
-    expect(dashboardLocaleState).toContain('formData.append("intent", "saveAdminLocale")');
-  });
-
-  it("saves from the language dropdown without rendering a separate Save button", () => {
-    const handler = dashboardPage.match(
-      /const handleLanguageChange = useCallback\([\s\S]*?\n  \}, \[[^\]]*\]\);/,
-    )?.[0];
-    expect(handler).toBeDefined();
-    expect(handler).toContain("applyDashboardLocaleSelection");
-    expect(dashboardPage).not.toContain('onClick={handleSaveLanguage}');
-    expect(dashboardPage).not.toContain('{t("dashboard.language.save")}');
-  });
-
-  it("does not write browser cache from the dropdown change handler", () => {
-    const handler = dashboardPage.match(
-      /const handleLanguageChange = useCallback\([\s\S]*?\n  \}, \[[^\]]*\]\);/,
-    )?.[0];
-    expect(handler).toBeDefined();
-    expect(handler).not.toContain("localStorage.setItem");
-  });
-
-  it("updates browser cache only after the save response confirms the locale", () => {
-    expect(dashboardPage).toContain('localStorage.setItem("wolfpack-locale", locale)');
+  it("does not render or persist an app-owned dashboard locale preference", () => {
+    expect(dashboard).not.toContain('intent === "saveAdminLocale"');
+    expect(dashboardPage).not.toContain("languageOptions");
+    expect(dashboardPage).not.toContain("wolfpack-locale");
   });
 });

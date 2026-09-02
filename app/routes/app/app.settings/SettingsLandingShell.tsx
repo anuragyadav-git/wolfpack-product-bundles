@@ -1,4 +1,5 @@
 import styles from "./SettingsLandingShell.module.css";
+import { translateAdmin } from "~/i18n/config";
 
 export type SettingsWorkspaceView = "design" | "language" | "controls";
 
@@ -17,13 +18,15 @@ const SETTINGS_SECTIONS: Array<{
   {
     id: "language",
     title: "Language",
-    description: "Configure all text, labels, and translations for your bundle here",
+    description:
+      "Configure all text, labels, and translations for your bundle here",
     icon: "language-translate",
   },
   {
     id: "controls",
     title: "Controls",
-    description: "Change loading screen gif, add custom CSS, modify checkout settings and more",
+    description:
+      "Change loading screen gif, add custom CSS, modify checkout settings and more",
     icon: "settings",
   },
 ];
@@ -48,11 +51,11 @@ export function SettingsLandingShell({
             <s-button
               variant="tertiary"
               icon="arrow-left"
-              accessibilityLabel="Back to previous page"
+              accessibilityLabel={translateAdmin("billing.actions.back")}
               onClick={onBack}
             />
             <s-heading {...({ className: styles.settingsLandingTitle } as any)}>
-              Settings
+              {translateAdmin("nav.settings")}
             </s-heading>
           </s-stack>
           <s-grid
@@ -94,7 +97,9 @@ export function SettingsLandingShell({
                       </s-stack>
                     </s-box>
                     <s-icon
-                      {...({ className: styles.settingsLandingTileArrow } as any)}
+                      {...({
+                        className: styles.settingsLandingTileArrow,
+                      } as any)}
                       type="arrow-right"
                       size="base"
                     />
@@ -117,19 +122,25 @@ export function SettingsLandingShell({
 
 export function SettingsWorkspaceError({ onExit }: { onExit: () => void }) {
   return (
-    <s-page heading="Settings" inlineSize="large">
+    <s-page heading={translateAdmin("nav.settings")} inlineSize="large">
       <s-box paddingBlockEnd="small-200">
         <s-banner
-          heading="Settings could not be loaded"
+          heading={translateAdmin("adminAttributes.settingsCouldNotBeLoaded")}
           tone="critical"
           dismissible={false}
           hidden={false}
         >
           <s-stack direction="block" gap="small">
             <s-paragraph>
-              Reload the page or return to Settings and try again.
+              {translateAdmin(
+                "adminExtracted.appSettings.settingslandingshell.reloadThePageOrReturnToSettingsAndTryAgain"
+              )}
             </s-paragraph>
-            <s-button onClick={onExit}>Return to Settings</s-button>
+            <s-button onClick={onExit}>
+              {translateAdmin(
+                "adminExtracted.appSettings.settingslandingshell.returnToSettings"
+              )}
+            </s-button>
           </s-stack>
         </s-banner>
       </s-box>

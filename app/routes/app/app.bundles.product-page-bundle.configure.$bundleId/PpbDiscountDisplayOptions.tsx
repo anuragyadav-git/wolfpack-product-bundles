@@ -1,6 +1,7 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PpbDiscountMessagingOptions } from "./PpbDiscountMessagingOptions";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbDiscountDisplayOptions() {
   const { displayOptionsInactive } = usePpbConfigureContext();
@@ -11,10 +12,14 @@ export function PpbDiscountDisplayOptions() {
         <s-stack direction="block" gap="small">
           <s-stack direction="block" gap="small-400">
             <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-              Discount Display Options
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountdisplayoptions.discountDisplayOptions"
+              )}
             </h4>
             <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-              Choose how discounts are displayed
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountdisplayoptions.chooseHowDiscountsAreDisplayed"
+              )}
             </p>
           </s-stack>
           <PpbBundleQuantityOptions />
@@ -61,10 +66,12 @@ function PpbBundleQuantityOptions() {
         <s-stack direction="inline" gap="small" alignItems="center">
           <div className={productPageBundleStyles.displayOptionText}>
             <p className={productPageBundleStyles.displayOptionTitle}>
-              Bundle Quantity Options
+              {translateAdmin("tooltips.bundleQuantityOptions.title")}
             </p>
             <p className={productPageBundleStyles.displayOptionDescription}>
-              Configure this section to enable quantity options.
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.configureThisSectionToEnableQuantityOptions"
+              )}
             </p>
           </div>
           <QuestionHelpTooltip tooltipKey="bundleQuantityOptions" />
@@ -79,16 +86,24 @@ function PpbBundleQuantityOptions() {
         </s-stack>
         <s-button
           variant="secondary"
-              icon="language-translate"
+          icon="language-translate"
           disabled={!qtyOptionsEnabled || shopLocales.length === 0 || undefined}
           onClick={() => setIsBundleQuantityMultiLangModalOpen(true)}
         >
-          Multi Language
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+          )}
         </s-button>
       </s-stack>
       <p className={productPageBundleStyles.optionNote}>
-        <strong>Note:</strong> Bundle Quantity Options can only be enabled when
-        discount rules are based on quantity.
+        <strong>
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.note"
+          )}
+        </strong>{" "}
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.bundleQuantityOptionsCanOnlyBeEnabledWhenDiscountRulesAreBasedOn"
+        )}
       </p>
       <DisabledConfigurationRegion
         disabled={!qtyOptionsEnabled || !bundleQuantityOptionsEligible}
@@ -97,8 +112,9 @@ function PpbBundleQuantityOptions() {
           <s-stack direction="block" gap="small">
             {pricingState.discountRules.length === 0 ? (
               <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-                Add quantity-based discount rules to configure bundle quantity
-                options.
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.addQuantityBasedDiscountRulesToConfigureBundleQuantityOptions"
+                )}
               </p>
             ) : (
               <s-stack direction="block" gap="small">
@@ -121,13 +137,17 @@ function PpbBundleQuantityOptions() {
                             flex: 1,
                           }}
                         >
-                          Rule #{index + 1}
+                          {translateAdmin("adminDynamic.ruleNumber", {
+                            number: index + 1,
+                          })}
                         </h5>
                         <s-press-button
                           variant="tertiary"
                           tone="neutral"
                           pressed={rule.id === qtyOptionsDefaultRuleId}
-                          accessibilityLabel="Make this rule default"
+                          accessibilityLabel={translateAdmin(
+                            "adminAttributes.makeThisRuleDefault"
+                          )}
                           onClick={() => {
                             setQtyOptionsDefaultRuleId(rule.id);
                             markAsDirty();
@@ -143,13 +163,13 @@ function PpbBundleQuantityOptions() {
                             {rule.id === qtyOptionsDefaultRuleId
                               ? "\u2605"
                               : "\u2606"}{" "}
-                            Make this rule default
+                            {translateAdmin("adminDynamic.makeRuleDefault")}
                           </s-text>
                         </s-press-button>
                       </s-stack>
                       <s-stack direction="inline" gap="small">
                         <s-text-field
-                          label="Box Label"
+                          label={translateAdmin("adminAttributes.boxLabel")}
                           placeholder={`Box of ${rule.conditionValue ?? ""}`}
                           value={qtyRuleLabels[rule.id] ?? ""}
                           onInput={(e) => {
@@ -162,8 +182,10 @@ function PpbBundleQuantityOptions() {
                           autocomplete="off"
                         />
                         <s-text-field
-                          label="Box Subtext"
-                          placeholder="e.g. 20% off"
+                          label={translateAdmin("adminAttributes.boxSubtext")}
+                          placeholder={translateAdmin(
+                            "adminAttributes.eG20Off"
+                          )}
                           value={qtyRuleSubtexts[rule.id] ?? ""}
                           onInput={(e) => {
                             setQtyRuleSubtexts((prev) => ({
@@ -213,10 +235,12 @@ function PpbProgressBarOptions() {
         <s-stack direction="inline" gap="small" alignItems="center">
           <div className={productPageBundleStyles.displayOptionText}>
             <p className={productPageBundleStyles.displayOptionTitle}>
-              Progress Bar
+              {translateAdmin("tooltips.discountProgressBar.title")}
             </p>
             <p className={productPageBundleStyles.displayOptionDescription}>
-              Edit the progress bar content and settings.
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.editTheProgressBarContentAndSettings"
+              )}
             </p>
           </div>
           <QuestionHelpTooltip tooltipKey="discountProgressBar" />
@@ -239,14 +263,16 @@ function PpbProgressBarOptions() {
           }
           onClick={() => setIsProgressBarMultiLangModalOpen(true)}
         >
-          Multi Language
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+          )}
         </s-button>
       </s-stack>
       <DisabledConfigurationRegion disabled={!progressBarEnabled}>
         <div className={productPageBundleStyles.nestedDisplayOptions}>
           <s-stack direction="block" gap="small">
             <s-choice-list
-              label="Progress bar type"
+              label={translateAdmin("adminAttributes.progressBarType")}
               labelAccessibilityVisibility="exclusive"
               values={[progressBarType]}
               onChange={(e) => {
@@ -256,8 +282,16 @@ function PpbProgressBarOptions() {
                 if (value) setProgressBarType(value);
               }}
             >
-              <s-choice value="simple">Simple Bar</s-choice>
-              <s-choice value="step_based">Step-Based Bar</s-choice>
+              <s-choice value="simple">
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.simpleBar"
+                )}
+              </s-choice>
+              <s-choice value="step_based">
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.stepBasedBar"
+                )}
+              </s-choice>
             </s-choice-list>
             {progressBarType === "step_based" ? (
               <PpbProgressTierTextFields
@@ -285,7 +319,9 @@ function PpbProgressTierTextFields({
   if (pricingState.discountRules.length === 0) {
     return (
       <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-        Add discount rules to configure tier text.
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.addDiscountRulesToConfigureTierText"
+        )}
       </p>
     );
   }
@@ -296,11 +332,11 @@ function PpbProgressTierTextFields({
         <div key={rule.id} className={productPageBundleStyles.discountRuleCard}>
           <s-stack direction="block" gap="small-100">
             <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
-              Rule #{index + 1}
+              {translateAdmin("adminDynamic.ruleNumber", { number: index + 1 })}
             </p>
             <s-grid gridTemplateColumns="repeat(2, minmax(0, 1fr))" gap="small">
               <s-text-field
-                label="Tier Text"
+                label={translateAdmin("adminAttributes.tierText")}
                 value={tierTextByRuleId[rule.id]?.tierText ?? ""}
                 onInput={(e) => {
                   const value = (e.target as HTMLInputElement).value;
@@ -316,7 +352,7 @@ function PpbProgressTierTextFields({
                 autocomplete="off"
               />
               <s-text-field
-                label="Tier Subtext"
+                label={translateAdmin("adminAttributes.tierSubtext")}
                 value={tierTextByRuleId[rule.id]?.tierSubtext ?? ""}
                 onInput={(e) => {
                   const value = (e.target as HTMLInputElement).value;

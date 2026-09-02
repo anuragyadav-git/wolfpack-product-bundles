@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepSetupDetailsCard({
   flow,
@@ -25,45 +26,65 @@ export function FpbStepSetupDetailsCard({
     <div className={fullPageBundleStyles.stepSetupDetails}>
       <div className={fullPageBundleStyles.stepSetupHeader}>
         <div className={fullPageBundleStyles.stepSetupTitleGroup}>
-          <h3 className={fullPageBundleStyles.stepSetupTitle}>Step Setup</h3>
+          <h3 className={fullPageBundleStyles.stepSetupTitle}>
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupdetailscard.stepSetup"
+            )}
+          </h3>
           <s-switch
-            accessibilityLabel="Enable step"
+            accessibilityLabel={translateAdmin("adminAttributes.enableStep")}
             checked={isFirstStep || step.enabled !== false || undefined}
             disabled={isFirstStep || undefined}
             onChange={(e) => {
               stepsState.updateStepField(
                 step.id,
                 "enabled",
-                (e.target as HTMLInputElement).checked,
+                (e.target as HTMLInputElement).checked
               );
               markAsDirty();
             }}
           />
         </div>
         <div className={fullPageBundleStyles.stepSetupActions}>
-          <span title="Multi Language">
+          <span
+            title={translateAdmin(
+              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+            )}
+          >
             <s-button
               variant="tertiary"
               icon="language-translate"
-              accessibilityLabel="Multi Language"
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+              )}
               disabled={shopLocales.length === 0 || undefined}
               onClick={() => openStepMultiLanguageModal(step.id)}
             />
           </span>
-          <span title="Clone current step">
+          <span title={translateAdmin("adminAttributes.cloneCurrentStep")}>
             <s-button
               variant="tertiary"
               icon="duplicate"
-              accessibilityLabel="Clone current step"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.cloneCurrentStep"
+              )}
               onClick={() => cloneStep(step.id)}
             />
           </span>
-          <span title={stepsState.steps.length <= 1 ? "At least one step is required" : "Delete current step"}>
+          <span
+            title={
+              stepsState.steps.length <= 1
+                ? "At least one step is required"
+                : "Delete current step"
+            }
+          >
             <s-button
               variant="tertiary"
               icon="delete"
               tone="critical"
-              accessibilityLabel="Delete current step"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.deleteCurrentStep"
+              )}
               disabled={stepsState.steps.length <= 1 || undefined}
               onClick={() => deleteStep(step.id)}
             />
@@ -79,21 +100,23 @@ export function FpbStepSetupDetailsCard({
         inert={step.enabled === false && !isFirstStep ? "" : undefined}
       >
         <p className={fullPageBundleStyles.stepSetupDescription}>
-          Edit your step name (Only visible if more than one step is present)
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupdetailscard.editYourStepNameOnlyVisibleIfMoreThanOneStepIsPresent"
+          )}
         </p>
         <s-stack direction="block" gap="small">
           <s-text-field
             id={`configure-steps-${step.id}-name`}
-            label="Step Name"
+            label={translateAdmin("adminAttributes.stepName")}
             required
             error={validationErrors[`steps.${step.id}.name`]}
-            placeholder="Eg:- Add product"
+            placeholder={translateAdmin("adminAttributes.egAddProduct")}
             value={step.name ?? ""}
             onInput={(e) => {
               stepsState.updateStepField(
                 step.id,
                 "name",
-                (e.target as HTMLInputElement).value,
+                (e.target as HTMLInputElement).value
               );
               markAsDirty();
               clearValidationError(`steps.${step.id}.name`);

@@ -1,9 +1,16 @@
-import { FEATURE_COMPARISON, type FeatureComparisonRow } from "../../constants/pricing-data";
+import {
+  FEATURE_COMPARISON,
+  type FeatureComparisonRow,
+} from "../../constants/pricing-data";
 import styles from "./FeatureComparisonTable.module.css";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 import { useTranslation } from "react-i18next";
+import { translateAdmin } from "~/i18n/config";
 
-function renderFeatureValue(value: boolean | string, translate: (messageId: string) => string) {
+function renderFeatureValue(
+  value: boolean | string,
+  translate: (messageId: string) => string
+) {
   if (value === true) {
     return (
       <div className={styles.check}>
@@ -32,19 +39,32 @@ export function FeatureComparisonTable({
   return (
     <s-section>
       <s-stack direction="block" gap="base">
-        <h3 className={brandStyles.sectionTitle}>{t("billing.route.features")}</h3>
-        <div className={styles.scrollRegion} role="region" aria-label="Plan feature comparison" tabIndex={0}>
+        <h3 className={brandStyles.sectionTitle}>
+          {t("billing.route.features")}
+        </h3>
+        <div
+          className={styles.scrollRegion}
+          role="region"
+          aria-label={translateAdmin("adminAttributes.planFeatureComparison")}
+          tabIndex={0}
+        >
           <table className={styles.table}>
             <thead>
               <tr className={styles.headerRow}>
                 <th className={styles.featureHeading}>
-                  Feature
+                  {translateAdmin(
+                    "adminExtracted.components.billing.featurecomparisontable.feature"
+                  )}
                 </th>
                 <th className={styles.planHeading}>
-                  Free
+                  {translateAdmin(
+                    "adminExtracted.components.billing.featurecomparisontable.free"
+                  )}
                 </th>
                 <th className={`${styles.planHeading} ${styles.growthColumn}`}>
-                  Growth
+                  {translateAdmin(
+                    "adminExtracted.components.billing.featurecomparisontable.growth"
+                  )}
                 </th>
               </tr>
             </thead>
@@ -52,9 +72,14 @@ export function FeatureComparisonTable({
               {features.map((row, index) => (
                 <tr
                   key={index}
-                  className={`${styles.bodyRow} ${row.highlight ? styles.highlightRow : ""}`}
+                  className={`${styles.bodyRow} ${
+                    row.highlight ? styles.highlightRow : ""
+                  }`}
                 >
-                  <td className={styles.featureCell} data-highlight={row.highlight || undefined}>
+                  <td
+                    className={styles.featureCell}
+                    data-highlight={row.highlight || undefined}
+                  >
                     {t(row.featureMessageId)}
                   </td>
                   <td className={styles.planCell}>

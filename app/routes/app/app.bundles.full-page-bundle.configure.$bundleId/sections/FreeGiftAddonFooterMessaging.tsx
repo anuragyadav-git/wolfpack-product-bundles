@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbAddonFooterMessaging({
   flow,
@@ -40,7 +41,9 @@ export function FpbAddonFooterMessaging({
         >
           <div className={fullPageBundleStyles.panelHeader}>
             <h3 className={fullPageBundleStyles.panelTitle}>
-              Footer Messaging
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonfootermessaging.footerMessaging"
+              )}
             </h3>
             <s-stack direction="inline" gap="small-100">
               <s-button
@@ -48,7 +51,9 @@ export function FpbAddonFooterMessaging({
                 icon="code"
                 onClick={() => setIsAddonVariablesModalOpen(true)}
               >
-                Show Variables
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.showVariables"
+                )}
               </s-button>
               <s-button
                 variant="secondary"
@@ -60,16 +65,24 @@ export function FpbAddonFooterMessaging({
                 }
                 onClick={openAddonFooterMultiLanguageModal}
               >
-                Multi Language
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                )}
               </s-button>
             </s-stack>
           </div>
           <s-stack direction="block" gap="small">
-            <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>Tier 1</h4>
+            <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonfootermessaging.tier1"
+              )}
+            </h4>
             <s-text-field
-              label="Message when rule not met"
+              label={translateAdmin("adminAttributes.messageWhenRuleNotMet")}
               value={addonMessages.discountText}
-              placeholder="Add {{addonsConditionDiff}} more product(s) to claim {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+              placeholder={translateAdmin(
+                "adminAttributes.addAddonsConditionDiffMoreProductSToClaimAddonsDiscountValueAddonsDiscountValueUnit"
+              )}
               onInput={(e) => {
                 const value = (e.target as HTMLInputElement).value;
                 setRuleMessages((prev: Record<string, any>) => ({
@@ -84,9 +97,13 @@ export function FpbAddonFooterMessaging({
               autocomplete="off"
             />
             <s-text-field
-              label="Success Message"
+              label={translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
+              )}
               value={addonMessages.successMessage}
-              placeholder="Congrats you are eligible for {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+              placeholder={translateAdmin(
+                "adminAttributes.congratsYouAreEligibleForAddonsDiscountValueAddonsDiscountValueUnitOffOn"
+              )}
               onInput={(e) => {
                 const value = (e.target as HTMLInputElement).value;
                 setRuleMessages((prev: Record<string, any>) => ({

@@ -1,28 +1,42 @@
 import { type HeadersFunction, type LoaderFunctionArgs } from "@remix-run/node";
-import { Outlet, useLoaderData, useLocation, useNavigate, useNavigation, useRouteError, isRouteErrorResponse } from "@remix-run/react";
+import {
+  Outlet,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+  useNavigation,
+  useRouteError,
+  isRouteErrorResponse,
+} from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../../shopify.server";
 import { ErrorPage } from "../../components/ErrorPage";
 import { I18nextProvider, useTranslation } from "react-i18next";
-import { useEffect } from "react";
-import { changeAdminI18nLanguage, i18n, loadAdminLocaleResources } from "../../i18n/config";
-import { loadShopAdminLocale } from "../../services/admin-locale.server";
+import { useEffect, useState } from "react";
+import {
+  changeAdminI18nLanguage,
+  i18n,
+  loadAdminLocaleResources,
+  resolveAdminLocaleFromRequest,
+} from "../../i18n/config";
 
 type AdminLoadingApi = (isLoading?: boolean) => void;
 
 export function isAdminPageNavigationLoading(
   state: string,
   currentPathname: string,
-  destinationPathname?: string,
+  destinationPathname?: string
 ) {
-  return state === "loading"
-    && destinationPathname !== undefined
-    && destinationPathname !== currentPathname;
+  return (
+    state === "loading" &&
+    destinationPathname !== undefined &&
+    destinationPathname !== currentPathname
+  );
 }
 
 export function syncAdminNavigationLoading(
   isLoading: boolean,
-  loading: AdminLoadingApi,
+  loading: AdminLoadingApi
 ) {
   loading(isLoading);
   return () => loading(false);
@@ -30,7 +44,7 @@ export function syncAdminNavigationLoading(
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
-  const locale = await loadShopAdminLocale(session.shop);
+  const locale = resolveAdminLocaleFromRequest(request);
   await loadAdminLocaleResources(locale);
   return {
     apiKey: process.env.SHOPIFY_API_KEY || "",
@@ -45,15 +59,24 @@ function AdminNavigation() {
 
   const handleNavigation = (href: string) => (event: Event) => {
     const mouseEvent = event as MouseEvent;
-    if (mouseEvent.metaKey || mouseEvent.ctrlKey || mouseEvent.shiftKey || mouseEvent.altKey) return;
+    if (
+      mouseEvent.metaKey ||
+      mouseEvent.ctrlKey ||
+      mouseEvent.shiftKey ||
+      mouseEvent.altKey
+    )
+      return;
     event.preventDefault();
-    const shopify = (
+    const shopify =
       typeof window === "undefined"
         ? undefined
-        : (window as typeof window & {
-            shopify?: { saveBar?: { leaveConfirmation?: () => Promise<void> | void } };
-          }).shopify
-    );
+        : (
+            window as typeof window & {
+              shopify?: {
+                saveBar?: { leaveConfirmation?: () => Promise<void> | void };
+              };
+            }
+          ).shopify;
     if (!shopify?.saveBar?.leaveConfirmation) {
       navigate(href);
       return;
@@ -63,36 +86,64 @@ function AdminNavigation() {
 
   return (
     <s-app-nav>
-      <s-link href="/app/dashboard" onClick={handleNavigation("/app/dashboard")}>{t("nav.dashboard")}</s-link>
-      <s-link href="/app/settings" onClick={handleNavigation("/app/settings")}>{t("nav.settings")}</s-link>
-      <s-link href="/app/integrations" onClick={handleNavigation("/app/integrations")}>{t("nav.integrations")}</s-link>
-      <s-link href="/app/attribution" onClick={handleNavigation("/app/attribution")}>{t("nav.analytics")}</s-link>
-      <s-link href="/app/offer-operations" onClick={handleNavigation("/app/offer-operations")}>{t("nav.offerOperations")}</s-link>
-      <s-link href="/app/billing" onClick={handleNavigation("/app/billing")}>{t("nav.billing")}</s-link>
-      <s-link href="/app/events" onClick={handleNavigation("/app/events")}>{t("nav.events")}</s-link>
+      <s-link
+        href="/app/dashboard"
+        onClick={handleNavigation("/app/dashboard")}
+      >
+        {t("nav.dashboard")}
+      </s-link>
+      <s-link href="/app/settings" onClick={handleNavigation("/app/settings")}>
+        {t("nav.settings")}
+      </s-link>
+      <s-link
+        href="/app/integrations"
+        onClick={handleNavigation("/app/integrations")}
+      >
+        {t("nav.integrations")}
+      </s-link>
+      <s-link
+        href="/app/attribution"
+        onClick={handleNavigation("/app/attribution")}
+      >
+        {t("nav.analytics")}
+      </s-link>
+      <s-link
+        href="/app/offer-operations"
+        onClick={handleNavigation("/app/offer-operations")}
+      >
+        {t("nav.offerOperations")}
+      </s-link>
+      <s-link href="/app/billing" onClick={handleNavigation("/app/billing")}>
+        {t("nav.billing")}
+      </s-link>
+      <s-link href="/app/events" onClick={handleNavigation("/app/events")}>
+        {t("nav.events")}
+      </s-link>
     </s-app-nav>
   );
 }
 
 export default function App() {
   const { locale } = useLoaderData<typeof loader>();
+  const [, setRenderedLocale] = useState(locale);
   const location = useLocation();
   const navigation = useNavigation();
   const isPageNavigationLoading = isAdminPageNavigationLoading(
     navigation.state,
     location.pathname,
-    navigation.location?.pathname,
+    navigation.location?.pathname
   );
 
   useEffect(() => {
-    if (i18n.language !== locale) {
-      void changeAdminI18nLanguage(locale);
+    const shopifyLocale = shopify.config.locale;
+    if (i18n.language !== shopifyLocale) {
+      void changeAdminI18nLanguage(shopifyLocale).then(setRenderedLocale);
     }
   }, [locale]);
 
   useEffect(
     () => syncAdminNavigationLoading(isPageNavigationLoading, shopify.loading),
-    [isPageNavigationLoading],
+    [isPageNavigationLoading]
   );
 
   return (
@@ -105,7 +156,11 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  if (isRouteErrorResponse(error) && error.status !== 401 && error.status !== 403) {
+  if (
+    isRouteErrorResponse(error) &&
+    error.status !== 401 &&
+    error.status !== 403
+  ) {
     return <ErrorPage error={error} />;
   }
   return boundary.error(error);

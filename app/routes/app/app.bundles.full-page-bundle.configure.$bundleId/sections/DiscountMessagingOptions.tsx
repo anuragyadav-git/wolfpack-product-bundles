@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbDiscountMessagingOptions({
   flow,
@@ -42,10 +43,12 @@ export function FpbDiscountMessagingOptions({
           <s-stack direction="inline" gap="small" alignItems="center">
             <div className={fullPageBundleStyles.displayOptionText}>
               <p className={fullPageBundleStyles.displayOptionTitle}>
-                Discount Messaging
+                {translateAdmin("tooltips.discountMessaging.title")}
               </p>
               <p className={fullPageBundleStyles.displayOptionDescription}>
-                Edit how discount messages appear above the subtotal.
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.editHowDiscountMessagesAppearAboveTheSubtotal"
+                )}
               </p>
             </div>
             <QuestionHelpTooltip tooltipKey="discountMessaging" />
@@ -60,7 +63,7 @@ export function FpbDiscountMessagingOptions({
           </s-stack>
           {shopLocales.length > 0 && (
             <s-checkbox
-              label="Enable multi-language"
+              label={translateAdmin("adminAttributes.enableMultiLanguage")}
               checked={discountMessagingMultiLanguageEnabled || undefined}
               disabled={!pricingState.discountMessagingEnabled || undefined}
               onChange={(e) => {
@@ -74,8 +77,9 @@ export function FpbDiscountMessagingOptions({
         </s-stack>
         {pricingState.discountType === DiscountMethod.BUY_X_GET_Y && (
           <s-paragraph>
-            Discount messaging displays the Total Quantity to Claim Offer (Buy +
-            Get) to ensure customers add their rewards to the cart
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.discountMessagingDisplaysTheTotalQuantityToClaimOfferBuyGetToEns"
+            )}
           </s-paragraph>
         )}
         <DisabledConfigurationRegion
@@ -89,7 +93,7 @@ export function FpbDiscountMessagingOptions({
                 >
                   <s-stack direction="block" gap="small-100">
                     <s-select
-                      label="Language"
+                      label={translateAdmin("dashboard.language.label")}
                       value={activeDiscountLocale}
                       onChange={(e) => {
                         const locale = (e.target as HTMLSelectElement).value;
@@ -129,7 +133,9 @@ export function FpbDiscountMessagingOptions({
                         fontWeight: 500,
                       }}
                     >
-                      Active languages
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.activeLanguages"
+                      )}
                     </p>
                     <s-stack direction="inline" gap="small-100">
                       {shopLocales
@@ -160,7 +166,9 @@ export function FpbDiscountMessagingOptions({
                   icon="code"
                   onClick={() => setIsDiscountVariablesModalOpen(true)}
                 >
-                  Show Variables
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.showVariables"
+                  )}
                 </s-button>
               </div>
               {pricingState.discountRules.length > 0 ? (
@@ -190,10 +198,14 @@ export function FpbDiscountMessagingOptions({
                                 fontWeight: 600,
                               }}
                             >
-                              Rule #{index + 1}
+                              {translateAdmin("adminDynamic.ruleNumber", {
+                                number: index + 1,
+                              })}
                             </h5>
                             <s-text-field
-                              label="Discount Text"
+                              label={translateAdmin(
+                                "adminAttributes.discountText"
+                              )}
                               value={
                                 localeMessages?.discountText ||
                                 defaultDiscountText
@@ -233,7 +245,9 @@ export function FpbDiscountMessagingOptions({
                   <s-section>
                     <s-stack direction="block" gap="small">
                       <s-text-field
-                        label="Success Message"
+                        label={translateAdmin(
+                          "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
+                        )}
                         value={(() => {
                           const defaultMsg =
                             getDefaultDiscountRuleSuccessMessage(
@@ -274,7 +288,9 @@ export function FpbDiscountMessagingOptions({
                       textAlign: "center",
                     }}
                   >
-                    Add discount rules to configure messaging.
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.addDiscountRulesToConfigureMessaging"
+                    )}
                   </p>
                 </s-section>
               )}

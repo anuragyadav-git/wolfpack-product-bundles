@@ -1,5 +1,6 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PlusIcon } from "./PpbStepSetupShared";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbCategoryRulesList({
   step,
@@ -36,7 +37,11 @@ export function PpbCategoryRulesList({
                 }))
               }
             >
-              <span>{categoryLabel} rules</span>
+              <span>
+                {translateAdmin("adminDynamic.categoryRules", {
+                  category: categoryLabel,
+                })}
+              </span>
               <span aria-hidden="true">{isRulesOpen ? "⌃" : "⌄"}</span>
             </button>
             {isRulesOpen && (
@@ -78,8 +83,13 @@ function PpbCategoryRuleBody({
   return (
     <div className={productPageBundleStyles.categoryRuleBody}>
       <p className={productPageBundleStyles.categoryRuleHelp}>
-        Create Rules based on amount or quantity of products added on this
-        category. <br /> Note: Rules are only valid on this category
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.createRulesBasedOnAmountOrQuantityOfProductsAddedOnThisCategory"
+        )}{" "}
+        <br />{" "}
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.noteRulesAreOnlyValidOnThisCategory"
+        )}
       </p>
       <div className={productPageBundleStyles.rulesList}>
         {rules.map((rule: any, ruleIndex: number) => {
@@ -92,7 +102,9 @@ function PpbCategoryRuleBody({
             >
               <div className={productPageBundleStyles.ruleHeader}>
                 <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>
-                  Rule #{ruleIndex + 1}
+                  {translateAdmin("adminDynamic.ruleNumber", {
+                    number: ruleIndex + 1,
+                  })}
                 </h4>
                 <s-button
                   variant="tertiary"
@@ -102,7 +114,9 @@ function PpbCategoryRuleBody({
                     removeCategoryConditionRule(step.id, catIndex, ruleId)
                   }
                 >
-                  Remove
+                  {translateAdmin(
+                    "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                  )}
                 </s-button>
               </div>
               <div className={productPageBundleStyles.categoryRuleFields}>
@@ -115,10 +129,10 @@ function PpbCategoryRuleBody({
                       catIndex,
                       ruleId,
                       "type",
-                      (e.target as HTMLSelectElement).value,
+                      (e.target as HTMLSelectElement).value
                     )
                   }
-                  aria-label="Type"
+                  aria-label={translateAdmin("dashboard.table.type")}
                 >
                   {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -137,10 +151,12 @@ function PpbCategoryRuleBody({
                       catIndex,
                       ruleId,
                       "condition",
-                      (e.target as HTMLSelectElement).value,
+                      (e.target as HTMLSelectElement).value
                     )
                   }
-                  aria-label="Condition"
+                  aria-label={translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                  )}
                 >
                   {[...CATEGORY_CONDITION_OPERATOR_OPTIONS].map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -159,11 +175,11 @@ function PpbCategoryRuleBody({
                       catIndex,
                       ruleId,
                       "value",
-                      (e.target as HTMLInputElement).value,
+                      (e.target as HTMLInputElement).value
                     )
                   }
                   autoComplete="off"
-                  aria-label="Value"
+                  aria-label={translateAdmin("adminAttributes.value")}
                 />
               </div>
             </div>
@@ -172,13 +188,13 @@ function PpbCategoryRuleBody({
       </div>
       {rules.length === 1 && (
         <s-checkbox
-          label="Auto Next When rule is met"
+          label={translateAdmin("adminAttributes.autoNextWhenRuleIsMet")}
           checked={cat.autoNextStepOnConditionMet === true || undefined}
           onChange={(e) =>
             updateCategoryAutoNextRule(
               step.id,
               catIndex,
-              (e.target as HTMLInputElement).checked,
+              (e.target as HTMLInputElement).checked
             )
           }
         />
@@ -189,7 +205,9 @@ function PpbCategoryRuleBody({
         onClick={() => addCategoryConditionRule(step.id, catIndex)}
       >
         <PlusIcon />
-        Add Rule
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+        )}
       </button>
     </div>
   );

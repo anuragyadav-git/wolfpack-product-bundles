@@ -5,7 +5,11 @@
  * Uses shared billing components from app/components/billing.
  */
 
-import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
+import {
+  json,
+  type LoaderFunctionArgs,
+  type ActionFunctionArgs,
+} from "@remix-run/node";
 import { useLoaderData, useFetcher, useNavigate } from "@remix-run/react";
 import { authenticate } from "../../shopify.server";
 import { BundleAnalyticsService } from "../../services/bundle-analytics.server";
@@ -26,9 +30,7 @@ import {
   AdminPageTitleBar,
 } from "../../components/AdminPageNavigation";
 import { resolveShopEntitlements } from "../../services/subscriptions/subscription-service.server";
-import {
-  getShopifyAppPricingUrl,
-} from "../../services/subscriptions/app-pricing-navigation.server";
+import { getShopifyAppPricingUrl } from "../../services/subscriptions/app-pricing-navigation.server";
 import db from "../../db.server";
 import { getCurrentShopifyAppIdentity } from "../../services/subscriptions/shopify-app-identity.server";
 
@@ -47,13 +49,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const upgraded = url.searchParams.get("upgraded");
     const error = url.searchParams.get("error");
 
-    const [subscriptionInfo, quickStats, currentBundleCount] = await Promise.all([
-    resolveShopEntitlements({ shopDomain }),
-      BundleAnalyticsService.getQuickStats(shopDomain),
-      db.bundle.count({
-        where: { shopId: shopDomain, status: { in: ["active", "unlisted"] } },
-      }),
-    ]);
+    const [subscriptionInfo, quickStats, currentBundleCount] =
+      await Promise.all([
+        resolveShopEntitlements({ shopDomain }),
+        BundleAnalyticsService.getQuickStats(shopDomain),
+        db.bundle.count({
+          where: { shopId: shopDomain, status: { in: ["active", "unlisted"] } },
+        }),
+      ]);
 
     if (!subscriptionInfo.entitlements || !subscriptionInfo.planCode) {
       throw new Error("Could not retrieve subscription information");
@@ -65,11 +68,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
       subscription: {
         plan: subscriptionInfo.planCode.toLowerCase() as "free" | "growth",
         status: subscriptionInfo.status.toLowerCase(),
-        isActive: subscriptionInfo.status === "ACTIVE" || subscriptionInfo.planCode === "FREE",
+        isActive:
+          subscriptionInfo.status === "ACTIVE" ||
+          subscriptionInfo.planCode === "FREE",
         billingInterval: subscriptionInfo.billingInterval,
         bundleLimit: publicLimit ?? Number.MAX_SAFE_INTEGER,
         currentBundleCount,
-        canCreateBundle: publicLimit === null || currentBundleCount < publicLimit,
+        canCreateBundle:
+          publicLimit === null || currentBundleCount < publicLimit,
       },
       stats: quickStats,
       plans: PLANS,
@@ -77,10 +83,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
       callbackError: error ?? null,
     });
   } catch (error: any) {
-    AppLogger.error("Error loading billing page", {
-      component: "app.billing",
-      operation: "loader"
-    }, error);
+    AppLogger.error(
+      "Error loading billing page",
+      {
+        component: "app.billing",
+        operation: "loader",
+      },
+      error
+    );
 
     return json(
       {
@@ -110,19 +120,32 @@ export async function action({ request }: ActionFunctionArgs) {
         hostedPlanUrl: getShopifyAppPricingUrl(session.shop, app.handle),
       });
     } catch (error: any) {
-      AppLogger.error("Error opening Shopify plan management", {
-        component: "app.billing",
-        operation: "action-cancel"
-      }, error);
+      AppLogger.error(
+        "Error opening Shopify plan management",
+        {
+          component: "app.billing",
+          operation: "action-cancel",
+        },
+        error
+      );
 
-      return json({ error: "Failed to open Shopify plan management" }, { status: 500 });
+      return json(
+        { error: "Failed to open Shopify plan management" },
+        { status: 500 }
+      );
     }
   }
 
   return json({ error: "Invalid intent" }, { status: 400 });
 }
 
-function CustomProgressBar({ progress, tone }: { progress: number; tone: string }) {
+function CustomProgressBar({
+  progress,
+  tone,
+}: {
+  progress: number;
+  tone: string;
+}) {
   return (
     <div className={billingStyles.progressTrack}>
       <div
@@ -156,14 +179,20 @@ export default function BillingPage() {
     dismissErrorBanner,
   } = billingState;
 
-  const isCancelling = fetcher.state === "submitting" && fetcher.formData?.get("intent") === "cancel";
+  const isCancelling =
+    fetcher.state === "submitting" &&
+    fetcher.formData?.get("intent") === "cancel";
   const handleCancelSubscription = useCallback(() => {
     fetcher.submit({ intent: "cancel" }, { method: "post" });
     closeCancelConfirm();
   }, [fetcher, closeCancelConfirm]);
 
   useEffect(() => {
-    if (fetcher.data && "hostedPlanUrl" in fetcher.data && fetcher.data.hostedPlanUrl) {
+    if (
+      fetcher.data &&
+      "hostedPlanUrl" in fetcher.data &&
+      fetcher.data.hostedPlanUrl
+    ) {
       open(fetcher.data.hostedPlanUrl, "_top");
     }
   }, [fetcher.data]);
@@ -173,7 +202,10 @@ export default function BillingPage() {
   const isGrowthPlan = currentPlan === "growth";
 
   const usagePercentage = data.subscription
-    ? calculateUsagePercentage(data.subscription.currentBundleCount, data.subscription.bundleLimit)
+    ? calculateUsagePercentage(
+        data.subscription.currentBundleCount,
+        data.subscription.bundleLimit
+      )
     : 0;
 
   const progressBarTone = getProgressBarTone(usagePercentage);
@@ -198,208 +230,277 @@ export default function BillingPage() {
             onBack={handleBack}
           />
           <s-stack direction="block" gap="large">
+            {showSuccessBanner && (
+              <UpgradeSuccessBanner onDismiss={dismissSuccessBanner} />
+            )}
 
-          {showSuccessBanner && (
-            <UpgradeSuccessBanner
-              onDismiss={dismissSuccessBanner}
-            />
-          )}
+            {showErrorBanner && data.callbackError && (
+              <SubscriptionErrorBanner
+                errorCode={data.callbackError}
+                onRetry={dismissErrorBanner}
+                onDismiss={dismissErrorBanner}
+              />
+            )}
 
-          {showErrorBanner && data.callbackError && (
-            <SubscriptionErrorBanner
-              errorCode={data.callbackError}
-              onRetry={dismissErrorBanner}
-              onDismiss={dismissErrorBanner}
-            />
-          )}
-
-          {/* Current Plan Status */}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <s-stack direction="inline" justifyContent="space-between" alignItems="start">
-                <s-stack direction="block" gap="small-100">
-                  <s-stack direction="inline" alignItems="center" gap="small-100">
-                    <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{t("billing.route.currentPlan")}</h2>
-                    {isGrowthPlan && (
-                      <div className={billingStyles.starIcon}>
-                        <s-icon type="check" />
-                      </div>
-                    )}
+            {/* Current Plan Status */}
+            <s-section>
+              <s-stack direction="block" gap="base">
+                <s-stack
+                  direction="inline"
+                  justifyContent="space-between"
+                  alignItems="start"
+                >
+                  <s-stack direction="block" gap="small-100">
+                    <s-stack
+                      direction="inline"
+                      alignItems="center"
+                      gap="small-100"
+                    >
+                      <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+                        {t("billing.route.currentPlan")}
+                      </h2>
+                      {isGrowthPlan && (
+                        <div className={billingStyles.starIcon}>
+                          <s-icon type="check" />
+                        </div>
+                      )}
+                    </s-stack>
+                    <s-stack direction="inline" alignItems="center" gap="small">
+                      <span style={{ fontSize: 20, fontWeight: 700 }}>
+                        {PLANS[currentPlan].name}
+                      </span>
+                      <s-badge tone={isGrowthPlan ? "success" : "info"}>
+                        {data.subscription?.isActive
+                          ? t("billing.route.active")
+                          : t("billing.route.inactive")}
+                      </s-badge>
+                    </s-stack>
                   </s-stack>
-                  <s-stack direction="inline" alignItems="center" gap="small">
-                    <span style={{ fontSize: 20, fontWeight: 700 }}>{PLANS[currentPlan].name}</span>
-                    <s-badge tone={isGrowthPlan ? "success" : "info"}>
-                      {data.subscription?.isActive ? t("billing.route.active") : t("billing.route.inactive")}
+                  {isGrowthPlan && (
+                    <s-stack direction="block" gap="small-400" alignItems="end">
+                      <span style={{ fontSize: 28, fontWeight: 700 }}>
+                        ${PLANS.growth.price}
+                      </span>
+                      <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
+                        {t("billing.cards.perMonth")}
+                      </p>
+                    </s-stack>
+                  )}
+                </s-stack>
+
+                <s-divider />
+
+                {/* Bundle Usage */}
+                <s-stack direction="block" gap="small">
+                  <s-stack
+                    direction="inline"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                      {t("billing.route.bundleUsage")}
+                    </p>
+                    <s-badge
+                      tone={
+                        usagePercentage >= 90
+                          ? "critical"
+                          : usagePercentage >= 70
+                          ? "warning"
+                          : "success"
+                      }
+                    >
+                      {isFreePlan
+                        ? t("billing.route.bundleCount", {
+                            current: data.subscription?.currentBundleCount ?? 0,
+                            limit: data.subscription?.bundleLimit ?? 0,
+                          })
+                        : t("billing.values.unlimited")}
                     </s-badge>
                   </s-stack>
+                  {isFreePlan && (
+                    <CustomProgressBar
+                      progress={usagePercentage}
+                      tone={progressBarTone}
+                    />
+                  )}
+                  {!data.subscription?.canCreateBundle && (
+                    <s-box paddingBlockEnd="small-200">
+                      <s-banner
+                        tone="warning"
+                        heading={t("common.upgradePrompt.limitReachedTitle")}
+                        dismissible={false}
+                        hidden={false}
+                      >
+                        {t("billing.route.limitReached")}
+                        {isFreePlan && ` ${t("billing.route.limitUpgrade")}`}
+                      </s-banner>
+                    </s-box>
+                  )}
                 </s-stack>
-                {isGrowthPlan && (
-                  <s-stack direction="block" gap="small-400" alignItems="end">
-                    <span style={{ fontSize: 28, fontWeight: 700 }}>${PLANS.growth.price}</span>
-                    <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>{t("billing.cards.perMonth")}</p>
-                  </s-stack>
+
+                {isFreePlan && (
+                  <>
+                    <s-divider />
+                    <s-button variant="primary" href="/app/billing/plans">
+                      {t("common.actions.upgradeNow")}
+                    </s-button>
+                  </>
                 )}
-              </s-stack>
 
-              <s-divider />
-
-              {/* Bundle Usage */}
-              <s-stack direction="block" gap="small">
-                <s-stack direction="inline" justifyContent="space-between" alignItems="center">
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{t("billing.route.bundleUsage")}</p>
-                  <s-badge
-                    tone={
-                      usagePercentage >= 90 ? "critical" :
-                      usagePercentage >= 70 ? "warning" : "success"
-                    }
-                  >
-                    {isFreePlan
-                      ? t("billing.route.bundleCount", { current: data.subscription?.currentBundleCount ?? 0, limit: data.subscription?.bundleLimit ?? 0 })
-                      : t("billing.values.unlimited")}
-                  </s-badge>
-                </s-stack>
-                {isFreePlan && <CustomProgressBar progress={usagePercentage} tone={progressBarTone} />}
-                {!data.subscription?.canCreateBundle && (
-                  <s-box paddingBlockEnd="small-200">
-                    <s-banner
-                      tone="warning"
-                      heading={t("common.upgradePrompt.limitReachedTitle")}
-                      dismissible={false}
-                      hidden={false}
-                    >
-                      {t("billing.route.limitReached")}
-                      {isFreePlan && ` ${t("billing.route.limitUpgrade")}`}
-                    </s-banner>
-                  </s-box>
-                )}
-              </s-stack>
-
-              {isFreePlan && (
-                <>
-                  <s-divider />
-                  <s-button
-                    variant="primary"
-                    href="/app/billing/plans"
-                  >
-                    {t("common.actions.upgradeNow")}
-                  </s-button>
-                </>
-              )}
-
-              {/* Quick Stats */}
-              {data.stats && (
-                <>
-                  <s-divider />
-                  <s-stack direction="block" gap="small-100">
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{t("billing.route.overview")}</p>
-                    <s-grid gridTemplateColumns="@container billing-page (inline-size > 560px) 1fr 1fr 1fr 1fr, 1fr 1fr" gap="base">
-                      <s-stack direction="block" gap="small-400">
-                        <span style={{ fontSize: 16, fontWeight: 700 }}>{data.stats.activeBundles}</span>
-                        <span style={{ fontSize: 12, color: "#6d7175" }}>{t("billing.route.activeBundles")}</span>
-                      </s-stack>
-                      <s-stack direction="block" gap="small-400">
-                        <span style={{ fontSize: 16, fontWeight: 700 }}>{data.stats.totalSteps}</span>
-                        <span style={{ fontSize: 12, color: "#6d7175" }}>{t("billing.route.totalSteps")}</span>
-                      </s-stack>
-                      <s-stack direction="block" gap="small-400">
-                        <span style={{ fontSize: 16, fontWeight: 700 }}>{data.stats.bundleTypes.productPage}</span>
-                        <span style={{ fontSize: 12, color: "#6d7175" }}>{t("billing.route.productPage")}</span>
-                      </s-stack>
-                      <s-stack direction="block" gap="small-400">
-                        <span style={{ fontSize: 16, fontWeight: 700 }}>{data.stats.bundleTypes.fullPage}</span>
-                        <span style={{ fontSize: 12, color: "#6d7175" }}>{t("billing.route.fullPage")}</span>
-                      </s-stack>
-                    </s-grid>
-                  </s-stack>
-                </>
-              )}
-
-              {/* Cancel Subscription */}
-              {isGrowthPlan && !showCancelConfirm && (
-                <>
-                  <s-divider />
-                  <s-button
-                    variant="tertiary"
-                    tone="critical"
-                    onClick={openCancelConfirm}
-                    disabled={isCancelling || undefined}
-                  >
-                    {t("billing.route.cancelSubscription")}
-                  </s-button>
-                </>
-              )}
-
-              {showCancelConfirm && (
-                <>
-                  <s-divider />
-                  <s-box paddingBlockEnd="small-200">
-                    <s-banner
-                      tone="warning"
-                      heading={t("billing.route.cancelHeading")}
-                      dismissible={false}
-                      hidden={false}
-                    >
-                      <s-stack direction="block" gap="small">
-                        <p style={{ margin: 0, fontSize: 14 }}>
-                          {t("billing.route.downgradeBody", { limit: PLANS.free.bundleLimit })}
-                        </p>
-                        {data.subscription && data.subscription.currentBundleCount > PLANS.free.bundleLimit && (
-                          <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                            {t("billing.route.archiveWarning", { current: data.subscription.currentBundleCount, excess: data.subscription.currentBundleCount - PLANS.free.bundleLimit })}
-                          </p>
-                        )}
-                        <s-stack direction="inline" gap="small-100">
-                          <s-button
-                            variant="primary"
-                            onClick={handleCancelSubscription}
-                            loading={isCancelling || undefined}
-                          >
-                            {t("billing.route.confirmCancellation")}
-                          </s-button>
-                          <s-button onClick={closeCancelConfirm}>
-                            {t("billing.route.keepSubscription")}
-                          </s-button>
+                {/* Quick Stats */}
+                {data.stats && (
+                  <>
+                    <s-divider />
+                    <s-stack direction="block" gap="small-100">
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                        {t("billing.route.overview")}
+                      </p>
+                      <s-grid
+                        gridTemplateColumns="@container billing-page (inline-size > 560px) 1fr 1fr 1fr 1fr, 1fr 1fr"
+                        gap="base"
+                      >
+                        <s-stack direction="block" gap="small-400">
+                          <span style={{ fontSize: 16, fontWeight: 700 }}>
+                            {data.stats.activeBundles}
+                          </span>
+                          <span style={{ fontSize: 12, color: "#6d7175" }}>
+                            {t("billing.route.activeBundles")}
+                          </span>
                         </s-stack>
-                      </s-stack>
-                    </s-banner>
-                  </s-box>
-                </>
-              )}
-            </s-stack>
-          </s-section>
+                        <s-stack direction="block" gap="small-400">
+                          <span style={{ fontSize: 16, fontWeight: 700 }}>
+                            {data.stats.totalSteps}
+                          </span>
+                          <span style={{ fontSize: 12, color: "#6d7175" }}>
+                            {t("billing.route.totalSteps")}
+                          </span>
+                        </s-stack>
+                        <s-stack direction="block" gap="small-400">
+                          <span style={{ fontSize: 16, fontWeight: 700 }}>
+                            {data.stats.bundleTypes.productPage}
+                          </span>
+                          <span style={{ fontSize: 12, color: "#6d7175" }}>
+                            {t("billing.route.productPage")}
+                          </span>
+                        </s-stack>
+                        <s-stack direction="block" gap="small-400">
+                          <span style={{ fontSize: 16, fontWeight: 700 }}>
+                            {data.stats.bundleTypes.fullPage}
+                          </span>
+                          <span style={{ fontSize: 12, color: "#6d7175" }}>
+                            {t("billing.route.fullPage")}
+                          </span>
+                        </s-stack>
+                      </s-grid>
+                    </s-stack>
+                  </>
+                )}
 
-          {/* Plan Features */}
-          <s-section>
-            <s-stack direction="block" gap="base">
-              <s-heading>{t("billing.route.features")}</s-heading>
-              <div className={billingStyles.featuresGrid}>
-                {PLANS[currentPlan].featureMessageIds.map((messageId) => (
-                  <s-stack key={messageId} direction="inline" alignItems="center" gap="small-100">
-                    <div className={billingStyles.checkIcon}>
-                      <s-icon type="check" />
-                    </div>
-                    <s-text>{t(messageId)}</s-text>
-                  </s-stack>
-                ))}
-              </div>
-            </s-stack>
-          </s-section>
+                {/* Cancel Subscription */}
+                {isGrowthPlan && !showCancelConfirm && (
+                  <>
+                    <s-divider />
+                    <s-button
+                      variant="tertiary"
+                      tone="critical"
+                      onClick={openCancelConfirm}
+                      disabled={isCancelling || undefined}
+                    >
+                      {t("billing.route.cancelSubscription")}
+                    </s-button>
+                  </>
+                )}
 
-          {/* Help Section */}
-          <s-section>
-            <s-stack direction="block" gap="small-100">
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{t("billing.route.needHelp")}</h3>
-              <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                {t("billing.route.helpBody")}
-              </p>
-              <s-button
-                onClick={() => openSupportChat()}
-              >
-                {t("billing.actions.contactSupport")}
-              </s-button>
-            </s-stack>
-          </s-section>
+                {showCancelConfirm && (
+                  <>
+                    <s-divider />
+                    <s-box paddingBlockEnd="small-200">
+                      <s-banner
+                        tone="warning"
+                        heading={t("billing.route.cancelHeading")}
+                        dismissible={false}
+                        hidden={false}
+                      >
+                        <s-stack direction="block" gap="small">
+                          <p style={{ margin: 0, fontSize: 14 }}>
+                            {t("billing.route.downgradeBody", {
+                              limit: PLANS.free.bundleLimit,
+                            })}
+                          </p>
+                          {data.subscription &&
+                            data.subscription.currentBundleCount >
+                              PLANS.free.bundleLimit && (
+                              <p
+                                style={{
+                                  margin: 0,
+                                  fontSize: 14,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {t("billing.route.archiveWarning", {
+                                  current: data.subscription.currentBundleCount,
+                                  excess:
+                                    data.subscription.currentBundleCount -
+                                    PLANS.free.bundleLimit,
+                                })}
+                              </p>
+                            )}
+                          <s-stack direction="inline" gap="small-100">
+                            <s-button
+                              variant="primary"
+                              onClick={handleCancelSubscription}
+                              loading={isCancelling || undefined}
+                            >
+                              {t("billing.route.confirmCancellation")}
+                            </s-button>
+                            <s-button onClick={closeCancelConfirm}>
+                              {t("billing.route.keepSubscription")}
+                            </s-button>
+                          </s-stack>
+                        </s-stack>
+                      </s-banner>
+                    </s-box>
+                  </>
+                )}
+              </s-stack>
+            </s-section>
 
+            {/* Plan Features */}
+            <s-section>
+              <s-stack direction="block" gap="base">
+                <s-heading>{t("billing.route.features")}</s-heading>
+                <div className={billingStyles.featuresGrid}>
+                  {PLANS[currentPlan].featureMessageIds.map((messageId) => (
+                    <s-stack
+                      key={messageId}
+                      direction="inline"
+                      alignItems="center"
+                      gap="small-100"
+                    >
+                      <div className={billingStyles.checkIcon}>
+                        <s-icon type="check" />
+                      </div>
+                      <s-text>{t(messageId)}</s-text>
+                    </s-stack>
+                  ))}
+                </div>
+              </s-stack>
+            </s-section>
+
+            {/* Help Section */}
+            <s-section>
+              <s-stack direction="block" gap="small-100">
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+                  {t("billing.route.needHelp")}
+                </h3>
+                <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
+                  {t("billing.route.helpBody")}
+                </p>
+                <s-button onClick={() => openSupportChat()}>
+                  {t("billing.actions.contactSupport")}
+                </s-button>
+              </s-stack>
+            </s-section>
           </s-stack>
         </div>
       </s-query-container>

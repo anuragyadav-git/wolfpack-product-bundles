@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { translateAdmin } from "~/i18n/config";
 
 export function ConfigureContextualSaveBar({
   isOpen,
@@ -35,10 +36,12 @@ export function ConfigureContextualSaveBar({
         disabled={isSaving}
         onClick={onSave}
       >
-        Save
+        {translateAdmin("dashboard.language.save")}
       </button>
       <button type="button" disabled={isSaving} onClick={onDiscard}>
-        Discard
+        {translateAdmin(
+          "adminExtracted.shared.bundleConfigure.configurecontextualsavebar.discard"
+        )}
       </button>
     </ui-save-bar>
   );

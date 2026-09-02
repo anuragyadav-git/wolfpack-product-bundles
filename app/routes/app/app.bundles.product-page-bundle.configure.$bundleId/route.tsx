@@ -21,9 +21,7 @@ import {
   handleAssignProductTemplate,
 } from "./handlers";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
-import {
-  fetchBundleConfigureShopifyData,
-} from "../../../lib/bundle-configure-loader.server";
+import { fetchBundleConfigureShopifyData } from "../../../lib/bundle-configure-loader.server";
 import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import {
   handlePrepareStorefrontPreview,
@@ -111,7 +109,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const shopifyData = await fetchBundleConfigureShopifyData(
     admin,
     bundle.shopifyProductId,
-    bundleId,
+    bundleId
   );
 
   const { offerPolicy, ...safeBundle } = bundle;
@@ -119,7 +117,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     bundle: safeBundle,
     offerDelivery: buildSpecificLinkOfferAdminState(
       offerPolicy,
-      shopifyData.shopIanaTimezone,
+      shopifyData.shopIanaTimezone
     ),
     bundleProduct: shopifyData.bundleProduct,
     shop: session.shop,
@@ -140,7 +138,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     if (!session?.shop) {
       return json(
         { success: false, error: ERROR_MESSAGES.AUTH_REQUIRED },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -150,7 +148,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     if (!bundleId) {
       return json(
         { success: false, error: ERROR_MESSAGES.BUNDLE_ID_REQUIRED },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -162,7 +160,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           admin,
           session,
           bundleId,
-          formData,
+          formData
         );
       case "syncProduct":
         return await handleSyncProduct(admin, session, bundleId, formData);
@@ -171,7 +169,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
           admin,
           session,
           bundleId,
-          formData,
+          formData
         );
       case "getPages":
         return await handleGetPages(admin, session);
@@ -184,35 +182,60 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
       case "validateWidgetPlacement":
         return await handleValidateWidgetPlacement(admin, session, bundleId);
       case "syncBundle":
-        return await handleSyncStorefrontNow(admin, session, bundleId, "product_page", "sync_bundle");
+        return await handleSyncStorefrontNow(
+          admin,
+          session,
+          bundleId,
+          "product_page",
+          "sync_bundle"
+        );
       case "preparePreviewBundle":
-        return await handlePrepareStorefrontPreview(admin, session, bundleId, "product_page");
+        return await handlePrepareStorefrontPreview(
+          admin,
+          session,
+          bundleId,
+          "product_page"
+        );
       case "updateBundleDesignTemplate":
         return await handleUpdateBundleDesignTemplate(
           admin,
           session,
           bundleId,
-          formData,
+          formData
         );
       case "assignProductTemplate":
         return await handleAssignProductTemplate(
           admin,
           session,
           bundleId,
-          formData,
+          formData
         );
       case "recordBundlePreview":
-        return await handleRecordBundlePreview(admin, session, bundleId, formData);
+        return await handleRecordBundlePreview(
+          admin,
+          session,
+          bundleId,
+          formData
+        );
       case "generateSpecificLinkOffer":
-        return await handleGenerateSpecificLinkOffer(session, bundleId, formData);
+        return await handleGenerateSpecificLinkOffer(
+          session,
+          bundleId,
+          formData
+        );
       case "revokeSpecificLinkOffer":
         return await handleRevokeSpecificLinkOffer(admin, session, bundleId);
       case "validateSellingPlanGroups":
-        return await handleValidateSellingPlanGroups(admin, session, bundleId, "product_page");
+        return await handleValidateSellingPlanGroups(
+          admin,
+          session,
+          bundleId,
+          "product_page"
+        );
       default:
         return json(
           { success: false, error: ERROR_MESSAGES.UNKNOWN_ACTION },
-          { status: 400 },
+          { status: 400 }
         );
     }
   } catch (error: any) {
@@ -222,14 +245,14 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         component: "bundle-config",
         operation: "action",
       },
-      error,
+      error
     );
     return json(
       {
         success: false,
         error: (error as Error).message || "An error occurred",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 };

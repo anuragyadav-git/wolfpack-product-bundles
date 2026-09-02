@@ -1,6 +1,7 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { areFpbProductSlotsAvailable } from "../../../../lib/fpb-product-slots-availability";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbQuantitySettings({
   flow,
@@ -46,11 +47,15 @@ export function FpbQuantitySettings({
                 flex: 1,
               }}
             >
-              Enable Quantity Validation
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.enableQuantityValidation"
+              )}
               <QuestionHelpTooltip tooltipKey="quantityValidation" />
             </h3>
             <s-switch
-              accessibilityLabel="Enable quantity validation"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.enableQuantityValidation"
+              )}
               checked={quantityValidationEnabled || undefined}
               onChange={(e) => {
                 setQuantityValidationEnabled(
@@ -63,7 +68,9 @@ export function FpbQuantitySettings({
           <DisabledConfigurationRegion disabled={!quantityValidationEnabled}>
             <s-number-field
               id="configure-settings-maxQuantity"
-              label="Maximum allowed quantity per product"
+              label={translateAdmin(
+                "adminAttributes.maximumAllowedQuantityPerProduct"
+              )}
               required={quantityValidationEnabled || undefined}
               error={validationErrors["settings.maxQuantity"]}
               min={1}
@@ -95,11 +102,13 @@ export function FpbQuantitySettings({
                       opacity: productSlotsAvailable ? 1 : 0.5,
                     }}
                   >
-                    Product Slots
+                    {translateAdmin("tooltips.productSlots.title")}
                     <QuestionHelpTooltip tooltipKey="productSlots" />
                   </p>
                   <s-switch
-                    accessibilityLabel="Enable product slots display"
+                    accessibilityLabel={translateAdmin(
+                      "adminAttributes.enableProductSlotsDisplay"
+                    )}
                     checked={
                       productSlotsAvailable && productSlotsEnabled
                         ? true
@@ -123,7 +132,9 @@ export function FpbQuantitySettings({
                     opacity: productSlotsAvailable ? 1 : 0.5,
                   }}
                 >
-                  This feature displays empty slots on the storefront.
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.thisFeatureDisplaysEmptySlotsOnTheStorefront"
+                  )}
                 </p>
               </s-stack>
             </>
@@ -185,7 +196,9 @@ export function FpbQuantitySettings({
                     lineHeight: "20px",
                   }}
                 >
-                  Slot Icon
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.slotIcon"
+                  )}
                 </h3>
                 <p
                   style={{
@@ -195,8 +208,9 @@ export function FpbQuantitySettings({
                     color: "#303030",
                   }}
                 >
-                  You can change the default icon that renders in the empty
-                  slots
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.youCanChangeTheDefaultIconThatRendersInTheEmptySlots"
+                  )}
                 </p>
                 <div
                   style={{
@@ -211,7 +225,9 @@ export function FpbQuantitySettings({
                     disabled={!productSlotsAvailable}
                     onClick={() => setShowSlotIconPicker(true)}
                   >
-                    Change Icon
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.changeIcon"
+                    )}
                   </s-button>
                   <button
                     type="button"
@@ -232,7 +248,9 @@ export function FpbQuantitySettings({
                       cursor: productSlotsAvailable ? "pointer" : "default",
                     }}
                   >
-                    Reset
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.reset"
+                    )}
                   </button>
                 </div>
               </div>
@@ -247,7 +265,9 @@ export function FpbQuantitySettings({
                   setShowSlotIconPicker(false);
                   markAsDirty();
                 }}
-                label="Slot Icon"
+                label={translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.slotIcon"
+                )}
                 uploadLabel="No file chosen"
               />
             )}
@@ -259,7 +279,9 @@ export function FpbQuantitySettings({
                 opacity: productSlotsAvailable ? 1 : 0.5,
               }}
             >
-              Note: Only applicable when rules are based on quantity
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.noteOnlyApplicableWhenRulesAreBasedOnQuantity"
+              )}
             </p>
           </s-stack>
         </s-stack>

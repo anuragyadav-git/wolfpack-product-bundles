@@ -107,6 +107,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.10.1",
+    "eslint-plugin-i18next": "^6.1.5",
     "eslint-plugin-prisma": "^1.0.1",
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-unicorn": "^51.0.1",

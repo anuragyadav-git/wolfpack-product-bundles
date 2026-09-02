@@ -10,6 +10,7 @@ import {
 import { useBannerSessionState } from "../../../lib/banner-session-state";
 import styles from "./AttributionRouteShell.module.css";
 import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
+import { translateAdmin } from "~/i18n/config";
 
 // ─── Pixel Status Card ────────────────────────────────────────
 
@@ -20,7 +21,9 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
   const shopify = useAppBridge();
   const fetcher = useFetcher<typeof action>();
   const isSubmitting = fetcher.state !== "idle";
-  const [dismissed, dismiss] = useBannerSessionState(UTM_PIXEL_STATUS_BANNER_KEY);
+  const [dismissed, dismiss] = useBannerSessionState(
+    UTM_PIXEL_STATUS_BANNER_KEY
+  );
   const [hydrated, setHydrated] = useState(false);
 
   const [active, setActive] = useState(pixelActive);
@@ -31,15 +34,27 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
 
   useEffect(() => {
     if (!fetcher.data) return;
-    const data = fetcher.data as { success: boolean; pixelActive?: boolean; message?: string; error?: string };
+    const data = fetcher.data as {
+      success: boolean;
+      pixelActive?: boolean;
+      message?: string;
+      error?: string;
+    };
     if (data.success && data.pixelActive !== undefined) {
       setActive(data.pixelActive);
       shopify.toast.show(
-        t(data.pixelActive ? "common.success.trackingEnabled" : "common.success.trackingDisabled"),
-        { isError: false },
+        t(
+          data.pixelActive
+            ? "common.success.trackingEnabled"
+            : "common.success.trackingDisabled"
+        ),
+        { isError: false }
       );
     } else if (!data.success && data.error) {
-      showAdminTransientErrorToast(shopify, t("common.alerts.trackingNotUpdated"));
+      showAdminTransientErrorToast(
+        shopify,
+        t("common.alerts.trackingNotUpdated")
+      );
     }
   }, [fetcher.data, shopify, t]);
 
@@ -59,12 +74,17 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
       <s-box paddingBlockEnd="small-200">
         <s-banner
           tone={active ? "success" : "warning"}
-          heading="UTM Pixel Tracking"
+          heading={translateAdmin("adminAttributes.utmPixelTracking")}
           dismissible={active}
           hidden={false}
           onDismiss={active && hydrated ? dismiss : undefined}
         >
-          <s-stack direction="inline" justifyContent="space-between" alignItems="center" gap="base">
+          <s-stack
+            direction="inline"
+            justifyContent="space-between"
+            alignItems="center"
+            gap="base"
+          >
             <s-text>{model.description}</s-text>
             {model.actionLabel ? (
               <s-button
@@ -82,7 +102,7 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
       {!active ? (
         <s-modal
           id="utm-pixel-tracking-disclosure"
-          heading="UTM Pixel Tracking"
+          heading={translateAdmin("adminAttributes.utmPixelTracking")}
         >
           <s-button
             slot="primary-action"
@@ -92,26 +112,30 @@ export function PixelStatusCard({ pixelActive }: { pixelActive: boolean }) {
             disabled={isSubmitting || undefined}
             onClick={handleToggle}
           >
-            Activate Tracking
+            {translateAdmin(
+              "adminExtracted.appAttribution.pixelstatuscard.activateTracking"
+            )}
           </s-button>
           <s-button
             slot="secondary-actions"
             commandFor="utm-pixel-tracking-disclosure"
             command="--hide"
           >
-            Close
+            {translateAdmin("dashboard.storefrontSetup.close")}
           </s-button>
 
           <s-stack direction="block" gap="base">
-            <s-paragraph>
-              {UTM_PIXEL_PRIVACY_MESSAGE}
-            </s-paragraph>
+            <s-paragraph>{UTM_PIXEL_PRIVACY_MESSAGE}</s-paragraph>
             <s-stack direction="block" gap="small">
               <p className={styles.pixelDisclosureText}>
-                Turn this on to connect ad clicks with bundle orders when shoppers visit through UTM-tagged links.
+                {translateAdmin(
+                  "adminExtracted.appAttribution.pixelstatuscard.turnThisOnToConnectAdClicksWithBundleOrdersWhenShoppersVisitThro"
+                )}
               </p>
               <p className={styles.pixelDisclosureText}>
-                Shopify controls when the pixel can run, so tracking follows each shopper's consent choices.
+                {translateAdmin(
+                  "adminExtracted.appAttribution.pixelstatuscard.shopifyControlsWhenThePixelCanRunSoTrackingFollowsEachShopperSCo"
+                )}
               </p>
             </s-stack>
           </s-stack>

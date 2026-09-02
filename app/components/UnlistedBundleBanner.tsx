@@ -9,7 +9,7 @@ interface UnlistedBundleBannerProps {
 
 export function buildShopifyProductAdminUrl(
   shop: string,
-  productId: string | null,
+  productId: string | null
 ): string | null {
   if (!productId) return null;
   const numericId = productId.includes("gid://shopify/Product/")
@@ -32,11 +32,7 @@ export function UnlistedBundleBanner({
     const loadingLabel = t("common.parentProductStatus.loadingTitle");
     return (
       <s-box paddingBlockEnd="small-200">
-        <s-banner
-          tone="info"
-          heading={loadingLabel}
-          dismissible
-        >
+        <s-banner tone="info" heading={loadingLabel} dismissible>
           <s-stack direction="inline" alignItems="center" gap="small">
             <s-spinner size="base" accessibilityLabel={loadingLabel} />
             <s-text>{t("common.parentProductStatus.loadingBody")}</s-text>
@@ -56,13 +52,14 @@ export function UnlistedBundleBanner({
         dismissible={false}
         hidden={false}
       >
-        <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+        <s-stack
+          direction="inline"
+          justifyContent="space-between"
+          alignItems="start"
+          gap="base"
+        >
           <s-text>{t("common.unlistedBundle.body")}</s-text>
-          <s-button
-            variant="secondary"
-            tone="auto"
-            onClick={onManage}
-          >
+          <s-button variant="secondary" tone="auto" onClick={onManage}>
             {t("common.actions.manage")}
           </s-button>
         </s-stack>

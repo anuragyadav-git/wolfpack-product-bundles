@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepCategoryFooter({
   flow,
@@ -30,21 +31,27 @@ export function FpbStepCategoryFooter({
           markAsDirty();
         }}
       >
-        <span aria-hidden="true"><s-icon type="plus" /></span>
-        Add Category
+        <span aria-hidden="true">
+          <s-icon type="plus" />
+        </span>
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
+        )}
       </button>
       <div style={{ margin: "12px 0" }}>
         <s-divider />
       </div>
       <s-checkbox
-        label="Display variants as individual products"
+        label={translateAdmin(
+          "adminAttributes.displayVariantsAsIndividualProducts2"
+        )}
         checked={step.displayVariantsAsIndividual ?? undefined}
         onChange={(e) => {
           const checked = (e.target as HTMLInputElement).checked;
           stepsState.updateStepField(
             step.id,
             "displayVariantsAsIndividual",
-            checked,
+            checked
           );
           markAsDirty();
         }}

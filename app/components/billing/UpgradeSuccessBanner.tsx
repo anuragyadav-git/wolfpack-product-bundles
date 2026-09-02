@@ -4,14 +4,21 @@ export interface UpgradeSuccessBannerProps {
   onDismiss: () => void;
 }
 
-export function UpgradeSuccessBanner({
-  onDismiss,
-}: UpgradeSuccessBannerProps) {
+export function UpgradeSuccessBanner({ onDismiss }: UpgradeSuccessBannerProps) {
   const { t } = useTranslation();
   const stats = [
-    { label: t("billing.success.bundleLimit"), value: t("billing.success.bundleLimitValue") },
-    { label: t("billing.success.designControl"), value: t("billing.success.fullAccess") },
-    { label: t("billing.success.support"), value: t("billing.success.priority") },
+    {
+      label: t("billing.success.bundleLimit"),
+      value: t("billing.success.bundleLimitValue"),
+    },
+    {
+      label: t("billing.success.designControl"),
+      value: t("billing.success.fullAccess"),
+    },
+    {
+      label: t("billing.success.support"),
+      value: t("billing.success.priority"),
+    },
   ];
 
   return (
@@ -28,7 +35,12 @@ export function UpgradeSuccessBanner({
 
           <s-stack direction="inline" gap="base">
             {stats.map(({ label, value }: any) => (
-              <s-box key={label} padding="small" background="subdued" borderRadius="base">
+              <s-box
+                key={label}
+                padding="small"
+                background="subdued"
+                borderRadius="base"
+              >
                 <s-stack direction="block" gap="small-400">
                   <s-text color="subdued">{label}</s-text>
                   <s-text>{value}</s-text>

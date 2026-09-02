@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbImagesGifsPanel({
   flow,
@@ -37,11 +38,14 @@ export function FpbImagesGifsPanel({
               <s-icon type="upload" />
               <s-stack direction="block">
                 <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                  Media Assets
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.mediaAssets"
+                  )}
                 </p>
                 <p style={{ margin: 0, fontSize: 12, color: "#6d7175" }}>
-                  Add visual media to enhance the bundle experience for
-                  shoppers.
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.addVisualMediaToEnhanceTheBundleExperienceForShoppers"
+                  )}
                 </p>
               </s-stack>
             </s-stack>
@@ -53,7 +57,9 @@ export function FpbImagesGifsPanel({
                   <s-icon type="upload" />
                   <s-stack direction="block" gap="small-400">
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                      Promo Banner
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.promoBanner"
+                      )}
                     </p>
                     <p
                       style={{
@@ -62,11 +68,17 @@ export function FpbImagesGifsPanel({
                         color: "#6d7175",
                       }}
                     >
-                      Wide banner displayed at the top of the full-page bundle
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.wideBannerDisplayedAtTheTopOfTheFullPageBundle"
+                      )}
                     </p>
                   </s-stack>
                 </s-stack>
-                <s-badge tone="info">Page header</s-badge>
+                <s-badge tone="info">
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.pageHeader"
+                  )}
+                </s-badge>
               </s-stack>
               <div
                 style={{
@@ -88,7 +100,9 @@ export function FpbImagesGifsPanel({
                       FORMAT
                     </p>
                     <p style={{ margin: 0, fontSize: 14 }}>
-                      JPG, PNG, WebP, GIF, SVG, AVIF
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.jpgPngWebpGifSvgAvif"
+                      )}
                     </p>
                   </s-stack>
                   <s-stack direction="block" gap="small-400">
@@ -100,10 +114,14 @@ export function FpbImagesGifsPanel({
                         color: "#6d7175",
                       }}
                     >
-                      RECOMMENDED SIZE
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.recommendedSize"
+                      )}
                     </p>
                     <p style={{ margin: 0, fontSize: 14 }}>
-                      1600 × 400 px · 4:1 ratio
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.1600400Px41Ratio"
+                      )}
                     </p>
                   </s-stack>
                 </s-stack>
@@ -132,7 +150,9 @@ export function FpbImagesGifsPanel({
                           fontWeight: 600,
                         }}
                       >
-                        Step Images
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.stepImages"
+                        )}
                       </p>
                       <p
                         style={{
@@ -141,11 +161,17 @@ export function FpbImagesGifsPanel({
                           color: "#6d7175",
                         }}
                       >
-                        Tab icon and banner image per step — shown in the widget
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.tabIconAndBannerImagePerStepShownInTheWidget"
+                        )}
                       </p>
                     </s-stack>
                   </s-stack>
-                  <s-badge tone="info">Per step</s-badge>
+                  <s-badge tone="info">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.perStep"
+                    )}
+                  </s-badge>
                 </s-stack>
                 <div>
                   <div className={fullPageBundleStyles.tabRow}>
@@ -177,7 +203,9 @@ export function FpbImagesGifsPanel({
                                 fontWeight: 600,
                               }}
                             >
-                              Tab Icon
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.tabIcon"
+                              )}
                             </p>
                             <p
                               style={{
@@ -186,12 +214,15 @@ export function FpbImagesGifsPanel({
                                 color: "#6d7175",
                               }}
                             >
-                              Circular icon in the step tab. Replaces the step
-                              number when set. Recommended: 100 × 100 px square.
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1"
+                              )}
                             </p>
                           </s-stack>
                           <FilePicker
-                            label="Choose tab icon"
+                            label={translateAdmin(
+                              "adminAttributes.chooseTabIcon"
+                            )}
                             value={(step as any).imageUrl ?? null}
                             onChange={(url) => {
                               stepsState.updateStepField(
@@ -213,7 +244,9 @@ export function FpbImagesGifsPanel({
                                 fontWeight: 600,
                               }}
                             >
-                              Step Banner Image
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.stepBannerImage"
+                              )}
                             </p>
                             <p
                               style={{
@@ -222,12 +255,15 @@ export function FpbImagesGifsPanel({
                                 color: "#6d7175",
                               }}
                             >
-                              Full-width image above the product grid when this
-                              step is active. Recommended: 1600 × 400 px.
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended"
+                              )}
                             </p>
                           </s-stack>
                           <FilePicker
-                            label="Choose banner image"
+                            label={translateAdmin(
+                              "adminAttributes.chooseBannerImage"
+                            )}
                             value={(step as any).bannerImageUrl ?? null}
                             onChange={(url) => {
                               stepsState.updateStepField(
@@ -252,7 +288,9 @@ export function FpbImagesGifsPanel({
                   <s-icon type="note" />
                   <s-stack direction="block" gap="small-400">
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                      Floating Promo Badge
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.floatingPromoBadge"
+                      )}
                     </p>
                     <p
                       style={{
@@ -261,15 +299,20 @@ export function FpbImagesGifsPanel({
                         color: "#6d7175",
                       }}
                     >
-                      Fixed badge at bottom-left of the page — session-dismissed
-                      when shopper clicks X
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks"
+                      )}
                     </p>
                   </s-stack>
                 </s-stack>
-                <s-badge tone="info">Storefront</s-badge>
+                <s-badge tone="info">
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.storefront"
+                  )}
+                </s-badge>
               </s-stack>
               <s-checkbox
-                label="Show floating promo badge"
+                label={translateAdmin("adminAttributes.showFloatingPromoBadge")}
                 checked={floatingBadgeEnabled || undefined}
                 onChange={(e) => {
                   setFloatingBadgeEnabled(
@@ -280,7 +323,7 @@ export function FpbImagesGifsPanel({
               />
               <DisabledConfigurationRegion disabled={!floatingBadgeEnabled}>
                 <s-text-field
-                  label="Badge text"
+                  label={translateAdmin("adminAttributes.badgeText")}
                   value={floatingBadgeText}
                   disabled={!floatingBadgeEnabled || undefined}
                   onInput={(e) => {
@@ -289,7 +332,9 @@ export function FpbImagesGifsPanel({
                     );
                     markAsDirty();
                   }}
-                  placeholder="e.g. Save 20% today only!"
+                  placeholder={translateAdmin(
+                    "adminAttributes.eGSave20TodayOnly"
+                  )}
                   autocomplete="off"
                 />
               </DisabledConfigurationRegion>

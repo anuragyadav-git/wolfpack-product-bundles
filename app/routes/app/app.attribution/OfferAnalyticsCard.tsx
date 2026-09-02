@@ -25,9 +25,9 @@ export function OfferAnalyticsCard({
   onSelectionChange: (offerPolicyId: string | null) => void;
 }) {
   const { t } = useTranslation();
-  const selected = model.options.find((option) => (
-    option.id === model.selectedOfferPolicyId
-  ));
+  const selected = model.options.find(
+    (option) => option.id === model.selectedOfferPolicyId
+  );
   return (
     <s-section heading={t("analyticsPage.offers.title")}>
       <s-grid
@@ -44,20 +44,26 @@ export function OfferAnalyticsCard({
         >
           <s-option value="">{t("analyticsPage.offers.allOffers")}</s-option>
           {model.options.map((option) => (
-            <s-option key={option.id} value={option.id}>{option.label}</s-option>
+            <s-option key={option.id} value={option.id}>
+              {option.label}
+            </s-option>
           ))}
         </s-select>
         {selected ? (
           <s-stack direction="inline" gap="small" alignItems="center">
             <s-badge tone="info">
-              {t("analyticsPage.offers.ruleVersion", { version: selected.ruleVersion ?? "—" })}
+              {t("analyticsPage.offers.ruleVersion", {
+                version: selected.ruleVersion ?? "—",
+              })}
             </s-badge>
             {selected.eligibilitySource ? (
               <s-badge>{selected.eligibilitySource.replace(/_/g, " ")}</s-badge>
             ) : null}
             {selected.tierIds.length > 0 ? (
               <s-text color="subdued">
-                {t("analyticsPage.offers.tierCount", { count: selected.tierIds.length })}
+                {t("analyticsPage.offers.tierCount", {
+                  count: selected.tierIds.length,
+                })}
               </s-text>
             ) : null}
           </s-stack>

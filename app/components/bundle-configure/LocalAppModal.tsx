@@ -41,7 +41,11 @@ export function LocalAppModal({
 
     if (dialog && !dialog.open && typeof dialog.showModal === "function") {
       dialog.showModal();
-      dialog.querySelector<HTMLElement>("s-button, button, [href], input, select, textarea")?.focus();
+      dialog
+        .querySelector<HTMLElement>(
+          "s-button, button, [href], input, select, textarea"
+        )
+        ?.focus();
     }
 
     return () => {
@@ -55,8 +59,8 @@ export function LocalAppModal({
 
     const focusable = Array.from(
       event.currentTarget.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), s-button, [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      ),
+        'button:not([disabled]), s-button, [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
     ).filter((element) => !element.hasAttribute("hidden"));
     if (focusable.length === 0) return;
 
@@ -108,9 +112,7 @@ export function LocalAppModal({
           onClick={() => onCloseRef.current()}
         />
       </header>
-      <div className={styles.body}>
-        {children}
-      </div>
+      <div className={styles.body}>{children}</div>
       {(primaryAction || secondaryAction) && (
         <footer className={styles.footer}>
           {secondaryAction}

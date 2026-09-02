@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import type { BundleProductCardProps } from "./types";
+import { translateAdmin } from "~/i18n/config";
 
 export const QuestionHelpTooltip = ConfigureHelpPopover;
 
@@ -23,10 +24,19 @@ export const BundleProductCard = memo(
           alignItems="center"
         >
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-            Bundle Product
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.bundleProduct"
+            )}
           </h3>
-          <s-button variant="tertiary" tone="critical" icon="refresh" onClick={onSync}>
-            Sync Product
+          <s-button
+            variant="tertiary"
+            tone="critical"
+            icon="refresh"
+            onClick={onSync}
+          >
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.syncProduct"
+            )}
           </s-button>
         </s-stack>
 
@@ -56,7 +66,9 @@ export const BundleProductCard = memo(
                   variant="tertiary"
                   icon="product"
                   onClick={onSelect}
-                  aria-label="Change bundle product"
+                  aria-label={translateAdmin(
+                    "adminAttributes.changeBundleProduct"
+                  )}
                 >
                   <s-icon type="clock" />
                 </s-button>
@@ -68,14 +80,16 @@ export const BundleProductCard = memo(
             <s-stack direction="block" gap="small-400" alignItems="center">
               <s-icon type="product" />
               <s-button variant="tertiary" icon="product" onClick={onSelect}>
-                Select Bundle Product
+                {translateAdmin(
+                  "adminExtracted.appBundlesProductPageBundleConfigure.configurebundleflowUi.selectBundleProduct"
+                )}
               </s-button>
             </s-stack>
           </div>
         )}
       </s-stack>
     </s-section>
-  ),
+  )
 );
 
 BundleProductCard.displayName = "BundleProductCard";

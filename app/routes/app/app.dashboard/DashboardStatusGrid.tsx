@@ -1,11 +1,10 @@
-import {
-  type NormalizedThemeExtensionResource,
-} from "../../../lib/theme-extension-status";
+import { type NormalizedThemeExtensionResource } from "../../../lib/theme-extension-status";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { useBannerSessionState } from "../../../lib/banner-session-state";
 
-export const DASHBOARD_STOREFRONT_SETUP_BANNER_KEY = "dashboard_storefront_setup";
+export const DASHBOARD_STOREFRONT_SETUP_BANNER_KEY =
+  "dashboard_storefront_setup";
 
 type DashboardStatusGridProps = {
   resources: NormalizedThemeExtensionResource[];
@@ -78,16 +77,20 @@ export function getStorefrontSetupSummary({
 }
 
 export function getStorefrontStatusRows(
-  resources: NormalizedThemeExtensionResource[],
+  resources: NormalizedThemeExtensionResource[]
 ): {
   core: StorefrontStatusResource[];
 } {
-  const resourceRows = resources.length > 0
-    ? resources
-    : [] as NormalizedThemeExtensionResource[];
+  const resourceRows =
+    resources.length > 0
+      ? resources
+      : ([] as NormalizedThemeExtensionResource[]);
 
   const coreResources = resourceRows.filter((resource) =>
-    CORE_STORE_FRONT_RESOURCES.includes(resource.handle as (typeof CORE_STORE_FRONT_RESOURCES)[number]));
+    CORE_STORE_FRONT_RESOURCES.includes(
+      resource.handle as (typeof CORE_STORE_FRONT_RESOURCES)[number]
+    )
+  );
 
   return {
     core: coreResources,
@@ -104,7 +107,9 @@ export function DashboardStatusGrid({
   themeEditorUrl,
 }: DashboardStatusGridProps) {
   const { t } = useTranslation();
-  const [dismissed, dismiss] = useBannerSessionState(DASHBOARD_STOREFRONT_SETUP_BANNER_KEY);
+  const [dismissed, dismiss] = useBannerSessionState(
+    DASHBOARD_STOREFRONT_SETUP_BANNER_KEY
+  );
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -113,39 +118,45 @@ export function DashboardStatusGrid({
 
   if (dismissed && !appEmbedStatusLoading) return null;
 
-  const {
-    core: coreResources,
-  } = getStorefrontStatusRows(resources);
+  const { core: coreResources } = getStorefrontStatusRows(resources);
 
   const coreResourcesWithOverrides = coreResources.map((resource) => {
     if (resource.handle !== "bundle-app-embed") return resource;
     return appEmbedEnabled ? { ...resource, enabled: true } : resource;
   });
 
-  const remainingCoreCount = Math.max(0, coreResourcesWithOverrides.length - coreResourcesWithOverrides.filter((resource) => resource.enabled).length);
+  const remainingCoreCount = Math.max(
+    0,
+    coreResourcesWithOverrides.length -
+      coreResourcesWithOverrides.filter((resource) => resource.enabled).length
+  );
   const storefrontSummary = getStorefrontSetupSummary({
     loading: appEmbedStatusLoading,
     error,
-    enabledCoreCount: coreResourcesWithOverrides.filter((resource) => resource.enabled).length,
+    enabledCoreCount: coreResourcesWithOverrides.filter(
+      (resource) => resource.enabled
+    ).length,
     totalCoreCount: coreResourcesWithOverrides.length,
   });
   const summaryDescriptionKey = appEmbedStatusLoading
     ? storefrontSummary.descriptionKey
     : appEmbedEnabled
-      ? "dashboard.storefrontSetup.completeDescription"
-      : storefrontSummary.descriptionKey;
+    ? "dashboard.storefrontSetup.completeDescription"
+    : storefrontSummary.descriptionKey;
   const summaryDescription = t(summaryDescriptionKey, {
     count: remainingCoreCount,
   });
   const setupComplete = appEmbedEnabled;
-  const title = t(appEmbedStatusLoading
-    ? storefrontSummary.titleKey
-    : "dashboard.storefrontSetup.incompleteTitle");
+  const title = t(
+    appEmbedStatusLoading
+      ? storefrontSummary.titleKey
+      : "dashboard.storefrontSetup.incompleteTitle"
+  );
   const tone = appEmbedStatusLoading
     ? "info"
     : setupComplete
-      ? "success"
-      : "warning";
+    ? "success"
+    : "warning";
 
   return (
     <s-box paddingBlockEnd="small-200">
@@ -167,7 +178,12 @@ export function DashboardStatusGrid({
               <s-text>{summaryDescription}</s-text>
             </s-stack>
           ) : !setupComplete ? (
-            <s-stack direction="inline" justifyContent="space-between" alignItems="start" gap="base">
+            <s-stack
+              direction="inline"
+              justifyContent="space-between"
+              alignItems="start"
+              gap="base"
+            >
               <s-text>{summaryDescription}</s-text>
               <s-button
                 ref={enableActionRef}

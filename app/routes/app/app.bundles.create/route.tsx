@@ -1,5 +1,18 @@
-import { json, redirect, type ActionFunctionArgs, type HeadersFunction, type LinksFunction, type LoaderFunctionArgs } from "@remix-run/node";
-import { Form, useActionData, useNavigate, useNavigation, useSearchParams } from "@remix-run/react";
+import {
+  json,
+  redirect,
+  type ActionFunctionArgs,
+  type HeadersFunction,
+  type LinksFunction,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
+import {
+  Form,
+  useActionData,
+  useNavigate,
+  useNavigation,
+  useSearchParams,
+} from "@remix-run/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { authenticate } from "../../../shopify.server";
@@ -8,8 +21,12 @@ import { BundleType } from "../../../constants/bundle";
 import { parseOnboardingBundleType } from "../../../lib/onboarding-bundle-type";
 import { showPolarisModal } from "../_shared/bundle-configure/modal-utils";
 import styles from "./create-bundle.module.css";
-import { ensureShopIdentity, recordBusinessEvent } from "../../../services/app-events.server";
+import {
+  ensureShopIdentity,
+  recordBusinessEvent,
+} from "../../../services/app-events.server";
 import { APP_BRAND } from "../../../lib/app-brand";
+import { translateAdmin } from "~/i18n/config";
 
 export const links: LinksFunction = () => [
   {
@@ -51,8 +68,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const bundleName = formData.get("bundleName");
   const bundleType = formData.get("bundleType");
   const createFormData = new FormData();
-  if (typeof bundleName === "string") createFormData.set("bundleName", bundleName);
-  if (typeof bundleType === "string") createFormData.set("bundleType", bundleType);
+  if (typeof bundleName === "string")
+    createFormData.set("bundleName", bundleName);
+  if (typeof bundleType === "string")
+    createFormData.set("bundleType", bundleType);
   await recordBusinessEvent({
     eventHandle: "bundle_create_started",
     shopDomain: session.shop,
@@ -122,7 +141,7 @@ export default function CreateBundleEntry() {
   const [bundleType, setBundleType] = useState<string | null>(() =>
     searchParams.has("bundleType")
       ? parseOnboardingBundleType(searchParams.get("bundleType"))
-      : null,
+      : null
   );
   const [bundleTypeError, setBundleTypeError] = useState<string | null>(null);
   const [bundleNameError, setBundleNameError] = useState<string | null>(null);
@@ -135,12 +154,14 @@ export default function CreateBundleEntry() {
   useEffect(() => {
     const el = bundleNameRef.current;
     if (!el) return;
-    const handler = (e: Event) => setBundleName((e.target as HTMLInputElement).value ?? "");
+    const handler = (e: Event) =>
+      setBundleName((e.target as HTMLInputElement).value ?? "");
     el.addEventListener("input", handler);
     return () => el.removeEventListener("input", handler);
   }, []);
 
-  const serverError = actionData && "error" in actionData ? String(actionData.error) : null;
+  const serverError =
+    actionData && "error" in actionData ? String(actionData.error) : null;
 
   useEffect(() => {
     if (serverError) showPolarisModal(nameModalRef);
@@ -186,10 +207,7 @@ export default function CreateBundleEntry() {
   return (
     <>
       <ui-title-bar title={t("createBundle.title")}>
-        <button
-          variant="breadcrumb"
-          onClick={handleBackToDashboard}
-        >
+        <button variant="breadcrumb" onClick={handleBackToDashboard}>
           {t("createBundle.dashboard")}
         </button>
       </ui-title-bar>
@@ -215,66 +233,102 @@ export default function CreateBundleEntry() {
         </div>
 
         <div className={styles.formContent}>
-            <div className={styles.formSection}>
-              {bundleTypeError && <p className={styles.errorText}>{bundleTypeError}</p>}
-              <div className={styles.bundleTypeGrid}>
-                <div
-                  className={`${styles.bundleTypeCard} ${bundleType === BundleType.PRODUCT_PAGE ? styles.bundleTypeCardSelected : ""}`}
-                  onClick={() => handleSelectBundleType(BundleType.PRODUCT_PAGE)}
-                >
-                  <div className={styles.bundleThumbnailWrap}>
-                    <span
-                      className={`${styles.bundleThumbnailImg} ${styles.productPageThumbnail}`}
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className={styles.bundleCardBody}>
-                    <div className={styles.bundleCardText}>
-                      <strong>{t("createBundle.bundleType.productPage.title")}</strong>
-                      <p>{t("createBundle.bundleType.productPage.description")}</p>
-                    </div>
-                    <s-button
-                      variant={bundleType === BundleType.PRODUCT_PAGE ? "primary" : "secondary"}
-                      onClick={(e: Event) => { e.stopPropagation(); handleSelectBundleType(BundleType.PRODUCT_PAGE); }}
-                    >
-                      {bundleType === BundleType.PRODUCT_PAGE ? t("createBundle.actions.selected") : t("createBundle.actions.select")}
-                    </s-button>
-                  </div>
+          <div className={styles.formSection}>
+            {bundleTypeError && (
+              <p className={styles.errorText}>{bundleTypeError}</p>
+            )}
+            <div className={styles.bundleTypeGrid}>
+              <div
+                className={`${styles.bundleTypeCard} ${
+                  bundleType === BundleType.PRODUCT_PAGE
+                    ? styles.bundleTypeCardSelected
+                    : ""
+                }`}
+                onClick={() => handleSelectBundleType(BundleType.PRODUCT_PAGE)}
+              >
+                <div className={styles.bundleThumbnailWrap}>
+                  <span
+                    className={`${styles.bundleThumbnailImg} ${styles.productPageThumbnail}`}
+                    aria-hidden="true"
+                  />
                 </div>
+                <div className={styles.bundleCardBody}>
+                  <div className={styles.bundleCardText}>
+                    <strong>
+                      {t("createBundle.bundleType.productPage.title")}
+                    </strong>
+                    <p>
+                      {t("createBundle.bundleType.productPage.description")}
+                    </p>
+                  </div>
+                  <s-button
+                    variant={
+                      bundleType === BundleType.PRODUCT_PAGE
+                        ? "primary"
+                        : "secondary"
+                    }
+                    onClick={(e: Event) => {
+                      e.stopPropagation();
+                      handleSelectBundleType(BundleType.PRODUCT_PAGE);
+                    }}
+                  >
+                    {bundleType === BundleType.PRODUCT_PAGE
+                      ? t("createBundle.actions.selected")
+                      : t("createBundle.actions.select")}
+                  </s-button>
+                </div>
+              </div>
 
-                <div
-                  className={`${styles.bundleTypeCard} ${bundleType === BundleType.FULL_PAGE ? styles.bundleTypeCardSelected : ""}`}
-                  onClick={() => handleSelectBundleType(BundleType.FULL_PAGE)}
-                >
-                  <div className={styles.bundleThumbnailWrap}>
-                    <span
-                      className={`${styles.bundleThumbnailImg} ${styles.fullPageThumbnail}`}
-                      aria-hidden="true"
-                    />
+              <div
+                className={`${styles.bundleTypeCard} ${
+                  bundleType === BundleType.FULL_PAGE
+                    ? styles.bundleTypeCardSelected
+                    : ""
+                }`}
+                onClick={() => handleSelectBundleType(BundleType.FULL_PAGE)}
+              >
+                <div className={styles.bundleThumbnailWrap}>
+                  <span
+                    className={`${styles.bundleThumbnailImg} ${styles.fullPageThumbnail}`}
+                    aria-hidden="true"
+                  />
+                </div>
+                <div className={styles.bundleCardBody}>
+                  <div className={styles.bundleCardText}>
+                    <strong>
+                      {t("createBundle.bundleType.fullPage.title")}
+                    </strong>
+                    <p>{t("createBundle.bundleType.fullPage.description")}</p>
                   </div>
-                  <div className={styles.bundleCardBody}>
-                    <div className={styles.bundleCardText}>
-                      <strong>{t("createBundle.bundleType.fullPage.title")}</strong>
-                      <p>{t("createBundle.bundleType.fullPage.description")}</p>
-                    </div>
-                    <s-button
-                      variant={bundleType === BundleType.FULL_PAGE ? "primary" : "secondary"}
-                      onClick={(e: Event) => { e.stopPropagation(); handleSelectBundleType(BundleType.FULL_PAGE); }}
-                    >
-                      {bundleType === BundleType.FULL_PAGE ? t("createBundle.actions.selected") : t("createBundle.actions.select")}
-                    </s-button>
-                  </div>
+                  <s-button
+                    variant={
+                      bundleType === BundleType.FULL_PAGE
+                        ? "primary"
+                        : "secondary"
+                    }
+                    onClick={(e: Event) => {
+                      e.stopPropagation();
+                      handleSelectBundleType(BundleType.FULL_PAGE);
+                    }}
+                  >
+                    {bundleType === BundleType.FULL_PAGE
+                      ? t("createBundle.actions.selected")
+                      : t("createBundle.actions.select")}
+                  </s-button>
                 </div>
               </div>
             </div>
+          </div>
         </div>
 
         <s-modal
           ref={nameModalRef}
           id="create-bundle-name-modal"
-          heading={bundleType === BundleType.FULL_PAGE
-            ? t("createBundle.bundleType.fullPage.title")
-            : t("createBundle.bundleType.productPage.title")}
+          heading={
+            bundleType === BundleType.FULL_PAGE
+              ? t("createBundle.bundleType.fullPage.title")
+              : t("createBundle.bundleType.productPage.title")
+          }
         >
           <Form method="post" className={styles.modalForm}>
             <s-text-field
@@ -287,15 +341,22 @@ export default function CreateBundleEntry() {
               onChange={handleBundleNameInput}
               error={bundleNameError ?? serverError ?? undefined}
             />
-            {bundleType && <input type="hidden" name="bundleType" value={bundleType} />}
-            <button ref={submitButtonRef} type="submit" style={{ display: "none" }} aria-hidden="true" />
+            {bundleType && (
+              <input type="hidden" name="bundleType" value={bundleType} />
+            )}
+            <button
+              ref={submitButtonRef}
+              type="submit"
+              style={{ display: "none" }}
+              aria-hidden="true"
+            />
             <div className={styles.modalActions}>
               <s-button
                 variant="primary"
                 loading={isSubmitting || undefined}
                 onClick={handleSaveName}
               >
-                Save
+                {translateAdmin("dashboard.language.save")}
               </s-button>
             </div>
           </Form>

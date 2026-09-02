@@ -1,6 +1,7 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { FpbAddonTierEditor } from "./FreeGiftAddonTierEditor";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbAddonProductsCard({
   flow,
@@ -24,10 +25,14 @@ export function FpbAddonProductsCard({
         <div className={fullPageBundleStyles.addonsHeaderLine}>
           <div className={fullPageBundleStyles.addonsTitleCluster}>
             <h3 className={fullPageBundleStyles.panelTitle}>
-              Add-Ons with Bundles
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonproductscard.addOnsWithBundles"
+              )}
             </h3>
             <s-switch
-              accessibilityLabel="Enable add-ons with bundles"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.enableAddOnsWithBundles"
+              )}
               checked={addonDraft.addonProductsEnabled === true || undefined}
               onChange={(e) => {
                 updateAddonDraft({
@@ -39,7 +44,9 @@ export function FpbAddonProductsCard({
               variant="tertiary"
               tone="neutral"
               icon="play"
-              accessibilityLabel="How to setup?"
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+              )}
               onClick={() =>
                 window.open(
                   ADDONS_HELP_ARTICLE_URL,
@@ -48,7 +55,9 @@ export function FpbAddonProductsCard({
                 )
               }
             >
-              How to setup?
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+              )}
             </s-press-button>
           </div>
           <div className={fullPageBundleStyles.addonsHeaderActions}>
@@ -62,7 +71,9 @@ export function FpbAddonProductsCard({
               }
               onClick={openAddonSectionMultiLanguageModal}
             >
-              Multi Language
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+              )}
             </s-button>
           </div>
         </div>
@@ -71,12 +82,13 @@ export function FpbAddonProductsCard({
         >
           <s-stack direction="block" gap="small">
             <p className={fullPageBundleStyles.panelDescription}>
-              Enable customers to add extra items to their bundles at a
-              discounted price, for free, or at full price.
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonproductscard.enableCustomersToAddExtraItemsToTheirBundlesAtADiscountedPriceFo"
+              )}
             </p>
             <div className={fullPageBundleStyles.addonsFormStack}>
               <s-text-field
-                label="Add on Section title"
+                label={translateAdmin("adminAttributes.addOnSectionTitle")}
                 value={addonDraft.addonProductsTitle ?? ""}
                 disabled={!addonDraft.addonProductsEnabled || undefined}
                 onInput={(e) => {

@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepRuleModeContent({
   flow,
@@ -22,20 +23,21 @@ export function FpbStepRuleModeContent({
     updateCategoryAutoNextRule,
     updateCategoryConditionRule,
   } = flow;
-  const stepCategories = ((step as any).StepCategory as any[] | undefined) ?? [];
+  const stepCategories =
+    ((step as any).StepCategory as any[] | undefined) ?? [];
   const categoryRulesAvailable = deriveControlDependencies({
     categoryCount: stepCategories.length,
   }).categoryRulesVisible;
   const hasStepRules =
     (conditionsState.stepConditions[step.id] || []).length > 0;
   const hasCategoryRules = stepCategories.some(
-    (category: any) => (category.conditions || []).length > 0,
+    (category: any) => (category.conditions || []).length > 0
   );
   const activeRuleMode = hasCategoryRules
     ? "category"
     : hasStepRules
-      ? "step"
-      : "none";
+    ? "step"
+    : "none";
   const handleRuleModeChange = (nextMode: string) => {
     if (nextMode === "none") {
       conditionsState.clearStepConditions(step.id);
@@ -111,15 +113,23 @@ export function FpbStepRuleModeContent({
                     }))
                   }
                 >
-                  <span>{categoryLabel} rules</span>
+                  <span>
+                    {translateAdmin("adminDynamic.categoryRules", {
+                      category: categoryLabel,
+                    })}
+                  </span>
                   <span aria-hidden="true">{isRulesOpen ? "⌃" : "⌄"}</span>
                 </button>
                 {isRulesOpen && (
                   <div className={fullPageBundleStyles.categoryRuleBody}>
                     <p className={fullPageBundleStyles.categoryRuleHelp}>
-                      Create Rules based on amount or quantity of products added
-                      on this category. <br /> Note: Rules are only valid on
-                      this category
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.createRulesBasedOnAmountOrQuantityOfProductsAddedOnThisCategory"
+                      )}{" "}
+                      <br />{" "}
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.noteRulesAreOnlyValidOnThisCategory"
+                      )}
                     </p>
                     <div className={fullPageBundleStyles.rulesList}>
                       {rules.map((rule: any, ruleIndex: number) => {
@@ -137,7 +147,9 @@ export function FpbStepRuleModeContent({
                                   fontWeight: 650,
                                 }}
                               >
-                                Rule #{ruleIndex + 1}
+                                {translateAdmin("adminDynamic.ruleNumber", {
+                                  number: ruleIndex + 1,
+                                })}
                               </h4>
                               <s-button
                                 variant="tertiary"
@@ -147,15 +159,19 @@ export function FpbStepRuleModeContent({
                                   removeCategoryConditionRule(
                                     step.id,
                                     catIndex,
-                                    ruleId,
+                                    ruleId
                                   )
                                 }
                               >
-                                Remove
+                                {translateAdmin(
+                                  "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                                )}
                               </s-button>
                             </div>
                             <div
-                              className={fullPageBundleStyles.categoryRuleFields}
+                              className={
+                                fullPageBundleStyles.categoryRuleFields
+                              }
                             >
                               <select
                                 className={
@@ -168,10 +184,12 @@ export function FpbStepRuleModeContent({
                                     catIndex,
                                     ruleId,
                                     "type",
-                                    (e.target as HTMLSelectElement).value,
+                                    (e.target as HTMLSelectElement).value
                                   )
                                 }
-                                aria-label="Type"
+                                aria-label={translateAdmin(
+                                  "dashboard.table.type"
+                                )}
                               >
                                 {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
                                   <option key={opt.value} value={opt.value}>
@@ -194,18 +212,20 @@ export function FpbStepRuleModeContent({
                                     catIndex,
                                     ruleId,
                                     "condition",
-                                    (e.target as HTMLSelectElement).value,
+                                    (e.target as HTMLSelectElement).value
                                   )
                                 }
-                                aria-label="Condition"
+                                aria-label={translateAdmin(
+                                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                                )}
                               >
-                                {[
-                                  ...CATEGORY_CONDITION_OPERATOR_OPTIONS,
-                                ].map((opt) => (
-                                  <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                  </option>
-                                ))}
+                                {[...CATEGORY_CONDITION_OPERATOR_OPTIONS].map(
+                                  (opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                      {opt.label}
+                                    </option>
+                                  )
+                                )}
                               </select>
                               <input
                                 type="number"
@@ -220,11 +240,13 @@ export function FpbStepRuleModeContent({
                                     catIndex,
                                     ruleId,
                                     "value",
-                                    (e.target as HTMLInputElement).value,
+                                    (e.target as HTMLInputElement).value
                                   )
                                 }
                                 autoComplete="off"
-                                aria-label="Value"
+                                aria-label={translateAdmin(
+                                  "adminAttributes.value"
+                                )}
                               />
                             </div>
                           </div>
@@ -233,7 +255,9 @@ export function FpbStepRuleModeContent({
                     </div>
                     {rules.length === 1 && (
                       <s-checkbox
-                        label="Auto Next When rule is met"
+                        label={translateAdmin(
+                          "adminAttributes.autoNextWhenRuleIsMet"
+                        )}
                         checked={
                           cat.autoNextStepOnConditionMet === true || undefined
                         }
@@ -241,7 +265,7 @@ export function FpbStepRuleModeContent({
                           updateCategoryAutoNextRule(
                             step.id,
                             catIndex,
-                            (e.target as HTMLInputElement).checked,
+                            (e.target as HTMLInputElement).checked
                           )
                         }
                       />
@@ -249,7 +273,9 @@ export function FpbStepRuleModeContent({
                     <button
                       type="button"
                       className={fullPageBundleStyles.addSectionButton}
-                      onClick={() => addCategoryConditionRule(step.id, catIndex)}
+                      onClick={() =>
+                        addCategoryConditionRule(step.id, catIndex)
+                      }
                     >
                       <svg
                         width="14"
@@ -265,7 +291,9 @@ export function FpbStepRuleModeContent({
                           strokeLinecap="round"
                         />
                       </svg>
-                      Add Rule
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+                      )}
                     </button>
                   </div>
                 )}
@@ -277,16 +305,15 @@ export function FpbStepRuleModeContent({
         <>
           {(conditionsState.stepConditions[step.id] || []).length === 0 ? (
             <div className={fullPageBundleStyles.emptyState}>
-              No rules defined yet
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.noRulesDefinedYet"
+              )}
             </div>
           ) : (
             <div className={fullPageBundleStyles.rulesList}>
               {(conditionsState.stepConditions[step.id] || []).map(
                 (rule: any, ruleIndex: number) => (
-                  <div
-                    key={rule.id}
-                    className={fullPageBundleStyles.ruleCard}
-                  >
+                  <div key={rule.id} className={fullPageBundleStyles.ruleCard}>
                     <div className={fullPageBundleStyles.ruleHeader}>
                       <h4
                         style={{
@@ -295,7 +322,9 @@ export function FpbStepRuleModeContent({
                           fontWeight: 650,
                         }}
                       >
-                        Rule #{ruleIndex + 1}
+                        {translateAdmin("adminDynamic.ruleNumber", {
+                          number: ruleIndex + 1,
+                        })}
                       </h4>
                       <s-button
                         variant="tertiary"
@@ -305,7 +334,9 @@ export function FpbStepRuleModeContent({
                           conditionsState.removeConditionRule(step.id, rule.id)
                         }
                       >
-                        Remove
+                        {translateAdmin(
+                          "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                        )}
                       </s-button>
                     </div>
                     <div className={fullPageBundleStyles.ruleFields}>
@@ -317,13 +348,13 @@ export function FpbStepRuleModeContent({
                             step.id,
                             rule.id,
                             "type",
-                            (e.target as HTMLSelectElement).value,
+                            (e.target as HTMLSelectElement).value
                           )
                         }
-                        aria-label="Type"
+                        aria-label={translateAdmin("dashboard.table.type")}
                       >
                         <option value="" disabled>
-                          Type
+                          {translateAdmin("dashboard.table.type")}
                         </option>
                         {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -339,13 +370,17 @@ export function FpbStepRuleModeContent({
                             step.id,
                             rule.id,
                             "operator",
-                            (e.target as HTMLSelectElement).value,
+                            (e.target as HTMLSelectElement).value
                           )
                         }
-                        aria-label="Condition"
+                        aria-label={translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                        )}
                       >
                         <option value="" disabled>
-                          Condition
+                          {translateAdmin(
+                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                          )}
                         </option>
                         {[...STEP_CONDITION_OPERATOR_OPTIONS].map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -364,17 +399,19 @@ export function FpbStepRuleModeContent({
                             step.id,
                             rule.id,
                             "value",
-                            (e.target as HTMLInputElement).value,
+                            (e.target as HTMLInputElement).value
                           )
                         }
                         autoComplete="off"
-                        aria-label="Value"
+                        aria-label={translateAdmin("adminAttributes.value")}
                       />
                     </div>
                     {(conditionsState.stepConditions[step.id] || []).length ===
                       1 && (
                       <s-checkbox
-                        label="Auto Next When rule is met"
+                        label={translateAdmin(
+                          "adminAttributes.autoNextWhenRuleIsMet"
+                        )}
                         checked={
                           rule.autoNext === true ||
                           rule.autoNext === "true" ||
@@ -387,20 +424,22 @@ export function FpbStepRuleModeContent({
                             "autoNext",
                             (e.target as HTMLInputElement).checked
                               ? "true"
-                              : "false",
+                              : "false"
                           );
                         }}
                       />
                     )}
                   </div>
-                ),
+                )
               )}
             </div>
           )}
           <button
             type="button"
             className={fullPageBundleStyles.addSectionButton}
-            disabled={(conditionsState.stepConditions[step.id] || []).length >= 2}
+            disabled={
+              (conditionsState.stepConditions[step.id] || []).length >= 2
+            }
             onClick={() => conditionsState.addConditionRule(step.id)}
           >
             <svg
@@ -417,12 +456,18 @@ export function FpbStepRuleModeContent({
                 strokeLinecap="round"
               />
             </svg>
-            Add Rule
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+            )}
           </button>
           {(conditionsState.stepConditions[step.id] || []).length >= 2 ? (
             <s-stack direction="inline" alignItems="center" gap="small">
               <s-icon type="alert-triangle" tone="caution" />
-              <s-text>A step can have at most 2 rules.</s-text>
+              <s-text>
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.aStepCanHaveAtMost2Rules"
+                )}
+              </s-text>
             </s-stack>
           ) : null}
         </>

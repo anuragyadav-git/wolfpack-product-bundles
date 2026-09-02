@@ -1,6 +1,7 @@
 import React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbImagesGifsSection() {
   const {
@@ -31,11 +32,14 @@ export function PpbImagesGifsSection() {
                 <s-icon type="upload" />
                 <s-stack direction="block">
                   <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                    Media Assets
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.mediaAssets"
+                    )}
                   </p>
                   <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                    Add visual media to enhance the bundle experience for
-                    shoppers.
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.addVisualMediaToEnhanceTheBundleExperienceForShoppers"
+                    )}
                   </p>
                 </s-stack>
               </s-stack>
@@ -48,17 +52,24 @@ export function PpbImagesGifsSection() {
                       <s-icon type="upload" />
                       <s-stack direction="block" gap="small-400">
                         <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                          Step Images
+                          {translateAdmin(
+                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.stepImages"
+                          )}
                         </p>
                         <p
                           style={{ margin: 0, fontSize: 12, color: "#6d7175" }}
                         >
-                          Banner image per step — shown above the step's
-                          products in the widget
+                          {translateAdmin(
+                            "adminExtracted.appBundlesProductPageBundleConfigure.ppbimagesgifssection.bannerImagePerStepShownAboveTheStepSProductsInTheWidget"
+                          )}
                         </p>
                       </s-stack>
                     </s-stack>
-                    <s-badge tone="info">Per step</s-badge>
+                    <s-badge tone="info">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.perStep"
+                      )}
+                    </s-badge>
                   </s-stack>
                   <div>
                     <div
@@ -114,7 +125,9 @@ export function PpbImagesGifsSection() {
                                   fontWeight: 600,
                                 }}
                               >
-                                Step Banner Image
+                                {translateAdmin(
+                                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.stepBannerImage"
+                                )}
                               </p>
                               <p
                                 style={{
@@ -123,25 +136,28 @@ export function PpbImagesGifsSection() {
                                   color: "#6d7175",
                                 }}
                               >
-                                Full-width image shown above this step's
-                                products. Recommended: 1600 × 400 px.
+                                {translateAdmin(
+                                  "adminExtracted.appBundlesProductPageBundleConfigure.ppbimagesgifssection.fullWidthImageShownAboveThisStepSProductsRecommended1600400Px"
+                                )}
                               </p>
                             </s-stack>
                             <FilePicker
-                              label="Choose banner image"
+                              label={translateAdmin(
+                                "adminAttributes.chooseBannerImage"
+                              )}
                               value={(step as any).bannerImageUrl ?? null}
                               onChange={(url) => {
                                 stepsState.updateStepField(
                                   step.id,
                                   "bannerImageUrl",
-                                  url ?? null,
+                                  url ?? null
                                 );
                                 markAsDirty();
                               }}
                             />
                           </s-stack>
                         </s-stack>
-                      ),
+                      )
                   )}
                 </s-stack>
               </s-section>
@@ -156,19 +172,35 @@ export function PpbImagesGifsSection() {
                   <s-stack direction="inline" gap="small" alignItems="center">
                     <s-icon type="clock" />
                     <s-stack direction="block" gap="small-400">
-                      <s-stack direction="inline" gap="small" alignItems="center">
+                      <s-stack
+                        direction="inline"
+                        gap="small"
+                        alignItems="center"
+                      >
                         <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                          Loading Animation
+                          {translateAdmin(
+                            "adminExtracted.appBundlesProductPageBundleConfigure.ppbimagesgifssection.loadingAnimation"
+                          )}
                         </p>
                         <ConfigureHelpPopover tooltipKey="loadingAnimation" />
                       </s-stack>
                       <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                        Overlay shown while bundle content is loading
+                        {translateAdmin(
+                          "adminExtracted.appBundlesProductPageBundleConfigure.ppbimagesgifssection.overlayShownWhileBundleContentIsLoading"
+                        )}
                       </p>
                     </s-stack>
                   </s-stack>
-                  <span title="This setting controls the loading animation visible to shoppers on your storefront">
-                    <s-badge tone="info">Storefront</s-badge>
+                  <span
+                    title={translateAdmin(
+                      "adminAttributes.thisSettingControlsTheLoadingAnimationVisibleToShoppers"
+                    )}
+                  >
+                    <s-badge tone="info">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.storefront"
+                      )}
+                    </s-badge>
                   </span>
                 </s-stack>
                 <div
@@ -190,7 +222,11 @@ export function PpbImagesGifsSection() {
                       >
                         FORMAT
                       </p>
-                      <p style={{ margin: 0, fontSize: 14 }}>GIF only</p>
+                      <p style={{ margin: 0, fontSize: 14 }}>
+                        {translateAdmin(
+                          "adminExtracted.appBundlesProductPageBundleConfigure.ppbimagesgifssection.gifOnly"
+                        )}
+                      </p>
                     </s-stack>
                     <s-stack direction="block" gap="small-400">
                       <p
@@ -201,17 +237,21 @@ export function PpbImagesGifsSection() {
                           color: "#6d7175",
                         }}
                       >
-                        RECOMMENDED SIZE
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.recommendedSize"
+                        )}
                       </p>
                       <p style={{ margin: 0, fontSize: 14 }}>
-                        Max 150 × 150 px
+                        {translateAdmin(
+                          "adminExtracted.appBundlesProductPageBundleConfigure.ppbimagesgifssection.max150150Px"
+                        )}
                       </p>
                     </s-stack>
                   </s-stack>
                 </div>
                 <s-divider />
                 <FilePicker
-                  label="Choose loading GIF"
+                  label={translateAdmin("adminAttributes.chooseLoadingGIF")}
                   value={loadingGif}
                   onChange={(url) => {
                     setLoadingGif(url);

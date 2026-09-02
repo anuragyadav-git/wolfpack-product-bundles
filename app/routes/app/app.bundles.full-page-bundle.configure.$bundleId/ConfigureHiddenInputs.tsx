@@ -42,7 +42,7 @@ export function ConfigureHiddenInputs({
         type="hidden"
         name="stepsData"
         value={JSON.stringify(
-          serializeFpbSaveSteps(stepsState.steps, selectedCollections),
+          serializeFpbSaveSteps(stepsState.steps, selectedCollections)
         )}
       />
       <input

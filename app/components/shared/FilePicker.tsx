@@ -1,3 +1,4 @@
+import { translateAdmin } from "~/i18n/config";
 import {
   useCallback,
   useEffect,
@@ -411,7 +412,7 @@ export function FilePicker({
       {!open && uploadStatus === "error" && uploadError && (
         <s-box paddingBlockEnd="small-200">
           <s-banner
-            heading="Upload failed"
+            heading={translateAdmin("adminAttributes.uploadFailed")}
             tone="critical"
             dismissible={false}
             hidden={false}

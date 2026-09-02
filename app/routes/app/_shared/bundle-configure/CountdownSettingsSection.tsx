@@ -80,12 +80,14 @@ export function CountdownSettingsSection({
                 setLayout(
                   (event.target as HTMLSelectElement).value === "full"
                     ? "full"
-                    : "compact",
+                    : "compact"
                 );
                 markAsDirty();
               }}
             >
-              <s-option value="compact">{i18n.t("countdown.layoutCompact")}</s-option>
+              <s-option value="compact">
+                {i18n.t("countdown.layoutCompact")}
+              </s-option>
               <s-option value="full">{i18n.t("countdown.layoutFull")}</s-option>
             </s-select>
             <s-select
@@ -96,13 +98,17 @@ export function CountdownSettingsSection({
                 setPosition(
                   (event.target as HTMLSelectElement).value === "below"
                     ? "below"
-                    : "above",
+                    : "above"
                 );
                 markAsDirty();
               }}
             >
-              <s-option value="above">{i18n.t("countdown.positionAbove")}</s-option>
-              <s-option value="below">{i18n.t("countdown.positionBelow")}</s-option>
+              <s-option value="above">
+                {i18n.t("countdown.positionAbove")}
+              </s-option>
+              <s-option value="below">
+                {i18n.t("countdown.positionBelow")}
+              </s-option>
             </s-select>
             <s-text-field
               label={i18n.t("countdown.timerTitleLabel")}
@@ -123,14 +129,18 @@ export function CountdownSettingsSection({
                 setExpiryAction(
                   value === "show_zeros" || value === "show_message"
                     ? value
-                    : "hide",
+                    : "hide"
                 );
                 markAsDirty();
               }}
             >
               <s-option value="hide">{i18n.t("countdown.expiryHide")}</s-option>
-              <s-option value="show_zeros">{i18n.t("countdown.expiryZeros")}</s-option>
-              <s-option value="show_message">{i18n.t("countdown.expiryMessage")}</s-option>
+              <s-option value="show_zeros">
+                {i18n.t("countdown.expiryZeros")}
+              </s-option>
+              <s-option value="show_message">
+                {i18n.t("countdown.expiryMessage")}
+              </s-option>
             </s-select>
             {expiryAction === "show_message" ? (
               <s-text-field

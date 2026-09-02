@@ -2,6 +2,7 @@ import { ProgressCircle } from "./FilePickerIcons";
 import type { FilePickerDialogProps } from "./types";
 import { formatStoreFileDate, truncateStoreFileText } from "./utils";
 import styles from "./FilePickerDialog.module.css";
+import { translateAdmin } from "~/i18n/config";
 
 export function FilePickerDialog({
   dialogRef,
@@ -28,11 +29,23 @@ export function FilePickerDialog({
   handleSelect,
 }: FilePickerDialogProps) {
   return (
-    <s-modal ref={dialogRef} id="store-file-picker-modal" heading={label} size="large">
-      <s-button slot="primary-action" variant="primary" disabled={!selectedUrl || isBlocked || undefined} onClick={handleSelect}>
-        Select
+    <s-modal
+      ref={dialogRef}
+      id="store-file-picker-modal"
+      heading={label}
+      size="large"
+    >
+      <s-button
+        slot="primary-action"
+        variant="primary"
+        disabled={!selectedUrl || isBlocked || undefined}
+        onClick={handleSelect}
+      >
+        {translateAdmin("createBundle.actions.select")}
       </s-button>
-      <s-button slot="secondary-actions" onClick={handleClose}>Cancel</s-button>
+      <s-button slot="secondary-actions" onClick={handleClose}>
+        {translateAdmin("dashboard.deleteModal.cancel")}
+      </s-button>
 
       <s-query-container containerName="file-picker">
         <s-stack direction="block" gap="base">
@@ -42,15 +55,21 @@ export function FilePickerDialog({
             alignItems="end"
           >
             <s-search-field
-              label="Search files"
+              label={translateAdmin("adminAttributes.searchFiles")}
               labelAccessibilityVisibility="exclusive"
-              placeholder="Search files…"
+              placeholder={translateAdmin("adminAttributes.searchFiles2")}
               value={search}
               disabled={isBlocked || undefined}
               onInput={(event) => setSearch(event.currentTarget.value)}
             />
-            <s-button icon="upload" onClick={handleUploadClick} disabled={isBlocked || undefined}>
-              Upload image
+            <s-button
+              icon="upload"
+              onClick={handleUploadClick}
+              disabled={isBlocked || undefined}
+            >
+              {translateAdmin(
+                "adminExtracted.shared.filePicker.filepickerdialog.uploadImage"
+              )}
             </s-button>
           </s-grid>
 
@@ -59,14 +78,16 @@ export function FilePickerDialog({
           {showProgressCircle ? (
             <div className={styles.progressRow}>
               <ProgressCircle status={progressCircleStatus} />
-              <s-text tone={progressTone === "success" ? "success" : "neutral"}>{progressLabel}</s-text>
+              <s-text tone={progressTone === "success" ? "success" : "neutral"}>
+                {progressLabel}
+              </s-text>
             </div>
           ) : null}
 
           {uploadStatus === "error" && uploadError ? (
             <s-box paddingBlockEnd="small-200">
               <s-banner
-                heading="Upload failed"
+                heading={translateAdmin("adminAttributes.uploadFailed")}
                 tone="critical"
                 dismissible={false}
                 hidden={false}
@@ -79,12 +100,14 @@ export function FilePickerDialog({
           {uploadStatus === "timeout" ? (
             <s-box paddingBlockEnd="small-200">
               <s-banner
-                heading="Upload processing"
+                heading={translateAdmin("adminAttributes.uploadProcessing")}
                 tone="success"
                 dismissible
                 hidden={false}
               >
-                Upload successful — image may take a moment to appear in your library. Close and re-open the picker to see it.
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickerdialog.uploadSuccessfulImageMayTakeAMomentToAppearInYourLibraryCloseAnd"
+                )}
               </s-banner>
             </s-box>
           ) : null}
@@ -101,8 +124,15 @@ export function FilePickerDialog({
 
           {hasNextPage && !search ? (
             <div className={styles.loadMore}>
-              <s-button variant="tertiary" onClick={handleLoadMore} loading={filesLoading || undefined} disabled={isBlocked || undefined}>
-                Load more
+              <s-button
+                variant="tertiary"
+                onClick={handleLoadMore}
+                loading={filesLoading || undefined}
+                disabled={isBlocked || undefined}
+              >
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickerdialog.loadMore"
+                )}
               </s-button>
             </div>
           ) : null}
@@ -122,14 +152,33 @@ function FileGrid({
   isBlocked,
 }: Pick<
   FilePickerDialogProps,
-  "files" | "filteredFiles" | "filesLoading" | "search" | "selectedUrl" | "setSelectedUrl" | "isBlocked"
+  | "files"
+  | "filteredFiles"
+  | "filesLoading"
+  | "search"
+  | "selectedUrl"
+  | "setSelectedUrl"
+  | "isBlocked"
 >) {
   if (filesLoading && files.length === 0) {
-    return <div className={styles.loading}><s-spinner size="large" accessibilityLabel="Loading files" /></div>;
+    return (
+      <div className={styles.loading}>
+        <s-spinner
+          size="large"
+          accessibilityLabel={translateAdmin("adminAttributes.loadingFiles")}
+        />
+      </div>
+    );
   }
 
   if (filteredFiles.length === 0) {
-    return <s-text color="subdued">{search ? "No files match your search." : "No image files found in your store."}</s-text>;
+    return (
+      <s-text color="subdued">
+        {search
+          ? "No files match your search."
+          : "No image files found in your store."}
+      </s-text>
+    );
   }
 
   return (
@@ -152,8 +201,12 @@ function FileGrid({
               className={styles.fileImage}
               loading="lazy"
             />
-            <span className={styles.fileName}>{truncateStoreFileText(file.filename, 24)}</span>
-            <span className={styles.fileDate}>{formatStoreFileDate(file.createdAt)}</span>
+            <span className={styles.fileName}>
+              {truncateStoreFileText(file.filename, 24)}
+            </span>
+            <span className={styles.fileDate}>
+              {formatStoreFileDate(file.createdAt)}
+            </span>
           </button>
         );
       })}

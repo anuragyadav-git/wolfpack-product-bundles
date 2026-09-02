@@ -2,6 +2,7 @@ import React from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbFreeGiftAddonsSection() {
   const {
@@ -33,8 +34,17 @@ export function PpbFreeGiftAddonsSection() {
                 style={{ textAlign: "center", padding: "32px 16px" }}
               >
                 <s-text color="subdued">
-                  Add at least one step in <strong>Step Setup</strong> to
-                  configure Free Gift &amp; Add Ons settings.
+                  {translateAdmin(
+                    "adminExtracted.appBundlesProductPageBundleConfigure.ppbfreegiftaddonssection.addAtLeastOneStepIn"
+                  )}{" "}
+                  <strong>
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupdetailscard.stepSetup"
+                    )}
+                  </strong>{" "}
+                  {translateAdmin(
+                    "adminExtracted.appBundlesProductPageBundleConfigure.ppbfreegiftaddonssection.toConfigureFreeGiftAmpAddOnsSettings"
+                  )}
                 </s-text>
               </div>
             );
@@ -49,11 +59,15 @@ export function PpbFreeGiftAddonsSection() {
                 <div className={productPageBundleStyles.card}>
                   <div className={productPageBundleStyles.panelHeader}>
                     <h3 className={productPageBundleStyles.panelTitle}>
-                      Add-Ons and Gifting Step
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.addOnsAndGiftingStep"
+                      )}
                       <ConfigureHelpPopover tooltipKey="freeGiftAddons" />
                     </h3>
                     <s-checkbox
-                      accessibilityLabel="Enable add-ons and gifting step"
+                      accessibilityLabel={translateAdmin(
+                        "adminAttributes.enableAddOnsAndGiftingStep"
+                      )}
                       checked={step.isFreeGift || undefined}
                       onChange={(e) => {
                         const checked = (e.target as HTMLInputElement).checked;
@@ -73,7 +87,9 @@ export function PpbFreeGiftAddonsSection() {
                           {step.addonIconUrl ? (
                             <img
                               src={step.addonIconUrl}
-                              alt="Add-ons step icon"
+                              alt={translateAdmin(
+                                "adminAttributes.addOnsStepIcon"
+                              )}
                               className={productPageBundleStyles.iconImg}
                             />
                           ) : (
@@ -82,7 +98,9 @@ export function PpbFreeGiftAddonsSection() {
                                 productPageBundleStyles.iconPlaceholder
                               }
                             >
-                              Upload file
+                              {translateAdmin(
+                                "adminExtracted.appBundlesProductPageBundleConfigure.ppbfreegiftaddonssection.uploadFile"
+                              )}
                             </div>
                           )}
                         </div>
@@ -128,19 +146,23 @@ export function PpbFreeGiftAddonsSection() {
                           variant="secondary"
                           icon="language-translate"
                           disabled={
-                            !step.isFreeGift || shopLocales.length === 0 || undefined
+                            !step.isFreeGift ||
+                            shopLocales.length === 0 ||
+                            undefined
                           }
                           onClick={() =>
                             openAddonMultiLanguageModal(step.id, "step")
                           }
                         >
-                          Multi Language
+                          {translateAdmin(
+                            "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                          )}
                         </s-button>
                         <s-text-field
-                          label="Step Name"
+                          label={translateAdmin("adminAttributes.stepName")}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonLabel ?? step.freeGiftName ?? ""}
-                          placeholder="Add On"
+                          placeholder={translateAdmin("adminAttributes.addOn")}
                           onInput={(e) => {
                             const value = (e.target as HTMLInputElement).value;
                             stepsState.updateStepField(
@@ -158,10 +180,12 @@ export function PpbFreeGiftAddonsSection() {
                           autocomplete="off"
                         />
                         <s-text-field
-                          label="Add On"
+                          label={translateAdmin("adminAttributes.addOn")}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonAddText ?? ""}
-                          placeholder="Add to Cart"
+                          placeholder={translateAdmin(
+                            "adminAttributes.addToCart"
+                          )}
                           onInput={(e) => {
                             stepsState.updateStepField(
                               step.id,
@@ -173,7 +197,7 @@ export function PpbFreeGiftAddonsSection() {
                           autocomplete="off"
                         />
                         <s-text-field
-                          label="Step Title"
+                          label={translateAdmin("adminAttributes.stepTitle")}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonTitle ?? ""}
                           onInput={(e) => {
@@ -187,10 +211,14 @@ export function PpbFreeGiftAddonsSection() {
                           autocomplete="off"
                         />
                         <s-text-field
-                          label="Replace"
+                          label={translateAdmin(
+                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
+                          )}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonReplaceText ?? ""}
-                          placeholder="Selected ✓"
+                          placeholder={translateAdmin(
+                            "adminAttributes.selected"
+                          )}
                           onInput={(e) => {
                             stepsState.updateStepField(
                               step.id,
@@ -210,15 +238,20 @@ export function PpbFreeGiftAddonsSection() {
                   <div className={productPageBundleStyles.panelHeader}>
                     <div>
                       <h3 className={productPageBundleStyles.panelTitle}>
-                        Add-Ons with Bundles
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonproductscard.addOnsWithBundles"
+                        )}
                       </h3>
                       <p className={productPageBundleStyles.panelDescription}>
-                        Enable customers to add extra items to their bundles at
-                        a discounted price, for free, or at full price.
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonproductscard.enableCustomersToAddExtraItemsToTheirBundlesAtADiscountedPriceFo"
+                        )}
                       </p>
                     </div>
                     <s-checkbox
-                      accessibilityLabel="Enable add-ons with bundles"
+                      accessibilityLabel={translateAdmin(
+                        "adminAttributes.enableAddOnsWithBundles"
+                      )}
                       checked={
                         step.addonUnlockAfterCompletion !== false || undefined
                       }
@@ -241,7 +274,9 @@ export function PpbFreeGiftAddonsSection() {
                           variant="tertiary"
                           tone="neutral"
                           icon="play"
-                          accessibilityLabel="How to setup?"
+                          accessibilityLabel={translateAdmin(
+                            "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+                          )}
                           onClick={() =>
                             window.open(
                               "https://www.youtube.com/watch?v=5ClNNtFybHo",
@@ -250,7 +285,9 @@ export function PpbFreeGiftAddonsSection() {
                             )
                           }
                         >
-                          How to setup?
+                          {translateAdmin(
+                            "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+                          )}
                         </s-press-button>
                         <s-button
                           variant="secondary"
@@ -264,11 +301,15 @@ export function PpbFreeGiftAddonsSection() {
                             openAddonMultiLanguageModal(step.id, "section")
                           }
                         >
-                          Multi Language
+                          {translateAdmin(
+                            "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                          )}
                         </s-button>
                       </s-stack>
                       <s-text-field
-                        label="Add on Section title"
+                        label={translateAdmin(
+                          "adminAttributes.addOnSectionTitle"
+                        )}
                         value={step.freeGiftName ?? ""}
                         onInput={(e) => {
                           stepsState.updateStepField(
@@ -312,7 +353,9 @@ export function PpbFreeGiftAddonsSection() {
                                       fontWeight: 650,
                                     }}
                                   >
-                                    Tier {idx + 1}
+                                    {translateAdmin("adminDynamic.tierNumber", {
+                                      number: idx + 1,
+                                    })}
                                   </h4>
                                   <s-button
                                     variant="tertiary"
@@ -323,11 +366,15 @@ export function PpbFreeGiftAddonsSection() {
                                       );
                                     }}
                                   >
-                                    Delete
+                                    {translateAdmin(
+                                      "dashboard.deleteModal.delete"
+                                    )}
                                   </s-button>
                                 </div>
                                 <s-checkbox
-                                  label="Display products as free ($0.00)"
+                                  label={translateAdmin(
+                                    "adminAttributes.displayProductsAsFree000"
+                                  )}
                                   checked={tier.displayFree === true}
                                   onChange={(e) => {
                                     const updated = addonTiers.map((t, i) =>
@@ -355,7 +402,9 @@ export function PpbFreeGiftAddonsSection() {
                                 ])
                               }
                             >
-                              Add Add Ons Tier
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                              )}
                             </s-button>
                           </>
                         );
@@ -372,7 +421,9 @@ export function PpbFreeGiftAddonsSection() {
                       <div className={productPageBundleStyles.card}>
                         <div className={productPageBundleStyles.panelHeader}>
                           <h3 className={productPageBundleStyles.panelTitle}>
-                            Footer Messaging
+                            {translateAdmin(
+                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonfootermessaging.footerMessaging"
+                            )}
                           </h3>
                           <s-stack direction="inline" gap="small-100">
                             <s-button
@@ -382,7 +433,9 @@ export function PpbFreeGiftAddonsSection() {
                                 showPolarisModal(templateVariablesModalRef)
                               }
                             >
-                              Show Variables
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.showVariables"
+                              )}
                             </s-button>
                             <s-button
                               variant="secondary"
@@ -396,7 +449,9 @@ export function PpbFreeGiftAddonsSection() {
                                 openAddonMultiLanguageModal(step.id, "footer")
                               }
                             >
-                              Multi Language
+                              {translateAdmin(
+                                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                              )}
                             </s-button>
                           </s-stack>
                         </div>
@@ -404,12 +459,18 @@ export function PpbFreeGiftAddonsSection() {
                           <h4
                             style={{ margin: 0, fontSize: 14, fontWeight: 650 }}
                           >
-                            Tier 1
+                            {translateAdmin(
+                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonfootermessaging.tier1"
+                            )}
                           </h4>
                           <s-text-field
-                            label="Message when rule not met"
+                            label={translateAdmin(
+                              "adminAttributes.messageWhenRuleNotMet"
+                            )}
                             value={addonMessages.discountText}
-                            placeholder="Add {{addonsConditionDiff}} more product(s) to claim {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+                            placeholder={translateAdmin(
+                              "adminAttributes.addAddonsConditionDiffMoreProductSToClaimAddonsDiscountValueAddonsDiscountValueUnit"
+                            )}
                             onInput={(e) => {
                               const value = (e.target as HTMLInputElement)
                                 .value;
@@ -425,9 +486,13 @@ export function PpbFreeGiftAddonsSection() {
                             autocomplete="off"
                           />
                           <s-text-field
-                            label="Success Message"
+                            label={translateAdmin(
+                              "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
+                            )}
                             value={addonMessages.successMessage}
-                            placeholder="Congrats you are eligible for {{addonsDiscountValue}}{{addonsDiscountValueUnit}} off on Add ons"
+                            placeholder={translateAdmin(
+                              "adminAttributes.congratsYouAreEligibleForAddonsDiscountValueAddonsDiscountValueUnitOffOn"
+                            )}
                             onInput={(e) => {
                               const value = (e.target as HTMLInputElement)
                                 .value;

@@ -63,12 +63,20 @@ export function AppEmbedEnableModal({
       size="large"
     >
       {view.primaryAction === "open" && (
-        <s-button slot="primary-action" variant="primary" onClick={onOpenThemeEditor}>
+        <s-button
+          slot="primary-action"
+          variant="primary"
+          onClick={onOpenThemeEditor}
+        >
           {t("dashboard.storefrontSetup.enableModal.openThemeEditor")}
         </s-button>
       )}
       {view.primaryAction === "retry" && (
-        <s-button slot="primary-action" variant="primary" onClick={onOpenThemeEditor}>
+        <s-button
+          slot="primary-action"
+          variant="primary"
+          onClick={onOpenThemeEditor}
+        >
           {t("dashboard.storefrontSetup.enableModal.openThemeEditorAgain")}
         </s-button>
       )}
@@ -90,7 +98,9 @@ export function AppEmbedEnableModal({
 
       <s-stack gap="base">
         {phase === "idle" && (
-          <s-text>{t("dashboard.storefrontSetup.enableModal.description")}</s-text>
+          <s-text>
+            {t("dashboard.storefrontSetup.enableModal.description")}
+          </s-text>
         )}
 
         {view.showGuide && (
@@ -113,21 +123,35 @@ export function AppEmbedEnableModal({
 
         {view.showSpinner && (
           <s-stack alignItems="center" gap="base">
-            <s-spinner accessibilityLabel={t("dashboard.storefrontSetup.enableModal.checking")} />
-            <s-text>{t("dashboard.storefrontSetup.enableModal.checking")}</s-text>
+            <s-spinner
+              accessibilityLabel={t(
+                "dashboard.storefrontSetup.enableModal.checking"
+              )}
+            />
+            <s-text>
+              {t("dashboard.storefrontSetup.enableModal.checking")}
+            </s-text>
           </s-stack>
         )}
 
         {phase === "success" && (
           <s-box paddingBlockEnd="small-200">
-            <s-banner tone="success" heading={t("dashboard.storefrontSetup.enableModal.enabled")} />
+            <s-banner
+              tone="success"
+              heading={t("dashboard.storefrontSetup.enableModal.enabled")}
+            />
           </s-box>
         )}
 
         {phase === "failure" && (
           <s-box paddingBlockEnd="small-200">
-            <s-banner tone="warning" heading={t("dashboard.storefrontSetup.enableModal.notDetected")}>
-              <s-text>{t("dashboard.storefrontSetup.enableModal.description")}</s-text>
+            <s-banner
+              tone="warning"
+              heading={t("dashboard.storefrontSetup.enableModal.notDetected")}
+            >
+              <s-text>
+                {t("dashboard.storefrontSetup.enableModal.description")}
+              </s-text>
             </s-banner>
           </s-box>
         )}

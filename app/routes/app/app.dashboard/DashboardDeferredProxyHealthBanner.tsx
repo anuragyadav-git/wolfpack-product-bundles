@@ -20,9 +20,11 @@ export function DashboardDeferredProxyHealthBanner({
   return (
     <Suspense fallback={null}>
       <Await resolve={banners}>
-        {(resolved) => resolved.proxyHealthy || !appUrl
-          ? null
-          : <ProxyHealthBanner shop={shop} appUrl={appUrl} />}
+        {(resolved) =>
+          resolved.proxyHealthy || !appUrl ? null : (
+            <ProxyHealthBanner shop={shop} appUrl={appUrl} />
+          )
+        }
       </Await>
     </Suspense>
   );

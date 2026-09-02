@@ -33,7 +33,9 @@ export function AccordionItem({
             </span>
             <s-text color="subdued">{subtitle}</s-text>
           </span>
-          <span className={styles.chevron} aria-hidden="true">⌄</span>
+          <span className={styles.chevron} aria-hidden="true">
+            {"⌄"}
+          </span>
         </summary>
         <div className={styles.content}>{children}</div>
       </details>

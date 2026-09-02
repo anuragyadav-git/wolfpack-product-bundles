@@ -19,7 +19,10 @@
 import type { ImgHTMLAttributes } from "react";
 
 export interface OptimisedImageProps
-  extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "width" | "height"> {
+  extends Omit<
+    ImgHTMLAttributes<HTMLImageElement>,
+    "src" | "width" | "height"
+  > {
   /** Path under /public, including leading slash and original extension (e.g. "/FPB-Standard.png"). */
   src: string;
   /** Required — reserves layout space to keep CLS low. */
@@ -35,7 +38,11 @@ export interface OptimisedImageProps
 }
 
 /** Returns sibling paths with the .avif and .webp extensions. */
-function deriveSiblings(src: string): { avif: string | null; webp: string | null; ext: string } {
+function deriveSiblings(src: string): {
+  avif: string | null;
+  webp: string | null;
+  ext: string;
+} {
   const match = /\.(png|jpe?g)$/i.exec(src);
   if (!match) return { avif: null, webp: null, ext: "" };
   const base = src.slice(0, src.length - match[0].length);
