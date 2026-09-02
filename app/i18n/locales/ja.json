@@ -6,8 +6,7 @@
     "integrations": "連携",
     "analytics": "分析",
     "offerOperations": "オファー操作",
-    "billing": "請求",
-    "events": "アップデートとFAQ"
+    "billing": "請求"
   },
   "integrations": {
     "requestMessage": "新しい連携への対応をリクエストしたいです。"
@@ -17,8 +16,7 @@
     "subtitle": "バンドル、カスタマーサポートなどにアクセスできます。",
     "header": {
       "syncCollections": "コレクションを同期",
-      "createBundle": "バンドルを作成",
-      "changelog": "変更履歴"
+      "createBundle": "バンドルを作成"
     },
     "support": {
       "heroTitle": "ストアの可能性を最大限に引き出しましょう。",
@@ -101,7 +99,6 @@
     "resources": {
       "bundleInspiration": "バンドルのインスピレーション",
       "support": "サポート",
-      "exploreUpdate": "アップデートを見る",
       "sdkDocumentation": "SDKドキュメント",
       "bundleGallery": "バンドルギャラリー",
       "comingSoon": "近日公開"
@@ -1445,8 +1442,6 @@
     }
   },
   "adminAttributes": {
-    "latestUpdates": "最新のアップデート",
-    "faqsTutorials": "よくある質問とチュートリアル",
     "searchCampaigns": "キャンペーンを検索",
     "searchByCampaignName": "キャンペーン名で検索",
     "sortTopCampaigns": "トップキャンペーンをソート",
@@ -2074,7 +2069,6 @@
     "bundleOrders": "バンドル注文",
     "bundleRevenue": "バンドル収入",
     "bundleViews": "バンドルビュー",
-    "cartPropertyDisplayFix": "カートプロパティ表示修正",
     "categoryRules": "カテゴリルール",
     "checkedOut": "チェックアウト済み",
     "colors": "色",
@@ -2087,7 +2081,6 @@
     "fullPageBundles": "フルページバンドル",
     "heroBanner": "ヒーローの旗",
     "invalidRequest": "無効なリクエスト",
-    "landingPageBundlesNowLoadInstantly": "ランディングページのバンドルが瞬時に読み込まれるようになりました",
     "mixMatchSteps": "ミックスとステップの一致",
     "navigationMenu": "Navigation Menu",
     "noRules": "ルールがありません",

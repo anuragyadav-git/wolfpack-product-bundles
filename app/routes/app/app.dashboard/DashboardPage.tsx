@@ -542,10 +542,6 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     shopify.toast.show(t("dashboard.header.syncCollections"));
   }, [shopify, t]);
 
-  const handleBellClick = useCallback(() => {
-    navigate("/app/events");
-  }, [navigate]);
-
   const { effectivePage, filteredBundles, pagedBundles, totalPages } = useMemo(
     () =>
       buildDashboardTablePage({
@@ -639,11 +635,6 @@ export function DashboardPage({ banners }: DashboardPageProps) {
                   {t("dashboard.header.createBundle")}
                 </span>
               </s-button>
-              <s-button
-                icon="notification"
-                onClick={handleBellClick}
-                accessibilityLabel={t("dashboard.header.changelog")}
-              />
             </div>
           </div>
 

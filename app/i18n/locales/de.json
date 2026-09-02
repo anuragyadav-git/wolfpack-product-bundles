@@ -6,8 +6,7 @@
     "integrations": "Integrationen",
     "analytics": "Analysen",
     "offerOperations": "Angebotsvorgänge",
-    "billing": "Abrechnung",
-    "events": "Updates und FAQs"
+    "billing": "Abrechnung"
   },
   "integrations": {
     "requestMessage": "Hallo, ich möchte Unterstützung für eine neue Integration anfragen."
@@ -17,8 +16,7 @@
     "subtitle": "Zugriff auf Ihre Bundles, Kundensupport und mehr.",
     "header": {
       "syncCollections": "Kollektionen synchronisieren",
-      "createBundle": "Bundle erstellen",
-      "changelog": "Änderungsprotokoll"
+      "createBundle": "Bundle erstellen"
     },
     "support": {
       "heroTitle": "Schöpfen Sie das volle Potenzial Ihres Shops aus.",
@@ -101,7 +99,6 @@
     "resources": {
       "bundleInspiration": "Bundle-Inspiration",
       "support": "Unterstützung",
-      "exploreUpdate": "Updates entdecken",
       "sdkDocumentation": "SDK-Dokumentation",
       "bundleGallery": "Bundle-Galerie",
       "comingSoon": "Demnächst verfügbar"
@@ -1445,8 +1442,6 @@
     }
   },
   "adminAttributes": {
-    "latestUpdates": "Neueste Updates",
-    "faqsTutorials": "FAQs & Tutorials",
     "searchCampaigns": "Kampagnen suchen",
     "searchByCampaignName": "Suche nach Kampagnennamen",
     "sortTopCampaigns": "Top-Kampagnen sortieren",
@@ -2074,7 +2069,6 @@
     "bundleOrders": "Bündelaufträge",
     "bundleRevenue": "Bundle-Einnahmen",
     "bundleViews": "Bundle-Ansichten",
-    "cartPropertyDisplayFix": "Warenkorb-Eigenschaften-Display-Fix",
     "categoryRules": "Kategorie-Regeln",
     "checkedOut": "Auscheckt",
     "colors": "Farben",
@@ -2087,7 +2081,6 @@
     "fullPageBundles": "Komplette Seitenpakete",
     "heroBanner": "Helden-Banner",
     "invalidRequest": "Ungültige Anfrage",
-    "landingPageBundlesNowLoadInstantly": "Landing Page Bundles laden jetzt sofort",
     "mixMatchSteps": "Mix & Match Schritte",
     "navigationMenu": "Navigation Menu",
     "noRules": "Keine Regeln",

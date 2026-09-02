@@ -160,7 +160,7 @@ describe("Shopify-native Admin locale wiring contract", () => {
     expect(appShell).toContain('t("nav.integrations")');
     expect(appShell).toContain('t("nav.analytics")');
     expect(appShell).toContain('t("nav.billing")');
-    expect(appShell).toContain('t("nav.events")');
+    expect(appShell).not.toContain('t("nav.events")');
   });
 
   it("does not render or persist an app-owned dashboard locale preference", () => {

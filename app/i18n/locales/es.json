@@ -6,8 +6,7 @@
     "integrations": "Integraciones",
     "analytics": "Analíticas",
     "offerOperations": "Operaciones de oferta",
-    "billing": "Facturación",
-    "events": "Actualizaciones y preguntas frecuentes"
+    "billing": "Facturación"
   },
   "integrations": {
     "requestMessage": "Hola, me gustaría solicitar compatibilidad con una nueva integración."
@@ -17,8 +16,7 @@
     "subtitle": "Acceda a sus bundles, soporte al cliente y más.",
     "header": {
       "syncCollections": "Sincronizar colecciones",
-      "createBundle": "Crear bundle",
-      "changelog": "Registro de cambios"
+      "createBundle": "Crear bundle"
     },
     "support": {
       "heroTitle": "Libere todo el potencial de su tienda.",
@@ -101,7 +99,6 @@
     "resources": {
       "bundleInspiration": "Inspiración de bundle",
       "support": "Soporte",
-      "exploreUpdate": "Explorar actualizaciones",
       "sdkDocumentation": "Documentación SDK",
       "bundleGallery": "Galería de bundles",
       "comingSoon": "Próximamente"
@@ -1445,8 +1442,6 @@
     }
   },
   "adminAttributes": {
-    "latestUpdates": "Últimas actualizaciones",
-    "faqsTutorials": "FAQs y Tutoriales",
     "searchCampaigns": "Buscar campañas",
     "searchByCampaignName": "Buscar por nombre de campaña",
     "sortTopCampaigns": "Ordenar campañas superiores",
@@ -2074,7 +2069,6 @@
     "bundleOrders": "Pedidos de paquete",
     "bundleRevenue": "Ingresos del paquete",
     "bundleViews": "Vistas de paquete",
-    "cartPropertyDisplayFix": "Corregir visualización de propiedades del carrito",
     "categoryRules": "Reglas de categorías",
     "checkedOut": "Comprobado",
     "colors": "Colores",
@@ -2087,7 +2081,6 @@
     "fullPageBundles": "Paquetes de página completa",
     "heroBanner": "Estandarte del héroe",
     "invalidRequest": "Solicitud no válida",
-    "landingPageBundlesNowLoadInstantly": "Carga instantánea de paquetes de página",
     "mixMatchSteps": "Mix & Match Steps",
     "navigationMenu": "Navigation Menu",
     "noRules": "Sin reglas",

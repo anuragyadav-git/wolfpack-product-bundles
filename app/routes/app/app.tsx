@@ -116,9 +116,6 @@ function AdminNavigation() {
       <s-link href="/app/billing" onClick={handleNavigation("/app/billing")}>
         {t("nav.billing")}
       </s-link>
-      <s-link href="/app/events" onClick={handleNavigation("/app/events")}>
-        {t("nav.events")}
-      </s-link>
     </s-app-nav>
   );
 }

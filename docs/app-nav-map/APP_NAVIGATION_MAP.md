@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-01
+last_audited: 2026-09-02
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-01
+**Last Updated:** 2026-09-02
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -70,8 +70,7 @@ Wolfpack Bundles SIT
 ├── Integrations        → /app/integrations
 ├── Analytics           → /app/attribution
 ├── Offer operations    → /app/offer-operations
-├── Billing             → /app/billing          (Subscription & Billing)
-└── Updates & FAQs      → /app/events
+└── Billing             → /app/billing          (Subscription & Billing)
 ```
 
 Pathname-changing navigation uses Shopify's native Admin header loading
@@ -113,7 +112,6 @@ Dashboard
 ├── Resources
 │   ├── Bundle Inspiration → selects the gallery preview panel
 │   ├── Support → opens Crisp
-│   ├── Explore Update → /app/events
 │   ├── SDK Documentation → unavailable, non-interactive Coming soon state
 │   └── Bundle Gallery previews → unavailable, non-interactive Coming soon state
 │
@@ -454,24 +452,7 @@ disclosure and preserves the existing configure state.
 
 ---
 
-### 2.5 Updates & FAQs — `/app/events`
-
-**Route file:** `app/routes/app/app.events.tsx`
-**Screenshot:** `screenshots/05-events.png`
-
-```
-Updates & FAQs Page
-├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
-├── Section: "Latest Updates"
-│   └── Accordion items (release notes, e.g. "Landing Page Bundles Now Load Instantly")
-│
-└── Section: "FAQs & Tutorials"
-    └── Accordion items (how-to guides)
-```
-
----
-
-### 2.6 Bundle Configure — Full-Page Bundle
+### 2.5 Bundle Configure — Full-Page Bundle
 
 **Route file:** `app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/full-page-bundle/configure/:bundleId`
@@ -573,7 +554,7 @@ Responsive configure behavior:
 
 ---
 
-### 2.7 Bundle Configure — Product-Page Bundle
+### 2.6 Bundle Configure — Product-Page Bundle
 
 **Route file:** `app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/product-page-bundle/configure/:bundleId`
@@ -757,7 +738,7 @@ items.
 
 ---
 
-### 2.8 Billing — `/app/billing`
+### 2.7 Billing — `/app/billing`
 
 **Route file:** `app/routes/app/app.billing.tsx`
 
@@ -923,5 +904,4 @@ Checkout order summary → Bundle & Save
 | `screenshots/02-dashboard.png`           | Dashboard (empty state — no bundles) |
 | `screenshots/03-analytics.png`           | Analytics / Attribution page         |
 | `screenshots/04-pricing.png`             | Pricing page (Free vs Grow)          |
-| `screenshots/05-events.png`              | Updates & FAQs page                  |
 | `screenshots/06-create-bundle-modal.png` | Create Bundle modal                  |

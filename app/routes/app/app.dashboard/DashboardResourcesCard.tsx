@@ -1,4 +1,3 @@
-import { useNavigate } from "@remix-run/react";
 import type { Dispatch, SetStateAction } from "react";
 import { useTranslation } from "react-i18next";
 import dashboardStyles from "./dashboard.module.css";
@@ -15,11 +14,6 @@ export function DashboardResourcesCard({
   handleDirectChat,
 }: DashboardResourcesCardProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  const handleExploreUpdatesClick = () => {
-    navigate("/app/events");
-  };
 
   return (
     <div className={dashboardStyles.resourcesCard}>
@@ -51,18 +45,6 @@ export function DashboardResourcesCard({
             </div>
             <span className={dashboardStyles.resourceItemLabel}>
               {t("dashboard.resources.support")}
-            </span>
-          </button>
-          <button
-            type="button"
-            className={dashboardStyles.resourceItem}
-            onClick={handleExploreUpdatesClick}
-          >
-            <div className={dashboardStyles.resourceItemIcon}>
-              <s-icon type="notification" />
-            </div>
-            <span className={dashboardStyles.resourceItemLabel}>
-              {t("dashboard.resources.exploreUpdate")}
             </span>
           </button>
           <button

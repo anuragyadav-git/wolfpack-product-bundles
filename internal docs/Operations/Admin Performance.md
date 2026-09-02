@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-09-01
+last_audited: 2026-09-02
 owners:
   - engineering
 domains:
@@ -84,7 +84,6 @@ Measured in the Shopify Admin chrome on `agent-5sfidg3m` / SIT using
 | `/app/dashboard` | Measured: support card description text | Render useful Dashboard content as soon as route data is available. Resolve proxy-health and App Embed status asynchronously in their owned warning surfaces; neither lookup may gate the whole workspace. Keep row action-menu content lazy until merchant intent because closed overlays are not Dashboard page content. Mount the app-embed tutorial media only after the merchant opens its instructional modal so the initial Dashboard route does not request either video source. |
 | `/app/bundles/create` | Measured: bundle type thumbnail rendered via `/ppb.avif` | Preloaded in route `links()` and HTTP `Link`; adjacent `/fpb.avif` also preloaded. The thumbnail is now a CSS background with stable dimensions, and local candidate paint was under target. |
 | `/app/integrations` | Measured: text content | Remove the artificial 800ms readiness interval; the static integration catalog paints immediately. |
-| `/app/events` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/billing` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/billing/plans` | Measured: pricing text | Render the title immediately and use a small Polaris loading state while deferred subscription data resolves. Do not render card-shaped skeleton geometry. |
 | `/app/bundles/cart-transform` | Source audit: no first-viewport owned image | No image preload fix |

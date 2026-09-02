@@ -6,8 +6,7 @@
     "integrations": "集成",
     "analytics": "分析",
     "offerOperations": "提供操作",
-    "billing": "计费",
-    "events": "更新和常见问题"
+    "billing": "计费"
   },
   "integrations": {
     "requestMessage": "您好，我想请求支持新的集成。"
@@ -17,8 +16,7 @@
     "subtitle": "访问您的包，客户支持和更多。",
     "header": {
       "syncCollections": "同步收藏集",
-      "createBundle": "创建包",
-      "changelog": "更新日志"
+      "createBundle": "创建包"
     },
     "support": {
       "heroTitle": "解锁您的店铺的全部潜力。",
@@ -101,7 +99,6 @@
     "resources": {
       "bundleInspiration": "捆绑的灵魂效果",
       "support": "支持",
-      "exploreUpdate": "探索更新",
       "sdkDocumentation": "SDK 文档",
       "bundleGallery": "捆绑库",
       "comingSoon": "即将开始"
@@ -1445,8 +1442,6 @@
     }
   },
   "adminAttributes": {
-    "latestUpdates": "最新更新",
-    "faqsTutorials": "常见问题和教程",
     "searchCampaigns": "搜索活动",
     "searchByCampaignName": "按活动名称搜索",
     "sortTopCampaigns": "排序顶级活动",
@@ -2074,7 +2069,6 @@
     "bundleOrders": "订购单",
     "bundleRevenue": "捆绑收入",
     "bundleViews": "Bundle 视图",
-    "cartPropertyDisplayFix": "购物车属性显示修复",
     "categoryRules": "类别规则",
     "checkedOut": "签出",
     "colors": "颜色",
@@ -2087,7 +2081,6 @@
     "fullPageBundles": "全页包",
     "heroBanner": "英雄旗帜",
     "invalidRequest": "无效请求",
-    "landingPageBundlesNowLoadInstantly": "立即装入登陆页面包",
     "mixMatchSteps": "混合和匹配步骤",
     "navigationMenu": "Navigation Menu",
     "noRules": "没有规则",

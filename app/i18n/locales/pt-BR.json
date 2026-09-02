@@ -6,8 +6,7 @@
     "integrations": "Integrações",
     "analytics": "Análises",
     "offerOperations": "Operações de oferta",
-    "billing": "Cobrança",
-    "events": "Atualizações e perguntas frequentes"
+    "billing": "Cobrança"
   },
   "integrations": {
     "requestMessage": "Olá, gostaria de solicitar suporte para uma nova integração."
@@ -17,8 +16,7 @@
     "subtitle": "Acesse seus bundles, suporte ao cliente e muito mais.",
     "header": {
       "syncCollections": "Sincronizar coleções",
-      "createBundle": "Criar bundle",
-      "changelog": "Registro de alterações"
+      "createBundle": "Criar bundle"
     },
     "support": {
       "heroTitle": "Libere todo o potencial da sua loja.",
@@ -101,7 +99,6 @@
     "resources": {
       "bundleInspiration": "Inspiração de bundle",
       "support": "Suporte",
-      "exploreUpdate": "Explorar atualizações",
       "sdkDocumentation": "Documentação do SDK",
       "bundleGallery": "Galeria de bundles",
       "comingSoon": "Em breve"
@@ -1445,8 +1442,6 @@
     }
   },
   "adminAttributes": {
-    "latestUpdates": "Últimas atualizações",
-    "faqsTutorials": "FAQs & Tutoriais",
     "searchCampaigns": "Buscar campanhas",
     "searchByCampaignName": "Pesquisar pelo nome da campanha",
     "sortTopCampaigns": "Ordenar melhores campanhas",
@@ -2074,7 +2069,6 @@
     "bundleOrders": "Pacotes de Pedidos",
     "bundleRevenue": "Pacote de Receita",
     "bundleViews": "Visualizações do pacote",
-    "cartPropertyDisplayFix": "Correção de exibição de propriedade do carrinho",
     "categoryRules": "Regras de categoria",
     "checkedOut": "Em uso",
     "colors": "Cores",
@@ -2087,7 +2081,6 @@
     "fullPageBundles": "Pacotes de Full-Page",
     "heroBanner": "Estandarte do Herói",
     "invalidRequest": "Solicitação Inválida",
-    "landingPageBundlesNowLoadInstantly": "Pacotes da página inicial agora carregar instantaneamente",
     "mixMatchSteps": "Etapas de Mistura e Correspondência",
     "navigationMenu": "Navigation Menu",
     "noRules": "Sem regras",

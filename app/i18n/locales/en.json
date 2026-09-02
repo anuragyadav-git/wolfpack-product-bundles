@@ -6,8 +6,7 @@
     "integrations": "Integrations",
     "analytics": "Analytics",
     "offerOperations": "Offer operations",
-    "billing": "Billing",
-    "events": "Updates & FAQs"
+    "billing": "Billing"
   },
   "integrations": {
     "requestMessage": "Hi, I'd like to request support for a new integration."
@@ -17,8 +16,7 @@
     "subtitle": "Access your bundles, Customer support and more.",
     "header": {
       "syncCollections": "Sync Collections",
-      "createBundle": "Create Bundle",
-      "changelog": "Changelog"
+      "createBundle": "Create Bundle"
     },
     "support": {
       "heroTitle": "Unlock your store's full potential.",
@@ -101,7 +99,6 @@
     "resources": {
       "bundleInspiration": "Bundle Inspiration",
       "support": "Support",
-      "exploreUpdate": "Explore Update",
       "sdkDocumentation": "SDK Documentation",
       "bundleGallery": "Bundle Gallery",
       "comingSoon": "Coming soon"
@@ -1445,8 +1442,6 @@
     }
   },
   "adminAttributes": {
-    "latestUpdates": "Latest Updates",
-    "faqsTutorials": "FAQs & Tutorials",
     "searchCampaigns": "Search campaigns",
     "searchByCampaignName": "Search by campaign name",
     "sortTopCampaigns": "Sort top campaigns",
@@ -2074,7 +2069,6 @@
     "bundleOrders": "Bundle Orders",
     "bundleRevenue": "Bundle Revenue",
     "bundleViews": "Bundle Views",
-    "cartPropertyDisplayFix": "Cart Property Display Fix",
     "categoryRules": "Category rules",
     "checkedOut": "Checked Out",
     "colors": "Colors",
@@ -2087,7 +2081,6 @@
     "fullPageBundles": "Full-Page Bundles",
     "heroBanner": "Hero Banner",
     "invalidRequest": "Invalid Request",
-    "landingPageBundlesNowLoadInstantly": "Landing Page Bundles Now Load Instantly",
     "mixMatchSteps": "Mix & Match Steps",
     "navigationMenu": "Navigation Menu",
     "noRules": "No rules",

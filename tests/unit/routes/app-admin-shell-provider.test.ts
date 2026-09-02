@@ -107,7 +107,7 @@ describe("app Admin shell provider", () => {
       '<s-link href="/app/attribution">nav.analytics</s-link>'
     );
     expect(view).toContain('<s-link href="/app/billing">nav.billing</s-link>');
-    expect(view).toContain('<s-link href="/app/events">nav.events</s-link>');
+    expect(view).not.toContain('/app/events');
     expect(view).not.toContain("<ui-nav-menu>");
   });
 

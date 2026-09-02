@@ -6,8 +6,7 @@
     "integrations": "Intégrations",
     "analytics": "Analyses",
     "offerOperations": "Opérations de l'offre",
-    "billing": "Facturation",
-    "events": "Mises à jour et FAQ"
+    "billing": "Facturation"
   },
   "integrations": {
     "requestMessage": "Bonjour, je souhaite demander la prise en charge d'une nouvelle intégration."
@@ -17,8 +16,7 @@
     "subtitle": "Accédez à vos bundles, au support client et bien plus.",
     "header": {
       "syncCollections": "Synchroniser les collections",
-      "createBundle": "Créer un bundle",
-      "changelog": "Journal des modifications"
+      "createBundle": "Créer un bundle"
     },
     "support": {
       "heroTitle": "Libérez tout le potentiel de votre boutique.",
@@ -101,7 +99,6 @@
     "resources": {
       "bundleInspiration": "Inspiration de bundle",
       "support": "Soutien",
-      "exploreUpdate": "Explorer les mises à jour",
       "sdkDocumentation": "Documentation SDK",
       "bundleGallery": "Galerie de bundles",
       "comingSoon": "Bientôt disponible"
@@ -1445,8 +1442,6 @@
     }
   },
   "adminAttributes": {
-    "latestUpdates": "Dernières mises à jour",
-    "faqsTutorials": "FAQ & Tutoriels",
     "searchCampaigns": "Rechercher des campagnes",
     "searchByCampaignName": "Recherche par nom de campagne",
     "sortTopCampaigns": "Trier les meilleures campagnes",
@@ -2074,7 +2069,6 @@
     "bundleOrders": "Commandes groupées",
     "bundleRevenue": "Revenus groupés",
     "bundleViews": "Vues groupées",
-    "cartPropertyDisplayFix": "Correction de l'affichage des propriétés du panier",
     "categoryRules": "Règles de catégorie",
     "checkedOut": "Verrouillé",
     "colors": "Couleurs",
@@ -2087,7 +2081,6 @@
     "fullPageBundles": "Bundles de la page complète",
     "heroBanner": "Bannière de Héros",
     "invalidRequest": "Requête invalide",
-    "landingPageBundlesNowLoadInstantly": "Les Bundles de Page d'Atterrissage sont maintenant chargés instantanément",
     "mixMatchSteps": "Mélanger et faire correspondre les étapes",
     "navigationMenu": "Navigation Menu",
     "noRules": "Aucune règle",
