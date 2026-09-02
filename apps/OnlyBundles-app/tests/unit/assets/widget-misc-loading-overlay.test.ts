@@ -1,0 +1,154 @@
+export {};
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ProductPageWidgetMiscMethods } = require('../../../app/assets/widgets/product-page/methods/widget-misc-methods.js');
+/* eslint-disable jest-dom/prefer-to-have-style */
+
+type MockElement = {
+  style: Record<string, string>;
+  dataset: Record<string, string>;
+  children: MockElement[];
+  className: string;
+  tagName?: string;
+  removed?: boolean;
+  offsetHeight?: number;
+  classList: {
+    add: (value: string) => void;
+    remove: (value: string) => void;
+    contains: (value: string) => boolean;
+  };
+  setAttribute: (name: string, value: string) => void;
+  getAttribute: (name: string) => string | undefined;
+  addEventListener: (name: string, listener: () => void, options?: unknown) => void;
+  querySelector: (selector: string) => MockElement | null;
+  appendChild: (child: MockElement) => MockElement;
+  remove?: () => void;
+};
+
+function createMockElement(): MockElement {
+  const classes = new Set<string>();
+  const attributes = new Map<string, string>();
+  return {
+    style: {},
+    dataset: {},
+    children: [],
+    className: '',
+    classList: {
+      add: (value: string) => {
+        classes.add(value);
+      },
+      remove: (value: string) => {
+        classes.delete(value);
+      },
+      contains: (value: string) => classes.has(value),
+    },
+    setAttribute(name: string, value: string) {
+      attributes.set(name, value);
+    },
+    getAttribute(name: string) {
+      return attributes.get(name);
+    },
+    addEventListener() {},
+    querySelector(selector: string) {
+      if (selector === '.bundle-loading-overlay') {
+        const match = this.children.find((child: MockElement) => child.className === 'bundle-loading-overlay');
+        if (match) {
+          return match;
+        }
+        return null;
+      }
+      return null;
+    },
+    appendChild(child: MockElement) {
+      this.children.push(child);
+      return child;
+    },
+  };
+}
+
+function createMockDocument() {
+  return {
+    createElement(tagName: string) {
+      const element = createMockElement();
+      element.tagName = tagName;
+      element.remove = () => {
+        element.removed = true;
+      };
+      element.offsetHeight = 0;
+      return element;
+    },
+    getComputedStyle: () => ({ position: 'static' }),
+    querySelector: () => null,
+  };
+}
+
+describe('ProductPageWidgetMiscMethods loading overlay', () => {
+  it('adds a loading overlay with a minimum loading area for zero-height containers', () => {
+    const container = createMockElement();
+    global.document = createMockDocument() as unknown as Document;
+    global.getComputedStyle = (() => ({ position: 'static' })) as unknown as typeof global.getComputedStyle;
+    const widget = { container };
+
+    ProductPageWidgetMiscMethods.showLoadingOverlay.call(widget, null);
+
+    const overlay = container.querySelector('.bundle-loading-overlay');
+    expect(overlay).not.toBeNull();
+    expect(overlay?.style.minHeight).toBe('var(--bundle-ppb-loading-overlay-min-height, 180px)');
+    expect(overlay?.style.minWidth).toBe('var(--bundle-ppb-loading-overlay-min-width, 180px)');
+    expect(container.style.position).toBe('relative');
+  });
+
+  it('marks and clears bootstrap loading separately from action loading', () => {
+    jest.useFakeTimers();
+    const container = createMockElement();
+    global.document = createMockDocument() as unknown as Document;
+    global.getComputedStyle = (() => ({ position: 'static' })) as unknown as typeof global.getComputedStyle;
+    global.performance = { now: jest.fn(() => 1000) } as unknown as Performance;
+    global.window = {
+      setTimeout: global.setTimeout,
+    } as unknown as Window & typeof globalThis;
+    const widget = { container };
+
+    ProductPageWidgetMiscMethods.showLoadingOverlay.call(widget, null, { bootstrap: true });
+    expect(container.dataset.wpbBootstrapLoading).toBe('true');
+
+    ProductPageWidgetMiscMethods.hideLoadingOverlay.call(widget);
+    jest.advanceTimersByTime(180);
+
+    expect(container.dataset.wpbBootstrapLoading).toBeUndefined();
+  });
+});
+
+describe('ProductPageWidgetMiscMethods modal controls', () => {
+  it('attaches the close behavior to every rendered modal close control', () => {
+    const listeners: Array<() => void> = [];
+    const closeButtons = [createMockElement(), createMockElement()];
+    closeButtons.forEach((button) => {
+      button.addEventListener = (name, listener) => {
+        if (name === 'click') listeners.push(listener);
+      };
+    });
+    const modal = createMockElement() as MockElement & {
+      querySelectorAll: (selector: string) => MockElement[];
+    };
+    modal.classList.add('bw-bs-panel--open');
+    modal.querySelectorAll = (selector) => selector === '.close-button' ? closeButtons : [];
+    const addToCartButton = createMockElement();
+    const closeModal = jest.fn();
+    global.document = {
+      addEventListener: jest.fn(),
+    } as unknown as Document;
+    const widget = {
+      elements: { addToCartButton, modal, bsOverlay: null },
+      selectedBundle: { steps: [] },
+      currentStepIndex: 0,
+      closeModal,
+    };
+
+    ProductPageWidgetMiscMethods.attachEventListeners.call(widget);
+    listeners.forEach((listener) => listener());
+
+    expect(listeners).toHaveLength(2);
+    expect(closeModal).toHaveBeenCalledTimes(2);
+  });
+});

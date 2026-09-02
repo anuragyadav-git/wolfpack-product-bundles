@@ -1,0 +1,124 @@
+import { useCallback } from "react";
+import { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
+import { ppbConfigureFlowStaticExports } from "./ppbConfigureFlowStaticExports";
+import { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import { usePpbVisibilityState } from "./usePpbVisibilityState";
+import { usePpbDisplayOptionsState } from "./usePpbDisplayOptionsState";
+import { usePpbBundleSettingsState } from "./usePpbBundleSettingsState";
+import { usePpbTemplateUiState } from "./usePpbTemplateUiState";
+import { usePpbMultiLanguageHandlers } from "./usePpbMultiLanguageHandlers";
+import { usePpbCategoryHandlers } from "./usePpbCategoryHandlers";
+import { usePpbSaveHandlers } from "./usePpbSaveHandlers";
+import { usePpbFetcherEffects } from "./usePpbFetcherEffects";
+import { usePpbPreviewReadinessHandlers } from "./usePpbPreviewReadinessHandlers";
+import { usePpbPlacementHandlers } from "./usePpbPlacementHandlers";
+import { usePpbModalAndTemplateController } from "./usePpbModalAndTemplateController";
+
+export function usePpbConfigureFlow() {
+  const base = usePpbBaseConfigureState();
+  const visibility = usePpbVisibilityState({
+    bundle: base.bundle,
+  });
+  const display = usePpbDisplayOptionsState({
+    bundle: base.bundle,
+    shopLocales: base.shopLocales,
+    pricingState: base.pricingState,
+    markAsDirty: base.markAsDirty,
+  });
+  const settings = usePpbBundleSettingsState({ bundle: base.bundle });
+  const templateState = usePpbTemplateUiState({ bundle: base.bundle });
+  const multiLanguage = usePpbMultiLanguageHandlers({
+    shopLocales: base.shopLocales,
+    stepsState: base.stepsState,
+    textOverridesByLocale: base.textOverridesByLocale,
+    setTextOverridesByLocale: base.setTextOverridesByLocale,
+    bundleEmbedMultiLangText: visibility.bundleEmbedMultiLangText,
+    setBundleEmbedMultiLangText: visibility.setBundleEmbedMultiLangText,
+    bundleWidgetMultiLangText: visibility.bundleWidgetMultiLangText,
+    setBundleWidgetMultiLangText: visibility.setBundleWidgetMultiLangText,
+    ruleMessages: base.ruleMessages,
+    ruleMessagesByLocale: display.ruleMessagesByLocale,
+    setRuleMessagesByLocale: display.setRuleMessagesByLocale,
+    setDiscountMessagingMultiLanguageEnabled:
+      display.setDiscountMessagingMultiLanguageEnabled,
+    markAsDirty: base.markAsDirty,
+  });
+  const categoryHandlers = usePpbCategoryHandlers({
+    stepsState: base.stepsState,
+    markAsDirty: base.markAsDirty,
+  });
+  const saveHandlers = usePpbSaveHandlers({
+    base,
+    visibility,
+    display,
+    settings,
+    templateState,
+    categoryHandlers,
+  });
+  const sharedHandlers = useSharedBundleHandlers({
+    stepsState: base.stepsState,
+    formState: base.formState,
+    selectedCollections: base.selectedCollections,
+    setSelectedCollections: base.setSelectedCollections,
+    setRuleMessages: base.setRuleMessages,
+    setBundleProduct: base.setBundleProduct,
+    setProductTitle: base.setProductTitle,
+    setProductImageUrl: base.setProductImageUrl,
+    markAsDirty: base.markAsDirty,
+    activeTabIndex: templateState.activeTabIndex,
+    setActiveTabIndex: templateState.setActiveTabIndex,
+    clearOperationAlert: base.clearOperationAlert,
+    shopify: base.shopify,
+    fetcher: base.fetcher,
+    setIsSyncModalOpen: templateState.setIsSyncModalOpen,
+    setSlideDir: templateState.setSlideDir,
+    setSlideKey: templateState.setSlideKey,
+  });
+  usePpbFetcherEffects({
+    base,
+    visibility,
+    settings,
+    templateState,
+    sharedHandlers,
+    saveHandlers,
+  });
+  const handleAddToStorefront = useCallback(() => {
+    base.clearOperationAlert();
+    base.openThemeEditorForAppEmbed();
+  }, [base]);
+  const previewReadiness = usePpbPreviewReadinessHandlers({
+    base,
+    visibility,
+    templateState,
+  });
+  const placement = usePpbPlacementHandlers({
+    base,
+    visibility,
+    templateState,
+  });
+  const modalAndTemplate = usePpbModalAndTemplateController({
+    base,
+    display,
+    templateState,
+    placement,
+    previewReadiness,
+    saveHandlers,
+  });
+
+  return {
+    ...ppbConfigureFlowStaticExports,
+    ...base,
+    ...visibility,
+    ...display,
+    ...settings,
+    ...templateState,
+    ...multiLanguage,
+    ...categoryHandlers,
+    ...saveHandlers,
+    ...sharedHandlers,
+    handleAddToStorefront,
+    ...previewReadiness,
+    ...placement,
+    ...modalAndTemplate,
+  };
+}

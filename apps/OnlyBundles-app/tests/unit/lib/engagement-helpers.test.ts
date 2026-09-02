@@ -1,0 +1,189 @@
+/**
+ * Unit tests for the engagement-funnel helpers.
+ *
+ * Issue: wpb-analytics-revamp-1
+ */
+
+import {
+  computeBundleFunnel,
+  computeOfferFunnel,
+  buildEngagementTrendSeries,
+  buildBundlePerformanceMatrix,
+  type BundleEngagementRow,
+  type BundleSummaryInput,
+} from "../../../app/lib/analytics/engagement-helpers";
+import type { OrderAttributionRow } from "../../../app/lib/analytics/analytics-helpers";
+
+const D = (iso: string) => new Date(iso);
+
+describe("computeBundleFunnel", () => {
+  it("returns all-zeros for empty input", () => {
+    const snap = computeBundleFunnel([], []);
+    expect(snap.engaged).toBe(0);
+    expect(snap.addedToCart).toBe(0);
+    expect(snap.revenueCents).toBe(0);
+    expect(snap.dropOffEngagedToAtc).toBe(0);
+  });
+
+  it("counts engaged as distinct sessionIds", () => {
+    const eng: BundleEngagementRow[] = [
+      { bundleId: "b1", sessionId: "s1", eventName: "wpb:session-engaged", createdAt: D("2026-06-01T00:00Z") },
+      { bundleId: "b1", sessionId: "s1", eventName: "wpb:session-engaged", createdAt: D("2026-06-01T00:01Z") }, // dup session
+      { bundleId: "b2", sessionId: "s2", eventName: "wpb:session-engaged", createdAt: D("2026-06-01T00:02Z") },
+    ];
+    const snap = computeBundleFunnel(eng, []);
+    expect(snap.engaged).toBe(2);
+  });
+
+  it("computes drop-off engaged → atc correctly", () => {
+    const eng: BundleEngagementRow[] = Array.from({ length: 10 }, (_, i) => ({
+      bundleId: "b1",
+      sessionId: `s${i}`,
+      eventName: "wpb:session-engaged",
+      createdAt: D("2026-06-01T00:00Z"),
+    }));
+    eng.push(
+      { bundleId: "b1", sessionId: "s0", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01T00:10Z") },
+      { bundleId: "b1", sessionId: "s1", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01T00:11Z") },
+      { bundleId: "b1", sessionId: "s2", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01T00:12Z") },
+      { bundleId: "b1", sessionId: "s3", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01T00:13Z") },
+    );
+    const attr: OrderAttributionRow[] = Array.from({ length: 4 }, (_, i) => ({
+      bundleId: "b1",
+      revenue: 5000,
+      createdAt: D("2026-06-01T00:00Z"),
+    }));
+    const snap = computeBundleFunnel(eng, attr);
+    expect(snap.engaged).toBe(10);
+    expect(snap.addedToCart).toBe(4);
+    expect(snap.dropOffEngagedToAtc).toBe(60); // 100 - 40
+  });
+
+  it("counts added-to-cart from persisted add-to-cart events independently of checkout", () => {
+    const eng: BundleEngagementRow[] = [
+      { bundleId: "b1", sessionId: "s1", eventName: "wpb:session-engaged", createdAt: D("2026-06-01T00:00Z") },
+      { bundleId: "b1", sessionId: "s1", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01T00:02Z") },
+    ];
+
+    const snap = computeBundleFunnel(eng, []);
+
+    expect(snap.engaged).toBe(1);
+    expect(snap.addedToCart).toBe(1);
+    expect(snap.checkedOut).toBe(0);
+  });
+
+  it("ignores attribution rows with null bundleId", () => {
+    const snap = computeBundleFunnel([], [
+      { bundleId: null, revenue: 9999, createdAt: D("2026-06-01T00:00Z") },
+    ]);
+    expect(snap.addedToCart).toBe(0);
+    expect(snap.revenueCents).toBe(0);
+  });
+});
+
+describe("computeOfferFunnel", () => {
+  const engagementRows: BundleEngagementRow[] = [
+    { bundleId: "b1", offerPolicyId: "p1", sessionId: "s1", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+    { bundleId: "b1", offerPolicyId: "p1", sessionId: "s1", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01") },
+    { bundleId: "b2", offerPolicyId: "p2", sessionId: "s2", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+    { bundleId: "b3", offerPolicyId: null, sessionId: "s3", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+  ];
+  const attributionRows: OrderAttributionRow[] = [
+    { bundleId: "b1", offerPolicyId: "p1", revenue: 1200, createdAt: D("2026-06-01") },
+    { bundleId: "b2", offerPolicyId: "p2", revenue: 800, createdAt: D("2026-06-01") },
+    { bundleId: "b3", offerPolicyId: null, revenue: 500, createdAt: D("2026-06-01") },
+  ];
+
+  it("filters one policy before computing the decision-to-revenue funnel", () => {
+    expect(computeOfferFunnel(engagementRows, attributionRows, "p1")).toMatchObject({
+      engaged: 1,
+      addedToCart: 1,
+      checkedOut: 1,
+      revenueCents: 1200,
+    });
+  });
+
+  it("aggregates offer rows while excluding bundle-only rows when no policy is selected", () => {
+    expect(computeOfferFunnel(engagementRows, attributionRows, null)).toMatchObject({
+      engaged: 2,
+      addedToCart: 1,
+      checkedOut: 2,
+      revenueCents: 2000,
+    });
+  });
+});
+
+describe("buildEngagementTrendSeries", () => {
+  it("fills zero buckets for an empty window", () => {
+    const series = buildEngagementTrendSeries(
+      [],
+      D("2026-06-01T00:00Z"),
+      D("2026-06-03T00:00Z"),
+    );
+    expect(series.map(p => p.date)).toEqual(["2026-06-01", "2026-06-02", "2026-06-03"]);
+    expect(series.every(p => p.engagements === 0)).toBe(true);
+  });
+
+  it("counts engagements per day and tracks unique bundles", () => {
+    const eng: BundleEngagementRow[] = [
+      { bundleId: "b1", sessionId: "s1", eventName: "wpb:session-engaged", createdAt: D("2026-06-01T03:00Z") },
+      { bundleId: "b1", sessionId: "s2", eventName: "wpb:session-engaged", createdAt: D("2026-06-01T05:00Z") },
+      { bundleId: "b2", sessionId: "s3", eventName: "wpb:session-engaged", createdAt: D("2026-06-02T05:00Z") },
+    ];
+    const series = buildEngagementTrendSeries(eng, D("2026-06-01"), D("2026-06-02"));
+    expect(series).toHaveLength(2);
+    expect(series[0]).toEqual({ date: "2026-06-01", engagements: 2, uniqueBundles: 1 });
+    expect(series[1]).toEqual({ date: "2026-06-02", engagements: 1, uniqueBundles: 1 });
+  });
+});
+
+describe("buildBundlePerformanceMatrix", () => {
+  const bundles: BundleSummaryInput[] = [
+    { id: "b1", name: "Snowboard Kit", status: "active", presetId: "CLASSIC" },
+    { id: "b2", name: "Coffee Sampler", status: "active", presetId: "HORIZONTAL" },
+    { id: "b3", name: "Empty Bundle", status: "draft", presetId: null },
+  ];
+
+  it("filters out bundles with no engagement and no revenue", () => {
+    const rows = buildBundlePerformanceMatrix(bundles, [], [], []);
+    expect(rows).toEqual([]);
+  });
+
+  it("computes engagement→order conversion + aov + sorts by revenue desc", () => {
+    const eng: BundleEngagementRow[] = [
+      { bundleId: "b1", sessionId: "s1", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+      { bundleId: "b1", sessionId: "s2", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+      { bundleId: "b2", sessionId: "s3", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
+    ];
+    const attr: OrderAttributionRow[] = [
+      { bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
+      { bundleId: "b2", revenue: 25_000, createdAt: D("2026-06-01") },
+    ];
+    const rows = buildBundlePerformanceMatrix(bundles, eng, attr, []);
+    expect(rows.map(r => r.bundleId)).toEqual(["b2", "b1"]);
+    const b1 = rows.find(r => r.bundleId === "b1")!;
+    expect(b1.engagedSessions).toBe(2);
+    expect(b1.ordersFromBundle).toBe(1);
+    expect(b1.aovCents).toBe(10_000);
+    expect(b1.engagementToOrderRate).toBe(50);
+  });
+
+  it("keeps view-only bundles and computes overall conversion from orders divided by views", () => {
+    const attr: OrderAttributionRow[] = [
+      { bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
+    ];
+    const views = Array.from({ length: 4 }, () => ({
+      bundleId: "b1",
+      createdAt: D("2026-06-01"),
+    }));
+    views.push({ bundleId: "b3", createdAt: D("2026-06-01") });
+
+    const rows = buildBundlePerformanceMatrix(bundles, [], attr, views);
+    const b1 = rows.find(r => r.bundleId === "b1")!;
+    const b3 = rows.find(r => r.bundleId === "b3")!;
+
+    expect(b1.views).toBe(4);
+    expect(b1.overallConversionRate).toBe(25);
+    expect(b3).toMatchObject({ views: 1, ordersFromBundle: 0, overallConversionRate: 0 });
+  });
+});

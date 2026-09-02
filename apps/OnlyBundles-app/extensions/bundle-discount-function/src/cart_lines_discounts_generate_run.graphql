@@ -1,0 +1,57 @@
+query Input {
+  presentmentCurrencyRate
+  localization { country { isoCode } }
+  shop {
+    ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value }
+  }
+  cart {
+    lines {
+      id
+      quantity
+      wolfpackProductBundleOfferId: attribute(key: "_wolfpackProductBundle:OfferId") {
+        value
+      }
+      runtimeToken: attribute(key: "_wolfpack_bundle_runtime") {
+        value
+      }
+      lineAuthorization: attribute(key: "_wolfpack_line_auth") {
+        value
+      }
+      sellingPlanAllocation { sellingPlan { id } }
+      stepType: attribute(key: "_bundle_step_type") {
+        value
+      }
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          id
+          product { id }
+          component_parents: metafield(namespace: "$app", key: "component_parents") {
+            value
+          }
+        }
+      }
+      cost {
+        amountPerQuantity {
+          amount
+        }
+      }
+    }
+  }
+  discount {
+    discountClasses
+    runtimeTokenSecret: metafield(namespace: "$app", key: "runtime_token_secret") {
+      value
+    }
+    discountRole: metafield(namespace: "$app", key: "discount_role") {
+      value
+    }
+    checkoutIntegrationConfig: metafield(namespace: "$app", key: "checkout_integration_config") {
+      jsonValue
+    }
+  }
+  enteredDiscountCodes {
+    code
+  }
+  triggeringDiscountCode
+}

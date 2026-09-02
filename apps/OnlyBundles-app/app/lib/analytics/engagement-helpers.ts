@@ -1,0 +1,245 @@
+/**
+ * Pure analytics helper functions for the engagement-funnel revamp.
+ *
+ * Zero external dependencies — no Prisma, no Remix, no DB.
+ * Unit-testable with plain object fixtures.
+ *
+ * Issue: docs/issues-prod/wpb-analytics-revamp-1.md
+ */
+
+import type { OrderAttributionRow, TrendPoint } from "./analytics-helpers";
+import type { BundleViewRow } from "./bundle-metrics";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface BundleEngagementRow {
+  bundleId: string;
+  offerPolicyId?: string | null;
+  sessionId: string;
+  eventName: string;
+  createdAt: Date;
+  presetId?: string | null;
+}
+
+export interface FunnelSnapshot {
+  // Each step is a unique-count (sessions for engaged/atc, orders for revenue).
+  // `impressions` is optional and only populated when the storefront also forwards
+  // wpb:bundle-ready beacons; for now it defaults to engagements (so the funnel
+  // collapses to engaged → atc → checkout → revenue) and the impressions step is
+  // hidden in the UI when impressions == engagements.
+  impressions: number;
+  engaged: number;
+  addedToCart: number;
+  checkedOut: number;
+  revenueCents: number;
+  // Drop-off percentages between adjacent steps, capped at [0, 100].
+  dropOffEngagedToAtc: number;
+  dropOffAtcToCheckout: number;
+}
+
+export interface EngagementTrendPoint {
+  date: string; // YYYY-MM-DD
+  engagements: number;
+  uniqueBundles: number;
+}
+
+export interface BundleMatrixRow {
+  bundleId: string;
+  bundleName: string;
+  presetId: string | null;
+  status: string;
+  engagedSessions: number;
+  views: number;
+  ordersFromBundle: number;
+  revenueCents: number;
+  aovCents: number | null;
+  engagementToOrderRate: number | null; // 0..100, null when no engagement
+  overallConversionRate: number; // 0..100, orders divided by views
+}
+
+// ─── computeBundleFunnel ───────────────────────────────────────────────────────
+
+/**
+ * Build the cross-bundle funnel snapshot for a single time window.
+ *
+ * Engagement = distinct sessionIds with a session-engaged event.
+ * AddedToCart = distinct sessionIds with a bundle-add-to-cart-success event.
+ * CheckedOut = bundle-attributed completed checkout rows.
+ */
+export function computeBundleFunnel(
+  engagementRows: BundleEngagementRow[],
+  attributionRows: OrderAttributionRow[],
+): FunnelSnapshot {
+  const engagedSessionIds = new Set<string>();
+  const addedToCartSessionIds = new Set<string>();
+  for (const r of engagementRows) {
+    if (r.eventName === "wpb:session-engaged") {
+      engagedSessionIds.add(r.sessionId);
+    }
+    if (r.eventName === "wpb:bundle-add-to-cart-success") {
+      addedToCartSessionIds.add(r.sessionId);
+      engagedSessionIds.add(r.sessionId);
+    }
+  }
+  const engaged = engagedSessionIds.size;
+  const addedToCart = addedToCartSessionIds.size;
+
+  let checkedOut = 0;
+  let revenueCents = 0;
+  for (const r of attributionRows) {
+    if (r.bundleId !== null) {
+      checkedOut += 1;
+      revenueCents += r.revenue;
+    }
+  }
+
+  const dropOffEngagedToAtc =
+    engaged > 0 ? Math.max(0, Math.min(100, 100 - Math.round((addedToCart / engaged) * 100))) : 0;
+  const dropOffAtcToCheckout =
+    addedToCart > 0 ? Math.max(0, Math.min(100, 100 - Math.round((checkedOut / addedToCart) * 100))) : 0;
+
+  return {
+    impressions: engaged, // hidden in UI until impression-beacon ships
+    engaged,
+    addedToCart,
+    checkedOut,
+    revenueCents,
+    dropOffEngagedToAtc,
+    dropOffAtcToCheckout,
+  };
+}
+
+export function computeOfferFunnel(
+  engagementRows: BundleEngagementRow[],
+  attributionRows: OrderAttributionRow[],
+  offerPolicyId: string | null,
+): FunnelSnapshot {
+  const includesPolicy = (value: string | null | undefined) => (
+    offerPolicyId ? value === offerPolicyId : Boolean(value)
+  );
+  return computeBundleFunnel(
+    engagementRows.filter((row) => includesPolicy(row.offerPolicyId)),
+    attributionRows.filter((row) => includesPolicy(row.offerPolicyId)),
+  );
+}
+
+// ─── buildEngagementTrendSeries ────────────────────────────────────────────────
+
+/**
+ * Aggregate engagement rows into a daily series. Days with zero engagement still
+ * appear in the result (filled-zero) so the chart renders a continuous line.
+ */
+export function buildEngagementTrendSeries(
+  rows: BundleEngagementRow[],
+  windowStart: Date,
+  windowEnd: Date,
+): EngagementTrendPoint[] {
+  const dayKey = (d: Date): string => d.toISOString().slice(0, 10);
+  const series = new Map<string, { engagements: number; uniqueBundles: Set<string> }>();
+
+  // Pre-fill the window with zero buckets.
+  const cursor = new Date(windowStart);
+  cursor.setUTCHours(0, 0, 0, 0);
+  const end = new Date(windowEnd);
+  end.setUTCHours(0, 0, 0, 0);
+  while (cursor <= end) {
+    series.set(dayKey(cursor), { engagements: 0, uniqueBundles: new Set() });
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  for (const r of rows) {
+    if (r.eventName !== "wpb:session-engaged") continue;
+    const key = dayKey(r.createdAt);
+    const bucket = series.get(key);
+    if (!bucket) continue;
+    bucket.engagements += 1;
+    bucket.uniqueBundles.add(r.bundleId);
+  }
+
+  return Array.from(series.entries()).map(([date, b]: any) => ({
+    date,
+    engagements: b.engagements,
+    uniqueBundles: b.uniqueBundles.size,
+  }));
+}
+
+// ─── buildBundlePerformanceMatrix ──────────────────────────────────────────────
+
+export interface BundleSummaryInput {
+  id: string;
+  name: string;
+  status: string;
+  presetId: string | null;
+}
+
+/**
+ * Join bundle metadata + engagement + revenue into one row per bundle.
+ * Bundles with zero engagement AND zero revenue are filtered out so the matrix
+ * does not pollute with inactive bundles.
+ */
+export function buildBundlePerformanceMatrix(
+  bundles: BundleSummaryInput[],
+  engagementRows: BundleEngagementRow[],
+  attributionRows: OrderAttributionRow[],
+  viewRows: BundleViewRow[],
+): BundleMatrixRow[] {
+  const engagedByBundle = new Map<string, Set<string>>();
+  for (const r of engagementRows) {
+    if (r.eventName !== "wpb:session-engaged") continue;
+    const set = engagedByBundle.get(r.bundleId) ?? new Set<string>();
+    set.add(r.sessionId);
+    engagedByBundle.set(r.bundleId, set);
+  }
+
+  const revenueByBundle = new Map<string, { revenue: number; orders: number }>();
+  for (const r of attributionRows) {
+    if (r.bundleId === null) continue;
+    const existing = revenueByBundle.get(r.bundleId) ?? { revenue: 0, orders: 0 };
+    existing.revenue += r.revenue;
+    existing.orders += 1;
+    revenueByBundle.set(r.bundleId, existing);
+  }
+
+  const viewsByBundle = new Map<string, number>();
+  for (const row of viewRows) {
+    if (row.bundleId === null) continue;
+    viewsByBundle.set(row.bundleId, (viewsByBundle.get(row.bundleId) ?? 0) + 1);
+  }
+
+  const rows: BundleMatrixRow[] = [];
+  for (const b of bundles) {
+    const engaged = engagedByBundle.get(b.id)?.size ?? 0;
+    const rev = revenueByBundle.get(b.id) ?? { revenue: 0, orders: 0 };
+    const views = viewsByBundle.get(b.id) ?? 0;
+    if (engaged === 0 && rev.orders === 0 && views === 0) continue;
+    const aov = rev.orders > 0 ? Math.round(rev.revenue / rev.orders) : null;
+    const rate =
+      engaged > 0 ? Math.max(0, Math.min(100, Math.round((rev.orders / engaged) * 100))) : null;
+    rows.push({
+      bundleId: b.id,
+      bundleName: b.name,
+      presetId: b.presetId,
+      status: b.status,
+      engagedSessions: engaged,
+      views,
+      ordersFromBundle: rev.orders,
+      revenueCents: rev.revenue,
+      aovCents: aov,
+      engagementToOrderRate: rate,
+      overallConversionRate: views > 0
+        ? Number(((rev.orders / views) * 100).toFixed(2))
+        : 0,
+    });
+  }
+
+  // Default sort: revenue desc, then engagement desc.
+  rows.sort((a, b) => {
+    if (b.revenueCents !== a.revenueCents) return b.revenueCents - a.revenueCents;
+    return b.engagedSessions - a.engagedSessions;
+  });
+
+  return rows;
+}
+
+// Re-export helper for any callers wanting the existing trend type.
+export type { TrendPoint };

@@ -1,0 +1,99 @@
+.scrollRegion {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  contain: inline-size;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.scrollRegion:focus-visible {
+  outline: 2px solid #1f3d2e;
+  outline-offset: 2px;
+}
+
+.table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.featureHeading,
+.featureCell,
+.planHeading,
+.planCell {
+  padding: 12px 8px;
+}
+
+.featureHeading {
+  color: #1f3d2e;
+  font-weight: 600;
+  text-align: left;
+}
+
+.planHeading {
+  width: clamp(96px, 18vw, 120px);
+  color: #1f3d2e;
+  font-weight: 600;
+  text-align: center;
+}
+
+.featureCell {
+  color: #1f3d2e;
+}
+
+.featureCell[data-highlight="true"] {
+  font-weight: 500;
+}
+
+.planCell {
+  text-align: center;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.growthColumn {
+  color: #1f3d2e;
+  background: rgb(167 194 154 / 22%);
+}
+
+.check {
+  display: flex;
+  justify-content: center;
+  color: #557f57;
+}
+
+.unavailable {
+  display: flex;
+  justify-content: center;
+  color: #7d887f;
+}
+
+.headerRow {
+  border-bottom: 2px solid rgb(31 61 46 / 20%);
+}
+
+.bodyRow {
+  border-bottom: 1px solid rgb(31 61 46 / 14%);
+}
+
+.highlightRow {
+  background: rgb(244 237 226 / 55%);
+}
+
+@media (max-width: 767px) {
+  .featureHeading,
+  .featureCell {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 180px;
+    background: #fffdf8;
+    box-shadow: 1px 0 0 rgb(31 61 46 / 16%);
+  }
+}

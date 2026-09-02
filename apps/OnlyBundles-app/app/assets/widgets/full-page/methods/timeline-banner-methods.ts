@@ -1,0 +1,421 @@
+import { ToastManager } from '../../shared/toast-manager.js';
+import { ConditionValidator } from '../../shared/condition-validator.js';
+import {
+  getTimelineEntryState,
+  shouldShowTimelineCompletedState,
+} from '../../shared/engine/bundle-selectors.js';
+import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
+import { createStepTimelineEntryElement } from '../../shared/components/step-timeline.js';
+
+export const fullPageTimelineBannerMethods: Record<string, any> & ThisType<any> = {
+getStandardTimelineVisibleEntries(timelineEntries: any, activeEntryIndex: number) {
+  const entries = Array.isArray(timelineEntries) ? timelineEntries : [];
+  const timelinePageSize = this.getStandardTimelinePageSize();
+
+  if (entries.length <= timelinePageSize) {
+    this.standardTimelineWindowStart = 0;
+    this.standardTimelineLastActiveEntryIndex = activeEntryIndex;
+    return {
+      visibleEntries: entries,
+      windowStart: 0,
+      pageSize: timelinePageSize,
+      isPaged: false,
+    };
+  }
+
+  const activeChanged = this.standardTimelineLastActiveEntryIndex !== activeEntryIndex;
+  let windowStart = Number.isFinite(this.standardTimelineWindowStart)
+    ? this.standardTimelineWindowStart
+    : 0;
+
+  if (activeChanged && (activeEntryIndex < windowStart || activeEntryIndex >= windowStart + timelinePageSize)) {
+    windowStart = activeEntryIndex;
+  }
+
+  if (windowStart + timelinePageSize > entries.length) {
+    windowStart = entries.length - timelinePageSize;
+  }
+
+  windowStart = Math.max(0, windowStart);
+  this.standardTimelineWindowStart = windowStart;
+  this.standardTimelineLastActiveEntryIndex = activeEntryIndex;
+
+  return {
+    visibleEntries: entries.slice(windowStart, windowStart + timelinePageSize),
+    windowStart,
+    pageSize: timelinePageSize,
+    isPaged: true,
+  };
+},
+
+shouldRenderMultipleCategoryTimelineEntry() {
+  return false;
+},
+
+// Create circular icon-based step timeline with connecting lines and three icon states
+createStepTimeline() {
+  if (this._usesReferenceStepBarTimeline()) {
+    return this.createStandardStepTimeline();
+  }
+
+  const timeline = document.createElement('div');
+  timeline.className = 'step-timeline';
+
+  if (!this.selectedBundle || !this.selectedBundle.steps) {
+    return timeline;
+  }
+
+  const timelineEntries = this.buildStepTimelineEntries();
+  const totalEntryCount = Math.max(timelineEntries.length, 1);
+  const hasMultipleCategoryEntryForStep = (entry: any) => (
+    this.shouldRenderMultipleCategoryTimelineEntry(entry?.step)
+  );
+  const activeEntryIndex = Math.max(0, timelineEntries.findIndex((entry: any) => (
+    entry.type === 'multiple_categories'
+      ? Number(entry.stepIndex) === Number(this.currentStepIndex)
+      : entry.type === 'step'
+        ? Number(entry.stepIndex) === Number(this.currentStepIndex)
+          && !hasMultipleCategoryEntryForStep(entry)
+        : false
+  )));
+  const {
+    visibleEntries,
+    windowStart,
+    pageSize,
+    isPaged,
+  } = this.getStandardTimelineVisibleEntries(timelineEntries, activeEntryIndex);
+  const visibleEntryCount = Math.max(visibleEntries.length, 1);
+
+  timeline.classList.toggle('step-timeline--paged', isPaged);
+  timeline.dataset.windowStart = String(windowStart);
+  timeline.dataset.pageSize = String(pageSize);
+  timeline.dataset.totalEntries = String(totalEntryCount);
+
+  const createTimelineArrow = (direction: string) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = direction === 'prev'
+      ? 'timeline-navigation-arrow timeline-navigation-arrow--prev'
+      : 'timeline-navigation-arrow timeline-navigation-arrow--next';
+    button.setAttribute('aria-label', direction === 'prev' ? 'Previous timeline items' : 'Next timeline items');
+    button.textContent = direction === 'prev' ? '‹' : '›';
+    button.addEventListener('click', () => {
+      if (direction === 'prev') {
+        this.standardTimelineWindowStart = Math.max(0, windowStart - pageSize);
+      } else {
+        this.standardTimelineWindowStart = Math.min(totalEntryCount - pageSize, windowStart + pageSize);
+      }
+      this.reRenderFullPage();
+    });
+    return button;
+  };
+
+  if (isPaged && windowStart > 0) {
+    timeline.appendChild(createTimelineArrow('prev'));
+  }
+
+  if (isPaged && windowStart + visibleEntryCount < totalEntryCount) {
+    timeline.appendChild(createTimelineArrow('next'));
+  }
+
+  visibleEntries.forEach((entry: any, displayIndex: number) => {
+    const step = entry.step;
+    const index = entry.stepIndex;
+    const hasMultipleCategoryEntry = this.shouldRenderMultipleCategoryTimelineEntry(step);
+    const isCompleted = shouldShowTimelineCompletedState({
+      entry,
+      currentStepIndex: this.currentStepIndex,
+      isStepCompleted: this.isStepCompleted(index),
+      hasMultipleCategoryEntry,
+    });
+    const timelineState = getTimelineEntryState({
+      entry,
+      currentStepIndex: this.currentStepIndex,
+      isCompleted,
+      isAccessible: this.isStepAccessible(index),
+      hasMultipleCategoryEntry,
+    });
+
+    const tabLabel = entry.label;
+    const accessibleName = tabLabel || `Step ${index + 1}`;
+
+    // Icon: addon-uploaded, then Step Config image, else default SVG.
+    const uploadedIconUrl = (step.isFreeGift && step.addonIconUrl) ? step.addonIconUrl : step.stepImage;
+    const icon = document.createElement('img');
+    icon.className = 'timeline-step-icon';
+    icon.src = uploadedIconUrl || this._getDefaultTimelineIconDataUri(step);
+    icon.alt = accessibleName;
+    const stepEl = createStepTimelineEntryElement({
+      stepIndex: index,
+      timelineType: entry.type,
+      label: tabLabel || `Step ${index + 1}`,
+      iconElement: icon,
+      classes: timelineState.classes,
+    });
+
+    // Click handler — accessible steps only
+    if (entry.type === 'step' && timelineState.isAccessible && !timelineState.isDefaultStep) {
+      stepEl.classList.add('timeline-step--interactive');
+      stepEl.addEventListener('click', () => {
+        if (!this.isStepAccessible(index)) {
+          ToastManager.show('Please complete the previous steps first.');
+          return;
+        }
+        if (index > this.currentStepIndex && !this.canProceedToNextStep()) {
+          ToastManager.show('Please meet the step conditions before proceeding.');
+          return;
+        }
+        this.currentStepIndex = index;
+        this.searchQuery = '';
+        this.activeCollectionId = null;
+        this.reRenderFullPage();
+      });
+    }
+
+    timeline.appendChild(stepEl);
+
+    // Connector — sibling between steps (not child), so flex layout drives width
+    if (displayIndex < visibleEntries.length - 1) {
+      const connectorEl = document.createElement('div');
+      connectorEl.className = 'timeline-connector';
+      const connectorFill = document.createElement('div');
+      connectorFill.className = 'timeline-connector-fill';
+      connectorFill.style.setProperty(
+        '--fpb-timeline-progress',
+        `${Math.round(this._getStepProgressRatio(index) * 100)}%`
+      );
+      connectorEl.appendChild(connectorFill);
+      timeline.appendChild(connectorEl);
+    }
+  });
+
+  return timeline;
+},
+
+createStandardStepTimeline() {
+  const timeline = document.createElement('div');
+  timeline.className = 'step-timeline step-timeline--standard';
+
+  if (!this.selectedBundle || !this.selectedBundle.steps) {
+    return timeline;
+  }
+
+  const timelineEntries = this.buildStepTimelineEntries();
+  const totalEntryCount = Math.max(timelineEntries.length, 1);
+  const activeEntryIndex = Math.max(0, timelineEntries.findIndex((entry: any) => (
+    entry.type === 'multiple_categories'
+      ? Number(entry.stepIndex) === Number(this.currentStepIndex)
+      : entry.type === 'step'
+        ? Number(entry.stepIndex) === Number(this.currentStepIndex)
+          && !this.shouldRenderMultipleCategoryTimelineEntry(entry.step)
+        : false
+  )));
+  const {
+    visibleEntries,
+    windowStart,
+    pageSize,
+    isPaged,
+  } = this.getStandardTimelineVisibleEntries(timelineEntries, activeEntryIndex);
+  const entryCount = Math.max(visibleEntries.length, 1);
+  const activeVisibleEntryIndex = Math.max(0, visibleEntries.findIndex((entry: any) => {
+    if (Number(entry.stepIndex) !== Number(this.currentStepIndex)) {
+      return false;
+    }
+    if (entry.type === 'multiple_categories') return true;
+    if (entry.type === 'step') return !this.shouldRenderMultipleCategoryTimelineEntry(entry.step);
+    return false;
+  }));
+  const progressFill = entryCount > 1
+    ? Math.max(0, Math.min(100, (activeVisibleEntryIndex / (entryCount - 1)) * 100))
+    : 0;
+  const progressLeft = 100 / (entryCount * 2);
+  const progressWidth = entryCount > 1 ? ((entryCount - 1) / entryCount) * 100 : 0;
+
+  timeline.style.setProperty('--standard-timeline-count', String(entryCount));
+  timeline.style.setProperty('--standard-timeline-visible-count', String(entryCount));
+  timeline.style.setProperty('--standard-timeline-total-count', String(totalEntryCount));
+  timeline.style.setProperty('--standard-timeline-progress-left', `${progressLeft.toFixed(4)}%`);
+  timeline.style.setProperty('--standard-timeline-progress-width', `${progressWidth.toFixed(4)}%`);
+  timeline.style.setProperty('--standard-timeline-progress-fill', `${progressFill.toFixed(4)}%`);
+  timeline.classList.toggle('standard-timeline--paged', isPaged);
+
+  const itemsContainer = document.createElement('div');
+  itemsContainer.className = 'standard-navigation-items-container';
+  itemsContainer.classList.toggle('standard-navigation-items-container--paged', isPaged);
+  itemsContainer.dataset.windowStart = String(windowStart);
+  itemsContainer.dataset.pageSize = String(pageSize);
+  itemsContainer.dataset.totalEntries = String(totalEntryCount);
+
+  const createTimelineArrow = (direction: string) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = direction === 'prev'
+      ? 'standard-navigation-arrow standard-navigation-arrow--prev'
+      : 'standard-navigation-arrow standard-navigation-arrow--next';
+    button.setAttribute('aria-label', direction === 'prev' ? 'Previous timeline items' : 'Next timeline items');
+    button.textContent = direction === 'prev' ? '‹' : '›';
+    button.addEventListener('click', () => {
+      if (direction === 'prev') {
+        this.standardTimelineWindowStart = Math.max(0, windowStart - pageSize);
+      } else {
+        this.standardTimelineWindowStart = Math.min(totalEntryCount - pageSize, windowStart + pageSize);
+      }
+      this.reRenderFullPage();
+    });
+    return button;
+  };
+
+  if (isPaged && windowStart > 0) {
+    itemsContainer.appendChild(createTimelineArrow('prev'));
+  }
+
+  if (isPaged && windowStart + entryCount < totalEntryCount) {
+    itemsContainer.appendChild(createTimelineArrow('next'));
+  }
+
+  visibleEntries.forEach((entry: any) => {
+    const step = entry.step;
+    const index = entry.stepIndex;
+    const hasMultipleCategoryEntry = this.shouldRenderMultipleCategoryTimelineEntry(step);
+    const isCompleted = shouldShowTimelineCompletedState({
+      entry,
+      currentStepIndex: this.currentStepIndex,
+      isStepCompleted: this.isStepCompleted(index),
+      hasMultipleCategoryEntry,
+    });
+    const itemEl = document.createElement('div');
+    itemEl.className = 'standard-navigation-item timeline-step';
+    itemEl.dataset.stepIndex = index;
+    itemEl.dataset.timelineType = entry.type;
+
+    const timelineState = getTimelineEntryState({
+      entry,
+      currentStepIndex: this.currentStepIndex,
+      isCompleted,
+      isAccessible: this.isStepAccessible(index),
+      hasMultipleCategoryEntry,
+    });
+    timelineState.classes.forEach((className) => itemEl.classList.add(className));
+
+    const displayName = String(entry.label || `Step ${index + 1}`);
+    const uploadedIconUrl = (step.isFreeGift && step.addonIconUrl) ? step.addonIconUrl : step.stepImage;
+    const iconUrl = uploadedIconUrl || this._getDefaultTimelineIconDataUri(step);
+
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'standard-navigation-step-img-container timeline-icon-wrapper';
+    const image = document.createElement('img');
+    image.className = 'standard-navigation-image timeline-step-icon';
+    image.src = String(iconUrl || '');
+    image.alt = displayName;
+    imageContainer.appendChild(image);
+    const titleContainer = document.createElement('div');
+    titleContainer.className = 'standard-navigation-title-container';
+    const title = document.createElement('p');
+    title.className = 'standard-navigation-title timeline-step-name';
+    title.textContent = displayName;
+    titleContainer.appendChild(title);
+    itemEl.append(imageContainer, titleContainer);
+
+    if (entry.type === 'step' && timelineState.isAccessible && !timelineState.isDefaultStep) {
+      itemEl.classList.add('timeline-step--interactive');
+      itemEl.addEventListener('click', () => {
+        if (!this.isStepAccessible(index)) {
+          ToastManager.show('Please complete the previous steps first.');
+          return;
+        }
+        if (index > this.currentStepIndex && !this.canProceedToNextStep()) {
+          ToastManager.show('Please meet the step conditions before proceeding.');
+          return;
+        }
+        this.currentStepIndex = index;
+        this.searchQuery = '';
+        this.activeCollectionId = null;
+        this.reRenderFullPage();
+      });
+    }
+
+    itemsContainer.appendChild(itemEl);
+  });
+
+  if (entryCount > 1) {
+    const progressContainer = document.createElement('div');
+    progressContainer.className = 'standard-steps-progress-bar-container';
+    const progressBar = document.createElement('div');
+    progressBar.className = 'standard-steps-progress-bar';
+    const progressFill = document.createElement('div');
+    progressFill.className = 'standard-steps-progress-bar-filled';
+    progressBar.appendChild(progressFill);
+    progressContainer.appendChild(progressBar);
+    itemsContainer.appendChild(progressContainer);
+  }
+
+  timeline.appendChild(itemsContainer);
+  return timeline;
+},
+
+// Returns a full-width banner image element for the active step, or null if not configured
+createStepBannerImage(stepIndex: string|number) {
+  const step = (this.selectedBundle?.steps || [])[stepIndex];
+  return createStepBannerImageElement(step, value => this._escapeHTML(value), document);
+},
+
+createBundleBanners() {
+  return createBundleBannerElement({
+    desktopBannerUrl: this.selectedBundle?.bundleBannerDesktopUrl,
+    mobileBannerUrl: this.selectedBundle?.bundleBannerMobileUrl,
+  }, document);
+},
+
+// Get a compact quantity hint string for a step tab (e.g. "Pick 2" or "Pick 2–5")
+getStepQuantityHint(step: any) {
+  if (!step) return null;
+
+  const { conditionOperator, conditionValue, conditionOperator2, conditionValue2 } = step;
+  const OPERATORS = ConditionValidator.OPERATORS;
+
+  if (conditionOperator && conditionValue != null) {
+    const val = Number(conditionValue);
+
+    // Range condition: primary AND secondary
+    if (conditionOperator2 && conditionValue2 != null) {
+      const val2 = Number(conditionValue2);
+      const min = Math.min(val, val2);
+      const max = Math.max(val, val2);
+      return `Pick ${min}–${max}`;
+    }
+
+    switch (conditionOperator) {
+      case OPERATORS.EQUAL_TO:                  return `Pick ${val}`;
+      case OPERATORS.GREATER_THAN:              return `Pick ${val + 1}+`;
+      case OPERATORS.GREATER_THAN_OR_EQUAL_TO:  return `Pick ${val}+`;
+      case OPERATORS.LESS_THAN:                 return `Up to ${val - 1}`;
+      case OPERATORS.LESS_THAN_OR_EQUAL_TO:     return `Up to ${val}`;
+      default:                                  return null;
+    }
+  }
+
+  return null;
+},
+
+// Get product images for a step (helper for tabs)
+getStepProductImages(stepIndex: string|number) {
+  const selectedProducts = this.selectedProducts[stepIndex] || {};
+  const productImages: { url: any; alt: any; }[] = [];
+
+  Object.entries(selectedProducts).forEach(([variantId, quantity]: any) => {
+    if (quantity > 0) {
+      const product = this.stepProductData[stepIndex]?.find((p: any)  => String(p.selectionId || '') === String(variantId));
+      if (product && product.imageUrl && !productImages.find(img => img.url === product.imageUrl)) {
+        productImages.push({
+          url: product.imageUrl,
+          alt: product.title || 'Product'
+        });
+      }
+    }
+  });
+
+  return productImages;
+},
+
+// Create search input for filtering products within the current step
+};

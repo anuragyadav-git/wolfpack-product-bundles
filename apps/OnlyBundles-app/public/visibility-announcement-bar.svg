@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" role="img" aria-labelledby="title desc">
+  <title id="title">Storefront announcement bar placement</title>
+  <desc id="desc">A compact storefront preview with a bundle promotion in the announcement bar.</desc>
+  <rect width="640" height="320" fill="#e7dfd4"/>
+  <rect width="640" height="34" fill="#176a55"/>
+  <text x="320" y="22" fill="#fff" font-family="Arial,sans-serif" font-size="12" text-anchor="middle">BUILD YOUR BUNDLE &amp; SAVE 20% — SHOP NOW</text>
+  <rect y="34" width="640" height="58" fill="#fff"/>
+  <text x="28" y="70" fill="#1f1f1f" font-family="Arial,sans-serif" font-size="17" font-weight="700">HOMESTEAD</text>
+  <g fill="#686868" font-family="Arial,sans-serif" font-size="11"><text x="402" y="68">SHOP</text><text x="450" y="68">JOURNAL</text><text x="516" y="68">ABOUT</text></g>
+  <rect x="26" y="114" width="588" height="184" fill="#d7c5ae"/>
+  <path d="M360 114h254v184H322c26-50 39-111 38-184z" fill="#9e8468"/>
+  <path d="M418 278c22-64 60-104 118-126 27 34 38 76 31 126z" fill="#6f8069"/>
+  <text x="54" y="180" fill="#fff" font-family="Arial,sans-serif" font-size="25" font-weight="700">Thoughtful goods</text>
+  <text x="54" y="210" fill="#fff" font-family="Arial,sans-serif" font-size="25" font-weight="700">for everyday rituals</text>
+  <rect x="54" y="236" width="102" height="34" rx="4" fill="#fff"/>
+  <text x="105" y="258" fill="#222" font-family="Arial,sans-serif" font-size="12" text-anchor="middle">Shop now</text>
+</svg>

@@ -1,0 +1,79 @@
+{% comment %}
+  Only Bundles app embed. Liquid provides data; the compiled runtime owns behavior.
+{% endcomment %}
+
+{% assign app_namespace = '$app' %}
+{% assign ppb_runtime_field = shop.metafields[app_namespace]['ppb_storefront_runtime'] %}
+{% assign ppb_runtime = ppb_runtime_field.value %}
+{% assign storefront_proxy_root = ppb_runtime.storefrontProxyRoot %}
+{% assign fpb_public_number = nil %}
+{% if product and product.variants.first %}
+  {% assign variant_metafields = product.variants.first.metafields[app_namespace] %}
+  {% if variant_metafields %}
+    {% assign bundle_ui_config_field = variant_metafields['bundle_ui_config'] %}
+    {% if bundle_ui_config_field and bundle_ui_config_field.value %}
+      {% assign bundle_ui_config = bundle_ui_config_field.value %}
+      {% if bundle_ui_config.bundleType == 'full_page' %}
+        {% assign fpb_public_number = bundle_ui_config.publicNumber %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% assign fpb_proxy_path = nil %}
+{% if fpb_public_number != blank and request.design_mode == false %}
+  {% assign fpb_proxy_path = storefront_proxy_root | append: '/wpb/' | append: fpb_public_number %}
+{% endif %}
+
+{% assign fpb_upsells_endpoint = storefront_proxy_root | append: '/api/fpb-upsells.json' %}
+{% assign ppb_embed_endpoint = storefront_proxy_root | append: '/api/ppb-embed.json' %}
+{% assign page_builder_embed_endpoint = storefront_proxy_root | append: '/api/page-builder-embed.json' %}
+{% assign controls_settings_endpoint = storefront_proxy_root | append: '/api/controls-settings/' | append: shop.domain | append: '?bundleType=full_page' %}
+{% assign ppb_design_settings_url = storefront_proxy_root | append: '/api/design-settings/' | append: shop.domain | append: '?bundleType=product_page' %}
+{% capture product_collection_ids %}{% if product %}{% for collection in product.collections %}{{ collection.id }}{% unless forloop.last %},{% endunless %}{% endfor %}{% endif %}{% endcapture %}
+
+<div
+  hidden
+  data-wpb-app-embed
+  data-storefront-proxy-root="{{ storefront_proxy_root | escape }}"
+  data-redirect-path="{{ fpb_proxy_path }}"
+  data-full-page-script-url="{{ 'bundle-widget-full-page-bundled.js' | asset_url }}"
+  data-fpb-upsells-endpoint="{{ fpb_upsells_endpoint }}"
+  data-ppb-embed-endpoint="{{ ppb_embed_endpoint }}"
+  data-page-builder-embed-endpoint="{{ page_builder_embed_endpoint }}"
+  data-controls-settings-endpoint="{{ controls_settings_endpoint }}"
+  data-product-id="{% if product %}{{ product.id }}{% endif %}"
+  data-product-handle="{% if product %}{{ product.handle | escape }}{% endif %}"
+  data-collection-ids="{{ product_collection_ids | strip }}"
+  data-locale="{{ request.locale.iso_code }}"
+  data-country-code="{{ localization.country.iso_code }}"
+  data-selected-variant-id="{% if product and product.selected_or_first_available_variant %}{{ product.selected_or_first_available_variant.id }}{% endif %}"
+  data-product-page-script-url="{{ 'bundle-widget-product-page-bundled.js' | asset_url }}"
+  data-product-page-style-url="{{ 'bundle-widget.css' | asset_url }}"
+  data-ppb-grid-style-url="{{ 'bundle-widget-product-page-grid.css' | asset_url }}"
+  data-ppb-cascade-style-url="{{ 'bundle-widget-product-page-cascade.css' | asset_url }}"
+  data-ppb-modal-style-url="{{ 'bundle-widget-product-page-modal.css' | asset_url }}"
+  data-design-settings-style-url="{{ ppb_design_settings_url }}"
+  data-full-page-style-url="{{ 'bundle-widget-full-page.css' | asset_url }}"
+  data-mobile-summary-style-url="{{ 'bundle-widget-full-page-mobile-summary.css' | asset_url }}"
+  data-responsive-style-url="{{ 'bundle-widget-full-page-responsive.css' | asset_url }}"
+  data-preset-standard="{{ 'bundle-widget-full-page-standard.css' | asset_url }}"
+  data-preset-classic="{{ 'bundle-widget-full-page-classic.css' | asset_url }}"
+  data-preset-compact="{{ 'bundle-widget-full-page-compact.css' | asset_url }}"
+  data-preset-horizontal="{{ 'bundle-widget-full-page-horizontal.css' | asset_url }}"
+></div>
+<script src="{{ 'bundle-app-embed.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Only Bundles",
+  "target": "body",
+  "stylesheet": "bundle-widget-bootstrap.css",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Activates Only Bundles storefront features, including product-page bundle offers and embedded bundle builders."
+    }
+  ]
+}
+{% endschema %}

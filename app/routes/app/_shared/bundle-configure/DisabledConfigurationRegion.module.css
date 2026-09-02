@@ -1,8 +1,0 @@
-.region {
-  transition: opacity 120ms ease, filter 120ms ease;
-}
-
-.disabled {
-  opacity: 0.5;
-  filter: grayscale(0.35);
-}

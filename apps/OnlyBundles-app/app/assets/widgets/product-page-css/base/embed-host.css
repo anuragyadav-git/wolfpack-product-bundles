@@ -1,0 +1,35 @@
+.wpb-ppb-embed {
+  box-sizing: border-box;
+  display: grid;
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  inline-size: 100%;
+  margin-block: clamp(1rem, 2.5vw, 2rem);
+}
+.wpb-ppb-embed__header {
+  display: grid;
+  gap: clamp(0.25rem, 0.75vw, 0.5rem);
+}
+
+.wpb-ppb-embed__title,
+.wpb-ppb-embed__subtitle {
+  margin: 0;
+}
+
+.wpb-ppb-embed__title {
+  color: currentColor;
+  font: inherit;
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.wpb-ppb-embed__subtitle {
+  color: color-mix(in srgb, currentColor 72%, transparent);
+  font: inherit;
+  line-height: 1.5;
+}
+
+.bundle-widget-container--embed-source {
+  inline-size: 100%;
+  max-inline-size: none;
+}

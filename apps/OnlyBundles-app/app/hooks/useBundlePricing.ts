@@ -1,0 +1,501 @@
+/**
+ * useBundlePricing Hook
+ *
+ * Manages bundle pricing and discount configuration including:
+ * - Discount enable/disable
+ * - Discount type selection
+ * - Pricing rules management
+ * - Footer visibility
+ * - Rule messaging
+ */
+
+import { useState, useCallback } from "react";
+import {
+  getDefaultDiscountRuleSuccessMessage,
+  getDefaultDiscountRuleText,
+  normalizePricingDisplayOptions,
+  normalizePricingRuleMessages,
+  serializePricingDisplayOptions,
+} from "../lib/pricing-display-options";
+import {
+  ensurePricingRuleMessagesForEnabledState,
+  ensurePricingRulesForEnabledState,
+} from "../lib/pricing-enable-default-rule";
+import {
+  DiscountMethod,
+  type PricingDisplayOptions,
+  type PricingProgressBarType,
+  type PricingRule,
+  type PricingRuleTierText,
+  createNewPricingRule,
+} from "../types/pricing";
+import {
+  applyProgressTierRuleUpdate,
+  ensureProgressTierDefaults,
+  getDefaultProgressTierText,
+  getShopCurrencySymbol,
+  removeProgressTierRule,
+  type ProgressTierState,
+} from "../lib/pricing-progress-tier-defaults";
+
+interface UseBundlePricingProps {
+  initialPricing?: {
+    enabled: boolean;
+    method: DiscountMethod | string;
+    rules: any;
+    showFooter?: boolean;
+    showDiscountProgressBar?: boolean;
+    messages?: any;
+    displayOptions?: any;
+  } | null;
+  currencyCode: string;
+  onStateChange?: () => void;
+}
+
+function createInitialPricingDisplayOptions(initialPricing: UseBundlePricingProps["initialPricing"]): PricingDisplayOptions {
+  const normalized = normalizePricingDisplayOptions({
+    rules: Array.isArray(initialPricing?.rules) ? initialPricing?.rules : [],
+    messages: { displayOptions: initialPricing?.displayOptions || null },
+    showProgressBar: initialPricing?.showDiscountProgressBar === true,
+  });
+
+  return serializePricingDisplayOptions({
+    existingMessages: {},
+    options: normalized,
+  }).displayOptions as PricingDisplayOptions;
+}
+
+export function useBundlePricing({
+  initialPricing,
+  currencyCode,
+  onStateChange,
+}: UseBundlePricingProps) {
+  const initialDiscountType = (initialPricing?.method as DiscountMethod) || DiscountMethod.PERCENTAGE_OFF;
+  const initialDiscountRules = ensurePricingRulesForEnabledState({
+    enabled: initialPricing?.enabled || false,
+    method: initialDiscountType,
+    rules: Array.isArray(initialPricing?.rules) ? initialPricing.rules : [],
+  });
+
+  // Pricing state
+  const [discountEnabled, setDiscountEnabledRaw] = useState(initialPricing?.enabled || false);
+  const [discountType, setDiscountTypeRaw] = useState<DiscountMethod>(initialDiscountType);
+  const [discountRules, setDiscountRulesRaw] = useState<PricingRule[]>(initialDiscountRules);
+  const [showFooter, setShowFooterRaw] = useState(initialPricing?.showFooter !== false);
+  const [showDiscountProgressBar, setShowDiscountProgressBarRaw] = useState(initialPricing?.showDiscountProgressBar === true);
+  const [discountMessagingEnabled, setDiscountMessagingEnabledRaw] = useState(initialPricing?.messages?.showDiscountMessaging === true);
+  const [pricingDisplayOptions, setPricingDisplayOptionsRaw] = useState<PricingDisplayOptions>(() =>
+    createInitialPricingDisplayOptions(initialPricing)
+  );
+  const [progressTierState, setProgressTierStateRaw] =
+    useState<ProgressTierState>(() => ({
+      tierTextByRuleId: ensureProgressTierDefaults(
+        initialDiscountRules,
+        initialDiscountType,
+        currencyCode,
+        (initialPricing?.messages?.tierTextByRuleId ?? {}) as Record<
+          string,
+          PricingRuleTierText
+        >,
+      ),
+      tierTextByLocaleByRuleId:
+        (initialPricing?.messages?.tierTextByLocaleByRuleId ?? {}) as Record<
+          string,
+          Record<string, PricingRuleTierText>
+        >,
+    }));
+
+  // Rule messaging
+  const [ruleMessages, setRuleMessages] = useState<Record<string, { discountText: string; successMessage: string }>>(
+    ensurePricingRuleMessagesForEnabledState({
+      rules: initialDiscountRules,
+      existingMessages: normalizePricingRuleMessages({
+        rules: Array.isArray(initialPricing?.rules) ? initialPricing.rules : [],
+        messages: initialPricing?.messages || {},
+        method: initialPricing?.method,
+      }),
+      method: initialDiscountType,
+    }),
+  );
+  const [showVariables, setShowVariables] = useState(false);
+
+  // Wrapped setters that trigger dirty flag
+  const setDiscountEnabled = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+    const nextEnabled = typeof value === "function" ? value(discountEnabled) : value;
+    if (nextEnabled) {
+      const nextRules = ensurePricingRulesForEnabledState({
+        enabled: nextEnabled,
+        method: discountType,
+        rules: discountRules,
+      });
+      setDiscountRulesRaw(nextRules);
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByRuleId: ensureProgressTierDefaults(
+          nextRules,
+          discountType,
+          currencyCode,
+          state.tierTextByRuleId,
+        ),
+      }));
+      setRuleMessages((messages) =>
+        ensurePricingRuleMessagesForEnabledState({
+          method: discountType,
+          rules: nextRules,
+          existingMessages: messages,
+        }),
+      );
+    }
+    setDiscountEnabledRaw(nextEnabled);
+    onStateChange?.();
+  }, [currencyCode, discountEnabled, discountRules, discountType, onStateChange]);
+
+  const setDiscountType = useCallback((value: DiscountMethod | ((prev: DiscountMethod) => DiscountMethod)) => {
+    setDiscountTypeRaw(value);
+    onStateChange?.();
+  }, [onStateChange]);
+
+  const setDiscountRules = useCallback((value: PricingRule[] | ((prev: PricingRule[]) => PricingRule[])) => {
+    setDiscountRulesRaw(value);
+    onStateChange?.();
+  }, [onStateChange]);
+
+  const setShowFooter = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+    setShowFooterRaw(value);
+    onStateChange?.();
+  }, [onStateChange]);
+
+  const setShowDiscountProgressBar = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+    setShowDiscountProgressBarRaw(value);
+    setPricingDisplayOptionsRaw(prev => {
+      const resolved = typeof value === "function" ? value(prev.progressBar.enabled) : value;
+      return {
+        ...prev,
+        progressBar: {
+          ...prev.progressBar,
+          enabled: resolved,
+        },
+      };
+    });
+    onStateChange?.();
+  }, [onStateChange]);
+
+  const setDiscountMessagingEnabled = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
+    setDiscountMessagingEnabledRaw(value);
+    onStateChange?.();
+  }, [onStateChange]);
+
+  const setPricingDisplayOptions = useCallback((value: PricingDisplayOptions | ((prev: PricingDisplayOptions) => PricingDisplayOptions)) => {
+    setPricingDisplayOptionsRaw(value);
+    onStateChange?.();
+  }, [onStateChange]);
+
+  const setTierTextByRuleId = useCallback(
+    (
+      value:
+        | Record<string, PricingRuleTierText>
+        | ((previous: Record<string, PricingRuleTierText>) => Record<string, PricingRuleTierText>),
+    ) => {
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByRuleId:
+          typeof value === "function" ? value(state.tierTextByRuleId) : value,
+      }));
+      onStateChange?.();
+    },
+    [onStateChange],
+  );
+
+  const setTierTextByLocaleByRuleId = useCallback(
+    (
+      value:
+        | Record<string, Record<string, PricingRuleTierText>>
+        | ((
+            previous: Record<string, Record<string, PricingRuleTierText>>,
+          ) => Record<string, Record<string, PricingRuleTierText>>),
+    ) => {
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByLocaleByRuleId:
+          typeof value === "function"
+            ? value(state.tierTextByLocaleByRuleId)
+            : value,
+      }));
+      onStateChange?.();
+    },
+    [onStateChange],
+  );
+
+  const setBundleQuantityOptionsEnabled = useCallback((enabled: boolean) => {
+    setPricingDisplayOptions(prev => ({
+      ...prev,
+      bundleQuantityOptions: {
+        ...prev.bundleQuantityOptions,
+        enabled,
+      },
+    }));
+  }, [setPricingDisplayOptions]);
+
+  const setBundleQuantityDefaultRule = useCallback((ruleId: string | null) => {
+    setPricingDisplayOptions(prev => ({
+      ...prev,
+      bundleQuantityOptions: {
+        ...prev.bundleQuantityOptions,
+        defaultRuleId: ruleId,
+      },
+    }));
+  }, [setPricingDisplayOptions]);
+
+  const updateBundleQuantityOption = useCallback((ruleId: string, updates: { label?: string; subtext?: string }) => {
+    setPricingDisplayOptions(prev => ({
+      ...prev,
+      bundleQuantityOptions: {
+        ...prev.bundleQuantityOptions,
+        optionsByRuleId: {
+          ...prev.bundleQuantityOptions.optionsByRuleId,
+          [ruleId]: {
+            ...(prev.bundleQuantityOptions.optionsByRuleId[ruleId] || { label: "", subtext: "" }),
+            ...updates,
+          },
+        },
+      },
+    }));
+  }, [setPricingDisplayOptions]);
+
+  const updateLocalizedBundleQuantityOption = useCallback((
+    locale: string,
+    ruleId: string,
+    updates: { label?: string; subtext?: string }
+  ) => {
+    setPricingDisplayOptions(prev => {
+      const optionsByLocaleByRuleId = prev.bundleQuantityOptions.optionsByLocaleByRuleId ?? {};
+      return {
+        ...prev,
+        bundleQuantityOptions: {
+          ...prev.bundleQuantityOptions,
+          optionsByLocaleByRuleId: {
+            ...optionsByLocaleByRuleId,
+            [locale]: {
+              ...(optionsByLocaleByRuleId[locale] ?? {}),
+              [ruleId]: {
+                ...(optionsByLocaleByRuleId[locale]?.[ruleId] ?? { label: "", subtext: "" }),
+                ...updates,
+              },
+            },
+          },
+        },
+      };
+    });
+  }, [setPricingDisplayOptions]);
+
+  const setProgressBarType = useCallback((type: PricingProgressBarType) => {
+    if (type === "step_based") {
+      setProgressTierStateRaw((state) => ({
+        ...state,
+        tierTextByRuleId: ensureProgressTierDefaults(
+          discountRules,
+          discountType,
+          currencyCode,
+          state.tierTextByRuleId,
+        ),
+      }));
+    }
+    setPricingDisplayOptions(prev => ({
+      ...prev,
+      progressBar: {
+        ...prev.progressBar,
+        type,
+      },
+    }));
+  }, [currencyCode, discountRules, discountType, setPricingDisplayOptions]);
+
+  const updateProgressBarOptions = useCallback((updates: Partial<PricingDisplayOptions["progressBar"]>) => {
+    setPricingDisplayOptions(prev => ({
+      ...prev,
+      progressBar: {
+        ...prev.progressBar,
+        ...updates,
+      },
+    }));
+  }, [setPricingDisplayOptions]);
+
+  // Add a new discount rule
+  const addDiscountRule = useCallback(() => {
+    const newRule = createNewPricingRule(discountType);
+    const ruleIndex = discountRules.length;
+    setDiscountRules(prev => [...prev, newRule]);
+    setProgressTierStateRaw((state) => ({
+      ...state,
+      tierTextByRuleId: {
+        ...state.tierTextByRuleId,
+        [newRule.id]: getDefaultProgressTierText(
+          newRule,
+          discountType,
+          currencyCode,
+        ),
+      },
+    }));
+
+    // Initialize messaging for new rule
+    setRuleMessages(prev => ({
+      ...prev,
+      [newRule.id]: {
+        discountText: getDefaultDiscountRuleText(discountType, ruleIndex),
+        successMessage: getDefaultDiscountRuleSuccessMessage(discountType)
+      }
+    }));
+  }, [currencyCode, discountRules, discountType, setDiscountRules]);
+
+  // Remove a discount rule
+  const removeDiscountRule = useCallback((ruleId: string) => {
+    setDiscountRules(prev => prev.filter(rule => rule.id !== ruleId));
+    setProgressTierStateRaw((state) =>
+      removeProgressTierRule(state, ruleId),
+    );
+
+    // Clean up messaging for removed rule
+    setRuleMessages(prev => {
+      const updated = { ...prev };
+      delete updated[ruleId];
+      return updated;
+    });
+  }, [setDiscountRules]);
+
+  // Update a discount rule
+  const updateDiscountRule = useCallback((ruleId: string, updates: Partial<PricingRule>) => {
+    const currentRule = discountRules.find((rule) => rule.id === ruleId);
+    if (!currentRule) return;
+    const nextRule = { ...currentRule, ...updates };
+    setDiscountRulesRaw((rules) =>
+      rules.map((rule) => (rule.id === ruleId ? nextRule : rule)),
+    );
+    setProgressTierStateRaw((state) =>
+      applyProgressTierRuleUpdate({
+        state,
+        rule: nextRule,
+        updates,
+        method: discountType,
+        currencyCode,
+      }),
+    );
+    onStateChange?.();
+  }, [currencyCode, discountRules, discountType, onStateChange]);
+
+  const replaceDiscountMethod = useCallback((method: DiscountMethod) => {
+    const nextRule = createNewPricingRule(method);
+    setDiscountTypeRaw(method);
+    setDiscountRulesRaw([nextRule]);
+    setRuleMessages({
+      [nextRule.id]: {
+        discountText: getDefaultDiscountRuleText(method, 0),
+        successMessage: getDefaultDiscountRuleSuccessMessage(method),
+      },
+    });
+    setProgressTierStateRaw({
+      tierTextByRuleId: {
+        [nextRule.id]: getDefaultProgressTierText(
+          nextRule,
+          method,
+          currencyCode,
+        ),
+      },
+      tierTextByLocaleByRuleId: {},
+    });
+    onStateChange?.();
+  }, [currencyCode, onStateChange]);
+
+  // Update rule message
+  const updateRuleMessage = useCallback((ruleId: string, field: 'discountText' | 'successMessage', value: string) => {
+    setRuleMessages(prev => ({
+      ...prev,
+      [ruleId]: {
+        ...(prev[ruleId] || { discountText: '', successMessage: '' }),
+        [field]: value
+      }
+    }));
+  }, []);
+
+  // Toggle discount enabled
+  const toggleDiscountEnabled = useCallback((enabled: boolean) => {
+    setDiscountEnabled(enabled);
+  }, [setDiscountEnabled]);
+
+  // Change discount type
+  const changeDiscountType = useCallback((type: DiscountMethod) => {
+    setDiscountType(type);
+  }, [setDiscountType]);
+
+  // Toggle footer
+  const toggleFooter = useCallback((show: boolean) => {
+    setShowFooter(show);
+  }, [setShowFooter]);
+
+  // Toggle variables panel
+  const toggleVariablesPanel = useCallback(() => {
+    setShowVariables(prev => !prev);
+  }, []);
+
+  // Get pricing data for submission
+  const getPricingData = useCallback(() => {
+    return {
+      discountEnabled,
+      discountType,
+      discountRules,
+      showFooter,
+      showDiscountProgressBar,
+      discountMessagingEnabled,
+      ruleMessages,
+      pricingDisplayOptions,
+      tierTextByRuleId: progressTierState.tierTextByRuleId,
+      tierTextByLocaleByRuleId: progressTierState.tierTextByLocaleByRuleId,
+    };
+  }, [discountEnabled, discountType, discountRules, showFooter, showDiscountProgressBar, discountMessagingEnabled, ruleMessages, pricingDisplayOptions, progressTierState]);
+
+  return {
+    // State
+    discountEnabled,
+    discountType,
+    discountRules,
+    showFooter,
+    showDiscountProgressBar,
+    discountMessagingEnabled,
+    ruleMessages,
+    pricingDisplayOptions,
+    tierTextByRuleId: progressTierState.tierTextByRuleId,
+    tierTextByLocaleByRuleId: progressTierState.tierTextByLocaleByRuleId,
+    currencyCode,
+    currencySymbol: getShopCurrencySymbol(currencyCode),
+    showVariables,
+
+    // Setters
+    setDiscountEnabled,
+    setDiscountType,
+    setDiscountRules,
+    setShowFooter,
+    setShowDiscountProgressBar,
+    setDiscountMessagingEnabled,
+    setPricingDisplayOptions,
+    setRuleMessages,
+    setTierTextByRuleId,
+    setTierTextByLocaleByRuleId,
+    setShowVariables,
+
+    // Methods
+    addDiscountRule,
+    removeDiscountRule,
+    updateDiscountRule,
+    replaceDiscountMethod,
+    updateRuleMessage,
+    setBundleQuantityOptionsEnabled,
+    setBundleQuantityDefaultRule,
+    updateBundleQuantityOption,
+    updateLocalizedBundleQuantityOption,
+    setProgressBarType,
+    updateProgressBarOptions,
+    toggleDiscountEnabled,
+    changeDiscountType,
+    toggleFooter,
+    toggleVariablesPanel,
+    getPricingData,
+  };
+}

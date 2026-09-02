@@ -1,0 +1,106 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "a383172f42c2ab283901a663d485a03d"
+name = "Only Bundles"
+application_url = "https://wolfpack-product-bundle-app.onrender.com"
+embedded = true
+handle = "wolfpack-product-bundles"
+
+[webhooks]
+api_version = "2026-07"
+
+  [[webhooks.subscriptions]]
+  topics = [
+  "products/delete",
+  "app/uninstalled",
+  "app/scopes_update",
+]
+  uri = "https://wolfpack-production-webhook-processor.onrender.com/webhooks"
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
+
+# No-op required while Shopify's remote schema incorrectly requires Events.
+[events]
+api_version = "unstable"
+subscription = []
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customer_events,read_discounts,read_inventory,read_locales,read_orders,read_product_listings,read_products,read_publications,read_themes,unauthenticated_read_checkouts,unauthenticated_read_content,unauthenticated_read_product_inventory,unauthenticated_read_product_listings,unauthenticated_write_checkouts,write_app_proxy,write_cart_transforms,write_content,write_discounts,write_inventory,write_pixels,write_products,write_publications,write_themes,write_online_store_navigation,write_orders"
+
+[auth]
+redirect_urls = [
+  "https://wolfpack-product-bundle-app.onrender.com/auth/callback",
+  "https://wolfpack-product-bundle-app.onrender.com/auth/shopify/callback",
+  "https://wolfpack-product-bundle-app.onrender.com/api/auth/callback"
+]
+
+[app_proxy]
+url = "https://wolfpack-product-bundle-app.onrender.com"
+subpath = "product-bundles"
+prefix = "apps"
+
+[pos]
+embedded = false
+
+[metafields]
+api_version = "2025-10"
+
+[shop.metafields.app.serverUrl]
+type = "single_line_text_field"
+name = "App Server URL"
+description = "URL of the app server for widget API calls"
+
+  [shop.metafields.app.serverUrl.access]
+  admin = "merchant_read_write"
+  storefront = "public_read"
+
+[shop.metafields.app.ppb_storefront_runtime]
+type = "json"
+name = "PPB Storefront Runtime"
+description = "Shopify-hosted Product Page Bundle runtime settings and public Storefront API client configuration"
+
+  [shop.metafields.app.ppb_storefront_runtime.access]
+  admin = "merchant_read_write"
+  storefront = "public_read"
+
+[shop.metafields.app.ppb_storefront_css]
+type = "multi_line_text_field"
+name = "PPB Storefront CSS"
+description = "Last successfully synchronized Product Page Bundle design CSS"
+
+  [shop.metafields.app.ppb_storefront_css.access]
+  admin = "merchant_read_write"
+  storefront = "public_read"
+
+[shop.metafields.app.lastSync]
+type = "single_line_text_field"
+name = "Last Sync Timestamp"
+description = "ISO timestamp of last successful sync with app server"
+
+  [shop.metafields.app.lastSync.access]
+  admin = "merchant_read"
+  storefront = "none"
+
+[shop.metafields.app.productPageWidgetInstalled]
+type = "boolean"
+name = "Product Page Widget Installed"
+description = "Indicates if the product page bundle widget has been installed in the theme"
+
+  [shop.metafields.app.productPageWidgetInstalled.access]
+  admin = "merchant_read_write"
+  storefront = "none"
+
+[shop.metafields.app.fullPageWidgetInstalled]
+type = "boolean"
+name = "Full Page Widget Installed"
+description = "Indicates if the full-page bundle widget has been installed in the theme"
+
+  [shop.metafields.app.fullPageWidgetInstalled.access]
+  admin = "merchant_read_write"
+  storefront = "none"
+
+[order.metafields.app.bundle_details]
+type = "json"
+name = "Bundle Details"
+description = "Copied bundle display metadata from cart metafields for order attribution"
+capabilities.cart_to_order_copyable = true

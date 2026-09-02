@@ -1,0 +1,684 @@
+/*
+ * Only Bundles Analytics — Design Tokens
+ *
+ * Single source of truth for the revamped analytics page. Every component
+ * under app/components/analytics/ consumes these vars; no ad-hoc hex codes.
+ *
+ * Issue: docs/issues-prod/wpb-analytics-revamp-1.md
+ */
+
+:root {
+  /* ── Surface / Ink ─────────────────────────────────────────────── */
+  --wpb-ink-100: #ffffff;
+  --wpb-ink-200: #faf8f4;
+  --wpb-ink-300: #f5f2ee;
+  --wpb-ink-500: #918c80;
+  --wpb-ink-700: #2a2823;
+  --wpb-ink-900: #15140f;
+
+  /* ── Accents ───────────────────────────────────────────────────── */
+  --wpb-accent-engagement: #0e7c7b;
+  --wpb-accent-engagement-soft: #cce5e3;
+  --wpb-accent-revenue: #b08800;
+  --wpb-accent-revenue-soft: #f3e9c8;
+  --wpb-accent-warning: #a36f00;
+  --wpb-accent-warning-soft: #f6e6b7;
+  --wpb-accent-success: #2f8a52;
+
+  /* ── Lines / shadows ───────────────────────────────────────────── */
+  --wpb-line: rgba(21, 20, 15, 0.08);
+  --wpb-line-strong: rgba(21, 20, 15, 0.18);
+  --wpb-shadow-card:
+    0 1px 0 rgba(21, 20, 15, 0.04), 0 4px 16px rgba(21, 20, 15, 0.06);
+
+  /* ── Type scale ────────────────────────────────────────────────── */
+  --wpb-font-stack:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue",
+    Arial, sans-serif;
+  --wpb-display: 700 44px/48px var(--wpb-font-stack);
+  --wpb-numeric: 600 28px/32px var(--wpb-font-stack);
+  --wpb-numeric-sm: 600 20px/24px var(--wpb-font-stack);
+  --wpb-heading: 600 18px/24px var(--wpb-font-stack);
+  --wpb-body: 400 14px/22px var(--wpb-font-stack);
+  --wpb-micro: 500 12px/16px var(--wpb-font-stack);
+  --wpb-label-size: 11px;
+  --wpb-label-spacing: 1px;
+
+  /* ── Surface metrics ───────────────────────────────────────────── */
+  --wpb-radius: 12px;
+  --wpb-radius-sm: 6px;
+  --wpb-pad: 24px;
+  --wpb-pad-sm: 16px;
+  --wpb-gap: 16px;
+  --wpb-gap-sm: 8px;
+}
+
+/* ── Shared atoms (used by multiple components) ─────────────────── */
+
+.wpb-card {
+  box-sizing: border-box;
+  min-width: 0;
+  background: var(--wpb-ink-100);
+  border: 1px solid var(--wpb-line);
+  border-radius: var(--wpb-radius);
+  box-shadow: var(--wpb-shadow-card);
+  padding: var(--wpb-pad);
+}
+
+.wpb-label {
+  font: var(--wpb-micro);
+  font-size: var(--wpb-label-size);
+  font-weight: 600;
+  letter-spacing: var(--wpb-label-spacing);
+  text-transform: uppercase;
+  color: var(--wpb-ink-500);
+  margin: 0;
+}
+
+.wpb-display-num {
+  font: var(--wpb-display);
+  color: var(--wpb-ink-900);
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.wpb-numeric {
+  font: var(--wpb-numeric);
+  color: var(--wpb-ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.wpb-delta {
+  font: var(--wpb-micro);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.wpb-delta--pos {
+  color: var(--wpb-accent-success);
+}
+.wpb-delta--neg {
+  color: var(--wpb-accent-warning);
+}
+.wpb-delta--neutral {
+  color: var(--wpb-ink-500);
+}
+
+.wpb-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 var(--wpb-gap);
+}
+.wpb-section-title {
+  font: var(--wpb-heading);
+  color: var(--wpb-ink-900);
+  margin: 0;
+}
+.wpb-section-hint {
+  font: var(--wpb-body);
+  color: var(--wpb-ink-500);
+  margin: 0;
+}
+
+.wpb-card--flush {
+  overflow: hidden;
+}
+
+.wpb-card--hero {
+  padding: 32px;
+}
+
+.wpb-section-kicker {
+  margin-bottom: 4px;
+}
+
+.wpb-section-title--hero {
+  font: var(--wpb-heading);
+  font-size: 22px;
+}
+
+.wpb-empty-copy {
+  color: var(--wpb-ink-500);
+  font: var(--wpb-body);
+  margin: 0;
+}
+
+.wpb-empty-block {
+  padding: 32px 0;
+  color: var(--wpb-ink-500);
+  font: var(--wpb-body);
+  text-align: center;
+}
+
+.wpb-two-column-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.wpb-chart-strip {
+  height: 160px;
+  margin: 0 -8px -8px;
+}
+
+.wpb-section-header--metric-chart {
+  align-items: flex-start;
+}
+
+.wpb-metric-selector {
+  flex: none;
+}
+
+.wpb-metric-chart {
+  height: 300px;
+  margin: 0 -8px -8px;
+}
+
+.wpb-results-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--wpb-line);
+}
+
+.wpb-results-sort-glyph {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.wpb-results-empty {
+  display: flex;
+  min-height: 168px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.wpb-results-empty-icon {
+  color: var(--wpb-ink-500);
+  font-size: 48px;
+  line-height: 1;
+}
+
+.wpb-results-empty-title {
+  margin: 0;
+  color: var(--wpb-ink-900);
+  font: var(--wpb-heading);
+}
+
+.wpb-funnel-grid {
+  display: grid;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.wpb-funnel-grid[data-step-count="4"] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.wpb-funnel-grid[data-step-count="5"] {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.wpb-funnel-step {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wpb-display-num[data-accent="engagement"],
+.wpb-funnel-meter[data-accent="engagement"] {
+  color: var(--wpb-accent-engagement);
+  accent-color: var(--wpb-accent-engagement);
+}
+
+.wpb-display-num[data-accent="revenue"],
+.wpb-funnel-meter[data-accent="revenue"] {
+  color: var(--wpb-accent-revenue);
+  accent-color: var(--wpb-accent-revenue);
+}
+
+.wpb-display-num[data-accent="warning"],
+.wpb-funnel-meter[data-accent="warning"] {
+  color: var(--wpb-accent-warning);
+  accent-color: var(--wpb-accent-warning);
+}
+
+.wpb-display-num[data-accent="ink"],
+.wpb-funnel-meter[data-accent="ink"] {
+  color: var(--wpb-ink-900);
+  accent-color: var(--wpb-ink-900);
+}
+
+.wpb-display-num--funnel {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.wpb-numeric--small {
+  font: var(--wpb-numeric-sm);
+}
+
+.wpb-funnel-meter,
+.wpb-campaign-meter {
+  width: 100%;
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--wpb-ink-300);
+  overflow: hidden;
+}
+
+.wpb-campaign-meter {
+  height: 4px;
+  margin-top: 6px;
+  accent-color: var(--wpb-accent-revenue);
+}
+
+.wpb-funnel-meter::-webkit-progress-bar,
+.wpb-campaign-meter::-webkit-progress-bar {
+  border-radius: 999px;
+  background: var(--wpb-ink-300);
+}
+
+.wpb-funnel-meter::-webkit-progress-value,
+.wpb-campaign-meter::-webkit-progress-value {
+  border-radius: 999px;
+}
+
+.wpb-funnel-meter[data-accent="engagement"]::-webkit-progress-value {
+  background: var(--wpb-accent-engagement);
+}
+
+.wpb-funnel-meter[data-accent="revenue"]::-webkit-progress-value,
+.wpb-campaign-meter::-webkit-progress-value {
+  background: var(--wpb-accent-revenue);
+}
+
+.wpb-funnel-meter[data-accent="warning"]::-webkit-progress-value {
+  background: var(--wpb-accent-warning);
+}
+
+.wpb-funnel-meter[data-accent="ink"]::-webkit-progress-value {
+  background: var(--wpb-ink-900);
+}
+
+.wpb-funnel-conversion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--wpb-micro);
+}
+
+.wpb-muted-micro {
+  color: var(--wpb-ink-500);
+  font: var(--wpb-micro);
+}
+
+.wpb-funnel-dropoff {
+  border-radius: 999px;
+  background: var(--wpb-accent-warning-soft);
+  color: var(--wpb-accent-warning);
+  padding: 2px 8px;
+  font-weight: 600;
+}
+
+.wpb-sort-button {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  border: 0;
+  background: none;
+  color: var(--wpb-ink-500);
+  cursor: pointer;
+  font: var(--wpb-micro);
+  font-size: var(--wpb-label-size);
+  font-weight: 600;
+  letter-spacing: var(--wpb-label-spacing);
+  padding: 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.wpb-sort-button[data-align="right"] {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.wpb-sort-indicator {
+  font-size: 9px;
+  opacity: 0.3;
+}
+
+.wpb-sort-indicator[data-active="true"] {
+  opacity: 1;
+}
+
+.wpb-kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wpb-kpi-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -2px;
+}
+
+.wpb-sparkline {
+  height: 36px;
+  margin: 8px -8px -8px;
+}
+
+.wpb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wpb-list--campaigns {
+  gap: 14px;
+}
+
+.wpb-list--scroll {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.wpb-campaign-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 0.25fr) minmax(120px, 0.3fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.wpb-campaign-table {
+  display: grid;
+}
+
+.wpb-campaign-table-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 0.25fr) minmax(120px, 0.3fr);
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--wpb-line);
+  color: var(--wpb-ink-500);
+  font: var(--wpb-micro);
+}
+
+.wpb-campaign-table-head span:not(:first-child) {
+  text-align: right;
+}
+
+.wpb-campaign-table-row {
+  padding-block: 14px;
+  border-bottom: 1px solid var(--wpb-line);
+}
+
+.wpb-campaign-table-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.wpb-activity-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.wpb-truncate-cell {
+  min-width: 0;
+}
+
+.wpb-row-title {
+  overflow: hidden;
+  margin: 0;
+  color: var(--wpb-ink-900);
+  font: var(--wpb-body);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wpb-row-title--activity::after {
+  content: " engaged";
+}
+
+.wpb-row-value {
+  margin: 0;
+  color: var(--wpb-accent-revenue);
+  font: var(--wpb-body);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.wpb-row-align-end {
+  text-align: right;
+}
+
+.wpb-live-dot,
+.wpb-activity-dot {
+  display: inline-block;
+  border-radius: 50%;
+  background: var(--wpb-accent-engagement);
+}
+
+.wpb-live-dot {
+  width: 8px;
+  height: 8px;
+  box-shadow: 0 0 0 4px rgba(14, 124, 123, 0.16);
+}
+
+.wpb-activity-dot {
+  width: 6px;
+  height: 6px;
+  margin-left: 2px;
+}
+
+.wpb-nowrap {
+  white-space: nowrap;
+}
+
+.wpb-matrix-scroll {
+  overflow-x: auto;
+}
+
+.wpb-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.wpb-matrix-head-row {
+  border-bottom: 1px solid var(--wpb-line);
+}
+
+.wpb-matrix-row {
+  cursor: default;
+}
+
+.wpb-matrix-row[data-clickable="true"] {
+  cursor: pointer;
+}
+
+.wpb-matrix-row:not(:last-child) {
+  border-bottom: 1px solid var(--wpb-line);
+}
+
+.wpb-matrix-th,
+.wpb-matrix-cell {
+  padding: 12px 8px;
+  text-align: left;
+}
+
+.wpb-matrix-cell {
+  padding-block: 16px;
+  color: var(--wpb-ink-900);
+  font: var(--wpb-body);
+}
+
+.wpb-matrix-cell--primary {
+  font-weight: 600;
+}
+
+.wpb-matrix-cell--right,
+.wpb-matrix-th--right {
+  text-align: right;
+}
+
+.wpb-matrix-cell--engagement {
+  color: var(--wpb-accent-engagement);
+  font-weight: 600;
+}
+
+.wpb-matrix-cell--muted {
+  color: var(--wpb-ink-700);
+}
+
+.wpb-matrix-cell--revenue {
+  color: var(--wpb-accent-revenue);
+  font-weight: 700;
+}
+
+.wpb-matrix-th--bundle {
+  width: 26%;
+}
+
+.wpb-matrix-th--preset {
+  width: 14%;
+}
+
+.wpb-matrix-th--engaged,
+.wpb-matrix-th--conv,
+.wpb-matrix-th--aov {
+  width: 12%;
+}
+
+.wpb-matrix-th--orders {
+  width: 10%;
+}
+
+.wpb-matrix-th--revenue {
+  width: 14%;
+}
+
+.wpb-preset-chip {
+  display: inline-block;
+  border-radius: 999px;
+  background: #e8e2d6;
+  color: #15140f;
+  font: var(--wpb-micro);
+  font-size: var(--wpb-label-size);
+  font-weight: 600;
+  letter-spacing: var(--wpb-label-spacing);
+  padding: 2px 10px;
+  text-transform: uppercase;
+}
+
+.wpb-preset-chip[data-preset="HORIZONTAL"] {
+  background: #cce5e3;
+  color: #0e7c7b;
+}
+
+.wpb-preset-chip[data-preset="CLASSIC"],
+.wpb-preset-chip[data-preset="COMPACT"] {
+  background: #e0dacc;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --wpb-pad: 20px;
+  }
+
+  .wpb-card--hero {
+    padding: 24px;
+  }
+
+  .wpb-funnel-grid[data-step-count="4"],
+  .wpb-funnel-grid[data-step-count="5"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wpb-matrix-table {
+    min-width: 720px;
+  }
+
+  .wpb-matrix-th:first-child,
+  .wpb-matrix-cell:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--wpb-ink-100);
+    box-shadow: 1px 0 0 var(--wpb-line);
+  }
+}
+
+@media (max-width: 520px) {
+  :root {
+    --wpb-pad: 16px;
+  }
+
+  .wpb-card--hero {
+    padding: 20px;
+  }
+
+  .wpb-section-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .wpb-section-header--metric-chart {
+    gap: 12px;
+  }
+
+  .wpb-metric-selector,
+  .wpb-metric-selector s-button {
+    width: 100%;
+  }
+
+  .wpb-metric-chart {
+    height: 240px;
+  }
+
+  .wpb-two-column-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wpb-display-num--funnel {
+    font-size: 32px;
+  }
+
+  .wpb-activity-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .wpb-activity-row > .wpb-nowrap {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 359px) {
+  .wpb-funnel-grid[data-step-count="4"],
+  .wpb-funnel-grid[data-step-count="5"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

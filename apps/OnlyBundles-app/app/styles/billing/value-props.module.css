@@ -1,0 +1,50 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  min-width: 0;
+  padding: 1rem;
+  color: #1f3d2e;
+  background: linear-gradient(145deg, rgb(167 194 154 / 20%), #fffdf8);
+  border: 1px solid rgb(167 194 154 / 55%);
+  border-radius: 12px;
+}
+
+.card > s-stack {
+  min-width: 0;
+}
+
+.icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  color: #1f3d2e;
+  background: rgb(167 194 154 / 28%);
+  border-radius: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin: 0;
+  color: #52675b;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

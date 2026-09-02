@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "copy-schema-v1",
+  "type": "json-schema",
+  "definition": {
+    "type": "object",
+    "properties": {
+      "copy_id": { "type": "string" },
+      "template": { "type": "string" },
+      "merchant_editable": { "type": "boolean" }
+    },
+    "required": ["copy_id", "template"]
+  }
+}

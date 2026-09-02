@@ -1,0 +1,864 @@
+/* ── Empty State ───────────────────────────────────────────── */
+.emptyWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  gap: 0;
+}
+
+.emptyIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 32px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #202223;
+  margin-bottom: 8px;
+}
+
+.emptySubtitle {
+  font-size: 14px;
+  color: #6d7175;
+  max-width: 360px;
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+
+.emptySteps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  background: #f6f6f7;
+  border-radius: 12px;
+  padding: 20px 24px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.emptyStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: #3d4045;
+  line-height: 1.5;
+}
+
+.stepNum {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #c9cccf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #5c5f62;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Header row ────────────────────────────────────────────── */
+.dashboardShell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1384px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3vw, 32px) 88px;
+}
+
+.criticalHeroShell {
+  max-width: 1320px;
+  margin: 0 auto 20px;
+  padding: 0 4px;
+}
+
+.dashboardStack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboardChartGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.dashboardActivityGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.comparePillSlot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analyticsActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analyticsActionButton {
+  width: max-content;
+  min-width: 0;
+}
+
+.customUtmBody {
+  padding: 18px 24px 22px;
+}
+
+.customUtmForm {
+  display: grid;
+  gap: 12px;
+}
+
+.customUtmSavedBlock {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.customUtmChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.customUtmChip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  max-width: 100%;
+  padding: 5px 30px 5px 12px;
+  border: 1px solid #c9cccf;
+  border-radius: 999px;
+  background: #f6f6f7;
+  color: #202223;
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.customUtmChipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customUtmChipRemove {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #6d7175;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.customUtmChipRemove:hover,
+.customUtmChipRemove:focus-visible {
+  background: #ebebeb;
+  color: #202223;
+}
+
+.customUtmChipRemove:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.customUtmFeedback {
+  display: grid;
+  gap: 6px;
+}
+
+.customUtmPreview {
+  margin: 0;
+  color: #202223;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.successText {
+  color: #008060;
+  font-size: 13px;
+}
+
+.errorText {
+  color: #d72c0d;
+  font-size: 13px;
+}
+
+.bodyText {
+  margin: 0;
+  font-size: 14px;
+}
+
+.mutedBodyText {
+  margin: 0;
+  color: #6d7175;
+  font-size: 14px;
+}
+
+.codeSample {
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 5px;
+  font-size: 12px;
+}
+
+.dateSelector {
+  position: relative;
+}
+
+.datePopover {
+  position: absolute;
+  z-index: 100;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 260px;
+  border: 1px solid #e1e3e5;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+}
+
+.dateInputStack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dateInputLabel {
+  display: block;
+  margin-bottom: 4px;
+  color: #6d7175;
+  font-size: 12px;
+}
+
+.dateInput {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #202223;
+}
+
+.datePickerWrap {
+  min-width: 160px;
+}
+
+.dateRangePopover {
+  padding: 12px;
+  min-width: 560px;
+}
+
+.presetChips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.presetChip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #c9cccf;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  color: #202223;
+  transition:
+    background 120ms,
+    border-color 120ms;
+}
+
+.presetChip:hover {
+  background: #f6f6f7;
+  border-color: #8c9196;
+}
+
+.presetChipActive {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+.calendarApplyRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e1e3e5;
+}
+
+/* ── Stat cards ────────────────────────────────────────────── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@container analytics-page (max-width: 720px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statCard {
+  background: #ffffff;
+  border: 1px solid #e1e3e5;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 12px 12px 0 0;
+}
+
+.statCard.accent1::before {
+  background: linear-gradient(90deg, #5c6ac4, #9c6ade);
+}
+.statCard.accent2::before {
+  background: linear-gradient(90deg, #00848e, #00a0ac);
+}
+.statCard.accent3::before {
+  background: linear-gradient(90deg, #f49342, #f26419);
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8c9196;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #202223;
+  line-height: 1.1;
+}
+
+.statSub {
+  font-size: 12px;
+  color: #8c9196;
+  margin-top: 2px;
+}
+
+.growthPos {
+  font-size: 11px;
+  font-weight: 600;
+  color: #008060;
+  background: #f0faf7;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+
+.growthNeg {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d82c0d;
+  background: #fff5f5;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+
+/* ── Section card ──────────────────────────────────────────── */
+.sectionCard {
+  background: #ffffff;
+  border: 1px solid #e1e3e5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid #f1f2f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #202223;
+}
+
+.sectionCount {
+  font-size: 12px;
+  color: #8c9196;
+  background: #f6f6f7;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ── Platform table ────────────────────────────────────────── */
+.platformTable {
+  width: 100%;
+}
+
+.platformRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #f1f2f3;
+}
+
+.platformRow:last-child {
+  border-bottom: none;
+}
+
+.platformRow.tableHead {
+  background: #fafbfb;
+  border-bottom: 1px solid #e1e3e5;
+}
+
+.platformRow.tableHead .colLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8c9196;
+}
+
+.platformName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.platformDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.platformLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #202223;
+  text-transform: capitalize;
+}
+
+.colLabel {
+  font-size: 13px;
+  color: #3d4045;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.revenueBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.barTrack {
+  flex: 1;
+  height: 6px;
+  background: #f1f2f3;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #5c6ac4, #9c6ade);
+  transition: width 0.4s ease;
+}
+
+.revenueAmt {
+  font-size: 13px;
+  font-weight: 600;
+  color: #202223;
+  min-width: 68px;
+  text-align: right;
+}
+
+/* ── Campaign / Bundle tables ──────────────────────────────── */
+.dataTable {
+  width: 100%;
+}
+
+.dataRow {
+  display: grid;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #f1f2f3;
+}
+
+.dataRow:last-child {
+  border-bottom: none;
+}
+
+.dataRow.headRow {
+  background: #fafbfb;
+  border-bottom: 1px solid #e1e3e5;
+}
+
+.dataRow.headRow .dataCell {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8c9196;
+}
+
+/* campaign: name / source / orders / revenue */
+.campaignRow {
+  grid-template-columns: 1fr 100px 72px 100px;
+}
+
+/* bundle: name / orders / revenue */
+.bundleRow {
+  grid-template-columns: 1fr 72px 100px;
+}
+
+/* medium: medium / orders / revenue / aov */
+.mediumRow {
+  grid-template-columns: 1fr 72px 100px 80px;
+}
+
+/* landing page: page / orders / revenue */
+.landingRow {
+  grid-template-columns: 1fr 72px 100px;
+}
+
+.dataCell {
+  font-size: 13px;
+  color: #3d4045;
+}
+
+.dataCell.primary {
+  font-weight: 500;
+  color: #202223;
+}
+
+.dataCell.right {
+  text-align: right;
+}
+
+.sourceTag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #f0f4ff;
+  color: #5c6ac4;
+  text-transform: capitalize;
+}
+
+.mediumTag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: #f0fdf4;
+  color: #008060;
+  text-transform: capitalize;
+}
+
+.pageUrl {
+  font-family: monospace;
+  font-size: 12px;
+  color: #3d4045;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 360px;
+}
+
+/* Two-column layout: trend chart + leaderboard */
+.bundleSplitRow {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@container analytics-page (max-width: 768px) {
+  .bundleSplitRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Leaderboard 4-column row */
+.leaderboardRow {
+  display: grid;
+  grid-template-columns: 1fr 100px 72px 80px;
+  align-items: center;
+}
+
+/* Truncate long bundle names */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+/* Section divider for UTM Attribution */
+.sectionDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.sectionDivider::before,
+.sectionDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e1e3e5;
+}
+
+.sectionDividerLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6d7175;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* Trend chart legend */
+.trendLegend {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
+  padding: 0 8px 4px;
+  margin-top: 4px;
+}
+
+.trendLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #6d7175;
+}
+
+.trendDotGreen {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: #008060;
+}
+
+.trendDotPurple {
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: #5c6ac4;
+  border-top: 1px dashed #5c6ac4;
+}
+
+/* ── Compare toggle ─────────────────────────────────────────── */
+.compareToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid #c9cccf;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #202223;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    border-color 120ms,
+    color 120ms;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.compareToggle:hover {
+  background: #f6f6f7;
+  border-color: #8c9196;
+}
+
+.compareToggleActive {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+.compareToggleActive:hover {
+  background: #374151;
+  border-color: #374151;
+  color: #fff;
+}
+
+.comparePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #f0f4ff;
+  border: 1px solid #dbe4ff;
+  font-size: 11px;
+  font-weight: 500;
+  color: #5c6ac4;
+  white-space: nowrap;
+}
+
+@container analytics-page (max-width: 720px) {
+  .dashboardShell {
+    padding-inline: 16px;
+  }
+
+  .dashboardChartGrid,
+  .dashboardActivityGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .headerRow {
+    align-items: stretch;
+  }
+
+  .comparePillSlot {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .analyticsActions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analyticsActionButton {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .analyticsActionButton:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .comparePillSlot .datePickerWrap,
+  .comparePillSlot .dateSelector {
+    width: auto;
+    min-width: 0;
+  }
+
+  .sectionHeader {
+    align-items: flex-start;
+  }
+
+  .customUtmBody {
+    padding: 16px;
+  }
+}
+
+@container analytics-page (max-width: 520px) {
+  .dashboardShell {
+    padding-inline: 16px;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+  }
+
+  .sectionHeader > s-button {
+    width: 100%;
+  }
+
+  .datePopover {
+    right: auto;
+    left: 0;
+    width: min(280px, calc(100vw - 48px));
+    min-width: 0;
+  }
+}
+
+@container analytics-page (max-width: 359px) {
+  .analyticsActions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .analyticsActionButton:first-child {
+    grid-column: auto;
+  }
+}

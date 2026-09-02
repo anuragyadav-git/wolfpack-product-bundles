@@ -1,0 +1,435 @@
+@import "../base/inpage-shared-footer.css";
+@import "../base/quantity-pills-skeletons.css";
+@import "../base/variant-selector-modes.css";
+
+/* ==========================================================================
+   Product List (PDP_INPAGE + LIST Cascade Flow)
+   ========================================================================== */
+
+#bundle-builder-app[data-ppb-design-preset="LIST"],
+[data-ppb-preset="LIST"] {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+#bundle-builder-app[data-ppb-design-preset="LIST"] .bundle-steps,
+.bundle-steps[data-ppb-design-preset="LIST"] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin: 16px 0 8px;
+  padding: 0;
+}
+
+/* Step Flow Header */
+.bw-ppb-cascade-step-flow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  min-height: 60px;
+  padding: 15px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bw-ppb-cascade-step-flow::-webkit-scrollbar {
+  display: none;
+}
+
+.bw-ppb-cascade-step-flow__step {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 10px;
+  min-width: max-content;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1e1e1e;
+  font: inherit;
+  cursor: pointer;
+}
+
+.bw-ppb-cascade-step-flow__step:disabled {
+  cursor: default;
+}
+
+.bw-ppb-cascade-step-flow__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #1e1e1e;
+  border-radius: 50%;
+  background: #f4f9f9;
+  color: #1e1e1e;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.bw-ppb-cascade-step-flow__step.is-active .bw-ppb-cascade-step-flow__number {
+  border: 2px solid #1e1e1e;
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+.bw-ppb-cascade-step-flow__label {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 25.2px;
+  white-space: nowrap;
+}
+
+/* Step Section & Category Tabs */
+.bw-ppb-inpage-step-section {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 100%;
+}
+
+.bw-ppb-inpage-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.bw-ppb-inpage-category-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 8px 5px;
+  border: 1px solid #1e1e1e;
+  border-radius: 5px;
+  background: #f4f9f9;
+  color: #1e1e1e;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.bw-ppb-inpage-category-tab.active,
+.wpbMixCascadeCategoryTab--active {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+.bw-ppb-inpage-category-tab:hover:not(.active) {
+  background: #eaeaea;
+}
+
+/* Product List Container */
+.bw-ppb-cascade-product-list {
+  --bw-ppb-cascade-product-row-height: 70px;
+  --bw-ppb-cascade-product-row-media: 70px;
+  --bw-ppb-cascade-product-action-width: 112px;
+  --bw-ppb-cascade-action-radius: 5px;
+  --bw-ppb-cascade-product-list-max-height: min(410px, 60vh);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-height: var(--bw-ppb-cascade-product-list-max-height);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 0 2px;
+  scrollbar-gutter: stable;
+}
+
+.bw-ppb-cascade-product-list[aria-busy="true"] {
+  min-height: var(--bw-ppb-cascade-product-list-max-height);
+}
+
+/* Skeletons */
+.bw-ppb-inpage-loading {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.bw-ppb-inpage-loading-row {
+  display: grid;
+  grid-template-columns:
+    var(--bw-ppb-cascade-product-row-media, 70px)
+    minmax(0, 1fr)
+    var(--bw-ppb-cascade-product-action-width, 90px);
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: var(--bw-ppb-cascade-product-row-height, 70px);
+}
+
+.bw-ppb-inpage-loading-media {
+  width: var(--bw-ppb-cascade-product-row-media, 70px);
+  height: var(--bw-ppb-cascade-product-row-media, 70px);
+  border-radius: 5px;
+}
+
+.bw-ppb-inpage-loading-body {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bw-ppb-inpage-loading-line {
+  height: 13px;
+  border-radius: 999px;
+}
+
+.bw-ppb-inpage-loading-line--title {
+  width: min(100%, 16rem);
+}
+
+.bw-ppb-inpage-loading-line--price {
+  width: min(42%, 6rem);
+}
+
+.bw-ppb-inpage-loading-action {
+  justify-self: end;
+  width: var(--bw-ppb-cascade-product-action-width, 90px);
+  height: 32px;
+  border-radius: 5px;
+}
+
+/* Product Row Card */
+.bw-ppb-cascade-product-row {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  min-height: 70px;
+  border-radius: 7px;
+  background: var(--bundle-product-card-bg, transparent);
+  box-sizing: border-box;
+}
+
+.bw-ppb-cascade-product-row .product-stock-badge {
+  display: none;
+}
+
+.bw-ppb-cascade-product-row .product-image {
+  width: 70px;
+  height: 70px;
+  border-radius: 5px;
+  background: #111111;
+  overflow: hidden;
+  margin: 0;
+}
+
+.bw-ppb-cascade-product-row .product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: var(--bundle-product-card-image-fit, cover);
+  display: block;
+}
+
+.bw-ppb-cascade-product-row .product-content-wrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--bw-ppb-cascade-product-action-width, 90px);
+  grid-template-rows: 43px 25px;
+  gap: 2px 10px;
+  align-items: start;
+  width: 100%;
+  height: 70px;
+  min-width: 0;
+}
+
+.bw-ppb-cascade-product-row--has-variant-selector .product-content-wrapper {
+  grid-template-rows: auto 18px 28px;
+  align-content: start;
+  height: auto;
+  min-height: 70px;
+}
+
+.bw-ppb-cascade-product-row.bw-product-card--has-variant:not(.bw-ppb-cascade-product-row--has-variant-selector) .product-content-wrapper {
+  grid-template-rows: 18px 18px 22px;
+}
+
+.bw-ppb-cascade-product-row .product-text-container,
+.bw-ppb-cascade-product-row .product-card-price-action {
+  display: contents;
+}
+
+.bw-ppb-cascade-product-row .product-title {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  height: 43px;
+  font-size: 14px;
+  line-height: normal;
+  font-weight: 700;
+  align-self: start;
+  color: var(--bundle-product-card-font-color, #1e1e1e);
+  margin: 0;
+}
+
+.bw-ppb-cascade-product-row--has-variant-selector .product-title,
+.bw-ppb-cascade-product-row.bw-product-card--has-variant .product-title {
+  height: auto;
+  min-height: 0;
+}
+
+.bw-ppb-cascade-product-row .product-variant-row {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: start;
+  min-width: 0;
+  overflow: hidden;
+  color: #1e1e1e;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bw-ppb-cascade-product-row .product-price-row {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: start;
+  width: 100%;
+  height: 25px;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.bw-ppb-cascade-product-row--has-variant-selector .product-price-row {
+  height: 18px;
+  align-items: center;
+}
+
+.bw-ppb-cascade-product-row .product-price,
+.bw-ppb-cascade-product-row .product-price-strike {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+  color: var(--bundle-product-final-price-color, #000000);
+}
+
+.bw-ppb-cascade-product-row .variant-selector-wrapper {
+  text-align: left;
+  color: #1e1e1e;
+}
+
+.bw-ppb-cascade-product-row .variant-selector {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: start;
+  width: 80%;
+  max-width: 100%;
+  height: 27.5px;
+  margin: 0;
+  padding: 2px;
+  border: 1.5px solid #c0c0c0;
+  border-radius: 5px;
+  color: #1e1e1e;
+  background-color: #ffffff;
+  font-size: 14px;
+  line-height: normal;
+}
+
+/* Action Button & Quantity Control */
+.bw-ppb-cascade-product-row .product-card-action {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: end;
+  width: var(--bw-ppb-cascade-product-action-width, 90px);
+  min-height: var(--bundle-product-card-action-min-height, 44px);
+  margin: 0;
+}
+
+.bw-ppb-cascade-product-row--has-variant-selector .product-card-action,
+.bw-ppb-cascade-product-row.bw-product-card--has-variant .product-card-action {
+  grid-row: 1 / span 3;
+}
+
+.bw-ppb-cascade-product-row .product-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--bw-ppb-cascade-product-action-width, 90px);
+  height: var(--bundle-product-card-action-min-height, 44px);
+  padding: 4px 14px;
+  border-radius: var(--bw-ppb-cascade-action-radius, 5px);
+  background: var(--bundle-button-bg, #111111);
+  color: var(--bundle-button-text-color, #ffffff);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: normal;
+  border: 0;
+  cursor: pointer;
+}
+
+.bw-ppb-cascade-product-row .product-add-btn.added {
+  background: var(--bundle-button-added-bg, var(--bundle-button-bg, #111111));
+  color: var(--bundle-button-added-text, var(--bundle-button-text-color, #ffffff));
+}
+
+.bw-ppb-cascade-product-row .product-add-btn:disabled {
+  background: #8a8a8a;
+  cursor: not-allowed;
+}
+
+.bw-ppb-cascade-product-row .bw-quantity-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: var(--bw-ppb-cascade-product-action-width, 90px);
+  height: var(--bundle-product-card-action-min-height, 44px);
+  padding: 0;
+  border-radius: var(--bw-ppb-cascade-action-radius, 5px);
+  background: transparent;
+}
+
+.bw-ppb-cascade-product-row .bw-quantity-control__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--bundle-product-card-action-min-height, 44px);
+  height: var(--bundle-product-card-action-min-height, 44px);
+  border: 0;
+  border-radius: var(--bw-ppb-cascade-action-radius, 5px);
+  background: var(--bundle-button-bg, #111111);
+  color: var(--bundle-button-text-color, #ffffff);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 25.2px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.bw-ppb-cascade-product-row .bw-quantity-control__button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.bw-ppb-cascade-product-row .bw-quantity-control__value {
+  color: #1e1e1e;
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 25.2px;
+  min-width: auto;
+  text-align: center;
+  width: auto;
+}

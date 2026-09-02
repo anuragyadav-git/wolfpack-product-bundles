@@ -1,0 +1,18 @@
+{
+  "bundleSavings": "Save {{amount}}",
+  "bundleDiscount": "-{{percent}}%",
+  "welcome": "Welcome to the {{target}} extension!",
+  "iWouldLikeAFreeGiftWithMyOrder": "I would like to receive a free gift with my order",
+  "addAFreeGiftToMyOrder": "Add a free gift to my order",
+  "attributeChangesAreNotSupported": "Attribute changes are not supported on this order",
+  "bundleAndSave": "Bundle & Save",
+  "bundleOffers": "Bundle offers",
+  "noAddon": "No add-on",
+  "quantity": "Quantity",
+  "offerUpdateFailed": "We couldn't update this bundle offer. Your previous selection was restored.",
+  "offerOverLimitReadOnly": "This cart quantity is above the current offer limit and can't be edited here.",
+  "offerMultipleVariantsReadOnly": "Multiple variants are already present for this offer and can't be edited here.",
+  "volumeStatus": "Volume pricing updates automatically",
+  "buyXGetYStatus": "Buy X Get Y pricing updates automatically",
+  "bundleQuantityOptionsStatus": "Bundle Quantity Options update automatically"
+}

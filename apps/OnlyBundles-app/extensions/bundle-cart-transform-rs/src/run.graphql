@@ -1,0 +1,64 @@
+query Input {
+  presentmentCurrencyRate
+  localization { country { isoCode } }
+  shop {
+    ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value }
+  }
+  cartTransform {
+    runtimeConfiguration: metafield(namespace: "$app", key: "runtime_configuration") {
+      value
+    }
+  }
+  cart {
+    lines {
+      id
+      quantity
+      wolfpackProductBundleOfferId: attribute(key: "_wolfpackProductBundle:OfferId") {
+        value
+      }
+      runtimeToken: attribute(key: "_wolfpack_bundle_runtime") {
+        value
+      }
+      lineAuthorization: attribute(key: "_wolfpack_line_auth") {
+        value
+      }
+      stepType: attribute(key: "_bundle_step_type") {
+        value
+      }
+      bundleDisplayProperties: attribute(key: "_bundle_display_properties") {
+        value
+      }
+      sellingPlanAllocation { __typename }
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          id
+          product { id }
+          # For EXPAND: Check if this variant is a bundle parent
+          component_reference: metafield(namespace: "$app", key: "component_reference") {
+            value
+          }
+
+          component_quantities: metafield(namespace: "$app", key: "component_quantities") {
+            value
+          }
+
+          # Price adjustment configuration for discounting
+          price_adjustment: metafield(namespace: "$app", key: "price_adjustment") {
+            value
+          }
+
+          # Component pricing for expanded checkout display (cents-based)
+          component_pricing: metafield(namespace: "$app", key: "component_pricing") {
+            value
+          }
+        }
+      }
+      cost {
+        amountPerQuantity {
+          amount
+        }
+      }
+    }
+  }
+}

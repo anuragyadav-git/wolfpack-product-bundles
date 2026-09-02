@@ -1,0 +1,16 @@
+{
+  "welcome": "Bienvenue dans l'extension {{target}}!",
+  "iWouldLikeAFreeGiftWithMyOrder": "Je souhaite recevoir un cadeau gratuit avec ma commande",
+  "addAFreeGiftToMyOrder": "Ajouter un cadeau gratuit à ma commande",
+  "attributeChangesAreNotSupported": "Les modifications d'attribut ne sont pas prises en charge dans cette commande",
+  "bundleAndSave": "Offre groupée et économies",
+  "bundleOffers": "Offres groupées",
+  "noAddon": "Aucun ajout",
+  "quantity": "Quantité",
+  "offerUpdateFailed": "Impossible de mettre à jour cette offre. Votre sélection précédente a été restaurée.",
+  "offerOverLimitReadOnly": "La quantité du panier dépasse la limite actuelle et ne peut pas être modifiée ici.",
+  "offerMultipleVariantsReadOnly": "Plusieurs variantes sont déjà présentes et ne peuvent pas être modifiées ici.",
+  "volumeStatus": "La tarification par volume se met à jour automatiquement",
+  "buyXGetYStatus": "La tarification Achetez X, obtenez Y se met à jour automatiquement",
+  "bundleQuantityOptionsStatus": "Les options de quantité se mettent à jour automatiquement"
+}

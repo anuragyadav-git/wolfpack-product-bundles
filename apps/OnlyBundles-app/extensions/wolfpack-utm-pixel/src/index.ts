@@ -1,0 +1,158 @@
+import { register } from "@shopify/web-pixels-extension";
+
+const UTM_STORAGE_KEY = "_wolfpack_utm_params";
+const UTM_PARAMS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
+const MAX_CUSTOM_UTM_PARAMETERS = 10;
+const CUSTOM_PARAM_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
+const BLOCKED_CUSTOM_PARAM_RE = /(email|phone|address|customer|buyer|token|secret|password)/i;
+
+function parseCustomUtmParameters(value: unknown): string[] {
+  const raw = Array.isArray(value) ? value.join(",") : String(value ?? "");
+  const names = new Set<string>();
+  for (const token of raw.split(/[\s,]+/)) {
+    const name = token.trim().toLowerCase();
+    if (!name || !CUSTOM_PARAM_RE.test(name) || BLOCKED_CUSTOM_PARAM_RE.test(name)) continue;
+    names.add(name);
+    if (names.size >= MAX_CUSTOM_UTM_PARAMETERS) break;
+  }
+  return [...names];
+}
+
+/**
+ * Extract UTM parameters from a URL string.
+ * Returns null if no UTM params are present.
+ */
+function extractUtmParams(url: string, customParamNames: string[]): Record<string, unknown> | null {
+  try {
+    const urlObj = new URL(url);
+    const params: Record<string, unknown> = {};
+    const customAttributes: Record<string, string> = {};
+    let hasUtm = false;
+
+    for (const key of UTM_PARAMS) {
+      const value = urlObj.searchParams.get(key);
+      if (value) {
+        params[key] = value;
+        hasUtm = true;
+      }
+    }
+
+    for (const key of customParamNames) {
+      const value = urlObj.searchParams.get(key);
+      if (value) {
+        customAttributes[key] = value.slice(0, 256);
+        hasUtm = true;
+      }
+    }
+
+    if (hasUtm) {
+      if (Object.keys(customAttributes).length > 0) {
+        params.custom_utm_attributes = customAttributes;
+      }
+      params.landing_page = urlObj.pathname + urlObj.search;
+      params.captured_at = new Date().toISOString();
+      return params;
+    }
+  } catch (_e: any) {
+    // Invalid URL — ignore
+  }
+  return null;
+}
+
+register(({ analytics, browser, settings }: any) => {
+  const appServerUrl = settings.app_server_url as string | undefined;
+  const customUtmParameters = parseCustomUtmParameters(settings.custom_utm_parameters);
+  // Shop domain is passed in at activation from session.shop so it doesn't depend
+  // on document.location.hostname — that value can be null on Shopify's hosted
+  // Thank-you page or the wrong domain when a shop uses a custom checkout domain,
+  // which would cause the /api/attribution POST to be rejected or written under
+  // the wrong shopId.
+  const shopDomainSetting = settings.shop_domain as string | undefined;
+
+  // ── page_viewed: Capture UTMs from the landing URL (last-touch) ──
+  // Uses localStorage (persists across sessions) and always overwrites so the
+  // most recent UTM click gets credit (last-touch attribution model).
+  analytics.subscribe("page_viewed", async (event: any) => {
+    try {
+      const url = event.context?.document?.location?.href;
+      if (!url) return;
+
+      const utmParams = extractUtmParams(url, customUtmParameters);
+      if (!utmParams) return;
+
+      // Last-touch: always overwrite with the most recent UTM click
+      await browser.localStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(utmParams));
+    } catch (_e: any) {
+      // Silently fail — pixel errors must not affect storefront
+    }
+  });
+
+  // ── checkout_completed: Send attribution data to server ──
+  // Always fires, even when no UTMs are stored, so that bundle revenue is tracked
+  // for direct / organic traffic. UTM fields are null when not available.
+  analytics.subscribe("checkout_completed", async (event: any) => {
+    try {
+      if (!appServerUrl) return;
+
+      const checkout = event.data?.checkout;
+      if (!checkout) return;
+
+      // Read UTMs from localStorage — null object when customer arrived without UTMs
+      const storedUtmsRaw = await browser.localStorage.getItem(UTM_STORAGE_KEY);
+      const utmParams: Record<string, any> = storedUtmsRaw
+        ? (JSON.parse(storedUtmsRaw) as Record<string, any>)
+        : {};
+
+      // Normalise order ID — may be a GID ("gid://shopify/Order/123") or plain number
+      const rawOrderId = checkout.order?.id != null ? String(checkout.order.id) : null;
+      const orderNumber = rawOrderId
+        ? (rawOrderId.includes("/") ? rawOrderId.split("/").pop() ?? null : rawOrderId)
+        : null;
+
+      const payload = {
+        orderId: rawOrderId,
+        orderNumber,
+        shopId: shopDomainSetting ?? event.context?.document?.location?.hostname ?? null,
+        totalPrice: checkout.totalPrice?.amount ?? null,
+        currencyCode: checkout.totalPrice?.currencyCode ?? "USD",
+        lineItems: (checkout.lineItems ?? []).map((item: any) => ({
+          productId: item.variant?.product?.id ?? null,
+          variantId: item.variant?.id ?? null,
+          title: item.title ?? null,
+          quantity: item.quantity ?? 0,
+          price: item.variant?.price?.amount ?? null,
+          properties: item.properties ?? [],
+          lineComponents: (item.lineComponents ?? []).map((component: any) => ({
+            productId: component.variant?.product?.id ?? null,
+            variantId: component.variant?.id ?? null,
+            properties: component.properties ?? [],
+          })),
+        })),
+        utmSource: utmParams.utm_source ?? null,
+        utmMedium: utmParams.utm_medium ?? null,
+        utmCampaign: utmParams.utm_campaign ?? null,
+        utmContent: utmParams.utm_content ?? null,
+        utmTerm: utmParams.utm_term ?? null,
+        customUtmAttributes: utmParams.custom_utm_attributes ?? null,
+        landingPage: utmParams.landing_page ?? null,
+      };
+
+      // POST directly to the app server attribution endpoint.
+      // Do NOT include /apps/product-bundles — that prefix is stripped by the App Proxy;
+      // the server itself never sees it.
+      await fetch(`${appServerUrl}/api/attribution`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      });
+
+      // Clear stored UTMs after successful send
+      if (storedUtmsRaw) {
+        await browser.localStorage.removeItem(UTM_STORAGE_KEY);
+      }
+    } catch (_e: any) {
+      // Silently fail — pixel errors must not affect checkout
+    }
+  });
+});

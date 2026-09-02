@@ -1,0 +1,62 @@
+{% comment %}
+  Provider-neutral placement marker for PageFly, GemPages, Shogun, and other
+  page builders. The global app embed owns resolution, assets, and rendering.
+{% endcomment %}
+
+{% assign embed_mode = block.settings.embed_mode %}
+{% assign parent_product = block.settings.ppb_parent_product %}
+
+<div
+  {{ block.shopify_attributes }}
+  data-wpb-page-builder-embed
+  data-embed-mode="{{ embed_mode }}"
+  {% if embed_mode == 'product-page-bundle' and parent_product != blank %}
+    data-parent-product-handle="{{ parent_product.handle | escape }}"
+  {% endif %}
+  {% if embed_mode == 'full-page-bundle' and block.settings.fpb_public_number != blank %}
+    data-public-number="{{ block.settings.fpb_public_number | escape }}"
+  {% endif %}
+></div>
+
+{% schema %}
+{
+  "name": "Page Builder bundle",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "embed_mode",
+      "label": "Bundle source",
+      "default": "eligible-product",
+      "options": [
+        {
+          "value": "eligible-product",
+          "label": "Eligible bundle for current product"
+        },
+        {
+          "value": "product-page-bundle",
+          "label": "Specific Product Page Bundle"
+        },
+        {
+          "value": "full-page-bundle",
+          "label": "Specific Full Page Bundle"
+        }
+      ]
+    },
+    {
+      "type": "product",
+      "id": "ppb_parent_product",
+      "label": "Product Page Bundle parent product"
+    },
+    {
+      "type": "text",
+      "id": "fpb_public_number",
+      "label": "Full Page Bundle public number"
+    },
+    {
+      "type": "paragraph",
+      "content": "Enable the Only Bundles app embed before using this block. Only the setting for the selected bundle source is used."
+    }
+  ]
+}
+{% endschema %}

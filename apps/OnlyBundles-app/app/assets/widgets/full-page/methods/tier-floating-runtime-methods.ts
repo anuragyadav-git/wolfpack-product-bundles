@@ -1,0 +1,334 @@
+import { ToastManager } from '../../shared/toast-manager.js';
+import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
+export const fullPageTierFloatingRuntimeMethods: Record<string, any> & ThisType<any> = {
+initTierPills(tiers: any[]) {
+  if (tiers.length < 2) return;
+
+  const bar = document.createElement('div');
+  bar.className = 'bundle-tier-pill-bar';
+  bar.setAttribute('role', 'group');
+  bar.setAttribute('aria-label', 'Bundle pricing tiers');
+
+  tiers.forEach((tier: any, i: number) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'bundle-tier-pill' + (i === 0 ? ' bundle-tier-pill--active' : '');
+    btn.dataset.tierIndex = String(i);
+    btn.dataset.bundleId = tier.bundleId;
+    btn.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+    btn.textContent = tier.label;
+    bar.appendChild(btn);
+  });
+
+  this.container.insertBefore(bar, this.container.firstChild);
+  this.elements.tierPillBar = bar;
+},
+
+/** Updates aria-pressed and active CSS class on all pills to match activeTierIndex. */
+updatePillActiveStates() {
+  if (!this.elements.tierPillBar) return;
+  this.elements.tierPillBar.querySelectorAll('.bundle-tier-pill').forEach((pill: any)  => {
+    const idx = parseInt(pill.dataset.tierIndex, 10);
+    const active = idx === this.activeTierIndex;
+    pill.classList.toggle('bundle-tier-pill--active', active);
+    pill.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+},
+
+/** Switches the active bundle tier — fetches new bundle data and re-renders the widget. */
+async switchTier(bundleId: any, tierIndex: number) {
+  if (tierIndex === this.activeTierIndex) return;
+
+  const pills = this.elements.tierPillBar
+    ? [...this.elements.tierPillBar.querySelectorAll('.bundle-tier-pill')]
+    : [];
+
+  // Disable all pills while loading
+  pills.forEach(p => p.classList.add('bundle-tier-pill--disabled'));
+  if (pills[tierIndex]) pills[tierIndex].classList.add('bundle-tier-pill--loading');
+
+  this.showLoadingOverlay();
+
+  try {
+    // Reset mutable widget state
+    this.selectedProducts = [];
+    this.stepProductData = [];
+    this.currentStepIndex = 0;
+    this.stepCollectionProductIds = {};
+    this.searchQuery = '';
+
+    // Swap bundle ID and fetch new data
+    this.config.bundleId = bundleId;
+    await this.loadBundleData();
+    this.selectBundle();
+
+    if (!this.selectedBundle) {
+      throw new Error('Bundle not found for this tier.');
+    }
+    this.applyPersonalizationAddonProducts();
+
+    // Re-resolve showStepTimeline from the newly loaded tier bundle's API value
+    this.config.showStepTimeline = this.resolveShowStepTimeline(
+      this.selectedBundle.showStepTimeline ?? null,
+      this.config.showStepTimeline
+    );
+
+    this.initializeDataStructures();
+
+    // Clear existing step content and re-render
+    if (this.elements.stepsContainer) {
+      this.elements.stepsContainer.replaceChildren();
+    }
+    await this.renderUI();
+
+    this.activeTierIndex = tierIndex;
+    this.updatePillActiveStates();
+  } catch (err: any) {
+    ToastManager.show('Failed to load tier: ' + err.message);
+    // Restore previous active state styling
+    this.updatePillActiveStates();
+  } finally {
+    this.hideLoadingOverlay();
+    pills.forEach(p => {
+      p.classList.remove('bundle-tier-pill--disabled', 'bundle-tier-pill--loading');
+    });
+  }
+},
+
+_mergeBundleSettings(settings: any) {
+  if (!settings || !this.selectedBundle) return;
+  const keys: any[] = [
+    'promoBannerBgImage',
+    'bundleBannerDesktopUrl', 'bundleBannerMobileUrl',
+    'showStepTimeline', 'floatingBadgeEnabled', 'floatingBadgeText', 'tierConfig',
+  ];
+  for (const key of keys) {
+    if (settings[key] !== undefined) this.selectedBundle[key] = settings[key];
+  }
+},
+
+_initFloatingBadge() {
+  const enabled = this.selectedBundle && this.selectedBundle.floatingBadgeEnabled;
+  const text = this.selectedBundle && this.selectedBundle.floatingBadgeText;
+  if (!enabled || !text || !text.trim()) return;
+
+  const DISMISS_KEY = `fpb_badge_dismissed_${this.selectedBundle.id}`;
+  if (sessionStorage.getItem(DISMISS_KEY)) return;
+
+  const badge = document.createElement('div');
+  badge.className = 'floating-promo-badge';
+  badge.setAttribute('role', 'status');
+  const badgeText = document.createElement('span');
+  badgeText.className = 'floating-promo-badge__text';
+  badgeText.textContent = text.trim();
+  const close = document.createElement('button');
+  close.className = 'floating-promo-badge__close';
+  close.setAttribute('aria-label', 'Dismiss');
+  close.textContent = '×';
+  badge.append(badgeText, close);
+
+  badge.querySelector('.floating-promo-badge__close')!.addEventListener('click', () => {
+    sessionStorage.setItem(DISMISS_KEY, '1');
+    badge.remove();
+  });
+
+  document.body.appendChild(badge);
+},
+
+_escapeHtml(str: string) {
+  return str.replace(/[&<>"']/g, (c: string) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
+},
+
+attachEventListeners() {
+  // Tier pill click handler
+  if (this.elements.tierPillBar) {
+    this.elements.tierPillBar.addEventListener('click', (e: any)  => {
+      const pill = e.target.closest('.bundle-tier-pill');
+      if (!pill) return;
+      this.switchTier(pill.dataset.bundleId, parseInt(pill.dataset.tierIndex, 10));
+    });
+    this.elements.tierPillBar.addEventListener('keydown', (e: any)  => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const pill = e.target.closest('.bundle-tier-pill');
+        if (!pill) return;
+        e.preventDefault();
+        pill.click();
+      }
+    });
+  }
+
+  // Modal close handlers
+  const modal = this.elements.modal;
+  const closeButton = modal.querySelector('.close-button');
+  const overlay = modal.querySelector('.modal-overlay');
+  const prevButton = modal.querySelector('.prev-button');
+  const nextButton = modal.querySelector('.next-button');
+
+  if (closeButton) {
+    closeButton.addEventListener('click', () => this.closeModal());
+  }
+
+  if (overlay) {
+    overlay.addEventListener('click', () => this.closeModal());
+  }
+
+  // Modal navigation
+  if (prevButton) {
+    prevButton.addEventListener('click', () => this.navigateModal(-1));
+  }
+
+  if (nextButton) {
+    nextButton.addEventListener('click', () => this.navigateModal(1));
+  }
+
+  // Keyboard handlers
+  document.addEventListener('keydown', (e: any) => {
+    if (!modal.hidden && e.key === 'Escape') {
+      this.closeModal();
+    }
+  });
+},
+
+async navigateModal(direction: number) {
+  const newStepIndex = this.currentStepIndex + direction;
+
+  if (direction < 0 && newStepIndex >= 0) {
+    // Previous step — no validation required, user must be free to correct mistakes
+    this.currentStepIndex = newStepIndex;
+
+    // Update modal header
+    const headerText = this.getFormattedHeaderText();
+    this.elements.modal.querySelector('.modal-step-title').textContent = headerText;
+
+    // Load products for this step
+    await this.loadStepProducts(newStepIndex);
+
+    this.renderModalTabs();
+    this.renderModalProducts(this.currentStepIndex);
+    this.updateModalNavigation();
+    this.updateModalFooterMessaging();
+  } else if (direction > 0) {
+    if (newStepIndex < this.selectedBundle.steps.length) {
+      // Next step
+      if (this.validateStep(this.currentStepIndex)) {
+        this.currentStepIndex = newStepIndex;
+
+        // Update modal header
+        const headerText = this.getFormattedHeaderText();
+        this.elements.modal.querySelector('.modal-step-title').textContent = headerText;
+
+        // Load products for this step
+        await this.loadStepProducts(newStepIndex);
+
+        this.renderModalTabs();
+        this.renderModalProducts(this.currentStepIndex);
+        this.updateModalNavigation();
+        this.updateModalFooterMessaging();
+      } else {
+        ToastManager.show(this.getStepConditionValidationMessage?.() || 'Please meet the quantity conditions for the current step before proceeding.');
+      }
+    } else {
+      // Done button clicked on last step
+      if (this.validateStep(this.currentStepIndex)) {
+        this.closeModal();
+      } else {
+        ToastManager.show('Please meet the quantity conditions for the current step before finishing.');
+      }
+    }
+  }
+},
+
+// ========================================================================
+// UTILITY METHODS
+// ========================================================================
+
+showFallbackUI() {
+  const fallback = document.createElement('div');
+  fallback.className = 'bundle-fallback';
+  const title = document.createElement('h3');
+  title.textContent = 'Bundle Configuration';
+  const message = document.createElement('p');
+  message.textContent = 'No active bundles found for this product.';
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  summary.textContent = 'Debug Information';
+  const debug = document.createElement('pre');
+  debug.textContent = JSON.stringify({
+    config: this.config,
+    bundleDataKeys: this.bundleData ? Object.keys(this.bundleData) : 'No data',
+    currentProductId: this.config.currentProductId
+  }, null, 2);
+  details.append(summary, debug);
+  fallback.append(title, message, details);
+  this.container.replaceChildren(fallback);
+},
+
+showErrorUI(_error: any) {
+  const error = document.createElement('div');
+  error.className = 'bundle-error';
+  const title = document.createElement('h3');
+  title.textContent = 'Bundle unavailable';
+  const message = document.createElement('p');
+  message.textContent = "We couldn't load this bundle right now. Please refresh the page or try again later.";
+  const help = document.createElement('p');
+  help.textContent = 'If the problem persists, please contact the store owner.';
+  error.append(title, message, help);
+  this.container.replaceChildren(error);
+},
+
+/**
+ * Fire-and-forget error report to the server so AppLogger can track widget failures.
+ * Does NOT await — never blocks the render path.
+ */
+
+_reportError(error: any) {
+  try {
+    const payload: any = {
+      message: error?.message ?? String(error),
+      bundleId: this.config?.bundleId ?? null,
+      bundleType: this.container?.dataset?.bundleType ?? null,
+      shop: window.Shopify?.shop ?? null,
+      url: window.location?.href ?? null,
+    };
+    // Use the app proxy path so the request is authenticated by Shopify
+    fetch(buildStorefrontApiPath('widget-error'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => { /* best-effort — ignore if proxy is also down */ });
+  } catch (_: any) {
+    // Never throw from error reporting
+  }
+},
+
+_resolveText(key: string|number, fallback: any) {
+  if (this.selectedBundle?.textOverrides?.[key]) {
+    return this.selectedBundle.textOverrides[key];
+  }
+  const locale = window.Shopify?.locale;
+  if (locale && this.config?.textOverridesByLocale?.[locale]?.[key]) {
+    return this.config.textOverridesByLocale[locale][key];
+  }
+  if (this.config?.textOverrides?.[key]) {
+    return this.config.textOverrides[key];
+  }
+  return fallback;
+},
+
+_recordView() {
+  try {
+    const bundleId = this.config?.bundleId ?? this.container?.dataset?.bundleId;
+    const shop = window.Shopify?.shop;
+    if (!bundleId || !shop) return;
+    fetch(buildStorefrontApiPath(`bundle/${bundleId}/view`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shop }),
+      keepalive: true,
+    }).catch(() => { /* best-effort */ });
+  } catch (_: any) {
+    // Never throw from analytics
+  }
+},
+};

@@ -1,0 +1,2119 @@
+{
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "designControlPanel": "デザインコントロールパネル",
+    "settings": "設定",
+    "integrations": "連携",
+    "analytics": "分析",
+    "offerOperations": "オファー操作",
+    "billing": "請求"
+  },
+  "integrations": {
+    "requestMessage": "新しい連携への対応をリクエストしたいです。"
+  },
+  "dashboard": {
+    "title": "ダッシュボード: Only Bundles",
+    "subtitle": "バンドル、カスタマーサポートなどにアクセスできます。",
+    "header": {
+      "syncCollections": "コレクションを同期",
+      "createBundle": "バンドルを作成"
+    },
+    "support": {
+      "heroTitle": "ストアの可能性を最大限に引き出しましょう。",
+      "heroDesc": "専門家が無料の1対1戦略セッションで、コンバージョン率の高いバンドル作成をサポートします。",
+      "heading": "サポートが必要ですか？創業者のParthにお話しください！",
+      "body": "バンドルの設定、カスタムスタイル、技術的な問題についてサポートを受けられます。",
+      "onlineNow": "オンライン中",
+      "availability": "月〜金 • 1時間以内に返信",
+      "cta": "Parthとチャット",
+      "imageAlt": "Parth、創業者",
+      "imageLoading": "Parthのプロフィール写真を読み込み中"
+    },
+    "supportIssues": {
+      "title": "お困りですか？",
+      "featureNotWorking": "機能が動作しませんか？",
+      "bundleNotShowing": "ストアにバンドルが表示されませんか？",
+      "uninstallHelp": "アンインストールをご希望ですか？",
+      "storeDesignHelp": "ストアに合わせたデザインをご希望ですか？",
+      "analyticsNotWorking": "分析機能が動作しませんか？",
+      "description": "すべての問題を私たちが解決します。",
+      "cta": "サポート担当者に相談する"
+    },
+    "filters": {
+      "status": "ステータス",
+      "bundleType": "バンドルタイプ",
+      "byStatus": "ステータスでフィルター",
+      "byType": "タイプでフィルター",
+      "all": "すべて"
+    },
+    "status": {
+      "active": "有効",
+      "draft": "下書き",
+      "unlisted": "非公開"
+    },
+    "bundleType": {
+      "product_page": "商品ページ",
+      "full_page": "フルページ"
+    },
+    "search": {
+      "label": "バンドルを検索",
+      "placeholder": "検索...."
+    },
+    "table": {
+      "bundleName": "バンドル名",
+      "status": "ステータス",
+      "type": "タイプ",
+      "actions": "操作"
+    },
+    "emptyState": {
+      "title": "まだバンドルがありません",
+      "body": "ストアにバンドルをまだ作成していません。今すぐ始めて、最高の商品をグループ化して売上を伸ばしましょう。"
+    },
+    "noResults": "現在のフィルターに一致するバンドルがありません",
+    "pagination": {
+      "page": "{{current}} / {{total}} ページ",
+      "perPageLabel": "ページあたりのバンドル数",
+      "per10": "10",
+      "per20": "20",
+      "per50": "50",
+      "prev": "前のページ",
+      "next": "次のページ"
+    },
+    "actions": {
+      "moreActions": "その他の操作",
+      "editBundle": "バンドルを編集",
+      "previewBundle": "ストアでプレビュー",
+      "previewUnavailable": "プレビューするにはバンドルを保存してください",
+      "cloneBundle": "バンドルを複製",
+      "deleteBundle": "バンドルを削除",
+      "cloneSuccess": "バンドルが複製されました",
+      "deleteSuccess": "バンドルが削除されました",
+      "themeEditorUnavailable": "このストアではテーマエディターのリンクを利用できません。"
+    },
+    "deleteModal": {
+      "heading": "バンドルを削除しますか？",
+      "delete": "削除",
+      "cancel": "キャンセル",
+      "body": "この操作は取り消せません。バンドルの設定、ステップ、割引ルールがすべて完全に削除されます。"
+    },
+    "resources": {
+      "bundleInspiration": "バンドルのインスピレーション",
+      "support": "サポート",
+      "sdkDocumentation": "SDKドキュメント",
+      "bundleGallery": "バンドルギャラリー",
+      "comingSoon": "近日公開"
+    },
+    "language": {
+      "label": "言語",
+      "en": "日本語",
+      "fr": "Français",
+      "de": "Deutsch",
+      "es": "Español",
+      "ja": "日本語",
+      "pt-BR": "Português (BR)",
+      "save": "保存",
+      "saveSuccess": "管理画面の言語を保存しました",
+      "saveError": "管理画面の言語を保存できませんでした"
+    },
+    "storefrontSetup": {
+      "loadingTitle": "ストアフロント設定を確認しています",
+      "loadingDescription": "公開されたテーマのコンポーネントとアプリの埋め込みを確認しています。",
+      "errorTitle": "ストアフロント状態に注意が必要です",
+      "errorDescription": "公開されたテーマを確認できませんでした。次のステップを確認するには、詳細を開いてください。",
+      "incompleteTitle": "アプリが埋め込まれた状態",
+      "incompleteDescription_one": "アプリの埋め込みはテーマエディタで有効になっていません。",
+      "incompleteDescription_other": "アプリの埋め込みはテーマエディタで有効になっていません。",
+      "completeTitle": "あなたの店舗は準備ができています",
+      "completeDescription": "アプリの埋め込みはテーマエディターで有効になっています",
+      "finishSetup": "セットアップを完了",
+      "viewDetails": "ステータスを表示",
+      "activate": "有効にする",
+      "enableModal": {
+        "heading": "ストアで Only Bundles を有効にする",
+        "description": "テーマエディターで Only Bundles アプリ埋め込みをオンにして保存をクリックし、ここに戻ってください。",
+        "mediaLabel": "Only Bundles アプリ埋め込みを有効にしてテーマを保存する手順",
+        "openThemeEditor": "テーマエディターを開く",
+        "checking": "テーマを確認しています…",
+        "enabled": "アプリ埋め込みが有効になりました",
+        "notDetected": "アプリ埋め込みが検出されませんでした",
+        "openThemeEditorAgain": "テーマエディターをもう一度開く",
+        "chatWithSupport": "サポートにチャットする",
+        "done": "完了",
+        "cancel": "キャンセル"
+      },
+      "ready": "準備完了",
+      "checking": "設定を確認しています",
+      "actionNeeded": "アクションが必要です",
+      "coreComponents": "コアコンポーネントは有効です",
+      "activeBundles": "アクティブなバンドル",
+      "modalHeading": "UI ラベル: ストアフロントセットアップ",
+      "modalDescription": "これらのコンポーネントは、Only Bundlesで作成されたバンドルが店頭にどのように表示されるかを制御します。",
+      "modalError": "ステータスが利用できません。再読み込みして再度お試しください。",
+      "coreHeading": "コアバンドルコンポーネント",
+      "optionalHeading": "任意の場所",
+      "openThemeEditor": "テーマエディターを開く",
+      "close": "閉じる",
+      "resources": {
+        "appEmbed": "アプリの埋め込み",
+        "fullPage": "全ページウィジェット",
+        "productPage": "商品ページウィジェット",
+        "upsellBlock": "アップセルブロック",
+        "upsellButton": "アップセルボタン"
+      },
+      "status": {
+        "enabled": "有効",
+        "ready": "有効にする準備ができました",
+        "unavailable": "利用できません"
+      }
+    }
+  },
+  "settingsDcp": {
+    "growthGate": {
+      "heading": "Growth のデザインコントロール",
+      "body": "Free でも基本のブランドカラーとタイポグラフィは編集できます。高度なカラー、角、画像、GIF を変更するには Growth にアップグレードしてください。"
+    },
+    "preview": {
+      "heading": "ライブプレビュー",
+      "unsaved": "未保存の変更がここに表示されます。",
+      "workspace": {
+        "label": "デザインワークスペース表示",
+        "preview": "プレビュー",
+        "customize": "カスタマイズ"
+      },
+      "inspector": {
+        "collapse": "カスタマイズパネルを折りたたむ",
+        "expand": "カスタマイズパネルを展開する",
+        "customize": "{{context}}をカスタマイズ"
+      },
+      "bundleType": {
+        "label": "バンドルの種類",
+        "landingPage": "ランディングページ",
+        "productPage": "商品ページ"
+      },
+      "templateLabel": "テンプレート",
+      "focusLabel": "編集中: {{context}}",
+      "areaSelector": {
+        "label": "エリアを編集",
+        "bundle-header": "バンドルヘッダー",
+        "navigation": "UI ラベル: ナビゲーション",
+        "categories": "カテゴリ",
+        "product-card": "商品カード",
+        "product-slots": "商品スロット",
+        "cart-summary": "カート/要約"
+      },
+      "stateSelector": {
+        "label": "状態をプレビュー",
+        "default": "デフォルト",
+        "product-picker": "製品ピッカー",
+        "loading": "読み込み中",
+        "validation": "検証",
+        "upsell": "UIラベル: Upsell"
+      },
+      "templates": {
+        "standard": "標準",
+        "classic": "クラシック",
+        "compact": "コンパクト化",
+        "horizontal": "水平方向",
+        "productList": "商品一覧",
+        "productGrid": "商品グリッド",
+        "horizontalSlots": "水平スロット",
+        "verticalSlots": "垂直スロット"
+      },
+      "viewport": {
+        "label": "ビューポートをプレビュー",
+        "desktop": "デスクトップ プレビュー",
+        "mobile": "モバイルプレビュー"
+      },
+      "previewOnly": "プレビューのみ",
+      "loading": "プレビューを読み込み中",
+      "notApplicable": "この設定は選択したテンプレートでは使用されていません。",
+      "feedback": {
+        "tierHit": "ティア達成",
+        "complete": "全ティア達成"
+      },
+      "storefront": {
+        "open": "バンドルをプレビュー",
+        "heading": "バンドルプレビュー",
+        "close": "閉じる",
+        "empty": "プレビュー可能なストアフロントバンドルがありません。",
+        "bundleName": "バンドル名",
+        "bundleType": "タイプ",
+        "actions": "操作",
+        "view": "表示",
+        "saveBeforePreview": "ストアフロントプレビューを開く前にデザインの変更を保存してください。",
+        "errors": {
+          "popupBlocked": "ストアフロントプレビューを開くにはポップアップを許可してください。",
+          "notReady": "ストアフロントプレビューの準備ができていません。もう一度お試しください。"
+        }
+      },
+      "surface": {
+        "bundleName": "完璧なバンドルを作る",
+        "description": "商品を選んでバンドルを作成します。",
+        "navigationLabel": "バンドル手順",
+        "slotsLabel": "バンドルスロット",
+        "stepOne": "1. 商品を選択",
+        "stepTwo": "2. バンドルを確認",
+        "stepOneShort": "商品",
+        "stepTwoShort": "UIラベル: Extras",
+        "stepThreeShort": "レビュー",
+        "categoryOne": "エッセンシャル",
+        "categoryTwo": "お気に入り",
+        "categoryThree": "UIラベル: Extras",
+        "selectionRule": "少なくとも2つの製品を選択してください",
+        "progressCount": "2つのうち1つが選択されました",
+        "variant": "標準",
+        "products": {
+          "first": {
+            "name": "毎日の定番",
+            "price": "$24.00",
+            "compareAt": "$28.00"
+          },
+          "second": {
+            "name": "人気の追加商品",
+            "price": "$18.00",
+            "compareAt": "$22.00"
+          },
+          "third": {
+            "name": "顧客のお気に入り",
+            "price": "$16.00",
+            "compareAt": "$20.00"
+          },
+          "fourth": {
+            "name": "追加バンドル",
+            "price": "$12.00",
+            "compareAt": "$15.00"
+          }
+        },
+        "add": "追加",
+        "added": "追加 ×1",
+        "upsellTitle": "バンドルを完了",
+        "upsellBody": "人気の追加機能を追加",
+        "upsellEyebrow": "バンドルをお勧めします",
+        "summary": "バンドル概要",
+        "selectedCount": "{{count}} 点",
+        "discount": "15％オフから8ドル離れています",
+        "totalLabel": "バンドルの合計",
+        "totalPrice": "$42.00",
+        "total": "2商品を選択 · $42.00",
+        "back": "戻る",
+        "next": "続ける",
+        "emptySlot": "製品を選択",
+        "chooseProduct": "製品を選択",
+        "removeProduct": "商品を削除",
+        "close": "閉じる",
+        "slotNumber": "商品{{number}}",
+        "addBundle": "カートにバンドルを追加",
+        "loadingBody": "バンドルを準備しています…",
+        "validationMessage": "このステップに少なくとも2つの製品を追加します"
+      }
+    }
+  },
+  "tooltips": {
+    "helpLabel": "{{title}}について",
+    "stepFlow": {
+      "title": "ステップフロー",
+      "description": "ステップはバンドルビルダーの上にナビゲーション項目として表示されます",
+      "imageAlt": "複数のナビゲーションステップを備えたストアフロントバンドルビルダー"
+    },
+    "category": {
+      "title": "カテゴリ",
+      "description": "カテゴリは各ステップ内にタブとして表示されます",
+      "imageAlt": "バンドルステップ内に表示されるカテゴリタブ"
+    },
+    "rulesConfiguration": {
+      "title": "買い物客の選択をガイドするルール",
+      "description": "各カテゴリに独自のルールが必要な場合は、1つの選択制限にステップルールを使用するか、カテゴリルールを使用します。",
+      "imageAlt": "バンドルステップとそのカテゴリに適用される選択ルール"
+    },
+    "bundleQuantityOptions": {
+      "title": "バンドル数量オプション",
+      "description": "数量ベースの割引ルールを選択可能なバンドルボックスとして表示します。各ボックスには、独自のラベル、サブテキスト、およびデフォルトのルールがあります。",
+      "imageAlt": "ストアフロント上のバンドル数量ボックスを選択"
+    },
+    "discountProgressBar": {
+      "title": "進行状況バー",
+      "description": "買い物客が次の割引にどれくらい近いかを表示します。シンプルには1つのバーを使用し、ステップベースには割引マイルストーンが表示されます。",
+      "imageAlt": "マイルストーンのあるバンドル割引プログレスバー"
+    },
+    "discountMessaging": {
+      "title": "割引メッセージ",
+      "description": "割引が解除される前に表示されるメッセージをカスタマイズします。",
+      "imageAlt": "資格の前後にバンドル割引メッセージを表示する"
+    },
+    "loadingAnimation": {
+      "title": "ストアフロント読み込み中",
+      "description": "Only Bundlesが店頭にバンドルコンテンツを読み込んで表示します。",
+      "imageAlt": "バンドルコンテンツの準備中に表示される読み込み状態"
+    },
+    "bundleVisibilityPending": {
+      "description": "あなたのバンドルが買い物客によって発見可能であるかどうかを追跡します。 バンドルリンクをコピーしてストアに配置するときに最適化し、バンドルウィジェットを有効にするか、バンドル埋め込みを設定します。"
+    },
+    "productSlots": {
+      "title": "製品スロット",
+      "description": "店舗に空のスロットを表示し、空のスロットに設定されたスロットアイコンを使用します。",
+      "imageAlt": "買い物客としての空の商品スロットはバンドルを構築します"
+    },
+    "variantSelector": {
+      "title": "バリアントセレクター",
+      "description": "各商品カードにバリアントのドロップダウンを表示して、買い物客が素早く外観を開かずにオプションを選択できるようにします。",
+      "imageAlt": "バンドル商品カード内に表示されるバリアントセレクター。"
+    },
+    "showTextOnAddButton": {
+      "title": "+ ボタンにテキストを表示",
+      "description": "+アイコンをテキストに置き換えます 商品価格の下に配置されたカートに追加ボタン。",
+      "imageAlt": "バンドル商品価格の下に表示されるテキスト追加ボタン"
+    },
+    "cartLineItemDiscountDisplay": {
+      "title": "カートラインアイテム割引表示",
+      "description": "カートの品目にバンドルの節約の表示方法を設定します。例えば、小売価格やメッセージを保存します。",
+      "imageAlt": "カートの品目に表示される節約のバンドル"
+    },
+    "swatchTooltip": {
+      "title": "カラースワッチ名",
+      "description": "ショッパーが色見本にカーソルを合わせたりフォーカスを合わせたりしたときにShopifyのオプション値を表示します。ラベルはタッチのみのデバイスで意図的に非表示になります。",
+      "imageAlt": "色名を表示するフォーカスされたカラースウォッチ"
+    },
+    "tierBadge": {
+      "title": "等級バッジ",
+      "description": "店頭に設定可能なバッジで価格帯を強調表示します。",
+      "imageAlt": "強調表示されたバンドル価格帯にバッジが付いています"
+    },
+    "freeGiftAddons": {
+      "title": "無料ギフトとアドオン",
+      "description": "買い物客が設定されたバンドル条件を満たすときにオプションのギフトステップを追加するか、アドオン製品を提供します。",
+      "imageAlt": "ギフトとオプションのアドオン製品のロックを解除するバンドル"
+    },
+    "specificLinkAccess": {
+      "title": "特定のリンクアクセス",
+      "description": "オファーが有効になる前に、買い物客がその生成されたプライベートリンクを介してバンドルを開くことが必要です。",
+      "imageAlt": "対象となるバンドルオファーを開くプライベートリンク"
+    },
+    "offerOperations": {
+      "title": "スケジューリングと優先度",
+      "description": "バンドルが表示され、どのOnly Bundlesオファーが最初に一致するかを制御します。",
+      "imageAlt": "優先順位付けされたバンドルは、スケジュールされた時間ウィンドウに配置されています"
+    },
+    "countryTargeting": {
+      "title": "国の標的値",
+      "description": "Shopifyマーケットで選択した買い物客の国を使用して、バンドルを含めるか除外します。",
+      "imageAlt": "バンドル資格を管理するストアフロントのカントリーセレクター。"
+    },
+    "bundleWidget": {
+      "title": "バンドルウィジェット",
+      "description": "対象となる商品ページにバンドルアップセルボタンまたはコンテンツブロックを配置します。",
+      "imageAlt": "商品ページに表示されるバンドルアップセルウィジェット"
+    },
+    "bundleEmbed": {
+      "title": "バンドル埋め込み",
+      "description": "製品ページのバンドルビルダーを選択した製品テンプレートに直接埋め込みます。",
+      "imageAlt": "商品ページに埋め込まれたバンドルビルダー。"
+    },
+    "preselectedProducts": {
+      "title": "事前選択された製品",
+      "description": "すでにショッパーに選択されている設定済みの商品でバンドルを開始します。",
+      "imageAlt": "商品が既に選択されているバンドルビルダーです。"
+    },
+    "quantityValidation": {
+      "title": "数量検証",
+      "description": "買い物客がバンドルに追加できる製品の単位数を制限します。",
+      "imageAlt": "許可された制限を示すバンドル商品の数量管理"
+    },
+    "lowStockAlert": {
+      "title": "低在庫アラート",
+      "description": "在庫が設定されたしきい値に達したときにShopifyの販売可能なバリアント数量を表示します。",
+      "imageAlt": "低在庫メッセージを表示するバンドル商品カード"
+    },
+    "stickyAddToCart": {
+      "title": "カートに固定する",
+      "description": "お客さまがサポートされているデスクトップまたはモバイルレイアウトをスクロールしている間は、バンドルアクションを表示し続けます。",
+      "imageAlt": "ストアフロントの端に固定されたスティッキーバンドルアクションバー"
+    },
+    "countdownTimer": {
+      "title": "カウントダウンタイマー",
+      "description": "バンドルの既存のスケジュール済みオファーが終了するまでの残り時間を表示します。",
+      "imageAlt": "バンドルビルダーの上に表示されるカウントダウンタイマー"
+    },
+    "bundleSubscriptions": {
+      "title": "バンドルサブスクリプション",
+      "description": "買い物客は、バンドル製品で共有されているShopifyの販売プランから選択できるようにします。",
+      "imageAlt": "バンドルのワンタイム購入とサブスクリプションのオプション"
+    }
+  },
+  "specificLinkOffer": {
+    "title": "特定のリンクアクセス",
+    "description": "買い物客が生成されたプライベートリンクを介してこの商品を開いた場合にのみ、バンドルビルダーを表示します。",
+    "statusLabel": "リンクの状態",
+    "enableLabel": "特定のリンクが必要です",
+    "enableDetails": "この設定を変更した後にバンドルを保存します。",
+    "generate": "リンクを生成",
+    "regenerate": "リンクを再生成",
+    "revoke": "UIラベル: 取り消すリンク",
+    "copy": "リンクをコピー",
+    "oneTimeNotice": "このリンクをコピーします。セキュリティのため、このページを離れるか再読み込みした後は再度表示できません。",
+    "generatedSuccess": "特定のリンクが生成されました",
+    "revokedSuccess": "特定のリンクが取り消されました",
+    "copiedSuccess": "特定のリンクがコピーされました",
+    "status": {
+      "not_generated": "生成されていません",
+      "active": "アクティブ",
+      "revoked": "UIラベル: 取り消された",
+      "expired": "期限切れ"
+    }
+  },
+  "offerOperations": {
+    "title": "スケジューリングと優先度",
+    "description": "このバンドルがOnly Bundlesストアの店舗配置に表示され、最初にどのマッチングオファーが表示されるかを制御します。",
+    "shopifyOwnership": "Shopifyのコントロールチェックアウト割引日時と組み合わせ. これらの設定はOnly Bundlesストアの表示と選択を制御します.",
+    "priorityLabel": "ストアフロント優先",
+    "priorityDetails": "複数のOnly Bundlesが同じ配置に一致する場合、低い数字が最初に考慮されます。",
+    "stopLowerLabel": "優先度の低い店舗のオファーを停止する",
+    "stopLowerDetails": "このオファーが選択された後、一致するOnly Bundlesオファーをより大きな優先順位番号で非表示にします。",
+    "statusLabel": "現在の店舗の状態",
+    "status": {
+      "active": "今すぐ有効にする",
+      "scheduled": "スケジュール済み",
+      "expired": "終了",
+      "invalid": "修正が必要"
+    },
+    "nextTransition": "次の状態変更: {{timestamp}}",
+    "scheduleModeLabel": "スケジュール",
+    "scheduleModeAlways": "常にアクティブ",
+    "scheduleModeOneTime": "ワンタイムウィンドウ",
+    "scheduleModeRecurring": "繰り返しウィンドウ",
+    "startsAtLabel": "開始",
+    "endsAtLabel": "終了時刻",
+    "dateDetails": "タイムゾーンオフセットでISO 8601を瞬時に入力します。境界なしの場合は空白のままにします。",
+    "datePlaceholder": "2026-09-01T10:00Z",
+    "recurrenceTimezone": "Shopifyストアのタイムゾーン:{{timezone}}を使用します。",
+    "recurrenceFrequencyLabel": "繰り返し",
+    "recurrenceWeekly": "UI ラベル: 週",
+    "recurrenceMonthly": "月ごと",
+    "recurrenceAnchorDateLabel": "最初の発行日",
+    "recurrenceAnchorDateDetails": "毎週のスケジュールは、この平日に繰り返されます. 毎月のスケジュールは、この日に繰り返し、それを含まない月をスキップします.",
+    "recurrenceWindowStartLabel": "ローカル時間で開始",
+    "recurrenceWindowEndLabel": "現地時間で終了",
+    "recurrenceTimePlaceholder": "09:00",
+    "recurrenceWindowDetails": "終了時刻は同じ日に遅くなければなりません。",
+    "recurrenceTerminationLabel": "繰り返しを停止",
+    "recurrenceNever": "一切なし",
+    "recurrenceOnDate": "日付に",
+    "recurrenceAfterRuns": "繰り返し回数の後",
+    "recurrenceEndsOnLabel": "最終発生日",
+    "recurrenceRunCountLabel": "発生回数",
+    "validation": {
+      "priority": "1 から 9999 までの全体の数字の優先度を入力します。",
+      "scheduleMode": "このオファーがアクティブな場合に選択します。",
+      "startsAt": "ISO 8601の有効な開始瞬間を入力してください。",
+      "endsAt": "ISO 8601の有効な終了瞬間を入力してください。",
+      "range": "終了インスタントは開始瞬間より後でなければなりません。",
+      "timezone": "Shopify から無効なストアのタイムゾーンが返されました。Shopify でストアのタイムゾーンを更新して、もう一度お試しください。",
+      "frequency": "毎週または毎月の繰り返しを選択します。",
+      "anchorDate": "最初の発生日を選択します。",
+      "windowStart": "有効なローカル開始時間を選択します。",
+      "windowEnd": "同じ日に後からローカルの終了時間を選択します。",
+      "endsOn": "最初の発生日以降の最終発生日を選択します。",
+      "runCount": "ゼロより大きいオカレンスの数を入力します。"
+    }
+  },
+  "countryTargeting": {
+    "title": "国別ターゲティング",
+    "description": "選択したShopifyストアフロントの国だけにこのバンドルを表示するか、選択した国以外に表示します。",
+    "shopifyOwnership": "Shopifyで選択されたストアフロントの国を使用します。IP検索や顧客データは使用しません。",
+    "enableLabel": "国別にターゲティングする",
+    "enableDetails": "ターゲティングをオフにしても、選択した国は保存されます。",
+    "modeLabel": "国のルール",
+    "modeInclude": "選択した国だけに表示",
+    "modeExclude": "選択した国では非表示",
+    "searchLabel": "国を検索",
+    "searchPlaceholder": "国名または国コードで検索",
+    "resultsLabel": "一致する国",
+    "noCountries": "国が選択されていません。",
+    "noResults": "一致する国が見つかりません。",
+    "removeCountry": "{{country}}を削除",
+    "validation": {
+      "mode": "選択した国を対象に含めるか除外するかを選択してください。",
+      "countries": "国別ターゲティングを有効にする場合は、有効な国を1つ以上選択してください。"
+    }
+  },
+  "countdown": {
+    "title": "カウントダウンタイマー",
+    "description": "このバンドルオファーの設定された終了時刻までの残り時間を表示します。",
+    "missingSchedule": "カウントダウンを有効にする前に、バンドルの表示設定でオファー終了時刻を追加してください。",
+    "layoutLabel": "レイアウト",
+    "layoutCompact": "コンパクト表示",
+    "layoutFull": "日、時、分、秒",
+    "positionLabel": "位置",
+    "positionAbove": "バンドルの上",
+    "positionBelow": "バンドルの下",
+    "timerTitleLabel": "タイマーのタイトル",
+    "expiryActionLabel": "カウントダウン終了時",
+    "expiryHide": "カウントダウンを非表示",
+    "expiryZeros": "ゼロを表示",
+    "expiryMessage": "メッセージを表示",
+    "expiredMessageLabel": "終了メッセージ"
+  },
+  "common": {
+    "alerts": {
+      "actionFailed": "操作に失敗しました",
+      "previewUnavailable": "プレビューを利用できません",
+      "settingsNotSaved": "設定を保存できませんでした",
+      "exportUnavailable": "エクスポートを利用できません",
+      "backfillUnavailable": "バックフィルを利用できません",
+      "trackingNotUpdated": "トラッキングを更新できませんでした",
+      "bundleNotSaved": "バンドルを保存できませんでした",
+      "operationFailed": "処理に失敗しました"
+    },
+    "success": {
+      "previewOpened": "プレビューを開きました",
+      "csvExported": "CSVをエクスポートしました",
+      "backfillComplete": "バックフィルが完了しました",
+      "trackingEnabled": "トラッキングを有効化しました",
+      "trackingDisabled": "トラッキングを無効化しました",
+      "changesSaved": "変更を保存しました",
+      "productSynced": "商品を同期しました",
+      "bundleSynced": "バンドルを同期しました",
+      "operationComplete": "処理が完了しました"
+    },
+    "actions": {
+      "close": "閉じる",
+      "cancel": "キャンセル",
+      "dismiss": "閉じる",
+      "manage": "管理",
+      "enable": "有効にする",
+      "enableHere": "ここで有効にする",
+      "learnMore": "詳しく見る",
+      "view": "表示",
+      "maybeLater": "後で行う",
+      "setUpVisibility": "公開設定を行う",
+      "reinstallApp": "アプリを再インストール",
+      "upgradeNow": "今すぐアップグレード",
+      "viewPlans": "プランを見る",
+      "discardChanges": "変更を破棄",
+      "continueEditing": "編集を続ける"
+    },
+    "loading": {
+      "appLabel": "Only Bundles を読み込んでいます",
+      "workspace": "ワークスペースを読み込んでいます"
+    },
+    "appEmbed": {
+      "body": "バンドルを配置してプレビューするには、Only Bundles のテーマアプリ拡張機能を有効にしてください。",
+      "guideTitle": "アプリ埋め込みを有効にする",
+      "guideImageAlt": "Only Bundles のアプリ埋め込みを有効にする方法"
+    },
+    "previewGate": {
+      "title": "バンドルの公開設定がまだ完了していません",
+      "body": "バンドルは有効ですが、購入者が見つける方法がありません。公開設定を行ってください。"
+    },
+    "unlistedBundle": {
+      "title": "バンドルは非掲載です",
+      "body": "見つけられるようにするには、Shopifyの商品でバンドル商品のステータスを有効に変更してください。"
+    },
+    "warningGroup": {
+      "heading": "操作が必要です",
+      "summary": "バンドルを公開するには、いくつかの操作が必要です。",
+      "modalTitle": "必要な操作"
+    },
+    "parentProductStatus": {
+      "loadingTitle": "親商品のステータスを確認しています",
+      "loadingBody": "Shopifyの商品から最新のステータスを取得しています。"
+    },
+    "proxyHealth": {
+      "title": "アプリプロキシが接続されていません",
+      "body": "フルページのバンドルウィジェットはストアフロントに読み込まれません。修正するにはアプリを再インストールしてください。"
+    },
+    "upgradePrompt": {
+      "limitReachedTitle": "バンドル数の上限に達しました",
+      "limitReachedBody": "無料プランの公開バンドル上限に達しました。Growthでは公開バンドルが無制限です。",
+      "approachingTitle": "バンドル数の上限が近づいています",
+      "approachingBody": "{{limit}}件中{{current}}件の公開バンドルを使用しています。Growthでは公開バンドルが無制限です。",
+      "usageBody": "無料プランで{{limit}}件中{{current}}件の公開バンドルを使用しています。Growthでは公開バンドルが無制限です。"
+    },
+    "discardChanges": {
+      "title": "未保存の変更をすべて破棄",
+      "body": "変更を破棄すると、最後に保存してから行った編集内容が削除されます。"
+    },
+    "multiLanguage": {
+      "title": "複数言語のテキストをカスタマイズ",
+      "saveAndClose": "保存して閉じる",
+      "translations": "翻訳",
+      "helper": "このセクションのドロップダウンから編集する言語を選択してください",
+      "chooseLanguage": "編集する言語を選択",
+      "customText": "カスタムテキスト",
+      "inputHelper": "選択した言語のテキストを入力",
+      "textSettings": "テキスト設定"
+    },
+    "readiness": {
+      "itemAccessibility": "{{label}} の準備項目",
+      "points": "+{{points}} ポイント",
+      "ready": "バンドルを販売できます！",
+      "notReady": "バンドルはまだ販売準備ができていません。",
+      "toggleAccessibility": "準備スコアを切り替える",
+      "title": "準備スコア",
+      "helper": "すべての手順を完了して、バンドルの成果を最大化しましょう。"
+    },
+    "bundleStatus": {
+      "title": "バンドルステータス",
+      "options": {
+        "active": "有効",
+        "draft": "下書き",
+        "archived": "アーカイブ済み",
+        "unlisted": "非掲載（広告キャンペーン）"
+      }
+    }
+  },
+  "createBundle": {
+    "title": "バンドルを作成",
+    "dashboard": "ダッシュボード",
+    "heading": "バンドルビルダーのタイプを選択",
+    "help": "バンドルビルダーのタイプについて",
+    "validation": {
+      "required": "バンドル名は必須です",
+      "minLength": "バンドル名は3文字以上で入力してください"
+    },
+    "fields": {
+      "name": "バンドル名",
+      "namePlaceholder": "例：Tシャツバンドル"
+    },
+    "bundleType": {
+      "productPage": {
+        "title": "商品ページバンドルビルダー",
+        "description": "既存の商品ページにバンドルビルダーを表示します（ほとんどのストアにおすすめ）"
+      },
+      "fullPage": {
+        "title": "フルページバンドルビルダー",
+        "description": "タブと完全なカスタマイズ機能を備えたバンドル専用ランディングページを作成します"
+      }
+    },
+    "actions": {
+      "selected": "選択済み",
+      "select": "選択",
+      "next": "次へ"
+    }
+  },
+  "billing": {
+    "pricePerMonth": "${{price}}/月",
+    "actions": {
+      "tryAgain": "再試行",
+      "contactSupport": "サポートに連絡",
+      "cancel": "キャンセル",
+      "back": "前のページに戻る"
+    },
+    "error": {
+      "heading": "サブスクリプションの問題",
+      "verificationFailed": "Shopifyで現在のサブスクリプションを確認できませんでした。もう一度お試しください。",
+      "unexpected": "サブスクリプションの設定中に予期しないエラーが発生しました。"
+    },
+    "upgradeModal": {
+      "heading": "Growthを選択",
+      "confirm": "Shopifyへ進む",
+      "redirect": "月額または年額請求を選択するためShopifyへ移動します。",
+      "benefitsHeading": "Growthの内容：",
+      "managedByShopify": "プラン選択と請求はShopifyで管理されます",
+      "benefits": {
+        "unlimitedPublicBundles": "公開バンドルとステップが無制限",
+        "allTemplatesDesign": "すべてのテンプレートと高度なデザイン設定",
+        "advancedAnalytics": "高度なバンドル分析",
+        "prioritySupport": "優先サポート"
+      }
+    },
+    "success": {
+      "heading": "Growthが有効になりました",
+      "body": "サブスクリプションが有効になりました。すべてのプレミアム機能をご利用いただけます。",
+      "bundleLimit": "バンドル上限",
+      "bundleLimitValue": "無制限",
+      "designControl": "デザイン管理",
+      "fullAccess": "フルアクセス",
+      "support": "サポート",
+      "priority": "優先"
+    },
+    "cards": {
+      "currentPlan": "現在のプラン",
+      "freePrice": "$0",
+      "freeDescription": "1つの完全なバンドルを作成、公開、販売できます",
+      "includes": "含まれる内容：",
+      "freePlan": "無料プラン",
+      "mostPopular": "一番人気",
+      "perMonth": "/ 月",
+      "growthDescription": "高度な販売促進、カスタマイズ、分析、拡張性",
+      "growthIncludes": "無料プランのすべてに加えて：",
+      "chooseGrowth": "Growthを選択",
+      "annualPrice": "または年額${{price}}",
+      "trialAndBilling": "{{days}}日間の無料体験。Shopifyで月額または年額請求を選択できます。"
+    },
+    "planFeatures": {
+      "onePublicBundle": "公開バンドル1件",
+      "twoSteps": "有効なステップまたはカテゴリー2件",
+      "productPageBundles": "商品ページバンドル",
+      "fullPageBundles": "フルページバンドル",
+      "brandTypography": "ブランドカラーとタイポグラフィ",
+      "summary30": "30日間の分析概要",
+      "merchandising": "すべての販売促進機能",
+      "standardSupport": "標準サポート",
+      "unlimitedBundlesSteps": "公開バンドルとステップが無制限",
+      "allTemplates": "すべてのバンドルテンプレート",
+      "advancedDesign": "高度なデザイン設定",
+      "advancedAnalytics": "高度なバンドル分析",
+      "prioritySupport": "優先サポート"
+    },
+    "comparison": {
+      "publicBundles": "公開バンドル",
+      "steps": "有効なステップまたはカテゴリー",
+      "productPageBundles": "商品ページバンドル",
+      "fullPageBundles": "フルページバンドル",
+      "merchandising": "割引、ギフト、アドオン、アップセル",
+      "customerSubscriptions": "顧客向けバンドルサブスクリプション",
+      "customization": "コピー、翻訳、CSS、スクリプト",
+      "templates": "テンプレート",
+      "design": "デザイン",
+      "analytics": "分析",
+      "prioritySupport": "優先サポート"
+    },
+    "values": {
+      "unlimited": "無制限",
+      "standard": "標準",
+      "all": "すべて",
+      "brandTypography": "ブランドカラーとタイポグラフィ",
+      "allControls": "すべての設定",
+      "summary30": "30日間の概要",
+      "advanced": "高度"
+    },
+    "valueProps": {
+      "scaleTitle": "公開バンドルを拡大",
+      "scaleDescription": "無制限のバンドルキャンペーンを公開し、ステップやカテゴリーを無制限に使用できます",
+      "designTitle": "すべてのテンプレートと高度なデザイン設定を使用",
+      "designDescription": "すべてのFPB・PPBテンプレートとコンポーネント単位の表示設定を利用できます",
+      "analyticsTitle": "分析と最適化",
+      "analyticsDescription": "カスタム期間、バンドルとキャンペーンの詳細、バックフィル、CSVエクスポートを利用できます"
+    },
+    "faq": {
+      "heading": "よくある質問",
+      "changeQuestion": "いつでもプランを変更できますか？",
+      "changeAnswer": "はい。請求ページから、Shopifyが月額、年額、無料プランへの変更を管理します。",
+      "downgradeQuestion": "無料プランに変更するとバンドルはどうなりますか？",
+      "downgradeAnswer": "バンドル設定はすべて保持されます。無料プランに対応する直近公開済みのバンドルは直ちに公開状態を維持し、その他の公開バンドルは下書きになります。",
+      "billingQuestion": "請求はどのように行われますか？",
+      "billingAnswer": "GrowthはShopify App Pricingを通じて月額または年額で利用できます。どちらの請求期間でも機能は同じです。",
+      "refundQuestion": "返金はありますか？",
+      "refundAnswer": "サブスクリプションはShopifyを通じて請求されます。請求に関するお問い合わせはサポートチームまでご連絡ください。"
+    },
+    "cta": {
+      "heading": "バンドルビジネスを成長させる準備はできましたか？",
+      "body": "Growthでは公開バンドル無制限、すべてのテンプレート、高度なデザインと分析、優先サポートを利用できます。",
+      "highlights": {
+        "bundles": "公開バンドル無制限",
+        "design": "デザインコントロールパネル",
+        "support": "優先サポート"
+      },
+      "upgrade": "Growthを見る",
+      "cancelAnytime": "いつでもキャンセル可能"
+    },
+    "route": {
+      "title": "サブスクリプションと請求",
+      "dashboard": "ダッシュボード",
+      "currentPlan": "現在のプラン",
+      "active": "有効",
+      "inactive": "無効",
+      "bundleUsage": "バンドル使用状況",
+      "bundleCount": "{{current}} / {{limit}} バンドル",
+      "limitReached": "バンドルの上限に達しました。",
+      "limitUpgrade": "Growthでは公開バンドルが無制限です。",
+      "overview": "バンドル概要",
+      "activeBundles": "有効なバンドル",
+      "totalSteps": "合計ステップ",
+      "productPage": "商品ページ",
+      "fullPage": "フルページ",
+      "cancelSubscription": "サブスクリプションを管理",
+      "cancelHeading": "Shopifyでサブスクリプションを管理しますか？",
+      "downgradeBody": "プラン変更前にShopifyで適用日が表示されます。",
+      "archiveWarning": "ダウングレード後もすべてのバンドル設定が保持されます。",
+      "confirmCancellation": "Shopifyのプラン管理を開く",
+      "keepSubscription": "サブスクリプションを維持",
+      "features": "プランの機能",
+      "needHelp": "お困りですか？",
+      "helpBody": "請求に関する質問やカスタムプランのご相談がありますか？サポートチームがお手伝いします。"
+    }
+  },
+  "analyticsPage": {
+    "offers": {
+      "title": "パフォーマンスを提供",
+      "description": "プライバシーに保護されたオファーの決定をバンドルエンゲージメント、カートへの追加アクティビティ、完了した注文、収益と比較します。",
+      "filterLabel": "オファーポリシー",
+      "allOffers": "すべてのオファー",
+      "ruleVersion": "ルールバージョン{{version}}",
+      "tierCount_one": "{{count}}がティアに達しました",
+      "tierCount_other": "{{count}}が階層に達しました",
+      "engaged": "参加しているセッション",
+      "addedToCart": "カートに追加しました",
+      "checkedOut": "完了した注文",
+      "revenue": "収入"
+    }
+  },
+  "offerPolicyCsv": {
+    "title": "オファー操作",
+    "export": {
+      "title": "オファーポリシーのエクスポート",
+      "description": "既存のすべてのバンドルのオファー優先順位、スケジューリング、リンク資格、国ターゲティングのバージョン付きCSVをダウンロードします。",
+      "action": "CSVエクスポート",
+      "error": "CSVをエクスポートできませんでした。もう一度お試しください。"
+    },
+    "import": {
+      "title": "検証とインポート",
+      "description": "バージョン管理された CSV をアップロードし、レビュー検証し、既存のバンドルにポリシーの変更を適用します。",
+      "safetyTitle": "バンドル公開は変更されていません",
+      "safetyBody": "Import はバンドルを作成したり公開したりすることはなく、キャンペーントークンを受け付けることはありません。 リンクのみの配信は、すでに有効なキャンペーンリンクを持っているバンドルに対してのみ有効にできます。",
+      "dropLabel": "オファーポリシー CSV",
+      "dropAccessibility": "バージョン2のオファーポリシーCSVをアップロード",
+      "validate": "UIラベル: CSVの検証",
+      "apply": "有効な変更を適用"
+    },
+    "result": {
+      "title": "インポート結果",
+      "valid": "CSV検証が渡されました",
+      "invalid": "CSVレビューが必要です",
+      "summary": "行: {{rows}}. 変更: {{changed}}. 適用: {{applied}}. ストアフロント同期: {{synced}}.",
+      "rowError": "{{row}}, {{field}}: {{message}}",
+      "syncError": "バンドル{{bundleId}}は保存されましたが、ストアの同期に失敗しました。Shopifyが利用可能になった後に同期バンドルを使用してください。"
+    },
+    "errors": {
+      "file_too_large": "CSVは1MiB以下でなければなりません。",
+      "too_many_rows": "CSVには最大500行まで含めることができます。",
+      "invalid_csv": "有効なCSVファイルを選択してください。",
+      "invalid_headers": "変更されていないバージョン2のCSVヘッダーを使用してください。",
+      "unsupported_schema_version": "スキーマバージョン 2 のみがサポートされています。",
+      "duplicate_bundle_id": "各バンドル ID は一度だけ表示される必要があります。",
+      "bundle_not_found": "バンドルはこのショップに存在しません。",
+      "invalid_boolean": "trueまたはfalseを使用してください。",
+      "invalid_priority": "優先度は1から9999までの整数でなければなりません。",
+      "invalid_date": "ISO 8601タイムスタンプを使用するか、フィールドを空白のままにしてください。",
+      "invalid_date_range": "終了は開始より後でなければなりません。",
+      "invalid_schedule_mode": "スケジュールモードは、常に、1_time、または再帰でなければなりません。",
+      "invalid_recurrence_frequency": "繰り返しの頻度は毎週、毎月、または空でなければなりません。",
+      "recurrence_frequency_required": "繰り返しスケジュールには、毎週または毎月の頻度が必要です。",
+      "invalid_recurrence_timezone": "有効な IANA タイムゾーンを使用してください。",
+      "recurrence_timezone_required": "繰り返しスケジュールにはShopifyストアのタイムゾーンが必要です。",
+      "shop_timezone_mismatch": "繰り返しタイムゾーンは、現在のShopifyストアのタイムゾーンと一致する必要があります。",
+      "invalid_recurrence_date": "YYYY-MM-DD のローカル日付を使用するか、項目を空白のままにします。",
+      "recurrence_anchor_required": "繰り返しスケジュールには最初の発生日が必要です。",
+      "invalid_recurrence_time": "現地時間24時間HH:mmを使用するか、フィールドを空白のままにしてください。",
+      "recurrence_window_required": "繰り返しスケジュールにはローカルの開始時間が必要です。",
+      "invalid_recurrence_window": "繰り返し終了時刻は、同じ日以降にする必要があります。",
+      "invalid_recurrence_termination": "繰り返し終了は、on_date、after_runsのいずれかでなければなりません。",
+      "invalid_recurrence_end_date": "最終発生日は最初の発生日以降でなければなりません。",
+      "invalid_recurrence_run_count": "オカレンスカウントはゼロより大きい整数でなければなりません。",
+      "invalid_country_mode": "国別ターゲティングモードは含めるか除外する必要があります。",
+      "invalid_country_codes": "セミコロンで区切られた2文字の国コードを使用し、ターゲティングが有効な場合は少なくとも1つを選択してください。",
+      "invalid_rule_version": "ルールのバージョンは非負の整数でなければなりません。",
+      "stale_rule_version": "新しいポリシーを上書きする前に、新しいCSVをエクスポートします。",
+      "campaign_link_required": "リンクのみの配信を有効にする前に、アクティブなキャンペーンリンクを生成します。"
+    }
+  },
+  "subscription": {
+    "analytics": {
+      "summaryNotice": "無料プランには30日間のアクティビティ概要が含まれます。Growthでは期間指定、詳細、UTM、バックフィル、CSV出力を利用できます。"
+    }
+  },
+  "adminExtracted": {
+    "components": {
+      "cartpropertyfixcard": {
+        "ifYourCartPageShowsInternalPropertiesLike": "カートページに内部プロパティが表示される場合:",
+        "bundleName": "_bundle_name",
+        "or": "または",
+        "isBundleParent": "_is_bundle_parent",
+        "yourThemeNeedsAOneLineFix": "を選択すると、テーマには1行の修正が必要です。",
+        "cartItemLiquidUnlessCondition": "cart-item.liquid — 条件がない限り",
+        "propertyFirst": "UI ラベル: property.first",
+        "contains": "を含む",
+        "appendThisToTheExisting": "既存のものにこれを追加",
+        "unless": "でない限り",
+        "conditionInsideYourPropertyLoopForExample": "プロパティループ内の条件 — 例:",
+        "unlessPropertyLastEmptyOrPropertyFirstContains": "property.last == empty または property.first に '_' が含まれていない場合",
+        "mostThemesDonTNeedThis": "ほとんどのテーマはこれを必要としません。",
+        "dawnRefreshAndOtherModernShopifyThemesHideUnderscorePrefixedProp": "Dawn、Refresh、その他の最新のShopifyテーマは、アンダースコアの接頭辞付きプロパティを自動的に非表示にします。 カートページに内部プロパティが表示されている場合にのみ、この修正を適用してください。"
+      },
+      "errorpage": {
+        "technicalDetails": "技術的な詳細",
+        "goToDashboard": "ダッシュボードに移動"
+      },
+      "analytics": {
+        "bundlemetricchart": {
+          "bundleSplit": "バンドル分割",
+          "performanceAcrossTheSelectedDateRange": "選択した日付範囲のパフォーマンス"
+        },
+        "bundleperformancematrix": {
+          "bundlePerformance": "バンドルパフォーマンス",
+          "sort": "並べ替え",
+          "highest": "ページの最も高い",
+          "lowest": "（低い）",
+          "noItemsFound": "アイテムが見つかりません",
+          "tryChangingTheFiltersOrSearchTerm": "フィルタまたは検索用語を変更してみてください",
+          "bundle": "バンドル",
+          "views": "ビュー",
+          "noOfOrders": "注文数",
+          "totalBundleValue": "バンドルの合計値",
+          "overallConversions": "全体の変換"
+        },
+        "engagementpulse": {
+          "engagementPulse": "エンゲージメントの点滅",
+          "preCheckoutSignal": "チェックアウト前の信号"
+        },
+        "funnelhero": {
+          "bundleFunnel": "バンドルファネル",
+          "howShoppersMoveThroughYourBundles": "お客さまのバンドルの移動方法"
+        },
+        "liveactivityfeed": {
+          "liveActivity": "ライブアクティビティ",
+          "mostRecentEngagements": "最近の取引",
+          "nobodyHasEngagedYetActivityWillStreamHereAsShoppersInteractWithY": "まだ誰も関与していません。買い物客があなたのバンドルとやり取りすると、アクティビティはここでストリーミングされます。"
+        },
+        "revenueattribution": {
+          "revenueAttribution": "収益の表示",
+          "utmTrackedBundleRevenue": "UTM-tracked bundle recomment"
+        },
+        "topcampaigns": {
+          "topCampaigns": "トップキャンペーン",
+          "bundleRevenueByUtmCampaign": "UTMキャンペーンによるバンドル収入",
+          "campaignName": "キャンペーン名",
+          "tryChangingTheSearchOrSortOptions": "検索または並べ替えオプションを変更してみてください",
+          "campaign": "キャンペーン",
+          "orders": "注文",
+          "bundleRevenue": "バンドル収入"
+        }
+      },
+      "billing": {
+        "featurecomparisontable": {
+          "feature": "機能",
+          "free": "無料",
+          "growth": "成長"
+        }
+      },
+      "bundleConfigure": {
+        "bundleguidedtour": {
+          "dismissGuidedTour": "ガイド付きツアーを却下する"
+        },
+        "templatepreviewfeedbackmodal": {
+          "bundleIsVisibleOnStore": "バンドルはストアで表示されます",
+          "havingIssuesWithTheBundleContactUs": "バンドルに問題がありますか？お問い合わせください"
+        },
+        "templatereadyscreen": {
+          "viewYourBundle": "バンドルを見る",
+          "viewYourBundleWithYourCustomizations": "カスタマイズでバンドルを表示",
+          "yourBundleIsReady": "バンドルの準備ができました",
+          "previewItNowWithYourCustomizations": "今すぐカスタマイズしてプレビューする"
+        }
+      }
+    },
+    "shared": {
+      "filePicker": {
+        "filepickerdialog": {
+          "uploadImage": "画像をアップロード",
+          "uploadSuccessfulImageMayTakeAMomentToAppearInYourLibraryCloseAnd": "アップロードに成功しました — 画像がライブラリに表示されるにはしばらく時間がかかる場合があります。ピッカーを閉じて再度開きます。",
+          "loadMore": "さらに読み込む"
+        },
+        "filepickertrigger": {
+          "changeImage": "画像の変更",
+          "removeImage": "UIラベル: 画像を削除",
+          "change": "変更",
+          "remove": "削除"
+        }
+      },
+      "bundleConfigure": {
+        "bundlesubscriptionssection": {
+          "howToSetup": "設定方法は？",
+          "subscriptionSetupGuide": "サブスクリプションセットアップガイド",
+          "configureEveryBundleProductAndSelectableVariantInOneSellingPlanG": "サブスクリプションアプリケーションで、すべてのバンドル製品と選択可能なバリアントを1つの売り上げプラングループで設定し、ここに戻って共有プランを取得します。",
+          "changePlan": "プランの変更",
+          "getSubscriptionPlans": "サブスクリプションプランを取得",
+          "planTiers": "計画段階",
+          "refreshPlan": "計画を更新",
+          "configurations": "構成",
+          "configureTheSettingsForTheSubscriptionBundle": "サブスクリプションバンドルの設定を構成する",
+          "multiLanguage": "多言語対応",
+          "bundleDiscountAppliesOn": "バンドル割引の適用対象：",
+          "applyBundleDiscountsToSubscriptionPurchasesOnlyOneTimePurchasesO": "サブスクリプション購入のみ、ワンタイム購入のみ、またはその両方にバンドル割引を適用します。",
+          "onlyOnSubscriptionPurchase": "サブスクリプション購入時のみ",
+          "onlyOnOneTimePurchase": "一回限りの購入のみ",
+          "onBoth": "両方で",
+          "fixTheSubscriptionFieldsBeforeSaving": "保存する前にサブスクリプション項目を修正します。"
+        },
+        "commonbundlevisibilityoverview": {
+          "publishingBestPractices": "ベストプラクティスを公開する",
+          "pickAPlacementAndFollowTheQuickGuideToMakeYourBundleDiscoverable": "配置を選び、クイックガイドに従って、あなたのバンドルをストアで発見できるようにします。",
+          "quickSetupGuide": "クイックセットアップガイド",
+          "5MinSetup": "UIラベル: 5分間セットアップ",
+          "yourBundleLink": "バンドルリンク",
+          "shareItInYourThemeEmailsAdsOrSocialProfiles": "テーマ、メール、広告、ソーシャルプロフィールで共有できます。",
+          "copyLink": "リンクをコピー",
+          "wantMorePlacementOptions": "他の配置オプションが必要ですか？"
+        },
+        "commonbundlewidgetsection": {
+          "productPageBundleUpsellWidgets": "製品ページバンドルアップセルウィジェット",
+          "thisWillDisplayAnUpsellBlockOrButtonOnTheProductPagesOfYourChoic": "選択した製品ページにアップセルブロックまたはボタンが表示されます。",
+          "offerUpsellBlock": "Upsell ブロックを提供する",
+          "offerUpsellButton": "アップセルボタンを提供する",
+          "selectIfYouWantTheUpsellBlockOrButtonToAppearOnProductPages": "アップセルブロックまたはボタンを製品ページに表示する場合に選択します。",
+          "widgetSettings": "ウィジェットの設定",
+          "displayWidgetOn": "ウィジェットを表示する"
+        },
+        "commonconfiguresidebar": {
+          "bundleProduct": "バンドル製品",
+          "replaceProduct": "商品を置き換え",
+          "syncProduct": "商品を同期",
+          "editProduct": "商品を編集",
+          "parentProductStatus": "親商品のステータス",
+          "bundleSetup": "バンドル設定",
+          "setUpYourBundleBuilder": "バンドルビルダーを設定"
+        },
+        "commonstepcategoryaccordion": {
+          "categoryName": "カテゴリ名",
+          "productsSelectedHereWillBeDisplayedOnThisStep": "ここで選択された商品はこのステップに表示されます",
+          "addProducts": "商品を追加",
+          "noProductsSelectedForThisCategoryYet": "このカテゴリに選択された製品はまだありません。",
+          "collectionsSelectedHereWillBeDisplayedOnThisStep": "ここに選択されたコレクションはこのステップに表示されます",
+          "addCollections": "コレクションを追加",
+          "noCollectionsSelectedForThisCategoryYet": "このカテゴリに選択されたコレクションはまだありません。"
+        },
+        "configurecontextualsavebar": {
+          "discard": "破棄する"
+        },
+        "configurevalidationsummary": {
+          "fixTheFollowingFieldsBeforeSaving": "保存する前に次のフィールドを修正:"
+        },
+        "defaultproductdiscounttipbanner": {
+          "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "ヒント：割引はカート内のすべてのアイテムに基づいています。 Don't forget to include the Pre Selected Product's quantity or amount"
+        },
+        "discountpricingtipbanner": {
+          "tipDiscountsAreCalculatedBasedOnTheProductsInCartMakeSureToAddTh": "ヒント: 割引はカート内の商品に基づいて計算されます。割引を設定する際に、 \"Default Product\" quantity または金額を追加してください。"
+        },
+        "pricingtierbadgefields": {
+          "highlightThisPricingTierOnTheStorefront": "店頭でこの価格帯を強調表示します。",
+          "availableVariables": "利用可能な変数:",
+          "pill": "UIラベル: Pill",
+          "folded": "折り畳まれた",
+          "bannerRounded": "バナーを丸め",
+          "always": "常に表示",
+          "selectedTierOnly": "選択した階層のみ"
+        }
+      }
+    },
+    "appIndex": {
+      "welcomeTo": "ようこそ",
+      "theCompleteBundleSolutionForShopifyBuildCustomizeAndPromoteProdu": "Shopifyの完全なバンドルソリューション — 変換された製品バンドルを構築、カスタマイズ、促進します。",
+      "getStarted": "<unk> Get Started",
+      "goToDashboard": "ダッシュボードへ移動 →",
+      "everythingIncluded": "すべてが含まれています",
+      "documentation": "ドキュメント"
+    },
+    "appAttribution": {
+      "attributiondashboard": {
+        "from": "差出人:",
+        "to": "終了日",
+        "apply": "適用",
+        "backfillSelectedWindow": "選択したウィンドウをバックフィルする",
+        "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "バンドルおよびインポート可能な収益、ランディングページ、およびUTMの詳細に対応する注文行項目が一致します。",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "既存のアトリビューションレコードはスキップされるため、再び同じウィンドウを実行しても重複は作成されません。",
+        "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopifyの注文とストアフトラッキングは変更されません。",
+        "customUtmAttributes": "UTMのカスタム属性",
+        "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Only Bundlesは、今後の訪問時に一致するURL値をキャプチャし、チェックアウト属性で保存します。",
+        "onlyTheFirst10ValidCustomAttributesWillBeSaved": "最初の10個の有効なカスタム属性のみが保存されます。",
+        "howCustomAttributesWork": "カスタム属性の仕組み",
+        "customAttributesAreExtraUrlQueryParametersYouAddToCampaignAffili": "カスタム属性は、標準の UTM フィールドが不十分な場合、キャンペーン、アフィリエイト、インフルエンサー、またはクリエイターリンクに追加する追加の URL クエリパラメーターです。",
+        "howToSetThemUp": "設定方法",
+        "addParameterNamesOnePerLineOrSeparatedByCommasEnterOnlyTheParame": "パラメータ名を1行に1つ追加するか、コンマで区切ってください。パラメータ名だけを入力してください。URLは入力しません。値は入力しません。",
+        "exampleNames": "名前の例:",
+        "utmInfluencerPartnerId": "utm_influencer, partner_id",
+        "exampleLink": "リンク例:",
+        "httpsStoreComProductsBundleUtmSourceInstagramUtmInfluencerMayaAm": "https://store.com/products/bundle?utm_source=instagram&utm_influencer=maya&partner_id=summer-drop",
+        "whatHappensAfterSaving": "保存後の動作について",
+        "onlyBundlesSavesUpTo10ValidNamesUpdatesTheTrackingPixelSettingsA": "Only Bundlesは、最大10の有効な名前を保存し、トラッキングピクセル設定を更新し、保存後に新しい訪問のためにそれらの属性をキャプチャし始めます。",
+        "whenAShopperReachesCheckoutFromAMatchingLinkTheSavedValuesAreSto": "買い物客が一致するリンクからチェックアウトに到達すると、保存された値は注文アトリビューションレコードとともに保存され、分析エクスポートに含まれます。",
+        "doNotTrackShopperIdentifiersSuchAsEmailAddressesPhoneNumbersCust": "電子メールアドレス、電話番号、顧客ID、または個人を識別できる値などの買い物客識別子を追跡しないでください。",
+        "backfillWindow": "バックフィルウィンドウ"
+      },
+      "pixelstatuscard": {
+        "activateTracking": "トラッキングを有効にする",
+        "turnThisOnToConnectAdClicksWithBundleOrdersWhenShoppersVisitThro": "これをオンにすると、買い物客がUTMタグ付けされたリンクを訪問したときにバンドル注文で広告クリックを接続できます。",
+        "shopifyControlsWhenThePixelCanRunSoTrackingFollowsEachShopperSCo": "Shopifyはピクセルがいつ実行できるかをコントロールしますので、トラッキングは各お客さまの同意の選択に従います。"
+      }
+    },
+    "appBundlesFullPageBundleConfigure": {
+      "configurecanvasheader": {
+        "configureBundleFlow": "バンドルフローの設定",
+        "previewBundle": "バンドルをプレビュー"
+      },
+      "sections": {
+        "bundlesettingsbundlecart": {
+          "bundleCart": "カートをバンドル"
+        },
+        "bundlesettingscss": {
+          "bundleLevelCss": "バンドル レベル CSS"
+        },
+        "bundlesettingsdefaultproducts": {
+          "chooseProductsThatShouldBeAddedToBundleByDefault": "デフォルトでバンドルに追加する商品を選択してください",
+          "chooseDefaultProducts": "既定の商品を選択",
+          "browseProducts": "商品を参照"
+        },
+        "bundlesettingsquantity": {
+          "enableQuantityValidation": "数量の確認を有効にする",
+          "thisFeatureDisplaysEmptySlotsOnTheStorefront": "この機能は店頭に空のスロットを表示します。",
+          "slotIcon": "スロットアイコン",
+          "youCanChangeTheDefaultIconThatRendersInTheEmptySlots": "空のスロットでレンダリングされるデフォルトのアイコンを変更することができます",
+          "changeIcon": "アイコンの変更",
+          "reset": "UIラベル: リセット",
+          "noteOnlyApplicableWhenRulesAreBasedOnQuantity": "注: ルールが数量に基づいている場合にのみ適用されます"
+        },
+        "bundlesettingstemplate": {
+          "cartLineItemDiscountDisplay": "カート行商品の割引表示",
+          "editDefaults": "デフォルトを編集",
+          "showsHowMuchTheCustomerIsSavingOnTheBundleInCart": "お客様がカート内のバンドルに保存している金額を表示します"
+        },
+        "bundlesettingstimeline": {
+          "bundleBanner": "バンドルバナー",
+          "uploadBannerImagesForDesktopAndMobileViewsThatWillBeDisplayedAtT": "バンドルページの上部に表示されるデスクトップおよびモバイルビューのバナー画像をアップロードします。",
+          "bannerImageDesktop": "バナー画像: デスクトップ",
+          "recommendedSize": "推奨サイズ:",
+          "1900x230": "UIラベル: 1900x230",
+          "bannerImageMobile": "バナー画像: モバイル",
+          "1100x500": "UIラベル: 1100x500"
+        },
+        "configureselecteditemsmodals": {
+          "product": "商品",
+          "noProductsSelectedForThisStepYet": "このステップで選択された製品はまだありません。",
+          "x": "UI ラベル: x",
+          "noProductsSelectedForThisTierYet": "この層の製品がまだ選択されていません。",
+          "collection": "コレクション",
+          "noCollectionsSelectedForThisStepYet": "このステップで選択されたコレクションはまだありません。",
+          "useTheseVariablesInOnlyBundlesMessagesTheWidgetReplacesThemWithL": "Only Bundlesメッセージでこれらの変数を使用します。ウィジェットはライブバンドルと割引値でそれらを置き換えます。",
+          "thisWillDisableTheAddOnsStepAreYouSureYouWantToDisable": "アドオンステップを無効にします。無効にしてもよろしいですか？",
+          "yes": "はい"
+        },
+        "configuresyncandlanguagemodals": {
+          "syncingRefreshesTheShopifyDataUsedByThisBundleInOnlyBundles": "同期はOnly Bundlesでこのバンドルで使用されるShopifyデータを更新します。",
+          "theShopifyPageWillBeDeletedAndReCreated": "Shopifyページが削除され、再作成されます。",
+          "allBundleAndComponentMetafieldsWillBeRewritten": "すべてのバンドルとコンポーネントメタフィルドは書き換えられます。",
+          "bundleAnalyticsArePreservedThisActionCannotBeUndone": "バンドル解析は保持されます。この操作は元に戻せません。",
+          "syncBundle": "バンドルを同期"
+        },
+        "configuretemplatedialog": {
+          "customizeYourBundle": "バンドルをカスタマイズ",
+          "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "あなたのニーズに合ったデザインを選択してください",
+          "customizeColorsAmpLanguage": "色 & 言語をカスタマイズ",
+          "fineTuneColorsAndCornersBeforePreviewingTheBundle": "バンドルをプレビューする前に色と角を微調整する",
+          "colorsAndCorners": "色と角",
+          "textAndImages": "テキストと画像",
+          "useSettingsRarrDesignColorControlsForPrimarySecondaryBackgroundT": "設定 &rarr; プライマリ、セカンダリ、背景、テキスト、境界線、割引のアクセントにデザインカラーコントロールを使用します。",
+          "reviewBorderRadiusAndCardRoundingBeforeApplyingTheSelectedTempla": "選択したテンプレートを適用する前に、枠の半径とカードの丸めを確認します。",
+          "reviewTemplateLanguageLabelsAndMediaBeforeFinishingCustomization": "テンプレートの言語、ラベル、およびメディアのカスタマイズを完了する前に確認してください",
+          "reviewProductCardBundleCartBundlePopupsToastsAndAddonsTextFromSe": "設定言語から製品カード、バンドルカート、バンドル、ポップアップ、トースト、アドオンのテキストを確認します。",
+          "confirmTemplateMediaUploadedImagesAndLoadingGifsBeforeSavingTheT": "テンプレート選択を保存する前に、テンプレートメディア、アップロードされた画像、GIFの読み込みを確認してください。",
+          "enableYourPreview": "プレビューを有効にする",
+          "aSimpleSwitchInYourThemeEditorNothingChangesOnYourStoreUntilYouD": "テーマエディタのシンプルなスイッチ。決めるまで何も変わりません。",
+          "openYourThemeEditorEnableTheOnlyBundlesAppEmbedThenReturnHereToP": "テーマエディタを開き、Only Bundlesアプリ埋め込みを有効にしてから、ここに戻ってバンドルをプレビューしてください。",
+          "openThemeEditor": "テーマエディタを開く",
+          "iVeEnabledIt": "有効にしました"
+        },
+        "discountbundlequantityoptions": {
+          "configureThisSectionToEnableQuantityOptions": "数量オプションを有効にするには、このセクションを構成します。",
+          "note": "メモ:",
+          "bundleQuantityOptionsCanOnlyBeEnabledWhenDiscountRulesAreBasedOn": "バンドル数量オプションは、割引ルールが数量に基づいている場合にのみ有効にできます。",
+          "addQuantityBasedDiscountRulesToConfigureBundleQuantityOptions": "バンドル数量オプションを設定するために、数量ベースの割引ルールを追加します。"
+        },
+        "discountdisplayoptions": {
+          "discountDisplayOptions": "割引表示オプション",
+          "chooseHowDiscountsAreDisplayed": "割引の表示方法を選択"
+        },
+        "discountmessagingoptions": {
+          "editHowDiscountMessagesAppearAboveTheSubtotal": "小計の上に割引メッセージを表示する方法を編集します。",
+          "discountMessagingDisplaysTheTotalQuantityToClaimOfferBuyGetToEns": "割引メッセージには、オファーを請求する合計数量が表示されます（購入+取得）。顧客がカートに報酬を追加できるようにします。",
+          "activeLanguages": "アクティブな言語",
+          "showVariables": "変数を表示",
+          "addDiscountRulesToConfigureMessaging": "メッセージングを構成する割引ルールを追加します。"
+        },
+        "discountpricingrules": {
+          "discountAmpPricing": "割引 & 価格",
+          "setUpDiscountRulesAppliedFromLowestToHighest": "割引ルールを設定し、最低から最高まで適用されます。",
+          "customerBuys": "お客様が購入",
+          "customerGets": "顧客獲得数",
+          "off": "% オフ",
+          "theLowestPricedItems": "最低価格の商品",
+          "theLatestAddedItems": "最新の追加アイテム",
+          "quantity": "数量",
+          "amount": "金額",
+          "addRule": "ルールを追加",
+          "maximum4DiscountRulesReached": "最大4割引ルールに達しました"
+        },
+        "discountprogressbaroptions": {
+          "editTheProgressBarContentAndSettings": "進捗バーのコンテンツと設定を編集します。",
+          "simpleBar": "シンプルバー",
+          "stepBasedBar": "歩数ベースのバー",
+          "addDiscountRulesToConfigureTierText": "多重テキストを設定するための割引ルールを追加します。"
+        },
+        "freegiftaddonfootermessaging": {
+          "footerMessaging": "フッターメッセージ",
+          "tier1": "等級１"
+        },
+        "freegiftaddonproductscard": {
+          "addOnsWithBundles": "バンドル付きアドオン",
+          "enableCustomersToAddExtraItemsToTheirBundlesAtADiscountedPriceFo": "顧客がバンドルに追加のアイテムを割引価格、無料、またはフル価格で追加できるようにします。"
+        },
+        "freegiftaddonreferencestepcard": {
+          "addOnsAndGiftingStep": "アドオンとギフトステップ",
+          "replace": "置換"
+        },
+        "freegiftaddontiereditor": {
+          "bundleProductQuantity": "バンドル製品数量",
+          "bundleValue": "バンドル値",
+          "tierRules": "等級ルール",
+          "createRulesBasedOnQuantityOfProductsAddedOnThisTier": "この層に追加された製品の数量に基づいてルールを作成します。",
+          "noteRulesAreOnlyValidOnThisTier": "注意: ルールはこの階層でのみ有効です。",
+          "addTierRule": "階層ルールを追加",
+          "addAddOnsTier": "Add Ons Tierを追加"
+        },
+        "imagesgifspanel": {
+          "mediaAssets": "メディアアセット",
+          "addVisualMediaToEnhanceTheBundleExperienceForShoppers": "買い物客のバンドル体験を向上させるために視覚的なメディアを追加します。",
+          "promoBanner": "プロモーション旗",
+          "wideBannerDisplayedAtTheTopOfTheFullPageBundle": "全ページバンドルの上部にワイドバナーが表示されます",
+          "pageHeader": "ページヘッダー",
+          "jpgPngWebpGifSvgAvif": "UIラベル: JPG、PNG、WebP、GIF、SVG、AVIF",
+          "recommendedSize": "推奨サイズ",
+          "1600400Px41Ratio": "UI label: 1600 × 400 px · 4:1 ratio",
+          "stepImages": "ステップ画像",
+          "tabIconAndBannerImagePerStepShownInTheWidget": "ステップごとのタブアイコンとバナー画像 — ウィジェットに表示",
+          "perStep": "ステップごと",
+          "tabIcon": "UIラベル: タブアイコン",
+          "circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1": "ステップタブの円形アイコン。設定時にステップ番号を置き換えます。推奨: 100 x 100 px 正方形。",
+          "stepBannerImage": "ステップバナー画像",
+          "fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended": "このステップがアクティブな場合、製品グリッドの上にフル幅の画像を表示します。推奨: 1600 × 400 px。",
+          "floatingPromoBadge": "フローティングプロモーションバッジ",
+          "fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks": "ページの左下にあるバッジを修正しました — 買い物客がXをクリックしたときにセッションが解除されました",
+          "storefront": "ストアフロント"
+        },
+        "stepsetupcategorycard": {
+          "addAllProductSelectionsInThisStepToASingleCategoryOrSeparateThem": "このステップですべての製品選択を単一のカテゴリに追加するか、より良い分離のために複数のカテゴリに分類します。",
+          "noCategoryDefinedYet": "まだカテゴリが定義されていません"
+        },
+        "stepsetupcategoryfooter": {
+          "addCategory": "カテゴリを追加"
+        },
+        "stepsetupconfigcard": {
+          "stepConfig": "ステップ設定"
+        },
+        "stepsetupdetailscard": {
+          "stepSetup": "ステップ設定",
+          "editYourStepNameOnlyVisibleIfMoreThanOneStepIsPresent": "ステップ名を編集 (複数のステップが存在する場合にのみ表示)"
+        },
+        "stepsetuprulemodecontent": {
+          "createRulesBasedOnAmountOrQuantityOfProductsAddedOnThisCategory": "このカテゴリに追加された製品の量または数量に基づいてルールを作成します。",
+          "noteRulesAreOnlyValidOnThisCategory": "注意: ルールはこのカテゴリでのみ有効です",
+          "addRule": "ルールを追加",
+          "noRulesDefinedYet": "ルールはまだ定義されていません",
+          "condition": "条件",
+          "aStepCanHaveAtMost2Rules": "ステップは最大 2 つのルールを持つことができます。"
+        },
+        "stepsetuprulescard": {
+          "rulesConfiguration": "ルールの設定",
+          "applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom": "顧客の選択をガイドするために、ステップ全体または特定のカテゴリにルールを適用します。"
+        },
+        "stepsetupsection": {
+          "createStepsForYourMultiStepBundleHereSelectProductOptionsForEach": "ここでマルチステップバンドルのステップを作成します。以下の各ステップの商品オプションを選択します",
+          "addStep": "ステップを追加"
+        }
+      }
+    },
+    "appBundlesProductPageBundleConfigure": {
+      "configurebundleflowUi": {
+        "selectBundleProduct": "バンドル商品を選択"
+      },
+      "ppbbundleembedsection": {
+        "embedBundleBuilderOnProductPages": "製品ページにバンドルビルダーを埋め込んでください",
+        "directlyEmbedTheBundleBuilderBlockOnProductPagesToLetCustomersCu": "format@@0 ブロックを製品ページに直接埋め込んで、お客様がバンドルをそこにキュレーションできるようにします。",
+        "displayBundleOn": "バンドルを表示する",
+        "putTheBundleBuilderAtACustomLocation": "バンドルビルダーをカスタムの場所に置く",
+        "placeAppBlockOnTheTheme": "アプリをテーマにブロックする",
+        "placeBlock": "ブロックを配置"
+      },
+      "ppbbundlesettingscontrolsCategorysteps": {
+        "useCategoriesAsBundleSteps": "カテゴリをバンドルステップとして使用",
+        "showOneCategoryAtATimeWithStepNavigation": "ステップナビゲーションで一度に 1 つのカテゴリを表示します。"
+      },
+      "ppbbundlesettingscontrolsQuantity": {
+        "enableVariantSelectionWithinTheProductCardsInsteadOfTheQuickLook": "クイックルックの代わりに製品カード内のバリアント選択を有効にする",
+        "showShopifySSellableComponentVariantQuantityAtOrBelowAThreshold": "しきい値以下にShopifyの販売可能なコンポーネントバリアント数量を表示します。"
+      },
+      "ppbbundlesettingscontrolsStickyaddtocart": {
+        "keepABundleActionAvailableAfterTheMainBundleButtonLeavesTheViewp": "メインバンドルボタンがビューポートから離れた後に、バンドルアクションを使用できるようにします。",
+        "scrollToBundleOffers": "バンドルオファーまでスクロールする",
+        "addSelectedBundle": "選択したバンドルを追加"
+      },
+      "ppbcategoryaccordion": {
+        "dropdown": "ドロップダウン",
+        "pills": "ピル数",
+        "colorSwatches": "カラースウォッチ",
+        "imageSwatches": "画像スウォッチ",
+        "colorAndImageValuesComeFromShopifyProductOptionSwatches": "色と画像の値はShopifyの商品オプション見本から来ています。"
+      },
+      "ppbdiscountmessagerulefields": {
+        "successMessage": "成功メッセージ"
+      },
+      "ppbdiscountrulespanel": {
+        "discountType": "割引の種類"
+      },
+      "ppbfreegiftaddonssection": {
+        "addAtLeastOneStepIn": "少なくとも1つのステップを追加する",
+        "toConfigureFreeGiftAmpAddOnsSettings": "無料ギフトとアドオンの設定を構成します。",
+        "uploadFile": "ファイルをアップロード"
+      },
+      "ppbimagesgifssection": {
+        "bannerImagePerStepShownAboveTheStepSProductsInTheWidget": "ステップごとのバナーイメージ — ウィジェット内のステップの製品の上に表示されます",
+        "fullWidthImageShownAboveThisStepSProductsRecommended1600400Px": "このステップの製品の上に表示されるフル幅の画像。 推奨: 1600 × 400 px。",
+        "loadingAnimation": "アニメーションを読み込み中",
+        "overlayShownWhileBundleContentIsLoading": "バンドルコンテンツの読み込み中にオーバーレイが表示されます",
+        "gifOnly": "GIF のみ",
+        "max150150Px": "UI ラベル: Max 150 × 150 px"
+      },
+      "ppbpageselectionmodal": {
+        "noTemplatesAvailable": "利用可能なテンプレートはありません",
+        "createPage": "ページを作成"
+      },
+      "ppbselecttemplatedialog": {
+        "reviewProductCardBundleCartBundlePopupsToastsAddonsAndMessagesTe": "設定言語から製品カード、バンドルカート、バンドル、ポップアップ、トースト、アドオン、およびメッセージのテキストを確認します。"
+      },
+      "ppbstepsetupsection": {
+        "actionNeeded": "アクションが必要:",
+        "addCategory": "+ カテゴリを追加"
+      },
+      "ppbutilitymodals": {
+        "thisWillDeleteAndReCreateAllShopifyDataForThisBundle": "このバンドルのShopifyデータをすべて削除し、再作成します。",
+        "theShopifyProductWillBeArchivedAndDeletedThenReCreated": "Shopifyの製品はアーカイブされ削除され、再度作成されます",
+        "allBundleAndComponentMetafieldsWillBeRewritten": "すべてのバンドルとコンポーネントメタフィールズは書き換えられます",
+        "syncBundle": "バンドルを同期"
+      }
+    },
+    "appIntegrations": {
+      "integrationsrouteshell": {
+        "integrationsHub": "連携ハブ",
+        "connectTheToolsThatSupportYourBundleWorkflow": "バンドルワークフローをサポートするツールを接続します。",
+        "requestIntegration": "連携をリクエスト"
+      }
+    },
+    "appSettings": {
+      "designsettingsview": {
+        "controlsUpdateForTheComponentVisibleInThePreview": "プレビューに表示されるコンポーネントの更新をコントロールします。",
+        "resetVisibleControls": "表示されているコントロールをリセット"
+      },
+      "languagesettingsview": {
+        "languageSettings": "言語設定",
+        "sharedLabels": "共有ラベル",
+        "usedAcrossEveryBundleLayout": "各バンドルレイアウトで使用されます。",
+        "cartAmpCheckout": "カート & チェックアウト",
+        "bundleLabels": "バンドルラベル",
+        "chooseALayoutThenEditItsLabels": "レイアウトを選択し、そのラベルを編集します。",
+        "landingPageLayout": "ランディングページのレイアウト",
+        "productPageLayout": "製品ページのレイアウト"
+      },
+      "settingscontrols": {
+        "editLanguage": "言語を編集"
+      },
+      "settingsdesignfields": {
+        "shopBrand": "ショップブランド",
+        "visualReference": "ビジュアルリファレンス",
+        "seeWhichStorefrontElementsTheseColorControlsAffect": "これらのカラーコントロールのエフェクトをどのストアフロント要素に格納するかを確認します。",
+        "showColourGuide": "カラーガイドを表示"
+      },
+      "settingsfeedback": {
+        "productLevelInventoryTracking": "商品レベルの在庫追跡",
+        "enableTheInventoryTrackingToggleInAdditionalConfigurationsToAppl": "追加設定で在庫追跡トグルを有効にして、全てのバンドルに製品レベルの在庫追跡を適用します。",
+        "eachChildProductShouldHaveShopifyTrackQuantityEnabled": "各子商品はShopify Track Quantityを有効にする必要があります。",
+        "productsWithZeroInventoryAreNotShownInTheBundle": "在庫がない商品はバンドルに表示されません。",
+        "digitalProductsShouldUseInventory0OrBelowSoTheyAreRecognizedCorr": "デジタル製品は在庫0以下を使用する必要がありますので、正しく認識されます。",
+        "ifTrackQuantityIsDisabledTheProductMayStillAppearButCannotBeAdde": "トラック数量が無効の場合、商品はまだ表示されますが、在庫が無い場合はカートに追加できません。",
+        "ifOutOfStockSellingIsEnabledAndInventoryIsAbove0DigitalProductDe": "在庫切れ販売が有効で在庫が0を超えている場合、デジタル製品の検出を制限することができます。"
+      },
+      "settingslandingshell": {
+        "reloadThePageOrReturnToSettingsAndTryAgain": "ページを再読み込みするか、設定に戻って再度お試し下さい。",
+        "returnToSettings": "設定に戻る"
+      },
+      "settingsroute": {
+        "additionalConfigurations": "追加設定",
+        "configurationSection": "設定セクション",
+        "appConfigurations": "アプリの設定",
+        "configureYourBundleSettings": "バンドルの設定を構成する"
+      }
+    }
+  },
+  "adminAttributes": {
+    "searchCampaigns": "キャンペーンを検索",
+    "searchByCampaignName": "キャンペーン名で検索",
+    "sortTopCampaigns": "トップキャンペーンをソート",
+    "sortBy": "並び替え",
+    "direction": "方向",
+    "topCampaignPerformance": "トップキャンペーンのパフォーマンス",
+    "settingsCouldNotBeLoaded": "設定を読み込めませんでした",
+    "backToSettings": "設定に戻る",
+    "contextualCustomizationInspector": "Contextual customize inspector",
+    "bundleAOV": "バンドル AOV",
+    "searchByBundleName": "バンドル名で検索",
+    "sortBundlePerformance": "バンドルのパフォーマンスをソート",
+    "graphMetric": "グラフメトリック",
+    "engagedCheckout": "エンゲージメント済み → チェックアウト",
+    "enableMultipleLanguages": "複数の言語を有効にする",
+    "addOrEditLanguages": "言語を追加または編集",
+    "bundleLayout": "バンドルレイアウト",
+    "languageSections": "言語セクション",
+    "languageConfigurations": "言語設定",
+    "layoutSelector": "レイアウト選択",
+    "configurationTabs": "構成タブ",
+    "variables": "変数",
+    "dismissHelpModal": "ヘルプモーダルを閉じる",
+    "liveBundlePreview": "ライブバンドルのプレビュー",
+    "planFeatureComparison": "機能の比較",
+    "uploadFailed": "アップロードに失敗しました",
+    "searchFiles": "ファイルを検索",
+    "searchFiles2": "Search files…",
+    "uploadProcessing": "アップロード処理中",
+    "loadingFiles": "ファイルを読み込み中",
+    "uploading": "アップロード中",
+    "bannerImageActions": "バナー画像の操作",
+    "uploadingImage": "画像をアップロード中",
+    "selectLanguage": "言語の選択",
+    "liveWidgetPreview": "ライブウィジェットのプレビュー",
+    "wereYouAbleToPreviewTheBundle": "バンドルをプレビューできましたか？",
+    "enableProductPageBundleUpsellWidgets": "商品ページバンドルアップセルウィジェットを有効にする",
+    "widgetType": "ウィジェットの種類",
+    "uploadImage": "画像をアップロード",
+    "widgetTitle": "ウィジェットのタイトル",
+    "widgetDescription": "ウィジェットの説明",
+    "widgetButtonText": "ウィジェットボタンのテキスト",
+    "productPageTargeting": "商品ページのターゲット",
+    "addBrowsedProductToBundle": "ブラウズされた商品をバンドルに追加",
+    "removeSelectedResource": "選択したリソースを削除",
+    "discountSetupTip": "割引セットアップのヒント",
+    "discountTip": "割引のヒント",
+    "bundleLink": "バンドルリンク",
+    "bundleLinkUnavailable": "バンドルリンクが利用できません",
+    "badgeText": "バッジテキスト",
+    "shape": "形状",
+    "visibility": "公開範囲",
+    "textColor": "テキストの色",
+    "ffffff": "#ffffff",
+    "backgroundColor": "背景色",
+    "1f2937": "#1f2937",
+    "clone": "複製",
+    "categoryName": "カテゴリ名",
+    "selectedProducts": "選択された製品",
+    "selectedCollections": "選択されたコレクション",
+    "enableBundleSubscriptions": "バンドルサブスクリプションを有効にする",
+    "subscriptionPlan": "サブスクリプションプラン",
+    "subscriptionTitle": "サブスクリプションタイトル",
+    "planNameInDropdown": "ドロップダウンのプラン名",
+    "discountPill": "割引ピル（ピル）",
+    "subscriptionOptionDescription": "サブスクリプションオプションの説明",
+    "enableRecurringDiscounts": "定期割引を有効にする",
+    "oneTimePurchase": "一回限りの購入",
+    "oneTimePurchaseLabel": "1回限りの購入ラベル",
+    "oneTimePurchaseDescription": "ワンタイム購入の説明",
+    "makeOneTimePurchaseSelectedByDefault": "デフォルトで1回限りの購入を選択する",
+    "purchaseOptionsSubtitle": "購入オプションのサブタイトル",
+    "unavailablePlanMessage": "利用できないプランのメッセージ",
+    "showSubscriptionDiscountOnProductCards": "製品カードに購読割引を表示する",
+    "defaultSubscriptionPlan": "デフォルトのサブスクリプションプラン",
+    "subscriptionLanguages": "サブスクリプション言語",
+    "bundleProductOptions": "バンドル製品のオプション",
+    "availableIntegrations": "利用可能な統合",
+    "backToDashboard": "ダッシュボードに戻る",
+    "enableAddOnsAndGiftingStep": "アドオンとギフトステップを有効にする",
+    "addOnsStepIcon": "アドオンのステップアイコン",
+    "stepName": "ステップ名",
+    "addOn": "追加",
+    "addToCart": "カートに追加",
+    "stepTitle": "ステップタイトル",
+    "selected": "UI label: Selected ✓",
+    "enableAddOnsWithBundles": "バンドル付きアドオンを有効にする",
+    "addOnSectionTitle": "セクションタイトルに追加",
+    "displayProductsAsFree000": "製品を無料で表示 ($0.00)",
+    "messageWhenRuleNotMet": "ルールが満たされていないときのメッセージ",
+    "addAddonsConditionDiffMoreProductSToClaimAddonsDiscountValueAddonsDiscountValueUnit": "あと {{addonsConditionDiff}} 個の商品を追加すると、アドオンが {{addonsDiscountValue}}{{addonsDiscountValueUnit}} オフになります",
+    "congratsYouAreEligibleForAddonsDiscountValueAddonsDiscountValueUnitOffOn": "おめでとうございます。アドオンが {{addonsDiscountValue}}{{addonsDiscountValueUnit}} オフになります",
+    "enableDiscountPricing": "割引価格を有効にする",
+    "minimumQuantityOfItems": "商品の最小数量",
+    "discountValue": "割引値",
+    "discountType": "割引タイプ",
+    "applyDiscountTo": "割引適用対象：",
+    "numberOfProductsInBundle": "バンドル中の商品数",
+    "price": "価格",
+    "discountOn": "UIラベル: 割引オン",
+    "isGreaterThanOrEqualTo": "以上である",
+    "value": "値",
+    "autoNextWhenRuleIsMet": "自動次へルールが満たされたとき",
+    "enablePreSelectedProduct": "選択済み製品を有効にする",
+    "defaultProductsTitle": "デフォルトの商品タイトル",
+    "enableStep": "ステップを有効にする",
+    "cloneCurrentStep": "現在のステップを複製",
+    "deleteCurrentStep": "現在のステップを削除",
+    "egAddProduct": "例えば:- 製品を追加",
+    "customization": "カスタマイズ",
+    "templateNotSaved": "テンプレートは保存されていません",
+    "templateCustomization": "テンプレートのカスタマイズ",
+    "brandColors": "ブランドカラー",
+    "corners": "コーナー",
+    "textAndLanguage": "テキストと言語",
+    "imagesAndGIFs": "画像とGIF",
+    "stepIcon": "ステップアイコン",
+    "removeStepIcon": "ステップアイコンを削除",
+    "egCustomizedTShirtBundleForYou": "例えば:- あなたのためのカスタマイズされたTシャツバンドル",
+    "tierTitle": "階層タイトル",
+    "displayVariantsAsIndividualProducts": "個々の商品としてバリエーションを表示",
+    "discountBasedOn": "に基づく割引",
+    "discountOnAddOns": "アドオン割引",
+    "enableQuantityValidation": "数量の検証を有効にする",
+    "maximumAllowedQuantityPerProduct": "製品あたりの最大許容数量",
+    "enableProductSlotsDisplay": "商品スロットの表示を有効にする",
+    "syncBundleWithOnlyBundles": "Only Bundlesとバンドルを同期しますか？",
+    "bundleCartTitle": "バンドルカートタイトル",
+    "yourBundle": "バンドル",
+    "bundleCartSubtitle": "バンドルカートの字幕",
+    "reviewYourBundle": "バンドルをレビューする",
+    "addCustomCSSForThisBundle": "/* Add custom CSS for this bundle */",
+    "chooseTabIcon": "タブのアイコンを選択",
+    "chooseBannerImage": "バナー画像を選択",
+    "showFloatingPromoBadge": "フローティングプロモーションバッジを表示",
+    "eGSave20TodayOnly": "例: 今日だけ20% 割引!",
+    "enableMultiLanguage": "多言語を有効にする",
+    "discountText": "割引テキスト",
+    "makeThisRuleDefault": "このルールをデフォルトにする",
+    "boxLabel": "ボックスラベル",
+    "boxSubtext": "ボックスのサブテキスト",
+    "displayVariantsAsIndividualProducts2": "個々の商品としてバリエーションを表示する",
+    "selectedProducts2": "選択された製品",
+    "selectedCollections2": "選択したコレクション",
+    "messageVariables": "メッセージ変数",
+    "disablePersonalizationStep": "パーソナライゼーションステップを無効にする",
+    "simpleProgressBar": "シンプルなプログレスバー",
+    "stepBasedProgressBar": "ステップベースのプログレスバー",
+    "tierText": "階層テキスト",
+    "tierSubtext": "等級のサブテキスト",
+    "variantSelector": "バリアント選択",
+    "showShopifySSellableComponentVariantQuantityWhenIt": "設定されたしきい値に達したときにShopifyの販売可能なコンポーネントバリアント数量を表示します。",
+    "lowStockThreshold": "低在庫のしきい値",
+    "lowStockMessage": "ローストックメッセージ",
+    "replacesTheIconWithATextButtonAndMoves": "+ アイコンをテキストボタンに置き換え、価格の下に移動します。",
+    "showTextOnPlusButton": "プラスボタンにテキストを表示する",
+    "buttonText": "ボタンのテキスト",
+    "eG20Off": "例: 20% off",
+    "progressBarType": "プログレスバーの種類",
+    "title": "タイトル",
+    "subTitle": "サブタイトル",
+    "showOnDesktop": "デスクトップに表示",
+    "showOnMobile": "モバイルで表示",
+    "action": "アクション",
+    "variantSelectorStyle": "バリアントセレクタースタイル",
+    "showColorNameOnHoverAndFocus": "ホバーとフォーカスに色名を表示する",
+    "changeBundleProduct": "バンドル商品を変更",
+    "syncBundle": "同期バンドル",
+    "selectProductPageTemplate": "製品ページのテンプレートを選択",
+    "thisSettingControlsTheLoadingAnimationVisibleToShoppers": "ショッパーに表示されるローディングアニメーションを設定します",
+    "chooseLoadingGIF": "GIFの読み込みを選択",
+    "backfillAnalyticsWindow": "分析画面をバックフィルする",
+    "savedCustomUTMAttributes": "保存されたカスタムUTM属性",
+    "parameterNames": "パラメータ名",
+    "utmInfluencerPartnerIdCreator": "utm_influencer, partner_id\ncreator",
+    "privacyCheck": "プライバシーチェック",
+    "utmPixelTracking": "UIラベル: UTMピクセルトラッキング"
+  },
+  "adminDynamic": {
+    "bundlesInPeriod_one": "{{count}}バンドル期間",
+    "bundlesInPeriod_other": "{{count}}バンドル期間",
+    "percentageKept": "{{percentage}}%保持",
+    "embedUpsellAtCustomLocation": "Upsell {{placement}}をカスタムロケーションに埋め込みました",
+    "upsellDefaultPlacement": "デフォルトでは、アップセル{{displayMode}}は購入ボタンの下に追加されます。 必要に応じて、製品ページのカスタムスポットに移動できます。",
+    "embedUpsell": "Upsell {{placement}}",
+    "selectedCount": "{{count}}が選択されました",
+    "ruleNumber": "ルール #{{number}}",
+    "tierNumber": "UI ラベル: Tier {{number}}",
+    "amountOff": "{{amount}} OFF",
+    "categoryRules": "{{category}}ルール",
+    "selectedProductsForStep_one": "このステップで選択された商品：{{count}}件",
+    "selectedProductsForStep_other": "このステップで選択された商品：{{count}}件",
+    "variantsAvailable_one": "{{count}}バリアントが利用可能です",
+    "variantsAvailable_other": "{{count}}バリアントが利用可能です",
+    "selectedCollectionsForStep_one": "このステップで選択されたコレクション：{{count}}件",
+    "selectedCollectionsForStep_other": "このステップで選択されたコレクション：{{count}}件",
+    "collectionHandle": "ハンドル: {{handle}}",
+    "lastDays": "最後の{{days}}日",
+    "selectedWindow": "選択されたウィンドウ: {{window}}. このクエリ 選択された期間のShopify注文と、Analyticsが見逃していた可能性のあるアトリビューションレコードが作成されます。",
+    "ignoredParameters": "無視: {{parameters}} URLパラメータ名のみを使用し、買い物客の識別子ではありません。",
+    "comparedWith": "UIラベル: vs {{period}}",
+    "compareOn": "比較",
+    "compareOff": "比較オフ",
+    "legacyStepProducts_one": "このステップには、以前のシステムの{{count}}製品があります。下のカテゴリを追加して新しいカテゴリシステムに再追加してください。",
+    "legacyStepProducts_other": "このステップには、以前のシステムの{{count}}製品があります。以下のカテゴリを追加して新しいカテゴリシステムに再追加してください。",
+    "makeRuleDefault": "このルールをデフォルトにする",
+    "products": "商品",
+    "collections": "コレクション",
+    "selectedProductsInStep_one": "このステップでは商品が {{count}} 件選択されています。",
+    "selectedProductsInStep_other": "このステップでは商品が {{count}} 件選択されています。",
+    "selectedCollectionsInStep_one": "このステップではコレクションが {{count}} 件選択されています。",
+    "selectedCollectionsInStep_other": "このステップではコレクションが {{count}} 件選択されています。",
+    "clickToUploadLoadingGif": "クリックして読み込みGIFをアップロード",
+    "clickToUploadImage": "クリックして画像またはアイコンをアップロード",
+    "chooseGifFile": "GIF ファイルを選択します。",
+    "chooseSupportedImageFile": "サポートされている画像ファイルを選択してください。",
+    "integrationLogo": "{{name}}ロゴ",
+    "guidedTourProgress": "ガイドツアー：全 {{total}} ステップ中 {{current}} ステップ目",
+    "guidedTourStep": "全 {{total}} ステップ中 {{current}} ステップ目",
+    "gotIt": "了解",
+    "next": "次へ",
+    "defaultSpinner": "既定のスピナー"
+  },
+  "adminData": {
+    "actionButtonsProgressBarsAndActiveElements": "アクションボタン、プログレスバー、アクティブ要素",
+    "activeTabBackgroundColor": "アクティブなタブの背景色",
+    "activeTabTextColor": "アクティブなタブのテキストの色",
+    "addBundleCartLabel": "バンドルカートのラベルを追加",
+    "addBundleLoadingLabel": "バンドル読み込みラベルを追加",
+    "addBundleSuccessLabel": "バンドル成功ラベルを追加",
+    "addBundleToCartButton": "カートボタンにバンドルを追加",
+    "addButtonText": "ボタンのテキストを追加",
+    "addEmptyProductCardText": "空の商品カードテキストを追加",
+    "addProductButtonColor": "商品ボタンの色を追加",
+    "addProductButtonTextColor": "商品ボタンのテキスト色を追加",
+    "addProductToBundleButton": "バンドルボタンに製品を追加",
+    "addAtLeastOneProductOrCollectionToABundle": "買い物客が選択するオプションがあるように、少なくとも1つの商品またはコレクションをバンドルステップに追加します。",
+    "addBundleToCartAfterTheLastStepIsCompleted": "最後のステップが完了した後にカートにバンドルを追加",
+    "addProducts": "商品を追加",
+    "addToCartButtonSelectors": "カートボタンセレクターに追加",
+    "addToCartWhenProductCardIsClicked": "商品カードがクリックされたときにカートに追加する",
+    "addedLabel": "追加したラベル",
+    "additionalBundleLevelSettingsApplicableToAllBundlesCreated": "作成されたすべてのバンドルに適用可能な追加バンドルレベルの設定",
+    "additionalConfigurations": "追加の構成",
+    "addonProductsMandatoryMessage": "アドオン製品必須メッセージ",
+    "addonSettings": "アドオンの設定",
+    "addonProductConfigurationAndValidationMessages": "アドオン製品の設定と検証メッセージ",
+    "addons": "UI label: Addons",
+    "amountAndPercentageEgYouSave730019": "金額と割合 (例えば: \"あなたは$73.00 (19%)を節約します)",
+    "amountOnlyEgYouSave7300": "金額のみ (例えば: \"あなたは$73.00を節約する\")",
+    "applyAnyRequiredReviewBadgeVisibilityOverrideThroughThemePage": "テーマページCSSを通じて必要なレビューバッジの可視性オーバーライドを適用します。",
+    "arabic": "アラビア文字",
+    "backButtonColor": "戻るボタンの色",
+    "backButtonTextColor": "戻るボタンの文字色",
+    "backgroundColor": "背景色",
+    "backgroundColorForBundleCart": "バンドルカートの背景色",
+    "backgroundColorForCompletedStepIndicators": "完了したステップインジケーターの背景色",
+    "backgroundColorForConditionToast": "コンディショントーストの背景色",
+    "backgroundColorForIncompleteSectionsOfProgressBars": "進捗バーの不完全なセクションの背景色",
+    "backgroundColorForProductCardsAndCartFooter": "商品カードとカートフッターの背景色",
+    "backgroundColorForTheBackStepButton": "バックステップボタンの背景色",
+    "backgroundColorForTheCurrentlySelectedCategoryTab": "現在選択されているカテゴリタブの背景色",
+    "backgroundColorForTheNextStepButton": "次のステップボタンの背景色",
+    "backgroundColorForUnselectedCategoryTabs": "未選択のカテゴリタブの背景色",
+    "backgroundColorForUpsellButtons": "アップセルボタンの背景色",
+    "backgroundColorOfIndividualProductCards": "個々の商品カードの背景色",
+    "backgroundColorOfTheFullPageBundleLoadingScreen": "フルページバンドルの読み込み画面の背景色",
+    "base": "UIラベル: Base",
+    "basicBundleConfiguration": "基本的なバンドル設定",
+    "blockForHidingQtySelectorAndOverwritingRemoveButtonFor": "個数選択および上書きを非表示にするブロック バンドル製品の削除ボタンをカート: バンドルアイテムの個々の数量増加を防止し、バンドル製品を削除した場合にすべてのバンドル製品を強制的に削除します。",
+    "bodyFontSize": "本文のフォントサイズ",
+    "bodyFontWeight": "本文フォントの重量",
+    "bold": "UI ラベル: 太字の",
+    "borderColorForEmptyProductSlotsWaitingToBeFilled": "空の商品スロットの枠線の色",
+    "boxSelectionEligibilityToast": "適格性トースト",
+    "brandColors": "ブランドカラー",
+    "brandColorsControlPrimaryButtonTextPrimaryTextSecondaryBackground": "ブランドカラーはプライマリ、ボタンテキスト、プライマリテキスト、セカンダリ背景、および商品カードのバックグラウンドカラーを制御します。",
+    "bulgarianBG": "ブルガリア語 (BG)",
+    "bundleButtonsBase": "バンドルボタンベース",
+    "bundleButtonsCornerStyle": "UIラベル: バンドルボタン コーナースタイル",
+    "bundleCartDiscountDisplayLabel": "バンドルカート割引表示ラベル",
+    "bundleContainsLabel": "バンドルにラベルが含まれています",
+    "bundleItems": "バンドルアイテム",
+    "bundleOriginalPriceLabel": "バンドル元価格ラベル",
+    "bundleSettings": "バンドル設定",
+    "bundleVisibility": "バンドルの可視性",
+    "bundleCartNavigationButtonTextAndLabels": "バンドルカートのナビゲーションボタンのテキストとラベル",
+    "bundleLinkIsUnavailable": "バンドルリンクは利用できません。",
+    "bundleProductNotYetLinked": "バンドル製品はまだリンクされていません。",
+    "buttonConfiguration": "ボタンの設定",
+    "buttonTextColor": "ボタンのテキストの色",
+    "buyNowButton": "今すぐ購入ボタン",
+    "css": "UI label: CSS",
+    "cssScripts": "UIラベル: CSSとスクリプト",
+    "callbackAndRedirectIntegrationSettingsForCheckoutAppsSideCarts": "チェックアウトアプリ、サイドカート、カートドロワーのコールバックとリダイレクトの統合設定。",
+    "cartBackgroundColor": "カートの背景色",
+    "cartInclusionTitle": "カートに含まれるタイトル",
+    "cartItemQuantityButtonSelectors": "UIラベル: カート商品数量ボタンセレクター",
+    "cartItemRemoveParentSelectors": "UIラベル: カート商品は親セレクターを削除",
+    "cartItemRemoveSelectors": "UIラベル: カート商品セレクターを削除",
+    "cartItemSelectors": "UIラベル: カート商品選択",
+    "cartMessaging": "UIラベル: カートメッセージ",
+    "cartTextColor": "UIラベル: カートテキストの色",
+    "cartAndCheckoutSharedLabelsIncludeBundleContainsOriginalPrice": "UIラベル: カートとチェックアウト共有ラベルにはバンドルが含まれ、元の価格、およびカート割引表示ラベルが含まれます。",
+    "cartPageItemsSectionID": "UIラベル: カートページアイテムセクションID",
+    "cartPageItemsSelector": "UIラベル: カートページアイテムの選択",
+    "catalan": "UI ラベル: Catalan",
+    "centeredBadge": "UIラベル: 中央にあるバッジ",
+    "changeLoadingScreenGifAddCustomCSSModifyCheckoutSettings": "UI ラベル: 読み込み画面の gif の変更、カスタム CSS の追加、チェックアウト設定の変更など",
+    "checkMarkColor": "UIラベル: マークの色をチェックする",
+    "checkAppEmbed": "UIラベル: アプリの埋め込みを確認",
+    "checkMarkIconsDisplayedOnCompletedBundleSteps": "UIラベル: 完成したバンドルステップに表示されるマークアイコンをチェックする",
+    "checkout": "UIラベル: チェックアウト",
+    "checkoutGIF": "UI ラベル: Checkout GIF",
+    "checkoutIntegration": "UI ラベル: Checkout integration",
+    "checkoutSettings": "UIラベル: チェックアウト設定",
+    "checkoutAndCartBehaviorIsConfiguredThroughExplicitTargetRedirects": "UI ラベル: チェックアウトとカートの動作は、明示的なターゲットリダイレクトまたはコールバック関数によって構成されます。",
+    "chineseCN": "UIラベル: 中国語 (CN)",
+    "chineseTW": "UIラベル: 中国語 (TW)",
+    "chooseOptionsButton": "UIラベル: オプションボタンを選択",
+    "chooseTheProductsCustomersCanPickFromInThisProduct": "UI ラベル: この製品ページのバンドルで顧客が選択できる製品を選択します。",
+    "chooseWhetherTheImageReplacesTheCenteredPlusIconOr": "UI ラベル: イメージが中央にあるプラスアイコンを置き換えるか、フルスロットに対するスケールを選択します。",
+    "clearCartButtonText": "UI ラベル: Clear Cart Button Text",
+    "clearCartModal": "UIラベル: Clear Cart Modal",
+    "clearCartConfirmationModalTextAndButtons": "UIラベル: カートの確認モーダルとボタンをクリア",
+    "colorBeatShownWhenAShopperReachesAnIntermediateDiscount": "UI ラベル: 買物客が中間割引層に達したときに表示される色",
+    "colorBeatsShownWhenAShopperReachesTheHighestDiscount": "UIラベル: 買い物客が最高の割引層に達したときに表示される色のビート。",
+    "colorForTheButtonOnTheProductCard": "UI ラベル: 製品カードのボタンの色",
+    "completedStepColor": "UI ラベル: 完了したステップの色",
+    "completionBackground": "UIラベル: 完了の背景",
+    "completionText": "UIラベル: 補完テキスト",
+    "conditionToastBackgroundColor": "UIラベル: 条件トースト背景色",
+    "conditionToastTextColor": "UIラベル: 条件トーストテキストの色",
+    "configuration": "UIラベル: 設定",
+    "configureAllTextLabelsAndTranslationsForYourBundleHere": "UIラベル：バンドルのすべてのテキスト、ラベル、翻訳をここで設定します",
+    "configureTheAuthenticatedPublicTokenInAdditionalConfigurations": "UI label: 追加設定で認証済みの公開トークンを設定します。",
+    "confirmTheThemeAppEmbedIsEnabledSoTheFull": "UI label: 全ページバンドルがストアでレンダリングできるように、テーマアプリの埋め込みが有効になっていることを確認します。",
+    "confirmTheThemeAppEmbedIsEnabledSoTheProduct": "UIラベル: テーマアプリの埋め込みが有効になっていることを確認し、ストアで商品ページのウィジェットがレンダリングできるようにします。",
+    "contain": "UIラベル: 含む",
+    "controls": "UIラベル: コントロール",
+    "controlsAreGroupedIntoConfigurationCSSScriptsIntegrationsAndAdvanced": "UIラベル: コントロールは、構成、CSSとスクリプト、統合、および詳細タブにグループ化されます。",
+    "cornersExposeSeparateBundleButtonAndProductCardCartRadius": "UIラベル: コーナーはバンドルボタンと商品カード/カートの半径の値を公開します。",
+    "cover": "UI ラベル: カバー",
+    "croatian": "UIラベル: Croatian",
+    "customCSSForMixAndMatchBundles": "UIラベル: カスタムCSSのミックスとマッチバンドル",
+    "customCSSForBundleBuilderPages": "UI ラベル: バンドルビルダーのページのためのカスタム CSS",
+    "customCSSForBundleDummyProductPage": "UIラベル: ダミー商品ページをバンドルするためのカスタム CSS",
+    "customCSSForThemePages": "UI ラベル: テーマページのカスタム CSS",
+    "customCartIntegrationScript": "UIラベル: カスタムカート統合スクリプト",
+    "customFont": "UIラベル: カスタムフォント",
+    "customJSBundleScript": "UIラベル: カスタムJSバンドルスクリプト",
+    "customThemeIntegrationScript": "UIラベル: カスタムテーマ統合スクリプト",
+    "customizeTheCheckoutBehaviorForAllTheBundleFlows": "UI ラベル: すべてのバンドルフローのチェックアウトの動作をカスタマイズします",
+    "customizeTheRedirectOnAddToCart": "UIラベル: カートに追加時のリダイレクトをカスタマイズする",
+    "czech": "UIラベル: チェコ語",
+    "danish": "UIラベル: デンマーク語",
+    "designControlPanel": "UIラベル: デザインコントロールパネル",
+    "designSettingsForBundleColorsTypographyCornersAndMediaControls": "UIラベル:バンドルカラー、タイポグラフィ、コーナー、およびメディアコントロールの設計設定。",
+    "discountBadgeSuffix": "UIラベル: 割引バッジサフィックス",
+    "discountDisplay": "UIラベル: 割引表示",
+    "discountProgressBarEmptyColor": "UIラベル: 割引進行状況バーの空の色",
+    "discountProgressBarFilledColor": "UIラベル: 割引進行状況バー塗りつぶし色",
+    "discountTextColor": "UIラベル: 割引テキストの色",
+    "discountFeedback": "UIラベル: 割引フィードバック",
+    "discountFormat": "UIラベル: 割引フォーマット",
+    "displayEmptyStateBoxesBasedOnBundleCondition": "UIラベル: バンドル条件に基づいて空の状態ボックスを表示",
+    "displayStarRatingsAndReviewsOnYourBundles": "UIラベル：バンドルに星評価とレビューを表示する",
+    "displayedDuringCheckoutLoadingUnlessAMerchantGIFIsConfigured": "UI label: マーチャントの GIF が設定されていない限り、チェックアウトの読み込み中に表示されます。",
+    "dutch": "UIラベル: Dutch",
+    "emptyStateBorderColor": "UIラベル: 空の要塞枠の色",
+    "emptyStateTextColor": "UIラベル: 空の状態のテキストの色",
+    "enableCartIntegration": "UIラベル: カート統合を有効にする",
+    "enableCustomThemeIntegrationScript": "UIラベル: カスタムテーマ統合スクリプトを有効にする",
+    "enableJudgeMeIntegration": "UIラベル：Judge Me統合を有効にする",
+    "enableTheShopfloCheckoutIntegrationAndConfirmSDKLoadingOn": "UIラベル: Shopfloのチェックアウト統合を有効にし、ストアフロページでSDKのロードを確認します。",
+    "equalToRuleMessageAmount": "UI label: Equal to Rule (Amount)",
+    "equalToRuleMessageQuantity": "UI label: Equal to rule message (Quantity)",
+    "equalToRuleMessageWeight": "UI ラベル: Equal to rule message (Weight)",
+    "estonian": "UIラベル: エストニア語",
+    "executeCustomScript": "UIラベル: カスタムスクリプトの実行",
+    "executeDefaultSideCartUpdate": "UIラベル: デフォルトのサイドカート更新を実行",
+    "executeScript": "UIラベル: スクリプトの実行",
+    "fpbLoadingGIF": "UIラベル: FPB GIF読み込み中",
+    "fill": "UIラベル: 塗りつぶし",
+    "fillColorForCompletedPartOfDiscountProgressBar": "UI ラベル: 割引進捗バーの完了部分のための色を塗りつぶします",
+    "fillColorForEmptyPartOfDiscountProgressBar": "UIラベル: 割引進捗バーの空の部分に色を塗りつぶします",
+    "finnish": "UIラベル: フィンランド語",
+    "fit": "UIラベル: フィット",
+    "fontSettings": "UIラベル: フォント設定",
+    "footerFinishButton": "UIラベル: フッター終了ボタン",
+    "footerNextButton": "UIラベル: フッター 次のボタン",
+    "footerPreviousButton": "UIラベル: フッター前のボタン",
+    "fullPageBundleControlsForTheAdditionalConfigurationsSurface": "UI ラベル: 追加構成サーフェスのフルページバンドルコントロール。",
+    "gempages": "UIラベル: GemPages",
+    "generalPopupContent": "一般的なポップアップコンテンツ",
+    "generalSettings": "全般設定",
+    "generalToasts": "一般的なトースト",
+    "generalToastMessagesAndAlerts": "一般的なトーストメッセージとアラート",
+    "georgian": "グルジア語",
+    "globalBrandColorsUsedByBundleCardsSummaryButtonsAnd": "バンドルカード、サマリー、ボタン、サポートサーフェスで使用されるグローバルブランドカラー。",
+    "gokwik": "UIラベル: GoKwik",
+    "greaterThanRuleMessageAmount": "ルールメッセージよりも大きい（合計）",
+    "greaterThanRuleMessageQuantity": "ルールメッセージよりも大きい（数量）",
+    "greaterThanRuleMessageWeight": "ルールメッセージよりも大きい（重量）",
+    "greek": "ギリシア語",
+    "guidedSetup": "ガイド付きセットアップ",
+    "hebrew": "ヘブライ文字",
+    "hideIrrelevantVariantImages": "無関係なバリエーション画像を非表示",
+    "hideOutOfStockProducts": "在庫切れ商品を隠す",
+    "hideStepTitlesInCompletedState": "完了した状態でステップタイトルを隠す",
+    "hungarian": "ハンガリー語",
+    "imageFit": "画像に合わせる",
+    "imageFitSlotIconAndFullPageBundleLoadingScreen": "Image-Fit、スロットアイコン、および全ページバンドルのスクリーンコントロールをロードします。",
+    "imagesGIFs": "UIラベル: 画像とGIF",
+    "imagesAndGIFsConfigureProductImageFitPlusLoadingMedia": "画像とGIF構成製品画像フィットプラスバンドルとチェックアウト状態のためのメディアをロードします。",
+    "inactiveTabBackgroundColor": "非アクティブタブの背景色",
+    "inactiveTabTextColor": "タブのテキストの色",
+    "indonesian": "インドネシア語",
+    "inlineAddToCartButtonQuantitySelectionMessage": "インラインカートに追加ボタン - 数量選択メッセージ",
+    "inlineCartDrawerButtonText": "インラインカート・ドロワーボタンのテキスト",
+    "inlineCartSelectedProductsLabel": "インラインカート選択された商品ラベル",
+    "inlineProductAddButtonText": "インライン製品 - ボタンテキストを追加",
+    "integrateJSBundleScriptWithCartPage": "JS バンドルスクリプトをカートページと統合",
+    "integrateJSWithCustomElementsFromTheStoreTheme": "ストアのテーマからのカスタム要素と JS を統合",
+    "integrateWithJudgeMe": "ジャッジミーと統合",
+    "inventoryLimitReachedLabel": "在庫上限ラベルに達しました",
+    "italian": "イタリア語",
+    "javascriptSelectors": "JavaScriptとセレクター",
+    "judgeMe": "UIラベル: Judge.me",
+    "knowMore": "もっと知る",
+    "korean": "UIラベル: 韓国語",
+    "landingPageLayoutAndProductPageLayoutExposeDifferentConfiguration": "ランディングページレイアウトと製品ページレイアウトには、異なる設定セットが表示されます。",
+    "landingPageBundleBehaviorTogglesAndCheckoutCartFlowControls": "ランディングページバンドルの動作は、チェックアウト/カートのフローコントロールを切り替えます。",
+    "languageConfigurations": "言語設定",
+    "latvian": "ラトビア語",
+    "layoutSpecificBehaviorControlsAndIntegrationCallbackSettings": "レイアウト固有のビヘイビアコントロールとインテグレーションのコールバック設定。",
+    "lessThanRuleMessageAmount": "ルールメッセージ未満（合計）",
+    "lessThanRuleMessageQuantity": "UI ラベル: Less than rule message (Quantity)",
+    "lessThanRuleMessageWeight": "ルール未満のメッセージ（重量）",
+    "lithuanian": "リトアニア語",
+    "loadMoreProductsButton": "他の商品ボタンを読み込む",
+    "loadingScreenBackgroundColor": "画面の背景色を読み込み中",
+    "maxAddonProductsAllowedMessage": "最大アドオン製品許可メッセージ",
+    "mobileAddOnNotification": "モバイルで通知を追加",
+    "modalCancelButtonText": "モーダルキー → ボタンのキャンセル",
+    "modalConfirmButtonText": "モーダル：ボタンのテキストの確認",
+    "modalDescription": "モーダル（モーダル）- 説明",
+    "modalTitle": "モーダルのタイトル",
+    "modifyAndCustomizeAllDesignElementsOfTheBundleHere": "ここでバンドルのすべてのデザイン要素を変更およびカスタマイズします",
+    "multilingualAndTextTemplateConfigurationSurface": "多言語およびテキストテンプレートの構成面。",
+    "multilingualConfigurationIsEnabledAndDefaultsToEnglish": "多言語設定が有効になっており、デフォルトは英語です。",
+    "navigationButtons": "UIラベル: ナビゲーションボタン",
+    "nextButtonColor": "次のボタンの色",
+    "nextButtonText": "次のボタンのテキスト",
+    "nextButtonTextColor": "次のボタンのテキスト色",
+    "noProductsAvailableLabel": "利用可能な商品ラベルがありません",
+    "norwegian": "ノルウェー語",
+    "norwegianBokmL": "Norwegian Bokma<unk>",
+    "noteByDefaultYourStorefrontThemeFontWillBePicked": "注:デフォルトでは、ストアフロントのテーマフォントが選択されます。",
+    "noteThisSectionIsOnlyForDevelopers": "注意: このセクションは開発者向けのものです。",
+    "optionalGIFDisplayedInsteadOfTheDefaultSpinnerOnThe": "オプションのGIFは、フルページバンドルロード画面でデフォルトのスピナーの代わりに表示されます。",
+    "optionalImageDisplayedInEmptyFPBAndPPBProductSlots": "空のFPBとPPB製品スロットに表示されるオプションの画像。",
+    "originalBundlePrice": "元のバンドル価格",
+    "pageBuilders": "ページビルダー",
+    "pagefly": "UI ラベル: PageFly",
+    "pasteCustomBundleScriptHere": "ここにカスタムバンドルスクリプトを貼り付け",
+    "percentageOnlyEgYouSave19": "パーセンテージのみ (例えば: \"あなたは19%を節約する\")",
+    "placeProductPageAndFullPageBundlesInCustomStorefront": "カスタムストアフロントレイアウトに製品ページと全ページバンドルを配置します。",
+    "placeBundleBuildersInGemPagesStorefrontLayouts": "GemPages ストアのレイアウトにバンドルビルダーを配置します。",
+    "placeBundleBuildersInPageFlyPagesAndSavedSections": "PageFlyページと保存されたセクションにバンドルビルダーを配置します。",
+    "placeBundleBuildersInShogunProductAndCustomLayouts": "将軍製品とカスタムレイアウトにバンドルビルダーを配置します。",
+    "placeOrLinkTheFullPageBundleSoShoppersCan": "買い物客があなたの店頭からバンドルページを開くことができるように、フルページのバンドルを配置またはリンクします。",
+    "placeTheBundle": "バンドルを配置する",
+    "placeTheWidget": "ウィジェットを置く",
+    "polish": "ポーランド語",
+    "popupDialogTextLabelsAndButtonText": "ポップアップ ダイアログ テキスト、ラベル、ボタン テキスト",
+    "popups": "UIラベル: ポップアップ",
+    "portuguesePT": "ポルトガル語 (PT)",
+    "preparingBundleLabel": "バンドルラベルの準備",
+    "primaryColor": "プライマリ色",
+    "primaryFontSize": "プライマリフォントサイズ",
+    "primaryFontWeight": "プライマリフォントの重量",
+    "primaryTextColor": "プライマリテキストの色",
+    "productAddToCartButton": "商品をカートボタンに追加",
+    "productAddedLabel": "商品追加ラベル",
+    "productBackgroundColor": "商品背景色",
+    "productCard": "商品カード",
+    "productCardCartBase": "商品カードとカートベース",
+    "productCardCartCornerStyle": "商品カードとカートコーナースタイル",
+    "productOutOfStockButton": "在庫切れ商品ボタン",
+    "productPageTitleColor": "商品ページタイトル色",
+    "productSlotIcon": "商品スロットアイコン",
+    "productTitleTextColor": "商品タイトルのテキスト色",
+    "productVariantLabel": "製品バリアントラベル",
+    "productCardButtonTextAndActionLabels": "商品カードボタンのテキストとアクションラベル",
+    "productCardCopyIncludesTheAddToBundleActionLabel": "製品カードコピーには、追加バンドルアクションラベルが含まれています。",
+    "productCardLabelsForProductPageBundles": "製品ページバンドルの製品カードラベル",
+    "productNamesPricesLabelsAndMainContentText": "製品名、価格、ラベル、およびメインコンテンツテキスト",
+    "productPagePriceSelector": "製品ページの価格選択",
+    "productPageBundleBehaviorTogglesAndRedirectControls": "製品ページバンドルの動作は、コントロールを切り替えてリダイレクトします。",
+    "productPageBundleCartLabelsAndNavigation": "商品ページバンドルカートラベルとナビゲーション",
+    "productPageBundleControlsForTheAdditionalConfigurationsSurface": "追加構成サーフェスの製品ページバンドルコントロール。",
+    "productPageBundleStateLabels": "製品ページのバンドル状態ラベル",
+    "productPageBundleToastMessages": "製品ページバンドルトーストメッセージ",
+    "productPageCustomCSSScriptAndSelectorConfiguration": "製品ページのカスタム CSS、スクリプト、およびセレクタの設定。",
+    "productPageQuantityAmountAndWeightRuleMessages": "商品ページ数量、金額、重量ルールのメッセージ",
+    "publicToken": "公開トークン",
+    "quantityLabel": "数量ラベル",
+    "quantityAmountAndWeightRuleValidationMessages": "数量、金額、重量ルール検証メッセージ",
+    "radiusControlsForBundleButtonsAndProductCardCartShells": "バンドルボタンと商品カード/カートシェルの半径コントロール。",
+    "redirectCollectionPageQuickAddToBundle": "コレクションページ「クイック追加」をバンドルにリダイレクトする",
+    "redirectSettings": "リダイレクト設定",
+    "redirectToCart": "カートにリダイレクト",
+    "redirectToCheckout": "チェックアウトにリダイレクト",
+    "redirectingLabel": "ラベルをリダイレクト中",
+    "regular": "標準",
+    "removeProductFromFooterText": "フッターテキストから商品を削除",
+    "reviewButtonText": "レビューボタンのテキスト",
+    "reviews": "レビュー",
+    "romanian": "ルーマニア語",
+    "round": "ラウンド",
+    "ruleMessages": "ルールメッセージ",
+    "russian": "ロシア語",
+    "scriptWrittenHereWouldBeAppliedOnlyOnBundlePages": "ここに書かれたスクリプトは、バンドルページにのみ適用されます。",
+    "secondaryColor": "セカンダリカラー",
+    "secondaryFontSize": "セカンダリフォントサイズ",
+    "secondaryFontWeight": "セカンダリフォントの重量",
+    "secondaryElementsEmptyProgressBarsAndInactiveStates": "セカンダリ要素、進行状況バー、および非アクティブな状態",
+    "selectBundleProductsLabel": "バンドル商品ラベルを選択",
+    "selectTemplate": "テンプレートを選択",
+    "selectTheCheckoutAppInstalledOnThisStore": "このストアにインストールされているチェックアウトアプリを選択してください。",
+    "serbian": "セルビア語",
+    "setActive": "アクティブに設定",
+    "setTheParentProductToActiveAfterTheRequiredSetup": "必要なセットアップが保存された後、親製品をformat@@0に設定します。",
+    "sharp": "シャープ。",
+    "shogun": "<unk>",
+    "shopflo": "Shopfro",
+    "showReviewsOnProductCardsThroughIntegrationWithJudgeme": "審査員との統合を通じて製品カードにレビューを表示する",
+    "showSocialProofByDisplayingProductRatingsWithinYourBundles": "バンドル内に製品評価を表示することで、社会的証明を表示します。",
+    "showsHowMuchTheCustomerIsSavingOnTheBundle": "お客様がバンドルにどれだけ保存しているかを表示します",
+    "showsTheIndividualItemsWithinABundle": "バンドル内の個々のアイテムを表示",
+    "showsTheRetailPriceBeforeBundleDiscount": "バンドル割引の前に小売価格を表示",
+    "sideCartOpenButtonSelector": "サイドカートを開くボタンの選択",
+    "sideCartSectionID": "サイドカートセクションID",
+    "sideCartSelector": "サイドカートの選択",
+    "slotIconPresentation": "スロットアイコンのプレゼンテーション",
+    "slovakSK": "UI label: Slovak (SK)",
+    "slovenianSI": "UIラベル: スロベニア語(SI)",
+    "stepProgressBarEmptyColor": "UI ラベル: Step Progress Bar Empty Color",
+    "stepTextColor": "ステップテキストの色",
+    "stepsDrawerPillText": "歩数ドロワーのピルテキスト",
+    "subscriptionSelectionLabel": "サブスクリプション選択ラベル",
+    "subscriptions": "サブスクリプション",
+    "subtotalText": "小計",
+    "supported": "サポート",
+    "swedish": "スウェーデン語",
+    "templateTextIsGroupedIntoProductCardBundleCartBundle": "テンプレートテキストは商品カード、バンドルカート、ポップアップ、トースト、アドオン、メッセージにグループ化されています。",
+    "textColorDisplayedOnUpsellButtons": "アップセルボタンに表示されるテキスト色",
+    "textColorDisplayedOnUpsellWidget": "アップセルウィジェットに表示されるテキスト色",
+    "textColorForCartContentTotalsAndLabels": "カートのコンテンツ、合計、ラベルのテキスト色",
+    "textColorForConditionToast": "条件トーストのテキスト色",
+    "textColorForDiscountMessages": "割引メッセージのテキスト色",
+    "textColorForPlaceholderMessagesInEmptyProductSlots": "空の製品スロットのプレースホルダメッセージのテキスト色",
+    "textColorForProductNamesDisplayedOnCards": "カードに表示される商品名の文字色",
+    "textColorForStepNamesAndNavigationLabels": "ステップ名とナビゲーションラベルのテキスト色",
+    "textColorForTheBackStepButton": "戻るステップボタンのテキスト色",
+    "textColorForTheButtonOnTheProductCard": "商品カードのボタンの色",
+    "textColorForTheCurrentlySelectedCategoryTab": "現在選択されているカテゴリタブのテキスト色",
+    "textColorForTheNextStepButton": "次のステップボタンのテキスト色",
+    "textColorForUnselectedCategoryTabs": "未選択のカテゴリタブのテキスト色",
+    "textColorShownDuringHighestTierFeedback": "フィードバック時に表示されるテキストの色",
+    "textColorShownDuringIntermediateTierFeedback": "中間層フィードバック時に表示されるテキストの色",
+    "textDisplayedOnPrimaryButtonsAndActionElements": "プライマリボタンとアクション要素に表示されるテキスト",
+    "textTokenDefaultsForPrimarySecondaryAndBodyLabels": "テキストトークンのデフォルトは、プライマリ、セカンダリ、ボディラベルです。",
+    "thai": "タイ語",
+    "theCSSWrittenHereWillBeAppliedToAllProduct": "ここに書かれた CSS はすべての製品ページバンドルに適用されます。",
+    "theCSSWrittenHereWillBeAppliedToBundleBuilder": "ここで書かれた CSS はバンドルビルダーのページに適用されます。",
+    "theCSSWrittenHereWillBeAppliedToBundleDummy": "ここに書かれた CSS は、ダミー製品のバンドルページに適用されます。",
+    "theCSSWrittenHereWillHaveAGlobalImpactOn": "ここに書かれているCSSはすべてのストアページにグローバルな影響を与えます。慎重にクラスを選択してください。",
+    "theScriptWrittenHereWillBeAppliedAfterProductPage": "ここに書かれたスクリプトは、製品ページの読み込み後に適用されます",
+    "theScriptWrittenHereWillExclusivelyApplyToThemePages": "ここで書かれたスクリプトはテーマページにのみ適用され、バンドルページには影響しません。 私たちの内部のノーションドキュメント(簡単なバンドルカスタムCSSとJSリクエスト)を参照してください。",
+    "themePageCSSAndScriptsAreConfiguredFromThisSurface": "テーマページ CSS とスクリプトは、各統合カードからではなく、このサーフェスから設定されます。",
+    "themePageCustomCSSAndCustomScriptsUsedByTheme": "テーマページのカスタムCSSとテーマと統合で使用されるカスタムスクリプトの修正。",
+    "thisScriptRunsGloballyOnThemePagesReviewAndTest": "このスクリプトはテーマページでグローバルに実行されます。有効にする前に確認してテストしてください。",
+    "tierBackground": "等級の背景",
+    "tierText": "階層テキスト",
+    "titleTextColorOnTheBundleBuilderPage": "バンドルビルダーページのタイトルテキストの色",
+    "toasts": "UIラベル: Toasts",
+    "totalLabel": "ラベルの合計",
+    "trackInventoryOnAddToCartInBeta": "Add to Cart (ベータ版) で在庫を追跡する",
+    "turkish": "トルコ語",
+    "typography": "タイポグラフィー（文法）",
+    "typographyIsSplitBetweenPrimarySecondaryAndBodyTextTokens": "タイポグラフィは、サイズと重量コントロールを備えたプライマリ、セカンダリ、ボディのテキストトークンに分割されます。",
+    "upsellButtonColor": "アップセルボタンの色",
+    "upsellButtonTextColor": "アップセルボタンのテキスト色",
+    "upsellWidgetBodyTextColor": "UIラベル: Upsell Widget本文テキストの色",
+    "useWpbBundleHTMLAsParentClassForGiftboxBuilderCSS": "giftbox ビルダーCSSの親クラスとして「.wpbundle-HTML」を使用して、サイト全体でCSSを上書きしないようにしてください。",
+    "usePageFlySShopifyAppBlockElementWithThePage": "Online Store 2.0テーマのPage Builderバンドルブロックを使用して、PageFlyのShopifyアプリブロック要素を使用します。",
+    "useShopifyNativeCheckoutAndCartFlowsForBundleConversion": "Shopify-native チェックアウトとカートフローをバンドル変換に使用します。",
+    "useAThirdPartyCheckoutHandoffFlowWithGoKwik": "GoKwikでサードパーティ製のチェックアウトハンドオフフローを使用します。",
+    "useAThirdPartyCheckoutHandoffFlowWithShopflo": "Shopfloでサードパーティ製のチェックアウトハンドオフフローを使用します。",
+    "useDiscountCodeHandoffFlowSoOrderDiscountingContinuesThrough": "割引コードハンドオフフローを使用すると、注文割引はチェックアウトを通じて継続されます。",
+    "useTheGemPagesShopifyAppElementWithThePageBuilder": "GemPages Shopify App Element を Page Builder バンドルブロックで使用します。",
+    "useTheLiquidFreeHTMLMarkerForShogunCustomLayouts": "Shogunのカスタムレイアウトには、液体のないHTMLマーカーを使用します。",
+    "useThePageBuilderBundleAppBlockWithAShopify": "Shopify 2.0 または既存のテーマレイアウトで Page Builder バンドルアプリブロックを使用します。",
+    "useTheProviderNeutralCustomCodeMarkerWhenAnApp": "アプリブロックが使用できない場合は、プロバイダニュートラルのカスタムコードマーカーを使用します。",
+    "useTheProviderNeutralHTMLLiquidMarkerWhenAnApp": "アプリブロックが使用できない場合は、プロバイダニュートラルの HTML/液体マーカーを使用します。",
+    "useTheWidgetPlacementControlsSoShoppersCanSeeAnd": "買い物客が商品ページからバンドルを表示して開くことができるように、ウィジェットの配置コントロールを使用します。",
+    "useYourStoreSGoKwikCheckoutConfigurationAndKeepNative": "店舗のGoKwikチェックアウト設定を使用し、ネイティブのフォールバックルーティングを有効にしてください。",
+    "verifyCallbackSetupForGoKwikCheckoutHandoffInThemeScript": "GoKwikチェックアウトハンドオフのコールバック設定をテーマのスクリプトタグで確認します。",
+    "vietnamese": "UIラベル: ベトナム語",
+    "viewCartProductsLabel": "カート商品のラベルを表示",
+    "viewSetup": "セットアップを見る",
+    "off": "$ off",
+    "aov": "AOV",
+    "accessDenied": "アクセスを拒否しました",
+    "addAButtonToYourHomepageHeroToDriveShoppers": "あなたのバンドルに直接買い物客を運転するためにあなたのホームページのヒーローにボタンを追加します。",
+    "addThisConditionToTheExistingUnlessGuard": "ガードがない限り、この条件を既存のものに追加します",
+    "addYourBundleAsANavLinkSoShoppersCan": "買い物客があなたの店のどこからでもそれを見つけることができるように、あなたのバンドルをナビリンクとして追加します。",
+    "addedToCart": "カートに追加しました",
+    "allProductsInBundle": "全ての商品がバンドルされています",
+    "announcementBanner": "アナウンスバナー",
+    "bxgy": "BXGY",
+    "badRequest": "不正なリクエスト",
+    "bundleOrders": "バンドル注文",
+    "bundleRevenue": "バンドル収入",
+    "bundleViews": "バンドルビュー",
+    "categoryRules": "カテゴリルール",
+    "checkedOut": "チェックアウト済み",
+    "colors": "色",
+    "conversion": "変換",
+    "customizeForThisBundle": "このバンドルのカスタマイズ",
+    "engaged": "従事中",
+    "featureYourBundleProductOnYourHomepageSoShoppersFind": "ホームページにバンドル商品を表示して、買い物客がすぐに見つけましょう。",
+    "featuredProductCard": "注目の商品カード",
+    "findTheCartPropertyLoop": "カートのプロパティループを見つける",
+    "fullPageBundles": "フルページバンドル",
+    "heroBanner": "ヒーローの旗",
+    "invalidRequest": "無効なリクエスト",
+    "mixMatchSteps": "ミックスとステップの一致",
+    "navigationMenu": "Navigation Menu",
+    "noRules": "ルールがありません",
+    "none": "なし",
+    "notAuthenticated": "未認証",
+    "openYourThemeCodeEditor": "テーマコードエディタを開く",
+    "optimised": "最適化",
+    "pageNotFound": "ページが見つかりません",
+    "pending": "保留中",
+    "placeTheBundleBuilderDirectlyOnSelectedProductPages": "バンドルビルダーを選択した製品ページに直接配置します。",
+    "purchaseOptionsTitle": "購入オプションのタイトル",
+    "setADifferentDiscountFormatOrLabelForThisBundle": "このバンドルのみ別の割引フォーマットまたはラベルを設定してください。",
+    "settingsDesign": "設定 -> デザイン",
+    "sharedCartAndCheckoutLabels": "共有カートとチェックアウトラベル",
+    "showAnUpsellButtonOrBlockOnSelectedProductPages": "選択した製品ページにアップセルボタンまたはブロックを表示します。",
+    "showYourOfferInTheAnnouncementBarSoVisitorsSee": "告知バーにオファーを表示すると、訪問者はすぐにそれを見ることができます。",
+    "smartDiscountRules": "スマート割引ルール",
+    "somethingWentWrongOnOurEndOurTeamHasBeen": "問題が発生しました。チームに通知されました。",
+    "specificCollections": "特定のコレクション",
+    "specificProducts": "特定の製品",
+    "stepRules": "ステップルール",
+    "thePageYouReLookingForDoesnTExistOr": "お探しのページは存在しないか、移動されている可能性があります。",
+    "theRequestCouldnTBeUnderstoodPleaseCheckTheURL": "リクエストが理解できませんでした。URL を確認して、もう一度やり直してください。",
+    "theServerCouldnTProcessYourRequestAsSubmitted": "サーバーはあなたのリクエストを送信できませんでした。",
+    "tooManyRequests": "リクエストが多すぎます",
+    "utmAttributionAnalytics": "UTMアトリビューション分析",
+    "unexpectedError": "予期しないエラー",
+    "useAppDefaults": "アプリの既定値を使用",
+    "usesTheDiscountFormatAndLabelConfiguredInYourApp": "アプリの設定で設定された割引フォーマットとラベルを使用します。",
+    "youDonTHavePermissionToViewThisPage": "このページを表示する権限がありません。",
+    "youNeedToBeSignedInToAccessThisPage": "このページにアクセスするにはサインインする必要があります。",
+    "youVeSentTooManyRequestsInAShortPeriod": "短期間にリクエストが多すぎます。ゆっくりお待ちください。",
+    "fixed": "修正",
+    "unknown": "不明"
+  }
+}

@@ -1,0 +1,184 @@
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"] {
+  --classic-product-modal-gutter: var(--bundle-product-card-spacing, 1rem);
+  --classic-product-modal-max-width: var(--bundle-modal-inline-size, 100%);
+  --classic-product-modal-radius: var(
+    --bundle-full-page-product-card-radius,
+    0.625rem
+  );
+}
+
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  .bundle-modal-container {
+    background: #ffffff;
+    box-shadow: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+}
+
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  #modal-product-price[hidden],
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  #modal-variants-container[hidden],
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  .bundle-modal-quantity[hidden],
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  #modal-add-to-box[hidden] {
+  display: none;
+}
+
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  .bundle-modal-selection-summary {
+  display: none;
+}
+
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  .bundle-modal-header {
+  gap: 0.75rem;
+}
+
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  .bundle-modal-title {
+  color: var(--bundle-global-primary-text, #1a1a1a);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+  .bundle-modal-overlay[data-read-only="true"]
+  .bundle-modal-description {
+  color: var(--bundle-global-secondary-text, #4b5563);
+  max-height: none;
+  overflow: visible;
+}
+
+@media (min-width: 768px) {
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"] {
+    align-items: center;
+    justify-content: center;
+    padding: var(--classic-product-modal-gutter);
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay.active[data-read-only="true"]
+    .bundle-modal-container {
+    width: min(100%, 72rem);
+    max-width: var(--classic-product-modal-max-width);
+    max-height: calc(100dvh - (var(--classic-product-modal-gutter) * 2));
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border-radius: var(--classic-product-modal-radius);
+    transform: scale(1);
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-content {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: stretch;
+    padding: 0;
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-images {
+    align-self: center;
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-main-image {
+    aspect-ratio: 1 / 1;
+    border-radius: 0.5rem;
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-details {
+    align-self: stretch;
+    gap: 1rem;
+    padding: 0;
+  }
+
+}
+
+@media (max-width: 767px) {
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"] {
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+    padding-top: env(safe-area-inset-top);
+    background: rgba(24, 24, 24, 0.8);
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay.active[data-read-only="true"]
+    .bundle-modal-container {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    height: auto;
+    max-height: 88dvh;
+    padding: var(--classic-product-modal-gutter);
+    padding-bottom: max(var(--classic-product-modal-gutter), env(safe-area-inset-bottom));
+    border-radius: var(--classic-product-modal-radius) var(--classic-product-modal-radius) 0 0;
+    transform: translateY(0);
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+    gap: 0;
+    min-height: 0;
+    padding: 0;
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-images {
+    grid-row: 2;
+    gap: 0;
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-main-image {
+    aspect-ratio: 7 / 6;
+    min-height: 0;
+    border-radius: 0.5rem;
+  }
+
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-details {
+    grid-row: 3;
+    align-self: start;
+    gap: 0.875rem;
+    padding: 0;
+  }
+
+}
+
+@media (min-width: 1024px) {
+  body:has(.layout-sidebar[data-fpb-design-preset="CLASSIC"], .fpb-preset-classic)
+    .bundle-modal-overlay[data-read-only="true"]
+    .bundle-modal-content {
+    min-height: min(68dvh, 40rem);
+  }
+}

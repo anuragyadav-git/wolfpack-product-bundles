@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-08-29T10:33:36.107Z",
+  "summary": {
+    "totalSuites": 6,
+    "totalTests": 2228,
+    "totalPassed": 2228,
+    "totalFailed": 0,
+    "totalSkipped": 0,
+    "totalDuration": 15124
+  },
+  "totalDuration": 15126,
+  "suites": [
+    {
+      "suite": "Unit Tests - Services",
+      "passed": 268,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 3211,
+      "commandFailed": false
+    },
+    {
+      "suite": "Unit Tests - Extensions",
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 1669,
+      "commandFailed": false
+    },
+    {
+      "suite": "Unit Tests - Routes",
+      "passed": 604,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 3347,
+      "commandFailed": false
+    },
+    {
+      "suite": "Unit Tests - Assets",
+      "passed": 1294,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 4254,
+      "commandFailed": false
+    },
+    {
+      "suite": "Integration Tests",
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 1490,
+      "commandFailed": false
+    },
+    {
+      "suite": "End-to-End Tests",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 1153,
+      "commandFailed": false
+    }
+  ],
+  "environment": {
+    "nodeVersion": "v25.1.0",
+    "platform": "darwin",
+    "cwd": "/Users/adityaawasthi/Developer/wolfpack-product-bundles"
+  }
+}

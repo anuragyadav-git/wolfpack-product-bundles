@@ -1,0 +1,374 @@
+/**
+ * Shared bundle formatter for widget consumption.
+ *
+ * Used by:
+ *  - app/routes/api/api.bundle.$bundleId[.]json.tsx  (proxy API response)
+ *
+ * Converts a Prisma bundle (with steps + StepProduct + pricing) into the
+ * JSON shape the widget expects.
+ */
+
+import { formatStepCategoriesForRuntime } from "./bundle-config/category-runtime";
+import { resolveShowProductComparedAtPrice } from "./bundle-config/product-page-display";
+import {
+  buildPublicBundleSubscriptionConfig,
+  type BundleSubscriptionConfigV1,
+} from "./bundle-subscriptions";
+import { buildOfferDecisionMarker } from "./offer-policy-decision";
+import {
+  buildCountdownRuntimeConfig,
+  type CountdownRuntimeConfig,
+} from "./bundle-countdown";
+
+/** Convert a Shopify GID to its numeric ID for storefront cart operations. */
+function extractNumericId(gid: string): string {
+  const match = gid.match(/\/(\d+)$/);
+  return match ? match[1] : gid;
+}
+
+export interface FormattedBundle {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  bundleType: string;
+  bundleDesignTemplate: string | null;
+  bundleDesignPresetId: string | null;
+  loadingGif: string | null;
+  defaultProductsData: Record<string, unknown>;
+  boxSelection: Record<string, unknown> | null;
+  bundleUpsellConfig: Record<string, unknown> | null;
+  bundleTextConfig: Record<string, unknown> | null;
+  bundleLevelCss: string | null;
+  bundleBannerDesktopUrl: string | null;
+  bundleBannerMobileUrl: string | null;
+  personalizationData: Record<string, unknown> | null;
+  discountDisplayOverride: Record<string, unknown> | null;
+  validateQuantityPerProduct: Record<string, unknown>;
+  productSlotsEnabled: boolean;
+  productSlotIconUrl: string | null;
+  variantSelectorEnabled: boolean;
+  useSingleStepCategoriesAsBundleSteps: boolean;
+  shopifyProductId: string | null;
+  steps: FormattedStep[];
+  pricing: FormattedPricing | null;
+  offerDelivery: {
+    decisionRequired: boolean;
+    serverDecisionRequired: boolean;
+    specificLinkRequired: boolean;
+    countryTargetingEnabled: boolean;
+    countryTargetingMode: 'include' | 'exclude';
+    countryCodes: string[];
+    offerPolicyId: string | null;
+    ruleVersion: number | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'country' | 'priority' | null;
+  };
+  // Per-bundle behavioral settings
+  showProductPrices: boolean;
+  showProductComparedAtPrice: boolean;
+  cartRedirectToCheckout: boolean;
+  allowQuantityChanges: boolean;
+  lowStockAlert: {
+    enabled: boolean;
+    threshold: number;
+    message: string;
+  };
+  stickyAddToCart: {
+    enabled: boolean;
+    showDesktop: boolean;
+    showMobile: boolean;
+    action: "scroll_to_offers" | "add_selected_offer";
+  };
+  countdown: CountdownRuntimeConfig | null;
+  showTextOnAddButton: boolean;
+  // Per-bundle text overrides
+  textOverrides: Record<string, string> | null;
+  textOverridesByLocale: Record<string, Record<string, string>> | null;
+  subscription: BundleSubscriptionConfigV1 | null;
+}
+
+interface FormattedStep {
+  id: string;
+  name: string;
+  pageTitle: string | null;
+  position: number;
+  minQuantity: number | null;
+  maxQuantity: number | null;
+  enabled: boolean;
+  displayVariantsAsIndividual: boolean;
+  products: FormattedProduct[];
+  collections: unknown[];
+  categories: unknown[];
+  conditionType: string | null;
+  conditionOperator: string | null;
+  conditionValue: string | null;
+  conditionOperator2: string | null;
+  conditionValue2: string | null;
+  autoNextStepOnConditionMet: boolean;
+  isFreeGift: boolean;
+  freeGiftName: string | null;
+  addonLabel: string | null;
+  addonTitle: string | null;
+  addonAddText: string | null;
+  addonReplaceText: string | null;
+  addonDisplayFree: boolean;
+  addonTiers: unknown[];
+  addonUnlockAfterCompletion: boolean;
+  isDefault: boolean;
+  defaultVariantId: string | null;
+  stepImage: string | null;
+  primaryVariantOption: string | null;
+}
+
+interface FormattedProduct {
+  id: string;
+  title: string;
+  featuredImage: { url: string } | null;
+  price: number;
+  compareAtPrice: number | null;
+  available: boolean;
+  variants: FormattedVariant[];
+}
+
+interface FormattedVariant {
+  id: string;
+  gid: string;
+  title: string;
+  price: number;
+  compareAtPrice: number | null;
+  image: { url: string } | null;
+  available: boolean;
+}
+
+interface FormattedPricing {
+  enabled: boolean;
+  method: string | null;
+  rules: unknown[];
+  showFooter: boolean;
+  messages: unknown;
+  displayOptions: unknown;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getProductIdFromSource(product: any): string {
+  return getProductId(product);
+}
+
+function getCategorySourceProducts(step: any): any[] {
+  if (!Array.isArray(step.StepCategory)) return [];
+
+  return step.StepCategory.flatMap((category: any) => {
+    return Array.isArray(category?.products) ? category.products : [];
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dedupeProductsById(products: any[]): any[] {
+  const seenIds = new Set<string>();
+  const result: any[] = [];
+
+  products.forEach((product) => {
+    const productId = getProductIdFromSource(product);
+    if (!productId) return;
+
+    const normalized = productId.includes("/") ? productId : `gid://shopify/Product/${productId}`;
+    if (seenIds.has(normalized)) return;
+
+    seenIds.add(normalized);
+    result.push(product);
+  });
+
+  return result;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getStepSourceProducts(step: any, bundleType: string): any[] {
+  const explicitProducts = Array.isArray(step.StepProduct) ? [...step.StepProduct] : [];
+
+  if (bundleType !== "full_page") {
+    return explicitProducts;
+  }
+
+  return dedupeProductsById([
+    ...explicitProducts,
+    ...getCategorySourceProducts(step),
+  ]);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getProductId(product: any): string {
+  return product.productId ?? product.id ?? product.graphqlId ?? "";
+}
+
+function resolveBundleDesignTemplate(bundle: any): string | null {
+  if (bundle?.bundleDesignTemplate) return bundle.bundleDesignTemplate;
+  return null;
+}
+
+function resolveBundleDesignPresetId(bundle: any): string | null {
+  if (bundle?.bundleDesignPresetId) return bundle.bundleDesignPresetId;
+  return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getImageUrl(image: any): string | null {
+  if (!image) return null;
+  if (typeof image === "string") return image;
+  return image.url ?? image.originalSrc ?? image.src ?? null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function formatBundleForWidget(bundle: any): FormattedBundle {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const steps = (bundle.steps ?? []).map((step: any) => {
+    const bundleType = bundle.bundleType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stepProducts = getStepSourceProducts(step, bundleType);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productsArray: FormattedProduct[] = stepProducts.map((sp: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dbVariants = (sp.variants as any[]) ?? [];
+      const firstVariant = dbVariants[0];
+      const productId = getProductId(sp);
+
+      return {
+        id: productId,
+        title: sp.title,
+        featuredImage: sp.imageUrl ? { url: sp.imageUrl } : null,
+        price: firstVariant?.price ? Math.round(parseFloat(firstVariant.price) * 100) : 0,
+        compareAtPrice: firstVariant?.compareAtPrice
+          ? Math.round(parseFloat(firstVariant.compareAtPrice) * 100)
+          : null,
+        available: true,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        variants: dbVariants.map((v: any): FormattedVariant => {
+          const variantImageUrl = getImageUrl(v.imageUrl ?? v.image);
+          return {
+            id: extractNumericId(v.id ?? ''),
+            gid: v.id ?? '',
+            title: v.title ?? 'Default Title',
+            price: Math.round(parseFloat(v.price ?? '0') * 100),
+            compareAtPrice: v.compareAtPrice
+              ? Math.round(parseFloat(v.compareAtPrice) * 100)
+              : null,
+            image: variantImageUrl ? { url: variantImageUrl } : null,
+            available: true,
+          };
+        }),
+      };
+    }).filter((product) => product.id);
+
+    return {
+      id: step.id,
+      name: step.name,
+      pageTitle: step.pageTitle ?? null,
+      multiLangData: step.multiLangData ?? {},
+      position: step.position,
+      minQuantity: step.minQuantity,
+      maxQuantity: step.maxQuantity,
+      enabled: step.enabled,
+      displayVariantsAsIndividual: step.displayVariantsAsIndividual,
+      products: productsArray,
+      collections: Array.isArray(step.collections) ? step.collections : [],
+      categories: formatStepCategoriesForRuntime(step, stepProducts),
+      conditionType: step.conditionType ?? null,
+      conditionOperator: step.conditionOperator ?? null,
+      conditionValue: step.conditionValue ?? null,
+      conditionOperator2: step.conditionOperator2 ?? null,
+      conditionValue2: step.conditionValue2 ?? null,
+      autoNextStepOnConditionMet: step.autoNextStepOnConditionMet === true,
+      isFreeGift: step.isFreeGift ?? false,
+      freeGiftName: step.freeGiftName ?? null,
+      addonLabel: step.addonLabel ?? null,
+      addonTitle: step.addonTitle ?? null,
+      addonAddText: step.addonAddText ?? null,
+      addonReplaceText: step.addonReplaceText ?? null,
+      addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
+      addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
+      isDefault: step.isDefault ?? false,
+      defaultVariantId: step.defaultVariantId ?? null,
+      stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
+      primaryVariantOption: step.primaryVariantOption ?? null,
+    };
+  });
+
+  const bundleDesignTemplate = resolveBundleDesignTemplate(bundle);
+  const bundleDesignPresetId = resolveBundleDesignPresetId(bundle);
+
+  return {
+    id: bundle.id,
+    name: bundle.name,
+    description: bundle.description,
+    status: bundle.status,
+    bundleType: bundle.bundleType,
+    bundleDesignTemplate,
+    bundleDesignPresetId,
+    loadingGif: bundle.loadingGif ?? null,
+    defaultProductsData: (bundle.defaultProductsData as Record<string, unknown> | null) ?? {},
+    boxSelection: (bundle.boxSelection as Record<string, unknown> | null) ?? null,
+    bundleUpsellConfig: (bundle.bundleUpsellConfig as Record<string, unknown> | null) ?? null,
+    bundleTextConfig: (bundle.bundleTextConfig as Record<string, unknown> | null) ?? null,
+    bundleLevelCss: typeof bundle.bundleLevelCss === "string" && bundle.bundleLevelCss.trim()
+      ? bundle.bundleLevelCss
+      : null,
+    bundleBannerDesktopUrl: bundle.bundleBannerDesktopUrl ?? null,
+    bundleBannerMobileUrl: bundle.bundleBannerMobileUrl ?? null,
+    personalizationData: (bundle.personalizationData as Record<string, unknown> | null) ?? null,
+    discountDisplayOverride: (bundle.discountDisplayOverride as Record<string, unknown> | null) ?? null,
+    validateQuantityPerProduct: (bundle.validateQuantityPerProduct as Record<string, unknown> | null) ?? {
+      isEnabled: false,
+      allowedQuantity: 1,
+    },
+    productSlotsEnabled: bundle.bundleType === "full_page" ? bundle.productSlotsEnabled ?? false : false,
+    productSlotIconUrl: bundle.bundleType === "full_page" ? bundle.productSlotIconUrl ?? null : null,
+  variantSelectorEnabled: bundle.variantSelectorEnabled ?? true,
+  useSingleStepCategoriesAsBundleSteps: bundle.useSingleStepCategoriesAsBundleSteps ?? false,
+  shopifyProductId: bundle.shopifyProductId,
+    steps,
+    pricing: bundle.pricing
+      ? {
+          enabled: bundle.pricing.enabled,
+          method: bundle.pricing.method,
+          rules: bundle.pricing.rules ?? [],
+          showFooter: bundle.pricing.showFooter,
+          messages: {
+            ...((bundle.pricing.messages as Record<string, unknown> | null) ?? {}),
+            ...(bundle.pricing.ruleMessagesByLocale
+              ? { ruleMessagesByLocale: bundle.pricing.ruleMessagesByLocale }
+              : {}),
+          },
+          displayOptions: bundle.pricing.displayOptions ?? null,
+        }
+      : null,
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
+    showProductPrices: bundle.showProductPrices ?? true,
+    showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
+    cartRedirectToCheckout: bundle.cartRedirectToCheckout ?? false,
+    allowQuantityChanges: bundle.allowQuantityChanges ?? true,
+    lowStockAlert: {
+      enabled: bundle.lowStockAlertEnabled ?? false,
+      threshold: bundle.lowStockAlertThreshold ?? 5,
+      message: bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    },
+    stickyAddToCart: {
+      enabled:
+        bundle.bundleType === "product_page" &&
+        (bundle.stickyAddToCartEnabled ?? false),
+      showDesktop: bundle.stickyAddToCartShowDesktop ?? true,
+      showMobile: bundle.stickyAddToCartShowMobile ?? true,
+      action:
+        bundle.stickyAddToCartAction === "add_selected_offer"
+          ? "add_selected_offer"
+          : "scroll_to_offers",
+    },
+    countdown: buildCountdownRuntimeConfig(bundle, bundle.offerPolicy),
+    showTextOnAddButton: bundle.showTextOnAddButton ?? false,
+    textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,
+    textOverridesByLocale: (bundle.textOverridesByLocale as Record<string, Record<string, string>> | null) ?? null,
+    subscription: buildPublicBundleSubscriptionConfig(
+      bundle.bundleSubscriptionConfig,
+    ),
+  };
+}
