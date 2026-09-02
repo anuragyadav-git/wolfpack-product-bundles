@@ -2,7 +2,7 @@ import { PpbCategoryRulesList } from "./PpbCategoryRulesList";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { getStepCategories } from "./PpbStepSetupShared";
 import { PpbStepRulesList } from "./PpbStepRulesList";
-import { APP_BRAND } from "../../../lib/app-brand";
+import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
 
 export function PpbRulesConfigurationCard({ step }: { step: any }) {
@@ -89,7 +89,13 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
         type="button"
         className={productPageBundleStyles.linkButton}
         style={{ marginBottom: 12, display: "inline-block" }}
-        onClick={() => window.open(APP_BRAND.links.company, "_blank")}
+        onClick={() =>
+          window.open(
+            TUTORIAL_LINKS.productPageRules,
+            "_blank",
+            "noopener,noreferrer"
+          )
+        }
       >
         {translateAdmin("common.actions.learnMore")}
       </button>

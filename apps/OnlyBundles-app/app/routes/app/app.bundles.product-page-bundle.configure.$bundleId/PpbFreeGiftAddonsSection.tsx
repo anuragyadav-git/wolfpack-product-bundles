@@ -3,6 +3,7 @@ import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
+import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 
 export function PpbFreeGiftAddonsSection() {
   const {
@@ -279,7 +280,7 @@ export function PpbFreeGiftAddonsSection() {
                           )}
                           onClick={() =>
                             window.open(
-                              "https://www.youtube.com/watch?v=5ClNNtFybHo",
+                              TUTORIAL_LINKS.productPageGiftsAndAddons,
                               "_blank",
                               "noopener,noreferrer"
                             )

@@ -15,6 +15,7 @@ import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-contro
 import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import { OfferAnalyticsCard } from "./OfferAnalyticsCard";
 import { translateAdmin } from "~/i18n/config";
+import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 
 type AttributionDashboardViewData = Omit<
   AttributionDashboardData,
@@ -566,6 +567,9 @@ export function CustomUtmTrackingCard({
               )}
             </s-banner>
           </s-box>
+          <s-link href={TUTORIAL_LINKS.analytics} target="_blank">
+            {translateAdmin("common.actions.learnMore")}
+          </s-link>
         </s-stack>
       </s-modal>
     </section>

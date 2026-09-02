@@ -25,7 +25,7 @@ import {
   ensureShopIdentity,
   recordBusinessEvent,
 } from "../../../services/app-events.server";
-import { APP_BRAND } from "../../../lib/app-brand";
+import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
 
 export const links: LinksFunction = () => [
@@ -225,7 +225,7 @@ export default function CreateBundleEntry() {
           </div>
           <s-button
             variant="secondary"
-            href={APP_BRAND.links.company}
+            href={TUTORIAL_LINKS.createBundle}
             target="_blank"
           >
             {t("createBundle.help")}

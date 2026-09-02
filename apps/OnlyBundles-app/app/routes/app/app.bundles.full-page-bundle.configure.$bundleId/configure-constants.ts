@@ -3,6 +3,7 @@ import {
   buildBundleVisibilityChildItems,
   buildConfigureSetupItems,
 } from "../../../lib/bundle-config/common-configure-page-model";
+import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 
 export const fullPageTemplateOptions = [
   { presetId: "STANDARD", label: "Standard Design", image: "/FPB-Standard.avif" },
@@ -24,8 +25,7 @@ export const stepSetupChildItems = [
 ];
 
 export const ADDON_MESSAGE_KEY = "addons-direct";
-export const ADDONS_HELP_ARTICLE_URL =
-  "https://www.youtube.com/watch?v=5p_B81I7tWE";
+export const ADDONS_HELP_ARTICLE_URL = TUTORIAL_LINKS.fullPageGiftsAndAddons;
 
 export const bundleVisibilityChildItems =
   buildBundleVisibilityChildItems("full_page");

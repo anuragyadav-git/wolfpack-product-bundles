@@ -4,6 +4,7 @@ import { FpbStepConfigCard } from "./StepSetupConfigCard";
 import { FpbStepSetupDetailsCard } from "./StepSetupDetailsCard";
 import { FpbStepRulesCard } from "./StepSetupRulesCard";
 import { translateAdmin } from "~/i18n/config";
+import { TUTORIAL_LINKS } from "../../../../lib/tutorial-links";
 
 export function StepSetupSection({
   flow,
@@ -46,7 +47,7 @@ export function StepSetupSection({
               )}
               onClick={() =>
                 window.open(
-                  "https://www.youtube.com/watch?v=5p_B81I7tWE",
+                  TUTORIAL_LINKS.fullPageSetup,
                   "_blank",
                   "noopener,noreferrer"
                 )

@@ -1,6 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { FpbStepRuleModeContent } from "./StepSetupRuleModeContent";
-import { APP_BRAND } from "../../../../lib/app-brand";
+import { TUTORIAL_LINKS } from "../../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepRulesCard({
@@ -45,7 +45,13 @@ export function FpbStepRulesCard({
           type="button"
           className={fullPageBundleStyles.linkButton}
           style={{ marginBottom: 12, display: "inline-block" }}
-          onClick={() => window.open(APP_BRAND.links.company, "_blank")}
+          onClick={() =>
+            window.open(
+              TUTORIAL_LINKS.fullPageRules,
+              "_blank",
+              "noopener,noreferrer"
+            )
+          }
         >
           {translateAdmin("common.actions.learnMore")}
         </button>

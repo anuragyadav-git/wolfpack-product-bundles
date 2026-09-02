@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 
 export function PpbStepFlowCard({ children }: { children: ReactNode }) {
   const {
@@ -33,7 +34,7 @@ export function PpbStepFlowCard({ children }: { children: ReactNode }) {
             )}
             onClick={() =>
               window.open(
-                "https://www.youtube.com/watch?v=5ClNNtFybHo",
+                TUTORIAL_LINKS.productPageSetup,
                 "_blank",
                 "noopener,noreferrer"
               )

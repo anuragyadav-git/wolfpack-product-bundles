@@ -18,6 +18,7 @@ import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
 import { AdminWarningGroup } from "../../../../components/AdminWarningGroup";
 import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
+import { TUTORIAL_LINKS } from "../../../../lib/tutorial-links";
 
 type SubscriptionValidationResponse = {
   success?: boolean;
@@ -284,6 +285,9 @@ export function BundleSubscriptionsSection(
                       "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.configureEveryBundleProductAndSelectableVariantInOneSellingPlanG"
                     )}
                   </s-paragraph>
+                  <s-link href={TUTORIAL_LINKS.subscriptions} target="_blank">
+                    {translateAdmin("common.actions.learnMore")}
+                  </s-link>
                 </s-box>
               ) : null}
               {groups.length > 0 ? (
