@@ -14,6 +14,11 @@ import {
   buildPublicBundleSubscriptionConfig,
   type BundleSubscriptionConfigV1,
 } from "./bundle-subscriptions";
+import { buildOfferDecisionMarker } from "./offer-policy-decision";
+import {
+  buildCountdownRuntimeConfig,
+  type CountdownRuntimeConfig,
+} from "./bundle-countdown";
 
 /** Convert a Shopify GID to its numeric ID for storefront cart operations. */
 function extractNumericId(gid: string): string {
@@ -47,11 +52,34 @@ export interface FormattedBundle {
   shopifyProductId: string | null;
   steps: FormattedStep[];
   pricing: FormattedPricing | null;
+  offerDelivery: {
+    decisionRequired: boolean;
+    serverDecisionRequired: boolean;
+    specificLinkRequired: boolean;
+    countryTargetingEnabled: boolean;
+    countryTargetingMode: 'include' | 'exclude';
+    countryCodes: string[];
+    offerPolicyId: string | null;
+    ruleVersion: number | null;
+    eligibilitySource: 'always' | 'specific_link' | 'schedule' | 'country' | 'priority' | null;
+  };
   // Per-bundle behavioral settings
   showProductPrices: boolean;
   showProductComparedAtPrice: boolean;
   cartRedirectToCheckout: boolean;
   allowQuantityChanges: boolean;
+  lowStockAlert: {
+    enabled: boolean;
+    threshold: number;
+    message: string;
+  };
+  stickyAddToCart: {
+    enabled: boolean;
+    showDesktop: boolean;
+    showMobile: boolean;
+    action: "scroll_to_offers" | "add_selected_offer";
+  };
+  countdown: CountdownRuntimeConfig | null;
   showTextOnAddButton: boolean;
   // Per-bundle text overrides
   textOverrides: Record<string, string> | null;
@@ -314,10 +342,28 @@ export function formatBundleForWidget(bundle: any): FormattedBundle {
           displayOptions: bundle.pricing.displayOptions ?? null,
         }
       : null,
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
     showProductPrices: bundle.showProductPrices ?? true,
     showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
     cartRedirectToCheckout: bundle.cartRedirectToCheckout ?? false,
     allowQuantityChanges: bundle.allowQuantityChanges ?? true,
+    lowStockAlert: {
+      enabled: bundle.lowStockAlertEnabled ?? false,
+      threshold: bundle.lowStockAlertThreshold ?? 5,
+      message: bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    },
+    stickyAddToCart: {
+      enabled:
+        bundle.bundleType === "product_page" &&
+        (bundle.stickyAddToCartEnabled ?? false),
+      showDesktop: bundle.stickyAddToCartShowDesktop ?? true,
+      showMobile: bundle.stickyAddToCartShowMobile ?? true,
+      action:
+        bundle.stickyAddToCartAction === "add_selected_offer"
+          ? "add_selected_offer"
+          : "scroll_to_offers",
+    },
+    countdown: buildCountdownRuntimeConfig(bundle, bundle.offerPolicy),
     showTextOnAddButton: bundle.showTextOnAddButton ?? false,
     textOverrides: (bundle.textOverrides as Record<string, string> | null) ?? null,
     textOverridesByLocale: (bundle.textOverridesByLocale as Record<string, Record<string, string>> | null) ?? null,

@@ -5,7 +5,7 @@ title: Shopify App Pricing Redirect Test Spec
 type: test-spec
 status: active
 summary: Defines secure hosted plan redirect and return verification behavior for Shopify App Pricing.
-last_audited: 2026-08-30
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -18,7 +18,7 @@ source_paths:
   - app/components/billing/UpgradeConfirmationModal.tsx
   - app/services/subscriptions/app-pricing-navigation.server.ts
   - app/services/subscriptions/shopify-app-identity.server.ts
-  - app/routes/app/app.pricing.tsx
+  - app/routes/app/app.billing_.plans.tsx
   - app/routes/app/app.billing.tsx
   - app/routes/app/app.billing.return.tsx
 related_docs:

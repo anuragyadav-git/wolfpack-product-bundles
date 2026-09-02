@@ -26,6 +26,10 @@ describe("page builder embed service", () => {
         bundleType: "product_page",
         shopifyProductHandle: "summer-bundle",
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { specificLinkRequired: false } } },
+        ],
       },
     }));
     expect(db.designSettings.findUnique).not.toHaveBeenCalled();
@@ -52,6 +56,10 @@ describe("page builder embed service", () => {
         bundleType: "full_page",
         publicNumber: 7,
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { specificLinkRequired: false } } },
+        ],
       },
     }));
   });
@@ -63,6 +71,43 @@ describe("page builder embed service", () => {
       bundleType: "full_page",
       publicNumber: 99,
       locale: "en",
+    })).resolves.toBeNull();
+  });
+
+  it("returns null while the selected bundle schedule is not effective", async () => {
+    const db = database();
+    db.bundle.findFirst.mockResolvedValue({
+      id: "scheduled",
+      bundleType: "product_page",
+      offerPolicy: {
+        scheduleMode: "one_time",
+        startsAt: "2026-09-01T00:00:00.000Z",
+        endsAt: null,
+      },
+    });
+    await expect(resolvePageBuilderEmbed(db as any, "shop.myshopify.com", {
+      bundleType: "product_page",
+      parentProductHandle: "scheduled",
+      locale: "en",
+    }, new Date("2026-08-31T12:00:00.000Z"))).resolves.toBeNull();
+  });
+
+  it("returns null when the Shopify-selected country is ineligible", async () => {
+    const db = database();
+    db.bundle.findFirst.mockResolvedValue({
+      id: "targeted",
+      bundleType: "product_page",
+      offerPolicy: {
+        countryTargetingEnabled: true,
+        countryTargetingMode: "include",
+        countryCodes: ["CA"],
+      },
+    });
+    await expect(resolvePageBuilderEmbed(db as any, "shop.myshopify.com", {
+      bundleType: "product_page",
+      parentProductHandle: "targeted",
+      locale: "en",
+      countryCode: "US",
     })).resolves.toBeNull();
   });
 });

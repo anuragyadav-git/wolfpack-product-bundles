@@ -1,5 +1,5 @@
 import {
-  applyPpbCategoryVariantFlags,
+  applyPpbCategoryVariantConfiguration,
   buildBundleLinkModel,
   buildBundleSettingsSlotModel,
   buildBundleVisibilityChildItems,
@@ -164,19 +164,21 @@ describe("common configure page model", () => {
         name: "Category 1",
         products: [{ id: "gid://shopify/Product/1" }],
         displayVariantsAsIndividualProducts: false,
-        displayVariantsAsSwatches: true,
+        variantSelectorMode: "color_swatch",
+        swatchTooltipEnabled: true,
       },
       {
         id: "cat-2",
         name: "Category 2",
         collections: [{ id: "gid://shopify/Collection/1" }],
         displayVariantsAsIndividualProducts: false,
-        displayVariantsAsSwatches: false,
+        variantSelectorMode: "dropdown",
+        swatchTooltipEnabled: false,
       },
     ];
 
     expect(
-      applyPpbCategoryVariantFlags(categories, {
+      applyPpbCategoryVariantConfiguration(categories, {
         displayVariantsAsIndividualProducts: true,
       }),
     ).toEqual([
@@ -185,14 +187,16 @@ describe("common configure page model", () => {
         name: "Category 1",
         products: [{ id: "gid://shopify/Product/1" }],
         displayVariantsAsIndividualProducts: true,
-        displayVariantsAsSwatches: true,
+        variantSelectorMode: "color_swatch",
+        swatchTooltipEnabled: true,
       },
       {
         id: "cat-2",
         name: "Category 2",
         collections: [{ id: "gid://shopify/Collection/1" }],
         displayVariantsAsIndividualProducts: true,
-        displayVariantsAsSwatches: false,
+        variantSelectorMode: "dropdown",
+        swatchTooltipEnabled: false,
       },
     ]);
   });

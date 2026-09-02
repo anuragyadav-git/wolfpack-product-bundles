@@ -6,10 +6,12 @@ describe("page builder embed request", () => {
       bundleType: "product_page",
       parentProductHandle: " Summer-Bundle ",
       locale: "fr-CA",
+      country: "ca",
     }))).toEqual({
       bundleType: "product_page",
       parentProductHandle: "summer-bundle",
       locale: "fr-CA",
+      countryCode: "CA",
     });
   });
 
@@ -18,10 +20,12 @@ describe("page builder embed request", () => {
       bundleType: "full_page",
       publicNumber: "12",
       locale: "en",
+      country: "us",
     }))).toEqual({
       bundleType: "full_page",
       publicNumber: 12,
       locale: "en",
+      countryCode: "US",
     });
   });
 

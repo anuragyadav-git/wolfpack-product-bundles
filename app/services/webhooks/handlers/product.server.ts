@@ -1,133 +1,11 @@
 /**
- * Product Webhook Handlers
- *
- * Handles product-related webhooks:
- * - products/update
- * - products/delete
+ * Product deletion webhook handler.
  */
 
 import db from "../../../db.server";
 import { AppLogger } from "../../../lib/logger";
 import type { WebhookProcessResult } from "../types";
 import { BundleStatus } from "../../../constants/bundle";
-
-/**
- * Handle product update webhook
- * Monitors products used in bundles and sets bundles to draft if product becomes unavailable
- */
-export async function handleProductUpdate(
-  shopDomain: string,
-  payload: any
-): Promise<WebhookProcessResult> {
-  try {
-    // SAFETY: Validate payload has required fields
-    if (!payload.id) {
-      return {
-        success: false,
-        message: "Missing product ID in webhook payload",
-        error: "payload.id is required"
-      };
-    }
-
-    const productId = `gid://shopify/Product/${payload.id}`;
-    const status = payload.status;
-    const variants = payload.variants || [];
-
-    AppLogger.info("Processing product update", {
-      component: "webhook-processor",
-      operation: "handleProductUpdate"
-    }, { shop: shopDomain, productId, status });
-
-    // Find all bundle steps using this product
-    const stepsWithProduct = await db.stepProduct.findMany({
-      where: {
-        productId
-      },
-      include: {
-        step: {
-          include: {
-            bundle: true
-          }
-        }
-      }
-    });
-
-    if (stepsWithProduct.length === 0) {
-      return {
-        success: true,
-        message: "Product not used in any bundles"
-      };
-    }
-
-    // Check if product has critical changes
-    const isArchived = status === BundleStatus.ARCHIVED || status === BundleStatus.DRAFT;
-    const hasNoVariants = variants.length === 0;
-    const hasNoAvailableVariants = variants.every((v: any) =>
-      v.inventory_policy === "deny" && v.inventory_quantity <= 0
-    );
-
-    const isCriticalChange = isArchived || hasNoVariants || hasNoAvailableVariants;
-
-    if (isCriticalChange) {
-      // Get unique bundle IDs that are currently active
-      const affectedBundleIds = [
-        ...new Set(
-          stepsWithProduct
-            .map(sp => sp.step.bundle)
-            .filter(bundle => bundle.status === BundleStatus.ACTIVE)
-            .map(bundle => bundle.id)
-        )
-      ];
-
-      if (affectedBundleIds.length > 0) {
-        // Set affected bundles to draft
-        await db.bundle.updateMany({
-          where: {
-            id: {
-              in: affectedBundleIds
-            },
-            status: BundleStatus.ACTIVE
-          },
-          data: {
-            status: BundleStatus.DRAFT
-          }
-        });
-
-        AppLogger.warn("Set bundles to draft due to product becoming unavailable", {
-          component: "webhook-processor",
-          operation: "handleProductUpdate"
-        }, {
-          shop: shopDomain,
-          productId,
-          reason: isArchived ? "product_archived" : hasNoVariants ? "no_variants" : "no_available_variants",
-          affectedBundles: affectedBundleIds.length
-        });
-
-        return {
-          success: true,
-          message: `Set ${affectedBundleIds.length} bundles to draft due to product unavailability`
-        };
-      }
-    }
-
-    return {
-      success: true,
-      message: "Product update processed, no critical changes detected"
-    };
-
-  } catch (error: any) {
-    AppLogger.error("Error handling product update", {
-      component: "webhook-processor",
-      operation: "handleProductUpdate"
-    }, error);
-
-    return {
-      success: false,
-      message: "Error handling product update",
-      error: error instanceof Error ? error.message : "Unknown error"
-    };
-  }
-}
 
 /**
  * Handle product delete webhook
@@ -157,7 +35,12 @@ export async function handleProductDelete(
     // Find all steps using this product
     const stepsWithProduct = await db.stepProduct.findMany({
       where: {
-        productId
+        productId,
+        step: {
+          bundle: {
+            shopId: shopDomain,
+          },
+        },
       },
       include: {
         step: true
@@ -174,7 +57,12 @@ export async function handleProductDelete(
     // Delete all StepProduct entries for this product
     await db.stepProduct.deleteMany({
       where: {
-        productId
+        productId,
+        step: {
+          bundle: {
+            shopId: shopDomain,
+          },
+        },
       }
     });
 

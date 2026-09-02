@@ -9,6 +9,7 @@ type EmbedContext = {
   locale: string;
   endpointUrl: string;
   selectedVariantId: string;
+  countryCode: string;
 };
 
 type EmbedPayload = {
@@ -80,6 +81,7 @@ function createContext(embed: HTMLElement): EmbedContext {
     locale: embed.dataset.locale ?? "",
     endpointUrl: embed.dataset.ppbEmbedEndpoint ?? "",
     selectedVariantId: embed.dataset.selectedVariantId ?? "",
+    countryCode: embed.dataset.countryCode ?? "",
   };
 }
 
@@ -99,6 +101,7 @@ async function fetchEmbed(context: EmbedContext) {
   const url = new URL(context.endpointUrl, window.location.origin);
   url.searchParams.set("productId", context.productId);
   url.searchParams.set("locale", context.locale);
+  if (context.countryCode) url.searchParams.set("country", context.countryCode);
   if (context.productHandle) url.searchParams.set("productHandle", context.productHandle);
   context.collectionIds.forEach((collectionId) =>
     url.searchParams.append("collectionId", collectionId),

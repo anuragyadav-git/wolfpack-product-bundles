@@ -112,7 +112,7 @@ export function PpbSaveForm() {
                         `Box of ${rule.conditionValue ?? ""}`,
                       subtext: qtyRuleSubtexts[rule.id] ?? "",
                     },
-                  ]),
+                  ])
                 ),
                 optionsByLocaleByRuleId: qtyRuleTextsByLocaleByRuleId,
               },

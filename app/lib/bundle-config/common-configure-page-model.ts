@@ -168,23 +168,27 @@ export function buildBundleSettingsSlotModel(
   };
 }
 
-export function applyPpbCategoryVariantFlags<T extends Record<string, unknown>>(
+export function applyPpbCategoryVariantConfiguration<T extends Record<string, unknown>>(
   categories: T[],
-  flags: {
+  configuration: {
     displayVariantsAsIndividualProducts?: boolean;
-    displayVariantsAsSwatches?: boolean;
+    variantSelectorMode?: "dropdown" | "pill" | "color_swatch" | "image_swatch";
+    swatchTooltipEnabled?: boolean;
   },
 ): T[] {
   return categories.map((category) => ({
     ...category,
-    ...(typeof flags.displayVariantsAsIndividualProducts === "boolean"
+    ...(typeof configuration.displayVariantsAsIndividualProducts === "boolean"
       ? {
           displayVariantsAsIndividualProducts:
-            flags.displayVariantsAsIndividualProducts,
+            configuration.displayVariantsAsIndividualProducts,
         }
       : {}),
-    ...(typeof flags.displayVariantsAsSwatches === "boolean"
-      ? { displayVariantsAsSwatches: flags.displayVariantsAsSwatches }
+    ...(configuration.variantSelectorMode
+      ? { variantSelectorMode: configuration.variantSelectorMode }
+      : {}),
+    ...(typeof configuration.swatchTooltipEnabled === "boolean"
+      ? { swatchTooltipEnabled: configuration.swatchTooltipEnabled }
       : {}),
   }));
 }

@@ -2,7 +2,7 @@
  * Pricing Utilities
  *
  * Shared utility functions for pricing and billing calculations.
- * Used by both app.billing.tsx and app.pricing.tsx routes.
+ * Used by both app.billing.tsx and app.billing_.plans.tsx routes.
  */
 
 /**

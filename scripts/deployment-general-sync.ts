@@ -23,7 +23,11 @@ async function main() {
       ensureMetafieldDefinitions: (admin) =>
         ensureVariantBundleMetafieldDefinitions(admin),
       syncPpbRuntime: (admin, shopDomain) =>
-        syncPpbStorefrontRuntime(admin as any, shopDomain),
+        syncPpbStorefrontRuntime(
+          admin as any,
+          shopDomain,
+          process.env.STOREFRONT_PROXY_ROOT,
+        ),
       syncBundle: syncBundleStorefrontNow as any,
       updateStepProductVariants: async ({ stepProductId, variants }: any) => {
         await db.stepProduct.update({

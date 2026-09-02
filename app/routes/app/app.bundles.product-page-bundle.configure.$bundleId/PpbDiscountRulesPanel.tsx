@@ -5,6 +5,8 @@ import {
 } from "../../../lib/pricing-progress-tier-defaults";
 import { DiscountPricingTipBanner } from "../_shared/bundle-configure/DiscountPricingTipBanner";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
+import { PricingTierBadgeFields } from "../_shared/bundle-configure/PricingTierBadgeFields";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbDiscountRulesPanel() {
   const {
@@ -30,10 +32,14 @@ export function PpbDiscountRulesPanel() {
             }}
           >
             <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-              Discount &amp; Pricing
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.discountAmpPricing"
+              )}
             </h3>
             <s-switch
-              accessibilityLabel="Enable discount pricing"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.enableDiscountPricing"
+              )}
               checked={pricingState.discountEnabled || undefined}
               onChange={(e) =>
                 pricingState.setDiscountEnabled(
@@ -43,7 +49,9 @@ export function PpbDiscountRulesPanel() {
             />
           </div>
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            Set up discount rules, applied from lowest to highest.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.setUpDiscountRulesAppliedFromLowestToHighest"
+            )}
           </p>
         </s-stack>
         <DiscountPricingTipBanner />
@@ -51,7 +59,9 @@ export function PpbDiscountRulesPanel() {
           <s-stack direction="block" gap="base">
             <div>
               <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600 }}>
-                Discount Type
+                {translateAdmin(
+                  "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountrulespanel.discountType"
+                )}
               </p>
               <s-select
                 value={pricingState.discountType}
@@ -98,7 +108,9 @@ function PpbBuyXGetYRules() {
           <s-stack direction="block" gap="small">
             <div className={productPageBundleStyles.discountRuleHeader}>
               <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                Rule #{index + 1}
+                {translateAdmin("adminDynamic.ruleNumber", {
+                  number: index + 1,
+                })}
               </h4>
               <s-button
                 variant="tertiary"
@@ -106,16 +118,20 @@ function PpbBuyXGetYRules() {
                 icon="delete"
                 onClick={() => pricingState.removeDiscountRule(rule.id)}
               >
-                Remove
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                )}
               </s-button>
             </div>
             <div className={productPageBundleStyles.bxyRuleBody}>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>
-                Customer buys
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.customerBuys"
+                )}
               </p>
               <s-number-field
                 id={`configure-discount-rules-${rule.id}-customerBuys`}
-                label="Minimum quantity of items"
+                label={translateAdmin("adminAttributes.minimumQuantityOfItems")}
                 required
                 error={
                   validationErrors[`discount.rules.${rule.id}.customerBuys`]
@@ -132,11 +148,15 @@ function PpbBuyXGetYRules() {
                 min={1}
               />
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>
-                Customer gets
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.customerGets"
+                )}
               </p>
               <s-number-field
                 id={`configure-discount-rules-${rule.id}-customerGets`}
-                label="Quantity"
+                label={translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.quantity"
+                )}
                 required
                 error={
                   validationErrors[`discount.rules.${rule.id}.customerGets`]
@@ -155,7 +175,7 @@ function PpbBuyXGetYRules() {
               <div className={productPageBundleStyles.bxyRewardGrid}>
                 <s-number-field
                   id={`configure-discount-rules-${rule.id}-discountValue`}
-                  label="Discount value"
+                  label={translateAdmin("adminAttributes.discountValue")}
                   required
                   error={
                     validationErrors[`discount.rules.${rule.id}.discountValue`]
@@ -199,7 +219,7 @@ function PpbBuyXGetYRules() {
                   }
                 />
                 <s-select
-                  label="Discount type"
+                  label={translateAdmin("adminAttributes.discountType")}
                   value={rule.bxyDiscountType ?? "percentage"}
                   onChange={(e) => {
                     const bxyDiscountType = (e.target as HTMLSelectElement)
@@ -220,13 +240,19 @@ function PpbBuyXGetYRules() {
                     });
                   }}
                 >
-                  <s-option value="percentage">% off</s-option>
+                  <s-option value="percentage">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.off"
+                    )}
+                  </s-option>
                   <s-option value="fixed_amount">
-                    {pricingState.currencySymbol} off
+                    {translateAdmin("adminDynamic.amountOff", {
+                      amount: pricingState.currencySymbol,
+                    })}
                   </s-option>
                 </s-select>
                 <s-select
-                  label="Apply Discount to"
+                  label={translateAdmin("adminAttributes.applyDiscountTo")}
                   value={rule.bxyApplyMode ?? "lowest_priced"}
                   onChange={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -237,14 +263,25 @@ function PpbBuyXGetYRules() {
                   }
                 >
                   <s-option value="lowest_priced">
-                    The lowest priced items
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.theLowestPricedItems"
+                    )}
                   </s-option>
                   <s-option value="latest_added">
-                    The latest added items
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.theLatestAddedItems"
+                    )}
                   </s-option>
                 </s-select>
               </div>
             </div>
+            <PricingTierBadgeFields
+              rule={rule}
+              validationErrors={validationErrors}
+              onChange={(updates) =>
+                pricingState.updateDiscountRule(rule.id, updates)
+              }
+            />
           </s-stack>
         </div>
       ))}
@@ -270,7 +307,9 @@ function PpbStandardDiscountRules() {
           <s-stack direction="block" gap="small">
             <div className={productPageBundleStyles.discountRuleHeader}>
               <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                Rule #{index + 1}
+                {translateAdmin("adminDynamic.ruleNumber", {
+                  number: index + 1,
+                })}
               </h4>
               <s-button
                 variant="tertiary"
@@ -278,14 +317,18 @@ function PpbStandardDiscountRules() {
                 icon="delete"
                 onClick={() => pricingState.removeDiscountRule(rule.id)}
               >
-                Remove
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                )}
               </s-button>
             </div>
             {pricingState.discountType === DiscountMethod.FIXED_BUNDLE_PRICE ? (
               <div className={productPageBundleStyles.discountFieldsRowPair}>
                 <s-number-field
                   id={`configure-discount-rules-${rule.id}-conditionValue`}
-                  label="Number of Products in Bundle"
+                  label={translateAdmin(
+                    "adminAttributes.numberOfProductsInBundle"
+                  )}
                   required
                   error={
                     validationErrors[`discount.rules.${rule.id}.conditionValue`]
@@ -301,7 +344,7 @@ function PpbStandardDiscountRules() {
                 />
                 <s-number-field
                   id={`configure-discount-rules-${rule.id}-discountValue`}
-                  label="Price"
+                  label={translateAdmin("adminAttributes.price")}
                   required
                   error={
                     validationErrors[`discount.rules.${rule.id}.discountValue`]
@@ -321,7 +364,7 @@ function PpbStandardDiscountRules() {
             ) : (
               <div className={productPageBundleStyles.discountFieldsRow}>
                 <s-select
-                  label="Discount on"
+                  label={translateAdmin("adminAttributes.discountOn")}
                   value={rule.conditionType ?? "quantity"}
                   onChange={(e) =>
                     pricingState.updateDiscountRule(rule.id, {
@@ -331,12 +374,22 @@ function PpbStandardDiscountRules() {
                     })
                   }
                 >
-                  <s-option value="quantity">Quantity</s-option>
-                  <s-option value="amount">Amount</s-option>
+                  <s-option value="quantity">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.quantity"
+                    )}
+                  </s-option>
+                  <s-option value="amount">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.amount"
+                    )}
+                  </s-option>
                 </s-select>
                 <s-number-field
                   id={`configure-discount-rules-${rule.id}-conditionValue`}
-                  label="is greater than or equal to"
+                  label={translateAdmin(
+                    "adminAttributes.isGreaterThanOrEqualTo"
+                  )}
                   required
                   error={
                     validationErrors[`discount.rules.${rule.id}.conditionValue`]
@@ -416,6 +469,13 @@ function PpbStandardDiscountRules() {
                 />
               </div>
             )}
+            <PricingTierBadgeFields
+              rule={rule}
+              validationErrors={validationErrors}
+              onChange={(updates) =>
+                pricingState.updateDiscountRule(rule.id, updates)
+              }
+            />
           </s-stack>
         </div>
       ))}
@@ -435,7 +495,9 @@ function PpbAddDiscountRuleButton() {
         inlineSize="fill"
         onClick={pricingState.addDiscountRule}
       >
-        Add rule
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.addRule"
+        )}
       </s-button>
     );
   }
@@ -444,7 +506,9 @@ function PpbAddDiscountRuleButton() {
     <p
       style={{ margin: 0, fontSize: 14, color: "#6d7175", textAlign: "center" }}
     >
-      Maximum 4 discount rules reached
+      {translateAdmin(
+        "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.maximum4DiscountRulesReached"
+      )}
     </p>
   );
 }

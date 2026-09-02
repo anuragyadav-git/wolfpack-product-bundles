@@ -284,6 +284,66 @@ describe('PPB in-page rendering control wiring', () => {
     expect(target.textContent).toMatch(/Out of Stock/);
   });
 
+  it('shows merchant low-stock copy from exact Shopify variant quantity', () => {
+    const target = createTarget();
+    const context = {
+      ...ProductPageInpageRenderMethods,
+      ...createBaseContext({
+        selectedBundle: {
+          steps: [{}],
+          validateQuantityPerProduct: null,
+          lowStockAlert: {
+            enabled: true,
+            threshold: 5,
+            message: 'Only {{stock}} remaining',
+          },
+        },
+        stepProductData: [[{
+          id: 'variant-low-stock',
+          price: 1200,
+          title: 'Low stock product',
+          available: true,
+          quantityAvailable: 3,
+          currentlyNotInStock: false,
+        }]],
+      }),
+    } as any;
+
+    ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
+
+    expect(target.textContent).toContain('Only 3 remaining');
+  });
+
+  it('suppresses low-stock copy for Shopify backorder variants', () => {
+    const target = createTarget();
+    const context = {
+      ...ProductPageInpageRenderMethods,
+      ...createBaseContext({
+        selectedBundle: {
+          steps: [{}],
+          validateQuantityPerProduct: null,
+          lowStockAlert: {
+            enabled: true,
+            threshold: 5,
+            message: 'Only {{stock}} remaining',
+          },
+        },
+        stepProductData: [[{
+          id: 'variant-backorder',
+          price: 1200,
+          title: 'Backorder product',
+          available: true,
+          quantityAvailable: 3,
+          currentlyNotInStock: true,
+        }]],
+      }),
+    } as any;
+
+    ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
+
+    expect(target.textContent).not.toContain('Only 3 remaining');
+  });
+
   it('uses selectionId as the shared card identity key in in-page rendering', () => {
     const target = createTarget();
     const context = {

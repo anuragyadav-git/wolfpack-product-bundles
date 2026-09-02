@@ -11,6 +11,7 @@ import type {
   ActionResponse,
   BundleStep,
 } from "../../../types/bundle-configure";
+import type { SpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
 
 export type {
   StepProduct,
@@ -55,11 +56,13 @@ export interface LoaderData {
   availableBundles: { id: string; name: string }[];
   shop: string;
   apiKey: string;
+  storefrontProxyRoot: string;
   blockHandle: string;
   configureMode?: "create" | "edit";
   showFirstLoadTour?: boolean;
   shopCurrencyCode: string;
   shopLocales: { locale: string; name: string; primary: boolean }[];
+  offerDelivery: SpecificLinkOfferAdminState;
 }
 
 export interface SaveBundleResponse extends ActionResponse {

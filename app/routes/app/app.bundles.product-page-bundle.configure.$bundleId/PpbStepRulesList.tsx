@@ -1,5 +1,6 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PlusIcon } from "./PpbStepSetupShared";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbStepRulesList({ step }: { step: any }) {
   const {
@@ -14,7 +15,9 @@ export function PpbStepRulesList({ step }: { step: any }) {
     <>
       {rules.length === 0 ? (
         <div className={productPageBundleStyles.emptyState}>
-          No rules defined yet
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.noRulesDefinedYet"
+          )}
         </div>
       ) : (
         <div className={productPageBundleStyles.rulesList}>
@@ -22,7 +25,9 @@ export function PpbStepRulesList({ step }: { step: any }) {
             <div key={rule.id} className={productPageBundleStyles.ruleCard}>
               <div className={productPageBundleStyles.ruleHeader}>
                 <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>
-                  Rule #{ruleIndex + 1}
+                  {translateAdmin("adminDynamic.ruleNumber", {
+                    number: ruleIndex + 1,
+                  })}
                 </h4>
                 <s-button
                   variant="tertiary"
@@ -32,7 +37,9 @@ export function PpbStepRulesList({ step }: { step: any }) {
                     conditionsState.removeConditionRule(step.id, rule.id)
                   }
                 >
-                  Remove
+                  {translateAdmin(
+                    "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                  )}
                 </s-button>
               </div>
               <div className={productPageBundleStyles.ruleFields}>
@@ -44,13 +51,13 @@ export function PpbStepRulesList({ step }: { step: any }) {
                       step.id,
                       rule.id,
                       "type",
-                      (e.target as HTMLSelectElement).value,
+                      (e.target as HTMLSelectElement).value
                     )
                   }
-                  aria-label="Type"
+                  aria-label={translateAdmin("dashboard.table.type")}
                 >
                   <option value="" disabled>
-                    Type
+                    {translateAdmin("dashboard.table.type")}
                   </option>
                   {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -66,13 +73,17 @@ export function PpbStepRulesList({ step }: { step: any }) {
                       step.id,
                       rule.id,
                       "operator",
-                      (e.target as HTMLSelectElement).value,
+                      (e.target as HTMLSelectElement).value
                     )
                   }
-                  aria-label="Condition"
+                  aria-label={translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                  )}
                 >
                   <option value="" disabled>
-                    Condition
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                    )}
                   </option>
                   {[...STEP_CONDITION_OPERATOR_OPTIONS].map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -91,16 +102,18 @@ export function PpbStepRulesList({ step }: { step: any }) {
                       step.id,
                       rule.id,
                       "value",
-                      (e.target as HTMLInputElement).value,
+                      (e.target as HTMLInputElement).value
                     )
                   }
                   autoComplete="off"
-                  aria-label="Value"
+                  aria-label={translateAdmin("adminAttributes.value")}
                 />
               </div>
               {rules.length === 1 && (
                 <s-checkbox
-                  label="Auto Next When rule is met"
+                  label={translateAdmin(
+                    "adminAttributes.autoNextWhenRuleIsMet"
+                  )}
                   checked={
                     rule.autoNext === true ||
                     rule.autoNext === "true" ||
@@ -111,7 +124,7 @@ export function PpbStepRulesList({ step }: { step: any }) {
                       step.id,
                       rule.id,
                       "autoNext",
-                      (e.target as HTMLInputElement).checked ? "true" : "false",
+                      (e.target as HTMLInputElement).checked ? "true" : "false"
                     );
                   }}
                 />
@@ -127,12 +140,18 @@ export function PpbStepRulesList({ step }: { step: any }) {
         onClick={() => conditionsState.addConditionRule(step.id)}
       >
         <PlusIcon />
-        Add Rule
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+        )}
       </button>
       {rules.length >= 2 ? (
         <s-stack direction="inline" alignItems="center" gap="small">
           <s-icon type="alert-triangle" tone="caution" />
-          <s-text>A step can have at most 2 rules.</s-text>
+          <s-text>
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.aStepCanHaveAtMost2Rules"
+            )}
+          </s-text>
         </s-stack>
       ) : null}
     </>

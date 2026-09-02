@@ -27,6 +27,28 @@ async function loadBundleForStorefrontSync(shopDomain: string, bundleId: string)
         orderBy: { position: "asc" },
       },
       pricing: true,
+      offerPolicy: {
+        select: {
+          specificLinkRequired: true,
+          priority: true,
+          stopLowerPriority: true,
+          scheduleMode: true,
+          startsAt: true,
+          endsAt: true,
+          recurrenceFrequency: true,
+          recurrenceTimezone: true,
+          recurrenceAnchorDate: true,
+          recurrenceWindowStartMinute: true,
+          recurrenceWindowEndMinute: true,
+          recurrenceTermination: true,
+          recurrenceEndsOn: true,
+          recurrenceRunCount: true,
+          countryTargetingEnabled: true,
+          countryTargetingMode: true,
+          countryCodes: true,
+          ruleVersion: true,
+        },
+      },
     },
   });
 }

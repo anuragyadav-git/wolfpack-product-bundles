@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbProgressBarOptions({
   flow,
@@ -29,10 +30,12 @@ export function FpbProgressBarOptions({
           <s-stack direction="inline" gap="small" alignItems="center">
             <div className={fullPageBundleStyles.displayOptionText}>
               <p className={fullPageBundleStyles.displayOptionTitle}>
-                Progress Bar
+                {translateAdmin("tooltips.discountProgressBar.title")}
               </p>
               <p className={fullPageBundleStyles.displayOptionDescription}>
-                Edit the progress bar content and settings.
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.editTheProgressBarContentAndSettings"
+                )}
               </p>
             </div>
             <QuestionHelpTooltip tooltipKey="discountProgressBar" />
@@ -47,7 +50,7 @@ export function FpbProgressBarOptions({
           </s-stack>
           <s-button
             variant="secondary"
-              icon="language-translate"
+            icon="language-translate"
             disabled={
               !pricingState.showDiscountProgressBar ||
               (pricingState.pricingDisplayOptions.progressBar.type ||
@@ -57,7 +60,9 @@ export function FpbProgressBarOptions({
             }
             onClick={() => setIsProgressBarMultiLangModalOpen(true)}
           >
-            Multi Language
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+            )}
           </s-button>
         </s-stack>
         <DisabledConfigurationRegion
@@ -67,7 +72,7 @@ export function FpbProgressBarOptions({
             <s-stack direction="block" gap="small">
               <s-stack direction="inline" gap="small" alignItems="center">
                 <s-choice-list
-                  label="Simple progress bar"
+                  label={translateAdmin("adminAttributes.simpleProgressBar")}
                   labelAccessibilityVisibility="exclusive"
                   values={
                     (pricingState.pricingDisplayOptions.progressBar.type ||
@@ -79,10 +84,14 @@ export function FpbProgressBarOptions({
                     pricingState.setProgressBarType("simple");
                   }}
                 >
-                  <s-choice value="simple">Simple Bar</s-choice>
+                  <s-choice value="simple">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.simpleBar"
+                    )}
+                  </s-choice>
                 </s-choice-list>
                 <s-choice-list
-                  label="Step-based progress bar"
+                  label={translateAdmin("adminAttributes.stepBasedProgressBar")}
                   labelAccessibilityVisibility="exclusive"
                   values={
                     (pricingState.pricingDisplayOptions.progressBar.type ||
@@ -94,7 +103,11 @@ export function FpbProgressBarOptions({
                     pricingState.setProgressBarType("step_based");
                   }}
                 >
-                  <s-choice value="step_based">Step-Based Bar</s-choice>
+                  <s-choice value="step_based">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.stepBasedBar"
+                    )}
+                  </s-choice>
                 </s-choice-list>
               </s-stack>
               {(pricingState.pricingDisplayOptions.progressBar.type ||
@@ -108,7 +121,9 @@ export function FpbProgressBarOptions({
                         color: "#6d7175",
                       }}
                     >
-                      Add discount rules to configure tier text.
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.addDiscountRulesToConfigureTierText"
+                      )}
                     </p>
                   ) : (
                     pricingState.discountRules.map((rule, index) => (
@@ -124,14 +139,16 @@ export function FpbProgressBarOptions({
                               fontWeight: 500,
                             }}
                           >
-                            Rule #{index + 1}
+                            {translateAdmin("adminDynamic.ruleNumber", {
+                              number: index + 1,
+                            })}
                           </p>
                           <s-grid
                             gridTemplateColumns="repeat(2, minmax(0, 1fr))"
                             gap="small"
                           >
                             <s-text-field
-                              label="Tier Text"
+                              label={translateAdmin("adminAttributes.tierText")}
                               value={tierTextByRuleId[rule.id]?.tierText ?? ""}
                               onInput={(e) => {
                                 const val = (e.target as HTMLInputElement)
@@ -151,7 +168,9 @@ export function FpbProgressBarOptions({
                               autocomplete="off"
                             />
                             <s-text-field
-                              label="Tier Subtext"
+                              label={translateAdmin(
+                                "adminAttributes.tierSubtext"
+                              )}
                               value={
                                 tierTextByRuleId[rule.id]?.tierSubtext ?? ""
                               }

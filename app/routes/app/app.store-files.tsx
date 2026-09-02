@@ -64,10 +64,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     const data = await response.json();
     const edges = data.data?.files?.edges ?? [];
-    const pageInfo = data.data?.files?.pageInfo ?? { hasNextPage: false, endCursor: null };
+    const pageInfo = data.data?.files?.pageInfo ?? {
+      hasNextPage: false,
+      endCursor: null,
+    };
 
     const files: StoreFile[] = edges
-      .filter((edge: any) => edge.node.fileStatus === "READY" && edge.node.image?.url)
+      .filter(
+        (edge: any) => edge.node.fileStatus === "READY" && edge.node.image?.url
+      )
       .map((edge: any) => ({
         id: edge.node.id,
         url: edge.node.image.url,
@@ -78,6 +83,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     return json({ files, pageInfo });
   } catch {
-    return json({ files: [], pageInfo: { hasNextPage: false, endCursor: null } });
+    return json({
+      files: [],
+      pageInfo: { hasNextPage: false, endCursor: null },
+    });
   }
 }

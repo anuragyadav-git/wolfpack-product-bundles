@@ -5,7 +5,7 @@ title: Admin Billing LCP
 type: test-spec
 status: active
 summary: Verifies that Billing paints useful route content before deferred subscription data resolves.
-last_audited: 2026-08-29
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -15,7 +15,7 @@ systems:
   - remix
   - app-bridge
 source_paths:
-  - app/routes/app/app.pricing.tsx
+  - app/routes/app/app.billing_.plans.tsx
   - tests/unit/routes/admin-billing-progressive-render.test.ts
 related_docs:
   - internal docs/Operations/Admin Performance.md

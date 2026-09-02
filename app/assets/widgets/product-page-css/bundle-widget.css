@@ -9,5 +9,9 @@
 @import "./base/quantity-pills-skeletons.css";
 @import "../shared-css/purchase-options.css";
 @import "../shared-css/discount-tier-feedback.css";
+@import "../shared-css/pricing-tier-badge.css";
+@import "../shared-css/low-stock-badge.css";
+@import "../shared-css/countdown-timer.css";
+@import "./base/sticky-add-to-cart.css";
 @import "./base/mobile-drawers.css";
 @import "./base/embed-host.css";

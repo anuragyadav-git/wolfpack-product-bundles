@@ -3,6 +3,8 @@ import {
   type FpbLoadingScreenSettings,
 } from "../lib/fpb-loading-screen";
 import type { PageBuilderEmbedRequest } from "../lib/page-builder-embed";
+import { resolveOfferSchedule } from "../lib/offer-policy-decision";
+import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility";
 
 type Database = {
   bundle: {
@@ -22,6 +24,7 @@ const bundleInclude = {
     },
   },
   pricing: true,
+  offerPolicy: true,
 };
 
 export type PageBuilderEmbedResolution = {
@@ -33,6 +36,7 @@ export async function resolvePageBuilderEmbed(
   database: Database,
   shopDomain: string,
   request: PageBuilderEmbedRequest,
+  now = new Date(),
 ): Promise<PageBuilderEmbedResolution | null> {
   const where = request.bundleType === "product_page"
     ? {
@@ -40,15 +44,25 @@ export async function resolvePageBuilderEmbed(
         bundleType: "product_page",
         shopifyProductHandle: request.parentProductHandle,
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { specificLinkRequired: false } } },
+        ],
       }
     : {
         shopId: shopDomain,
         bundleType: "full_page",
         publicNumber: request.publicNumber,
         status: { in: ["active", "unlisted"] },
+        OR: [
+          { offerPolicy: { is: null } },
+          { offerPolicy: { is: { specificLinkRequired: false } } },
+        ],
       };
   const bundle = await database.bundle.findFirst({ where, include: bundleInclude });
   if (!bundle) return null;
+  if (!resolveOfferSchedule(bundle.offerPolicy ?? {}, now).effective) return null;
+  if (!resolveOfferCountryEligibility(bundle.offerPolicy, request.countryCode)) return null;
 
   if (request.bundleType === "product_page") {
     return { bundle, loadingScreen: null };

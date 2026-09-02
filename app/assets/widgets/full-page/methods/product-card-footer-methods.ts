@@ -11,6 +11,7 @@ import {
 import { BundleProductModal } from '../../../bundle-modal-component.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
 import { getSubscriptionProductCardPrice } from '../../shared/subscription-storefront-methods.js';
+import { resolveLowStockAlert } from '../../../../lib/low-stock-alert.js';
 
 const productCardFooterTemplateSystem = TemplateDesignSystem;
 
@@ -106,6 +107,22 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
   const outOfStock = typeof this.isVariantOutOfStock === 'function'
     ? this.isVariantOutOfStock(displayProduct)
     : displayProduct?.available === false;
+  const lowStockAlert = this.selectedBundle?.lowStockAlert
+    ? resolveLowStockAlert(this.selectedBundle.lowStockAlert, [{
+      quantityAvailable: typeof displayProduct.quantityAvailable === 'number'
+        ? displayProduct.quantityAvailable
+        : null,
+      currentlyNotInStock: displayProduct.currentlyNotInStock === true,
+      availableForSale: displayProduct.available !== false,
+      requiredQuantity: 1,
+    }])
+    : null;
+  let stockBadgeElement: HTMLDivElement | null = null;
+  if (lowStockAlert) {
+    stockBadgeElement = document.createElement('div');
+    stockBadgeElement.className = 'product-stock-badge product-stock-badge--low';
+    stockBadgeElement.textContent = lowStockAlert.message;
+  }
   const increaseDisabled = ConditionValidator.isProductQuantityIncreaseDisabled(
     this.selectedBundle?.validateQuantityPerProduct,
     currentQuantity,
@@ -159,6 +176,7 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
         addButtonText,
         increaseDisabled,
         cardBadgeElement,
+        stockBadgeElement,
         variantSelectorPlacement: usesDropdownVariantSelector ? 'beforePrice' : undefined,
       }
     );

@@ -1,5 +1,6 @@
 import { BundleStatusSection } from "../../_shared/bundle-configure/BundleStatusSection";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbBundleCssSettings({
   flow,
@@ -35,7 +36,9 @@ export function FpbBundleCssSettings({
             onClick={() => setBundleLevelCssExpanded((prev) => !prev)}
           >
             <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-              Bundle Level CSS
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingscss.bundleLevelCss"
+              )}
             </h3>
             <span
               style={{
@@ -46,13 +49,15 @@ export function FpbBundleCssSettings({
                 transition: "transform 0.2s",
               }}
             >
-              ▾
+              {"▾"}
             </span>
           </button>
           {bundleLevelCssExpanded && (
             <textarea
               value={bundleLevelCss}
-              placeholder="/* Add custom CSS for this bundle */"
+              placeholder={translateAdmin(
+                "adminAttributes.addCustomCSSForThisBundle"
+              )}
               rows={6}
               style={{
                 width: "100%",

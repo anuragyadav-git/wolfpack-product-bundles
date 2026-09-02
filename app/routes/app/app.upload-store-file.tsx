@@ -1,4 +1,8 @@
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
+import {
+  json,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
 import { authenticate } from "../../shopify.server";
 import type { StoreFile } from "./app.store-files";
 
@@ -162,13 +166,16 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Step 2 — binary upload to staged URL
   const uploadForm = new FormData();
-  for (const param of target.parameters as Array<{ name: string; value: string }>) {
+  for (const param of target.parameters as Array<{
+    name: string;
+    value: string;
+  }>) {
     uploadForm.append(param.name, param.value);
   }
   uploadForm.append(
     "file",
     new Blob([fileBuffer], { type: file.type }),
-    file.name,
+    file.name
   );
 
   const uploadRes = await fetch(target.url as string, {

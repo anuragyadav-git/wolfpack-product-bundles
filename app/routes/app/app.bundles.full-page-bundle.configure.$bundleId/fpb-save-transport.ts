@@ -208,7 +208,6 @@ function compactCategory(value: unknown): Record<string, unknown> | null {
   keepBoolean(compact, source, [
     "autoNextStepOnConditionMet",
     "displayVariantsAsIndividualProducts",
-    "displayVariantsAsSwatches",
   ]);
 
   compact.products = compactProducts(source.products);

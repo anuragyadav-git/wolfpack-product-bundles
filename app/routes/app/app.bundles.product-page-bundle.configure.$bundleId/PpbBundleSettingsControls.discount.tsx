@@ -1,6 +1,7 @@
 import { useNavigate } from "@remix-run/react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { navigateToProductPageDefaults } from "../../../lib/bundle-config/product-page-admin-sections";
+import { translateAdmin } from "~/i18n/config";
 
 const CART_DISCOUNT_DISPLAY_OPTIONS = [
   {
@@ -39,7 +40,9 @@ export function PpbCartDiscountDisplaySettings() {
               flex: 1,
             }}
           >
-            Cart line item discount display
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.cartLineItemDiscountDisplay"
+            )}
           </h3>
           <QuestionHelpTooltip tooltipKey="cartLineItemDiscountDisplay" />
           <button
@@ -47,7 +50,7 @@ export function PpbCartDiscountDisplaySettings() {
             onClick={() => {
               void navigateToProductPageDefaults(
                 () => shopify.saveBar.leaveConfirmation(),
-                navigate,
+                navigate
               );
             }}
             style={{
@@ -65,50 +68,58 @@ export function PpbCartDiscountDisplaySettings() {
               cursor: "pointer",
             }}
           >
-            Edit Defaults
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.editDefaults"
+            )}
           </button>
         </s-stack>
         <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-          Shows how much the customer is saving on the bundle in cart
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.showsHowMuchTheCustomerIsSavingOnTheBundleInCart"
+          )}
         </p>
-        {CART_DISCOUNT_DISPLAY_OPTIONS.map(({ value, label, description }: any) => (
-          <label
-            key={value}
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 8,
-              cursor: "pointer",
-            }}
-          >
-            <input
-              type="radio"
-              name="cartDiscountDisplay"
-              value={value}
-              checked={(textOverrides.cartDiscountDisplay ?? "defaults") === value}
-              onChange={() => {
-                setTextOverrides((prev) => ({
-                  ...prev,
-                  cartDiscountDisplay: value,
-                }));
-                markAsDirty();
+        {CART_DISCOUNT_DISPLAY_OPTIONS.map(
+          ({ value, label, description }: any) => (
+            <label
+              key={value}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 8,
+                cursor: "pointer",
               }}
-              style={{ marginTop: 3 }}
-            />
-            <span>
-              <span style={{ display: "block", fontSize: 14 }}>{label}</span>
-              <span
-                style={{
-                  display: "block",
-                  fontSize: 13,
-                  color: "#6d7175",
+            >
+              <input
+                type="radio"
+                name="cartDiscountDisplay"
+                value={value}
+                checked={
+                  (textOverrides.cartDiscountDisplay ?? "defaults") === value
+                }
+                onChange={() => {
+                  setTextOverrides((prev) => ({
+                    ...prev,
+                    cartDiscountDisplay: value,
+                  }));
+                  markAsDirty();
                 }}
-              >
-                {description}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                <span style={{ display: "block", fontSize: 14 }}>{label}</span>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 13,
+                    color: "#6d7175",
+                  }}
+                >
+                  {description}
+                </span>
               </span>
-            </span>
-          </label>
-        ))}
+            </label>
+          )
+        )}
       </s-stack>
     </s-section>
   );

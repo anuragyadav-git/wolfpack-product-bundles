@@ -43,7 +43,7 @@ describe("app.attribution route shell", () => {
 
     expect(view).toContain("<ui-title-bar");
     expect(view).toContain("How shoppers move through your bundles");
-    expect(view).toContain("common.loading.workspace");
+    expect(view).toContain("Loading your workspace");
     expect(view).not.toContain("UTM Pixel Tracking");
     expect(view).not.toContain("analyticsSkeletonCard");
   });

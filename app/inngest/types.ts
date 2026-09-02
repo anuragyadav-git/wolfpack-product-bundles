@@ -3,7 +3,7 @@
  */
 
 export interface ShopifyWebhookEventData {
-  /** Raw Shopify webhook body, base64-encoded — matches PubSubMessage.data format */
+  /** Raw Shopify webhook body, base64-encoded for durable transport */
   rawPayload: string;
   /** Shopify topic, e.g. "inventory_levels/update" */
   topic: string;

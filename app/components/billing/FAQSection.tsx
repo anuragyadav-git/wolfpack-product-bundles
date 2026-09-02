@@ -15,7 +15,9 @@ export function FAQSection({ faqs = PRICING_FAQ }: FAQSectionProps) {
         <s-stack direction="block" gap="base">
           {faqs.map((faq, index) => (
             <s-stack key={index} direction="block" gap="small-400">
-              <p className={brandStyles.featureHeading}>{t(faq.questionMessageId)}</p>
+              <p className={brandStyles.featureHeading}>
+                {t(faq.questionMessageId)}
+              </p>
               <p className={brandStyles.muted}>{t(faq.answerMessageId)}</p>
             </s-stack>
           ))}

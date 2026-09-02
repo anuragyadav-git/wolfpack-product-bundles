@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbSelectedItemsModals() {
   const {
@@ -19,19 +20,22 @@ export function PpbSelectedItemsModals() {
   return (
     <>
       {/* Selected Products Modal */}
-      <s-modal ref={productsModalRef} heading="Selected Products">
+      <s-modal
+        ref={productsModalRef}
+        heading={translateAdmin("adminAttributes.selectedProducts")}
+      >
         <s-stack direction="block" gap="base">
           {(() => {
             const currentStep = stepsState.steps.find(
-              (step) => step.id === currentModalStepId,
+              (step) => step.id === currentModalStepId
             );
             const selectedProducts = currentStep?.StepProduct || [];
             return selectedProducts.length > 0 ? (
               <s-stack direction="block" gap="small">
                 <span style={{ fontSize: 14, fontWeight: 500 }}>
-                  {selectedProducts.length} product
-                  {selectedProducts.length !== 1 ? "s" : ""} selected for this
-                  step:
+                  {translateAdmin("adminDynamic.selectedProductsForStep", {
+                    count: selectedProducts.length,
+                  })}
                 </span>
                 <s-section>
                   <ul style={{ margin: 0, paddingLeft: 20 }}>
@@ -88,14 +92,19 @@ export function PpbSelectedItemsModals() {
                                         color: "#6d7175",
                                       }}
                                     >
-                                      {product.variants.length} variant
-                                      {product.variants.length !== 1 ? "s" : ""}
-                                      available
+                                      {translateAdmin(
+                                        "adminDynamic.variantsAvailable",
+                                        { count: product.variants.length }
+                                      )}
                                     </p>
                                   )}
                               </s-stack>
                             </s-stack>
-                            <s-badge tone="info">Product</s-badge>
+                            <s-badge tone="info">
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.product"
+                              )}
+                            </s-badge>
                           </s-stack>
                         </li>
                       );
@@ -106,7 +115,9 @@ export function PpbSelectedItemsModals() {
             ) : (
               <s-stack direction="block" gap="small-100" alignItems="center">
                 <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                  No products selected for this step yet.
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.noProductsSelectedForThisStepYet"
+                  )}
                 </p>
               </s-stack>
             );
@@ -117,19 +128,23 @@ export function PpbSelectedItemsModals() {
           variant="primary"
           onClick={handleCloseProductsModal}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
       </s-modal>
       {/* Selected Collections Modal */}
-      <s-modal ref={collectionsModalRef} heading="Selected Collections">
+      <s-modal
+        ref={collectionsModalRef}
+        heading={translateAdmin("adminAttributes.selectedCollections")}
+      >
         <s-stack direction="block" gap="base">
           {(() => {
             const collections = selectedCollections[currentModalStepId] || [];
             return collections.length > 0 ? (
               <s-stack direction="block" gap="small">
                 <span style={{ fontSize: 14, fontWeight: 500 }}>
-                  {collections.length} collection
-                  {collections.length !== 1 ? "s" : ""} selected for this step:
+                  {translateAdmin("adminDynamic.selectedCollectionsForStep", {
+                    count: collections.length,
+                  })}
                 </span>
                 <s-section>
                   <ul style={{ margin: 0, paddingLeft: 20 }}>
@@ -152,11 +167,18 @@ export function PpbSelectedItemsModals() {
                                   color: "#6d7175",
                                 }}
                               >
-                                Handle: {collection.handle}
+                                {translateAdmin(
+                                  "adminDynamic.collectionHandle",
+                                  { handle: collection.handle }
+                                )}
                               </p>
                             )}
                           </s-stack>
-                          <s-badge tone="success">Collection</s-badge>
+                          <s-badge tone="success">
+                            {translateAdmin(
+                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.collection"
+                            )}
+                          </s-badge>
                         </s-stack>
                       </li>
                     ))}
@@ -166,7 +188,9 @@ export function PpbSelectedItemsModals() {
             ) : (
               <s-stack direction="block" gap="small-100" alignItems="center">
                 <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                  No collections selected for this step yet.
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.noCollectionsSelectedForThisStepYet"
+                  )}
                 </p>
               </s-stack>
             );
@@ -177,7 +201,7 @@ export function PpbSelectedItemsModals() {
           variant="primary"
           onClick={handleCloseCollectionsModal}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
       </s-modal>
       <DiscardChangesModal

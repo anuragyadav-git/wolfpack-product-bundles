@@ -548,6 +548,23 @@ export async function updateBundleProductMetafields(
   productSlotIconUrl: bundleConfiguration.bundleType === "full_page" ? bundleConfiguration.productSlotIconUrl ?? null : null,
   useSingleStepCategoriesAsBundleSteps: bundleConfiguration.useSingleStepCategoriesAsBundleSteps ?? false,
   showProductComparedAtPrice: resolveShowProductComparedAtPrice(),
+    lowStockAlert: {
+      enabled: bundleConfiguration.lowStockAlertEnabled ?? false,
+      threshold: bundleConfiguration.lowStockAlertThreshold ?? 5,
+      message: bundleConfiguration.lowStockAlertMessage ?? "Only {{stock}} left",
+    },
+    stickyAddToCart: {
+      enabled:
+        bundleConfiguration.bundleType === BundleType.PRODUCT_PAGE &&
+        (bundleConfiguration.stickyAddToCartEnabled ?? false),
+      showDesktop: bundleConfiguration.stickyAddToCartShowDesktop ?? true,
+      showMobile: bundleConfiguration.stickyAddToCartShowMobile ?? true,
+      action:
+        bundleConfiguration.stickyAddToCartAction === "add_selected_offer"
+          ? "add_selected_offer"
+          : "scroll_to_offers",
+    },
+    countdown: bundleConfiguration.countdown ?? null,
     bundleVariantId: bundleVariantId, // Bundle parent variant ID for cart transform EXPAND operation
     steps: (bundleConfiguration.steps || []).map((step: any, stepIndex: number) => {
       const stepKey = String(step.id ?? stepIndex);
@@ -614,6 +631,7 @@ export async function updateBundleProductMetafields(
         if (rule.customerGets !== undefined) flat.customerGets = Number(rule.customerGets);
         if (rule.bxyDiscountType !== undefined) flat.bxyDiscountType = rule.bxyDiscountType;
         if (rule.bxyApplyMode !== undefined) flat.bxyApplyMode = rule.bxyApplyMode;
+        if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
         return flat;
       }),
       messages: {
@@ -641,6 +659,15 @@ export async function updateBundleProductMetafields(
     textOverrides: bundleConfiguration.textOverrides ?? null,
     textOverridesByLocale: bundleConfiguration.textOverridesByLocale ?? null,
     sdkMode: bundleConfiguration.sdkMode ?? false,
+    offerDelivery: bundleConfiguration.offerDelivery ?? {
+      decisionRequired: false,
+      serverDecisionRequired: false,
+      specificLinkRequired: false,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
+      ruleVersion: null,
+    },
   };
 
   let ppbPolicyRevisionMetafield: Record<string, unknown> | null = null;

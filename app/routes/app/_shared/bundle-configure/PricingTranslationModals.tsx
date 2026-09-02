@@ -1,3 +1,4 @@
+import { translateAdmin } from "~/i18n/config";
 import { MultiLanguageTextModal } from "../../../../components/bundle-configure/MultiLanguageTextModal";
 
 type ShopLocale = { locale: string; name: string; primary: boolean };
@@ -33,28 +34,31 @@ type PricingTranslationModalsProps = {
 };
 
 function flattenRuleValues(
-  valuesByLocale: Record<string, Record<string, Record<string, string | undefined>>>,
-  keys: string[],
+  valuesByLocale: Record<
+    string,
+    Record<string, Record<string, string | undefined>>
+  >,
+  keys: string[]
 ) {
   return Object.fromEntries(
     Object.entries(valuesByLocale).map(([locale, valuesByRuleId]) => [
       locale,
       Object.fromEntries(
         Object.entries(valuesByRuleId).flatMap(([ruleId, values]) =>
-          keys.flatMap((key) => (
+          keys.flatMap((key) =>
             typeof values[key] === "string"
               ? [[`${ruleId}:${key}`, values[key]]]
               : []
-          )),
-        ),
+          )
+        )
       ),
-    ]),
+    ])
   );
 }
 
 function expandRuleValues<T extends Record<string, string | undefined>>(
   valuesByLocale: Record<string, Record<string, string>>,
-  keys: string[],
+  keys: string[]
 ): Record<string, Record<string, T>> {
   const expanded: Record<string, Record<string, T>> = {};
   for (const [locale, values] of Object.entries(valuesByLocale)) {
@@ -113,31 +117,41 @@ export function PricingTranslationModals({
       <MultiLanguageTextModal
         id="discount-bundle-quantity-language-modal"
         open={quantity.open}
-        title="Customize Text for Multiple Languages"
+        title={translateAdmin("common.multiLanguage.title")}
         layout="compact"
         locales={locales}
         activeLocale={quantity.activeLocale}
         fields={quantityFields}
-        valuesByLocale={flattenRuleValues(quantity.values, ["label", "subtext"])}
+        valuesByLocale={flattenRuleValues(quantity.values, [
+          "label",
+          "subtext",
+        ])}
         onActiveLocaleChange={quantity.onActiveLocaleChange}
-        onSave={(values) => quantity.onApply(
-          expandRuleValues<RuleCopy>(values, ["label", "subtext"]),
-        )}
+        onSave={(values) =>
+          quantity.onApply(
+            expandRuleValues<RuleCopy>(values, ["label", "subtext"])
+          )
+        }
         onClose={quantity.onClose}
       />
       <MultiLanguageTextModal
         id="discount-progress-language-modal"
         open={progress.open}
-        title="Customize Text for Multiple Languages"
+        title={translateAdmin("common.multiLanguage.title")}
         layout="compact"
         locales={locales}
         activeLocale={progress.activeLocale}
         fields={progressFields}
-        valuesByLocale={flattenRuleValues(progress.values, ["tierText", "tierSubtext"])}
+        valuesByLocale={flattenRuleValues(progress.values, [
+          "tierText",
+          "tierSubtext",
+        ])}
         onActiveLocaleChange={progress.onActiveLocaleChange}
-        onSave={(values) => progress.onApply(
-          expandRuleValues<TierCopy>(values, ["tierText", "tierSubtext"]),
-        )}
+        onSave={(values) =>
+          progress.onApply(
+            expandRuleValues<TierCopy>(values, ["tierText", "tierSubtext"])
+          )
+        }
         onClose={progress.onClose}
       />
     </>

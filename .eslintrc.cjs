@@ -9,6 +9,7 @@ module.exports = {
   // - scripts/**       : Node build scripts
   // - *.config.js      : root-level config files (jest, postcss, tailwind)
   ignorePatterns: [
+    ".eslintrc.cjs",
     "app/assets/**",
     "app/types/*.generated.d.ts",
     "extensions/**/*.js",
@@ -96,9 +97,35 @@ module.exports = {
     },
   },
 
-  plugins: ["@typescript-eslint", "security", "prisma", "unicorn"],
+  plugins: ["@typescript-eslint", "security", "prisma", "unicorn", "i18next"],
 
   overrides: [
+    {
+      files: ["app/routes/app/**/*.tsx", "app/components/**/*.tsx"],
+      rules: {
+        "i18next/no-literal-string": [
+          "error",
+          {
+            markupOnly: true,
+            onlyAttribute: [
+              "accessibilityLabel",
+              "alt",
+              "aria-label",
+              "description",
+              "heading",
+              "helpText",
+              "label",
+              "placeholder",
+              "title",
+            ],
+            ignore: [
+              "^[^A-Za-zÀ-ž\\u3040-\\u30ff\\u3400-\\u9fff]+$",
+              "^[\\s⌄▾]+$",
+            ],
+          },
+        ],
+      },
+    },
     {
       // Tests and the CLI test runner have different runtime semantics:
       // - `it()` / `describe()` from node:test return promises that the

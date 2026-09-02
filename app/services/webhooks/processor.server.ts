@@ -15,9 +15,8 @@
 
 import db from "../../db.server";
 import { AppLogger } from "../../lib/logger";
-import type { PubSubMessage, WebhookProcessResult } from "./types";
+import type { WebhookMessage, WebhookProcessResult } from "./types";
 import {
-  handleProductUpdate,
   handleProductDelete,
 } from "./handlers/product.server";
 import {
@@ -29,18 +28,7 @@ import {
   handleAppUninstalled,
   handleScopesUpdate,
 } from "./handlers/lifecycle.server";
-import {
-  handleOrderCreate,
-} from "./handlers/orders.server";
-
-const RETIRED_WEBHOOK_TOPICS = new Set([
-  "products/update",
-  "PRODUCTS_UPDATE",
-  "inventory_levels/update",
-  "INVENTORY_LEVELS_UPDATE",
-  "orders/create",
-  "ORDERS_CREATE",
-]);
+import { isActiveWebhookTopic } from "./topics";
 
 /**
  * Main webhook processor entry point
@@ -74,26 +62,26 @@ export class WebhookProcessor {
   }
 
   /**
-   * Process a Pub/Sub message
+   * Process a normalized Shopify webhook message
    * Implements idempotency and routes to appropriate handler
    */
-  static async processPubSubMessage(
-    message: PubSubMessage
+  static async processWebhookMessage(
+    message: WebhookMessage
   ): Promise<WebhookProcessResult> {
     const topic = message.attributes["X-Shopify-Topic"];
     const shopDomain = message.attributes["X-Shopify-Shop-Domain"];
     const webhookId = message.attributes["X-Shopify-Webhook-Id"];
 
     try {
-      if (RETIRED_WEBHOOK_TOPICS.has(topic)) {
-        AppLogger.info("Ignored retired webhook topic before persistence", {
+      if (!isActiveWebhookTopic(topic)) {
+        AppLogger.info("Ignored inactive webhook topic before persistence", {
           component: "webhook-processor",
-          operation: "processPubSubMessage"
+          operation: "processWebhookMessage"
         }, { topic, shop: shopDomain, webhookId });
 
         return {
           success: true,
-          message: `Ignored retired webhook topic: ${topic}`
+          message: `Ignored inactive webhook topic: ${topic}`
         };
       }
 
@@ -103,7 +91,7 @@ export class WebhookProcessor {
 
       AppLogger.info("Processing webhook", {
         component: "webhook-processor",
-        operation: "processPubSubMessage"
+        operation: "processWebhookMessage"
       }, { topic, shop: shopDomain, webhookId });
 
       // Check idempotency - have we processed this webhook before?
@@ -121,7 +109,7 @@ export class WebhookProcessor {
         if (existing?.processed) {
           AppLogger.info("Webhook already processed, skipping", {
             component: "webhook-processor",
-            operation: "processPubSubMessage"
+            operation: "processWebhookMessage"
           }, { topic, shop: shopDomain, webhookId });
 
           return {
@@ -146,56 +134,32 @@ export class WebhookProcessor {
       let result: WebhookProcessResult;
 
       switch (topic) {
-        case "products/update":
-        case "PRODUCTS_UPDATE":
-          result = await handleProductUpdate(shopDomain, payload);
-          break;
-
         case "products/delete":
-        case "PRODUCTS_DELETE":
           result = await handleProductDelete(shopDomain, payload);
           break;
 
         case "customers/data_request":
-        case "CUSTOMERS_DATA_REQUEST":
           result = await handleCustomerDataRequest(shopDomain, payload);
           break;
 
         case "customers/redact":
-        case "CUSTOMERS_REDACT":
           result = await handleCustomerRedact(shopDomain, payload);
           break;
 
         case "shop/redact":
-        case "SHOP_REDACT":
           result = await handleShopRedact(shopDomain, payload, webhookEvent.id);
           break;
 
         case "app/uninstalled":
-        case "APP_UNINSTALLED":
           result = await handleAppUninstalled(shopDomain, payload, webhookEvent.id);
           break;
 
         case "app/scopes_update":
-        case "APP_SCOPES_UPDATE":
           result = await handleScopesUpdate(shopDomain, payload);
           break;
 
-        case "orders/create":
-        case "ORDERS_CREATE":
-          result = await handleOrderCreate(shopDomain, payload);
-          break;
-
         default:
-          AppLogger.warn("Unhandled webhook topic", {
-            component: "webhook-processor",
-            operation: "processPubSubMessage"
-          }, { topic, shop: shopDomain });
-
-          result = {
-            success: true,
-            message: `Unhandled webhook topic: ${topic}`
-          };
+          throw new Error(`Active webhook topic has no handler: ${topic}`);
       }
 
       // SAFETY: Only mark webhook as processed if handler succeeded
@@ -227,7 +191,7 @@ export class WebhookProcessor {
     } catch (error: any) {
       AppLogger.error("Error processing webhook", {
         component: "webhook-processor",
-        operation: "processPubSubMessage"
+        operation: "processWebhookMessage"
       }, error);
 
       return {

@@ -1,5 +1,6 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DefaultStepTimelineIcon } from "../_shared/bundle-configure/DefaultStepTimelineIcon";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbStepConfigCard({ step }: { step: any }) {
   const {
@@ -14,7 +15,9 @@ export function PpbStepConfigCard({ step }: { step: any }) {
   return (
     <div className={productPageBundleStyles.card}>
       <h3 className={productPageBundleStyles.stepConfigTitle}>
-        Step Config
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupconfigcard.stepConfig"
+        )}
       </h3>
       <div className={productPageBundleStyles.stepConfigRow}>
         <div className={productPageBundleStyles.stepConfigIconBox}>
@@ -22,13 +25,13 @@ export function PpbStepConfigCard({ step }: { step: any }) {
             <>
               <img
                 src={(step as any).stepImage}
-                alt="Step icon"
+                alt={translateAdmin("adminAttributes.stepIcon")}
                 className={productPageBundleStyles.iconImg}
               />
               <button
                 type="button"
                 className={productPageBundleStyles.iconRemoveButton}
-                aria-label="Remove step icon"
+                aria-label={translateAdmin("adminAttributes.removeStepIcon")}
                 onClick={() => {
                   stepsState.updateStepField(step.id, "stepImage", null);
                   setShowIconPickerForStep(null);
@@ -66,23 +69,27 @@ export function PpbStepConfigCard({ step }: { step: any }) {
             icon="replace"
             onClick={() =>
               setShowIconPickerForStep((prev) =>
-                prev === step.id ? null : step.id,
+                prev === step.id ? null : step.id
               )
             }
           >
-            Replace
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
+            )}
           </s-button>
         </div>
         <div className={productPageBundleStyles.fieldsColumn}>
           <s-text-field
-            label="Step Title"
-            placeholder="Eg:- Customized T-shirt Bundle for you"
+            label={translateAdmin("adminAttributes.stepTitle")}
+            placeholder={translateAdmin(
+              "adminAttributes.egCustomizedTShirtBundleForYou"
+            )}
             value={(step as any).pageTitle ?? ""}
             onInput={(e) => {
               stepsState.updateStepField(
                 step.id,
                 "pageTitle",
-                (e.target as HTMLInputElement).value,
+                (e.target as HTMLInputElement).value
               );
               markAsDirty();
             }}

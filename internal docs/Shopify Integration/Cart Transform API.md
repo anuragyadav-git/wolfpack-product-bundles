@@ -5,7 +5,7 @@ title: Cart Transform API
 type: shopify-integration
 status: authoritative
 summary: Shopify Cart Transform API target, activation, failure policy, inputs, and checkout-pricing boundaries.
-last_audited: 2026-08-25
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -91,6 +91,13 @@ query at Shopify's maximum calculated complexity of 30. Adding another leaf or
 metafield requires reducing or consolidating an existing selection first.
 Routine Cart Transform setup reads and merges the current JSON before rotating
 the deterministic secret so it does not erase saved cart-line messaging.
+
+Offer analytics reuses the selected `_bundle_display_properties` attribute.
+The storefront places one normalized `offerAnalytics` object inside that JSON;
+MERGE emits it as one `_wpb_offer_analytics` JSON property on the parent line,
+and unmerged component lines retain the nested input shape. Do not select the
+five offer dimensions as separate Function input attributes: that raised the
+calculated complexity to 35 and Shopify rejected the build on 2026-09-01.
 
 The token is issued only by the signed app-proxy route `/apps/product-bundles/api/cart-transform-runtime-token`. It validates the current DB bundle config before signing selected component/add-on variant GIDs, quantities, parent variant, and pricing config.
 

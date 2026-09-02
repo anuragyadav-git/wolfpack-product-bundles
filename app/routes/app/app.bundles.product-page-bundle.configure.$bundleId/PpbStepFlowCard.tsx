@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbStepFlowCard({ children }: { children: ReactNode }) {
   const {
@@ -19,7 +20,7 @@ export function PpbStepFlowCard({ children }: { children: ReactNode }) {
         <div className={productPageBundleStyles.stepFlowTitleRow}>
           <span className={productPageBundleStyles.headingWithHelp}>
             <h3 style={{ margin: 0, fontSize: 16, fontWeight: 650 }}>
-              Step Flow
+              {translateAdmin("tooltips.stepFlow.title")}
             </h3>
             <QuestionHelpTooltip tooltipKey="stepFlow" />
           </span>
@@ -27,21 +28,26 @@ export function PpbStepFlowCard({ children }: { children: ReactNode }) {
             variant="tertiary"
             tone="neutral"
             icon="play"
-            accessibilityLabel="How to setup?"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+            )}
             onClick={() =>
               window.open(
                 "https://www.youtube.com/watch?v=5ClNNtFybHo",
                 "_blank",
-                "noopener,noreferrer",
+                "noopener,noreferrer"
               )
             }
           >
-            How to setup?
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
+            )}
           </s-press-button>
         </div>
         <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-          Create steps for your multi-step bundle here. Select product options
-          for each step below
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.createStepsForYourMultiStepBundleHereSelectProductOptionsForEach"
+          )}
         </p>
       </s-stack>
       <div className={productPageBundleStyles.stepNav}>
@@ -68,7 +74,14 @@ export function PpbStepFlowCard({ children }: { children: ReactNode }) {
           className={productPageBundleStyles.addStepBtn}
           onClick={handleAddNewStep}
         >
-          <span aria-hidden="true"><s-icon type="plus" /></span> <span>Add Step</span>
+          <span aria-hidden="true">
+            <s-icon type="plus" />
+          </span>{" "}
+          <span>
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
+            )}
+          </span>
         </button>
       </div>
       {children}

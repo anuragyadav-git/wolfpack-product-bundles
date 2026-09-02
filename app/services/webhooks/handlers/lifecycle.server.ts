@@ -1,12 +1,12 @@
 /**
  * Lifecycle Webhook Handlers
  *
- * Handles app lifecycle webhooks via Pub/Sub:
+ * Handles app lifecycle webhooks delivered through the direct worker and Inngest:
  * - app/uninstalled
  * - app/scopes_update
  *
  * Note: These handlers do NOT have access to the Shopify admin API
- * because they arrive via Pub/Sub (not direct HTTP delivery).
+ * because background processing does not carry an authenticated Admin API context.
  * Metafield cleanup is handled automatically by Shopify when an app
  * is uninstalled ($app namespace metafields are deleted by Shopify).
  * These handlers focus on database cleanup only.
@@ -22,7 +22,7 @@ import type { WebhookProcessResult } from "../types";
  *
  * Performs comprehensive database cleanup when a merchant uninstalls the app.
  * Metafield cleanup is NOT done here because we don't have admin API access
- * via Pub/Sub. Shopify automatically deletes $app namespace metafields on uninstall.
+ * in this background handler. Shopify automatically deletes $app namespace metafields on uninstall.
  *
  * Operations are idempotent - safe to run multiple times.
  */

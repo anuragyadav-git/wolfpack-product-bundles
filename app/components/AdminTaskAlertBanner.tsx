@@ -16,7 +16,7 @@ export function AdminTaskAlertBanner({
   if (!alert) return null;
 
   return (
-    <s-box paddingBlockEnd="base">
+    <s-box paddingBlockEnd="small-200">
       <s-banner
         heading={alert.heading}
         tone="critical"

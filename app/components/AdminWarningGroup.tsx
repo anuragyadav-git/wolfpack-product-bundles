@@ -12,7 +12,7 @@ export type AdminWarningItem = {
 type PolarisModalElement = ElementRef<"s-modal">;
 
 export function getAdminWarningPresentation(
-  warnings: AdminWarningItem[],
+  warnings: AdminWarningItem[]
 ): "none" | "single" | "multiple" {
   if (warnings.length === 0) return "none";
   return warnings.length === 1 ? "single" : "multiple";
@@ -20,13 +20,17 @@ export function getAdminWarningPresentation(
 
 export function runAdminWarningAction(
   modalRef: { current: { hideOverlay?: () => void } | null },
-  onAction: () => void,
+  onAction: () => void
 ): void {
   modalRef.current?.hideOverlay?.();
   onAction();
 }
 
-export function AdminWarningGroup({ warnings }: { warnings: AdminWarningItem[] }) {
+export function AdminWarningGroup({
+  warnings,
+}: {
+  warnings: AdminWarningItem[];
+}) {
   const { t } = useTranslation();
   const modalRef = useRef<PolarisModalElement | null>(null);
   const presentation = getAdminWarningPresentation(warnings);
@@ -36,7 +40,7 @@ export function AdminWarningGroup({ warnings }: { warnings: AdminWarningItem[] }
   if (presentation === "single") {
     const warning = warnings[0];
     return (
-      <s-box paddingBlockEnd="base">
+      <s-box paddingBlockEnd="small-200">
         <s-banner
           tone="warning"
           heading={warning.heading}
@@ -56,7 +60,7 @@ export function AdminWarningGroup({ warnings }: { warnings: AdminWarningItem[] }
 
   return (
     <>
-      <s-box paddingBlockEnd="base">
+      <s-box paddingBlockEnd="small-200">
         <s-banner
           tone="warning"
           heading={t("common.warningGroup.heading")}
@@ -100,7 +104,8 @@ export function AdminWarningGroup({ warnings }: { warnings: AdminWarningItem[] }
                   <s-button
                     variant="secondary"
                     onClick={() =>
-                      runAdminWarningAction(modalRef, warning.onAction!)}
+                      runAdminWarningAction(modalRef, warning.onAction!)
+                    }
                   >
                     {warning.actionLabel}
                   </s-button>

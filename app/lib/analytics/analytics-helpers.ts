@@ -9,6 +9,7 @@
 
 export interface OrderAttributionRow {
   bundleId: string | null;
+  offerPolicyId?: string | null;
   revenue: number; // cents
   createdAt: Date;
 }

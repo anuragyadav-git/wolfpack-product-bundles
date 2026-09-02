@@ -53,4 +53,36 @@ describe("FPB Show Text on + Button persistence", () => {
     expect(result.showTextOnAddButton).toBe(true);
     expect(result.textOverrides).toBeNull();
   });
+
+  it("parses direct low-stock alert settings", () => {
+    const formData = buildSaveForm(true);
+    formData.set("lowStockAlertEnabled", "true");
+    formData.set("lowStockAlertThreshold", "8");
+    formData.set("lowStockAlertMessage", "Hurry, {{stock}} remaining");
+
+    expect(parseFpbSaveBundleForm(formData)).toMatchObject({
+      lowStockAlertEnabled: true,
+      lowStockAlertThreshold: 8,
+      lowStockAlertMessage: "Hurry, {{stock}} remaining",
+    });
+  });
+
+  it("parses direct countdown presentation settings", () => {
+    const formData = buildSaveForm(true);
+    formData.set("countdownEnabled", "true");
+    formData.set("countdownLayout", "full");
+    formData.set("countdownPosition", "below");
+    formData.set("countdownTitle", "Ends soon");
+    formData.set("countdownExpiryAction", "show_zeros");
+    formData.set("countdownExpiredMessage", "This offer has ended");
+
+    expect(parseFpbSaveBundleForm(formData)).toMatchObject({
+      countdownEnabled: true,
+      countdownLayout: "full",
+      countdownPosition: "below",
+      countdownTitle: "Ends soon",
+      countdownExpiryAction: "show_zeros",
+      countdownExpiredMessage: "This offer has ended",
+    });
+  });
 });

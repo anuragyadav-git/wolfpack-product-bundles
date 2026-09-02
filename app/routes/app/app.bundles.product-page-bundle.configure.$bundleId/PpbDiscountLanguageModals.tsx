@@ -3,15 +3,18 @@ import { usePpbConfigureContext } from "./PpbConfigureContext";
 
 export function PpbDiscountLanguageModals() {
   const flow = usePpbConfigureContext();
-  const rules = flow.pricingState.discountRules.map((rule: any, index: number) => ({
-    id: rule.id,
-    heading: `Rule #${index + 1}`,
-    quantityFallback: {
-      label: flow.qtyRuleLabels[rule.id] ?? `Box of ${rule.conditionValue ?? ""}`,
-      subtext: flow.qtyRuleSubtexts[rule.id] ?? "",
-    },
-    tierFallback: flow.tierTextByRuleId[rule.id] ?? {},
-  }));
+  const rules = flow.pricingState.discountRules.map(
+    (rule: any, index: number) => ({
+      id: rule.id,
+      heading: `Rule #${index + 1}`,
+      quantityFallback: {
+        label:
+          flow.qtyRuleLabels[rule.id] ?? `Box of ${rule.conditionValue ?? ""}`,
+        subtext: flow.qtyRuleSubtexts[rule.id] ?? "",
+      },
+      tierFallback: flow.tierTextByRuleId[rule.id] ?? {},
+    })
+  );
 
   return (
     <PricingTranslationModals

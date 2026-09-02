@@ -1,3 +1,4 @@
+import { translateAdmin } from "~/i18n/config";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -49,11 +50,17 @@ export function MultiLanguageTextModal({
   const { t } = useTranslation();
   const modalRef = useRef<any>(null);
   const wasOpenRef = useRef(false);
-  const [draftByLocale, setDraftByLocale] = useState<Record<string, Record<string, string>>>({});
+  const [draftByLocale, setDraftByLocale] = useState<
+    Record<string, Record<string, string>>
+  >({});
 
-  const selectedLocale = locales.some((locale) => locale.locale === activeLocale)
+  const selectedLocale = locales.some(
+    (locale) => locale.locale === activeLocale
+  )
     ? activeLocale
-    : locales.find((locale) => locale.primary)?.locale ?? locales[0]?.locale ?? "";
+    : locales.find((locale) => locale.primary)?.locale ??
+      locales[0]?.locale ??
+      "";
 
   useEffect(() => {
     const modal = modalRef.current;
@@ -95,7 +102,9 @@ export function MultiLanguageTextModal({
           label={field.label}
           value={localeValues[field.key] ?? ""}
           placeholder={field.fallback}
-          onInput={(event: Event) => updateDraft(field.key, (event.target as HTMLTextAreaElement).value)}
+          onInput={(event: Event) =>
+            updateDraft(field.key, (event.target as HTMLTextAreaElement).value)
+          }
         />
       ) : (
         <s-text-field
@@ -104,7 +113,9 @@ export function MultiLanguageTextModal({
           value={localeValues[field.key] ?? ""}
           placeholder={field.fallback}
           autocomplete="off"
-          onInput={(event: Event) => updateDraft(field.key, (event.target as HTMLInputElement).value)}
+          onInput={(event: Event) =>
+            updateDraft(field.key, (event.target as HTMLInputElement).value)
+          }
         />
       );
 
@@ -126,9 +137,11 @@ export function MultiLanguageTextModal({
   const compactBody = (
     <s-stack direction="block" gap="base">
       <s-select
-        label="Select Language"
+        label={translateAdmin("adminAttributes.selectLanguage")}
         value={selectedLocale}
-        onChange={(event: Event) => onActiveLocaleChange((event.target as HTMLSelectElement).value)}
+        onChange={(event: Event) =>
+          onActiveLocaleChange((event.target as HTMLSelectElement).value)
+        }
       >
         {locales.map((locale) => (
           <s-option key={locale.locale} value={locale.locale}>
@@ -153,7 +166,9 @@ export function MultiLanguageTextModal({
       <s-select
         label={t("common.multiLanguage.chooseLanguage")}
         value={selectedLocale}
-        onChange={(event: Event) => onActiveLocaleChange((event.target as HTMLSelectElement).value)}
+        onChange={(event: Event) =>
+          onActiveLocaleChange((event.target as HTMLSelectElement).value)
+        }
       >
         {locales.map((locale) => (
           <s-option key={locale.locale} value={locale.locale}>

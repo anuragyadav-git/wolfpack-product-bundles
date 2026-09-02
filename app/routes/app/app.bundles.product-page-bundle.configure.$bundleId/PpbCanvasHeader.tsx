@@ -4,6 +4,7 @@ import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { useTranslation } from "react-i18next";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbCanvasHeader() {
   const { t } = useTranslation();
@@ -36,7 +37,9 @@ export function PpbCanvasHeader() {
   return (
     <>
       <AdminPageTitleBar
-        title="Configure Bundle Flow"
+        title={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.configureBundleFlow"
+        )}
         breadcrumbLabel="Dashboard"
         onBack={handleBackClick}
       />
@@ -47,12 +50,14 @@ export function PpbCanvasHeader() {
               type="button"
               className={productPageBundleStyles.canvasBackButton}
               onClick={handleBackClick}
-              aria-label="Back to dashboard"
+              aria-label={translateAdmin("adminAttributes.backToDashboard")}
             >
               ←
             </button>
             <h1 className={productPageBundleStyles.canvasTitle}>
-              Configure Bundle Flow
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.configureBundleFlow"
+              )}
             </h1>
           </div>
         </div>
@@ -74,21 +79,25 @@ export function PpbCanvasHeader() {
                 {readinessScore}
               </span>
               <span className={productPageBundleStyles.readinessLabel}>
-                Readiness Score
+                {translateAdmin("common.readiness.title")}
               </span>
             </s-press-button>
           </span>
           <s-button
             variant="secondary"
             icon="view"
-            accessibilityLabel="Preview Bundle"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.previewBundle"
+            )}
             onClick={() => {
               void handlePreviewBundle();
             }}
             loading={isPreviewBundleLoading || undefined}
             disabled={fetcher.state !== "idle"}
           >
-            Preview Bundle
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.previewBundle"
+            )}
           </s-button>
         </div>
       </div>
@@ -122,7 +131,8 @@ export function PpbCanvasHeader() {
             themeEditorUrl={themeEditorUrl}
             onEnableClick={openThemeEditorForAppEmbed}
           />
-          {(parentProductStatusUi.isLoading || parentProductStatusUi.showUnlistedBanner) && (
+          {(parentProductStatusUi.isLoading ||
+            parentProductStatusUi.showUnlistedBanner) && (
             <div className={productPageBundleStyles.unlistedBannerGap}>
               <UnlistedBundleBanner
                 shop={shop}

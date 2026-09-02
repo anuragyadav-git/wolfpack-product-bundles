@@ -3,6 +3,7 @@ import { FpbBundleQuantityOptions } from "./DiscountBundleQuantityOptions";
 import { FpbDiscountMessagingOptions } from "./DiscountMessagingOptions";
 import { FpbProgressBarOptions } from "./DiscountProgressBarOptions";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbDiscountDisplayOptions({
   flow,
@@ -17,10 +18,14 @@ export function FpbDiscountDisplayOptions({
         <s-stack direction="block" gap="small">
           <s-stack direction="block" gap="small-400">
             <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-              Discount Display Options
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountdisplayoptions.discountDisplayOptions"
+              )}
             </h4>
             <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-              Choose how discounts are displayed
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountdisplayoptions.chooseHowDiscountsAreDisplayed"
+              )}
             </p>
           </s-stack>
           <FpbBundleQuantityOptions flow={flow} />

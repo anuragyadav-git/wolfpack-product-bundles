@@ -1,3 +1,5 @@
+import { parseVariantSelectorConfiguration } from "./variant-selector-config";
+
 function asObjectArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
@@ -23,6 +25,7 @@ export function buildStepCategoryCreateInput(category: Record<string, unknown>, 
   const sortOrder = numberValue(category.sortOrder) ?? index;
   const products = asObjectArray(category.products);
   const collections = asObjectArray(category.collections);
+  const variantSelector = parseVariantSelectorConfiguration(category);
 
   return {
     ...(categoryId ? { id: categoryId } : {}),
@@ -37,7 +40,7 @@ export function buildStepCategoryCreateInput(category: Record<string, unknown>, 
     categoryImg: stringValue(category.categoryImg),
     autoNextStepOnConditionMet: category.autoNextStepOnConditionMet === true,
     displayVariantsAsIndividualProducts: category.displayVariantsAsIndividualProducts === true,
-    displayVariantsAsSwatches: category.displayVariantsAsSwatches === true,
+    ...variantSelector,
     multiLangData: objectRecord(category.multiLangData),
   };
 }

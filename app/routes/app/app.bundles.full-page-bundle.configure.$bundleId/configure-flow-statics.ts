@@ -56,7 +56,6 @@ import {
 } from "./configure-constants";
 import {
   QuestionHelpTooltip,
-  RichHelpTooltip,
   SettingsRow,
   VisibilityBadge,
 } from "./SmallComponents";
@@ -123,7 +122,6 @@ const configureFlowStaticValues = {
   normalizeVisibilityProductForDisplayConfiguration,
   normalizeVisibilityProductPageTarget,
   QuestionHelpTooltip,
-  RichHelpTooltip,
   serializePricingDisplayOptions,
   SettingsRow,
   showPolarisModal,

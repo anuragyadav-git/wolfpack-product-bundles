@@ -5,7 +5,7 @@ title: Repository Subscription Inventory
 type: inventory
 status: active
 summary: Audited inventory of Only Bundles billing, entitlement, merchant UI, storefront, analytics, and deployment surfaces.
-last_audited: 2026-08-29
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -42,7 +42,7 @@ keywords:
 - `app/services/subscriptions/shopify-app-pricing.server.ts` verifies the Partner API `activeSubscription` response.
 - `app/services/subscriptions/subscription-entitlement-service.server.ts` owns cache freshness, force refresh, and persistence.
 - `app/lib/subscriptions/entitlements.ts` owns stable plan codes, capabilities, limits, and typed failures.
-- `/app/pricing`, `/app/billing`, and `/app/billing/return` are the only app-plan purchase and verification routes.
+- `/app/billing`, `/app/billing/plans`, and `/app/billing/return` are the only app-plan management, purchase, and verification routes.
 - Billing API create, confirm, status, cancel, callback, grant-plan, subscription webhook, and compatibility re-export surfaces were removed.
 
 ## Current enforcement and storefront behavior

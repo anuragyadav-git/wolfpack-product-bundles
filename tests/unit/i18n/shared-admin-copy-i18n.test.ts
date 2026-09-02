@@ -74,4 +74,15 @@ describe("shared embedded Admin component copy extraction", () => {
     expect(source).toContain("useTranslation");
     keys.forEach((key) => expect(source).toContain(key));
   });
+
+  it("keeps the parent product loading copy merchant-facing and explicit", () => {
+    const english = JSON.parse(readSource("app/i18n/locales/en.json")) as {
+      common: { parentProductStatus: { loadingTitle: string; loadingBody: string } };
+    };
+
+    expect(english.common.parentProductStatus).toEqual({
+      loadingTitle: "Scanning bundle status",
+      loadingBody: "bundle status is being fetched.",
+    });
+  });
 });

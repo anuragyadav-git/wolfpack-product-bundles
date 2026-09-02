@@ -6,6 +6,11 @@ import {
 } from "../../../lib/bundle-config/default-products";
 import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
+import type {
+  CountdownExpiryAction,
+  CountdownLayout,
+  CountdownPosition,
+} from "../../../lib/bundle-countdown";
 
 export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const { bundle, shop } = flow;
@@ -22,8 +27,9 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
       : buildFpbStorefrontUrl(
           `${shopDomain}.myshopify.com`,
           bundle.publicNumber,
+          flow.storefrontProxyRoot,
         ),
-    [shopDomain, bundle.publicNumber],
+    [shopDomain, bundle.publicNumber, flow.storefrontProxyRoot],
   );
 
   const [promoBannerBgImage, setPromoBannerBgImage] = useState<string | null>(
@@ -64,6 +70,37 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   );
   const [allowQuantityChanges, setAllowQuantityChanges] = useState<boolean>(
     (bundle as any).allowQuantityChanges ?? true,
+  );
+  const [lowStockAlertEnabled, setLowStockAlertEnabled] = useState<boolean>(
+    (bundle as any).lowStockAlertEnabled ?? false,
+  );
+  const [lowStockAlertThreshold, setLowStockAlertThreshold] = useState<string>(
+    String((bundle as any).lowStockAlertThreshold ?? 5),
+  );
+  const [lowStockAlertMessage, setLowStockAlertMessage] = useState<string>(
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+  );
+  const [countdownEnabled, setCountdownEnabled] = useState<boolean>(
+    (bundle as any).countdownEnabled ?? false,
+  );
+  const [countdownLayout, setCountdownLayout] = useState<CountdownLayout>(
+    (bundle as any).countdownLayout === "full" ? "full" : "compact",
+  );
+  const [countdownPosition, setCountdownPosition] = useState<CountdownPosition>(
+    (bundle as any).countdownPosition === "below" ? "below" : "above",
+  );
+  const [countdownTitle, setCountdownTitle] = useState<string>(
+    (bundle as any).countdownTitle ?? "",
+  );
+  const [countdownExpiryAction, setCountdownExpiryAction] =
+    useState<CountdownExpiryAction>(
+      (bundle as any).countdownExpiryAction === "show_zeros" ||
+        (bundle as any).countdownExpiryAction === "show_message"
+        ? (bundle as any).countdownExpiryAction
+        : "hide",
+    );
+  const [countdownExpiredMessage, setCountdownExpiredMessage] = useState<string>(
+    (bundle as any).countdownExpiredMessage ?? "",
   );
   const initialValidateQuantityPerProduct =
     ((bundle as any).validateQuantityPerProduct as {
@@ -112,6 +149,21 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const originalAllowQuantityChangesRef = useRef<boolean>(
     (bundle as any).allowQuantityChanges ?? true,
   );
+  const originalLowStockAlertEnabledRef = useRef<boolean>(
+    (bundle as any).lowStockAlertEnabled ?? false,
+  );
+  const originalLowStockAlertThresholdRef = useRef<string>(
+    String((bundle as any).lowStockAlertThreshold ?? 5),
+  );
+  const originalLowStockAlertMessageRef = useRef<string>(
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+  );
+  const originalCountdownEnabledRef = useRef(countdownEnabled);
+  const originalCountdownLayoutRef = useRef(countdownLayout);
+  const originalCountdownPositionRef = useRef(countdownPosition);
+  const originalCountdownTitleRef = useRef(countdownTitle);
+  const originalCountdownExpiryActionRef = useRef(countdownExpiryAction);
+  const originalCountdownExpiredMessageRef = useRef(countdownExpiredMessage);
   const directBundleSummary =
     (
       (bundle as any).bundleTextConfig as {
@@ -175,6 +227,15 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     initialTextOverrides,
     initialValidateQuantityPerProduct,
     loadingGif,
+    lowStockAlertEnabled,
+    lowStockAlertMessage,
+    lowStockAlertThreshold,
+    countdownEnabled,
+    countdownLayout,
+    countdownPosition,
+    countdownTitle,
+    countdownExpiryAction,
+    countdownExpiredMessage,
     maxQtyPerProduct,
     normalizeDefaultProductsData,
     originalAllowQuantityChangesRef,
@@ -183,6 +244,15 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     originalFloatingBadgeEnabledRef,
     originalFloatingBadgeTextRef,
     originalLoadingGifRef,
+    originalLowStockAlertEnabledRef,
+    originalLowStockAlertMessageRef,
+    originalLowStockAlertThresholdRef,
+    originalCountdownEnabledRef,
+    originalCountdownLayoutRef,
+    originalCountdownPositionRef,
+    originalCountdownTitleRef,
+    originalCountdownExpiryActionRef,
+    originalCountdownExpiredMessageRef,
     originalPromoBannerBgImageRef,
     originalShowProductPricesRef,
     originalShowStepTimelineRef,
@@ -199,6 +269,15 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     setFloatingBadgeEnabled,
     setFloatingBadgeText,
     setLoadingGif,
+    setLowStockAlertEnabled,
+    setLowStockAlertMessage,
+    setLowStockAlertThreshold,
+    setCountdownEnabled,
+    setCountdownLayout,
+    setCountdownPosition,
+    setCountdownTitle,
+    setCountdownExpiryAction,
+    setCountdownExpiredMessage,
     setMaxQtyPerProduct,
     setProductSlotIconUrl,
     setProductSlotsEnabled,

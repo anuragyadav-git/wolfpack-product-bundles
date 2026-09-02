@@ -11,7 +11,7 @@ import {
   applyDiscountProgressTransition,
   createDiscountProgressElement,
 } from '../../shared/components/discount-progress.js';
-import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
+import { resolveStorefrontProxyRoot } from '../../../../config/storefront-proxy-routes.js';
 
 export const fullPageDiscountModalMethods: Record<string, any> & ThisType<any> = {
 _renderDiscountProgress(options: any = {}) {
@@ -198,6 +198,6 @@ closeModal() {
 },
 
 resolveStorefrontApiBase() {
-  return STOREFRONT_PROXY_ROOT;
+  return resolveStorefrontProxyRoot();
 },
 };

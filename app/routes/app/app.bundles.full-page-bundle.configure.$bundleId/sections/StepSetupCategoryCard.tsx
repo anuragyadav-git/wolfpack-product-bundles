@@ -1,6 +1,7 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { FpbStepCategoryAccordion } from "./StepSetupCategoryAccordion";
 import { FpbStepCategoryFooter } from "./StepSetupCategoryFooter";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepCategoryCard({
   flow,
@@ -10,7 +11,7 @@ export function FpbStepCategoryCard({
   step: any;
 }) {
   const { fullPageBundleStyles, QuestionHelpTooltip } = flow;
-  const categories = ((step.StepCategory as any[] | undefined) ?? []);
+  const categories = (step.StepCategory as any[] | undefined) ?? [];
 
   return (
     <>
@@ -23,7 +24,9 @@ export function FpbStepCategoryCard({
             marginBottom: 4,
           }}
         >
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Category</h3>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+            {translateAdmin("tooltips.category.title")}
+          </h3>
           <QuestionHelpTooltip tooltipKey="category" />
         </div>
         <p
@@ -33,12 +36,15 @@ export function FpbStepCategoryCard({
             color: "#6d7175",
           }}
         >
-          Add all product selections in this step to a single category or
-          separate them into multiple categories for better segregation.
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategorycard.addAllProductSelectionsInThisStepToASingleCategoryOrSeparateThem"
+          )}
         </p>
         {categories.length === 0 && (
           <div className={fullPageBundleStyles.emptyState}>
-            No category defined yet
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategorycard.noCategoryDefinedYet"
+            )}
           </div>
         )}
         {categories.map((cat: any, catIndex: number) => (

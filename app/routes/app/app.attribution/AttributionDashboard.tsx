@@ -13,8 +13,13 @@ import styles from "../../../styles/routes/app-attribution.module.css";
 import type { AttributionDashboardData } from "../app.attribution";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
 import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
+import { OfferAnalyticsCard } from "./OfferAnalyticsCard";
+import { translateAdmin } from "~/i18n/config";
 
-type AttributionDashboardViewData = Omit<AttributionDashboardData, "from" | "to" | "accessMode"> & {
+type AttributionDashboardViewData = Omit<
+  AttributionDashboardData,
+  "from" | "to" | "accessMode"
+> & {
   from?: string;
   to?: string;
   accessMode: "SUMMARY" | "ADVANCED";
@@ -33,17 +38,26 @@ function formatRevenue(cents: number, currency = "USD"): string {
 // ─── DateRangeSelector ───────────────────────────────────────
 
 function formatDateLabel(d: Date): string {
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 function formatRangeLabel(days: number, from?: string, to?: string): string {
   if (from && to) {
     const start = new Date(from + "T00:00:00Z");
-    const end   = new Date(to   + "T00:00:00Z");
+    const end = new Date(to + "T00:00:00Z");
     const startStr = formatDateLabel(start);
-    const endStr   = formatDateLabel(end);
+    const endStr = formatDateLabel(end);
     if (start.getUTCFullYear() === end.getUTCFullYear()) {
-      const startNoYear = start.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+      const startNoYear = start.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      });
       return `${startNoYear} – ${endStr}`;
     }
     return `${startStr} – ${endStr}`;
@@ -76,7 +90,10 @@ function DateRangeSelector({ days, from, to }: DateRangeSelectorProps) {
   useEffect(() => {
     if (!popoverOpen) return;
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setPopoverOpen(false);
       }
     }
@@ -118,10 +135,12 @@ function DateRangeSelector({ days, from, to }: DateRangeSelectorProps) {
               <button
                 key={d}
                 type="button"
-                className={`${styles.presetChip}${!from && days === d ? ` ${styles.presetChipActive}` : ""}`}
+                className={`${styles.presetChip}${
+                  !from && days === d ? ` ${styles.presetChipActive}` : ""
+                }`}
                 onClick={() => navigateTo(d)}
               >
-                Last {d} days
+                {translateAdmin("adminDynamic.lastDays", { days: d })}
               </button>
             ))}
           </div>
@@ -129,7 +148,11 @@ function DateRangeSelector({ days, from, to }: DateRangeSelectorProps) {
           {/* Native date range inputs */}
           <div className={styles.dateInputStack}>
             <div>
-              <label className={styles.dateInputLabel}>From</label>
+              <label className={styles.dateInputLabel}>
+                {translateAdmin(
+                  "adminExtracted.appAttribution.attributiondashboard.from"
+                )}
+              </label>
               <input
                 type="date"
                 value={fromDate}
@@ -139,7 +162,11 @@ function DateRangeSelector({ days, from, to }: DateRangeSelectorProps) {
               />
             </div>
             <div>
-              <label className={styles.dateInputLabel}>To</label>
+              <label className={styles.dateInputLabel}>
+                {translateAdmin(
+                  "adminExtracted.appAttribution.attributiondashboard.to"
+                )}
+              </label>
               <input
                 type="date"
                 value={toDate}
@@ -154,10 +181,12 @@ function DateRangeSelector({ days, from, to }: DateRangeSelectorProps) {
           <div className={styles.calendarApplyRow}>
             <s-button
               variant="primary"
-              disabled={(!fromDate || !toDate) || undefined}
+              disabled={!fromDate || !toDate || undefined}
               onClick={handleApply}
             >
-              Apply
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.apply"
+              )}
             </s-button>
           </div>
         </div>
@@ -186,7 +215,7 @@ export function BackfillWindowModal({
   return (
     <s-modal
       id="analytics-backfill-window-modal"
-      heading="Backfill analytics window"
+      heading={translateAdmin("adminAttributes.backfillAnalyticsWindow")}
       size="base"
     >
       <s-button
@@ -199,29 +228,39 @@ export function BackfillWindowModal({
         command="--hide"
         onClick={onConfirm}
       >
-        Backfill selected window
+        {translateAdmin(
+          "adminExtracted.appAttribution.attributiondashboard.backfillSelectedWindow"
+        )}
       </s-button>
       <s-button
         slot="secondary-actions"
         commandFor="analytics-backfill-window-modal"
         command="--hide"
       >
-        Close
+        {translateAdmin("dashboard.storefrontSetup.close")}
       </s-button>
 
-        <s-stack direction="block" gap="base">
+      <s-stack direction="block" gap="base">
         <s-paragraph>
-          Selected window: {selectedWindow}. This queries Shopify orders for the selected period and creates attribution records that Analytics may have missed.
+          {translateAdmin("adminDynamic.selectedWindow", {
+            window: selectedWindow,
+          })}
         </s-paragraph>
         <s-unordered-list>
           <s-list-item>
-            Matches order line items to bundles and imports available revenue, landing-page, and UTM details.
+            {translateAdmin(
+              "adminExtracted.appAttribution.attributiondashboard.matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP"
+            )}
           </s-list-item>
           <s-list-item>
-            Existing attribution records are skipped, so running the same window again does not create duplicates.
+            {translateAdmin(
+              "adminExtracted.appAttribution.attributiondashboard.existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD"
+            )}
           </s-list-item>
           <s-list-item>
-            Shopify orders and storefront tracking are not modified.
+            {translateAdmin(
+              "adminExtracted.appAttribution.attributiondashboard.shopifyOrdersAndStorefrontTrackingAreNotModified"
+            )}
           </s-list-item>
         </s-unordered-list>
       </s-stack>
@@ -233,7 +272,7 @@ export function BackfillWindowModal({
 
 export function removeCustomUtmParameter(
   parameters: string[],
-  parameterToRemove: string,
+  parameterToRemove: string
 ): string[] {
   return parameters.filter((parameter) => parameter !== parameterToRemove);
 }
@@ -262,7 +301,10 @@ export function CustomUtmTrackingCard({
   }, [customUtmParameters]);
 
   useEffect(() => {
-    if (fetcher.data?.success && Array.isArray(fetcher.data.customUtmParameters)) {
+    if (
+      fetcher.data?.success &&
+      Array.isArray(fetcher.data.customUtmParameters)
+    ) {
       setInput(fetcher.data.customUtmParameters.join("\n"));
       setSavedParameters(fetcher.data.customUtmParameters);
     }
@@ -274,18 +316,23 @@ export function CustomUtmTrackingCard({
       : shopify.saveBar.hide("analytics-custom-utm-save-bar"));
   }, [isDirty, shopify]);
 
-  useEffect(() => () => {
-    void shopify.saveBar.hide("analytics-custom-utm-save-bar");
-  }, [shopify]);
+  useEffect(
+    () => () => {
+      void shopify.saveBar.hide("analytics-custom-utm-save-bar");
+    },
+    [shopify]
+  );
 
   const isSaving = fetcher.state !== "idle";
   const feedback = fetcher.data?.error ?? fetcher.data?.message;
-  const previewLabel = inputAnalysis.accepted.length > 0
-    ? `Only Bundles will track: ${inputAnalysis.accepted.join(", ")}`
-    : null;
-  const savedLabel = savedParameters.length > 0
-    ? "Currently tracking"
-    : "No custom attributes are configured yet.";
+  const previewLabel =
+    inputAnalysis.accepted.length > 0
+      ? `Only Bundles will track: ${inputAnalysis.accepted.join(", ")}`
+      : null;
+  const savedLabel =
+    savedParameters.length > 0
+      ? "Currently tracking"
+      : "No custom attributes are configured yet.";
 
   function submitCustomUtmParameters(nextInput: string) {
     fetcher.submit(
@@ -293,7 +340,7 @@ export function CustomUtmTrackingCard({
         intent: "saveCustomUtms",
         customUtmParameters: nextInput,
       },
-      { method: "post" },
+      { method: "post" }
     );
   }
 
@@ -303,7 +350,10 @@ export function CustomUtmTrackingCard({
   }
 
   function handleRemoveSavedParameter(parameterToRemove: string) {
-    const nextParameters = removeCustomUtmParameter(savedParameters, parameterToRemove);
+    const nextParameters = removeCustomUtmParameter(
+      savedParameters,
+      parameterToRemove
+    );
     setInput(nextParameters.join("\n"));
   }
 
@@ -315,9 +365,15 @@ export function CustomUtmTrackingCard({
     <section className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
         <div>
-          <h2 className={styles.sectionTitle}>Custom UTM attributes</h2>
+          <h2 className={styles.sectionTitle}>
+            {translateAdmin(
+              "adminExtracted.appAttribution.attributiondashboard.customUtmAttributes"
+            )}
+          </h2>
           <p className={styles.mutedBodyText}>
-            Enter parameter names separated by commas or new lines. Only Bundles captures matching URL values on future visits and stores them with checkout attribution.
+            {translateAdmin(
+              "adminExtracted.appAttribution.attributiondashboard.enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture"
+            )}
           </p>
         </div>
         <s-button
@@ -326,14 +382,19 @@ export function CustomUtmTrackingCard({
           commandFor="custom-utm-attributes-help"
           command="--show"
         >
-          Learn More
+          {translateAdmin("common.actions.learnMore")}
         </s-button>
       </div>
       <div className={styles.customUtmBody}>
         {savedParameters.length > 0 ? (
           <div className={styles.customUtmSavedBlock}>
             <p className={styles.mutedBodyText}>{savedLabel}</p>
-            <div className={styles.customUtmChipList} aria-label="Saved custom UTM attributes">
+            <div
+              className={styles.customUtmChipList}
+              aria-label={translateAdmin(
+                "adminAttributes.savedCustomUTMAttributes"
+              )}
+            >
               {savedParameters.map((parameter) => (
                 <span key={parameter} className={styles.customUtmChip}>
                   <span className={styles.customUtmChipText}>{parameter}</span>
@@ -352,95 +413,159 @@ export function CustomUtmTrackingCard({
           </div>
         ) : null}
 
-        <fetcher.Form method="post" className={styles.customUtmForm} onSubmit={handleSaveSubmit}>
+        <fetcher.Form
+          method="post"
+          className={styles.customUtmForm}
+          onSubmit={handleSaveSubmit}
+        >
           <input type="hidden" name="intent" value="saveCustomUtms" />
           <input type="hidden" name="customUtmParameters" value={input} />
           <s-text-area
-            label="Parameter names"
+            label={translateAdmin("adminAttributes.parameterNames")}
             value={input}
             rows={3}
-            placeholder={"utm_influencer, partner_id\ncreator"}
+            placeholder={translateAdmin(
+              "adminAttributes.utmInfluencerPartnerIdCreator"
+            )}
             onInput={(event) => {
               setInput((event.target as HTMLTextAreaElement).value);
             }}
           />
           <div className={styles.customUtmFeedback} aria-live="polite">
-            {previewLabel && <p className={styles.customUtmPreview}>{previewLabel}</p>}
+            {previewLabel && (
+              <p className={styles.customUtmPreview}>{previewLabel}</p>
+            )}
             {savedParameters.length === 0 ? (
-              <p className={styles.mutedBodyText}>
-                {savedLabel}
-              </p>
+              <p className={styles.mutedBodyText}>{savedLabel}</p>
             ) : null}
             {inputAnalysis.rejected.length > 0 ? (
               <p className={styles.errorText}>
-                Ignored: {inputAnalysis.rejected.join(", ")}. Use URL parameter names only, not shopper identifiers.
+                {translateAdmin("adminDynamic.ignoredParameters", {
+                  parameters: inputAnalysis.rejected.join(", "),
+                })}
               </p>
             ) : null}
             {inputAnalysis.limitReached ? (
               <p className={styles.mutedBodyText}>
-                Only the first 10 valid custom attributes will be saved.
+                {translateAdmin(
+                  "adminExtracted.appAttribution.attributiondashboard.onlyTheFirst10ValidCustomAttributesWillBeSaved"
+                )}
               </p>
             ) : null}
           </div>
           {feedback ? (
-            <span className={fetcher.data?.error ? styles.errorText : styles.successText}>
+            <span
+              className={
+                fetcher.data?.error ? styles.errorText : styles.successText
+              }
+            >
               {feedback}
             </span>
           ) : null}
         </fetcher.Form>
       </div>
       <ui-save-bar id="analytics-custom-utm-save-bar">
-        <button variant="primary" onClick={() => handleSaveSubmit()} disabled={isSaving}>Save</button>
-        <button onClick={handleDiscard} disabled={isSaving}>Discard</button>
+        <button
+          variant="primary"
+          onClick={() => handleSaveSubmit()}
+          disabled={isSaving}
+        >
+          {translateAdmin("dashboard.language.save")}
+        </button>
+        <button onClick={handleDiscard} disabled={isSaving}>
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.configurecontextualsavebar.discard"
+          )}
+        </button>
       </ui-save-bar>
       <s-modal
         id="custom-utm-attributes-help"
-        heading="Custom UTM attributes"
+        heading={translateAdmin(
+          "adminExtracted.appAttribution.attributiondashboard.customUtmAttributes"
+        )}
       >
         <s-button
           slot="secondary-actions"
           commandFor="custom-utm-attributes-help"
           command="--hide"
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
 
         <s-stack direction="block" gap="base">
           <div>
-            <h3 className={styles.sectionTitle}>How custom attributes work</h3>
+            <h3 className={styles.sectionTitle}>
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.howCustomAttributesWork"
+              )}
+            </h3>
             <p className={styles.mutedBodyText}>
-              Custom attributes are extra URL query parameters you add to campaign, affiliate, influencer, or creator links when the standard UTM fields are not enough.
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.customAttributesAreExtraUrlQueryParametersYouAddToCampaignAffili"
+              )}
             </p>
           </div>
           <div>
-            <h3 className={styles.sectionTitle}>How to set them up</h3>
+            <h3 className={styles.sectionTitle}>
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.howToSetThemUp"
+              )}
+            </h3>
             <p className={styles.mutedBodyText}>
-              Add parameter names one per line or separated by commas. Enter only the parameter name, not the full URL and not the value.
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.addParameterNamesOnePerLineOrSeparatedByCommasEnterOnlyTheParame"
+              )}
             </p>
             <p className={styles.mutedBodyText}>
-              Example names: <code className={styles.codeSample}>utm_influencer, partner_id</code>
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.exampleNames"
+              )}{" "}
+              <code className={styles.codeSample}>
+                {translateAdmin(
+                  "adminExtracted.appAttribution.attributiondashboard.utmInfluencerPartnerId"
+                )}
+              </code>
             </p>
             <p className={styles.mutedBodyText}>
-              Example link: <code className={styles.codeSample}>https://store.com/products/bundle?utm_source=instagram&utm_influencer=maya&amp;partner_id=summer-drop</code>
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.exampleLink"
+              )}{" "}
+              <code className={styles.codeSample}>
+                {translateAdmin(
+                  "adminExtracted.appAttribution.attributiondashboard.httpsStoreComProductsBundleUtmSourceInstagramUtmInfluencerMayaAm"
+                )}
+              </code>
             </p>
           </div>
           <div>
-            <h3 className={styles.sectionTitle}>What happens after saving</h3>
+            <h3 className={styles.sectionTitle}>
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.whatHappensAfterSaving"
+              )}
+            </h3>
             <p className={styles.mutedBodyText}>
-              Only Bundles saves up to 10 valid names, updates the tracking pixel settings, and starts capturing those attributes for new visits after you save.
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.onlyBundlesSavesUpTo10ValidNamesUpdatesTheTrackingPixelSettingsA"
+              )}
             </p>
             <p className={styles.mutedBodyText}>
-              When a shopper reaches checkout from a matching link, the saved values are stored with the order attribution record and included in analytics exports.
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.whenAShopperReachesCheckoutFromAMatchingLinkTheSavedValuesAreSto"
+              )}
             </p>
           </div>
-          <s-banner
-            heading="Privacy check"
-            tone="warning"
-            dismissible={false}
-            hidden={false}
-          >
-            Do not track shopper identifiers such as email addresses, phone numbers, customer IDs, or any value that can identify a person.
-          </s-banner>
+          <s-box paddingBlockEnd="small-200">
+            <s-banner
+              heading={translateAdmin("adminAttributes.privacyCheck")}
+              tone="warning"
+              dismissible={false}
+              hidden={false}
+            >
+              {translateAdmin(
+                "adminExtracted.appAttribution.attributiondashboard.doNotTrackShopperIdentifiersSuchAsEmailAddressesPhoneNumbersCust"
+              )}
+            </s-banner>
+          </s-box>
         </s-stack>
       </s-modal>
     </section>
@@ -449,14 +574,25 @@ export function CustomUtmTrackingCard({
 
 function AttributionDashboardContent({
   data,
+  onOfferSelectionChange,
 }: {
   data: AttributionDashboardViewData;
+  onOfferSelectionChange: (offerPolicyId: string | null) => void;
 }) {
   const { t } = useTranslation();
   const {
-    days, from, to, prevFrom, prevTo,
-    funnelSnapshot, bundleMetricTrend, bundleMatrix, topCampaignsRows,
-    customUtmParameters, accessMode = "ADVANCED",
+    days,
+    from,
+    to,
+    prevFrom,
+    prevTo,
+    funnelSnapshot,
+    bundleMetricTrend,
+    bundleMatrix,
+    topCampaignsRows,
+    customUtmParameters,
+    offerAnalytics,
+    accessMode = "ADVANCED",
   } = data;
   const navigate = useNavigate();
   const shopify = useAppBridge();
@@ -466,7 +602,11 @@ function AttributionDashboardContent({
     filename?: string;
     error?: string;
   }>();
-  const backfillFetcher = useFetcher<{ success?: boolean; message?: string; error?: string }>();
+  const backfillFetcher = useFetcher<{
+    success?: boolean;
+    message?: string;
+    error?: string;
+  }>();
 
   const [compare, setCompare] = useState(true);
 
@@ -474,8 +614,21 @@ function AttributionDashboardContent({
     if (!prevFrom || !prevTo) return null;
     const fmt = (s: string) => {
       const [, m, d] = s.split("-");
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      return `${months[parseInt(m,10)-1]} ${parseInt(d,10)}`;
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      return `${months[parseInt(m, 10) - 1]} ${parseInt(d, 10)}`;
     };
     return `${fmt(prevFrom)} – ${fmt(prevTo)}`;
   }, [prevFrom, prevTo]);
@@ -485,14 +638,19 @@ function AttributionDashboardContent({
     if (!result) return;
     if (!result.success || !result.csv || !result.filename) {
       if (result.error) {
-        showAdminTransientErrorToast(shopify, t("common.alerts.exportUnavailable"));
+        showAdminTransientErrorToast(
+          shopify,
+          t("common.alerts.exportUnavailable")
+        );
       }
       return;
     }
 
-    const objectUrl = URL.createObjectURL(new Blob([result.csv], {
-      type: "text/csv;charset=utf-8",
-    }));
+    const objectUrl = URL.createObjectURL(
+      new Blob([result.csv], {
+        type: "text/csv;charset=utf-8",
+      })
+    );
     const downloadLink = document.createElement("a");
     downloadLink.href = objectUrl;
     downloadLink.download = result.filename;
@@ -508,7 +666,10 @@ function AttributionDashboardContent({
     if (result?.message) {
       shopify.toast.show(t("common.success.backfillComplete"));
     } else if (result?.error) {
-      showAdminTransientErrorToast(shopify, t("common.alerts.backfillUnavailable"));
+      showAdminTransientErrorToast(
+        shopify,
+        t("common.alerts.backfillUnavailable")
+      );
     }
   }, [backfillFetcher.data, shopify, t]);
 
@@ -517,36 +678,57 @@ function AttributionDashboardContent({
       from && to
         ? { intent: "backfill", from, to }
         : { intent: "backfill", days: String(days) },
-      { method: "post" },
+      { method: "post" }
     );
   }
 
   function handleExport() {
+    const offerPolicyId = offerAnalytics?.selectedOfferPolicyId ?? undefined;
     exportFetcher.submit(
       from && to
-        ? { intent: "export", from, to }
-        : { intent: "export", days: String(days) },
-      { method: "post" },
+        ? {
+            intent: "export",
+            from,
+            to,
+            ...(offerPolicyId ? { offerPolicyId } : {}),
+          }
+        : {
+            intent: "export",
+            days: String(days),
+            ...(offerPolicyId ? { offerPolicyId } : {}),
+          },
+      { method: "post" }
     );
   }
 
   return (
     <div className={styles.dashboardShell}>
-        <div className={styles.dashboardStack}>
-          {/* Date range selector + Compare toggle + Export */}
-          {accessMode === "SUMMARY" && (
+      <div className={styles.dashboardStack}>
+        {accessMode === "ADVANCED" && (
+          <OfferAnalyticsCard
+            model={offerAnalytics}
+            onSelectionChange={onOfferSelectionChange}
+          />
+        )}
+        {/* Date range selector + Compare toggle + Export */}
+        {accessMode === "SUMMARY" && (
+          <s-box paddingBlockEnd="small-200">
             <s-banner tone="info">
               {t("subscription.analytics.summaryNotice")}
             </s-banner>
-          )}
-          {accessMode === "ADVANCED" && <div className={styles.headerRow}>
+          </s-box>
+        )}
+        {accessMode === "ADVANCED" && (
+          <div className={styles.headerRow}>
             <div className={styles.comparePillSlot}>
               <div className={styles.datePickerWrap}>
                 <DateRangeSelector days={days} from={from} to={to} />
               </div>
               {compare && comparePeriodLabel && (
                 <span className={styles.comparePill}>
-                  vs {comparePeriodLabel}
+                  {translateAdmin("adminDynamic.comparedWith", {
+                    period: comparePeriodLabel,
+                  })}
                 </span>
               )}
             </div>
@@ -556,9 +738,13 @@ function AttributionDashboardContent({
                   inlineSize="fill"
                   variant={compare ? "primary" : "secondary"}
                   icon={compare ? "check" : "chart-line"}
-                  onClick={() => setCompare(v => !v)}
+                  onClick={() => setCompare((v) => !v)}
                 >
-                  Compare {compare ? "on" : "off"}
+                  {translateAdmin(
+                    compare
+                      ? "adminDynamic.compareOn"
+                      : "adminDynamic.compareOff"
+                  )}
                 </s-button>
               </div>
               <div className={styles.analyticsActionButton}>
@@ -570,7 +756,7 @@ function AttributionDashboardContent({
                   disabled={exportFetcher.state !== "idle" || undefined}
                   onClick={handleExport}
                 >
-                  Export CSV
+                  {translateAdmin("offerPolicyCsv.export.action")}
                 </s-button>
               </div>
               <div className={styles.analyticsActionButton}>
@@ -582,55 +768,76 @@ function AttributionDashboardContent({
                   commandFor="analytics-backfill-window-modal"
                   command="--show"
                 >
-                  Backfill window
+                  {translateAdmin(
+                    "adminExtracted.appAttribution.attributiondashboard.backfillWindow"
+                  )}
                 </s-button>
               </div>
             </div>
-          </div>}
-          {accessMode === "ADVANCED" && <BackfillWindowModal
+          </div>
+        )}
+        {accessMode === "ADVANCED" && (
+          <BackfillWindowModal
             days={days}
             from={from}
             to={to}
             isSubmitting={backfillFetcher.state !== "idle"}
             onConfirm={handleBackfillConfirm}
-          />}
-          {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}
-
-          <FunnelHero
-            snapshot={funnelSnapshot}
-            windowLabel={from && to ? `${from} → ${to}` : `Last ${days} days`}
-            formatRevenue={formatRevenue}
-            formatCount={(n) => n.toLocaleString()}
-            showHeader={false}
           />
+        )}
+        {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}
 
-          {accessMode === "ADVANCED" && <Suspense fallback={null}>
+        <FunnelHero
+          snapshot={funnelSnapshot}
+          windowLabel={from && to ? `${from} → ${to}` : `Last ${days} days`}
+          formatRevenue={formatRevenue}
+          formatCount={(n) => n.toLocaleString()}
+          showHeader={false}
+        />
+
+        {accessMode === "ADVANCED" && (
+          <Suspense fallback={null}>
             <LazyBundleMetricChart
               trend={bundleMetricTrend}
               rangeDays={days}
               formatRevenue={formatRevenue}
             />
-          </Suspense>}
+          </Suspense>
+        )}
 
-          {accessMode === "ADVANCED" && <BundlePerformanceMatrix
+        {accessMode === "ADVANCED" && (
+          <BundlePerformanceMatrix
             rows={bundleMatrix}
             formatRevenue={formatRevenue}
-            onRowClick={(bundleId) => navigate(`/app/bundles/full-page-bundle/configure/${bundleId}`)}
-          />}
+            onRowClick={(bundleId) =>
+              navigate(`/app/bundles/full-page-bundle/configure/${bundleId}`)
+            }
+          />
+        )}
 
-          {accessMode === "ADVANCED" && <CustomUtmTrackingCard customUtmParameters={customUtmParameters} />}
+        {accessMode === "ADVANCED" && (
+          <CustomUtmTrackingCard customUtmParameters={customUtmParameters} />
+        )}
 
-          {accessMode === "ADVANCED" && <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />}
-
-        </div>
+        {accessMode === "ADVANCED" && (
+          <TopCampaigns rows={topCampaignsRows} formatRevenue={formatRevenue} />
+        )}
+      </div>
     </div>
   );
 }
 
 export default function AttributionDashboard({
   data,
+  onOfferSelectionChange,
 }: {
   data: AttributionDashboardViewData;
+  onOfferSelectionChange: (offerPolicyId: string | null) => void;
 }) {
-  return <AttributionDashboardContent data={data} />;
+  return (
+    <AttributionDashboardContent
+      data={data}
+      onOfferSelectionChange={onOfferSelectionChange}
+    />
+  );
 }

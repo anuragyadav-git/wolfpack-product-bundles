@@ -40,7 +40,18 @@ describe("PPB translation runtime configuration", () => {
     }, [step], {}, {
       discountEnabled: true,
       discountType: "percentage_off",
-      discountRules: [],
+      discountRules: [{
+        id: "rule-1",
+        conditionType: "quantity",
+        conditionValue: 2,
+        discountValue: 10,
+        tierBadge: {
+          enabled: true,
+          text: "Save {{saved_percentage}}",
+          shape: "pill",
+          visibility: "always",
+        },
+      }],
       showFooter: true,
       ruleMessages: {},
       ruleMessagesByLocale: {
@@ -60,6 +71,12 @@ describe("PPB translation runtime configuration", () => {
     }));
     expect(config.pricing.messages.ruleMessagesByLocale).toEqual({
       fr: { "addons-step-1": { discountText: "Ajoutez-en plus" } },
+    });
+    expect(config.pricing.rules[0].tierBadge).toEqual({
+      enabled: true,
+      text: "Save {{saved_percentage}}",
+      shape: "pill",
+      visibility: "always",
     });
   });
 

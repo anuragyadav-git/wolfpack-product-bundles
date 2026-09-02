@@ -1,24 +1,27 @@
 import { useBannerSessionState } from "../../../../lib/banner-session-state";
+import { translateAdmin } from "~/i18n/config";
 
 export const DISCOUNT_PRICING_TIP_BANNER_KEY = "configure_discount_pricing_tip";
 
 export function DiscountPricingTipBanner() {
   const [dismissed, dismiss] = useBannerSessionState(
-    DISCOUNT_PRICING_TIP_BANNER_KEY,
+    DISCOUNT_PRICING_TIP_BANNER_KEY
   );
 
   if (dismissed) return null;
 
   return (
-    <s-banner
-      tone="info"
-      heading="Discount setup tip"
-      dismissible
-      onDismiss={dismiss}
-    >
-      Tip: Discounts are calculated based on the products in cart, make sure to
-      add the &quot;Default Product&quot; quantity or amount while configuring
-      discounts.
-    </s-banner>
+    <s-box paddingBlockEnd="small-200">
+      <s-banner
+        tone="info"
+        heading={translateAdmin("adminAttributes.discountSetupTip")}
+        dismissible
+        onDismiss={dismiss}
+      >
+        {translateAdmin(
+          "adminExtracted.shared.bundleConfigure.discountpricingtipbanner.tipDiscountsAreCalculatedBasedOnTheProductsInCartMakeSureToAddTh"
+        )}
+      </s-banner>
+    </s-box>
   );
 }

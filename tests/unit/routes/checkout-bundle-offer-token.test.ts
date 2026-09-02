@@ -63,6 +63,7 @@ function parentPayload(shop = "test-shop.myshopify.com"): RuntimeTokenPayload {
     components: [{ variantId: "gid://shopify/ProductVariant/101", quantity: 2 }],
     addons: [],
     priceAdjustment: { method: "percentage_off", value: 10 },
+    countryRule: "",
   };
 }
 

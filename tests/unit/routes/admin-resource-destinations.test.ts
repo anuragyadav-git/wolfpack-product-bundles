@@ -34,6 +34,7 @@ describe("Admin resource destinations", () => {
 
     expect(view).toContain("dashboard.resources.sdkDocumentation");
     expect(view).toContain("dashboard.resources.comingSoon");
+    expect(view).not.toContain("dashboard.resources.exploreUpdate");
     expect(view).not.toContain("wolfpackapps.com");
     expect(view).not.toContain("<a ");
   });

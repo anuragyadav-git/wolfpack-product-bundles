@@ -5,7 +5,7 @@ title: FPB App Proxy Host
 type: architecture-decision
 status: accepted
 summary: Full Page Bundles use the signed app proxy as their sole storefront document host.
-last_audited: 2026-08-30
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -18,6 +18,7 @@ source_paths:
   - extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js
   - app/lib/fpb-storefront-url.ts
   - app/routes/root/wpb.$bundleId.tsx
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx
   - app/services/bundles/fpb-public-number.server.ts
   - app/services/bundles/bundle-parent-product.server.ts
   - app/routes/app/app.dashboard/handlers/handlers.server.ts
@@ -72,9 +73,25 @@ Shopify configuration and QA-store installation use
 `STOREFRONT_PROXY_ROOT=/apps/product-bundles-sit`. This prevents PROD and SIT
 from competing for one store-owned proxy path when both apps are installed on
 the same QA store. Production does not set an override and therefore continues
-to use `/apps/product-bundles`. An FPB document also infers its active proxy
-root from the current `/wpb/` pathname so subsequent same-page requests remain
-on the signed path that served the document.
+to use `/apps/product-bundles`. Both configurations retain Shopify's `apps`
+prefix; only the installation-specific subpath differs.
+
+Embedded Admin code cannot infer an installed storefront path from its own
+`/app/...` browser location, and browser bundles cannot read the server's Node
+environment. The authenticated FPB configure loader therefore resolves the
+environment-specific root on the server and carries that value through the
+controller into preview URL construction. Storefront FPB code resolves the
+root independently from the signed `/wpb/` document pathname. Neither surface
+falls back to the production path when the required runtime context is absent.
+
+The server writes the resolved complete root into the existing app-owned shop
+`$app.ppb_storefront_runtime` JSON. Theme Liquid reads that Shopify-hosted value,
+the app embed exposes it to its compiled runtime, and direct Product Page and SDK
+entrypoints initialize the shared proxy-path builder from the same value. A
+malformed configured value is rejected rather than silently sending requests to
+the production app. An FPB document can also infer its active proxy root from
+the current `/wpb/` pathname so subsequent same-page requests remain on the
+signed path that served the document.
 
 The storefront proxy resolver is bundled into the generated widget and SDK
 assets. Any change to `app/config/storefront-proxy-routes.ts` must therefore be

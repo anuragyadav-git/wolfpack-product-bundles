@@ -4,6 +4,7 @@ import type { ConfigureChildItem } from "../../../../lib/bundle-config/common-co
 import type { ParentProductStatusUi } from "../../../../lib/parent-product-status-ui";
 import { DiscountMethod } from "../../../../types/pricing";
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
+import { translateAdmin, translateAdminCopy } from "~/i18n/config";
 
 type StatusBadge = { label: string; tone?: string } | null;
 type CommonSetupItem = ConfigureChildItem & {
@@ -64,7 +65,7 @@ function getProductId(adapter: CommonConfigureSidebarAdapter) {
 
 function isItemActive(
   item: CommonSetupItem,
-  adapter: CommonConfigureSidebarAdapter,
+  adapter: CommonConfigureSidebarAdapter
 ) {
   const { activeSection } = adapter;
   if (activeSection === item.id) return true;
@@ -76,7 +77,9 @@ function isItemActive(
   }
   if (
     item.id === "bundle_visibility" &&
-    adapter.bundleVisibilityChildItems.some((child) => child.id === activeSection)
+    adapter.bundleVisibilityChildItems.some(
+      (child) => child.id === activeSection
+    )
   ) {
     return true;
   }
@@ -104,7 +107,7 @@ export function getActiveConfigureSectionLabel({
 }
 
 export function getMobileSetupChevronIcon(
-  open: boolean,
+  open: boolean
 ): "chevron-up" | "chevron-down" {
   return open ? "chevron-up" : "chevron-down";
 }
@@ -126,7 +129,7 @@ export function selectConfigureSection({
 
 export function getDiscountPricingStatusBadge(
   discountEnabled: boolean,
-  discountType: string,
+  discountType: string
 ): StatusBadge {
   if (!discountEnabled) return { label: "None" };
 
@@ -146,12 +149,12 @@ export function getDiscountPricingStatusBadge(
 
 function getItemStatusBadge(
   item: CommonSetupItem,
-  adapter: CommonConfigureSidebarAdapter,
+  adapter: CommonConfigureSidebarAdapter
 ): StatusBadge {
   if (item.id === "discount_pricing") {
     return getDiscountPricingStatusBadge(
       adapter.pricingState.discountEnabled,
-      adapter.pricingState.discountType,
+      adapter.pricingState.discountType
     );
   }
   if (item.id === "bundle_visibility") {
@@ -164,13 +167,17 @@ function getItemStatusBadge(
 
 function renderStatusBadge(
   statusBadge: StatusBadge,
-  VisibilityBadge: CommonConfigureSidebarAdapter["VisibilityBadge"],
+  VisibilityBadge: CommonConfigureSidebarAdapter["VisibilityBadge"]
 ) {
   if (!statusBadge) return null;
   if (statusBadge.label === "Pending" || statusBadge.label === "Optimised") {
     return <VisibilityBadge isOptimised={statusBadge.label === "Optimised"} />;
   }
-  return <s-badge tone={(statusBadge.tone as any) || "subdued"}>{statusBadge.label}</s-badge>;
+  return (
+    <s-badge tone={(statusBadge.tone as any) || "subdued"}>
+      {statusBadge.label}
+    </s-badge>
+  );
 }
 
 export function CommonConfigureSidebar({
@@ -233,7 +240,9 @@ export function CommonConfigureSidebar({
             {item.id === "select_template" && <s-divider />}
             <button
               type="button"
-              className={`${styles.setupNavItem} ${isActive ? styles.setupNavItemActive : ""}`}
+              className={`${styles.setupNavItem} ${
+                isActive ? styles.setupNavItemActive : ""
+              }`}
               onClick={() => {
                 if (item.id === "select_template") {
                   openSelectTemplateModal();
@@ -257,7 +266,9 @@ export function CommonConfigureSidebar({
                   "○"
                 )}
               </span>
-              <span className={styles.setupNavLabel}>{item.label}</span>
+              <span className={styles.setupNavLabel}>
+                {translateAdminCopy(item.label)}
+              </span>
               <span className={styles.setupNavMeta}>
                 {renderStatusBadge(statusBadge, VisibilityBadge)}
               </span>
@@ -265,13 +276,19 @@ export function CommonConfigureSidebar({
             {item.id === "step_setup" &&
               stepSetupChildItems.length > 0 &&
               (activeSection === "step_setup" ||
-                stepSetupChildItems.some((child) => child.id === activeSection)) && (
+                stepSetupChildItems.some(
+                  (child) => child.id === activeSection
+                )) && (
                 <div className={styles.subNav}>
                   {stepSetupChildItems.map((child) => (
                     <button
                       key={child.id}
                       type="button"
-                      className={`${styles.subNavItem} ${activeSection === child.id ? styles.subNavItemActive : ""}`}
+                      className={`${styles.subNavItem} ${
+                        activeSection === child.id
+                          ? styles.subNavItemActive
+                          : ""
+                      }`}
                       onClick={() => selectSection(child.id)}
                     >
                       {child.label}
@@ -281,13 +298,19 @@ export function CommonConfigureSidebar({
               )}
             {item.id === "bundle_visibility" &&
               (activeSection === "bundle_visibility" ||
-                bundleVisibilityChildItems.some((child) => child.id === activeSection)) && (
+                bundleVisibilityChildItems.some(
+                  (child) => child.id === activeSection
+                )) && (
                 <div className={styles.subNav}>
                   {bundleVisibilityChildItems.map((child) => (
                     <button
                       key={child.id}
                       type="button"
-                      className={`${styles.subNavItem} ${activeSection === child.id ? styles.subNavItemActive : ""}`}
+                      className={`${styles.subNavItem} ${
+                        activeSection === child.id
+                          ? styles.subNavItemActive
+                          : ""
+                      }`}
                       onClick={() => selectSection(child.id)}
                     >
                       {child.label}
@@ -307,12 +330,18 @@ export function CommonConfigureSidebar({
         <s-section>
           <s-stack direction="block" gap="small">
             <div className={styles.leftCardHeader}>
-              <h3 className={styles.leftCardTitle}>Bundle Product</h3>
+              <h3 className={styles.leftCardTitle}>
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.bundleProduct"
+                )}
+              </h3>
               <div className={styles.productMenuWrapper}>
                 <button
                   type="button"
                   className={styles.productMenuBtn}
-                  aria-label="Bundle product options"
+                  aria-label={translateAdmin(
+                    "adminAttributes.bundleProductOptions"
+                  )}
                   onClick={() => setProductMenuOpen((open) => !open)}
                 >
                   <s-icon type="menu-vertical" />
@@ -333,7 +362,11 @@ export function CommonConfigureSidebar({
                         }}
                       >
                         <s-icon type="edit" />
-                        <span>Replace Product</span>
+                        <span>
+                          {translateAdmin(
+                            "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.replaceProduct"
+                          )}
+                        </span>
                       </button>
                       <button
                         type="button"
@@ -344,7 +377,11 @@ export function CommonConfigureSidebar({
                         }}
                       >
                         <s-icon type="duplicate" />
-                        <span>Sync Product</span>
+                        <span>
+                          {translateAdmin(
+                            "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.syncProduct"
+                          )}
+                        </span>
                       </button>
                     </div>
                   </>
@@ -368,7 +405,9 @@ export function CommonConfigureSidebar({
                   {productTitle ||
                     bundleProduct?.title ||
                     formState.bundleName ||
-                    "Bundle Product"}
+                    translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.bundleProduct"
+                    )}
                 </span>
               </div>
               <button
@@ -383,19 +422,32 @@ export function CommonConfigureSidebar({
                   openProductInAdmin(productId);
                 }}
               >
-                <s-icon type="edit" /> <span>Edit Product</span>
+                <s-icon type="edit" />{" "}
+                <span>
+                  {translateAdmin(
+                    "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.editProduct"
+                  )}
+                </span>
               </button>
             </div>
             <div className={styles.parentProductStatus}>
-              <span>Parent Product Status</span>
+              <span>
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.parentProductStatus"
+                )}
+              </span>
               {parentProductStatusUi.isLoading ? (
                 <s-spinner
                   size="base"
-                  accessibilityLabel={t("common.parentProductStatus.loadingTitle")}
+                  accessibilityLabel={t(
+                    "common.parentProductStatus.loadingTitle"
+                  )}
                 />
               ) : (
                 <s-badge tone={parentProductStatusUi.tone as any}>
-                  {parentProductStatusUi.label}
+                  {parentProductStatusUi.label
+                    ? translateAdminCopy(parentProductStatusUi.label)
+                    : null}
                 </s-badge>
               )}
             </div>
@@ -405,8 +457,16 @@ export function CommonConfigureSidebar({
         <div className={styles.desktopSetupSection}>
           <s-section>
             <s-stack direction="block" gap="small">
-              <h3 className={styles.leftCardTitle}>Bundle Setup</h3>
-              <p className={styles.leftCardSubtitle}>Set-up your bundle builder</p>
+              <h3 className={styles.leftCardTitle}>
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.bundleSetup"
+                )}
+              </h3>
+              <p className={styles.leftCardSubtitle}>
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.setUpYourBundleBuilder"
+                )}
+              </p>
               {renderSetupNavigation({ includeTemplateRef: true })}
             </s-stack>
           </s-section>
@@ -415,26 +475,29 @@ export function CommonConfigureSidebar({
         <details
           className={styles.mobileSetupSection}
           open={mobileNavigationOpen}
-          onToggle={(event) => setMobileNavigationOpen(event.currentTarget.open)}
+          onToggle={(event) =>
+            setMobileNavigationOpen(event.currentTarget.open)
+          }
         >
           <summary className={styles.mobileSetupSummary}>
             <span className={styles.mobileSetupSummaryText}>
-              <span className={styles.mobileSetupTitle}>Bundle Setup</span>
+              <span className={styles.mobileSetupTitle}>
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.bundleSetup"
+                )}
+              </span>
               <span className={styles.mobileSetupActiveSection}>
-                {activeSectionLabel}
+                {translateAdminCopy(activeSectionLabel)}
               </span>
             </span>
             <span className={styles.mobileSetupChevron} aria-hidden="true">
-              <s-icon
-                type={getMobileSetupChevronIcon(mobileNavigationOpen)}
-              />
+              <s-icon type={getMobileSetupChevronIcon(mobileNavigationOpen)} />
             </span>
           </summary>
           <div className={styles.mobileSetupContent}>
             {renderSetupNavigation({ closeAfterSelection: true })}
           </div>
         </details>
-
       </s-stack>
     </div>
   );
@@ -450,9 +513,13 @@ export function CommonConfigureSupplement({
   return (
     <s-section>
       <s-stack direction="block" gap="small">
-        <h3 className={styles.leftCardTitle}>{liveCard.title}</h3>
+        <h3 className={styles.leftCardTitle}>
+          {translateAdminCopy(liveCard.title)}
+        </h3>
         <div className={styles.bundleLivePanel}>
-          <span className={styles.bundleLivePlaceOnTheme}>{liveCard.label}</span>
+          <span className={styles.bundleLivePlaceOnTheme}>
+            {translateAdminCopy(liveCard.label)}
+          </span>
           <s-button
             variant="secondary"
             icon={getConfigureActionIcon("place")}
@@ -460,7 +527,7 @@ export function CommonConfigureSupplement({
             disabled={liveCard.disabled || undefined}
             onClick={liveCard.onAction}
           >
-            {liveCard.actionLabel}
+            {translateAdminCopy(liveCard.actionLabel)}
           </s-button>
         </div>
       </s-stack>

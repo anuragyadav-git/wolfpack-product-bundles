@@ -42,6 +42,75 @@ describe("parsePPBBundleSettings", () => {
     expect(result.validateQuantityPerProduct).toEqual({ isEnabled: false, allowedQuantity: 1 });
     expect(result.bundleTextConfig).toBeNull();
     expect(result.useSingleStepCategoriesAsBundleSteps).toBe(false);
+    expect(result.lowStockAlertEnabled).toBe(false);
+    expect(result.lowStockAlertThreshold).toBe(5);
+    expect(result.lowStockAlertMessage).toBe("Only {{stock}} left");
+    expect(result.stickyAddToCartEnabled).toBe(false);
+    expect(result.stickyAddToCartShowDesktop).toBe(true);
+    expect(result.stickyAddToCartShowMobile).toBe(true);
+    expect(result.stickyAddToCartAction).toBe("scroll_to_offers");
+    expect(result.countdownEnabled).toBe(false);
+    expect(result.countdownLayout).toBe("compact");
+    expect(result.countdownPosition).toBe("above");
+    expect(result.countdownTitle).toBe("");
+    expect(result.countdownExpiryAction).toBe("hide");
+    expect(result.countdownExpiredMessage).toBe("");
+  });
+
+  it("parses direct countdown presentation settings", () => {
+    const result = parsePPBBundleSettings(makeForm({
+      countdownEnabled: "true",
+      countdownLayout: "full",
+      countdownPosition: "below",
+      countdownTitle: "Ends soon",
+      countdownExpiryAction: "show_message",
+      countdownExpiredMessage: "This offer has ended",
+    }));
+
+    expect(result.countdownEnabled).toBe(true);
+    expect(result.countdownLayout).toBe("full");
+    expect(result.countdownPosition).toBe("below");
+    expect(result.countdownTitle).toBe("Ends soon");
+    expect(result.countdownExpiryAction).toBe("show_message");
+    expect(result.countdownExpiredMessage).toBe("This offer has ended");
+  });
+
+  it("normalizes unsupported countdown options to canonical defaults", () => {
+    const result = parsePPBBundleSettings(makeForm({
+      countdownLayout: "banner",
+      countdownPosition: "fixed",
+      countdownExpiryAction: "restart",
+    }));
+
+    expect(result.countdownLayout).toBe("compact");
+    expect(result.countdownPosition).toBe("above");
+    expect(result.countdownExpiryAction).toBe("hide");
+  });
+
+  it("parses direct sticky add-to-cart settings", () => {
+    const result = parsePPBBundleSettings(makeForm({
+      stickyAddToCartEnabled: "true",
+      stickyAddToCartShowDesktop: "false",
+      stickyAddToCartShowMobile: "true",
+      stickyAddToCartAction: "add_selected_offer",
+    }));
+
+    expect(result.stickyAddToCartEnabled).toBe(true);
+    expect(result.stickyAddToCartShowDesktop).toBe(false);
+    expect(result.stickyAddToCartShowMobile).toBe(true);
+    expect(result.stickyAddToCartAction).toBe("add_selected_offer");
+  });
+
+  it("parses direct low-stock alert settings", () => {
+    const result = parsePPBBundleSettings(makeForm({
+      lowStockAlertEnabled: "true",
+      lowStockAlertThreshold: "8",
+      lowStockAlertMessage: "Hurry, {{stock}} remaining",
+    }));
+
+    expect(result.lowStockAlertEnabled).toBe(true);
+    expect(result.lowStockAlertThreshold).toBe(8);
+    expect(result.lowStockAlertMessage).toBe("Hurry, {{stock}} remaining");
   });
 
   it("parses variantSelectorEnabled defaults to true when missing", () => {

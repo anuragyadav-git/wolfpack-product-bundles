@@ -89,7 +89,7 @@ export function resolveProductPageTemplateSelection(
         bundleDesignPresetId?: unknown;
       }
     | null
-    | undefined,
+    | undefined
 ) {
   const layoutTemplate =
     typeof bundle?.bundleDesignTemplate === "string" &&
@@ -104,7 +104,7 @@ export function resolveProductPageTemplateSelection(
   const savedTemplate = productPageTemplateOptions.find(
     (templateOption) =>
       templateOption.layoutTemplate === layoutTemplate &&
-      templateOption.presetId === presetId,
+      templateOption.presetId === presetId
   );
 
   return savedTemplate
@@ -138,7 +138,7 @@ export type StepSetupMultiLanguageTarget =
 export type UpsellWidgetDisplayMode = "block" | "button";
 
 export function normalizeUpsellWidgetDisplayMode(
-  value: unknown,
+  value: unknown
 ): UpsellWidgetDisplayMode {
   return value === "button" ? "button" : "block";
 }
@@ -152,7 +152,7 @@ export function getVisibilityDisplayTarget(
     | Partial<VisibilityDisplayConfiguration>
     | null
     | undefined,
-  allValue: string,
+  allValue: string
 ): string {
   if (!displayConfiguration) return allValue;
   if (
@@ -180,7 +180,7 @@ export function buildVisibilityDisplayConfiguration(
   selectedProducts: unknown[] = [],
   showOnSpecificProductPages: unknown[] = [],
   collectionsSelectedData: unknown[] = [],
-  showOnSpecificCollectionPages: unknown[] = [],
+  showOnSpecificCollectionPages: unknown[] = []
 ): VisibilityDisplayConfiguration {
   const showOnAllBundleProducts =
     displayOn === "all" || displayOn === "all_products";
@@ -198,25 +198,25 @@ export function buildVisibilityDisplayConfiguration(
     selectedProducts:
       displayOn === "specific_products"
         ? selectedProducts.map((product) =>
-            compactVisibilityProductReference(product),
+            compactVisibilityProductReference(product)
           )
         : [],
     showOnSpecificProductPages:
       displayOn === "specific_products"
         ? productPageTargets.map((product) =>
-            compactVisibilityProductPageReference(product),
+            compactVisibilityProductPageReference(product)
           )
         : [],
     collectionsSelectedData:
       displayOn === "specific_collections"
         ? collectionsSelectedData.map((collection) =>
-            compactVisibilityCollectionReference(collection),
+            compactVisibilityCollectionReference(collection)
           )
         : [],
     showOnSpecificCollectionPages:
       displayOn === "specific_collections"
         ? collectionPageTargets.map((collection) =>
-            compactVisibilityCollectionPageReference(collection),
+            compactVisibilityCollectionPageReference(collection)
           )
         : [],
   };
@@ -237,9 +237,9 @@ function getVisibilityResourceNumericId(resource: any): string {
     resource?.productId ??
       resource?.collectionId ??
       getVisibilityResourceId(resource) ??
-      "",
+      ""
   );
-  return id.includes("/") ? (id.split("/").pop() ?? id) : id;
+  return id.includes("/") ? id.split("/").pop() ?? id : id;
 }
 
 function getVisibilityImageUrl(resource: any): string | null {
@@ -302,7 +302,7 @@ function compactVisibilityProductPageReference(product: any) {
 }
 
 export function normalizeVisibilityProductForDisplayConfiguration(
-  product: any,
+  product: any
 ) {
   return compactVisibilityProductReference(product);
 }
@@ -335,7 +335,7 @@ function compactVisibilityCollectionPageReference(collection: any) {
 }
 
 export function normalizeVisibilityCollectionForDisplayConfiguration(
-  collection: any,
+  collection: any
 ) {
   return compactVisibilityCollectionReference(collection);
 }

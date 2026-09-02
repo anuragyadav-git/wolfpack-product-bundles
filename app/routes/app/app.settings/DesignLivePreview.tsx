@@ -1,3 +1,4 @@
+import { translateAdmin } from "~/i18n/config";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
@@ -54,7 +55,10 @@ export type PreviewInteractionState = {
 export function createPreviewInteractionState(): PreviewInteractionState {
   return {
     quantities: Object.fromEntries(
-      DESIGN_PREVIEW_FIXTURE.products.map((product) => [product.id, product.quantity]),
+      DESIGN_PREVIEW_FIXTURE.products.map((product) => [
+        product.id,
+        product.quantity,
+      ])
     ),
     activeCategoryId: DESIGN_PREVIEW_FIXTURE.categories[0].id,
     progressStep: 0,
@@ -66,16 +70,19 @@ export function createPreviewInteractionState(): PreviewInteractionState {
 export function updatePreviewProductQuantity(
   state: PreviewInteractionState,
   productId: string,
-  delta: number,
+  delta: number
 ): PreviewInteractionState {
   const quantity = Math.max(0, (state.quantities[productId] ?? 0) + delta);
-  return { ...state, quantities: { ...state.quantities, [productId]: quantity } };
+  return {
+    ...state,
+    quantities: { ...state.quantities, [productId]: quantity },
+  };
 }
 
 export function setPreviewProductQuantity(
   state: PreviewInteractionState,
   productId: string,
-  quantity: number,
+  quantity: number
 ): PreviewInteractionState {
   return {
     ...state,
@@ -88,7 +95,7 @@ export function setPreviewProductQuantity(
 
 export function selectPreviewCategory(
   state: PreviewInteractionState,
-  categoryId: string,
+  categoryId: string
 ): PreviewInteractionState {
   return { ...state, activeCategoryId: categoryId };
 }
@@ -103,12 +110,14 @@ export function getPreviewSelectionSummary(state: PreviewInteractionState) {
     itemCount: products.reduce((total, item) => total + item.quantity, 0),
     totalCents: products.reduce(
       (total, item) => total + item.product.priceCents * item.quantity,
-      0,
+      0
     ),
   };
 }
 
-export function advancePreviewProgress(state: PreviewInteractionState): PreviewInteractionState {
+export function advancePreviewProgress(
+  state: PreviewInteractionState
+): PreviewInteractionState {
   const finalStep = DESIGN_PREVIEW_FIXTURE.discountTiers.length;
   if (state.progressStep >= finalStep) {
     return triggerPreviewDiscountFeedback(state, "complete");
@@ -119,17 +128,21 @@ export function advancePreviewProgress(state: PreviewInteractionState): PreviewI
   };
 }
 
-export function retreatPreviewProgress(state: PreviewInteractionState): PreviewInteractionState {
+export function retreatPreviewProgress(
+  state: PreviewInteractionState
+): PreviewInteractionState {
   return { ...state, progressStep: Math.max(0, state.progressStep - 1) };
 }
 
-export function togglePreviewMobileSummary(state: PreviewInteractionState): PreviewInteractionState {
+export function togglePreviewMobileSummary(
+  state: PreviewInteractionState
+): PreviewInteractionState {
   return { ...state, isMobileSummaryOpen: !state.isMobileSummaryOpen };
 }
 
 export function triggerPreviewDiscountFeedback(
   state: PreviewInteractionState,
-  feedbackState: "tier" | "complete",
+  feedbackState: "tier" | "complete"
 ): PreviewInteractionState {
   return {
     ...state,
@@ -142,7 +155,7 @@ export function triggerPreviewDiscountFeedback(
 
 export function clearPreviewDiscountFeedback(
   state: PreviewInteractionState,
-  replay: number,
+  replay: number
 ): PreviewInteractionState {
   if (state.discountFeedback.replay !== replay) return state;
 
@@ -152,35 +165,38 @@ export function clearPreviewDiscountFeedback(
   };
 }
 
-export function getDefaultTemplateKey(bundleType: BundleContractType): TemplateKey {
+export function getDefaultTemplateKey(
+  bundleType: BundleContractType
+): TemplateKey {
   return bundleType === "full_page" ? "standard" : "product-list";
 }
 
 export function isTemplateValidForBundleType(
   bundleType: BundleContractType,
-  templateKey: TemplateKey,
+  templateKey: TemplateKey
 ) {
   return DESIGN_PREVIEW_TEMPLATES.some(
-    (template) => template.bundleType === bundleType && template.key === templateKey,
+    (template) =>
+      template.bundleType === bundleType && template.key === templateKey
   );
 }
 
 export function isDesignPreviewAreaSupported(
   templateKey: TemplateKey,
-  area: DesignPreviewArea,
+  area: DesignPreviewArea
 ) {
   return getSupportedDesignPreviewAreas(templateKey).includes(area);
 }
 
 export function isDesignPreviewScenarioSupported(
   templateKey: TemplateKey,
-  scenario: DesignPreviewScenario,
+  scenario: DesignPreviewScenario
 ) {
   return getSupportedDesignPreviewScenarios(templateKey).includes(scenario);
 }
 
 export function createDesignPreviewState(
-  bundleType: BundleContractType = "full_page",
+  bundleType: BundleContractType = "full_page"
 ): DesignPreviewState {
   const templateKey = getDefaultTemplateKey(bundleType);
   return {
@@ -194,7 +210,7 @@ export function createDesignPreviewState(
 
 export function setDesignPreviewBundleType(
   state: DesignPreviewState,
-  bundleType: BundleContractType,
+  bundleType: BundleContractType
 ): DesignPreviewState {
   const templateKey = getDefaultTemplateKey(bundleType);
   return {
@@ -208,10 +224,12 @@ export function setDesignPreviewBundleType(
 
 export function setDesignPreviewTemplate(
   state: DesignPreviewState,
-  templateKey: TemplateKey,
+  templateKey: TemplateKey
 ): DesignPreviewState {
   if (!isTemplateValidForBundleType(state.bundleType, templateKey)) {
-    throw new Error(`Invalid Design preview template "${templateKey}" for ${state.bundleType}`);
+    throw new Error(
+      `Invalid Design preview template "${templateKey}" for ${state.bundleType}`
+    );
   }
   return {
     ...state,
@@ -225,14 +243,14 @@ export function setDesignPreviewTemplate(
 
 export function setDesignPreviewViewport(
   state: DesignPreviewState,
-  viewport: DesignPreviewViewport,
+  viewport: DesignPreviewViewport
 ): DesignPreviewState {
   return { ...state, viewport };
 }
 
 export function setDesignPreviewArea(
   state: DesignPreviewState,
-  area: DesignPreviewArea,
+  area: DesignPreviewArea
 ): DesignPreviewState {
   return isDesignPreviewAreaSupported(state.templateKey, area)
     ? { ...state, area, scenario: "default" }
@@ -241,7 +259,7 @@ export function setDesignPreviewArea(
 
 export function setDesignPreviewScenario(
   state: DesignPreviewState,
-  scenario: DesignPreviewScenario,
+  scenario: DesignPreviewScenario
 ): DesignPreviewState {
   return isDesignPreviewScenarioSupported(state.templateKey, scenario)
     ? { ...state, scenario }
@@ -259,7 +277,12 @@ export function DesignLivePreview({
   inheritedColorFieldKeys?: string[];
   shopBrandColors?: ShopBrandColors | null;
   initialState?: DesignPreviewState;
-  onContextChange?: (context: Pick<DesignPreviewState, "bundleType" | "templateKey" | "area" | "scenario">) => void;
+  onContextChange?: (
+    context: Pick<
+      DesignPreviewState,
+      "bundleType" | "templateKey" | "area" | "scenario"
+    >
+  ) => void;
 }) {
   const { t, i18n } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
@@ -273,7 +296,10 @@ export function DesignLivePreview({
       area: isDesignPreviewAreaSupported(state.templateKey, state.area)
         ? state.area
         : getDefaultDesignPreviewArea(state.templateKey),
-      scenario: isDesignPreviewScenarioSupported(state.templateKey, state.scenario)
+      scenario: isDesignPreviewScenarioSupported(
+        state.templateKey,
+        state.scenario
+      )
         ? state.scenario
         : "default",
     };
@@ -281,21 +307,23 @@ export function DesignLivePreview({
   const [isFrameReady, setIsFrameReady] = useState(false);
   const [previewAlert, setPreviewAlert] = useState<AdminTaskAlert | null>(null);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
-    (template) => template.bundleType === previewState.bundleType,
+    (template) => template.bundleType === previewState.bundleType
   );
-  const activeTemplate = DESIGN_PREVIEW_TEMPLATES.find(
-    (template) => template.key === previewState.templateKey,
-  ) ?? DESIGN_PREVIEW_TEMPLATES[0];
+  const activeTemplate =
+    DESIGN_PREVIEW_TEMPLATES.find(
+      (template) => template.key === previewState.templateKey
+    ) ?? DESIGN_PREVIEW_TEMPLATES[0];
   const supportedAreas = activeTemplate.supportedAreas;
   const supportedScenarios = activeTemplate.supportedScenarios;
   const designCss = useMemo(
-    () => buildDesignPreviewStorefrontCss({
-      fieldValues,
-      inheritedColorFieldKeys,
-      shopBrandColors,
-      templateKey: activeTemplate.key,
-    }),
-    [activeTemplate.key, fieldValues, inheritedColorFieldKeys, shopBrandColors],
+    () =>
+      buildDesignPreviewStorefrontCss({
+        fieldValues,
+        inheritedColorFieldKeys,
+        shopBrandColors,
+        templateKey: activeTemplate.key,
+      }),
+    [activeTemplate.key, fieldValues, inheritedColorFieldKeys, shopBrandColors]
   );
   const previewViewport = DESIGN_PREVIEW_VIEWPORTS[previewState.viewport];
   const previewCanvasSize = getDesignPreviewCanvasSize(previewState.viewport);
@@ -333,19 +361,34 @@ export function DesignLivePreview({
       area: previewState.area,
       scenario: previewState.scenario,
     });
-  }, [onContextChange, previewState.area, previewState.bundleType, previewState.scenario, previewState.templateKey]);
+  }, [
+    onContextChange,
+    previewState.area,
+    previewState.bundleType,
+    previewState.scenario,
+    previewState.templateKey,
+  ]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const frameWindow = previewFrameRef.current?.contentWindow ?? null;
-      if (!isTrustedStorefrontPreviewMessage(event, window.location.origin, frameWindow)) return;
+      if (
+        !isTrustedStorefrontPreviewMessage(
+          event,
+          window.location.origin,
+          frameWindow
+        )
+      )
+        return;
       const message: unknown = event.data;
       if (!isStorefrontPreviewEvent(message)) return;
       if (message.type === "READY") {
         setPreviewAlert(null);
         setIsFrameReady(true);
       } else if (message.type === "SCENARIO_CHANGED") {
-        setPreviewState((current) => setDesignPreviewScenario(current, message.payload.scenario));
+        setPreviewState((current) =>
+          setDesignPreviewScenario(current, message.payload.scenario)
+        );
       } else if (message.type === "ERROR") {
         setPreviewAlert({
           id: "design-preview",
@@ -365,7 +408,10 @@ export function DesignLivePreview({
       type: "INITIALIZE",
       payload: initializePayloadRef.current,
     };
-    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+    previewFrameRef.current?.contentWindow?.postMessage(
+      command,
+      window.location.origin
+    );
   }, [isFrameReady]);
 
   useEffect(() => {
@@ -375,7 +421,10 @@ export function DesignLivePreview({
       type: "UPDATE_DESIGN",
       payload: { designCss },
     };
-    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+    previewFrameRef.current?.contentWindow?.postMessage(
+      command,
+      window.location.origin
+    );
   }, [designCss, isFrameReady]);
 
   useEffect(() => {
@@ -383,9 +432,15 @@ export function DesignLivePreview({
     const command: StorefrontPreviewCommand = {
       version: PREVIEW_PROTOCOL_VERSION,
       type: "SET_TEMPLATE",
-      payload: { bundleType: previewState.bundleType, templateKey: previewState.templateKey },
+      payload: {
+        bundleType: previewState.bundleType,
+        templateKey: previewState.templateKey,
+      },
     };
-    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+    previewFrameRef.current?.contentWindow?.postMessage(
+      command,
+      window.location.origin
+    );
   }, [isFrameReady, previewState.bundleType, previewState.templateKey]);
 
   useEffect(() => {
@@ -395,7 +450,10 @@ export function DesignLivePreview({
       type: "SET_VIEWPORT",
       payload: { viewport: previewState.viewport },
     };
-    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+    previewFrameRef.current?.contentWindow?.postMessage(
+      command,
+      window.location.origin
+    );
   }, [isFrameReady, previewState.viewport]);
 
   useEffect(() => {
@@ -410,7 +468,10 @@ export function DesignLivePreview({
         }),
       },
     };
-    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+    previewFrameRef.current?.contentWindow?.postMessage(
+      command,
+      window.location.origin
+    );
   }, [isFrameReady, previewState.area, t]);
 
   useEffect(() => {
@@ -420,21 +481,33 @@ export function DesignLivePreview({
       type: "SET_SCENARIO",
       payload: { scenario: previewState.scenario },
     };
-    previewFrameRef.current?.contentWindow?.postMessage(command, window.location.origin);
+    previewFrameRef.current?.contentWindow?.postMessage(
+      command,
+      window.location.origin
+    );
   }, [isFrameReady, previewState.scenario]);
 
   useLayoutEffect(() => {
     const stage = previewStageRef.current;
     const canvas = previewCanvasRef.current;
     const scaledShell = previewScaledShellRef.current;
-    if (!stage || !canvas || !scaledShell || typeof ResizeObserver === "undefined") return;
+    if (
+      !stage ||
+      !canvas ||
+      !scaledShell ||
+      typeof ResizeObserver === "undefined"
+    )
+      return;
 
     let animationFrame = 0;
     let latestSize = { width: stage.clientWidth, height: stage.clientHeight };
 
     const applyLatestFit = () => {
       animationFrame = 0;
-      const presentation = getDesignPreviewFitPresentation(latestSize, previewState.viewport);
+      const presentation = getDesignPreviewFitPresentation(
+        latestSize,
+        previewState.viewport
+      );
       canvas.style.width = `${presentation.canvasWidth}px`;
       canvas.style.height = `${presentation.canvasHeight}px`;
       scaledShell.style.transform = `scale(${presentation.scale})`;
@@ -450,7 +523,10 @@ export function DesignLivePreview({
     const observer = new ResizeObserver((entries) => {
       const entry = entries[entries.length - 1];
       if (!entry) return;
-      scheduleFit({ width: entry.contentRect.width, height: entry.contentRect.height });
+      scheduleFit({
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      });
     });
     observer.observe(stage);
     return () => {
@@ -460,7 +536,10 @@ export function DesignLivePreview({
   }, [previewState.viewport]);
 
   return (
-    <section className={styles.previewPanel} aria-label="Live bundle preview">
+    <section
+      className={styles.previewPanel}
+      aria-label={translateAdmin("adminAttributes.liveBundlePreview")}
+    >
       <div className={styles.previewHeader}>
         <div>
           <h2>{t("settingsDcp.preview.heading")}</h2>
@@ -471,63 +550,94 @@ export function DesignLivePreview({
             label={t("settingsDcp.preview.bundleType.label")}
             value={previewState.bundleType}
             onChange={(event: Event) => {
-              const bundleType = (event.target as HTMLSelectElement).value as BundleContractType;
-              setPreviewState((current) => setDesignPreviewBundleType(current, bundleType));
+              const bundleType = (event.target as HTMLSelectElement)
+                .value as BundleContractType;
+              setPreviewState((current) =>
+                setDesignPreviewBundleType(current, bundleType)
+              );
             }}
           >
-            <s-option value="full_page">{t("settingsDcp.preview.bundleType.landingPage")}</s-option>
-            <s-option value="product_page">{t("settingsDcp.preview.bundleType.productPage")}</s-option>
+            <s-option value="full_page">
+              {t("settingsDcp.preview.bundleType.landingPage")}
+            </s-option>
+            <s-option value="product_page">
+              {t("settingsDcp.preview.bundleType.productPage")}
+            </s-option>
           </s-select>
           <s-select
             label={t("settingsDcp.preview.templateLabel")}
             value={previewState.templateKey}
             onChange={(event: Event) => {
-              const templateKey = (event.target as HTMLSelectElement).value as TemplateKey;
-              setPreviewState((current) => setDesignPreviewTemplate(current, templateKey));
+              const templateKey = (event.target as HTMLSelectElement)
+                .value as TemplateKey;
+              setPreviewState((current) =>
+                setDesignPreviewTemplate(current, templateKey)
+              );
             }}
           >
             {availableTemplates.map((template) => (
-              <s-option key={template.key} value={template.key}>{t(template.translationKey)}</s-option>
+              <s-option key={template.key} value={template.key}>
+                {t(template.translationKey)}
+              </s-option>
             ))}
           </s-select>
           <s-select
             label={t("settingsDcp.preview.areaSelector.label")}
             value={previewState.area}
             onChange={(event: Event) => {
-              const area = (event.target as HTMLSelectElement).value as DesignPreviewArea;
+              const area = (event.target as HTMLSelectElement)
+                .value as DesignPreviewArea;
               setPreviewState((current) => setDesignPreviewArea(current, area));
             }}
           >
             {supportedAreas.map((area) => (
-              <s-option key={area} value={area}>{t(`settingsDcp.preview.areaSelector.${area}`)}</s-option>
+              <s-option key={area} value={area}>
+                {t(`settingsDcp.preview.areaSelector.${area}`)}
+              </s-option>
             ))}
           </s-select>
           <s-select
             label={t("settingsDcp.preview.stateSelector.label")}
             value={previewState.scenario}
             onChange={(event: Event) => {
-              const scenario = (event.target as HTMLSelectElement).value as DesignPreviewScenario;
-              setPreviewState((current) => setDesignPreviewScenario(current, scenario));
+              const scenario = (event.target as HTMLSelectElement)
+                .value as DesignPreviewScenario;
+              setPreviewState((current) =>
+                setDesignPreviewScenario(current, scenario)
+              );
             }}
           >
             {supportedScenarios.map((scenario) => (
-              <s-option key={scenario} value={scenario}>{t(`settingsDcp.preview.stateSelector.${scenario}`)}</s-option>
+              <s-option key={scenario} value={scenario}>
+                {t(`settingsDcp.preview.stateSelector.${scenario}`)}
+              </s-option>
             ))}
           </s-select>
-          <div className={styles.viewportButtons} aria-label={t("settingsDcp.preview.viewport.label")}>
+          <div
+            className={styles.viewportButtons}
+            aria-label={t("settingsDcp.preview.viewport.label")}
+          >
             {(["desktop", "mobile"] as const).map((viewport) => {
               const isActive = previewState.viewport === viewport;
               const label = t(`settingsDcp.preview.viewport.${viewport}`);
               const tooltipId = `settings-design-preview-${viewport}-tooltip`;
               return (
-                <span key={viewport} className={styles.viewportButton} data-selected={isActive || undefined}>
+                <span
+                  key={viewport}
+                  className={styles.viewportButton}
+                  data-selected={isActive || undefined}
+                >
                   <s-button
                     icon={viewport}
                     variant={isActive ? "primary" : "secondary"}
                     accessibilityLabel={label}
                     interestFor={tooltipId}
                     aria-pressed={isActive}
-                    onClick={() => setPreviewState((current) => setDesignPreviewViewport(current, viewport))}
+                    onClick={() =>
+                      setPreviewState((current) =>
+                        setDesignPreviewViewport(current, viewport)
+                      )
+                    }
                   />
                   <s-tooltip id={tooltipId}>{label}</s-tooltip>
                 </span>
@@ -602,11 +712,26 @@ export function DesignLivePreview({
                       </div>
                     </div>
                   </div>
-                  <span className={styles.mobileDeviceStripe} aria-hidden="true" />
-                  <span className={styles.mobileDeviceHeader} aria-hidden="true" />
-                  <span className={styles.mobileDeviceSensors} aria-hidden="true" />
-                  <span className={styles.mobileDeviceButtons} aria-hidden="true" />
-                  <span className={styles.mobileDevicePower} aria-hidden="true" />
+                  <span
+                    className={styles.mobileDeviceStripe}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={styles.mobileDeviceHeader}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={styles.mobileDeviceSensors}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={styles.mobileDeviceButtons}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={styles.mobileDevicePower}
+                    aria-hidden="true"
+                  />
                 </div>
               </div>
               <span className={styles.desktopDeviceStand} aria-hidden="true" />

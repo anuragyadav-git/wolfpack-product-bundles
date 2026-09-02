@@ -1,4 +1,6 @@
 import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
+import { buildCountdownRuntimeConfig } from "../../../../lib/bundle-countdown";
 import { AppLogger } from "../../../../lib/logger";
 import {
   updateBundleProductMetafields,
@@ -30,6 +32,9 @@ function buildRuntimePricingRule(rule: any): Record<string, unknown> {
   }
   if (rule.bxyApplyMode !== undefined) {
     flatRule.bxyApplyMode = rule.bxyApplyMode;
+  }
+  if (rule.tierBadge !== undefined) {
+    flatRule.tierBadge = rule.tierBadge;
   }
 
   return flatRule;
@@ -455,7 +460,19 @@ export function buildSyncBundleConfiguration(
       isEnabled: false,
       allowedQuantity: 1,
     },
-  useSingleStepCategoriesAsBundleSteps:
+    lowStockAlertEnabled: bundle.lowStockAlertEnabled ?? false,
+    lowStockAlertThreshold: bundle.lowStockAlertThreshold ?? 5,
+    lowStockAlertMessage:
+      bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    stickyAddToCartEnabled: bundle.stickyAddToCartEnabled ?? false,
+    stickyAddToCartShowDesktop: bundle.stickyAddToCartShowDesktop ?? true,
+    stickyAddToCartShowMobile: bundle.stickyAddToCartShowMobile ?? true,
+    stickyAddToCartAction:
+      bundle.stickyAddToCartAction === "add_selected_offer"
+        ? "add_selected_offer"
+        : "scroll_to_offers",
+    countdown: buildCountdownRuntimeConfig(bundle, bundle.offerPolicy),
+    useSingleStepCategoriesAsBundleSteps:
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
     steps: buildSyncOptimizedSteps(bundle.steps || []),
     pricing: buildSyncPricingConfig(bundle.pricing),
@@ -465,6 +482,7 @@ export function buildSyncBundleConfiguration(
     textOverrides: bundle.textOverrides ?? null,
     textOverridesByLocale: bundle.textOverridesByLocale ?? null,
     sdkMode: bundle.sdkMode ?? false,
+    offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
     updatedAt: new Date().toISOString(),
     ...extra,
   };

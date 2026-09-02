@@ -1,4 +1,8 @@
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
+import {
+  json,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
 import { authenticate } from "../../shopify.server";
 import { handlePrepareStorefrontPreview } from "./shared/storefront-sync-action.server";
 
@@ -21,8 +25,12 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   if (!bundleId || !bundleType) {
     return json(
-      { success: false, statusCode: 400, error: "Invalid bundle preview route" },
-      { status: 400 },
+      {
+        success: false,
+        statusCode: 400,
+        error: "Invalid bundle preview route",
+      },
+      { status: 400 }
     );
   }
 

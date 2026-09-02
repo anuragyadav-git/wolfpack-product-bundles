@@ -116,6 +116,7 @@ describe('PPB Product List category variant display', () => {
         variants: expect.any(Array),
       }),
       context.selectedBundle.steps[0],
+      0,
     );
     expect(target.innerHTML).toContain('Variant Product');
     expect(target.innerHTML).toContain('data-grouped-product="Variant Product"');

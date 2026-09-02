@@ -1,3 +1,5 @@
+import { parseVariantSelectorConfiguration } from "./variant-selector-config";
+
 function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
@@ -283,6 +285,7 @@ export function formatStepCategoryForRuntime(
   const categoryId = stringOrNull(category.id) ?? `category-${index + 1}`;
   const sortOrder = numberOrNull(category.sortOrder) ?? index;
   const productSourceByKey = buildProductSourceMap(productSources);
+  const variantSelector = parseVariantSelectorConfiguration(category);
 
   return {
     id: categoryId,
@@ -297,7 +300,7 @@ export function formatStepCategoryForRuntime(
     categoryImg: stringOrEmpty(category.categoryImg),
     autoNextStepOnConditionMet: category.autoNextStepOnConditionMet === true,
     displayVariantsAsIndividualProducts: category.displayVariantsAsIndividualProducts === true,
-    displayVariantsAsSwatches: category.displayVariantsAsSwatches === true,
+    ...variantSelector,
     multiLangData: objectOrEmpty(category.multiLangData),
   };
 }

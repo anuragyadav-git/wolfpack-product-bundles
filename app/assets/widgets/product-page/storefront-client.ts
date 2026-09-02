@@ -31,6 +31,16 @@ const PRODUCT_QUERY = `
       ... on Product {
         id title handle description descriptionHtml featuredImage { url }
         images(first: 50) { nodes { url } }
+        options {
+          id name
+          optionValues {
+            id name
+            swatch {
+              color
+              image { ... on MediaImage { image { url altText } } }
+            }
+          }
+        }
         variants(first: 250) {
           nodes {
             id title availableForSale quantityAvailable currentlyNotInStock
@@ -64,7 +74,11 @@ const VARIANTS_QUERY = `
 `;
 
 function mapVariant(variant: any) {
-  const selected = Object.fromEntries((variant?.selectedOptions ?? []).map((option: any) => [option.name, option.value]));
+  const selectedOptions = (variant?.selectedOptions ?? []).map((option: any) => ({
+    name: option.name,
+    value: option.value,
+  }));
+  const selected = Object.fromEntries(selectedOptions.map((option: any) => [option.name, option.value]));
   return {
     id: variant.id,
     title: variant.title,
@@ -78,8 +92,27 @@ function mapVariant(variant: any) {
     option1: selected[Object.keys(selected)[0]] ?? null,
     option2: selected[Object.keys(selected)[1]] ?? null,
     option3: selected[Object.keys(selected)[2]] ?? null,
+    selectedOptions,
     image: variant.image ? { src: variant.image.url } : null,
   };
+}
+
+function mapProductOptions(options: any[] = []) {
+  return options.map((option: any) => ({
+    id: option.id,
+    name: option.name,
+    optionValues: (option.optionValues ?? []).map((optionValue: any) => ({
+      id: optionValue.id,
+      name: optionValue.name,
+      swatch: optionValue.swatch ? {
+        color: optionValue.swatch.color ?? null,
+        image: optionValue.swatch.image?.image ? {
+          src: optionValue.swatch.image.image.url,
+          altText: optionValue.swatch.image.image.altText ?? null,
+        } : null,
+      } : null,
+    })),
+  }));
 }
 
 function mapProduct(product: any) {
@@ -91,6 +124,7 @@ function mapProduct(product: any) {
     descriptionHtml: product.descriptionHtml ?? "",
     imageUrl: product.featuredImage?.url ?? "",
     images: (product.images?.nodes ?? []).map((image: any) => ({ src: image.url })),
+    options: mapProductOptions(product.options),
     variants: (product.variants?.nodes ?? []).map(mapVariant),
   };
 }

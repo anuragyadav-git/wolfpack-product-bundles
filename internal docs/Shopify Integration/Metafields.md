@@ -5,7 +5,7 @@ title: Metafields
 type: shopify-integration
 status: authoritative
 summary: Storefront bundle metafield ownership, synchronization, payload limits, and Shopify validation constraints.
-last_audited: 2026-08-27
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -98,7 +98,24 @@ embedding the complete multilingual Settings document in every entry; the
 input metafields are separately limited to 10KB, so the shop
 `$app.ppb_policy_revisions` map is checked against that smaller boundary.
 
+The shop `$app.ppb_storefront_runtime` schema-v2 snapshot includes
+`storefrontProxyRoot`. Normal runtime sync resolves it from the active app
+environment: PROD uses `/apps/product-bundles`, SIT uses
+`/apps/product-bundles-sit`, and both retain Shopify's `apps` prefix. Liquid and
+compiled storefront entrypoints consume this Shopify-hosted value so one shared
+theme extension does not hardcode traffic to the other installed app.
+Install/reauthorization and deployment general sync rewrite the snapshot;
+malformed configured roots fail before `metafieldsSet`.
+
 Runtime category payloads must be compacted at `app/lib/bundle-config/category-runtime.ts` before they are written by `app/services/bundles/metafield-sync/operations/bundle-product.server.ts`. Preserve storefront-required fields only: product IDs/title/handle/image/price/weight, compact product options, and compact variants with ID/title/price/compare-at/weight/availability/inventory/options/image/selling-plan data. Strip admin/cache-only fields such as metafields, SKU, selectedOptions blobs, inventory policy, timestamps, and extra image metadata.
+
+The derived bundle runtime includes the merchant's low-stock alert settings,
+but not a cached parent or aggregate inventory count. Exact availability comes
+from Shopify component variants in buyer context. `quantityAvailable` requires
+`unauthenticated_read_product_inventory`; `currentlyNotInStock` identifies an
+out-of-stock variant that remains purchasable for backorders. If Shopify does
+not return an exact positive sellable quantity, the widget suppresses the
+scarcity claim.
 
 Admin save transport should follow the same compact-field policy before posting `stepsData`. The route-level FPB save serializer is responsible for stripping picker/Admin graph data while preserving the product, variant, collection, category, and rule fields needed by persistence and storefront runtime generation.
 

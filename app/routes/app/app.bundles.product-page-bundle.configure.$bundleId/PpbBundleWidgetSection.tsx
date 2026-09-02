@@ -19,7 +19,9 @@ export function PpbBundleWidgetSection() {
         FilePicker={flow.FilePicker}
         getResourceId={flow.getVisibilityResourceId}
         imageUrl={flow.upsellWidgetImageUrl}
-        multiLanguageDisabled={!flow.upsellWidgetEnabled || (flow.shopLocales?.length ?? 0) === 0}
+        multiLanguageDisabled={
+          !flow.upsellWidgetEnabled || (flow.shopLocales?.length ?? 0) === 0
+        }
         onAddBrowsedProductChange={(checked) => {
           flow.setAutoSelectBrowsedProduct(checked);
           flow.markAsDirty();
@@ -53,18 +55,41 @@ export function PpbBundleWidgetSection() {
           await flow.openVisibilityCollectionPicker("widget");
           flow.clearValidationError("widget.collections");
         }}
-        onOpenMultiLanguage={() => flow.openMultiLanguageModal("Bundle Widget", [
-          { key: "widgetTitle", label: "Widget Title", fallback: flow.upsellWidgetTitle },
-          { key: "widgetDescription", label: "Widget Description", fallback: flow.upsellWidgetDescription, multiline: true },
-          { key: "widgetButtonText", label: "Widget Button Text", fallback: flow.upsellWidgetButtonText },
-        ], "widget")}
+        onOpenMultiLanguage={() =>
+          flow.openMultiLanguageModal(
+            "Bundle Widget",
+            [
+              {
+                key: "widgetTitle",
+                label: "Widget Title",
+                fallback: flow.upsellWidgetTitle,
+              },
+              {
+                key: "widgetDescription",
+                label: "Widget Description",
+                fallback: flow.upsellWidgetDescription,
+                multiline: true,
+              },
+              {
+                key: "widgetButtonText",
+                label: "Widget Button Text",
+                fallback: flow.upsellWidgetButtonText,
+              },
+            ],
+            "widget"
+          )
+        }
         onOpenProductPicker={async () => {
           await flow.openVisibilityProductPicker("widget");
           flow.clearValidationError("widget.products");
         }}
         onPlaceWidget={flow.handlePlaceWidget}
-        onRemoveCollection={(index) => flow.removeVisibilityCollectionTarget("widget", index)}
-        onRemoveProduct={(index) => flow.removeVisibilityProductTarget("widget", index)}
+        onRemoveCollection={(index) =>
+          flow.removeVisibilityCollectionTarget("widget", index)
+        }
+        onRemoveProduct={(index) =>
+          flow.removeVisibilityProductTarget("widget", index)
+        }
         onTitleChange={(value) => {
           flow.setUpsellWidgetTitle(value);
           flow.clearValidationError("widget.title");

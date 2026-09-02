@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbCategoryStepSettings() {
   const {
@@ -11,20 +12,28 @@ export function PpbCategoryStepSettings() {
     <s-section>
       <s-stack direction="block" gap="small">
         <s-stack direction="inline" alignItems="center" gap="small">
-          <s-text>Use categories as bundle steps</s-text>
+          <s-text>
+            {translateAdmin(
+              "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundlesettingscontrolsCategorysteps.useCategoriesAsBundleSteps"
+            )}
+          </s-text>
           <s-switch
-            accessibilityLabel="Use categories as bundle steps"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundlesettingscontrolsCategorysteps.useCategoriesAsBundleSteps"
+            )}
             checked={useSingleStepCategoriesAsBundleSteps || undefined}
             onChange={(event) => {
               setUseSingleStepCategoriesAsBundleSteps(
-                (event.target as HTMLInputElement).checked,
+                (event.target as HTMLInputElement).checked
               );
               markAsDirty();
             }}
           />
         </s-stack>
         <s-text tone={"subdued" as any}>
-          Show one category at a time with step navigation.
+          {translateAdmin(
+            "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundlesettingscontrolsCategorysteps.showOneCategoryAtATimeWithStepNavigation"
+          )}
         </s-text>
       </s-stack>
     </s-section>

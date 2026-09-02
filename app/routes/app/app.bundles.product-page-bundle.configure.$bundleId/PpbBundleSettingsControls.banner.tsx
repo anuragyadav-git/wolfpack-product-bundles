@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbBundleBannerSettings() {
   const {
@@ -14,11 +15,14 @@ export function PpbBundleBannerSettings() {
     <s-section>
       <s-stack direction="block" gap="small">
         <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-          Bundle Banner
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bundleBanner"
+          )}
         </p>
         <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-          Upload banner images for desktop and mobile views that will be
-          displayed at the top of your bundle page.
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.uploadBannerImagesForDesktopAndMobileViewsThatWillBeDisplayedAtT"
+          )}
         </p>
         <div
           style={{
@@ -29,7 +33,9 @@ export function PpbBundleBannerSettings() {
         >
           <div>
             <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 500 }}>
-              Banner Image: Desktop
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageDesktop"
+              )}
             </p>
             <FilePicker
               value={bundleBannerDesktopUrl || null}
@@ -41,13 +47,21 @@ export function PpbBundleBannerSettings() {
               }}
             />
             <p style={{ margin: "6px 0 0", fontSize: 12, color: "#6d7175" }}>
-              Recommended Size:
-              <span style={{ color: "#202223" }}>1900x230</span>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+              )}
+              <span style={{ color: "#202223" }}>
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1900x230"
+                )}
+              </span>
             </p>
           </div>
           <div>
             <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 500 }}>
-              Banner Image: Mobile
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageMobile"
+              )}
             </p>
             <FilePicker
               value={bundleBannerMobileUrl || null}
@@ -60,8 +74,14 @@ export function PpbBundleBannerSettings() {
               }}
             />
             <p style={{ margin: "6px 0 0", fontSize: 12, color: "#6d7175" }}>
-              Recommended Size:
-              <span style={{ color: "#202223" }}>1100x500</span>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+              )}
+              <span style={{ color: "#202223" }}>
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1100x500"
+                )}
+              </span>
             </p>
           </div>
         </div>

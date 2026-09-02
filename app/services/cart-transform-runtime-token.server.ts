@@ -5,6 +5,10 @@ import {
   buildPublicBundleSubscriptionConfig,
   shouldApplyBundleDiscount,
 } from "../lib/bundle-subscriptions";
+import {
+  buildOfferCountryTargetingRule,
+  encodeOfferCountryTargetingRule,
+} from "../lib/offer-country-eligibility";
 
 const RUNTIME_TOKEN_VERSION = 1;
 const RUNTIME_TOKEN_SECRET_CONTEXT = "wpb-runtime-token:";
@@ -33,6 +37,7 @@ export type RuntimeTokenPayload = {
   bundleName: string;
   components: RuntimeTokenLine[];
   addons: RuntimeTokenAddonLine[];
+  countryRule: string;
   priceAdjustment: unknown;
   subscription?: {
     sellingPlanGroupId: string;
@@ -360,6 +365,9 @@ export function buildRuntimeTokenPayload(input: {
     bundleName: String(input.bundle.name ?? "Bundle"),
     components: selection.components,
     addons: selection.addons,
+    countryRule: encodeOfferCountryTargetingRule(
+      buildOfferCountryTargetingRule(input.bundle.offerPolicy),
+    ),
     priceAdjustment: appliesToPurchaseMode
       ? buildPriceAdjustmentConfig(input.bundle.pricing)
       : { method: "percentage_off", value: 0 },

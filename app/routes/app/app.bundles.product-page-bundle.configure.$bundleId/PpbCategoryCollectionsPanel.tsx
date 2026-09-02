@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { moveArrayItem } from "../../../lib/bundle-config/reorder-items";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { getStepCategories } from "./PpbStepSetupShared";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbCategoryCollectionsPanel({
   step,
@@ -27,13 +28,14 @@ export function PpbCategoryCollectionsPanel({
   >(null);
 
   const updateCategoryCollections = (collections: any[]) => {
-    const updated = getStepCategories(step).map((category: any, index: number) =>
-      index === catIndex
-        ? {
-            ...category,
-            collections,
-          }
-        : category,
+    const updated = getStepCategories(step).map(
+      (category: any, index: number) =>
+        index === catIndex
+          ? {
+              ...category,
+              collections,
+            }
+          : category
     );
     stepsState.updateStepField(step.id, "StepCategory", updated);
     markAsDirty();
@@ -54,28 +56,38 @@ export function PpbCategoryCollectionsPanel({
         id: collection.id,
         handle: collection.handle,
         title: collection.title,
-      })),
+      }))
     );
   };
 
   const removeCollection = (collectionId: string) => {
     updateCategoryCollections(
-      catCollections.filter((collection: any) => collection.id !== collectionId),
+      catCollections.filter((collection: any) => collection.id !== collectionId)
     );
   };
 
   const reorderCollection = (fromIndex: number, toIndex: number) => {
-    updateCategoryCollections(moveArrayItem(catCollections, fromIndex, toIndex));
+    updateCategoryCollections(
+      moveArrayItem(catCollections, fromIndex, toIndex)
+    );
   };
 
   return (
     <div>
       <p className={productPageBundleStyles.categoryPickerHelp}>
-        Collections selected here will be displayed on this step
+        {translateAdmin(
+          "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.collectionsSelectedHereWillBeDisplayedOnThisStep"
+        )}
       </p>
       <div className={productPageBundleStyles.productActions}>
-        <s-button variant="primary" icon="collection" onClick={handlePickCollections}>
-          Add Collections
+        <s-button
+          variant="primary"
+          icon="collection"
+          onClick={handlePickCollections}
+        >
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addCollections"
+          )}
         </s-button>
         {catCollections.length > 0 && (
           <button
@@ -83,11 +95,16 @@ export function PpbCategoryCollectionsPanel({
             className={productPageBundleStyles.selectedItemsChip}
             onClick={() => showPolarisModal(selectedCollectionsModalRef)}
           >
-            {catCollections.length} Selected
+            {translateAdmin("adminDynamic.selectedCount", {
+              count: catCollections.length,
+            })}
           </button>
         )}
       </div>
-      <s-modal ref={selectedCollectionsModalRef} heading="Selected Collections">
+      <s-modal
+        ref={selectedCollectionsModalRef}
+        heading={translateAdmin("adminAttributes.selectedCollections")}
+      >
         {catCollections.length > 0 ? (
           <ul className={productPageBundleStyles.selectedItemList}>
             {catCollections.map((collection: any, index: number) => (
@@ -135,20 +152,26 @@ export function PpbCategoryCollectionsPanel({
                   }`}
                   onClick={() => removeCollection(collection.id)}
                 >
-                  x
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.x"
+                  )}
                 </button>
               </li>
             ))}
           </ul>
         ) : (
-          <p>No collections selected for this category yet.</p>
+          <p>
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.noCollectionsSelectedForThisCategoryYet"
+            )}
+          </p>
         )}
         <s-button
           slot="secondary-actions"
           variant="secondary"
           onClick={() => hidePolarisModal(selectedCollectionsModalRef)}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
         <s-button
           slot="primary-action"
@@ -156,7 +179,9 @@ export function PpbCategoryCollectionsPanel({
           icon="collection"
           onClick={handlePickCollections}
         >
-          Add Collections
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addCollections"
+          )}
         </s-button>
       </s-modal>
     </div>

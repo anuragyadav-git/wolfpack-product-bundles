@@ -2,6 +2,8 @@ import {
   localizePpbBundleEmbed,
   normalizePpbBundleEmbedConfig,
 } from "../lib/ppb-bundle-embed";
+import { applyOfferPriority } from "../lib/offer-policy-decision";
+import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility";
 
 type AnyRecord = Record<string, any>;
 
@@ -93,20 +95,27 @@ export type PpbBundleEmbedContext = {
   productHandle: string;
   collectionIds: string[];
   locale: string;
+  countryCode?: string | null;
+  now?: Date;
 };
 
 export function selectEligiblePpbBundleEmbed(
   bundles: AnyRecord[],
   context: PpbBundleEmbedContext,
 ): PpbBundleEmbedResolution | null {
-  const selected = bundles
+  const candidates = bundles
     .filter((bundle) => bundle.bundleType === "product_page")
     .filter((bundle) => bundle.status === "active" || bundle.status === "unlisted")
-    .filter((bundle) => bundleMatches(bundle, context))
-    .sort((left, right) => {
-      const dateOrder = new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
-      return dateOrder || String(left.id).localeCompare(String(right.id));
-    })[0];
+    .filter((bundle) => bundle.offerPolicy?.specificLinkRequired !== true)
+    .filter((bundle) => resolveOfferCountryEligibility(
+      bundle.offerPolicy,
+      context.countryCode,
+    ))
+    .filter((bundle) => bundleMatches(bundle, context));
+  const selected = applyOfferPriority<AnyRecord & { id: string }>(
+    candidates as Array<AnyRecord & { id: string }>,
+    context.now,
+  )[0];
   if (!selected) return null;
   const config = normalizePpbBundleEmbedConfig(selected.bundleUpsellConfig);
   const localized = localizePpbBundleEmbed(config, context.locale);

@@ -7,6 +7,7 @@ import { navigateBackOrFallback } from "../../lib/navigation";
 import { openSupportChat } from "../../lib/support-chat.client";
 import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
 import { APP_BRAND } from "../../lib/app-brand";
+import { translateAdmin } from "~/i18n/config";
 
 // This route handles /app → shows the Welcome landing screen for intentional visits,
 // and silently redirects to the dashboard when Shopify's auth flow lands here.
@@ -30,7 +31,7 @@ export const loader = async () => {
 };
 
 export function getInitialAppDestination(
-  isAuthFlow: boolean,
+  isAuthFlow: boolean
 ): "/app/dashboard" | null {
   if (!isAuthFlow) return null;
   return "/app/dashboard";
@@ -121,12 +122,14 @@ export default function AppIndex() {
           </div>
 
           <h1 className={styles.heroTitle}>
-            Welcome to <span>{APP_BRAND.name}</span>
+            {translateAdmin("adminExtracted.appIndex.welcomeTo")}{" "}
+            <span>{APP_BRAND.name}</span>
           </h1>
 
           <p className={styles.heroSubtitle}>
-            The complete bundle solution for Shopify — build, customize, and
-            promote product bundles that convert.
+            {translateAdmin(
+              "adminExtracted.appIndex.theCompleteBundleSolutionForShopifyBuildCustomizeAndPromoteProdu"
+            )}
           </p>
 
           <div className={styles.ctaRow}>
@@ -134,15 +137,17 @@ export default function AppIndex() {
               className={styles.btnPrimary}
               onClick={() => navigate("/app/bundles/create")}
             >
-              ✦ Get Started
+              {translateAdmin("adminExtracted.appIndex.getStarted")}
             </button>
             <button
               className={styles.btnSecondary}
               onClick={() =>
-                navigateBackOrFallback(navigate, "/app/dashboard", { replaceFallback: true })
+                navigateBackOrFallback(navigate, "/app/dashboard", {
+                  replaceFallback: true,
+                })
               }
             >
-              Go to Dashboard →
+              {translateAdmin("adminExtracted.appIndex.goToDashboard")}
             </button>
           </div>
         </div>
@@ -150,7 +155,9 @@ export default function AppIndex() {
 
       {/* ── Features ── */}
       <div className={styles.featuresSection}>
-        <p className={styles.sectionLabel}>Everything included</p>
+        <p className={styles.sectionLabel}>
+          {translateAdmin("adminExtracted.appIndex.everythingIncluded")}
+        </p>
         <div className={styles.featuresGrid}>
           {FEATURES.map((f) => (
             <div key={f.title} className={styles.featureCard}>
@@ -168,17 +175,19 @@ export default function AppIndex() {
       <div className={styles.footerStrip}>
         <button
           className={styles.footerLink}
-          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+          }}
           onClick={() => openSupportChat()}
         >
-          Contact Support
+          {translateAdmin("billing.actions.contactSupport")}
         </button>
         <span className={styles.footerDot} />
-        <span
-          className={styles.footerLink}
-          aria-disabled="true"
-        >
-          Documentation
+        <span className={styles.footerLink} aria-disabled="true">
+          {translateAdmin("adminExtracted.appIndex.documentation")}
         </span>
       </div>
     </div>

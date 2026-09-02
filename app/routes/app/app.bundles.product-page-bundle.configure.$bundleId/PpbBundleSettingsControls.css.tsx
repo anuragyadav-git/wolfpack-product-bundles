@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbBundleLevelCssSettings() {
   const {
@@ -27,7 +28,9 @@ export function PpbBundleLevelCssSettings() {
           onClick={() => setBundleLevelCssExpanded((prev) => !prev)}
         >
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-            Bundle Level CSS
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingscss.bundleLevelCss"
+            )}
           </h3>
           <span
             style={{
@@ -38,13 +41,15 @@ export function PpbBundleLevelCssSettings() {
               transition: "transform 0.2s",
             }}
           >
-            ▾
+            {"▾"}
           </span>
         </button>
         {bundleLevelCssExpanded && (
           <textarea
             value={bundleLevelCss}
-            placeholder="/* Add custom CSS for this bundle */"
+            placeholder={translateAdmin(
+              "adminAttributes.addCustomCSSForThisBundle"
+            )}
             rows={6}
             style={{
               width: "100%",

@@ -1,5 +1,4 @@
 use shopify_function::scalars::Decimal;
-use std::collections::HashMap;
 
 use crate::helpers::{decimal_to_f64, is_addon_line, is_free_gift_line, parse_json_or_default};
 use crate::pricing::{
@@ -17,6 +16,23 @@ fn non_empty(value: &Option<String>) -> Option<String> {
         .map(|value| value.trim())
         .filter(|value| !value.is_empty())
         .map(|value| value.to_string())
+}
+
+fn country_is_eligible(rule: &str, current_country: &str) -> bool {
+    if rule.is_empty() {
+        return true;
+    }
+    let Some((mode, countries)) = rule.split_once(':') else {
+        return false;
+    };
+    let matches = countries
+        .split(',')
+        .any(|country| country == current_country);
+    match mode {
+        "include" => matches,
+        "exclude" => !matches,
+        _ => false,
+    }
 }
 
 fn has_fixed_price_display_only_marker(
@@ -69,9 +85,13 @@ fn validate_ppb_v2_group(
     token: &str,
     secret: &str,
     policy_revisions: Option<&str>,
+    current_country: &str,
 ) -> Option<(ComponentParent, String)> {
     let bundle = verify_ppb_bundle_token(token, secret)?;
     if !ppb_policy_revision_matches(policy_revisions, &bundle.bundle_id, &bundle.revision) {
+        return None;
+    }
+    if !country_is_eligible(&bundle.country_rule, current_country) {
         return None;
     }
     let mut group_quantities = vec![0_i64; bundle.groups.len()];
@@ -182,11 +202,11 @@ fn wolfpack_product_bundle_offer_group_id(value: &str) -> Option<String> {
 ///
 /// # Returns
 /// Vec of CartOperation (merge variant), with processed line IDs added to
-/// the `processed_line_ids` set for the EXPAND pass to skip.
+/// the `processed_lines` bitmap for the EXPAND pass to skip.
 pub fn process_merge_operations(
     input: &schema::run::Input,
     presentment_currency_rate: f64,
-    processed_line_ids: &mut std::collections::HashSet<String>,
+    processed_lines: &mut [bool],
     cart_line_messaging: &CartLineMessagingSettings,
     runtime_token_secret: Option<&str>,
 ) -> Vec<schema::CartOperation> {
@@ -194,14 +214,15 @@ pub fn process_merge_operations(
 
     // Tracks how many times each bundle name appears — duplicate instances get " (2)", " (3)"
     // suffixes to prevent Shopify from consolidating separate bundle instances.
-    let mut bundle_name_counts: HashMap<String, u32> = HashMap::new();
+    let mut bundle_name_counts: Vec<(String, u32)> = Vec::new();
 
     // -------------------------------------------------------------------------
     // Step 1: Group cart lines by EB `_wolfpackProductBundle:OfferId` base in a single O(n) pass.
     // Using indices to avoid borrow conflicts with `lines` slice.
     // -------------------------------------------------------------------------
     let lines = input.cart().lines();
-    let mut bundle_groups: HashMap<String, Vec<usize>> = HashMap::new();
+    let current_country = input.localization().country().iso_code().as_str();
+    let mut bundle_groups: Vec<(String, Vec<usize>)> = Vec::new();
 
     for (idx, line) in lines.iter().enumerate() {
         let step_type = line.step_type().and_then(|a| a.value()).map(|s| s.as_str());
@@ -217,7 +238,14 @@ pub fn process_merge_operations(
             Some(v) => v,
             None => continue,
         };
-        bundle_groups.entry(offer_group_id).or_default().push(idx);
+        if let Some((_, indices)) = bundle_groups
+            .iter_mut()
+            .find(|(group_id, _)| group_id == &offer_group_id)
+        {
+            indices.push(idx);
+        } else {
+            bundle_groups.push((offer_group_id, vec![idx]));
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -276,6 +304,9 @@ pub fn process_merge_operations(
                     .filter(|value| !value.trim().is_empty())
             })?;
             if let Some(payload) = verify_runtime_token(token, secret) {
+                if !country_is_eligible(&payload.country_rule, current_country) {
+                    return None;
+                }
                 let actual_components: Vec<(String, i64)> = merge_line_indices
                     .iter()
                     .filter_map(|&idx| match lines[idx].merchandise() {
@@ -302,6 +333,7 @@ pub fn process_merge_operations(
                 token,
                 secret,
                 ppb_policy_revisions,
+                current_country,
             )
         });
 
@@ -389,20 +421,31 @@ pub fn process_merge_operations(
             0.0
         };
 
+        let source_display_properties: crate::types::CartLineDisplayProperties =
+            parse_json_or_default(merge_line_indices.iter().find_map(|&idx| {
+                lines[idx]
+                    .bundle_display_properties()
+                    .and_then(|attribute| attribute.value())
+                    .map(|value| value.as_str())
+            }));
+
         // -------------------------------------------------------------------------
         // Step 5: Build unique bundle title.
         // -------------------------------------------------------------------------
-        let base_name = lines[line_indices[0]]
-            .wolfpack_product_bundle_name()
-            .and_then(|a| a.value())
-            .map(|s| s.as_str().to_string())
+        let base_name = non_empty(&source_display_properties.bundle_name)
             .unwrap_or_else(|| "Bundle".to_string());
 
-        let count = bundle_name_counts
-            .entry(base_name.clone())
-            .and_modify(|c| *c += 1)
-            .or_insert(1);
-        let bundle_name = if *count > 1 {
+        let count = if let Some((_, count)) = bundle_name_counts
+            .iter_mut()
+            .find(|(name, _)| name == &base_name)
+        {
+            *count += 1;
+            *count
+        } else {
+            bundle_name_counts.push((base_name.clone(), 1));
+            1
+        };
+        let bundle_name = if count > 1 {
             format!("{} ({})", base_name, count)
         } else {
             base_name
@@ -529,13 +572,14 @@ pub fn process_merge_operations(
             });
         }
 
-        let source_display_properties: crate::types::CartLineDisplayProperties =
-            parse_json_or_default(merge_line_indices.iter().find_map(|&idx| {
-                lines[idx]
-                    .bundle_display_properties()
-                    .and_then(|attribute| attribute.value())
-                    .map(|value| value.as_str())
-            }));
+        if let Some(offer_analytics) = &source_display_properties.offer_analytics {
+            if let Ok(value) = serde_json::to_string(offer_analytics) {
+                attributes.push(schema::AttributeOutput {
+                    key: "_wpb_offer_analytics".into(),
+                    value,
+                });
+            }
+        }
 
         attributes.push(schema::AttributeOutput {
             key: "_Items".into(),
@@ -608,11 +652,11 @@ pub fn process_merge_operations(
         operations.push(schema::CartOperation::LinesMerge(merge_op));
 
         for &idx in &addon_line_indices {
-            processed_line_ids.insert(lines[idx].id().to_string());
+            processed_lines[idx] = true;
         }
 
         for &idx in &merge_line_indices {
-            processed_line_ids.insert(lines[idx].id().to_string());
+            processed_lines[idx] = true;
         }
     }
 

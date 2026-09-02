@@ -5,7 +5,7 @@ title: Deployment General Sync
 type: operations
 status: active
 summary: Post-deploy replay of the current persisted bundle storefront contract behind one true or false flag.
-last_audited: 2026-08-25
+last_audited: 2026-08-31
 owners:
   - engineering
 domains:
@@ -44,8 +44,8 @@ When enabled, it:
 1. Lists installed shops and their saved FPB and PPB bundle rows.
 2. Acquires each shop's compliant offline Admin client.
 3. Ensures the current variant metafield definitions.
-4. Ensures the shop-level PPB Storefront token, controls/language runtime, and
-   generated Design CSS metafields.
+4. Ensures the shop-level PPB Storefront token, environment-correct app-proxy
+   root, controls/language runtime, and generated Design CSS metafields.
 5. Calls `syncBundleStorefrontNow(... reason: "sync_bundle")`, which reloads
    each complete bundle graph from Prisma, activates the Cart Transform, and
    writes the current app-owned product/variant metafield values.

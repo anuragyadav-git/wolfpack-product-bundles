@@ -23,7 +23,7 @@ export const webhookFunction = inngest.createFunction(
   async ({ event }: { event: { data: ShopifyWebhookEventData } }) => {
     const { rawPayload, topic, shopDomain, webhookId, apiVersion } = event.data;
 
-    const result = await WebhookProcessor.processPubSubMessage({
+    const result = await WebhookProcessor.processWebhookMessage({
       data: rawPayload,
       attributes: {
         "X-Shopify-Topic": topic,

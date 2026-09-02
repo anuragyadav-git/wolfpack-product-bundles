@@ -3,6 +3,7 @@ import type {
   EmbedStatusModel,
 } from "../../../../lib/bundle-config/common-configure-page-model";
 import styles from "./CommonBundleVisibilityOverview.module.css";
+import { translateAdmin, translateAdminCopy } from "~/i18n/config";
 
 interface VisibilityGuide {
   title: string;
@@ -59,31 +60,52 @@ export function PublishingBestPractices() {
     <s-section>
       <s-stack direction="block" gap="base">
         <s-stack direction="block" gap="small-100">
-          <s-heading>Publishing Best Practices</s-heading>
+          <s-heading>
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.publishingBestPractices"
+            )}
+          </s-heading>
           <s-text color="subdued">
-            Pick a placement and follow the quick guide to make your bundle
-            discoverable on your store.
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.pickAPlacementAndFollowTheQuickGuideToMakeYourBundleDiscoverable"
+            )}
           </s-text>
         </s-stack>
         <div className={styles.practiceGrid}>
           {VISIBILITY_GUIDES.map(({ title, description, img, guide }) => (
             <div key={title} className={styles.practiceCard}>
               <s-box border="base" borderRadius="base">
-                <s-image aspectRatio="2/1" src={img} alt={title} />
+                <s-image
+                  aspectRatio="2/1"
+                  src={img}
+                  alt={translateAdminCopy(title)}
+                />
                 <s-box padding="base">
                   <div className={styles.practiceCardBody}>
-                    <s-heading>{title}</s-heading>
+                    <s-heading>{translateAdminCopy(title)}</s-heading>
                     <div className={styles.practiceDescription}>
-                      <s-text color="subdued">{description}</s-text>
+                      <s-text color="subdued">
+                        {translateAdminCopy(description)}
+                      </s-text>
                     </div>
                     <div className={styles.practiceFooter}>
                       <details className={styles.quickGuide}>
-                        <summary>Quick Setup Guide</summary>
+                        <summary>
+                          {translateAdmin(
+                            "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.quickSetupGuide"
+                          )}
+                        </summary>
                         <s-box paddingBlockStart="small">
-                          <s-text color="subdued">{guide}</s-text>
+                          <s-text color="subdued">
+                            {translateAdminCopy(guide)}
+                          </s-text>
                         </s-box>
                       </details>
-                      <s-text color="subdued">5 min setup</s-text>
+                      <s-text color="subdued">
+                        {translateAdmin(
+                          "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.5MinSetup"
+                        )}
+                      </s-text>
                     </div>
                   </div>
                 </s-box>
@@ -123,12 +145,16 @@ export function CommonBundleVisibilityOverview({
         <div className={styles.compactCardRow}>
           <div className={styles.compactCardCopy}>
             <s-stack direction="inline" alignItems="center" gap="small">
-              <s-heading>App Embed Status</s-heading>
+              <s-heading>
+                {translateAdmin("dashboard.storefrontSetup.incompleteTitle")}
+              </s-heading>
               <s-badge tone={embedStatus.enabled ? "success" : "warning"}>
-                {embedStatus.label}
+                {translateAdminCopy(embedStatus.label)}
               </s-badge>
             </s-stack>
-            <s-text color="subdued">{embedStatus.description}</s-text>
+            <s-text color="subdued">
+              {translateAdminCopy(embedStatus.description)}
+            </s-text>
           </div>
           {!embedStatus.enabled && themeEditorUrl && onEnableEmbed && (
             <s-button
@@ -136,7 +162,7 @@ export function CommonBundleVisibilityOverview({
               icon="theme-edit"
               onClick={onEnableEmbed}
             >
-              Enable Here
+              {translateAdmin("common.actions.enableHere")}
             </s-button>
           )}
         </div>
@@ -147,15 +173,21 @@ export function CommonBundleVisibilityOverview({
       <s-section>
         <div className={styles.compactCardStack}>
           <div className={styles.compactCardCopy}>
-            <s-heading>Your Bundle Link</s-heading>
+            <s-heading>
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.yourBundleLink"
+              )}
+            </s-heading>
             <s-text color="subdued">
-              Share it in your theme, emails, ads, or social profiles.
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.shareItInYourThemeEmailsAdsOrSocialProfiles"
+              )}
             </s-text>
           </div>
           {link.isLinked ? (
             <div className={styles.bundleLinkRow}>
               <s-text-field
-                label="Bundle link"
+                label={translateAdmin("adminAttributes.bundleLink")}
                 labelAccessibilityVisibility="exclusive"
                 value={link.url}
                 disabled
@@ -165,13 +197,20 @@ export function CommonBundleVisibilityOverview({
                 icon="duplicate"
                 onClick={onCopyLink}
               >
-                Copy Link
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.copyLink"
+                )}
               </s-button>
             </div>
           ) : (
-            <s-box paddingBlockEnd="base">
-              <s-banner heading="Bundle link unavailable" tone="warning">
-                {link.emptyMessage}
+            <s-box paddingBlockEnd="small-200">
+              <s-banner
+                heading={translateAdmin(
+                  "adminAttributes.bundleLinkUnavailable"
+                )}
+                tone="warning"
+              >
+                {translateAdminCopy(link.emptyMessage)}
               </s-banner>
             </s-box>
           )}
@@ -180,7 +219,11 @@ export function CommonBundleVisibilityOverview({
 
       <s-section>
         <div className={styles.compactCardStack}>
-          <s-heading>Want more placement options?</s-heading>
+          <s-heading>
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.wantMorePlacementOptions"
+            )}
+          </s-heading>
           <div className={styles.placementOptionsGrid}>
             {placementOptions.map((option) => (
               <s-box
@@ -191,15 +234,17 @@ export function CommonBundleVisibilityOverview({
               >
                 <div className={styles.placementOptionRow}>
                   <div className={styles.compactCardCopy}>
-                    <s-heading>{option.title}</s-heading>
-                    <s-text color="subdued">{option.description}</s-text>
+                    <s-heading>{translateAdminCopy(option.title)}</s-heading>
+                    <s-text color="subdued">
+                      {translateAdminCopy(option.description)}
+                    </s-text>
                   </div>
                   <s-button
                     variant={option.variant}
                     icon="arrow-right"
                     onClick={option.onAction}
                   >
-                    {option.actionLabel}
+                    {translateAdminCopy(option.actionLabel)}
                   </s-button>
                 </div>
               </s-box>

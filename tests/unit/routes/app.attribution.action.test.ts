@@ -147,8 +147,35 @@ describe("action — export intent", () => {
     expect(data).toEqual({
       success: true,
       filename: "only-bundles-analytics-2026-07-01-to-2026-07-20.csv",
-      csv: "Date,Type,Bundle ID,Bundle Name,UTM Source,UTM Medium,UTM Campaign,Custom UTM Attributes,Revenue (USD),Order ID,Landing Page",
+      csv: "Date,Type,Bundle ID,Bundle Name,Offer Policy ID,Offer Rule Version,Offer Tier ID,Offer Eligibility Source,UTM Source,UTM Medium,UTM Campaign,Custom UTM Attributes,Revenue (USD),Order ID,Landing Page",
     });
+  });
+
+  it("exports normalized offer dimensions and safely escapes identifiers", async () => {
+    getDb().orderAttribution.findMany.mockResolvedValueOnce([{
+      bundleId: "bundle-1",
+      offerPolicyId: 'policy,"one"',
+      offerRuleVersion: 3,
+      offerTierId: "tier-2",
+      offerEligibilitySource: "specific_link",
+      createdAt: new Date("2026-07-02T00:00:00.000Z"),
+      customUtmAttributes: {},
+      revenue: 1500,
+      orderId: "gid://shopify/Order/1",
+    }]);
+    getDb().bundle.findMany.mockResolvedValueOnce([{
+      id: "bundle-1",
+      name: "Bundle One",
+    }]);
+
+    const response = await action({
+      request: makeRequest("export", { from: "2026-07-01", to: "2026-07-20" }),
+      params: {},
+      context: {},
+    });
+    const data: any = await response.json();
+
+    expect(data.csv).toContain('"policy,""one""",3,"tier-2","specific_link"');
   });
 
   it("returns a billing-unverified denial when subscription state is unknown", async () => {

@@ -105,13 +105,13 @@ export function resolveModalFooterSummaryState({ totalQuantity = 0 }: any = {}) 
 export const ProductPageModalStateMethods: Record<string, any> & ThisType<any> = {
 _getModalFocusableSelectors() {
   return [
-    '.close-button',
-    '.prev-button',
-    '.next-button',
-    '.product-add-btn',
-    '.bw-quantity-control__button',
+    'a[href]',
     'button:not([disabled])',
+    'input:not([disabled]):not([type="hidden"])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
     '[tabindex]:not([tabindex="-1"])',
+    '[contenteditable="true"]',
   ];
 },
 
@@ -131,24 +131,14 @@ _getModalFocusableControls() {
   const modal = this.elements?.modal;
   if (!modal) return [];
 
-  const controls: any[] = [];
-  const seen = new Set();
   const selectors = this._getModalFocusableSelectors();
+  const candidates = typeof modal.querySelectorAll === 'function'
+    ? modal.querySelectorAll(selectors.join(','))
+    : [];
 
-  selectors.forEach((selector: any) => {
-    const list = typeof modal.querySelectorAll === 'function'
-      ? modal.querySelectorAll(selector)
-      : [];
-
-    if (!list) return;
-    list.forEach((el: unknown) => {
-      if (!this._isElementVisibleForFocus(el) || seen.has(el)) return;
-      seen.add(el);
-      controls.push(el);
-    });
-  });
-
-  return controls;
+  return Array.from(candidates ?? []).filter((element: any) => (
+    this._isElementVisibleForFocus(element)
+  ));
 },
 
 _captureActiveElementBeforeModalOpen(originFocusElement: any = null) {
