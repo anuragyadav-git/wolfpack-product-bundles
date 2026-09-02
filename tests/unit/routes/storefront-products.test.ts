@@ -111,6 +111,7 @@ describe("signed storefront products loader", () => {
     expect(payload.products[0].variants[0].selectedOptions).toEqual([
       { name: "Color", value: "Gold" },
     ]);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
 
   it("requests only variant overflow pages after the initial product batch", async () => {

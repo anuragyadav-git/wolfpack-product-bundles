@@ -3,6 +3,11 @@ import {
   normalizeDefaultProductsData,
   type DefaultProductsData,
 } from "../../../lib/bundle-config/default-products";
+import type {
+  CountdownExpiryAction,
+  CountdownLayout,
+  CountdownPosition,
+} from "../../../lib/bundle-countdown";
 
 export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   const [preSelectedProductVariantId, setPreSelectedProductVariantId] =
@@ -41,6 +46,63 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
   );
   const originalLowStockAlertMessageRef = useRef<string>(
     (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+  );
+  const [countdownEnabled, setCountdownEnabled] = useState<boolean>(
+    (bundle as any).countdownEnabled ?? false,
+  );
+  const [countdownLayout, setCountdownLayout] = useState<CountdownLayout>(
+    (bundle as any).countdownLayout === "full" ? "full" : "compact",
+  );
+  const [countdownPosition, setCountdownPosition] = useState<CountdownPosition>(
+    (bundle as any).countdownPosition === "below" ? "below" : "above",
+  );
+  const [countdownTitle, setCountdownTitle] = useState<string>(
+    (bundle as any).countdownTitle ?? "",
+  );
+  const [countdownExpiryAction, setCountdownExpiryAction] =
+    useState<CountdownExpiryAction>(
+      (bundle as any).countdownExpiryAction === "show_zeros" ||
+        (bundle as any).countdownExpiryAction === "show_message"
+        ? (bundle as any).countdownExpiryAction
+        : "hide",
+    );
+  const [countdownExpiredMessage, setCountdownExpiredMessage] = useState<string>(
+    (bundle as any).countdownExpiredMessage ?? "",
+  );
+  const originalCountdownEnabledRef = useRef(countdownEnabled);
+  const originalCountdownLayoutRef = useRef(countdownLayout);
+  const originalCountdownPositionRef = useRef(countdownPosition);
+  const originalCountdownTitleRef = useRef(countdownTitle);
+  const originalCountdownExpiryActionRef = useRef(countdownExpiryAction);
+  const originalCountdownExpiredMessageRef = useRef(countdownExpiredMessage);
+  const [stickyAddToCartEnabled, setStickyAddToCartEnabled] =
+    useState<boolean>((bundle as any).stickyAddToCartEnabled ?? false);
+  const [stickyAddToCartShowDesktop, setStickyAddToCartShowDesktop] =
+    useState<boolean>((bundle as any).stickyAddToCartShowDesktop ?? true);
+  const [stickyAddToCartShowMobile, setStickyAddToCartShowMobile] =
+    useState<boolean>((bundle as any).stickyAddToCartShowMobile ?? true);
+  const [stickyAddToCartAction, setStickyAddToCartAction] = useState<
+    "scroll_to_offers" | "add_selected_offer"
+  >(
+    (bundle as any).stickyAddToCartAction === "add_selected_offer"
+      ? "add_selected_offer"
+      : "scroll_to_offers",
+  );
+  const originalStickyAddToCartEnabledRef = useRef(
+    (bundle as any).stickyAddToCartEnabled ?? false,
+  );
+  const originalStickyAddToCartShowDesktopRef = useRef(
+    (bundle as any).stickyAddToCartShowDesktop ?? true,
+  );
+  const originalStickyAddToCartShowMobileRef = useRef(
+    (bundle as any).stickyAddToCartShowMobile ?? true,
+  );
+  const originalStickyAddToCartActionRef = useRef<
+    "scroll_to_offers" | "add_selected_offer"
+  >(
+    (bundle as any).stickyAddToCartAction === "add_selected_offer"
+      ? "add_selected_offer"
+      : "scroll_to_offers",
   );
   const [showTextOnAddButton, setShowTextOnAddButton] = useState<boolean>(
     (bundle as any).showTextOnAddButton ?? false,
@@ -94,6 +156,36 @@ export function usePpbBundleSettingsState({ bundle }: { bundle: any }) {
     originalLowStockAlertEnabledRef,
     originalLowStockAlertThresholdRef,
     originalLowStockAlertMessageRef,
+    countdownEnabled,
+    setCountdownEnabled,
+    countdownLayout,
+    setCountdownLayout,
+    countdownPosition,
+    setCountdownPosition,
+    countdownTitle,
+    setCountdownTitle,
+    countdownExpiryAction,
+    setCountdownExpiryAction,
+    countdownExpiredMessage,
+    setCountdownExpiredMessage,
+    originalCountdownEnabledRef,
+    originalCountdownLayoutRef,
+    originalCountdownPositionRef,
+    originalCountdownTitleRef,
+    originalCountdownExpiryActionRef,
+    originalCountdownExpiredMessageRef,
+    stickyAddToCartEnabled,
+    setStickyAddToCartEnabled,
+    stickyAddToCartShowDesktop,
+    setStickyAddToCartShowDesktop,
+    stickyAddToCartShowMobile,
+    setStickyAddToCartShowMobile,
+    stickyAddToCartAction,
+    setStickyAddToCartAction,
+    originalStickyAddToCartEnabledRef,
+    originalStickyAddToCartShowDesktopRef,
+    originalStickyAddToCartShowMobileRef,
+    originalStickyAddToCartActionRef,
     showTextOnAddButton,
     setShowTextOnAddButton,
     bundleCartTitle,

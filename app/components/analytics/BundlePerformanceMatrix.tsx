@@ -11,6 +11,7 @@ import {
   type BundleResultSortDirection,
   type BundleResultSortKey,
 } from "../../lib/analytics";
+import { translateAdmin } from "~/i18n/config";
 
 export interface BundlePerformanceMatrixProps {
   rows: BundleMatrixRow[];
@@ -29,7 +30,11 @@ const SORT_OPTIONS: Array<{ key: BundleResultSortKey; label: string }> = [
 type ChoiceListElement = HTMLElement & { values?: string[] };
 type TextFieldElement = HTMLElement & { value?: string };
 
-export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: BundlePerformanceMatrixProps) {
+export function BundlePerformanceMatrix({
+  rows,
+  formatRevenue,
+  onRowClick,
+}: BundlePerformanceMatrixProps) {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<BundleResultSortKey>("revenueCents");
   const [direction, setDirection] = useState<BundleResultSortDirection>("desc");
@@ -39,13 +44,14 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
   const sortTriggerRef = useRef<any>(null);
   const filteredRows = useMemo(
     () => filterAndSortBundleResults(rows, query, sortKey, direction),
-    [rows, query, sortKey, direction],
+    [rows, query, sortKey, direction]
   );
 
   useEffect(() => {
     const search = searchRef.current;
     if (!search) return;
-    const handleInput = (event: Event) => setQuery((event.currentTarget as TextFieldElement).value ?? "");
+    const handleInput = (event: Event) =>
+      setQuery((event.currentTarget as TextFieldElement).value ?? "");
     search.addEventListener("input", handleInput);
     return () => search.removeEventListener("input", handleInput);
   }, []);
@@ -54,8 +60,11 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
     const choices = sortChoiceRef.current;
     if (!choices) return;
     const handleChange = (event: Event) => {
-      const nextKey = (event.currentTarget as ChoiceListElement).values?.[0] as BundleResultSortKey | undefined;
-      if (nextKey && SORT_OPTIONS.some(option => option.key === nextKey)) setSortKey(nextKey);
+      const nextKey = (event.currentTarget as ChoiceListElement).values?.[0] as
+        | BundleResultSortKey
+        | undefined;
+      if (nextKey && SORT_OPTIONS.some((option) => option.key === nextKey))
+        setSortKey(nextKey);
     };
     choices.addEventListener("change", handleChange);
     return () => choices.removeEventListener("change", handleChange);
@@ -65,7 +74,8 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
     const choices = directionChoiceRef.current;
     if (!choices) return;
     const handleChange = (event: Event) => {
-      const nextDirection = (event.currentTarget as ChoiceListElement).values?.[0] as BundleResultSortDirection | undefined;
+      const nextDirection = (event.currentTarget as ChoiceListElement)
+        .values?.[0] as BundleResultSortDirection | undefined;
       if (nextDirection !== "asc" && nextDirection !== "desc") return;
       setDirection(nextDirection);
       sortTriggerRef.current?.click();
@@ -75,21 +85,32 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
   }, []);
 
   return (
-    <section className="wpb-card wpb-card--flush" aria-labelledby="wpb-bundle-matrix-title">
+    <section
+      className="wpb-card wpb-card--flush"
+      aria-labelledby="wpb-bundle-matrix-title"
+    >
       <header className="wpb-section-header">
         <div>
-          <h2 id="wpb-bundle-matrix-title" className="wpb-section-title">Bundle Performance</h2>
-          <p className="wpb-section-hint">{rows.length} bundles in period</p>
+          <h2 id="wpb-bundle-matrix-title" className="wpb-section-title">
+            {translateAdmin(
+              "adminExtracted.components.analytics.bundleperformancematrix.bundlePerformance"
+            )}
+          </h2>
+          <p className="wpb-section-hint">
+            {translateAdmin("adminDynamic.bundlesInPeriod", {
+              count: rows.length,
+            })}
+          </p>
         </div>
       </header>
 
       <div className="wpb-results-toolbar">
         <s-text-field
           ref={searchRef}
-          label="Search bundles"
+          label={translateAdmin("dashboard.search.label")}
           labelAccessibilityVisibility="exclusive"
           icon="search"
-          placeholder="Search by bundle name"
+          placeholder={translateAdmin("adminAttributes.searchByBundleName")}
           value={query}
           autocomplete="off"
         />
@@ -97,15 +118,30 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
           ref={sortTriggerRef}
           commandFor="bundle-performance-sort-popover"
           variant="secondary"
-          accessibilityLabel="Sort bundle performance"
+          accessibilityLabel={translateAdmin(
+            "adminAttributes.sortBundlePerformance"
+          )}
         >
-          <span className="wpb-results-sort-glyph" aria-hidden>↕</span> Sort
+          <span className="wpb-results-sort-glyph" aria-hidden>
+            ↕
+          </span>{" "}
+          {translateAdmin(
+            "adminExtracted.components.analytics.bundleperformancematrix.sort"
+          )}
         </s-button>
         <s-popover id="bundle-performance-sort-popover">
           <s-box padding="base">
-            <s-choice-list ref={sortChoiceRef} name="bundle-performance-sort" label="Sort by">
-              {SORT_OPTIONS.map(option => (
-                <s-choice key={option.key} value={option.key} selected={option.key === sortKey || undefined}>
+            <s-choice-list
+              ref={sortChoiceRef}
+              name="bundle-performance-sort"
+              label={translateAdmin("adminAttributes.sortBy")}
+            >
+              {SORT_OPTIONS.map((option) => (
+                <s-choice
+                  key={option.key}
+                  value={option.key}
+                  selected={option.key === sortKey || undefined}
+                >
                   {option.label}
                 </s-choice>
               ))}
@@ -114,11 +150,22 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
             <s-choice-list
               ref={directionChoiceRef}
               name="bundle-performance-direction"
-              label="Direction"
+              label={translateAdmin("adminAttributes.direction")}
               labelAccessibilityVisibility="exclusive"
             >
-              <s-choice value="desc" selected={direction === "desc" || undefined}>↑ Highest</s-choice>
-              <s-choice value="asc" selected={direction === "asc" || undefined}>↓ Lowest</s-choice>
+              <s-choice
+                value="desc"
+                selected={direction === "desc" || undefined}
+              >
+                {translateAdmin(
+                  "adminExtracted.components.analytics.bundleperformancematrix.highest"
+                )}
+              </s-choice>
+              <s-choice value="asc" selected={direction === "asc" || undefined}>
+                {translateAdmin(
+                  "adminExtracted.components.analytics.bundleperformancematrix.lowest"
+                )}
+              </s-choice>
             </s-choice-list>
           </s-box>
         </s-popover>
@@ -126,9 +173,19 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
 
       {filteredRows.length === 0 ? (
         <div className="wpb-results-empty">
-          <span className="wpb-results-empty-icon" aria-hidden><s-icon type="search" /></span>
-          <h3 className="wpb-results-empty-title">No Items found</h3>
-          <p className="wpb-section-hint">Try changing the filters or search term</p>
+          <span className="wpb-results-empty-icon" aria-hidden>
+            <s-icon type="search" />
+          </span>
+          <h3 className="wpb-results-empty-title">
+            {translateAdmin(
+              "adminExtracted.components.analytics.bundleperformancematrix.noItemsFound"
+            )}
+          </h3>
+          <p className="wpb-section-hint">
+            {translateAdmin(
+              "adminExtracted.components.analytics.bundleperformancematrix.tryChangingTheFiltersOrSearchTerm"
+            )}
+          </p>
         </div>
       ) : (
         <div className="wpb-matrix-scroll">
@@ -136,19 +193,29 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
             <thead>
               <tr className="wpb-matrix-head-row">
                 <th className="wpb-matrix-th wpb-matrix-th--bundle">
-                  Bundle
+                  {translateAdmin(
+                    "adminExtracted.components.analytics.bundleperformancematrix.bundle"
+                  )}
                 </th>
                 <th className="wpb-matrix-th wpb-matrix-th--right">
-                  Views
+                  {translateAdmin(
+                    "adminExtracted.components.analytics.bundleperformancematrix.views"
+                  )}
                 </th>
                 <th className="wpb-matrix-th wpb-matrix-th--right">
-                  No. of Orders
+                  {translateAdmin(
+                    "adminExtracted.components.analytics.bundleperformancematrix.noOfOrders"
+                  )}
                 </th>
                 <th className="wpb-matrix-th wpb-matrix-th--right">
-                  Total Bundle Value
+                  {translateAdmin(
+                    "adminExtracted.components.analytics.bundleperformancematrix.totalBundleValue"
+                  )}
                 </th>
                 <th className="wpb-matrix-th wpb-matrix-th--right">
-                  Overall conversions
+                  {translateAdmin(
+                    "adminExtracted.components.analytics.bundleperformancematrix.overallConversions"
+                  )}
                 </th>
               </tr>
             </thead>
@@ -157,7 +224,9 @@ export function BundlePerformanceMatrix({ rows, formatRevenue, onRowClick }: Bun
                 return (
                   <tr
                     key={row.bundleId}
-                    onClick={onRowClick ? () => onRowClick(row.bundleId) : undefined}
+                    onClick={
+                      onRowClick ? () => onRowClick(row.bundleId) : undefined
+                    }
                     className="wpb-matrix-row"
                     data-clickable={Boolean(onRowClick)}
                   >

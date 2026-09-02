@@ -3,6 +3,7 @@ import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { getStepCategories } from "./PpbStepSetupShared";
 import { PpbStepRulesList } from "./PpbStepRulesList";
 import { APP_BRAND } from "../../../lib/app-brand";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbRulesConfigurationCard({ step }: { step: any }) {
   const {
@@ -20,13 +21,13 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
   const hasStepRules =
     (conditionsState.stepConditions[step.id] || []).length > 0;
   const hasCategoryRules = stepCategories.some(
-    (category: any) => (category.conditions || []).length > 0,
+    (category: any) => (category.conditions || []).length > 0
   );
   const activeRuleMode = hasCategoryRules
     ? "category"
     : hasStepRules
-      ? "step"
-      : "none";
+    ? "step"
+    : "none";
   const ruleModeOptions = [
     { label: "No rules", value: "none" },
     { label: "Step rules", value: "step" },
@@ -67,7 +68,9 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
         }}
       >
         <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-          Rules Configuration
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+          )}
         </h3>
         <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
       </div>
@@ -78,8 +81,9 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
           color: "#6d7175",
         }}
       >
-        Apply rules to the entire step or to specific categories to guide your
-        customer's selections.
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
+        )}
       </p>
       <button
         type="button"
@@ -87,7 +91,7 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
         style={{ marginBottom: 12, display: "inline-block" }}
         onClick={() => window.open(APP_BRAND.links.company, "_blank")}
       >
-        Learn More
+        {translateAdmin("common.actions.learnMore")}
       </button>
       <div
         style={{

@@ -25,9 +25,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     throw new Response("Bundle not found", { status: 404 });
   }
 
-  const routeType = bundle.bundleType === BundleType.FULL_PAGE
-    ? "full-page-bundle"
-    : "product-page-bundle";
+  const routeType =
+    bundle.bundleType === BundleType.FULL_PAGE
+      ? "full-page-bundle"
+      : "product-page-bundle";
 
   return redirect(`/app/bundles/${routeType}/configure/${bundle.id}`);
 };

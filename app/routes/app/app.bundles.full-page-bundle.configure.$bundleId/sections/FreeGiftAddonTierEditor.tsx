@@ -4,6 +4,7 @@ import {
   normalizeAddonTierAccordionIndex,
 } from "../../../../lib/addon-tier-accordion";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbAddonTierEditor({
   flow,
@@ -37,7 +38,7 @@ export function FpbAddonTierEditor({
           if (updated === addonTiers) return;
           updateAddonTiers(updated);
           setActiveAddonTierIndex((currentIndex: number | null) =>
-            normalizeAddonTierAccordionIndex(currentIndex, updated.length),
+            normalizeAddonTierAccordionIndex(currentIndex, updated.length)
           );
         };
         const getAddonConditions = (tier: any) =>
@@ -58,7 +59,7 @@ export function FpbAddonTierEditor({
         };
         const removeAddonTierCondition = (
           tierIndex: number,
-          ruleId: string,
+          ruleId: string
         ) => {
           const updated = addonTiers.map((tier, i) => {
             if (i !== tierIndex) return tier;
@@ -66,7 +67,7 @@ export function FpbAddonTierEditor({
             return {
               ...tier,
               conditions: conditions.filter(
-                (rule: any, idx: number) => String(rule.id ?? idx) !== ruleId,
+                (rule: any, idx: number) => String(rule.id ?? idx) !== ruleId
               ),
             };
           });
@@ -76,7 +77,7 @@ export function FpbAddonTierEditor({
           tierIndex: number,
           ruleId: string,
           field: string,
-          value: string,
+          value: string
         ) => {
           const updated = addonTiers.map((tier, i) => {
             if (i !== tierIndex) return tier;
@@ -86,7 +87,7 @@ export function FpbAddonTierEditor({
               conditions: conditions.map((rule: any, idx: number) =>
                 String(rule.id ?? idx) === ruleId
                   ? { ...rule, [field]: value }
-                  : rule,
+                  : rule
               ),
             };
           });
@@ -99,24 +100,31 @@ export function FpbAddonTierEditor({
               return (
                 <div
                   key={idx}
-                  className={`${fullPageBundleStyles.addonsTierCard} ${isActiveTier ? fullPageBundleStyles.addonsTierCardActive : ""}`}
+                  className={`${fullPageBundleStyles.addonsTierCard} ${
+                    isActiveTier
+                      ? fullPageBundleStyles.addonsTierCardActive
+                      : ""
+                  }`}
                 >
                   <div
-                    className={`${fullPageBundleStyles.addonsTierHeader} ${isActiveTier ? fullPageBundleStyles.addonsTierHeaderActive : ""}`}
+                    className={`${fullPageBundleStyles.addonsTierHeader} ${
+                      isActiveTier
+                        ? fullPageBundleStyles.addonsTierHeaderActive
+                        : ""
+                    }`}
                     role="button"
                     tabIndex={0}
                     aria-expanded={isActiveTier}
                     onClick={() =>
                       setActiveAddonTierIndex((currentIndex: number | null) =>
-                        getNextAddonTierAccordionIndex(currentIndex, idx),
+                        getNextAddonTierAccordionIndex(currentIndex, idx)
                       )
                     }
                     onKeyDown={(event) => {
                       if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
-                        setActiveAddonTierIndex(
-                          (currentIndex: number | null) =>
-                            getNextAddonTierAccordionIndex(currentIndex, idx),
+                        setActiveAddonTierIndex((currentIndex: number | null) =>
+                          getNextAddonTierAccordionIndex(currentIndex, idx)
                         );
                       }
                     }}
@@ -126,7 +134,9 @@ export function FpbAddonTierEditor({
                       aria-hidden="true"
                     />
                     <h4 className={fullPageBundleStyles.addonsTierTitle}>
-                      Tier {idx + 1}
+                      {translateAdmin("adminDynamic.tierNumber", {
+                        number: idx + 1,
+                      })}
                     </h4>
                     <div
                       className={fullPageBundleStyles.categoryActions}
@@ -136,7 +146,9 @@ export function FpbAddonTierEditor({
                     >
                       <button
                         type="button"
-                        className={fullPageBundleStyles.categoryDeleteIconButton}
+                        className={
+                          fullPageBundleStyles.categoryDeleteIconButton
+                        }
                         title={`Delete Tier ${idx + 1}`}
                         aria-label={`Delete Tier ${idx + 1}`}
                         onClick={(event) => {
@@ -151,13 +163,14 @@ export function FpbAddonTierEditor({
                     <button
                       type="button"
                       className={fullPageBundleStyles.categoryChevron}
-                      aria-label={isActiveTier ? "Collapse tier" : "Expand tier"}
+                      aria-label={
+                        isActiveTier ? "Collapse tier" : "Expand tier"
+                      }
                       onMouseDown={(event) => event.stopPropagation()}
                       onClick={(event) => {
                         event.stopPropagation();
-                        setActiveAddonTierIndex(
-                          (currentIndex: number | null) =>
-                            getNextAddonTierAccordionIndex(currentIndex, idx),
+                        setActiveAddonTierIndex((currentIndex: number | null) =>
+                          getNextAddonTierAccordionIndex(currentIndex, idx)
                         );
                       }}
                     >
@@ -193,14 +206,14 @@ export function FpbAddonTierEditor({
                             strokeLinejoin="round"
                           />
                         </svg>
-                          )}
-                        </button>
+                      )}
+                    </button>
                   </div>
                   {isActiveTier && (
                     <div className={fullPageBundleStyles.addonsTierBody}>
                       <s-stack direction="block" gap="small">
                         <s-text-field
-                          label="Tier title"
+                          label={translateAdmin("adminAttributes.tierTitle")}
                           value={tier.title ?? `Tier ${idx + 1}`}
                           onInput={(e) => {
                             const updated = addonTiers.map((t, i) =>
@@ -209,7 +222,7 @@ export function FpbAddonTierEditor({
                                     ...t,
                                     title: (e.target as HTMLInputElement).value,
                                   }
-                                : t,
+                                : t
                             );
                             updateAddonTiers(updated);
                           }}
@@ -225,7 +238,9 @@ export function FpbAddonTierEditor({
                             icon="product-add"
                             onClick={() => handleAddonSelectedProductAdd(idx)}
                           >
-                            Add Products
+                            {translateAdmin(
+                              "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
+                            )}
                           </s-button>
                           {Array.isArray(tier.selectedAddonProducts) &&
                             tier.selectedAddonProducts.length > 0 && (
@@ -236,13 +251,16 @@ export function FpbAddonTierEditor({
                                   openAddonSelectedProductsModal(idx)
                                 }
                               >
-                                {tier.selectedAddonProducts.length}
-                                Selected
+                                {translateAdmin("adminDynamic.selectedCount", {
+                                  count: tier.selectedAddonProducts.length,
+                                })}
                               </button>
                             )}
                         </div>
                         <s-checkbox
-                          label="Display Variants as Individual Products"
+                          label={translateAdmin(
+                            "adminAttributes.displayVariantsAsIndividualProducts"
+                          )}
                           checked={
                             tier.displayVariantsAsIndividualProducts_addons ===
                               true || undefined
@@ -255,7 +273,7 @@ export function FpbAddonTierEditor({
                                     displayVariantsAsIndividualProducts_addons:
                                       (e.target as HTMLInputElement).checked,
                                   }
-                                : t,
+                                : t
                             );
                             updateAddonTiers(updated);
                           }}
@@ -264,7 +282,9 @@ export function FpbAddonTierEditor({
                           className={fullPageBundleStyles.addonsDiscountGrid}
                         >
                           <s-select
-                            label="Discount Based on"
+                            label={translateAdmin(
+                              "adminAttributes.discountBasedOn"
+                            )}
                             value={
                               tier.eligibilityType ||
                               tier.eligibilityCondition?.type ||
@@ -279,15 +299,21 @@ export function FpbAddonTierEditor({
                                         e.target as HTMLSelectElement
                                       ).value,
                                     }
-                                  : t,
+                                  : t
                               );
                               updateAddonTiers(updated);
                             }}
                           >
                             <s-option value="QUANTITY">
-                              Bundle Product Quantity
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.bundleProductQuantity"
+                              )}
                             </s-option>
-                            <s-option value="AMOUNT">Bundle Value</s-option>
+                            <s-option value="AMOUNT">
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.bundleValue"
+                              )}
+                            </s-option>
                           </s-select>
                           <s-number-field
                             label={
@@ -299,31 +325,32 @@ export function FpbAddonTierEditor({
                             value={String(
                               tier.eligibilityValue ??
                                 tier.eligibilityCondition?.value ??
-                                1,
+                                1
                             )}
                             onInput={(e) => {
                               const updated = addonTiers.map((t, i) =>
                                 i === idx
                                   ? {
                                       ...t,
-                                      eligibilityValue:
-                                        Math.max(
-                                          1,
-                                          Number(
-                                            (e.target as HTMLInputElement).value,
-                                          ) || 1,
-                                        ),
+                                      eligibilityValue: Math.max(
+                                        1,
+                                        Number(
+                                          (e.target as HTMLInputElement).value
+                                        ) || 1
+                                      ),
                                     }
-                                  : t,
+                                  : t
                               );
                               updateAddonTiers(updated);
                             }}
                             min={1}
                           />
                           <s-number-field
-                            label="Discount on Add-ons"
+                            label={translateAdmin(
+                              "adminAttributes.discountOnAddOns"
+                            )}
                             value={String(
-                              tier.discountValue ?? tier.discount?.value ?? 0,
+                              tier.discountValue ?? tier.discount?.value ?? 0
                             )}
                             onInput={(e) => {
                               const updated = addonTiers.map((t, i) =>
@@ -333,10 +360,10 @@ export function FpbAddonTierEditor({
                                       discountType: "PERCENTAGE",
                                       discountValue:
                                         Number(
-                                          (e.target as HTMLInputElement).value,
+                                          (e.target as HTMLInputElement).value
                                         ) || 0,
                                     }
-                                  : t,
+                                  : t
                               );
                               updateAddonTiers(updated);
                             }}
@@ -346,12 +373,21 @@ export function FpbAddonTierEditor({
                           />
                         </div>
                         <div className={fullPageBundleStyles.addonsTierRules}>
-                          <h5>Tier Rules</h5>
+                          <h5>
+                            {translateAdmin(
+                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.tierRules"
+                            )}
+                          </h5>
                           <p>
-                            Create Rules based on quantity of products added on
-                            this tier.
+                            {translateAdmin(
+                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.createRulesBasedOnQuantityOfProductsAddedOnThisTier"
+                            )}
                           </p>
-                          <p>Note: Rules are only valid on this tier.</p>
+                          <p>
+                            {translateAdmin(
+                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.noteRulesAreOnlyValidOnThisTier"
+                            )}
+                          </p>
                           {getAddonConditions(tier).length > 0 && (
                             <div className={fullPageBundleStyles.rulesList}>
                               {getAddonConditions(tier).map(
@@ -372,7 +408,10 @@ export function FpbAddonTierEditor({
                                           fontWeight: 650,
                                         }}
                                       >
-                                        Rule #{ruleIndex + 1}
+                                        {translateAdmin(
+                                          "adminDynamic.ruleNumber",
+                                          { number: ruleIndex + 1 }
+                                        )}
                                       </h4>
                                       <s-button
                                         variant="tertiary"
@@ -381,11 +420,13 @@ export function FpbAddonTierEditor({
                                         onClick={() =>
                                           removeAddonTierCondition(
                                             idx,
-                                            String(rule.id ?? ruleIndex),
+                                            String(rule.id ?? ruleIndex)
                                           )
                                         }
                                       >
-                                        Remove
+                                        {translateAdmin(
+                                          "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                                        )}
                                       </s-button>
                                     </div>
                                     <div
@@ -394,7 +435,9 @@ export function FpbAddonTierEditor({
                                       }
                                     >
                                       <s-select
-                                        label="Type"
+                                        label={translateAdmin(
+                                          "dashboard.table.type"
+                                        )}
                                         value={rule.type || "quantity"}
                                         onChange={(e) =>
                                           updateAddonTierCondition(
@@ -402,19 +445,25 @@ export function FpbAddonTierEditor({
                                             String(rule.id ?? ruleIndex),
                                             "type",
                                             (e.target as HTMLSelectElement)
-                                              .value,
+                                              .value
                                           )
                                         }
                                       >
                                         <s-option value="quantity">
-                                          Quantity
+                                          {translateAdmin(
+                                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.quantity"
+                                          )}
                                         </s-option>
                                         <s-option value="amount">
-                                          Amount
+                                          {translateAdmin(
+                                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.amount"
+                                          )}
                                         </s-option>
                                       </s-select>
                                       <s-select
-                                        label="Condition"
+                                        label={translateAdmin(
+                                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                                        )}
                                         value={
                                           rule.condition || "lessThanOrEqualTo"
                                         }
@@ -424,7 +473,7 @@ export function FpbAddonTierEditor({
                                             String(rule.id ?? ruleIndex),
                                             "condition",
                                             (e.target as HTMLSelectElement)
-                                              .value,
+                                              .value
                                           )
                                         }
                                       >
@@ -440,22 +489,23 @@ export function FpbAddonTierEditor({
                                         ))}
                                       </s-select>
                                       <s-number-field
-                                        label="Value"
+                                        label={translateAdmin(
+                                          "adminAttributes.value"
+                                        )}
                                         value={rule.value ?? ""}
                                         onInput={(e) => {
                                           updateAddonTierCondition(
                                             idx,
                                             String(rule.id ?? ruleIndex),
                                             "value",
-                                            (e.target as HTMLInputElement)
-                                              .value,
+                                            (e.target as HTMLInputElement).value
                                           );
                                         }}
                                         autocomplete="off"
                                       />
                                     </div>
                                   </div>
-                                ),
+                                )
                               )}
                             </div>
                           )}
@@ -471,7 +521,9 @@ export function FpbAddonTierEditor({
                               }
                               onClick={() => addAddonTierCondition(idx)}
                             >
-                              Add Tier Rule
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addTierRule"
+                              )}
                             </button>
                           </div>
                         </div>
@@ -495,7 +547,9 @@ export function FpbAddonTierEditor({
                   setActiveAddonTierIndex(addonTiers.length);
                 }}
               >
-                Add Add Ons Tier
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                )}
               </button>
             </div>
           </>

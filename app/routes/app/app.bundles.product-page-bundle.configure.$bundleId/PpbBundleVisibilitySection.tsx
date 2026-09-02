@@ -6,6 +6,7 @@ import { CommonBundleVisibilityOverview } from "../_shared/bundle-configure/Comm
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { SpecificLinkOfferSection } from "../shared/SpecificLinkOfferSection";
 import { OfferOperationsSection } from "../shared/OfferOperationsSection";
+import { CountryTargetingSection } from "../shared/CountryTargetingSection";
 
 export function PpbBundleVisibilitySection() {
   const flow = usePpbConfigureContext();
@@ -67,8 +68,23 @@ export function PpbBundleVisibilitySection() {
           state={flow.offerDeliveryState}
           onPriorityChange={flow.setOfferPriority}
           onStopLowerPriorityChange={flow.setOfferStopLowerPriority}
+          onScheduleModeChange={flow.setOfferScheduleMode}
           onStartsAtChange={flow.setOfferStartsAt}
           onEndsAtChange={flow.setOfferEndsAt}
+          onRecurrenceFrequencyChange={flow.setOfferRecurrenceFrequency}
+          onRecurrenceAnchorDateChange={flow.setOfferRecurrenceAnchorDate}
+          onRecurrenceWindowStartChange={flow.setOfferRecurrenceWindowStart}
+          onRecurrenceWindowEndChange={flow.setOfferRecurrenceWindowEnd}
+          onRecurrenceTerminationChange={flow.setOfferRecurrenceTermination}
+          onRecurrenceEndsOnChange={flow.setOfferRecurrenceEndsOn}
+          onRecurrenceRunCountChange={flow.setOfferRecurrenceRunCount}
+        />
+        <CountryTargetingSection
+          active={flow.activeSection === "bundle_visibility"}
+          state={flow.offerDeliveryState}
+          onEnabledChange={flow.setCountryTargetingEnabled}
+          onModeChange={flow.setCountryTargetingMode}
+          onCountryCodesChange={flow.setCountryCodes}
         />
       </s-stack>
     </div>

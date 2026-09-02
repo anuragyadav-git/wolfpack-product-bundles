@@ -1,5 +1,6 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbQuantitySettings() {
   const {
@@ -27,11 +28,16 @@ export function PpbQuantitySettings() {
       <s-stack direction="block" gap="small">
         <div className={productPageBundleStyles.settingTitleRow}>
           <h3 className={productPageBundleStyles.settingTitle}>
-            Enable Quantity Validation
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.enableQuantityValidation"
+            )}
+            <QuestionHelpTooltip tooltipKey="quantityValidation" />
           </h3>
           <span className={productPageBundleStyles.settingInlineSwitch}>
             <s-switch
-              accessibilityLabel="Enable quantity validation"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.enableQuantityValidation"
+              )}
               checked={quantityValidationEnabled || undefined}
               onChange={(e) => {
                 setQuantityValidationEnabled(
@@ -45,7 +51,9 @@ export function PpbQuantitySettings() {
         <DisabledConfigurationRegion disabled={!quantityValidationEnabled}>
           <s-number-field
             id="configure-settings-maxQuantity"
-            label="Maximum allowed quantity per product"
+            label={translateAdmin(
+              "adminAttributes.maximumAllowedQuantityPerProduct"
+            )}
             required={quantityValidationEnabled || undefined}
             error={validationErrors["settings.maxQuantity"]}
             min={1}
@@ -62,17 +70,20 @@ export function PpbQuantitySettings() {
         <div className={productPageBundleStyles.settingTitleRow}>
           <div>
             <h3 className={productPageBundleStyles.settingTitle}>
-              Variant Selector
+              {translateAdmin("tooltips.variantSelector.title")}
               <QuestionHelpTooltip tooltipKey="variantSelector" />
             </h3>
             <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-              Enable variant selection within the product cards instead of the
-              quick look
+              {translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundlesettingscontrolsQuantity.enableVariantSelectionWithinTheProductCardsInsteadOfTheQuickLook"
+              )}
             </p>
           </div>
           <span className={productPageBundleStyles.settingInlineSwitch}>
             <s-switch
-              accessibilityLabel="Variant selector"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.variantSelector"
+              )}
               checked={variantSelectorEnabled || undefined}
               onChange={(e) => {
                 setVariantSelectorEnabled(
@@ -86,20 +97,23 @@ export function PpbQuantitySettings() {
         <div className={productPageBundleStyles.settingTitleRow}>
           <div>
             <h3 className={productPageBundleStyles.settingTitle}>
-              Low-stock alert
+              {translateAdmin("tooltips.lowStockAlert.title")}
+              <QuestionHelpTooltip tooltipKey="lowStockAlert" />
             </h3>
             <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-              Show Shopify's sellable component-variant quantity at or below a threshold.
+              {translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundlesettingscontrolsQuantity.showShopifySSellableComponentVariantQuantityAtOrBelowAThreshold"
+              )}
             </p>
           </div>
           <span className={productPageBundleStyles.settingInlineSwitch}>
             <s-switch
-              accessibilityLabel="Low-stock alert"
+              accessibilityLabel={translateAdmin(
+                "tooltips.lowStockAlert.title"
+              )}
               checked={lowStockAlertEnabled || undefined}
               onChange={(e) => {
-                setLowStockAlertEnabled(
-                  (e.target as HTMLInputElement).checked,
-                );
+                setLowStockAlertEnabled((e.target as HTMLInputElement).checked);
                 markAsDirty();
               }}
             />
@@ -109,16 +123,14 @@ export function PpbQuantitySettings() {
           <s-stack direction="block" gap="small">
             <s-number-field
               id="configure-settings-lowStockThreshold"
-              label="Low-stock threshold"
+              label={translateAdmin("adminAttributes.lowStockThreshold")}
               min={1}
               max={1000}
               value={lowStockAlertThreshold}
               disabled={!lowStockAlertEnabled}
               error={validationErrors["settings.lowStockThreshold"]}
               onInput={(e) => {
-                setLowStockAlertThreshold(
-                  (e.target as HTMLInputElement).value,
-                );
+                setLowStockAlertThreshold((e.target as HTMLInputElement).value);
                 clearValidationError("settings.lowStockThreshold");
                 markAsDirty();
               }}
@@ -126,15 +138,13 @@ export function PpbQuantitySettings() {
             />
             <s-text-field
               id="configure-settings-lowStockMessage"
-              label="Low-stock message"
+              label={translateAdmin("adminAttributes.lowStockMessage")}
               value={lowStockAlertMessage}
               disabled={!lowStockAlertEnabled}
               error={validationErrors["settings.lowStockMessage"]}
               details="Include {{stock}} where the sellable quantity should appear."
               onInput={(e) => {
-                setLowStockAlertMessage(
-                  (e.target as HTMLInputElement).value,
-                );
+                setLowStockAlertMessage((e.target as HTMLInputElement).value);
                 clearValidationError("settings.lowStockMessage");
                 markAsDirty();
               }}

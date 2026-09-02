@@ -5,7 +5,7 @@ title: BOGOS and Bundlex Wolfpack Feasibility
 type: feasibility-analysis
 status: current
 summary: Prioritizes the best BOGOS and Bundlex capabilities for Wolfpack and defines Admin, data, storefront, analytics, Shopify, testing, and rollout boundaries.
-last_audited: 2026-08-31
+last_audited: 2026-09-01
 owners:
   - product
   - engineering
@@ -421,7 +421,7 @@ longer an early-access dependency.
 
 ### Slice I — Identity personalization
 
-**Scope:** Shopify Markets and discount customer-segment contexts first. Prefer
+**Scope:** Shopify-selected ISO country context and discount customer-segment contexts first. Do not persist market IDs or handles: Shopify now documents those single-market identifiers as unstable when nested markets change the most-specific match. Prefer
 Discount Function buyer-identity fields (including tag predicates) for
 checkout enforcement so raw customer records never enter Wolfpack. Customer
 tags or purchase history for **pre-cart visibility** remain deferred until the
@@ -433,15 +433,15 @@ protected-data and authenticated-identity gate is explicitly approved.
 
 **Effort/risk:** Large / very high privacy and platform risk.
 
-### Slice J — Offer import/export and recurring schedules
+### Slice J — Offer import/export and recurring schedules — implemented
 
-**Scope:** versioned CSV round trip, validate-only, draft import, job progress/errors, weekly/monthly recurrence.
+**Delivered scope:** strict version 2 CSV round trip for existing bundle policies, validate-only and atomic apply flows, optimistic rule-version checks, post-write storefront sync reporting, and timezone-safe weekly/monthly recurrence. The importer does not create or publish bundles, does not accept campaign secrets, and rejects recurrence timezones that differ from Shopify's current shop timezone.
 
-**Tests first:** CSV injection, encoding, duplicate keys, missing SKU/handle, partial validation, idempotent retry, recurrence/DST/run-count termination.
+**Tests:** CSV injection, encoding, duplicate bundle IDs, strict headers and row limits, stale versions, link prerequisites, recurrence/DST/month-end/run-count termination, and FPB/PPB persistence.
 
-**Browser QA:** small/large imports, cancellation, retry, downloadable errors, post-import draft review, schedule calendar/list states.
+**Remaining browser QA:** hard-reload FPB/PPB schedule editing and persistence on desktop/mobile, then validate/apply a small version 2 CSV through the authenticated Offer operations surface.
 
-**Effort/risk:** Large / high.
+**Constraint:** storefront eligibility is request-time enforced. Shopify checkout discount dates remain Shopify-owned; the current single shop-wide automatic app-discount node cannot represent independent per-bundle calendars.
 
 ## Cross-cutting acceptance gates
 

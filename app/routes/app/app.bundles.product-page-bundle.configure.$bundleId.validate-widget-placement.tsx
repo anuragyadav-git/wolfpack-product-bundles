@@ -14,7 +14,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   if (!bundleId) {
     return json(
       { success: false, error: "Invalid bundle widget placement route" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 

@@ -135,24 +135,21 @@ describe("app billing route", () => {
     });
   });
 
-  it.each(["upgrade", "cancel"])(
-    "opens Shopify-hosted plan management for %s",
-    async (intent) => {
-      const response = await action({
-        request: makeActionRequest(intent),
-        params: {},
-        context: {},
-      });
-      const data = await response.json() as { hostedPlanUrl?: string };
+  it("opens Shopify-hosted plan management for cancellation", async () => {
+    const response = await action({
+      request: makeActionRequest("cancel"),
+      params: {},
+      context: {},
+    });
+    const data = await response.json() as { hostedPlanUrl?: string };
 
-      expect(response.status).toBe(200);
-      expect(data.hostedPlanUrl).toContain("/pricing_plans");
-      expect(pricingUrl).toHaveBeenCalledWith(
-        "test-shop.myshopify.com",
-        "wolfpack-product-bundles-sit",
-      );
-    },
-  );
+    expect(response.status).toBe(200);
+    expect(data.hostedPlanUrl).toContain("/pricing_plans");
+    expect(pricingUrl).toHaveBeenCalledWith(
+      "test-shop.myshopify.com",
+      "wolfpack-product-bundles-sit",
+    );
+  });
 
   it("rejects unknown billing actions", async () => {
     const response = await action({
@@ -169,7 +166,7 @@ describe("app billing route", () => {
     currentAppIdentity.mockRejectedValueOnce(new Error("identity unavailable"));
 
     const response = await action({
-      request: makeActionRequest("upgrade"),
+      request: makeActionRequest("cancel"),
       params: {},
       context: {},
     });
@@ -177,7 +174,7 @@ describe("app billing route", () => {
     expect(response.status).toBe(500);
   });
 
-  it("renders a Shopify-managed plan action for a verified Free plan", () => {
+  it("links a verified Free merchant to the Billing Plans child route", () => {
     remixHooks().useLoaderData.mockReturnValue({
       subscription: {
         plan: "free",
@@ -202,5 +199,6 @@ describe("app billing route", () => {
     const view = renderToStaticMarkup(React.createElement(BillingPage));
 
     expect(view).toContain("common.actions.upgradeNow");
+    expect(view).toContain('href="/app/billing/plans"');
   });
 });

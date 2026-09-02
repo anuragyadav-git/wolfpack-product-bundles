@@ -23,6 +23,13 @@ const operationsMigration = fs.readFileSync(
   ),
   'utf8',
 );
+const countryTargetingMigration = fs.readFileSync(
+  path.join(
+    process.cwd(),
+    'prisma/migrations/20260901143000_add_offer_country_targeting/migration.sql',
+  ),
+  'utf8',
+);
 
 describe('specific-link offer schema', () => {
   it('gives each bundle one optional normalized offer policy', () => {
@@ -45,6 +52,16 @@ describe('specific-link offer schema', () => {
     expect(schema).toMatch(/model OfferCondition \{[\s\S]*revokedAt\s+DateTime\?/);
     expect(schema).not.toMatch(/rawToken|campaignToken/);
     expect(simplificationMigration).toContain('DROP COLUMN "tokenIdentifier"');
+  });
+
+  it('persists Shopify country targeting as direct typed policy fields', () => {
+    expect(schema).toMatch(/enum OfferCountryTargetingMode \{\s*include\s+exclude\s*\}/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*countryTargetingEnabled\s+Boolean\s+@default\(false\)/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*countryTargetingMode\s+OfferCountryTargetingMode\s+@default\(include\)/);
+    expect(schema).toMatch(/model OfferPolicy \{[\s\S]*countryCodes\s+String\[\]/);
+    expect(schema).not.toMatch(/marketIds|marketHandles|ipCountry/);
+    expect(countryTargetingMigration).toContain('"countryTargetingEnabled" BOOLEAN NOT NULL DEFAULT false');
+    expect(countryTargetingMigration).toContain('"countryCodes" TEXT[] DEFAULT ARRAY[]::TEXT[]');
   });
 
   it('enforces one condition type per policy and cascading ownership', () => {

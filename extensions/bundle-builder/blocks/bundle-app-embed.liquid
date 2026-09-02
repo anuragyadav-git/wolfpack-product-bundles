@@ -46,6 +46,7 @@
   data-product-handle="{% if product %}{{ product.handle | escape }}{% endif %}"
   data-collection-ids="{{ product_collection_ids | strip }}"
   data-locale="{{ request.locale.iso_code }}"
+  data-country-code="{{ localization.country.iso_code }}"
   data-selected-variant-id="{% if product and product.selected_or_first_available_variant %}{{ product.selected_or_first_available_variant.id }}{% endif %}"
   data-product-page-script-url="{{ 'bundle-widget-product-page-bundled.js' | asset_url }}"
   data-product-page-style-url="{{ 'bundle-widget.css' | asset_url }}"

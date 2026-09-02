@@ -48,6 +48,7 @@ const baseFlow = {
 
 const ppbContext = {
   ...baseFlow,
+  QuestionHelpTooltip: () => null,
   productPageBundleStyles: {
     defaultProductsPickerActions: "",
     defaultProductsPickerGroup: "",

@@ -780,6 +780,121 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("persists direct sticky add-to-cart settings", async () => {
+    const fd = makeFormData({
+      stickyAddToCartEnabled: "true",
+      stickyAddToCartShowDesktop: "false",
+      stickyAddToCartShowMobile: "true",
+      stickyAddToCartAction: "add_selected_offer",
+    });
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          stickyAddToCartEnabled: true,
+          stickyAddToCartShowDesktop: false,
+          stickyAddToCartShowMobile: true,
+          stickyAddToCartAction: "add_selected_offer",
+        }),
+      }),
+    );
+  });
+
+  it("persists direct countdown presentation without creating a deadline", async () => {
+    const fd = makeFormData({
+      countdownEnabled: "true",
+      countdownLayout: "full",
+      countdownPosition: "below",
+      countdownTitle: "Ends soon",
+      countdownExpiryAction: "show_message",
+      countdownExpiredMessage: "This offer has ended",
+    });
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          countdownEnabled: true,
+          countdownLayout: "full",
+          countdownPosition: "below",
+          countdownTitle: "Ends soon",
+          countdownExpiryAction: "show_message",
+          countdownExpiredMessage: "This offer has ended",
+        }),
+      }),
+    );
+    const updateInput = getDb().bundle.update.mock.calls[0][0];
+    expect(updateInput.data).not.toHaveProperty("countdownEndsAt");
+  });
+
+  it("persists normalized Shopify country targeting on the offer policy", async () => {
+    const fd = makeFormData({
+      countryTargetingEnabled: "true",
+      countryTargetingMode: "exclude",
+    });
+    fd.append("countryCodes", " us ");
+    fd.append("countryCodes", "CA");
+    fd.append("countryCodes", "US");
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          offerPolicy: {
+            create: expect.objectContaining({
+              countryTargetingEnabled: true,
+              countryTargetingMode: "exclude",
+              countryCodes: ["CA", "US"],
+            }),
+          },
+        }),
+      }),
+    );
+  });
+
+  it("persists a recurring offer in Shopify's store timezone", async () => {
+    MOCK_ADMIN.graphql.mockResolvedValueOnce({
+      json: async () => ({
+        data: { shop: { currencyCode: "CAD", ianaTimezone: "America/Toronto" } },
+      }),
+    });
+    const fd = makeFormData({
+      offerPriority: "30",
+      offerStopLowerPriority: "true",
+      offerScheduleMode: "recurring",
+      offerStartsAt: "",
+      offerEndsAt: "",
+      offerRecurrenceFrequency: "monthly",
+      offerRecurrenceAnchorDate: "2026-09-30",
+      offerRecurrenceWindowStart: "10:30",
+      offerRecurrenceWindowEnd: "18:00",
+      offerRecurrenceTermination: "never",
+      offerRecurrenceEndsOn: "",
+      offerRecurrenceRunCount: "",
+    });
+
+    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
+
+    expect(getDb().bundle.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        offerPolicy: {
+          create: expect.objectContaining({
+            scheduleMode: "recurring",
+            recurrenceFrequency: "monthly",
+            recurrenceTimezone: "America/Toronto",
+            recurrenceAnchorDate: new Date("2026-09-30T00:00:00.000Z"),
+            recurrenceWindowStartMinute: 630,
+            recurrenceWindowEndMinute: 1080,
+            recurrenceTermination: "never",
+            recurrenceRunCount: null,
+          }),
+        },
+      }),
+    }));
+  });
+
   it("creates StepCategory records in DB with correct shape", async () => {
     const categoryCondition = { type: "quantity", condition: "greaterThanOrEqualTo", value: "01" };
     const categoryProduct = {
@@ -1316,6 +1431,13 @@ describe("PPB handleSaveBundle — with shopifyProductId (direct storefront sync
       shopifyProductHandle: "bundle-123",
       offerPolicy: {
         specificLinkRequired: false,
+        priority: 100,
+        stopLowerPriority: false,
+        startsAt: null,
+        endsAt: null,
+        countryTargetingEnabled: false,
+        countryTargetingMode: "include",
+        countryCodes: [],
         ruleVersion: 1,
         conditions: [{ expiresAt: null, revokedAt: null }],
       },

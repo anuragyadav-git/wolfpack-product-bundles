@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbBundleTemplateSettings({
   flow,
@@ -26,7 +27,9 @@ export function FpbBundleTemplateSettings({
                 flex: 1,
               }}
             >
-              Cart line item discount display
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.cartLineItemDiscountDisplay"
+              )}
             </p>
             <QuestionHelpTooltip tooltipKey="cartLineItemDiscountDisplay" />
             <s-button
@@ -34,11 +37,15 @@ export function FpbBundleTemplateSettings({
               icon="edit"
               onClick={() => handleSectionChange("discount_pricing")}
             >
-              Edit Defaults
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.editDefaults"
+              )}
             </s-button>
           </s-stack>
           <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-            Shows how much the customer is saving on the bundle in cart
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.showsHowMuchTheCustomerIsSavingOnTheBundleInCart"
+            )}
           </p>
           {[
             {

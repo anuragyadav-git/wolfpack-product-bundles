@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DefaultStepTimelineIcon } from "../../_shared/bundle-configure/DefaultStepTimelineIcon";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepConfigCard({
   flow,
@@ -21,7 +22,9 @@ export function FpbStepConfigCard({
     <>
       <div className={fullPageBundleStyles.card}>
         <h3 className={fullPageBundleStyles.stepConfigTitle}>
-          Step Config
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupconfigcard.stepConfig"
+          )}
         </h3>
         <div className={fullPageBundleStyles.stepConfigRow}>
           <div className={fullPageBundleStyles.stepConfigIconBox}>
@@ -29,13 +32,13 @@ export function FpbStepConfigCard({
               <>
                 <img
                   src={(step as any).stepImage}
-                  alt="Step icon"
+                  alt={translateAdmin("adminAttributes.stepIcon")}
                   className={fullPageBundleStyles.iconImg}
                 />
                 <button
                   type="button"
                   className={fullPageBundleStyles.iconRemoveButton}
-                  aria-label="Remove step icon"
+                  aria-label={translateAdmin("adminAttributes.removeStepIcon")}
                   onClick={() => {
                     stepsState.updateStepField(step.id, "stepImage", null);
                     setShowIconPickerForStep(null);
@@ -73,23 +76,27 @@ export function FpbStepConfigCard({
               icon="replace"
               onClick={() =>
                 setShowIconPickerForStep((prev: string | null) =>
-                  prev === step.id ? null : step.id,
+                  prev === step.id ? null : step.id
                 )
               }
             >
-              Replace
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
+              )}
             </s-button>
           </div>
           <div className={fullPageBundleStyles.fieldsColumn}>
             <s-text-field
-              label="Step Title"
-              placeholder="Eg:- Customized T-shirt Bundle for you"
+              label={translateAdmin("adminAttributes.stepTitle")}
+              placeholder={translateAdmin(
+                "adminAttributes.egCustomizedTShirtBundleForYou"
+              )}
               value={(step as any).pageTitle ?? ""}
               onInput={(e) => {
                 stepsState.updateStepField(
                   step.id,
                   "pageTitle",
-                  (e.target as HTMLInputElement).value,
+                  (e.target as HTMLInputElement).value
                 );
                 markAsDirty();
               }}

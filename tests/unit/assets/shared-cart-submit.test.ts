@@ -14,6 +14,7 @@ describe('shared cart-submit helpers', () => {
         _bundle_display_properties: JSON.stringify({ box: '2', items: '2 x Product A' }),
       },
       bundleId: ' bundle-1 ',
+      bundleName: ' Gift Box ',
       offerDelivery: {
         offerPolicyId: ' policy-1 ',
         ruleVersion: 3,
@@ -24,6 +25,7 @@ describe('shared cart-submit helpers', () => {
       _bundle_display_properties: JSON.stringify({
         box: '2',
         items: '2 x Product A',
+        bundleName: 'Gift Box',
         offerAnalytics: {
           bundleId: 'bundle-1',
           offerPolicyId: 'policy-1',

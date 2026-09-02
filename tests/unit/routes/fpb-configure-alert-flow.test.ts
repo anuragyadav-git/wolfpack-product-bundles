@@ -11,6 +11,7 @@ jest.mock("@remix-run/react", () => ({
     bundle: { id: "bundle-1", name: "Bundle", status: "draft" },
     bundleProduct: null,
     shop: "shop.myshopify.com",
+    storefrontProxyRoot: "/apps/product-bundles-sit",
     shopCurrencyCode: "USD",
     shopLocales: [],
   }),
@@ -58,6 +59,7 @@ describe("FPB configure alert flow", () => {
       clearOperationAlert,
       operationAlert,
       setOperationAlert,
+      storefrontProxyRoot: "/apps/product-bundles-sit",
     }));
   });
 });

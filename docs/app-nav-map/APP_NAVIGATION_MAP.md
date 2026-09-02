@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-01
+last_audited: 2026-09-02
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-01
+**Last Updated:** 2026-09-02
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -69,8 +69,8 @@ Wolfpack Bundles SIT
 ├── Settings            → /app/settings
 ├── Integrations        → /app/integrations
 ├── Analytics           → /app/attribution
-├── Billing             → /app/pricing          (Subscription & Billing)
-└── Updates & FAQs      → /app/events
+├── Offer operations    → /app/offer-operations
+└── Billing             → /app/billing          (Subscription & Billing)
 ```
 
 Pathname-changing navigation uses Shopify's native Admin header loading
@@ -112,7 +112,6 @@ Dashboard
 ├── Resources
 │   ├── Bundle Inspiration → selects the gallery preview panel
 │   ├── Support → opens Crisp
-│   ├── Explore Update → /app/events
 │   ├── SDK Documentation → unavailable, non-interactive Coming soon state
 │   └── Bundle Gallery previews → unavailable, non-interactive Coming soon state
 │
@@ -231,14 +230,14 @@ Settings
 ├── Card: Language
 │   └── Shows multilanguage mode, 39 add/remove locale choices, shared Cart & Checkout strings, Landing Page Layout strings, and Product Page Layout strings
 └── Card: Controls
-    └── Navigates to /app/additional-configurations
+    └── Navigates to /app/settings/controls
 ```
 
 Primary action:
 
 - The complete Design, Language, and Controls cards are the actions; they do not render separate `Configure` affordances.
 - Selecting Design opens the Settings -> Design subpage.
-- Selecting Controls keeps the landing cards visible while Shopify's native Admin loading indicator reports navigation to `/app/additional-configurations`.
+- Selecting Controls keeps the landing cards visible while Shopify's native Admin loading indicator reports navigation to `/app/settings/controls`.
 - While the lazy Design or Language workspace loads after selection, the destination title and a small Polaris spinner render without card skeletons or an artificial delay.
 - The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the gutterless preview stage and its selectors sit beside one contextual inspector. On desktop, a vertically centered notch with a Polaris chevron straddles the preview/inspector boundary, remains centered in the visible sidebar edge while scrolling, and collapses the inspector so the width-driven storefront canvas grows without clearing unsaved settings or preview context. Canvas fitting is applied once per browser frame without React resize state or scale transitions. The canvas shows a centered Polaris spinner card and remains visually withheld until the isolated preview frame sends its trusted `READY` event. Mobile selection preserves the full 390 x 844 storefront viewport inside a decorative iPhone body whose chrome sits outside the iframe. At phone Admin widths the notch is hidden and a Preview / Customize segmented control remains the authoritative one-pane-at-a-time navigation.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
@@ -259,9 +258,9 @@ Primary action:
 
 ---
 
-### 2.2a Additional Configurations — `/app/additional-configurations`
+### 2.2a Settings Controls — `/app/settings/controls`
 
-**Route file:** `app/routes/app/app.additional-configurations.tsx`
+**Route file:** `app/routes/app/app.settings_.controls.tsx`
 
 Dedicated Controls workspace:
 
@@ -386,13 +385,46 @@ Responsive analytics behavior:
 
 ---
 
-### 2.4 Pricing — `/app/pricing`
+### 2.3a Offer operations — `/app/offer-operations`
 
-**Route file:** `app/routes/app/app.pricing.tsx`
+**Route file:** `app/routes/app/app.offer-operations.tsx`
+
+```
+Offer operations
+├── Export offer policies
+│   └── [Export CSV] → App Bridge-authenticated GET /app/offer-operations/export resource response
+│       └── version 2 CSV attachment with one-time and recurring schedules
+└── Validate and import
+    ├── Polaris CSV drop zone (1 MiB and 500-row bounds)
+    ├── [Validate CSV] → read-only row validation
+    ├── [Apply valid changes] → atomic policy writes, then storefront sync
+    └── Result summary → row errors and per-bundle storefront sync errors
+```
+
+The CSV addresses existing bundles by authenticated-shop bundle ID. Bundle
+name, type, and status are export context only: import never creates, changes,
+or publishes a bundle. Campaign tokens and token digests are excluded. Enabling
+link-only delivery requires an existing active campaign link managed by the
+bundle Configure action. Recurring rows must use the current Shopify store IANA
+timezone; validation rejects a different or invalid timezone before any write.
+
+---
+
+### 2.4 Billing — `/app/billing`
+
+**Route file:** `app/routes/app/app.billing.tsx`
+
+The Billing parent shows the current plan, usage, features, and Shopify-hosted
+plan management. Free merchants continue to the plans child route before
+starting Shopify-hosted plan selection.
+
+#### Billing Plans — `/app/billing/plans`
+
+**Route file:** `app/routes/app/app.billing_.plans.tsx`
 **Screenshot:** `screenshots/04-pricing.png`
 
 ```
-Pricing Page
+Billing Plans Page
 ├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
 ├── Subscription quota card (current usage)
 │   └── Threshold prompt → Dismiss removes it for the current page mount
@@ -420,24 +452,7 @@ disclosure and preserves the existing configure state.
 
 ---
 
-### 2.5 Updates & FAQs — `/app/events`
-
-**Route file:** `app/routes/app/app.events.tsx`
-**Screenshot:** `screenshots/05-events.png`
-
-```
-Updates & FAQs Page
-├── App Bridge breadcrumb + app-owned back action → previous page, Dashboard fallback
-├── Section: "Latest Updates"
-│   └── Accordion items (release notes, e.g. "Landing Page Bundles Now Load Instantly")
-│
-└── Section: "FAQs & Tutorials"
-    └── Accordion items (how-to guides)
-```
-
----
-
-### 2.6 Bundle Configure — Full-Page Bundle
+### 2.5 Bundle Configure — Full-Page Bundle
 
 **Route file:** `app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/full-page-bundle/configure/:bundleId`
@@ -464,7 +479,8 @@ FPB Configure Page
 │   │       ├── Generate/regenerate returns one copyable private link for the current response only
 │   │       ├── Require the specific link uses the global configure SaveBar
 │   │       └── Revoke immediately disables link-only delivery and invalidates the link
-│   │       └── Offer Operations → priority, stop-lower-priority, and optional storefront visibility window
+│   │       └── Offer Operations → priority, stop-lower-priority, always/one-time/recurring storefront schedule, live state, and next transition
+│   │       └── Country Targeting → Shopify storefront-country include/exclude rule with searchable ISO country choices
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
@@ -534,10 +550,11 @@ Responsive configure behavior:
 - The compact readiness trigger remains floating without covering editor actions. Opening it uses a labelled native modal dialog: a bounded floating checklist on desktop and a full-width, safe-area-aware bottom sheet on phones.
 - The readiness dialog supports Escape, safe backdrop dismissal, focus trapping, internal scrolling, and focus restoration without changing the existing readiness calculation or route adapter props.
 - Configure multi-language workflows share one staged Polaris `s-modal`; Apply updates route-owned draft state and Cancel/Escape/backdrop-close discard edits.
+- FPB and PPB expose curated visual help beside non-obvious setup, pricing, visibility, storefront, urgency, and subscription controls. Each info action opens the shared Polaris popover without changing configure state or activating the SaveBar.
 
 ---
 
-### 2.7 Bundle Configure — Product-Page Bundle
+### 2.6 Bundle Configure — Product-Page Bundle
 
 **Route file:** `app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/product-page-bundle/configure/:bundleId`
@@ -604,8 +621,14 @@ PPB Configure Page
 │   ├── Offer Operations
 │   │   ├── Priority: lower values are evaluated first across discovery results
 │   │   ├── Stop lower-priority offers after this eligible offer
-│   │   ├── Optional inclusive start and exclusive end instants in ISO 8601 format
+│   │   ├── Schedule: always active, one-time UTC window, or recurring local calendar window
+│   │   ├── Recurrence: Shopify store timezone, weekly/monthly cadence, same-day time window, and date/run termination
+│   │   ├── Current storefront state and next transition preview
 │   │   └── Shopify remains the owner of checkout discount dates and combinations
+│   ├── Country Targeting
+│   │   ├── Shopify-selected storefront country is the only geography signal
+│   │   ├── Include or exclude selected ISO countries using searchable localized names
+│   │   └── Disabling targeting retains the configured mode and countries for later activation
 │   └── Bundle Widget sub-section
 │       ├── Toggle: upsellWidgetEnabled
 │       ├── Disabled state keeps all saved settings visible, subdued, and inert
@@ -643,6 +666,14 @@ PPB Configure Page
 │   │   ├── FPB only: Slot Icon [Change Icon] opens bundle-level image picker; [Reset] clears icon
 │   │   ├── Settings -> Design: store-level FPB/PPB Slot Icon and Centered badge / Cover / Fit presentation control
 │   │   └── FPB only note: only applies when rules are quantity-based
+│   ├── PPB only: Low-stock alert
+│   │   ├── Enable toggle
+│   │   ├── Sellable component-variant threshold
+│   │   └── Tokenized message using {{stock}}
+│   ├── PPB only: Sticky add to cart
+│   │   ├── Enable toggle
+│   │   ├── Show on desktop / Show on mobile
+│   │   └── Action: Scroll to bundle offers / Add selected bundle
 │   ├── Cart line item discount display
 │   │   └── [Button] "Edit Defaults" → /app/settings
 │   ├── Bundle Banners (bundleBannerDesktopUrl + bundleBannerMobileUrl)
@@ -707,7 +738,7 @@ items.
 
 ---
 
-### 2.8 Billing — `/app/billing`
+### 2.7 Billing — `/app/billing`
 
 **Route file:** `app/routes/app/app.billing.tsx`
 
@@ -795,12 +826,13 @@ Dirty Admin form
 ### Flow D: Billing Upgrade
 
 ```
-/app/pricing
-  └── [Choose Growth monthly / annual]
-      └── Upgrade Confirmation Modal → confirm
-          └── POST /app/pricing → configured Shopify-hosted plan URL
-              └── Merchant selects or approves plan → /app/billing/return?plan_handle=...
-                  └── Partner API verification → /app/billing?upgraded=true
+/app/billing
+  └── [Upgrade now] → /app/billing/plans
+      └── [Choose Growth monthly / annual]
+          └── Upgrade Confirmation Modal → confirm
+              └── POST /app/billing/plans → configured Shopify-hosted plan URL
+                  └── Merchant selects or approves plan → /app/billing/return?plan_handle=...
+                      └── Partner API verification → /app/billing?upgraded=true
 ```
 
 ### Flow E: Bundle Checkout Pricing Safety
@@ -840,15 +872,15 @@ Checkout order summary → Bundle & Save
 | URL Pattern                                                    | Purpose                                                                                                                                                                                                         |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/apps/product-bundles/api/bundle/:id.json`                    | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape                                                                      |
-| `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy decision for app-owned pre-cart schedule and specific-link visibility; requires an opaque bearer token only for link-restricted offers and never returns its stored SHA-256 digest             |
+| `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy decision for app-owned pre-cart schedule, specific-link, and Shopify ISO-country visibility; requires an opaque bearer token only for link-restricted offers and never returns its stored SHA-256 digest |
 | `/apps/product-bundles/api/bundles.json`                       | All active bundles for shop                                                                                                                                                                                     |
-| `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, and locale; filters storefront schedules and returns priority-ordered eligible DTOs with private ETag caching                        |
-| `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, and locale; filters storefront schedules and returns the highest-priority eligible formatted PPB with private ETag caching       |
-| `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
+| `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns priority-ordered eligible DTOs with private ETag caching |
+| `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns the highest-priority eligible formatted PPB with private ETag caching |
+| `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup with Shopify ISO-country filtering: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
 | `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that merges EB-style cart `bundle_details` metafield entries                                                                                                                            |
 | `/apps/product-bundles/api/storefront-products`                | Signed Storefront-context product hydration with ID validation and inventory normalization                                                                                                                       |
 | `/apps/product-bundles/api/storefront-collections`             | Signed Storefront-context collection hydration with product deduplication and membership mapping                                                                                                                 |
-| `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime` for Cart Transform / Discount Function verification                                                         |
+| `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime`, including the canonical country rule, for independent Cart Transform / Discount Function verification |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations                                                                                                   |
 | `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
 | `/apps/product-bundles/api/design-settings/:shop`              | CSS vars for storefront widgets                                                                                                                                                                                 |
@@ -872,5 +904,4 @@ Checkout order summary → Bundle & Save
 | `screenshots/02-dashboard.png`           | Dashboard (empty state — no bundles) |
 | `screenshots/03-analytics.png`           | Analytics / Attribution page         |
 | `screenshots/04-pricing.png`             | Pricing page (Free vs Grow)          |
-| `screenshots/05-events.png`              | Updates & FAQs page                  |
 | `screenshots/06-create-bundle-modal.png` | Create Bundle modal                  |

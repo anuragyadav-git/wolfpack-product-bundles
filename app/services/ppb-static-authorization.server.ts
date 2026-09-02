@@ -2,6 +2,11 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { buildPriceAdjustmentConfig } from "./bundles/metafield-sync/utils/price-adjustment";
 import { buildPublicBundleSubscriptionConfig } from "../lib/bundle-subscriptions";
 import { normalizeProductVariantGid } from "./cart-transform-runtime-token.server";
+import {
+  buildOfferCountryTargetingRule,
+  encodeOfferCountryTargetingRule,
+  type OfferCountryTargetingRule,
+} from "../lib/offer-country-eligibility";
 
 export type PpbLineRole = "component" | "default" | "free_gift" | "addon";
 
@@ -14,6 +19,7 @@ export type PpbRuntimePolicyV2 = {
   revision: string;
   priceAdjustment: unknown;
   subscription: ReturnType<typeof buildPublicBundleSubscriptionConfig>;
+  countryTargeting: OfferCountryTargetingRule;
 };
 
 export type PpbRuntimeAuthorizationV2 = {
@@ -53,6 +59,7 @@ type StaticTokenPayload = {
   maxDiscountPercentage?: number;
   priceAdjustment?: unknown;
   subscription?: ReturnType<typeof buildPublicBundleSubscriptionConfig>;
+  countryRule?: string;
 };
 
 function stable(value: unknown): unknown {
@@ -226,6 +233,7 @@ export function buildPpbStaticAuthorization(input: {
     parentVariantId,
     priceAdjustment: buildPriceAdjustmentConfig(input.bundle?.pricing),
     subscription: buildPublicBundleSubscriptionConfig(input.bundle?.bundleSubscriptionConfig),
+    countryTargeting: buildOfferCountryTargetingRule(input.bundle?.offerPolicy),
     lines: linePolicies,
     groups,
   };
@@ -242,6 +250,7 @@ export function buildPpbStaticAuthorization(input: {
     revision,
     priceAdjustment: policyMaterial.priceAdjustment,
     subscription: policyMaterial.subscription,
+    countryTargeting: policyMaterial.countryTargeting,
   };
   const base = { version: 2 as const, shop: input.shop, bundleId, revision };
   const bundleToken = sign({
@@ -250,6 +259,7 @@ export function buildPpbStaticAuthorization(input: {
     parentVariantId,
     priceAdjustment: policy.priceAdjustment,
     subscription: policy.subscription,
+    countryRule: encodeOfferCountryTargetingRule(policy.countryTargeting),
     groups,
   }, input.secret);
   return {

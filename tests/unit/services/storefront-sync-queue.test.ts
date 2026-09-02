@@ -2,7 +2,6 @@ import {
   compactBundleForConfigureResponse,
   syncBundleStorefrontNow,
 } from "../../../app/services/bundles/storefront-sync.server";
-import { inngest } from "../../../app/inngest/client";
 import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
 
 jest.mock("../../../app/db.server", () => ({
@@ -13,12 +12,6 @@ jest.mock("../../../app/db.server", () => ({
       updateMany: jest.fn(),
       findUnique: jest.fn(),
     },
-  },
-}));
-
-jest.mock("../../../app/inngest/client", () => ({
-  inngest: {
-    send: jest.fn(),
   },
 }));
 
@@ -73,7 +66,6 @@ jest.mock("../../../app/lib/logger", () => ({
 }));
 
 const getDb = () => require("../../../app/db.server").default;
-const mockSend = inngest.send as jest.MockedFunction<typeof inngest.send>;
 
 describe("storefront sync direct flow", () => {
   beforeEach(() => {
@@ -105,7 +97,6 @@ describe("storefront sync direct flow", () => {
       steps: [],
       pricing: null,
     });
-    mockSend.mockResolvedValue({ ids: ["evt-1"] } as any);
   });
 
   afterEach(() => {
@@ -122,7 +113,6 @@ describe("storefront sync direct flow", () => {
     });
 
     expect(getDb().bundle.update).not.toHaveBeenCalled();
-    expect(mockSend).not.toHaveBeenCalled();
     expect(ensureBundleParentProduct).toHaveBeenCalledWith(expect.objectContaining({
       shopDomain: "test.myshopify.com",
       bundle: expect.objectContaining({ id: "bundle-1", publicNumber: 1 }),

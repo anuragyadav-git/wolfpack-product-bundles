@@ -125,6 +125,7 @@ export function buildCartItems(state: any) {
   var sourceProperties = buildOfferAnalyticsCartProperties({
     sourceProperties: _buildCartLineSourceProperties(state, selectedLines),
     bundleId: state.bundleId,
+    bundleName: state.bundleName,
     offerDelivery: state.bundleData && state.bundleData.offerDelivery,
   });
   items.forEach(function (item) {

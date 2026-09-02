@@ -113,7 +113,17 @@ The release build uses Rust size optimization and Shopify CLI's compatible
 WASM optimizer. Keep the authorization payload deserialization shared between
 v1 and v2 and deserialize only fields consumed by this Function; unknown signed
 payload fields are intentionally ignored. The resulting Shopify-optimized
-artifact was 255,623 bytes during the 2026-08-25 agent-store verification.
+artifact is 250,641 bytes after country authorization, below the repository's
+conservative 256,000-byte acceptance threshold. Country authorization uses one signed `countryRule` string
+(`include:CA,US`, `exclude:US`, or empty when disabled) instead of adding a
+nested Rust JSON deserializer. This is an internal signed-token ABI; the Admin
+and persisted offer policy remain directly typed.
+
+MERGE and EXPAND share a cart-line-index bitmap. Do not replace it with cloned
+line IDs in a `HashSet`: line indices are already stable for one Function run,
+and the bitmap avoids hashing code, allocation, and unnecessary WASM size.
+Bounded bundle groups, duplicate-name counters, and component-pricing lookups
+likewise use direct list traversal instead of shipping Rust hash-map machinery.
 
 Do not run `wasm-snip --snip-rust-panicking-code` on this Function. It can
 replace reachable Rust formatting and deserialization failure paths with

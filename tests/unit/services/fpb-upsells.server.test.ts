@@ -58,7 +58,7 @@ describe("selectEligibleFpbUpsells", () => {
       bundle({ id: "lower", publicNumber: 40, offerPolicy: { priority: 40 } }),
       bundle({ id: "winner", publicNumber: 30, offerPolicy: { priority: 20, stopLowerPriority: true } }),
       bundle({ id: "first", publicNumber: 20, offerPolicy: { priority: 10 } }),
-      bundle({ id: "future", publicNumber: 10, offerPolicy: { priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
+      bundle({ id: "future", publicNumber: 10, offerPolicy: { scheduleMode: "one_time", priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
     ], {
       productId: "123",
       collectionIds: [],
@@ -66,5 +66,28 @@ describe("selectEligibleFpbUpsells", () => {
       now: new Date("2026-08-31T12:00:00.000Z"),
     });
     expect(offers.map((offer) => offer.bundleId)).toEqual(["first", "winner"]);
+  });
+
+  it("filters offers against the Shopify-selected country", () => {
+    const targeted = bundle({
+      offerPolicy: {
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: "include",
+        countryCodes: ["CA"],
+      },
+    });
+    expect(selectEligibleFpbUpsells([targeted], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "US",
+    })).toEqual([]);
+    expect(selectEligibleFpbUpsells([targeted], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "CA",
+    })).toHaveLength(1);
   });
 });

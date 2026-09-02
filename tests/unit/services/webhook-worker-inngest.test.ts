@@ -3,8 +3,8 @@
  *
  * Verifies:
  *  - inngest.send() is called with correct event name and payload shape
+ *  - inactive topics and irrelevant product deletions are not enqueued
  *  - HTTP 200 is returned to Shopify even when inngest.send() throws
- *  - inngest.send() is called before res.end()
  *  - The old fire-and-forget WebhookProcessor call is removed
  */
 
@@ -14,14 +14,19 @@ import { IncomingMessage, ServerResponse } from "node:http";
 import { Socket } from "node:net";
 // Mock inngest client BEFORE importing the worker
 var mockSend = jest.fn();
+var mockIsTrackedBundleProductDelete = jest.fn();
 jest.mock("../../../app/inngest/client", () => ({
   inngest: { send: mockSend },
+}));
+
+jest.mock("../../../app/services/webhooks/product-delete-relevance.server", () => ({
+  isTrackedBundleProductDelete: mockIsTrackedBundleProductDelete,
 }));
 
 // Mock WebhookProcessor — it should NOT be called directly by the worker anymore
 jest.mock("../../../app/services/webhooks/processor.server", () => ({
   WebhookProcessor: {
-    processPubSubMessage: jest.fn(),
+    processWebhookMessage: jest.fn(),
   },
 }));
 
@@ -39,7 +44,7 @@ jest.mock("../../../app/lib/logger", () => ({
 const { WebhookProcessor } = require("../../../app/services/webhooks/processor.server");
 const { handleRequest } = require("../../../app/services/webhook-worker.server");
 
-const mockProcessPubSub = WebhookProcessor.processPubSubMessage as jest.Mock;
+const mockProcessWebhook = WebhookProcessor.processWebhookMessage as jest.Mock;
 
 // Helper: build a valid HMAC for the given body
 function makeHmac(body: string): string {
@@ -59,7 +64,7 @@ function buildReqRes(
   req.url = "/webhooks";
 
   const defaultHeaders = {
-    "x-shopify-topic": "inventory_levels/update",
+    "x-shopify-topic": "app/scopes_update",
     "x-shopify-shop-domain": "test.myshopify.com",
     "x-shopify-webhook-id": "wh-001",
     "x-shopify-api-version": "2025-10",
@@ -97,12 +102,14 @@ function emitBody(req: IncomingMessage, body: string) {
 describe("Webhook worker → Inngest integration", () => {
   beforeEach(() => {
     mockSend.mockReset();
-    mockProcessPubSub.mockReset();
+    mockProcessWebhook.mockReset();
+    mockIsTrackedBundleProductDelete.mockReset();
     mockSend.mockResolvedValue(undefined);
+    mockIsTrackedBundleProductDelete.mockResolvedValue(true);
   });
 
   it("calls inngest.send with 'shopify/webhook' event and correct payload fields", async () => {
-    const body = JSON.stringify({ inventory_item_id: 123 });
+    const body = JSON.stringify({ current: ["read_products"] });
     const { req, res, resData } = buildReqRes(body);
 
 
@@ -120,13 +127,81 @@ describe("Webhook worker → Inngest integration", () => {
     expect(mockSend).toHaveBeenCalledTimes(1);
     const [sentEvent] = mockSend.mock.calls[0];
     expect(sentEvent.name).toBe("shopify/webhook");
-    expect(sentEvent.data.topic).toBe("inventory_levels/update");
+    expect(sentEvent.data.topic).toBe("app/scopes_update");
     expect(sentEvent.data.shopDomain).toBe("test.myshopify.com");
     expect(sentEvent.data.webhookId).toBe("wh-001");
     expect(sentEvent.data.apiVersion).toBe("2025-10");
     // rawPayload must be base64-encoded body
     expect(Buffer.from(sentEvent.data.rawPayload, "base64").toString()).toBe(body);
     expect(resData.statusCode).toBe(200);
+    expect(mockIsTrackedBundleProductDelete).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "app_purchases_one_time/update",
+    "app_subscriptions/update",
+    "inventory_levels/update",
+    "orders/create",
+    "products/update",
+    "unexpected/topic",
+  ])("acknowledges inactive topic %s without sending it to Inngest", async (topic) => {
+    const body = JSON.stringify({ id: 123 });
+    const { req, res, resData } = buildReqRes(body, {
+      "x-shopify-topic": topic,
+    });
+
+    emitBody(req, body);
+    await handleRequest(req, res);
+
+    expect(resData.statusCode).toBe(200);
+    expect(mockSend).not.toHaveBeenCalled();
+    expect(mockIsTrackedBundleProductDelete).not.toHaveBeenCalled();
+  });
+
+  it("does not enqueue an unreferenced product deletion", async () => {
+    mockIsTrackedBundleProductDelete.mockResolvedValue(false);
+    const body = JSON.stringify({ id: 123 });
+    const { req, res, resData } = buildReqRes(body, {
+      "x-shopify-topic": "products/delete",
+    });
+
+    emitBody(req, body);
+    await handleRequest(req, res);
+
+    expect(resData.statusCode).toBe(200);
+    expect(mockIsTrackedBundleProductDelete).toHaveBeenCalledWith({
+      rawBody: expect.any(Buffer),
+      shopDomain: "test.myshopify.com",
+    });
+    expect(mockSend).not.toHaveBeenCalled();
+  });
+
+  it("enqueues a referenced product deletion", async () => {
+    const body = JSON.stringify({ id: 123 });
+    const { req, res } = buildReqRes(body, {
+      "x-shopify-topic": "products/delete",
+    });
+
+    emitBody(req, body);
+    await handleRequest(req, res);
+
+    expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
+      name: "shopify/webhook",
+      data: expect.objectContaining({ topic: "products/delete" }),
+    }));
+  });
+
+  it("fails open when product deletion relevance cannot be checked", async () => {
+    mockIsTrackedBundleProductDelete.mockRejectedValue(new Error("Database unavailable"));
+    const body = JSON.stringify({ id: 123 });
+    const { req, res } = buildReqRes(body, {
+      "x-shopify-topic": "products/delete",
+    });
+
+    emitBody(req, body);
+    await handleRequest(req, res);
+
+    expect(mockSend).toHaveBeenCalledTimes(1);
   });
 
   it("returns 200 even when inngest.send() throws", async () => {
@@ -151,7 +226,7 @@ describe("Webhook worker → Inngest integration", () => {
     expect(resData.ended).toBe(true);
   });
 
-  it("does NOT call WebhookProcessor.processPubSubMessage directly", async () => {
+  it("does NOT call WebhookProcessor.processWebhookMessage directly", async () => {
     mockSend.mockResolvedValue(undefined);
     const body = JSON.stringify({ test: true });
     const { req, res } = buildReqRes(body);
@@ -171,6 +246,6 @@ describe("Webhook worker → Inngest integration", () => {
 
     // Give async operations time to settle
     await new Promise((r) => setTimeout(r, 50));
-    expect(mockProcessPubSub).not.toHaveBeenCalled();
+    expect(mockProcessWebhook).not.toHaveBeenCalled();
   });
 });

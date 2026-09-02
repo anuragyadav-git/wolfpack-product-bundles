@@ -100,6 +100,7 @@ describe("FPB product-page upsell runtime behavior", () => {
       locale: "en",
       fpbUpsellsEndpoint: "/apps/product-bundles/api/fpb-upsells.json",
       selectedVariantId: "333",
+      countryCode: "CA",
     });
     const firstRoot = makeRoot();
     const replacementRoot = makeRoot();
@@ -136,6 +137,7 @@ describe("FPB product-page upsell runtime behavior", () => {
       await initializeFpbProductPageUpsells(embed, replacementRoot as unknown as ParentNode);
 
       expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(String((global.fetch as jest.Mock).mock.calls[0][0])).toContain("country=CA");
       expect((replacementRoot.automaticAnchor as { rendered?: unknown }).rendered).toBeTruthy();
     } finally {
       global.document = previousDocument;

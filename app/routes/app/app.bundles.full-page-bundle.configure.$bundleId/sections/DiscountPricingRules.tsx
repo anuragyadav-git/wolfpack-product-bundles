@@ -7,6 +7,7 @@ import {
 import { DiscountPricingTipBanner } from "../../_shared/bundle-configure/DiscountPricingTipBanner";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { PricingTierBadgeFields } from "../../_shared/bundle-configure/PricingTierBadgeFields";
+import { translateAdmin } from "~/i18n/config";
 
 export function fixedBundlePriceInputToCents(value: string): number {
   return amountToCents(Number(value) || 0);
@@ -45,14 +46,20 @@ export function FpbDiscountRulesSection({
           >
             <s-stack direction="block" gap="small-400">
               <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                Discount &amp; Pricing
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.discountAmpPricing"
+                )}
               </h3>
               <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                Set up discount rules, applied from lowest to highest.
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.setUpDiscountRulesAppliedFromLowestToHighest"
+                )}
               </p>
             </s-stack>
             <s-switch
-              accessibilityLabel="Enable discount pricing"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.enableDiscountPricing"
+              )}
               checked={pricingState.discountEnabled || undefined}
               onChange={(e) =>
                 pricingState.setDiscountEnabled(
@@ -65,7 +72,9 @@ export function FpbDiscountRulesSection({
           {/* Q2: Discount Type — always visible, grayed when disabled */}
           <DisabledConfigurationRegion disabled={!pricingState.discountEnabled}>
             <s-select
-              label="Discount Type"
+              label={translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountrulespanel.discountType"
+              )}
               value={pricingState.discountType}
               onChange={(e) => {
                 const nextDiscountType = (e.target as HTMLSelectElement)
@@ -101,7 +110,9 @@ export function FpbDiscountRulesSection({
                           fontWeight: 600,
                         }}
                       >
-                        Rule #{index + 1}
+                        {translateAdmin("adminDynamic.ruleNumber", {
+                          number: index + 1,
+                        })}
                       </h4>
                       <s-button
                         variant="tertiary"
@@ -109,7 +120,9 @@ export function FpbDiscountRulesSection({
                         icon="delete"
                         onClick={() => pricingState.removeDiscountRule(rule.id)}
                       >
-                        Remove
+                        {translateAdmin(
+                          "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                        )}
                       </s-button>
                     </div>
                     {pricingState.discountType ===
@@ -122,11 +135,15 @@ export function FpbDiscountRulesSection({
                             fontWeight: 600,
                           }}
                         >
-                          Customer buys
+                          {translateAdmin(
+                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.customerBuys"
+                          )}
                         </p>
                         <s-number-field
                           id={`configure-discount-rules-${rule.id}-customerBuys`}
-                          label="Minimum quantity of items"
+                          label={translateAdmin(
+                            "adminAttributes.minimumQuantityOfItems"
+                          )}
                           required
                           error={
                             validationErrors[
@@ -152,11 +169,15 @@ export function FpbDiscountRulesSection({
                             fontWeight: 600,
                           }}
                         >
-                          Customer gets
+                          {translateAdmin(
+                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.customerGets"
+                          )}
                         </p>
                         <s-number-field
                           id={`configure-discount-rules-${rule.id}-customerGets`}
-                          label="Quantity"
+                          label={translateAdmin(
+                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.quantity"
+                          )}
                           required
                           error={
                             validationErrors[
@@ -178,7 +199,9 @@ export function FpbDiscountRulesSection({
                         <div className={fullPageBundleStyles.bxyRewardGrid}>
                           <s-number-field
                             id={`configure-discount-rules-${rule.id}-discountValue`}
-                            label="Discount value"
+                            label={translateAdmin(
+                              "adminAttributes.discountValue"
+                            )}
                             required
                             error={
                               validationErrors[
@@ -229,7 +252,9 @@ export function FpbDiscountRulesSection({
                             }
                           />
                           <s-select
-                            label="Discount type"
+                            label={translateAdmin(
+                              "adminAttributes.discountType"
+                            )}
                             value={rule.bxyDiscountType ?? "percentage"}
                             onChange={(e) => {
                               const bxyDiscountType = (
@@ -251,13 +276,21 @@ export function FpbDiscountRulesSection({
                               });
                             }}
                           >
-                            <s-option value="percentage">% off</s-option>
+                            <s-option value="percentage">
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.off"
+                              )}
+                            </s-option>
                             <s-option value="fixed_amount">
-                              {pricingState.currencySymbol} off
+                              {translateAdmin("adminDynamic.amountOff", {
+                                amount: pricingState.currencySymbol,
+                              })}
                             </s-option>
                           </s-select>
                           <s-select
-                            label="Apply Discount to"
+                            label={translateAdmin(
+                              "adminAttributes.applyDiscountTo"
+                            )}
                             value={rule.bxyApplyMode ?? "lowest_priced"}
                             onChange={(e) =>
                               pricingState.updateDiscountRule(rule.id, {
@@ -267,10 +300,14 @@ export function FpbDiscountRulesSection({
                             }
                           >
                             <s-option value="lowest_priced">
-                              The lowest priced items
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.theLowestPricedItems"
+                              )}
                             </s-option>
                             <s-option value="latest_added">
-                              The latest added items
+                              {translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.theLatestAddedItems"
+                              )}
                             </s-option>
                           </s-select>
                         </div>
@@ -286,7 +323,9 @@ export function FpbDiscountRulesSection({
                           >
                             <s-number-field
                               id={`configure-discount-rules-${rule.id}-conditionValue`}
-                              label="Number of Products in Bundle"
+                              label={translateAdmin(
+                                "adminAttributes.numberOfProductsInBundle"
+                              )}
                               required
                               error={
                                 validationErrors[
@@ -306,7 +345,7 @@ export function FpbDiscountRulesSection({
                             />
                             <s-number-field
                               id={`configure-discount-rules-${rule.id}-discountValue`}
-                              label="Price"
+                              label={translateAdmin("adminAttributes.price")}
                               required
                               error={
                                 validationErrors[
@@ -330,7 +369,9 @@ export function FpbDiscountRulesSection({
                             className={fullPageBundleStyles.discountFieldsRow}
                           >
                             <s-select
-                              label="Discount on"
+                              label={translateAdmin(
+                                "adminAttributes.discountOn"
+                              )}
                               value={rule.conditionType ?? "quantity"}
                               onChange={(e) =>
                                 pricingState.updateDiscountRule(rule.id, {
@@ -339,12 +380,22 @@ export function FpbDiscountRulesSection({
                                 })
                               }
                             >
-                              <s-option value="quantity">Quantity</s-option>
-                              <s-option value="amount">Amount</s-option>
+                              <s-option value="quantity">
+                                {translateAdmin(
+                                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.quantity"
+                                )}
+                              </s-option>
+                              <s-option value="amount">
+                                {translateAdmin(
+                                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.amount"
+                                )}
+                              </s-option>
                             </s-select>
                             <s-number-field
                               id={`configure-discount-rules-${rule.id}-conditionValue`}
-                              label="is greater than or equal to"
+                              label={translateAdmin(
+                                "adminAttributes.isGreaterThanOrEqualTo"
+                              )}
                               required
                               error={
                                 validationErrors[
@@ -456,7 +507,9 @@ export function FpbDiscountRulesSection({
                   inlineSize="fill"
                   onClick={pricingState.addDiscountRule}
                 >
-                  Add rule
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.addRule"
+                  )}
                 </s-button>
               ) : (
                 <p
@@ -467,7 +520,9 @@ export function FpbDiscountRulesSection({
                     textAlign: "center",
                   }}
                 >
-                  Maximum 4 discount rules reached
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.maximum4DiscountRulesReached"
+                  )}
                 </p>
               )}
             </s-stack>

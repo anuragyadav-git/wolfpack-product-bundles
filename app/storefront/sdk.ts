@@ -96,6 +96,7 @@ async function mount(): Promise<void> {
   const eligible = await resolveSpecificLinkOfferStorefrontEligibility({
     bundle: state.bundleData,
     locationSearch: window.location.search,
+    countryCode: (window as Window & { currentCountryCode?: string }).currentCountryCode ?? null,
   });
   if (!eligible) {
     container.style.display = 'none';

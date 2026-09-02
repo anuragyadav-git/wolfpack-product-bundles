@@ -7,6 +7,14 @@ fn test_runtime_secret() -> String {
         .unwrap_or_else(|_| "wpb-runtime-token-test-secret".to_string())
 }
 
+fn run_discount(input: &str) -> schema::CartLinesDiscountsGenerateRunResult {
+    let mut value: serde_json::Value =
+        serde_json::from_str(input).expect("discount test input should be valid JSON");
+    value["localization"] = serde_json::json!({ "country": { "isoCode": "CA" } });
+    run_function_with_input(cart_lines_discounts_generate_run, &value.to_string())
+        .expect("should run")
+}
+
 fn addon_runtime_payload() -> String {
     serde_json::json!({
         "version": 1,
@@ -77,6 +85,7 @@ fn run_automatic_addon_lines(
     entered_discount_codes: Vec<&str>,
 ) -> schema::CartLinesDiscountsGenerateRunResult {
     let input = serde_json::json!({
+        "localization": { "country": { "isoCode": "CA" } },
         "cart": { "lines": lines },
         "discount": {
             "discountClasses": ["PRODUCT"],
@@ -92,7 +101,30 @@ fn run_automatic_addon_lines(
     })
     .to_string();
 
-    run_function_with_input(cart_lines_discounts_generate_run, input.as_str()).expect("should run")
+    run_discount(input.as_str())
+}
+
+#[test]
+fn rejects_addon_discount_for_ineligible_shopify_country() {
+    let runtime_secret = test_runtime_secret();
+    let mut payload: serde_json::Value = serde_json::from_str(&addon_runtime_payload())
+        .expect("runtime payload should be valid JSON");
+    payload["countryRule"] = serde_json::json!("include:US");
+    let runtime_token = sign_runtime_token_for_test(&payload.to_string(), &runtime_secret);
+
+    let output = run_automatic_addon_lines(
+        vec![addon_line(
+            "gid://shopify/CartLine/addon",
+            "gid://shopify/ProductVariant/201",
+            1,
+            10.0,
+            &runtime_token,
+        )],
+        &runtime_secret,
+        vec![],
+    );
+
+    assert!(output.operations.is_empty());
 }
 
 fn run_subscription_lines_with_role(
@@ -150,7 +182,7 @@ fn run_subscription_lines_with_role(
         "triggeringDiscountCode": null,
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     }).to_string();
-    run_function_with_input(cart_lines_discounts_generate_run, &input).expect("should run")
+    run_discount(&input)
 }
 
 fn run_subscription_lines(
@@ -307,8 +339,7 @@ fn ignores_partial_and_full_addon_discount_candidates_without_runtime_token() {
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     }"#;
 
-    let output: schema::CartLinesDiscountsGenerateRunResult =
-        run_function_with_input(cart_lines_discounts_generate_run, input).expect("should run");
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
 
     assert!(output.operations.is_empty());
 }
@@ -347,9 +378,7 @@ fn emits_addon_discount_only_when_runtime_token_authorizes_line() {
     }}"#
     );
 
-    let output: schema::CartLinesDiscountsGenerateRunResult =
-        run_function_with_input(cart_lines_discounts_generate_run, input.as_str())
-            .expect("should run");
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input.as_str());
 
     assert_eq!(output.operations.len(), 1);
     let add_operation = match &output.operations[0] {
@@ -418,8 +447,7 @@ fn emits_ppb_v2_addon_discount_only_for_current_shopify_policy() {
         "enteredDiscountCodes": [], "triggeringDiscountCode": null,
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     });
-    let output =
-        run_function_with_input(cart_lines_discounts_generate_run, &input.to_string()).unwrap();
+    let output = run_discount(&input.to_string());
     assert_eq!(output.operations.len(), 1);
 }
 
@@ -474,8 +502,7 @@ fn rejects_ppb_v2_addon_lines_split_beyond_signed_quantity() {
         "enteredDiscountCodes": [], "triggeringDiscountCode": null,
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     });
-    let output =
-        run_function_with_input(cart_lines_discounts_generate_run, &input.to_string()).unwrap();
+    let output = run_discount(&input.to_string());
     assert!(output.operations.is_empty());
 }
 
@@ -671,9 +698,7 @@ fn ignores_unsigned_addon_discount_markers() {
     }"#
     .replace("__RUNTIME_SECRET__", &runtime_secret);
 
-    let output: schema::CartLinesDiscountsGenerateRunResult =
-        run_function_with_input(cart_lines_discounts_generate_run, input.as_str())
-            .expect("should run");
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input.as_str());
 
     assert!(output.operations.is_empty());
 }
@@ -706,8 +731,7 @@ fn ignores_addon_lines_when_product_discount_class_is_unavailable() {
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     }"#;
 
-    let output: schema::CartLinesDiscountsGenerateRunResult =
-        run_function_with_input(cart_lines_discounts_generate_run, input).expect("should run");
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
 
     assert!(output.operations.is_empty());
 }
@@ -740,8 +764,7 @@ fn automatic_addon_branch_skips_when_generated_checkout_code_is_entered() {
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     }"#;
 
-    let output: schema::CartLinesDiscountsGenerateRunResult =
-        run_function_with_input(cart_lines_discounts_generate_run, input).expect("should run");
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
 
     assert!(output.operations.is_empty());
 }
@@ -793,8 +816,7 @@ fn code_mode_emits_bundle_discount_candidate_from_component_parent_pricing() {
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     }"#;
 
-    let output: schema::CartLinesDiscountsGenerateRunResult =
-        run_function_with_input(cart_lines_discounts_generate_run, input).expect("should run");
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
 
     assert_eq!(output.operations.len(), 1);
     let add_operation = match &output.operations[0] {
@@ -858,8 +880,7 @@ fn code_mode_emits_buy_x_get_y_bundle_discount_candidate() {
         "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
     }"#;
 
-    let output: schema::CartLinesDiscountsGenerateRunResult =
-        run_function_with_input(cart_lines_discounts_generate_run, input).expect("should run");
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
 
     let add_operation = match &output.operations[0] {
         schema::CartOperation::ProductDiscountsAdd(operation) => operation,

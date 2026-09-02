@@ -1,5 +1,6 @@
 query Input {
   presentmentCurrencyRate
+  localization { country { isoCode } }
   shop {
     ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value }
   }
@@ -13,9 +14,6 @@ query Input {
       id
       quantity
       wolfpackProductBundleOfferId: attribute(key: "_wolfpackProductBundle:OfferId") {
-        value
-      }
-      wolfpackProductBundleName: attribute(key: "_bundleName") {
         value
       }
       runtimeToken: attribute(key: "_wolfpack_bundle_runtime") {

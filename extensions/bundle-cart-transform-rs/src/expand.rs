@@ -1,10 +1,9 @@
 use shopify_function::scalars::Decimal;
-use std::collections::{HashMap, HashSet};
 
 use crate::helpers::{decimal_to_f64, parse_json_or_default};
 use crate::pricing::calculate_discount_percentage;
 use crate::schema;
-use crate::types::{ComponentPricingItem, PriceAdjustmentConfig};
+use crate::types::{CartLineDisplayProperties, ComponentPricingItem, PriceAdjustmentConfig};
 
 /// Process all EXPAND operations for one cart pass.
 ///
@@ -17,14 +16,14 @@ use crate::types::{ComponentPricingItem, PriceAdjustmentConfig};
 /// - Line's variant has `component_reference` + `component_quantities` metafields
 pub fn process_expand_operations(
     input: &schema::run::Input,
-    processed_line_ids: &HashSet<String>,
+    processed_lines: &[bool],
     presentment_currency_rate: f64,
 ) -> Vec<schema::CartOperation> {
     let mut operations: Vec<schema::CartOperation> = Vec::new();
     let lines = input.cart().lines();
 
-    for line in lines.iter() {
-        if processed_line_ids.contains(line.id()) {
+    for (line_index, line) in lines.iter().enumerate() {
+        if processed_lines.get(line_index).copied().unwrap_or(false) {
             continue;
         }
 
@@ -54,17 +53,13 @@ pub fn process_expand_operations(
         }
 
         // -------------------------------------------------------------------------
-        // Parse component_pricing → HashMap for O(1) lookup.
+        // Parse component pricing once. Bundle component lists are bounded and
+        // small, so direct lookup avoids shipping a hash-map implementation.
         // -------------------------------------------------------------------------
         let cp_json: Option<String> = variant.component_pricing().map(|m| m.value().clone());
 
         let component_pricing: Vec<ComponentPricingItem> =
             parse_json_or_default(cp_json.as_deref());
-
-        let pricing_map: HashMap<&str, &ComponentPricingItem> = component_pricing
-            .iter()
-            .map(|item| (item.variant_id.as_str(), item))
-            .collect();
 
         // -------------------------------------------------------------------------
         // Compute discount percentage.
@@ -104,7 +99,10 @@ pub fn process_expand_operations(
 
         for (i, variant_id) in component_references.iter().enumerate() {
             let qty = component_quantities[i] * (*line.quantity() as i64);
-            if let Some(pricing) = pricing_map.get(variant_id.as_str()) {
+            if let Some(pricing) = component_pricing
+                .iter()
+                .find(|pricing| pricing.variant_id == *variant_id)
+            {
                 total_retail_cents += pricing.retail_price * qty;
                 total_bundle_cents += pricing.bundle_price * qty;
                 total_savings_cents += pricing.savings_amount * qty;
@@ -140,10 +138,14 @@ pub fn process_expand_operations(
 
         let components_json = serde_json::to_string(&component_details).unwrap_or_default();
 
-        let bundle_name = line
-            .wolfpack_product_bundle_name()
-            .and_then(|a| a.value())
-            .map(|s| s.as_str().to_string())
+        let display_properties: CartLineDisplayProperties = parse_json_or_default(
+            line.bundle_display_properties()
+                .and_then(|attribute| attribute.value())
+                .map(|value| value.as_str()),
+        );
+        let bundle_name = display_properties
+            .bundle_name
+            .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| "Bundle".to_string());
 
         let merchandise_id = variant.id().to_string();

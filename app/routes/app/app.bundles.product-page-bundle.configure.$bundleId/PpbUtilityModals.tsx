@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbUtilityModals() {
   const {
@@ -17,19 +18,32 @@ export function PpbUtilityModals() {
   return (
     <>
       {/* Sync Bundle Confirmation Modal */}
-      <s-modal ref={syncModalRef} heading="Sync Bundle?">
+      <s-modal
+        ref={syncModalRef}
+        heading={translateAdmin("adminAttributes.syncBundle")}
+      >
         <s-stack direction="block" gap="small">
           <p style={{ margin: 0, fontSize: 14 }}>
-            This will delete and re-create all Shopify data for this bundle:
+            {translateAdmin(
+              "adminExtracted.appBundlesProductPageBundleConfigure.ppbutilitymodals.thisWillDeleteAndReCreateAllShopifyDataForThisBundle"
+            )}
           </p>
           <ul style={{ margin: 0, paddingLeft: 20 }}>
             <li>
-              The Shopify product will be archived and deleted, then re-created
+              {translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbutilitymodals.theShopifyProductWillBeArchivedAndDeletedThenReCreated"
+              )}
             </li>
-            <li>All bundle and component metafields will be rewritten</li>
+            <li>
+              {translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbutilitymodals.allBundleAndComponentMetafieldsWillBeRewritten"
+              )}
+            </li>
           </ul>
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            Bundle analytics are preserved. This action cannot be undone.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuresyncandlanguagemodals.bundleAnalyticsArePreservedThisActionCannotBeUndone"
+            )}
           </p>
         </s-stack>
         <s-button
@@ -39,25 +53,28 @@ export function PpbUtilityModals() {
           loading={fetcher.state === "submitting" || undefined}
           onClick={handleSyncBundleConfirm}
         >
-          Sync Bundle
+          {translateAdmin(
+            "adminExtracted.appBundlesProductPageBundleConfigure.ppbutilitymodals.syncBundle"
+          )}
         </s-button>
         <s-button
           slot="secondary-actions"
           onClick={() => setIsSyncModalOpen(false)}
         >
-          Cancel
+          {translateAdmin("dashboard.deleteModal.cancel")}
         </s-button>
       </s-modal>
       <s-modal
         id="ppb-template-variables-modal"
         ref={templateVariablesModalRef}
-        heading="Message variables"
+        heading={translateAdmin("adminAttributes.messageVariables")}
         size="small"
       >
         <s-stack direction="block" gap="small">
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            Use these variables in Only Bundles messages. The widget
-            replaces them with live bundle and discount values.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.useTheseVariablesInOnlyBundlesMessagesTheWidgetReplacesThemWithL"
+            )}
           </p>
           <div className={productPageBundleStyles.templateVariableGrid}>
             {ADDON_TEMPLATE_VARIABLES.map(([variable, description]: any) => (
@@ -79,27 +96,31 @@ export function PpbUtilityModals() {
           command="--hide"
           onClick={() => hidePolarisModal(templateVariablesModalRef)}
         >
-          Done
+          {translateAdmin("dashboard.storefrontSetup.enableModal.done")}
         </s-button>
       </s-modal>
       <s-modal
         id="discount-variables-modal"
         ref={discountVariablesModalRef}
-        heading="Variables"
+        heading={translateAdmin("adminAttributes.variables")}
         size="base"
       >
         <div>
-          {DISCOUNT_TEMPLATE_VARIABLES.map(([variable, description]: any, index) => (
-            <div key={variable}>
-              {index > 0 && <s-divider />}
-              <div className={productPageBundleStyles.discountVariableRow}>
-                <s-text color="subdued">{description}</s-text>
-                <span className={productPageBundleStyles.discountVariableCode}>
-                  {variable}
-                </span>
+          {DISCOUNT_TEMPLATE_VARIABLES.map(
+            ([variable, description]: any, index) => (
+              <div key={variable}>
+                {index > 0 && <s-divider />}
+                <div className={productPageBundleStyles.discountVariableRow}>
+                  <s-text color="subdued">{description}</s-text>
+                  <span
+                    className={productPageBundleStyles.discountVariableCode}
+                  >
+                    {variable}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </s-modal>
     </>

@@ -34,6 +34,8 @@ source_paths:
   - app/assets/widgets/full-page/initialization-guard.js
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
+  - app/assets/widgets/product-page/methods/sticky-add-to-cart-methods.ts
+  - app/assets/widgets/product-page-css/base/sticky-add-to-cart.css
   - app/assets/widgets/product-page/ppb-modal-card-presentation.ts
   - app/assets/widgets/product-page/methods/modal-methods.ts
   - app/assets/widgets/product-page/methods/modal-state-methods.ts
@@ -446,6 +448,42 @@ If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle
 
 ## PPB Load Strategy
 
+### Native product-form actions
+
+When the PPB block's **Hide native buttons** setting is enabled, the block hides
+the theme product form, accelerated checkout controls, and Horizon's native
+`sticky-add-to-cart` element. Horizon's sticky control submits the neutral
+bundle-parent variant through the theme product form; it does not know the
+shopper's selected component variants or Wolfpack's Cart Transform
+authorization. It therefore cannot be reused as the PPB bundle action. The
+bundle widget's existing validated add path remains the only cart mutation
+owner. Theme-specific event interception or product-form rewriting is not a
+supported integration path.
+
+The optional PPB sticky action is app-owned because Shopify does not provide a
+native sticky control that understands buyer-selected bundle components. It is
+mounted only for the persisted desktop/mobile targets and hidden while the
+canonical PPB CTA intersects the viewport. `scroll_to_offers` returns the
+shopper to the existing bundle selection surface. `add_selected_offer`
+delegates exactly once to the canonical PPB CTA when that CTA is enabled; when
+it is disabled, the action returns to the incomplete bundle surface instead.
+It owns no cart payload, request, validation, inventory, pending, error, or
+redirect logic.
+
+### Schedule-derived Countdown
+
+Both storefront widgets consume one nullable `countdown` runtime object. Its
+`endsAt` value is serialized only from `OfferPolicy.endsAt`; disabled
+presentation, missing schedules, and invalid instants produce `null`. The
+shared renderer recomputes remaining time from `Date.now()` every second and on
+document visibility changes, so background tabs and clock jumps do not create
+decrement drift. Active ticks use `role="timer"` with `aria-live="off"`; only a
+merchant-configured expiry message may become a polite status announcement.
+
+There is no visitor-reset duration, midnight mode, countdown analytics event,
+or transition job. A fresh storefront eligibility decision remains the owner
+of whether an expired scheduled offer is visible at all.
+
 ### Product-Page Block Stage — Shopify-Hosted Snapshot
 
 The PPB app block serializes only a complete schema-v3
@@ -481,6 +519,14 @@ schedule decision. Link-only bundles remain excluded from discovery surfaces so
 the generated direct link is their sole entry point. These rules govern
 Wolfpack storefront visibility and selection; Shopify discount dates and
 combination rules remain owned by Shopify discount APIs.
+
+Recurring schedules are evaluated at request time from the saved local calendar
+rule and Shopify's `shop.ianaTimezone`; there is no transition job. Weekly and
+monthly windows use start-inclusive/end-exclusive boundaries, monthly anchors
+skip months that do not contain the requested day, and malformed rules fail
+closed. The PPB Shopify-hosted snapshot carries only the safe decision marker;
+when recurrence requires a server decision, the widget calls the signed
+eligibility endpoint before exposing the static bundle data.
 
 There is no Wolfpack fallback for this surface. Storefront API failure fails
 closed rather than rendering stale catalog or price data. See

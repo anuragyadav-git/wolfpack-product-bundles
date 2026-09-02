@@ -283,6 +283,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     const sourceProperties = buildOfferAnalyticsCartProperties({
       sourceProperties: this.buildCartLineSourceProperties(selectedLines),
       bundleId: this.selectedBundle?.id,
+      bundleName: this.selectedBundle?.name,
       offerDelivery: this.selectedBundle?.offerDelivery,
       tierId: captureDiscountTierState(this).tierId,
     });

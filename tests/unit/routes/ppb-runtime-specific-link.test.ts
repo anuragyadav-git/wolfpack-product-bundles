@@ -22,7 +22,11 @@ describe('PPB specific-link runtime snapshot', () => {
 
     expect(config.offerDelivery).toEqual({
       decisionRequired: true,
+      serverDecisionRequired: true,
       specificLinkRequired: true,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       offerPolicyId: 'policy-1',
       ruleVersion: 8,
       eligibilitySource: 'specific_link',

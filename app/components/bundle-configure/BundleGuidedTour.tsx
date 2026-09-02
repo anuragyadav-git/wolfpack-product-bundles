@@ -1,6 +1,13 @@
-import { useEffect, useState, useCallback, useRef, type CSSProperties } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  type CSSProperties,
+} from "react";
 import styles from "./BundleGuidedTour.module.css";
 import type { TourStep } from "./tourSteps";
+import { translateAdmin, translateAdminCopy } from "~/i18n/config";
 
 interface SpotlightRect {
   x: number;
@@ -47,7 +54,9 @@ export function BundleGuidedTour({
 }: Props) {
   const [visible, setVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(null);
+  const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(
+    null
+  );
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
   const rafRef = useRef<number | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -61,8 +70,12 @@ export function BundleGuidedTour({
   const storageKey = getBundleGuidedTourStorageKey(shop);
 
   const getTooltipHeight = useCallback(() => {
-    const measuredHeight = dialogRef.current?.getBoundingClientRect().height ?? TOOLTIP_HEIGHT;
-    return Math.min(measuredHeight, Math.max(120, window.innerHeight - VIEWPORT_PAD * 2));
+    const measuredHeight =
+      dialogRef.current?.getBoundingClientRect().height ?? TOOLTIP_HEIGHT;
+    return Math.min(
+      measuredHeight,
+      Math.max(120, window.innerHeight - VIEWPORT_PAD * 2)
+    );
   }, []);
 
   useEffect(() => {
@@ -104,18 +117,21 @@ export function BundleGuidedTour({
     highlightedTargetRef.current = null;
   }, []);
 
-  const centeredBottomStyle = useCallback((): CSSProperties => ({
-    top: Math.max(
-      VIEWPORT_PAD,
-      window.innerHeight - getTooltipHeight() - VIEWPORT_PAD,
-    ),
-    left: Math.max(VIEWPORT_PAD, (window.innerWidth - getTooltipWidth()) / 2),
-    width: getTooltipWidth(),
-    maxHeight: Math.max(120, window.innerHeight - VIEWPORT_PAD * 2),
-    overflowY: "auto",
-    transform: "none",
-    bottom: "auto",
-  }), [getTooltipHeight]);
+  const centeredBottomStyle = useCallback(
+    (): CSSProperties => ({
+      top: Math.max(
+        VIEWPORT_PAD,
+        window.innerHeight - getTooltipHeight() - VIEWPORT_PAD
+      ),
+      left: Math.max(VIEWPORT_PAD, (window.innerWidth - getTooltipWidth()) / 2),
+      width: getTooltipWidth(),
+      maxHeight: Math.max(120, window.innerHeight - VIEWPORT_PAD * 2),
+      overflowY: "auto",
+      transform: "none",
+      bottom: "auto",
+    }),
+    [getTooltipHeight]
+  );
 
   const showFallbackPosition = useCallback(() => {
     setSpotlightRect(null);
@@ -128,83 +144,92 @@ export function BundleGuidedTour({
     );
   }, []);
 
-  const highlightTarget = useCallback((el: HTMLElement) => {
-    cleanupHighlightedTarget();
-    highlightedTargetRef.current = {
-      el,
-      position: el.style.position,
-      zIndex: el.style.zIndex,
-    };
-    el.classList.add("wpb-tour-highlight");
-    el.style.position = "relative";
-    el.style.zIndex = "595";
-  }, [cleanupHighlightedTarget]);
+  const highlightTarget = useCallback(
+    (el: HTMLElement) => {
+      cleanupHighlightedTarget();
+      highlightedTargetRef.current = {
+        el,
+        position: el.style.position,
+        zIndex: el.style.zIndex,
+      };
+      el.classList.add("wpb-tour-highlight");
+      el.style.position = "relative";
+      el.style.zIndex = "595";
+    },
+    [cleanupHighlightedTarget]
+  );
 
-  const updatePositions = useCallback((el: HTMLElement) => {
-    const rect = el.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const tooltipHeight = getTooltipHeight();
+  const updatePositions = useCallback(
+    (el: HTMLElement) => {
+      const rect = el.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const tooltipHeight = getTooltipHeight();
 
-    setSpotlightRect({
-      x: rect.left - SPOTLIGHT_PAD,
-      y: rect.top - SPOTLIGHT_PAD,
-      width: rect.width + SPOTLIGHT_PAD * 2,
-      height: rect.height + SPOTLIGHT_PAD * 2,
-    });
+      setSpotlightRect({
+        x: rect.left - SPOTLIGHT_PAD,
+        y: rect.top - SPOTLIGHT_PAD,
+        width: rect.width + SPOTLIGHT_PAD * 2,
+        height: rect.height + SPOTLIGHT_PAD * 2,
+      });
 
-    const belowTop = rect.bottom + VIEWPORT_PAD;
-    const aboveTop = rect.top - tooltipHeight - VIEWPORT_PAD;
-    const belowFits = belowTop + tooltipHeight <= vh - VIEWPORT_PAD;
-    const aboveFits = aboveTop >= VIEWPORT_PAD;
-    const top = belowFits
-      ? belowTop
-      : aboveFits
+      const belowTop = rect.bottom + VIEWPORT_PAD;
+      const aboveTop = rect.top - tooltipHeight - VIEWPORT_PAD;
+      const belowFits = belowTop + tooltipHeight <= vh - VIEWPORT_PAD;
+      const aboveFits = aboveTop >= VIEWPORT_PAD;
+      const top = belowFits
+        ? belowTop
+        : aboveFits
         ? aboveTop
         : Math.max(
             VIEWPORT_PAD,
-            Math.min(rect.top, vh - tooltipHeight - VIEWPORT_PAD),
+            Math.min(rect.top, vh - tooltipHeight - VIEWPORT_PAD)
           );
-    const tooltipWidth = getTooltipWidth();
-    let left = rect.left + rect.width / 2 - tooltipWidth / 2;
-    left = Math.max(
-      VIEWPORT_PAD,
-      Math.min(left, vw - tooltipWidth - VIEWPORT_PAD),
-    );
+      const tooltipWidth = getTooltipWidth();
+      let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+      left = Math.max(
+        VIEWPORT_PAD,
+        Math.min(left, vw - tooltipWidth - VIEWPORT_PAD)
+      );
 
-    setTooltipStyle({
-      top,
-      left,
-      width: tooltipWidth,
-      maxHeight: Math.max(120, vh - VIEWPORT_PAD * 2),
-      overflowY: "auto",
-      transform: "none",
-      bottom: "auto",
-    });
-  }, [getTooltipHeight]);
+      setTooltipStyle({
+        top,
+        left,
+        width: tooltipWidth,
+        maxHeight: Math.max(120, vh - VIEWPORT_PAD * 2),
+        overflowY: "auto",
+        transform: "none",
+        bottom: "auto",
+      });
+    },
+    [getTooltipHeight]
+  );
 
-  const waitForStableTarget = useCallback((el: HTMLElement) => {
-    let lastTop = -Infinity;
-    let stableFrames = 0;
+  const waitForStableTarget = useCallback(
+    (el: HTMLElement) => {
+      let lastTop = -Infinity;
+      let stableFrames = 0;
 
-    const poll = () => {
-      const rect = el.getBoundingClientRect();
-      if (Math.abs(rect.top - lastTop) < 0.5) {
-        stableFrames += 1;
-        if (stableFrames >= STABLE_FRAME_COUNT) {
-          updatePositions(el);
-          rafRef.current = null;
-          return;
+      const poll = () => {
+        const rect = el.getBoundingClientRect();
+        if (Math.abs(rect.top - lastTop) < 0.5) {
+          stableFrames += 1;
+          if (stableFrames >= STABLE_FRAME_COUNT) {
+            updatePositions(el);
+            rafRef.current = null;
+            return;
+          }
+        } else {
+          stableFrames = 0;
         }
-      } else {
-        stableFrames = 0;
-      }
-      lastTop = rect.top;
-      rafRef.current = requestAnimationFrame(poll);
-    };
+        lastTop = rect.top;
+        rafRef.current = requestAnimationFrame(poll);
+      };
 
-    rafRef.current = requestAnimationFrame(poll);
-  }, [updatePositions]);
+      rafRef.current = requestAnimationFrame(poll);
+    },
+    [updatePositions]
+  );
 
   useEffect(() => {
     if (!visible) return;
@@ -295,13 +320,16 @@ export function BundleGuidedTour({
     visible,
   ]);
 
-  const closeTour = useCallback((callback?: () => void) => {
-    localStorage.setItem(storageKey, "1");
-    setVisible(false);
-    const previouslyFocused = previouslyFocusedRef.current;
-    requestAnimationFrame(() => previouslyFocused?.focus());
-    callback?.();
-  }, [storageKey]);
+  const closeTour = useCallback(
+    (callback?: () => void) => {
+      localStorage.setItem(storageKey, "1");
+      setVisible(false);
+      const previouslyFocused = previouslyFocusedRef.current;
+      requestAnimationFrame(() => previouslyFocused?.focus());
+      callback?.();
+    },
+    [storageKey]
+  );
 
   const handleDismiss = useCallback(() => {
     closeTour(onDismiss);
@@ -346,13 +374,16 @@ export function BundleGuidedTour({
               <mask id="wpb-spotlight">
                 <rect width="100%" height="100%" fill="white" />
                 <rect
-                  style={{
-                    x: spotlightRect.x,
-                    y: spotlightRect.y,
-                    width: spotlightRect.width,
-                    height: spotlightRect.height,
-                    transition: "x 0.35s ease, y 0.35s ease, width 0.35s ease, height 0.35s ease",
-                  } as CSSProperties}
+                  style={
+                    {
+                      x: spotlightRect.x,
+                      y: spotlightRect.y,
+                      width: spotlightRect.width,
+                      height: spotlightRect.height,
+                      transition:
+                        "x 0.35s ease, y 0.35s ease, width 0.35s ease, height 0.35s ease",
+                    } as CSSProperties
+                  }
                   rx="10"
                   fill="black"
                 />
@@ -376,25 +407,42 @@ export function BundleGuidedTour({
         style={tooltipStyle}
         role="dialog"
         aria-modal="true"
-        aria-label={`Guided tour step ${currentStep + 1} of ${steps.length}`}
+        aria-label={translateAdmin("adminDynamic.guidedTourProgress", {
+          current: currentStep + 1,
+          total: steps.length,
+        })}
         tabIndex={-1}
       >
         <div className={styles.tourHeader}>
-          <button type="button" className={styles.dismissTourLink} onClick={handleDismiss}>
-            Dismiss guided tour
+          <button
+            type="button"
+            className={styles.dismissTourLink}
+            onClick={handleDismiss}
+          >
+            {translateAdmin(
+              "adminExtracted.components.bundleConfigure.bundleguidedtour.dismissGuidedTour"
+            )}
           </button>
         </div>
         <div className={styles.progressTrack}>
-          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          <div
+            className={styles.progressFill}
+            style={{ width: `${progress}%` }}
+          />
         </div>
         <div className={styles.stepLabel}>
-          STEP {currentStep + 1} OF {steps.length}
+          {translateAdmin("adminDynamic.guidedTourStep", {
+            current: currentStep + 1,
+            total: steps.length,
+          })}
         </div>
-        <div className={styles.title}>{step.title}</div>
-        <div className={styles.body}>{step.body}</div>
+        <div className={styles.title}>{translateAdminCopy(step.title)}</div>
+        <div className={styles.body}>{translateAdminCopy(step.body)}</div>
         <div className={styles.actions}>
           <button type="button" className={styles.nextBtn} onClick={handleNext}>
-            {isLast ? "Got it" : "Next →"}
+            {isLast
+              ? translateAdmin("adminDynamic.gotIt")
+              : `${translateAdmin("adminDynamic.next")} →`}
           </button>
         </div>
       </div>

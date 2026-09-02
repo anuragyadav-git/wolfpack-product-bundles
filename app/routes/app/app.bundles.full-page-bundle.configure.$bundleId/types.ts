@@ -56,6 +56,7 @@ export interface LoaderData {
   availableBundles: { id: string; name: string }[];
   shop: string;
   apiKey: string;
+  storefrontProxyRoot: string;
   blockHandle: string;
   configureMode?: "create" | "edit";
   showFirstLoadTour?: boolean;

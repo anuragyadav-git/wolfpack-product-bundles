@@ -7,7 +7,7 @@ import { AppLogger } from "./logger";
 export type ShopifyAdmin = Awaited<ReturnType<typeof authenticate.admin>>["admin"];
 
 // ─── Internal Secret Guard ────────────────────────────────────────────────────
-// Use on routes called by internal services (e.g. the Pub/Sub worker).
+// Use on routes called by authenticated internal services.
 // Checks Authorization: Bearer <INTERNAL_WEBHOOK_SECRET> with constant-time comparison.
 //
 // Returns null when authorized (caller may proceed).

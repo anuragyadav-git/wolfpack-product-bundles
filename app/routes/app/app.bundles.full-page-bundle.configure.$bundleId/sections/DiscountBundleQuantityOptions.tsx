@@ -1,5 +1,6 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbBundleQuantityOptions({
   flow,
@@ -30,10 +31,12 @@ export function FpbBundleQuantityOptions({
             <s-stack direction="inline" gap="small" alignItems="center">
               <div className={fullPageBundleStyles.displayOptionText}>
                 <p className={fullPageBundleStyles.displayOptionTitle}>
-                  Bundle Quantity Options
+                  {translateAdmin("tooltips.bundleQuantityOptions.title")}
                 </p>
                 <p className={fullPageBundleStyles.displayOptionDescription}>
-                  Configure this section to enable quantity options.
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.configureThisSectionToEnableQuantityOptions"
+                  )}
                 </p>
               </div>
               <QuestionHelpTooltip tooltipKey="bundleQuantityOptions" />
@@ -61,12 +64,20 @@ export function FpbBundleQuantityOptions({
               }
               onClick={() => setIsBundleQuantityMultiLangModalOpen(true)}
             >
-              Multi Language
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+              )}
             </s-button>
           </s-stack>
           <p className={fullPageBundleStyles.optionNote}>
-            <strong>Note:</strong> Bundle Quantity Options can only be enabled
-            when discount rules are based on quantity.
+            <strong>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.note"
+              )}
+            </strong>{" "}
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.bundleQuantityOptionsCanOnlyBeEnabledWhenDiscountRulesAreBasedOn"
+            )}
           </p>
           <DisabledConfigurationRegion
             disabled={
@@ -85,8 +96,9 @@ export function FpbBundleQuantityOptions({
                       color: "#6d7175",
                     }}
                   >
-                    Add quantity-based discount rules to configure bundle
-                    quantity options.
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.addQuantityBasedDiscountRulesToConfigureBundleQuantityOptions"
+                    )}
                   </p>
                 ) : (
                   normalizedPricingDisplayOptions.bundleQuantityOptions.options.map(
@@ -109,13 +121,17 @@ export function FpbBundleQuantityOptions({
                                 flex: 1,
                               }}
                             >
-                              Rule #{index + 1}
+                              {translateAdmin("adminDynamic.ruleNumber", {
+                                number: index + 1,
+                              })}
                             </h5>
                             <s-press-button
                               variant="tertiary"
                               tone="neutral"
                               pressed={option.isDefault}
-                              accessibilityLabel="Make this rule default"
+                              accessibilityLabel={translateAdmin(
+                                "adminAttributes.makeThisRuleDefault"
+                              )}
                               onClick={() =>
                                 pricingState.setBundleQuantityDefaultRule(
                                   option.ruleId
@@ -125,8 +141,8 @@ export function FpbBundleQuantityOptions({
                               <s-text
                                 tone={option.isDefault ? "success" : "neutral"}
                               >
-                                {option.isDefault ? "\u2605" : "\u2606"} Make
-                                this rule default
+                                {option.isDefault ? "\u2605" : "\u2606"}{" "}
+                                {translateAdmin("adminDynamic.makeRuleDefault")}
                               </s-text>
                             </s-press-button>
                           </s-stack>
@@ -143,7 +159,7 @@ export function FpbBundleQuantityOptions({
                           )}
                           <s-stack direction="inline" gap="small">
                             <s-text-field
-                              label="Box Label"
+                              label={translateAdmin("adminAttributes.boxLabel")}
                               value={option.label}
                               onInput={(e) =>
                                 pricingState.updateBundleQuantityOption(
@@ -156,7 +172,9 @@ export function FpbBundleQuantityOptions({
                               autocomplete="off"
                             />
                             <s-text-field
-                              label="Box Subtext"
+                              label={translateAdmin(
+                                "adminAttributes.boxSubtext"
+                              )}
                               value={option.subtext}
                               onInput={(e) =>
                                 pricingState.updateBundleQuantityOption(

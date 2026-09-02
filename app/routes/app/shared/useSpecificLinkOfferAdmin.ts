@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFetcher } from '@remix-run/react';
 import { i18n } from '../../../i18n/config';
 import type { SpecificLinkOfferAdminState } from '../../../lib/specific-link-offer-admin';
+import type { OfferCountryTargetingMode } from '../../../lib/offer-country-targeting';
 
 interface SpecificLinkOfferActionResponse {
   success: boolean;
@@ -98,6 +99,11 @@ export function useSpecificLinkOfferAdmin({
     markAsDirty();
   }, [markAsDirty]);
 
+  const setOfferScheduleMode = useCallback((scheduleMode: SpecificLinkOfferAdminState['scheduleMode']) => {
+    setOfferDeliveryState((current) => ({ ...current, scheduleMode }));
+    markAsDirty();
+  }, [markAsDirty]);
+
   const setOfferStartsAt = useCallback((startsAt: string | null) => {
     setOfferDeliveryState((current) => ({ ...current, startsAt }));
     markAsDirty();
@@ -105,6 +111,60 @@ export function useSpecificLinkOfferAdmin({
 
   const setOfferEndsAt = useCallback((endsAt: string | null) => {
     setOfferDeliveryState((current) => ({ ...current, endsAt }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferRecurrenceFrequency = useCallback((
+    recurrenceFrequency: SpecificLinkOfferAdminState['recurrenceFrequency'],
+  ) => {
+    setOfferDeliveryState((current) => ({ ...current, recurrenceFrequency }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferRecurrenceAnchorDate = useCallback((recurrenceAnchorDate: string | null) => {
+    setOfferDeliveryState((current) => ({ ...current, recurrenceAnchorDate }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferRecurrenceWindowStart = useCallback((recurrenceWindowStart: string | null) => {
+    setOfferDeliveryState((current) => ({ ...current, recurrenceWindowStart }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferRecurrenceWindowEnd = useCallback((recurrenceWindowEnd: string | null) => {
+    setOfferDeliveryState((current) => ({ ...current, recurrenceWindowEnd }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferRecurrenceTermination = useCallback((
+    recurrenceTermination: SpecificLinkOfferAdminState['recurrenceTermination'],
+  ) => {
+    setOfferDeliveryState((current) => ({ ...current, recurrenceTermination }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferRecurrenceEndsOn = useCallback((recurrenceEndsOn: string | null) => {
+    setOfferDeliveryState((current) => ({ ...current, recurrenceEndsOn }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setOfferRecurrenceRunCount = useCallback((recurrenceRunCount: number | null) => {
+    setOfferDeliveryState((current) => ({ ...current, recurrenceRunCount }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setCountryTargetingEnabled = useCallback((countryTargetingEnabled: boolean) => {
+    setOfferDeliveryState((current) => ({ ...current, countryTargetingEnabled }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setCountryTargetingMode = useCallback((countryTargetingMode: OfferCountryTargetingMode) => {
+    setOfferDeliveryState((current) => ({ ...current, countryTargetingMode }));
+    markAsDirty();
+  }, [markAsDirty]);
+
+  const setCountryCodes = useCallback((countryCodes: string[]) => {
+    setOfferDeliveryState((current) => ({ ...current, countryCodes }));
     markAsDirty();
   }, [markAsDirty]);
 
@@ -140,8 +200,19 @@ export function useSpecificLinkOfferAdmin({
     setSpecificLinkOfferEnabled,
     setOfferPriority,
     setOfferStopLowerPriority,
+    setOfferScheduleMode,
     setOfferStartsAt,
     setOfferEndsAt,
+    setOfferRecurrenceFrequency,
+    setOfferRecurrenceAnchorDate,
+    setOfferRecurrenceWindowStart,
+    setOfferRecurrenceWindowEnd,
+    setOfferRecurrenceTermination,
+    setOfferRecurrenceEndsOn,
+    setOfferRecurrenceRunCount,
+    setCountryTargetingEnabled,
+    setCountryTargetingMode,
+    setCountryCodes,
     generateSpecificLinkOffer,
     revokeSpecificLinkOffer,
     copySpecificLinkOffer,

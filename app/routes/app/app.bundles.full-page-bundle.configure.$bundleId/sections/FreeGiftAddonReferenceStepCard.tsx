@@ -1,5 +1,7 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbAddonReferenceStepCard({
   flow,
@@ -26,10 +28,15 @@ export function FpbAddonReferenceStepCard({
         <div className={fullPageBundleStyles.panelHeader}>
           <div className={fullPageBundleStyles.addonsTitleCluster}>
             <h3 className={fullPageBundleStyles.panelTitle}>
-              Add-Ons and Gifting Step
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.addOnsAndGiftingStep"
+              )}
+              <ConfigureHelpPopover tooltipKey="freeGiftAddons" />
             </h3>
             <s-switch
-              accessibilityLabel="Enable add-ons and gifting step"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.enableAddOnsAndGiftingStep"
+              )}
               checked={
                 addonDraft.isPersonalizationEnabled === true || undefined
               }
@@ -52,7 +59,9 @@ export function FpbAddonReferenceStepCard({
               }
               onClick={openAddonStepMultiLanguageModal}
             >
-              Multi Language
+              {translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+              )}
             </s-button>
           </div>
         </div>
@@ -68,7 +77,7 @@ export function FpbAddonReferenceStepCard({
                   {addonDraft.stepImage ? (
                     <img
                       src={addonDraft.stepImage}
-                      alt="Add-ons step icon"
+                      alt={translateAdmin("adminAttributes.addOnsStepIcon")}
                       className={fullPageBundleStyles.iconImg}
                     />
                   ) : (
@@ -125,16 +134,18 @@ export function FpbAddonReferenceStepCard({
                 className={fullPageBundleStyles.addonsReplaceButton}
                 onClick={() => setShowIconPickerForStep("addon-direct")}
               >
-                Replace
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
+                )}
               </button>
             </div>
             <div className={fullPageBundleStyles.addonsStepTextGroup}>
               <div className={fullPageBundleStyles.addonsStepNameGroup}>
                 <s-text-field
-                  label="Step Name"
+                  label={translateAdmin("adminAttributes.stepName")}
                   disabled={!addonDraft.isPersonalizationEnabled || undefined}
                   value={addonDraft.personalizeStepText ?? ""}
-                  placeholder="Add On"
+                  placeholder={translateAdmin("adminAttributes.addOn")}
                   onInput={(e) => {
                     const value = (e.target as HTMLInputElement).value;
                     updateAddonDraft({ personalizeStepText: value });
@@ -144,7 +155,7 @@ export function FpbAddonReferenceStepCard({
               </div>
               <div className={fullPageBundleStyles.addonsStepTitleGroup}>
                 <s-text-field
-                  label="Step Title"
+                  label={translateAdmin("adminAttributes.stepTitle")}
                   disabled={!addonDraft.isPersonalizationEnabled || undefined}
                   value={addonDraft.personalizePageSubtext ?? ""}
                   onInput={(e) => {

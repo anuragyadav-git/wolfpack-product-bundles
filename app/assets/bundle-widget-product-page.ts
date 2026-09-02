@@ -93,11 +93,13 @@ import { ProductPageDomMethods } from './widgets/product-page/methods/dom-method
 import { ProductPageFooterModalStateMethods } from './widgets/product-page/methods/footer-modal-state-methods.js';
 import { ProductPageModalStateMethods } from './widgets/product-page/methods/modal-state-methods.js';
 import { ProductPageWidgetMiscMethods } from './widgets/product-page/methods/widget-misc-methods.js';
+import { ProductPageStickyAddToCartMethods } from './widgets/product-page/methods/sticky-add-to-cart-methods.js';
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 import { applyBrowsedProductPreselection } from './widgets/product-page/embed-preselection.js';
 import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
 import { resolveSpecificLinkOfferStorefrontEligibility } from './widgets/shared/specific-link-offer-eligibility.js';
+import { SharedCountdownMethods } from './widgets/shared/countdown-timer.js';
 
 // ============================================================
 // BOTTOM-SHEET HELPER FUNCTIONS (pure — exposed for unit tests)
@@ -142,6 +144,8 @@ export class BundleWidgetProductPage {
       ProductPageFooterModalStateMethods,
       ProductPageModalStateMethods,
       ProductPageWidgetMiscMethods,
+      ProductPageStickyAddToCartMethods,
+      SharedCountdownMethods,
       ProductPageLayoutShellMethods,
       ProductPageInpageRenderMethods,
       ProductPageProductDataMethods,
@@ -231,6 +235,7 @@ export class BundleWidgetProductPage {
       const eligible = await resolveSpecificLinkOfferStorefrontEligibility({
         bundle: storefrontBundle,
         locationSearch: window.location.search,
+        countryCode: (window as Window & { currentCountryCode?: string }).currentCountryCode ?? null,
       });
       if (!eligible) {
         this.hideLoadingOverlay();
@@ -296,6 +301,8 @@ export class BundleWidgetProductPage {
 
       // Attach event listeners
       this.attachEventListeners();
+      this.setupCountdown();
+      this.setupStickyAddToCart();
 
       // Mark as initialized
       this.container.dataset.initialized = 'true';

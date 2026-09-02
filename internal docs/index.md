@@ -5,7 +5,7 @@ title: Only Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Only Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-08-29
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -66,10 +66,12 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
 - [[Shopify Integration/Admin API]] — Rate limits, native Prisma session storage, expiring-token migration gates
+- [[Shopify Integration/Embedded Admin Resource Authentication]] — App Bridge ID-token fetch ownership for authenticated backend requests and file downloads
 - [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, product description HTML, and Shop Brand color-pair inheritance
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules
 - [[Shopify Integration/Metafields]] — Bundle config sync, payload limits, and PPB component quantity validation constraints
+- [[Shopify Integration/Offer Country Targeting]] — Shopify-selected ISO country eligibility and the prohibition on unstable market identifiers or IP inference
 - [[Shopify Integration/Theme App Extensions]] — Native App Bridge extension status, preview gates, and current-theme editor links
 - [[Shopify Integration/Web Pixels]] — UTM Web Pixel settings payload rules, including nonblank custom-parameter sentinel behavior
 - [[Shopify Integration/Webhooks]] — Subscribed webhook topics, removed broad topics, and delivery-volume rationale

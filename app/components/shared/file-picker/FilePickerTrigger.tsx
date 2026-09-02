@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { MobileIcon, MonitorIcon } from "./FilePickerIcons";
 import { truncateStoreFileText } from "./utils";
+import { translateAdmin } from "~/i18n/config";
 
 type FilePickerTriggerProps = {
   value: string | null;
@@ -81,19 +82,25 @@ export function FilePickerTrigger({
               commandFor={previewActionsMenuId}
               icon="menu-horizontal"
               variant="secondary"
-              accessibilityLabel="Banner image actions"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.bannerImageActions"
+              )}
               disabled={disabled || undefined}
             />
             <s-menu
               id={previewActionsMenuId}
-              accessibilityLabel="Banner image actions"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.bannerImageActions"
+              )}
             >
               <s-button
                 icon="edit"
                 disabled={disabled || undefined}
                 onClick={handleOpen}
               >
-                Change image
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickertrigger.changeImage"
+                )}
               </s-button>
               <s-button
                 icon="delete"
@@ -101,7 +108,9 @@ export function FilePickerTrigger({
                 disabled={disabled || undefined}
                 onClick={handleRemove}
               >
-                Remove image
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickertrigger.removeImage"
+                )}
               </s-button>
             </s-menu>
           </div>
@@ -141,7 +150,9 @@ export function FilePickerTrigger({
                 disabled={disabled || undefined}
                 onClick={handleOpen}
               >
-                Change
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickertrigger.change"
+                )}
               </s-button>
               <s-button
                 variant="tertiary"
@@ -150,7 +161,9 @@ export function FilePickerTrigger({
                 disabled={disabled || undefined}
                 onClick={handleRemove}
               >
-                Remove
+                {translateAdmin(
+                  "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                )}
               </s-button>
             </s-stack>
           </s-stack>
@@ -191,7 +204,12 @@ export function FilePickerTrigger({
     >
       {triggerIsUploading ? (
         <>
-          <s-spinner size="base" accessibilityLabel="Uploading image" />
+          <s-spinner
+            size="base"
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.uploadingImage"
+            )}
+          />
           <s-text color="subdued">
             {uploadStatus === "uploading" ? "Uploading…" : "Processing…"}
           </s-text>

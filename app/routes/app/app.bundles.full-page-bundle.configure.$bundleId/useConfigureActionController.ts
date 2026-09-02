@@ -112,7 +112,11 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     const publicNumber = flow.bundle.publicNumber ?? 1;
     const shareablePreviewUrl =
       preparedPreview?.shareablePreviewUrl ||
-      buildFpbStorefrontUrl(flow.shop, publicNumber);
+      buildFpbStorefrontUrl(
+        flow.shop,
+        publicNumber,
+        flow.storefrontProxyRoot,
+      );
 
     const executePreviewBundle = (): string | false => {
       if (flow.bundle.bundleType === "full_page") {

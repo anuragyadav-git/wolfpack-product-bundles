@@ -1,46 +1,60 @@
 import { EnablePreviewModal } from "../../../../components/EnablePreviewModal";
 import { PricingTranslationModals } from "../../_shared/bundle-configure/PricingTranslationModals";
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbSyncAndLanguageModals({
   flow,
 }: {
   flow: ConfigureBundleFlowContext;
 }) {
-  const rules = flow.pricingState.discountRules.map((rule: any, index: number) => {
-    const quantityOption =
-      flow.normalizedPricingDisplayOptions.bundleQuantityOptions.options.find(
-        (option: any) => option.ruleId === rule.id,
-      );
-    return {
-      id: rule.id,
-      heading: `Rule #${index + 1}`,
-      quantityFallback: {
-        label: quantityOption?.label ?? "",
-        subtext: quantityOption?.subtext ?? "",
-      },
-      tierFallback: flow.tierTextByRuleId[rule.id] ?? {},
-    };
-  });
+  const rules = flow.pricingState.discountRules.map(
+    (rule: any, index: number) => {
+      const quantityOption =
+        flow.normalizedPricingDisplayOptions.bundleQuantityOptions.options.find(
+          (option: any) => option.ruleId === rule.id
+        );
+      return {
+        id: rule.id,
+        heading: `Rule #${index + 1}`,
+        quantityFallback: {
+          label: quantityOption?.label ?? "",
+          subtext: quantityOption?.subtext ?? "",
+        },
+        tierFallback: flow.tierTextByRuleId[rule.id] ?? {},
+      };
+    }
+  );
   const quantityValues =
     flow.pricingState.pricingDisplayOptions.bundleQuantityOptions
       .optionsByLocaleByRuleId ?? {};
 
   return (
     <>
-      <s-modal ref={flow.syncModalRef} heading="Sync bundle with Only Bundles?">
+      <s-modal
+        ref={flow.syncModalRef}
+        heading={translateAdmin("adminAttributes.syncBundleWithOnlyBundles")}
+      >
         <s-stack direction="block" gap="small">
           <s-paragraph>
-            Syncing refreshes the Shopify data used by this bundle in Only Bundles.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuresyncandlanguagemodals.syncingRefreshesTheShopifyDataUsedByThisBundleInOnlyBundles"
+            )}
           </s-paragraph>
           <s-paragraph>
-            The Shopify page will be deleted and re-created.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuresyncandlanguagemodals.theShopifyPageWillBeDeletedAndReCreated"
+            )}
           </s-paragraph>
           <s-paragraph>
-            All bundle and component metafields will be rewritten.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuresyncandlanguagemodals.allBundleAndComponentMetafieldsWillBeRewritten"
+            )}
           </s-paragraph>
           <s-paragraph>
-            Bundle analytics are preserved. This action cannot be undone.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuresyncandlanguagemodals.bundleAnalyticsArePreservedThisActionCannotBeUndone"
+            )}
           </s-paragraph>
         </s-stack>
         <s-button
@@ -50,13 +64,15 @@ export function FpbSyncAndLanguageModals({
           loading={flow.fetcher.state === "submitting" || undefined}
           onClick={flow.handleSyncBundleConfirm}
         >
-          Sync bundle
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuresyncandlanguagemodals.syncBundle"
+          )}
         </s-button>
         <s-button
           slot="secondary-actions"
           onClick={() => flow.setIsSyncModalOpen(false)}
         >
-          Cancel
+          {translateAdmin("dashboard.deleteModal.cancel")}
         </s-button>
       </s-modal>
       <PricingTranslationModals

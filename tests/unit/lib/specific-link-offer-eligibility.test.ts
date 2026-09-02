@@ -1,5 +1,6 @@
 import {
   resolveSpecificLinkOfferEligibility,
+  type SpecificLinkOfferPolicy,
 } from '../../../app/lib/specific-link-offer-eligibility.server';
 import {
   createSpecificLinkOfferToken,
@@ -10,7 +11,7 @@ const baseInput = {
 };
 const TEST_TOKEN = 'a'.repeat(43);
 
-function createPolicy(overrides: Record<string, unknown> = {}) {
+function createPolicy(overrides: Partial<SpecificLinkOfferPolicy> = {}) {
   const created = createSpecificLinkOfferToken({
     token: TEST_TOKEN,
   });
@@ -20,6 +21,9 @@ function createPolicy(overrides: Record<string, unknown> = {}) {
     policy: {
       id: 'policy-1',
       specificLinkRequired: true,
+      countryTargetingEnabled: false,
+      countryTargetingMode: 'include',
+      countryCodes: [],
       ruleVersion: 3,
       conditions: [{
         type: 'specific_link',
@@ -28,7 +32,7 @@ function createPolicy(overrides: Record<string, unknown> = {}) {
         revokedAt: null,
       }],
       ...overrides,
-    },
+    } satisfies SpecificLinkOfferPolicy,
   };
 }
 
@@ -54,6 +58,25 @@ describe('specific-link offer eligibility', () => {
     });
   });
 
+  it('evaluates recurring storefront eligibility before link matching', () => {
+    const { policy, token } = createPolicy({
+      scheduleMode: 'recurring',
+      recurrenceFrequency: 'weekly',
+      recurrenceTimezone: 'UTC',
+      recurrenceAnchorDate: '2026-08-30',
+      recurrenceWindowStartMinute: 600,
+      recurrenceWindowEndMinute: 660,
+      recurrenceTermination: 'never',
+    });
+
+    expect(resolveSpecificLinkOfferEligibility({ ...baseInput, policy, token })).toEqual({
+      eligible: false,
+      reasonCode: 'schedule_not_started',
+      offerPolicyId: 'policy-1',
+      ruleVersion: 3,
+    });
+  });
+
   it('accepts a matching active token', () => {
     const { policy, token } = createPolicy();
 
@@ -63,6 +86,63 @@ describe('specific-link offer eligibility', () => {
       offerPolicyId: 'policy-1',
       ruleVersion: 3,
     });
+  });
+
+  it('applies country targeting only when Shopify country context is supplied', () => {
+    const { policy, token } = createPolicy({
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'include',
+      countryCodes: ['CA'],
+    });
+
+    expect(resolveSpecificLinkOfferEligibility({
+      ...baseInput,
+      policy,
+      token,
+      countryCode: 'ca',
+    }).reasonCode).toBe('matched');
+    expect(resolveSpecificLinkOfferEligibility({
+      ...baseInput,
+      policy,
+      token,
+      countryCode: 'US',
+    })).toEqual({
+      eligible: false,
+      reasonCode: 'country_not_included',
+      offerPolicyId: 'policy-1',
+      ruleVersion: 3,
+    });
+    expect(resolveSpecificLinkOfferEligibility({
+      ...baseInput,
+      policy,
+      token,
+    }).reasonCode).toBe('matched');
+  });
+
+  it('rejects an excluded country and fails closed for unknown include context', () => {
+    const excluded = createPolicy({
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'exclude',
+      countryCodes: ['US'],
+    });
+    expect(resolveSpecificLinkOfferEligibility({
+      ...baseInput,
+      policy: excluded.policy,
+      token: excluded.token,
+      countryCode: 'US',
+    }).reasonCode).toBe('country_excluded');
+
+    const included = createPolicy({
+      countryTargetingEnabled: true,
+      countryTargetingMode: 'include',
+      countryCodes: ['CA'],
+    });
+    expect(resolveSpecificLinkOfferEligibility({
+      ...baseInput,
+      policy: included.policy,
+      token: included.token,
+      countryCode: null,
+    }).reasonCode).toBe('country_not_included');
   });
 
   it('rejects invalid, revoked, expired, and missing-condition states safely', () => {

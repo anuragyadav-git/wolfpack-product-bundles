@@ -11,7 +11,7 @@ import {
 } from "../../../components/AdminPageNavigation";
 import { PixelStatusCard } from "./PixelStatusCard";
 import AttributionDashboard from "./AttributionDashboard";
-import { OfferAnalyticsCard } from "./OfferAnalyticsCard";
+import { translateAdmin } from "~/i18n/config";
 
 function AttributionCriticalFunnelHeader() {
   return (
@@ -21,12 +21,18 @@ function AttributionCriticalFunnelHeader() {
     >
       <header className={styles.criticalHeroHeader}>
         <div>
-          <p className={styles.criticalHeroKicker}>Bundle Funnel</p>
+          <p className={styles.criticalHeroKicker}>
+            {translateAdmin(
+              "adminExtracted.components.analytics.funnelhero.bundleFunnel"
+            )}
+          </p>
           <h2
             id="wpb-critical-funnel-hero-title"
             className={styles.criticalHeroTitle}
           >
-            How shoppers move through your bundles
+            {translateAdmin(
+              "adminExtracted.components.analytics.funnelhero.howShoppersMoveThroughYourBundles"
+            )}
           </h2>
         </div>
       </header>
@@ -64,7 +70,7 @@ export default function AttributionRouteShell() {
   return (
     <>
       <AdminPageTitleBar
-        title="Analytics"
+        title={translateAdmin("nav.analytics")}
         breadcrumbLabel="Dashboard"
         onBack={handleBack}
       />
@@ -74,7 +80,7 @@ export default function AttributionRouteShell() {
       >
         <div className={styles.criticalHeroShell}>
           <AdminPageBackTitle
-            title="Analytics"
+            title={translateAdmin("nav.analytics")}
             backLabel="Back to previous page"
             onBack={handleBack}
           />
@@ -87,18 +93,17 @@ export default function AttributionRouteShell() {
           </Suspense>
           <AttributionCriticalFunnelHeader />
         </div>
-        <Suspense fallback={<AdminSectionLoadingState label={t("common.loading.workspace")} />}>
+        <Suspense
+          fallback={
+            <AdminSectionLoadingState label={t("common.loading.workspace")} />
+          }
+        >
           <Await resolve={analytics}>
             {(resolvedAnalytics: any) => (
-              <>
-                {resolvedAnalytics.accessMode === "ADVANCED" ? (
-                  <OfferAnalyticsCard
-                    model={resolvedAnalytics.offerAnalytics}
-                    onSelectionChange={handleOfferSelectionChange}
-                  />
-                ) : null}
-                <AttributionDashboard data={resolvedAnalytics} />
-              </>
+              <AttributionDashboard
+                data={resolvedAnalytics}
+                onOfferSelectionChange={handleOfferSelectionChange}
+              />
             )}
           </Await>
         </Suspense>

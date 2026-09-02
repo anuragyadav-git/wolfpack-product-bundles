@@ -617,4 +617,51 @@ describe('FPB Standard variant availability', () => {
       available: true,
     })).toBe(false);
   });
+
+  it('copies selected variant runtime stock onto a grouped product card', () => {
+    const context = {
+      shouldExpandStepProductsDuringLoad: () => false,
+      getRuntimeVariantInventory: fullPageProductProcessingMethods.getRuntimeVariantInventory,
+      getFirstAvailableVariant: fullPageProductProcessingMethods.getFirstAvailableVariant,
+      isVariantSelectableForInventory: fullPageProductProcessingMethods.isVariantSelectableForInventory,
+      isInventoryTrackingOnAddToCartEnabled: fullPageProductProcessingMethods.isInventoryTrackingOnAddToCartEnabled,
+      _getLandingPageControls: () => ({ trackInventoryOnAddToCart: false }),
+      _fpbRuntimeVariantInventoryById: {
+        '456': {
+          available: true,
+          quantityAvailable: 3,
+          currentlyNotInStock: false,
+        },
+      },
+    };
+
+    const normalized = fullPageProductProcessingMethods.processProductsForStep.call(
+      context,
+      [{
+        id: 'gid://shopify/Product/123',
+        title: 'Grouped product',
+        variants: [{
+          id: 'gid://shopify/ProductVariant/456',
+          selectionId: 'gid://shopify/ProductVariant/456',
+          title: 'Default Title',
+          price: '30.00',
+          available: true,
+          quantityAvailable: null,
+          currentlyNotInStock: false,
+        }],
+      }],
+      {},
+    );
+
+    expect(normalized[0]).toEqual(expect.objectContaining({
+      selectionId: '456',
+      quantityAvailable: 3,
+      currentlyNotInStock: false,
+      variants: [expect.objectContaining({
+        selectionId: '456',
+        quantityAvailable: 3,
+        currentlyNotInStock: false,
+      })],
+    }));
+  });
 });

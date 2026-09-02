@@ -1,5 +1,6 @@
-import { i18n } from '../../../i18n/config';
-import type { SpecificLinkOfferAdminState } from '../../../lib/specific-link-offer-admin';
+import { i18n } from "../../../i18n/config";
+import type { SpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
+import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 
 interface SpecificLinkOfferSectionProps {
   active: boolean;
@@ -13,10 +14,10 @@ interface SpecificLinkOfferSectionProps {
 }
 
 const statusTone = {
-  not_generated: 'neutral',
-  active: 'success',
-  revoked: 'critical',
-  expired: 'warning',
+  not_generated: "neutral",
+  active: "success",
+  revoked: "critical",
+  expired: "warning",
 } as const;
 
 export function SpecificLinkOfferSection({
@@ -31,29 +32,36 @@ export function SpecificLinkOfferSection({
 }: SpecificLinkOfferSectionProps) {
   if (!active) return null;
 
-  const canEnable = state.status === 'active' || state.enabled;
-  const canRevoke = state.status === 'active';
-  const generateLabel = state.status === 'not_generated'
-    ? i18n.t('specificLinkOffer.generate')
-    : i18n.t('specificLinkOffer.regenerate');
+  const canEnable = state.status === "active" || state.enabled;
+  const canRevoke = state.status === "active";
+  const generateLabel =
+    state.status === "not_generated"
+      ? i18n.t("specificLinkOffer.generate")
+      : i18n.t("specificLinkOffer.regenerate");
 
   return (
-    <s-section heading={i18n.t('specificLinkOffer.title')}>
+    <s-section>
       <s-stack direction="block" gap="base">
-        <s-paragraph>{i18n.t('specificLinkOffer.description')}</s-paragraph>
         <s-stack direction="inline" gap="small" alignItems="center">
-          <s-text>{i18n.t('specificLinkOffer.statusLabel')}</s-text>
+          <s-heading>{i18n.t("specificLinkOffer.title")}</s-heading>
+          <ConfigureHelpPopover tooltipKey="specificLinkAccess" />
+        </s-stack>
+        <s-paragraph>{i18n.t("specificLinkOffer.description")}</s-paragraph>
+        <s-stack direction="inline" gap="small" alignItems="center">
+          <s-text>{i18n.t("specificLinkOffer.statusLabel")}</s-text>
           <s-badge tone={statusTone[state.status]}>
             {i18n.t(`specificLinkOffer.status.${state.status}`)}
           </s-badge>
         </s-stack>
         <s-switch
           data-action="toggle-specific-link"
-          label={i18n.t('specificLinkOffer.enableLabel')}
-          details={i18n.t('specificLinkOffer.enableDetails')}
+          label={i18n.t("specificLinkOffer.enableLabel")}
+          details={i18n.t("specificLinkOffer.enableDetails")}
           checked={state.enabled}
           disabled={busy || !canEnable}
-          onChange={(event) => onEnabledChange(event.currentTarget.checked === true)}
+          onChange={(event) =>
+            onEnabledChange(event.currentTarget.checked === true)
+          }
         />
         <s-stack direction="inline" gap="base">
           <s-button
@@ -72,7 +80,7 @@ export function SpecificLinkOfferSection({
               disabled={busy}
               onClick={onRevoke}
             >
-              {i18n.t('specificLinkOffer.revoke')}
+              {i18n.t("specificLinkOffer.revoke")}
             </s-button>
           ) : null}
         </s-stack>
@@ -85,10 +93,10 @@ export function SpecificLinkOfferSection({
                 variant="tertiary"
                 onClick={() => onCopy(generatedLink)}
               >
-                {i18n.t('specificLinkOffer.copy')}
+                {i18n.t("specificLinkOffer.copy")}
               </s-button>
               <s-paragraph>
-                {i18n.t('specificLinkOffer.oneTimeNotice')}
+                {i18n.t("specificLinkOffer.oneTimeNotice")}
               </s-paragraph>
             </s-stack>
           </s-box>

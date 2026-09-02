@@ -18,6 +18,7 @@ type ProductContext = {
   locale: string;
   endpointUrl: string;
   selectedVariantId: string;
+  countryCode?: string;
 };
 
 type ProductPageUpsellState = {
@@ -169,6 +170,7 @@ async function fetchOffers(context: ProductContext) {
   const url = new URL(context.endpointUrl, window.location.origin);
   url.searchParams.set("productId", context.productId);
   url.searchParams.set("locale", context.locale);
+  if (context.countryCode) url.searchParams.set("country", context.countryCode);
   context.collectionIds.forEach((collectionId) => url.searchParams.append("collectionId", collectionId));
   const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" } });
   if (!response.ok) return [];
@@ -184,6 +186,7 @@ function createContext(embed: HTMLElement): ProductContext {
     locale: embed.dataset.locale ?? "",
     endpointUrl: embed.dataset.fpbUpsellsEndpoint ?? "",
     selectedVariantId: embed.dataset.selectedVariantId ?? "",
+    countryCode: embed.dataset.countryCode ?? "",
   };
 }
 

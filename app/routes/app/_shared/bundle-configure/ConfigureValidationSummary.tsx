@@ -1,4 +1,5 @@
 import type { ConfigureValidationIssue } from "../../../../lib/bundle-config/configure-validation";
+import { translateAdmin } from "~/i18n/config";
 
 export function ConfigureValidationSummary({
   activeSection,
@@ -8,7 +9,7 @@ export function ConfigureValidationSummary({
   issues: ConfigureValidationIssue[];
 }) {
   const sectionIssues = issues.filter(
-    (validationIssue) => validationIssue.section === activeSection,
+    (validationIssue) => validationIssue.section === activeSection
   );
   if (sectionIssues.length === 0) return null;
 
@@ -21,7 +22,9 @@ export function ConfigureValidationSummary({
     >
       <s-stack direction="block" gap="small">
         <s-text tone="critical">
-          Fix the following fields before saving:
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.configurevalidationsummary.fixTheFollowingFieldsBeforeSaving"
+          )}
         </s-text>
         {sectionIssues.map((validationIssue) => (
           <span

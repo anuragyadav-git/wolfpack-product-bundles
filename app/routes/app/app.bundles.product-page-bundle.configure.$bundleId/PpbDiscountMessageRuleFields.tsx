@@ -1,4 +1,5 @@
 import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbDiscountMessageRuleFields() {
   const {
@@ -30,7 +31,9 @@ export function PpbDiscountMessageRuleFields() {
             textAlign: "center",
           }}
         >
-          Add discount rules to configure messaging.
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.addDiscountRulesToConfigureMessaging"
+          )}
         </p>
       </s-section>
     );
@@ -40,12 +43,12 @@ export function PpbDiscountMessageRuleFields() {
     <s-stack direction="block" gap="small">
       {pricingState.discountRules.map((rule: any, index: number) => {
         const localeMessages = discountMessagingMultiLanguageEnabled
-          ? (ruleMessagesByLocale[activeDiscountLocale]?.[rule.id] ??
-            ruleMessages[rule.id])
+          ? ruleMessagesByLocale[activeDiscountLocale]?.[rule.id] ??
+            ruleMessages[rule.id]
           : ruleMessages[rule.id];
         const defaultDiscountText = getDefaultDiscountRuleText(
           pricingState.discountType,
-          index,
+          index
         );
 
         return (
@@ -55,10 +58,12 @@ export function PpbDiscountMessageRuleFields() {
           >
             <s-stack direction="block" gap="small">
               <h5 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>
-                Rule #{index + 1}
+                {translateAdmin("adminDynamic.ruleNumber", {
+                  number: index + 1,
+                })}
               </h5>
               <s-text-field
-                label="Discount Text"
+                label={translateAdmin("adminAttributes.discountText")}
                 value={localeMessages?.discountText || defaultDiscountText}
                 onInput={(e) => {
                   const value = (e.target as HTMLInputElement).value;
@@ -73,7 +78,7 @@ export function PpbDiscountMessageRuleFields() {
                             discountText: value,
                           },
                         },
-                      }),
+                      })
                     );
                     markAsDirty();
                   } else {
@@ -89,17 +94,21 @@ export function PpbDiscountMessageRuleFields() {
       <div className={productPageBundleStyles.discountRuleCard}>
         <s-stack direction="block" gap="small">
           <h5 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>
-            Success Message
+            {translateAdmin(
+              "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
+            )}
           </h5>
           <s-text-field
-            label="Success Message"
+            label={translateAdmin(
+              "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
+            )}
             value={(() => {
               const defaultMessage = getDefaultDiscountRuleSuccessMessage(
-                pricingState.discountType,
+                pricingState.discountType
               );
               const value = discountMessagingMultiLanguageEnabled
-                ? (successMessageByLocale[activeDiscountLocale] ??
-                  globalSuccessMessage)
+                ? successMessageByLocale[activeDiscountLocale] ??
+                  globalSuccessMessage
                 : globalSuccessMessage;
               return value || defaultMessage;
             })()}

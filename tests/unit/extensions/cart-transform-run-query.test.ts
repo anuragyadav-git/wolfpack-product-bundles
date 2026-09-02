@@ -32,6 +32,7 @@ describe("Cart Transform input query", () => {
 
     expect(metafieldCost + attributeCost + requiredLeafCost).toBeLessThanOrEqual(30);
     expect(normalizedQuery).toContain("sellingPlanAllocation { __typename }");
+    expect(normalizedQuery).toContain("localization { country { isoCode } }");
   });
 
   it("reuses bundle display properties instead of adding offer-analytics query leaves", () => {
@@ -41,7 +42,7 @@ describe("Cart Transform input query", () => {
 
   it("groups merge lines from EB public cart attributes instead of private bundle IDs", () => {
     expect(normalizedQuery).toContain('wolfpackProductBundleOfferId: attribute(key: "_wolfpackProductBundle:OfferId")');
-    expect(normalizedQuery).toContain('wolfpackProductBundleName: attribute(key: "_bundleName")');
+    expect(normalizedQuery).not.toContain('attribute(key: "_bundleName")');
     expect(normalizedQuery).toContain('runtimeToken: attribute(key: "_wolfpack_bundle_runtime")');
     expect(normalizedQuery).not.toContain('attribute(key: "_addon_offer_id")');
     expect(normalizedQuery).not.toContain('metafield(namespace: "$app", key: "component_parents")');

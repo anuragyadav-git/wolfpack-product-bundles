@@ -5,7 +5,7 @@ title: Parent Product Status Loading
 type: test-spec
 status: active
 summary: Verifies that configure-page parent product status loading and resolved states stay synchronized across the banner and bundle product card.
-last_audited: 2026-08-25
+last_audited: 2026-09-01
 owners:
   - engineering
 domains:
@@ -47,7 +47,7 @@ Keep the configure banner and Bundle Product card synchronized while Shopify par
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 5 | Parent product status is loading | Loading state | Info banner with native spinner | Manage action is absent. |
+| 5 | Parent product status is loading | Loading state | Info banner headed `Scanning bundle status`, with native spinner and `bundle status is being fetched.` | Manage action is absent. |
 | 6 | Parent product is Unlisted | Warning state | Warning banner with Manage action | Existing merchant action remains available. |
 
 ### CommonConfigureSidebar

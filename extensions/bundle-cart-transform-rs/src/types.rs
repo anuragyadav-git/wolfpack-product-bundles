@@ -159,6 +159,8 @@ fn default_amount_percentage() -> String {
 #[derive(serde::Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CartLineDisplayProperties {
+    #[serde(default)]
+    pub bundle_name: Option<String>,
     #[serde(default, rename = "box")]
     pub box_label: Option<String>,
     #[serde(default)]
@@ -262,6 +264,8 @@ pub struct RuntimeTokenPayload {
     pub components: Vec<RuntimeTokenLine>,
     #[serde(default)]
     pub price_adjustment: PriceAdjustmentConfig,
+    #[serde(default)]
+    pub country_rule: String,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]

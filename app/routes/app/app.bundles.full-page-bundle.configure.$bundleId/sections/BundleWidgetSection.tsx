@@ -3,7 +3,11 @@ import { CommonBundleWidgetSection } from "../../_shared/bundle-configure/Common
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { getVisibilityResourceId } from "../visibility-helpers";
 
-export function BundleWidgetSection({ flow }: { flow: ConfigureBundleFlowContext }) {
+export function BundleWidgetSection({
+  flow,
+}: {
+  flow: ConfigureBundleFlowContext;
+}) {
   if (flow.activeSection !== "bundle_widget") return null;
 
   return (
@@ -20,14 +24,20 @@ export function BundleWidgetSection({ flow }: { flow: ConfigureBundleFlowContext
         FilePicker={flow.FilePicker}
         getResourceId={getVisibilityResourceId}
         imageUrl={flow.upsellWidgetImageUrl}
-        multiLanguageDisabled={!flow.upsellWidgetEnabled || isMultiLanguageActionDisabled(flow.shopLocales)}
+        multiLanguageDisabled={
+          !flow.upsellWidgetEnabled ||
+          isMultiLanguageActionDisabled(flow.shopLocales)
+        }
         onAddBrowsedProductChange={(checked) => {
           flow.setAutoSelectBrowsedProduct(checked);
           flow.markAsDirty();
         }}
         onButtonTextChange={(value) => {
           flow.setUpsellWidgetButtonText(value);
-          flow.setTextOverrides((previous) => ({ ...previous, widgetButtonText: value }));
+          flow.setTextOverrides((previous) => ({
+            ...previous,
+            widgetButtonText: value,
+          }));
           flow.clearValidationError("widget.buttonText");
           flow.markAsDirty();
         }}
@@ -55,18 +65,36 @@ export function BundleWidgetSection({ flow }: { flow: ConfigureBundleFlowContext
           await flow.openVisibilityCollectionPicker("widget");
           flow.clearValidationError("widget.collections");
         }}
-        onOpenMultiLanguage={() => flow.openMultiLanguageModal("Bundle Widget", [
-          { key: "widgetTitle", label: "Widget Title", fallback: flow.upsellWidgetTitle },
-          { key: "widgetDescription", label: "Widget Description", fallback: flow.upsellWidgetDescription },
-          { key: "widgetButtonText", label: "Widget Button Text", fallback: flow.upsellWidgetButtonText },
-        ])}
+        onOpenMultiLanguage={() =>
+          flow.openMultiLanguageModal("Bundle Widget", [
+            {
+              key: "widgetTitle",
+              label: "Widget Title",
+              fallback: flow.upsellWidgetTitle,
+            },
+            {
+              key: "widgetDescription",
+              label: "Widget Description",
+              fallback: flow.upsellWidgetDescription,
+            },
+            {
+              key: "widgetButtonText",
+              label: "Widget Button Text",
+              fallback: flow.upsellWidgetButtonText,
+            },
+          ])
+        }
         onOpenProductPicker={async () => {
           await flow.openVisibilityProductPicker("widget");
           flow.clearValidationError("widget.products");
         }}
         onPlaceWidget={flow.handlePlaceWidget}
-        onRemoveCollection={(index) => flow.removeVisibilityCollectionTarget("widget", index)}
-        onRemoveProduct={(index) => flow.removeVisibilityProductTarget("widget", index)}
+        onRemoveCollection={(index) =>
+          flow.removeVisibilityCollectionTarget("widget", index)
+        }
+        onRemoveProduct={(index) =>
+          flow.removeVisibilityProductTarget("widget", index)
+        }
         onTitleChange={(value) => {
           flow.setUpsellWidgetTitle(value);
           flow.clearValidationError("widget.title");

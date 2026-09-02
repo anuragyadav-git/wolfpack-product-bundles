@@ -1,7 +1,30 @@
 ---
+schema_version: 1
+id: lcp-and-cls-playbook
 title: LCP and CLS Playbook
 type: operations
-last_audited: 2026-06-27
+status: active
+summary: Defines Wolfpack-specific LCP and CLS targets, measurement ownership, and route optimization guardrails.
+last_audited: 2026-09-01
+owners:
+  - engineering
+domains:
+  - admin
+  - performance
+systems:
+  - remix
+  - app-bridge
+source_paths:
+  - app/routes/app/app.tsx
+  - app/routes/app/app.billing_.plans.tsx
+related_docs:
+  - internal docs/Operations/Admin Performance.md
+tags:
+  - performance
+  - web-vitals
+keywords:
+  - LCP
+  - CLS
 ---
 
 # LCP and CLS Playbook
@@ -47,7 +70,7 @@ This is a Wolfpack-specific adaptation of internal LCP/CLS notes used as a refer
 ### 2a. Route reuse guardrails (deeper code-path pass, 2026-06-27)
 
 - Reuse parent/ancestor loader data for child screens where auth and shop context already exist.
-- For `app.pricing`:
+- For `app.billing_.plans`:
   - avoid a fresh subscription call when cached homepage subscription data exists.
   - check `getCachedSubscriptionInfo(shopDomain)` from an in-process cache first.
   - fall back to one shared fetch path only when cache miss (`getSubscriptionInfoFromCache`).

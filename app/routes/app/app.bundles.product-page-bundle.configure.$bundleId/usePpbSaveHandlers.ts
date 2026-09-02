@@ -299,6 +299,31 @@ export function usePpbSaveHandlers({
         settings.lowStockAlertThreshold,
       );
       formData.append("lowStockAlertMessage", settings.lowStockAlertMessage);
+      formData.append("countdownEnabled", String(settings.countdownEnabled));
+      formData.append("countdownLayout", settings.countdownLayout);
+      formData.append("countdownPosition", settings.countdownPosition);
+      formData.append("countdownTitle", settings.countdownTitle);
+      formData.append("countdownExpiryAction", settings.countdownExpiryAction);
+      formData.append(
+        "countdownExpiredMessage",
+        settings.countdownExpiredMessage,
+      );
+      formData.append(
+        "stickyAddToCartEnabled",
+        String(settings.stickyAddToCartEnabled),
+      );
+      formData.append(
+        "stickyAddToCartShowDesktop",
+        String(settings.stickyAddToCartShowDesktop),
+      );
+      formData.append(
+        "stickyAddToCartShowMobile",
+        String(settings.stickyAddToCartShowMobile),
+      );
+      formData.append(
+        "stickyAddToCartAction",
+        settings.stickyAddToCartAction,
+      );
       formData.append(
         "showTextOnAddButton",
         String(settings.showTextOnAddButton),
@@ -361,8 +386,50 @@ export function usePpbSaveHandlers({
         "offerStopLowerPriority",
         String(base.offerDeliveryState.stopLowerPriority),
       );
+      formData.append("offerScheduleMode", base.offerDeliveryState.scheduleMode);
       formData.append("offerStartsAt", base.offerDeliveryState.startsAt ?? "");
       formData.append("offerEndsAt", base.offerDeliveryState.endsAt ?? "");
+      formData.append(
+        "offerRecurrenceFrequency",
+        base.offerDeliveryState.recurrenceFrequency ?? "",
+      );
+      formData.append(
+        "offerRecurrenceAnchorDate",
+        base.offerDeliveryState.recurrenceAnchorDate ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowStart",
+        base.offerDeliveryState.recurrenceWindowStart ?? "",
+      );
+      formData.append(
+        "offerRecurrenceWindowEnd",
+        base.offerDeliveryState.recurrenceWindowEnd ?? "",
+      );
+      formData.append(
+        "offerRecurrenceTermination",
+        base.offerDeliveryState.recurrenceTermination,
+      );
+      formData.append(
+        "offerRecurrenceEndsOn",
+        base.offerDeliveryState.recurrenceEndsOn ?? "",
+      );
+      formData.append(
+        "offerRecurrenceRunCount",
+        base.offerDeliveryState.recurrenceRunCount == null
+          ? ""
+          : String(base.offerDeliveryState.recurrenceRunCount),
+      );
+      formData.append(
+        "countryTargetingEnabled",
+        String(base.offerDeliveryState.countryTargetingEnabled),
+      );
+      formData.append(
+        "countryTargetingMode",
+        base.offerDeliveryState.countryTargetingMode,
+      );
+      base.offerDeliveryState.countryCodes.forEach((countryCode: string) => {
+        formData.append("countryCodes", countryCode);
+      });
       validation.validateConfigureForm(formData, (validFormData) => {
         base.fetcher.submit(validFormData, { method: "post" });
       });
@@ -413,6 +480,28 @@ export function usePpbSaveHandlers({
     );
     settings.setLowStockAlertMessage(
       settings.originalLowStockAlertMessageRef.current,
+    );
+    settings.setCountdownEnabled(settings.originalCountdownEnabledRef.current);
+    settings.setCountdownLayout(settings.originalCountdownLayoutRef.current);
+    settings.setCountdownPosition(settings.originalCountdownPositionRef.current);
+    settings.setCountdownTitle(settings.originalCountdownTitleRef.current);
+    settings.setCountdownExpiryAction(
+      settings.originalCountdownExpiryActionRef.current,
+    );
+    settings.setCountdownExpiredMessage(
+      settings.originalCountdownExpiredMessageRef.current,
+    );
+    settings.setStickyAddToCartEnabled(
+      settings.originalStickyAddToCartEnabledRef.current,
+    );
+    settings.setStickyAddToCartShowDesktop(
+      settings.originalStickyAddToCartShowDesktopRef.current,
+    );
+    settings.setStickyAddToCartShowMobile(
+      settings.originalStickyAddToCartShowMobileRef.current,
+    );
+    settings.setStickyAddToCartAction(
+      settings.originalStickyAddToCartActionRef.current,
     );
     visibility.setUpsellWidgetEnabled(
       visibility.originalUpsellWidgetEnabledRef.current,

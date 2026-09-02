@@ -7,6 +7,7 @@ import {
 import { openSupportChatWithDraft } from "../../../lib/support-chat.client";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import styles from "./IntegrationsRouteShell.module.css";
+import { translateAdmin, translateAdminCopy } from "~/i18n/config";
 
 type IntegrationGuide = IntegrationCard & { category: string };
 type PolarisModalElement = ElementRef<"s-modal">;
@@ -30,14 +31,19 @@ function IntegrationSetupGuide({
     <s-modal
       ref={modalRef}
       id={`integration-setup-${integration.id}`}
-      heading={integration.title}
+      heading={translateAdminCopy(integration.title)}
       onHide={onClose}
     >
       <s-stack direction="block" gap="base">
         {integration.guideSummary.map((instruction, index) => (
-          <s-stack key={instruction} direction="inline" gap="small" alignItems="start">
+          <s-stack
+            key={instruction}
+            direction="inline"
+            gap="small"
+            alignItems="start"
+          >
             <s-badge>{String(index + 1)}</s-badge>
-            <s-paragraph>{instruction}</s-paragraph>
+            <s-paragraph>{translateAdminCopy(instruction)}</s-paragraph>
           </s-stack>
         ))}
       </s-stack>
@@ -47,12 +53,13 @@ function IntegrationSetupGuide({
 
 function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
-  const [selectedIntegration, setSelectedIntegration] = useState<IntegrationGuide | null>(null);
+  const [selectedIntegration, setSelectedIntegration] =
+    useState<IntegrationGuide | null>(null);
   const integrations = INTEGRATION_CATEGORIES.flatMap((category) =>
     category.cards.map((integration) => ({
       ...integration,
       category: category.title,
-    })),
+    }))
   );
 
   const handleRequestIntegration = () => {
@@ -62,13 +69,11 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
   return (
     <>
       <AdminPageTitleBar
-        title="Integrations"
+        title={translateAdmin("nav.integrations")}
         breadcrumbLabel="Dashboard"
         onBack={onBack}
       />
-      <s-query-container
-        containerName="integrations-page"
-      >
+      <s-query-container containerName="integrations-page">
         <main className={styles.page}>
           <header className={styles.header}>
             <s-stack gap="small">
@@ -76,13 +81,19 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
                 <s-button
                   variant="tertiary"
                   icon="arrow-left"
-                  accessibilityLabel="Back to previous page"
+                  accessibilityLabel={translateAdmin("billing.actions.back")}
                   onClick={onBack}
                 />
-                <s-heading>Integrations Hub</s-heading>
+                <s-heading>
+                  {translateAdmin(
+                    "adminExtracted.appIntegrations.integrationsrouteshell.integrationsHub"
+                  )}
+                </s-heading>
               </s-stack>
               <s-paragraph color="subdued">
-                Connect the tools that support your bundle workflow.
+                {translateAdmin(
+                  "adminExtracted.appIntegrations.integrationsrouteshell.connectTheToolsThatSupportYourBundleWorkflow"
+                )}
               </s-paragraph>
             </s-stack>
             <s-button
@@ -90,11 +101,15 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
               icon="apps"
               onClick={handleRequestIntegration}
             >
-              Request Integration
+              {translateAdmin(
+                "adminExtracted.appIntegrations.integrationsrouteshell.requestIntegration"
+              )}
             </s-button>
           </header>
 
-          <s-section heading="Available integrations">
+          <s-section
+            heading={translateAdmin("adminAttributes.availableIntegrations")}
+          >
             <div className={styles.catalogGrid}>
               {integrations.map((integration) => (
                 <s-box
@@ -111,28 +126,45 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
                           <img
                             className={styles.logoImage}
                             src={integration.logoUrl}
-                            alt={`${integration.title} logo`}
+                            alt={translateAdmin(
+                              "adminDynamic.integrationLogo",
+                              {
+                                name: integration.title,
+                              }
+                            )}
                           />
                         ) : (
                           <s-icon type="product" size="base" />
                         )}
                       </span>
-                      <s-badge tone={integration.status === "Supported" ? "success" : "info"}>
-                        {integration.status}
+                      <s-badge
+                        tone={
+                          integration.status === "Supported"
+                            ? "success"
+                            : "info"
+                        }
+                      >
+                        {translateAdminCopy(integration.status)}
                       </s-badge>
                     </div>
 
                     <div className={styles.cardRow}>
-                      <s-heading>{integration.title}</s-heading>
+                      <s-heading>
+                        {translateAdminCopy(integration.title)}
+                      </s-heading>
                     </div>
 
                     <div className={styles.cardRow}>
-                      <s-text color="subdued">{integration.category}</s-text>
+                      <s-text color="subdued">
+                        {translateAdminCopy(integration.category)}
+                      </s-text>
                     </div>
 
-                    <div className={`${styles.cardRow} ${styles.descriptionRow}`}>
+                    <div
+                      className={`${styles.cardRow} ${styles.descriptionRow}`}
+                    >
                       <s-paragraph color="subdued">
-                        {integration.description}
+                        {translateAdminCopy(integration.description)}
                       </s-paragraph>
                     </div>
 
@@ -141,7 +173,7 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
                         inlineSize="fill"
                         onClick={() => setSelectedIntegration(integration)}
                       >
-                        {integration.ctaLabel}
+                        {translateAdminCopy(integration.ctaLabel)}
                       </s-button>
                     </div>
                   </article>
@@ -161,6 +193,10 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
   );
 }
 
-export default function IntegrationsRouteShell({ onBack }: { onBack: () => void }) {
+export default function IntegrationsRouteShell({
+  onBack,
+}: {
+  onBack: () => void;
+}) {
   return <IntegrationsCatalog onBack={onBack} />;
 }

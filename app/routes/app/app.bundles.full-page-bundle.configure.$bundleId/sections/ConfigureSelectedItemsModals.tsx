@@ -1,4 +1,5 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbSelectedItemsModals({
   flow,
@@ -35,18 +36,21 @@ export function FpbSelectedItemsModals({
   return (
     <>
       {/* Selected Products Modal */}
-      <s-modal ref={productsModalRef} heading="Selected products">
+      <s-modal
+        ref={productsModalRef}
+        heading={translateAdmin("adminAttributes.selectedProducts2")}
+      >
         {(() => {
           const currentStep = stepsState.steps.find(
-            (step) => step.id === currentModalStepId,
+            (step) => step.id === currentModalStepId
           );
           const selectedProducts = currentStep?.StepProduct || [];
           return selectedProducts.length > 0 ? (
             <s-stack direction="block" gap="small">
               <p style={{ margin: 0, fontSize: 14, fontWeight: 500 }}>
-                {selectedProducts.length} product
-                {selectedProducts.length !== 1 ? "s" : ""} selected in this
-                step.
+                {translateAdmin("adminDynamic.selectedProductsInStep", {
+                  count: selectedProducts.length,
+                })}
               </p>
               <ul
                 style={{
@@ -107,14 +111,19 @@ export function FpbSelectedItemsModals({
                                 color: "#6d7175",
                               }}
                             >
-                              {product.variants.length} variant
-                              {product.variants.length !== 1 ? "s" : ""}
-                              available
+                              {translateAdmin(
+                                "adminDynamic.variantsAvailable",
+                                { count: product.variants.length }
+                              )}
                             </p>
                           )}
                         </s-stack>
                       </s-stack>
-                      <s-badge tone="info">Product</s-badge>
+                      <s-badge tone="info">
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.product"
+                        )}
+                      </s-badge>
                     </li>
                   );
                 })}
@@ -122,7 +131,9 @@ export function FpbSelectedItemsModals({
             </s-stack>
           ) : (
             <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-              No products selected for this step yet.
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.noProductsSelectedForThisStepYet"
+              )}
             </p>
           );
         })()}
@@ -131,13 +142,13 @@ export function FpbSelectedItemsModals({
           variant="primary"
           onClick={handleCloseProductsModal}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
       </s-modal>
       <s-modal
         id="addon-selected-products-modal"
         ref={addonSelectedProductsModalRef}
-        heading="Selected Products"
+        heading={translateAdmin("adminAttributes.selectedProducts")}
       >
         {(() => {
           const addonTiers = Array.isArray(addonDraft.addonTiers)
@@ -146,7 +157,7 @@ export function FpbSelectedItemsModals({
           const tierIndex = addonSelectedProductsTierIndex ?? 0;
           const tier = addonTiers[tierIndex] ?? addonTiers[0];
           const selectedAddonProducts = Array.isArray(
-            tier?.selectedAddonProducts,
+            tier?.selectedAddonProducts
           )
             ? tier.selectedAddonProducts
             : [];
@@ -161,7 +172,9 @@ export function FpbSelectedItemsModals({
                     <button
                       type="button"
                       className={fullPageBundleStyles.addonSelectedProductDrag}
-                      aria-label={`Reorder ${product.title || "selected product"}`}
+                      aria-label={`Reorder ${
+                        product.title || "selected product"
+                      }`}
                     >
                       ::
                     </button>
@@ -175,12 +188,16 @@ export function FpbSelectedItemsModals({
                       className={
                         fullPageBundleStyles.addonSelectedProductRemove
                       }
-                      aria-label={`Remove ${product.title || "selected product"}`}
+                      aria-label={`Remove ${
+                        product.title || "selected product"
+                      }`}
                       onClick={() =>
                         handleAddonSelectedProductRemove(tierIndex, index)
                       }
                     >
-                      x
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.x"
+                      )}
                     </button>
                   </li>
                 ))}
@@ -188,7 +205,9 @@ export function FpbSelectedItemsModals({
             </s-stack>
           ) : (
             <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-              No products selected for this tier yet.
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.noProductsSelectedForThisTierYet"
+              )}
             </p>
           );
         })()}
@@ -199,7 +218,7 @@ export function FpbSelectedItemsModals({
           command="--hide"
           onClick={handleCloseAddonSelectedProductsModal}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
         <s-button
           slot="primary-action"
@@ -211,18 +230,24 @@ export function FpbSelectedItemsModals({
             })
           }
         >
-          Add Products
+          {translateAdmin(
+            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
+          )}
         </s-button>
       </s-modal>
       {/* Selected Collections Modal */}
-      <s-modal ref={collectionsModalRef} heading="Selected collections">
+      <s-modal
+        ref={collectionsModalRef}
+        heading={translateAdmin("adminAttributes.selectedCollections2")}
+      >
         {(() => {
           const collections = selectedCollections[currentModalStepId] || [];
           return collections.length > 0 ? (
             <s-stack direction="block" gap="small">
               <p style={{ margin: 0, fontSize: 14, fontWeight: 500 }}>
-                {collections.length} collection
-                {collections.length !== 1 ? "s" : ""} selected in this step.
+                {translateAdmin("adminDynamic.selectedCollectionsInStep", {
+                  count: collections.length,
+                })}
               </p>
               <ul
                 style={{
@@ -254,18 +279,26 @@ export function FpbSelectedItemsModals({
                         <p
                           style={{ margin: 0, fontSize: 12, color: "#6d7175" }}
                         >
-                          Handle: {collection.handle}
+                          {translateAdmin("adminDynamic.collectionHandle", {
+                            handle: collection.handle,
+                          })}
                         </p>
                       )}
                     </s-stack>
-                    <s-badge tone="success">Collection</s-badge>
+                    <s-badge tone="success">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.collection"
+                      )}
+                    </s-badge>
                   </li>
                 ))}
               </ul>
             </s-stack>
           ) : (
             <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-              No collections selected for this step yet.
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.noCollectionsSelectedForThisStepYet"
+              )}
             </p>
           );
         })()}
@@ -274,20 +307,21 @@ export function FpbSelectedItemsModals({
           variant="primary"
           onClick={handleCloseCollectionsModal}
         >
-          Close
+          {translateAdmin("dashboard.storefrontSetup.close")}
         </s-button>
       </s-modal>
       {/* Template Variables Modal */}
       <s-modal
         id="template-variables-modal"
         ref={templateVariablesModalRef}
-        heading="Message variables"
+        heading={translateAdmin("adminAttributes.messageVariables")}
         size="small"
       >
         <s-stack direction="block" gap="small">
           <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            Use these variables in Only Bundles messages. The widget
-            replaces them with live bundle and discount values.
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.useTheseVariablesInOnlyBundlesMessagesTheWidgetReplacesThemWithL"
+            )}
           </p>
           <div className={fullPageBundleStyles.templateVariableGrid}>
             {TEMPLATE_VARIABLES.map(([variable, description]: any) => (
@@ -309,13 +343,13 @@ export function FpbSelectedItemsModals({
           command="--hide"
           onClick={() => hidePolarisModal(templateVariablesModalRef)}
         >
-          Done
+          {translateAdmin("dashboard.storefrontSetup.enableModal.done")}
         </s-button>
       </s-modal>
       <s-modal
         id="discount-variables-modal"
         ref={discountVariablesModalRef}
-        heading="Variables"
+        heading={translateAdmin("adminAttributes.variables")}
         size="base"
       >
         <div>
@@ -335,44 +369,50 @@ export function FpbSelectedItemsModals({
       <s-modal
         id="addon-variables-modal"
         ref={addonVariablesModalRef}
-        heading="Variables"
+        heading={translateAdmin("adminAttributes.variables")}
         size="base"
       >
         <div>
-          {ADDON_TEMPLATE_VARIABLES.map(([variable, description]: any, index) => (
-            <div key={variable}>
-              {index > 0 && <s-divider />}
-              <div className={fullPageBundleStyles.discountVariableRow}>
-                <s-text color="subdued">{description}</s-text>
-                <span className={fullPageBundleStyles.discountVariableCode}>
-                  {variable}
-                </span>
+          {ADDON_TEMPLATE_VARIABLES.map(
+            ([variable, description]: any, index) => (
+              <div key={variable}>
+                {index > 0 && <s-divider />}
+                <div className={fullPageBundleStyles.discountVariableRow}>
+                  <s-text color="subdued">{description}</s-text>
+                  <span className={fullPageBundleStyles.discountVariableCode}>
+                    {variable}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </s-modal>
       <s-modal
         id="disable-addon-step-modal"
         ref={disableAddonStepModalRef}
-        heading="Disable Personalization Step"
+        heading={translateAdmin("adminAttributes.disablePersonalizationStep")}
         size="small"
       >
         <p style={{ margin: 0, fontSize: 14 }}>
-          This will disable the add-ons step. Are you sure you want to disable?
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.thisWillDisableTheAddOnsStepAreYouSureYouWantToDisable"
+          )}
         </p>
         <s-button
           slot="secondary-actions"
           onClick={() => setIsDisableAddonStepModalOpen(false)}
         >
-          Cancel
+          {translateAdmin("dashboard.deleteModal.cancel")}
         </s-button>
         <s-button
           slot="primary-action"
           variant="primary"
           onClick={handleDisableAddonStepConfirm}
         >
-          Yes
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.configureselecteditemsmodals.yes"
+          )}
         </s-button>
       </s-modal>
     </>

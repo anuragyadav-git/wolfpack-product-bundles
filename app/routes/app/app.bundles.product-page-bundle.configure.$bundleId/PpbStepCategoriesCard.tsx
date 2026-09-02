@@ -1,6 +1,7 @@
 import { PpbCategoryAccordion } from "./PpbCategoryAccordion";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { getStepCategories } from "./PpbStepSetupShared";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbStepCategoriesCard({ step }: { step: any }) {
   const {
@@ -21,7 +22,9 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
           marginBottom: 4,
         }}
       >
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Category</h3>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+          {translateAdmin("tooltips.category.title")}
+        </h3>
         <QuestionHelpTooltip tooltipKey="category" />
       </div>
       <p
@@ -31,12 +34,15 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
           color: "#6d7175",
         }}
       >
-        Add all product selections in this step to a single category or separate
-        them into multiple categories for better segregation.
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategorycard.addAllProductSelectionsInThisStepToASingleCategoryOrSeparateThem"
+        )}
       </p>
       {stepCategories.length === 0 && (
         <div className={productPageBundleStyles.emptyState}>
-          No category defined yet
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategorycard.noCategoryDefinedYet"
+          )}
         </div>
       )}
       {stepCategories.map((cat: any, catIndex: number) => (
@@ -55,7 +61,7 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
             stepCategories.length > 0 &&
             stepCategories.every(
               (category: any) =>
-                category.displayVariantsAsIndividualProducts === true,
+                category.displayVariantsAsIndividualProducts === true
             );
           stepsState.updateStepField(step.id, "StepCategory", [
             ...stepCategories,
@@ -75,8 +81,12 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
           markAsDirty();
         }}
       >
-        <span aria-hidden="true"><s-icon type="plus" /></span>
-        Add Category
+        <span aria-hidden="true">
+          <s-icon type="plus" />
+        </span>
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
+        )}
       </button>
     </div>
   );

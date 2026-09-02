@@ -1,6 +1,8 @@
 import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DefaultProductDiscountTipBanner } from "../../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
+import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
+import { translateAdmin } from "~/i18n/config";
 
 export function FpbDefaultProductsSettings({
   flow,
@@ -46,8 +48,8 @@ export function FpbDefaultProductsSettings({
                 (
                   value: Parameters<
                     typeof buildDefaultProductEntryFromPicker
-                  >[0],
-                ) => buildDefaultProductEntryFromPicker(value),
+                  >[0]
+                ) => buildDefaultProductEntryFromPicker(value)
               )
               .filter(
                 (
@@ -75,10 +77,13 @@ export function FpbDefaultProductsSettings({
                     flex: 1,
                   }}
                 >
-                  Pre Selected Product
+                  {translateAdmin("tooltips.preselectedProducts.title")}
+                  <ConfigureHelpPopover tooltipKey="preselectedProducts" />
                 </h3>
                 <s-switch
-                  accessibilityLabel="Enable pre selected product"
+                  accessibilityLabel={translateAdmin(
+                    "adminAttributes.enablePreSelectedProduct"
+                  )}
                   checked={defaultProductsEnabled || undefined}
                   onChange={(e) => {
                     const checked = (e.target as HTMLInputElement).checked;
@@ -95,11 +100,15 @@ export function FpbDefaultProductsSettings({
               <DisabledConfigurationRegion disabled={!defaultProductsEnabled}>
                 <s-stack direction="block" gap="small">
                   <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
-                    Choose products that should be added to bundle by default
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsdefaultproducts.chooseProductsThatShouldBeAddedToBundleByDefault"
+                    )}
                   </p>
                   <DefaultProductDiscountTipBanner />
                   <s-text-field
-                    label="Default products title"
+                    label={translateAdmin(
+                      "adminAttributes.defaultProductsTitle"
+                    )}
                     value={defaultProductsData.defaultProductsTitle ?? ""}
                     disabled={!defaultProductsEnabled || undefined}
                     onInput={(e) => {
@@ -120,7 +129,9 @@ export function FpbDefaultProductsSettings({
                         fontWeight: 600,
                       }}
                     >
-                      Choose default products
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsdefaultproducts.chooseDefaultProducts"
+                      )}
                     </p>
                     <s-stack direction="inline" alignItems="center" gap="small">
                       <s-button
@@ -131,11 +142,15 @@ export function FpbDefaultProductsSettings({
                         disabled={!defaultProductsEnabled || undefined}
                         onClick={handleDefaultProductPicker}
                       >
-                        Browse Products
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsdefaultproducts.browseProducts"
+                        )}
                       </s-button>
                       {defaultProductCount > 0 && (
                         <s-badge tone="success">
-                          {defaultProductCount} selected
+                          {translateAdmin("adminDynamic.selectedCount", {
+                            count: defaultProductCount,
+                          })}
                         </s-badge>
                       )}
                     </s-stack>

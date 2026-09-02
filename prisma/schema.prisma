@@ -107,6 +107,16 @@ model Bundle {
   lowStockAlertEnabled                 Boolean           @default(false) // Show truthful component-variant low-stock messaging
   lowStockAlertThreshold               Int               @default(5) // Inclusive Shopify sellable-quantity threshold
   lowStockAlertMessage                 String            @default("Only {{stock}} left") // Merchant copy; must include {{stock}}
+  stickyAddToCartEnabled               Boolean           @default(false) // Show the PPB floating bundle action
+  stickyAddToCartShowDesktop           Boolean           @default(true)
+  stickyAddToCartShowMobile            Boolean           @default(true)
+  stickyAddToCartAction                String            @default("scroll_to_offers") // scroll_to_offers | add_selected_offer
+  countdownEnabled                     Boolean           @default(false) // Presentation only; deadline is OfferPolicy.endsAt
+  countdownLayout                      String            @default("compact") // compact | full
+  countdownPosition                    String            @default("above") // above | below
+  countdownTitle                       String            @default("")
+  countdownExpiryAction                String            @default("hide") // hide | show_zeros | show_message
+  countdownExpiredMessage              String            @default("")
   // Per-bundle text overrides
   textOverrides                        Json? // { addToCartButton, nextButton, doneButton, freeBadge, includedBadge, yourBundle, addingToCart, completeSteps }
   textOverridesByLocale                Json? // { "fr": { addToCartButton: "Ajouter au panier", ... }, ... }
@@ -286,36 +296,70 @@ enum OfferConditionType {
   specific_link
 }
 
+enum OfferCountryTargetingMode {
+  include
+  exclude
+}
+
+enum OfferScheduleMode {
+  always
+  one_time
+  recurring
+}
+
+enum OfferRecurrenceFrequency {
+  weekly
+  monthly
+}
+
+enum OfferRecurrenceTermination {
+  never
+  on_date
+  after_runs
+}
+
 model OfferPolicy {
-  id                   String           @id @default(cuid())
-  shopId               String
-  bundleId             String           @unique
-  bundle               Bundle           @relation(fields: [bundleId], references: [id], onDelete: Cascade)
-  specificLinkRequired Boolean          @default(false)
-  priority             Int              @default(100)
-  stopLowerPriority    Boolean          @default(false)
-  startsAt             DateTime?
-  endsAt               DateTime?
-  ruleVersion          Int              @default(1)
-  conditions           OfferCondition[]
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
+  id                          String                     @id @default(cuid())
+  shopId                      String
+  bundleId                    String                     @unique
+  bundle                      Bundle                     @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  specificLinkRequired        Boolean                    @default(false)
+  priority                    Int                        @default(100)
+  stopLowerPriority           Boolean                    @default(false)
+  scheduleMode                OfferScheduleMode          @default(always)
+  startsAt                    DateTime?
+  endsAt                      DateTime?
+  recurrenceFrequency         OfferRecurrenceFrequency?
+  recurrenceTimezone          String?
+  recurrenceAnchorDate        DateTime?                  @db.Date
+  recurrenceWindowStartMinute Int?
+  recurrenceWindowEndMinute   Int?
+  recurrenceTermination       OfferRecurrenceTermination @default(never)
+  recurrenceEndsOn            DateTime?                  @db.Date
+  recurrenceRunCount          Int?
+  countryTargetingEnabled     Boolean                    @default(false)
+  countryTargetingMode        OfferCountryTargetingMode  @default(include)
+  countryCodes                String[]
+  ruleVersion                 Int                        @default(1)
+  conditions                  OfferCondition[]
+  createdAt                   DateTime                   @default(now())
+  updatedAt                   DateTime                   @updatedAt
 
   @@index([shopId, specificLinkRequired])
   @@index([shopId, priority])
 }
 
 model OfferCondition {
-  id              String             @id @default(cuid())
-  offerPolicyId   String
-  offerPolicy     OfferPolicy        @relation(fields: [offerPolicyId], references: [id], onDelete: Cascade)
-  type            OfferConditionType
-  position        Int                @default(0)
-  tokenHash       String             @unique
-  expiresAt       DateTime?
-  revokedAt       DateTime?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  id            String             @id @default(cuid())
+  offerPolicyId String
+  offerPolicy   OfferPolicy        @relation(fields: [offerPolicyId], references: [id], onDelete: Cascade)
+  type          OfferConditionType
+  position      Int                @default(0)
+  tokenHash     String             @unique
+  expiresAt     DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
   @@unique([offerPolicyId, type])
   @@index([offerPolicyId, position])
@@ -583,7 +627,6 @@ model Shop {
   firstCreateTourEligible Boolean        @default(false) // True only for newly installed shops until their first create flow
   lastFpbPublicNumber     Int            @default(0) // Atomically incremented when an FPB is created
   subscriptions           Subscription[] // Subscription history
-  adminLocale             String? // Shop-wide embedded Admin UI language preference; null defaults to English
   customUtmParameters     Json           @default("[]") // Merchant-configured query parameters captured by the UTM pixel
   createdAt               DateTime       @default(now())
   updatedAt               DateTime       @updatedAt

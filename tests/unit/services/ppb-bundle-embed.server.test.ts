@@ -50,8 +50,33 @@ describe("selectEligiblePpbBundleEmbed", () => {
       bundle({ offerPolicy: { priority: 20 } }),
       bundle({ id: "bundle-z", offerPolicy: { priority: 10 } }),
       bundle({ id: "bundle-a", offerPolicy: { priority: 10 } }),
-      bundle({ id: "future", offerPolicy: { priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
+      bundle({ id: "future", offerPolicy: { scheduleMode: "one_time", priority: 1, startsAt: "2026-09-01T00:00:00.000Z" } }),
     ], { productId: "123", productHandle: "sample", collectionIds: [], locale: "fr-CA", now: new Date("2026-08-31T12:00:00.000Z") });
     expect(result).toMatchObject({ title: "Construisez", subTitle: "Choisissez", preselectBrowsedProduct: true, bundle: { id: "bundle-a" } });
+  });
+
+  it("filters embeds against the Shopify-selected country", () => {
+    const targeted = bundle({
+      offerPolicy: {
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: "exclude",
+        countryCodes: ["US"],
+      },
+    });
+    expect(selectEligiblePpbBundleEmbed([targeted], {
+      productId: "123",
+      productHandle: "sample",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "US",
+    })).toBeNull();
+    expect(selectEligiblePpbBundleEmbed([targeted], {
+      productId: "123",
+      productHandle: "sample",
+      collectionIds: [],
+      locale: "en",
+      countryCode: "CA",
+    })).not.toBeNull();
   });
 });

@@ -1,4 +1,5 @@
 import { processCss } from "../../../../lib/css-sanitizer";
+import { parseCountdownSettings } from "../../../../lib/bundle-countdown";
 import { parseLowStockAlertSettings } from "../../../../lib/low-stock-alert";
 
 function str(formData: FormData, key: string): string | null {
@@ -18,6 +19,11 @@ function int(formData: FormData, key: string): number | null {
   if (typeof val !== "string" || val.trim() === "") return null;
   const parsed = parseInt(val, 10);
   return isNaN(parsed) ? null : parsed;
+}
+
+function stickyAddToCartAction(formData: FormData) {
+  const action = str(formData, "stickyAddToCartAction");
+  return action === "add_selected_offer" ? action : "scroll_to_offers";
 }
 
 function jsonObject<T extends Record<string, unknown> | null>(
@@ -96,6 +102,23 @@ export function parsePPBBundleSettings(formData: FormData) {
       "useSingleStepCategoriesAsBundleSteps",
       false,
     ),
+    stickyAddToCartEnabled: bool(
+      formData,
+      "stickyAddToCartEnabled",
+      false,
+    ),
+    stickyAddToCartShowDesktop: bool(
+      formData,
+      "stickyAddToCartShowDesktop",
+      true,
+    ),
+    stickyAddToCartShowMobile: bool(
+      formData,
+      "stickyAddToCartShowMobile",
+      true,
+    ),
+    stickyAddToCartAction: stickyAddToCartAction(formData),
+    ...parseCountdownSettings(formData),
     ...parseLowStockAlertSettings(formData),
   };
 }

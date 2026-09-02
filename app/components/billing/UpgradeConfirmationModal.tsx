@@ -18,7 +18,7 @@ type PolarisModalRef = {
 
 export function syncUpgradeConfirmationModal(
   modalRef: PolarisModalRef,
-  open: boolean,
+  open: boolean
 ): void {
   if (open) {
     modalRef.current?.showOverlay?.();
@@ -66,9 +66,7 @@ export function UpgradeConfirmationModal({
       </s-button>
 
       <s-stack direction="block" gap="base">
-        <s-paragraph>
-          {t("billing.upgradeModal.redirect")}
-        </s-paragraph>
+        <s-paragraph>{t("billing.upgradeModal.redirect")}</s-paragraph>
 
         <s-stack direction="block" gap="small">
           <h3 className={brandStyles.sectionTitle}>
@@ -76,7 +74,12 @@ export function UpgradeConfirmationModal({
           </h3>
           <s-stack direction="block" gap="small-100">
             {benefits.map((benefit, index) => (
-              <s-stack key={index} direction="inline" alignItems="center" gap="small-100">
+              <s-stack
+                key={index}
+                direction="inline"
+                alignItems="center"
+                gap="small-100"
+              >
                 <div className={brandStyles.check}>
                   <s-icon type="check" />
                 </div>
@@ -89,7 +92,9 @@ export function UpgradeConfirmationModal({
         <s-divider />
 
         <s-stack direction="inline" justifyContent="space-between">
-          <s-text tone="neutral" color="subdued">{t("billing.upgradeModal.managedByShopify")}</s-text>
+          <s-text tone="neutral" color="subdued">
+            {t("billing.upgradeModal.managedByShopify")}
+          </s-text>
         </s-stack>
       </s-stack>
     </s-modal>

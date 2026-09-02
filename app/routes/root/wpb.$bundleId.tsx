@@ -12,6 +12,7 @@ import {
 } from "../../lib/fpb-loading-screen";
 import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
 import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
+import { buildOfferCountryLiquidGuard } from "../../lib/offer-country-liquid-guard.server";
 
 function escapeHtmlAttribute(value: string): string {
   return value
@@ -174,7 +175,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const loadingGifAttr = loadingScreen.gifUrl
     ? ` data-fpb-loading-gif="${escapeHtmlAttribute(loadingScreen.gifUrl)}"`
     : "";
-  const liquid = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-fpb-loading-background="${escapeHtmlAttribute(loadingScreen.backgroundColor)}"${loadingGifAttr}${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${loadingScreenMarkup}</div>`;
+  const marker = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-country-code="{{ localization.country.iso_code }}" data-fpb-loading-background="${escapeHtmlAttribute(loadingScreen.backgroundColor)}"${loadingGifAttr}${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${loadingScreenMarkup}</div>`;
+  const liquid = hasValidDraftPreview
+    ? marker
+    : buildOfferCountryLiquidGuard(marker, bundle.offerPolicy);
 
   AppLogger.info("FPB proxy page rendered", {
     component: "wpb.proxy",

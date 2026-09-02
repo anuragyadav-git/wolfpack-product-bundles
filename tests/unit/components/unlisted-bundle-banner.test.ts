@@ -42,7 +42,7 @@ describe("buildShopifyProductAdminUrl", () => {
     expect(buildShopifyProductAdminUrl("s.myshopify.com", "")).toBeNull();
   });
 
-  it("renders ordinary loading status without a Manage action", () => {
+  it("renders parent product loading as an informational banner without a Manage action", () => {
     const view = renderToStaticMarkup(
       React.createElement(UnlistedBundleBanner, {
         shop: "s.myshopify.com",
@@ -52,8 +52,10 @@ describe("buildShopifyProductAdminUrl", () => {
       }),
     );
 
+    expect(view).toContain('<s-banner tone="info" heading="common.parentProductStatus.loadingTitle" dismissible="true"');
     expect(view).toContain("<s-spinner");
     expect(view).toContain("common.parentProductStatus.loadingTitle");
+    expect(view).toContain("common.parentProductStatus.loadingBody");
     expect(view).not.toContain("common.actions.manage");
   });
 

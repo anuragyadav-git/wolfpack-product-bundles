@@ -40,23 +40,20 @@ export function KpiTile({
 }: KpiTileProps) {
   const sparkData = useMemo(
     () => (sparkline ?? []).map((v, i) => ({ i, v })),
-    [sparkline],
+    [sparkline]
   );
 
   const valueClass =
     size === "hero"
       ? "wpb-display-num"
       : size === "small"
-        ? "wpb-numeric wpb-numeric--small"
-        : "wpb-numeric";
+      ? "wpb-numeric wpb-numeric--small"
+      : "wpb-numeric";
 
   return (
     <div className="wpb-card wpb-kpi-card">
       <span className="wpb-label">{label}</span>
-      <span
-        className={valueClass}
-        data-accent={accent}
-      >
+      <span className={valueClass} data-accent={accent}>
         {value}
       </span>
       {(delta || hint) && (
@@ -64,25 +61,52 @@ export function KpiTile({
           {delta && (
             <span
               className={`wpb-delta wpb-delta--${delta.direction}`}
-              aria-label={`${delta.direction === "pos" ? "Up" : delta.direction === "neg" ? "Down" : "Flat"} ${delta.text}`}
+              aria-label={`${
+                delta.direction === "pos"
+                  ? "Up"
+                  : delta.direction === "neg"
+                  ? "Down"
+                  : "Flat"
+              } ${delta.text}`}
             >
-              <span aria-hidden>{delta.direction === "pos" ? "▴" : delta.direction === "neg" ? "▾" : "·"}</span>
+              <span aria-hidden>
+                {delta.direction === "pos"
+                  ? "▴"
+                  : delta.direction === "neg"
+                  ? "▾"
+                  : "·"}
+              </span>
               {delta.text}
             </span>
           )}
-          {hint && (
-            <span className="wpb-muted-micro">{hint}</span>
-          )}
+          {hint && <span className="wpb-muted-micro">{hint}</span>}
         </div>
       )}
       {sparkline && sparkline.length > 1 && (
         <div className="wpb-sparkline">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={sparkData} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
+            <AreaChart
+              data={sparkData}
+              margin={{ top: 4, right: 4, bottom: 0, left: 4 }}
+            >
               <defs>
-                <linearGradient id={`spark-${label.replace(/\s+/g, "-")}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={KPI_ACCENT_VAR[accent]} stopOpacity={0.45} />
-                  <stop offset="100%" stopColor={KPI_ACCENT_VAR[accent]} stopOpacity={0} />
+                <linearGradient
+                  id={`spark-${label.replace(/\s+/g, "-")}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="0%"
+                    stopColor={KPI_ACCENT_VAR[accent]}
+                    stopOpacity={0.45}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={KPI_ACCENT_VAR[accent]}
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <Area

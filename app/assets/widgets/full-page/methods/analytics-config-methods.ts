@@ -498,9 +498,17 @@ async loadBundleData() {
         // Use Shopify app proxy path - Shopify automatically adds signature and auth params
         // App proxy config: /apps/product-bundles -> https://wolfpack-product-bundle-app.onrender.com
         // CRITICAL: URL-encode bundle ID to handle special characters in cuid() format
-        const apiUrl = buildStorefrontApiPath(
+        const apiPath = buildStorefrontApiPath(
           `bundle/${encodeURIComponent(bundleId)}.json`,
         );
+        const countryCode = String(
+          this.container.dataset.countryCode
+          || (window as Window & { currentCountryCode?: string }).currentCountryCode
+          || '',
+        ).trim().toUpperCase();
+        const apiUrl = countryCode
+          ? `${apiPath}?country=${encodeURIComponent(countryCode)}`
+          : apiPath;
 
         const response = await fetch(apiUrl);
 

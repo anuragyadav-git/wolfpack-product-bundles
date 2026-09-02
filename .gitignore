@@ -57,3 +57,4 @@ graphify-out/caches/
 graphify-out/.cache/
 graphify-out/tmp/
 .agents/skills/storefront-design-director-workspace/
+.crowdin/

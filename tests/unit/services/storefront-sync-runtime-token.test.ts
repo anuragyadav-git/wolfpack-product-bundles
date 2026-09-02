@@ -12,10 +12,6 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
-jest.mock("../../../app/inngest/client", () => ({
-  inngest: { send: jest.fn() },
-}));
-
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(),

@@ -194,6 +194,59 @@ describe("formatBundleForWidget", () => {
     });
   });
 
+  it("emits the direct sticky add-to-cart storefront contract", () => {
+    const configured = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+      stickyAddToCartEnabled: true,
+      stickyAddToCartShowDesktop: false,
+      stickyAddToCartShowMobile: true,
+      stickyAddToCartAction: "add_selected_offer",
+    }) as any);
+    const defaults = formatBundleForWidget(makeBundle({
+      bundleType: "product_page",
+    }) as any);
+
+    expect(configured.stickyAddToCart).toEqual({
+      enabled: true,
+      showDesktop: false,
+      showMobile: true,
+      action: "add_selected_offer",
+    });
+    expect(defaults.stickyAddToCart).toEqual({
+      enabled: false,
+      showDesktop: true,
+      showMobile: true,
+      action: "scroll_to_offers",
+    });
+  });
+
+  it("emits countdown presentation with OfferPolicy.endsAt as its only deadline", () => {
+    const result = formatBundleForWidget(makeBundle({
+      countdownEnabled: true,
+      countdownLayout: "full",
+      countdownPosition: "below",
+      countdownTitle: "Ends soon",
+      countdownExpiryAction: "show_message",
+      countdownExpiredMessage: "This offer has ended",
+      offerPolicy: {
+        id: "policy-1",
+        ruleVersion: 1,
+        specificLinkRequired: false,
+        startsAt: null,
+        endsAt: new Date("2030-01-02T03:04:05.000Z"),
+      },
+    }) as any);
+
+    expect(result.countdown).toEqual({
+      layout: "full",
+      position: "below",
+      title: "Ends soon",
+      expiryAction: "show_message",
+      expiredMessage: "This offer has ended",
+      endsAt: "2030-01-02T03:04:05.000Z",
+    });
+  });
+
   it("keeps product-page compare-at visibility enabled despite a stale persisted setting", () => {
     const result = formatBundleForWidget(makeBundle({
       bundleType: "product_page",

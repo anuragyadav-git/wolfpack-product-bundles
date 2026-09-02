@@ -5,7 +5,7 @@ title: BOGOS Personalization, Analytics, and Offer Operations
 type: competitor-analysis
 status: current
 summary: Documents installed-app and vendor evidence for BOGOS targeting, analytics, prioritization, scheduling, and bulk offer operations, with Shopify and Wolfpack implications.
-last_audited: 2026-08-30
+last_audited: 2026-09-01
 owners:
   - product
   - engineering
@@ -52,7 +52,7 @@ keywords:
 
 BOGOS has the stronger operational offer engine of the two competitors studied. Its most reusable ideas are a composable eligibility builder, an explicit conflict priority, scheduled lifecycle states, CSV-scale maintenance, and an offer-centric analytics surface. The installed free plan proved link, tag, location, market, scheduling, and analytics controls. Purchase-history targeting and priority editing were visibly present but plan-locked, so their detailed behavior is supported by BOGOS documentation rather than a live saved execution.
 
-Wolfpack already has stronger bundle-funnel and campaign-attribution plumbing than BOGOS exposed in the empty account. It does not yet have a general offer eligibility model, offer priority, recurring schedules, or offer import/export. The recommended direction is therefore to add BOGOS-like operations around Wolfpack's existing bundle/config/runtime contracts, not replace Wolfpack Analytics with a clone of BOGOS's dashboard.
+Wolfpack already has stronger bundle-funnel and campaign-attribution plumbing than BOGOS exposed in the empty account. The adopted implementation now adds normalized storefront priority, one-time and recurring schedules, country/link eligibility, and strict CSV operations around Wolfpack's existing bundle/config/runtime contracts rather than replacing Wolfpack Analytics with a clone of BOGOS's dashboard. Customer-tag and purchase-history targeting remain deferred behind the protected-data gate.
 
 ## Research method and confidence
 
@@ -118,12 +118,18 @@ Recommended Wolfpack boundary:
 
 ### Location and Markets
 
-BOGOS separates IP-country targeting from Shopify Markets. Wolfpack should preserve that distinction:
+BOGOS separates IP-country targeting from Shopify Markets. Current Shopify
+guidance changes the recommended Wolfpack implementation boundary:
 
-- **Market targeting** uses Shopify's buyer market/localization context and follows the merchant's market configuration.
-- **Country targeting** uses the effective storefront country where available. If an external IP service is used, it introduces consent, accuracy, VPN, caching, and data-processing concerns and should be a later opt-in capability.
+- **Country targeting** uses `localization.country.iso_code`, Shopify's effective storefront country context. It needs no `read_markets` or protected-customer scope.
+- **IP-country targeting** is rejected for the first implementation. It adds consent, accuracy, VPN, caching, and data-processing concerns while duplicating Shopify's localization surface.
+- **Market IDs and handles are not persisted for buyer targeting.** Shopify now warns that nested markets make those identifiers unstable because deprecated single-market surfaces return only the most-specific match.
 
-Shopify describes a Market as a group of buyers matched by conditions and applies the most specific matching market. A buyer may match more than one market. That makes a stable market identifier safer than persisting a display name. A location rule should also define its behavior when country is unknown rather than silently treating unknown as excluded.
+The first direct persistence contract therefore stores include/exclude mode plus
+canonical uppercase ISO country codes. An include rule fails closed when the
+country is unknown; an exclude rule remains eligible. Checkout enforcement
+must independently use Shopify Function localization rather than trusting a
+browser-supplied country or eligibility flag.
 
 ### Admin design lessons
 
@@ -249,7 +255,7 @@ Recommended Wolfpack schedule contract:
 - record schedule transition events with idempotency keys;
 - show next run and next stop in Admin.
 
-`QueuedJob` currently supports only `publish`, `unpublish`, and `sync`. It can participate in one-shot transitions, but recurring schedules need a schedule model and a durable scheduler/reconciliation strategy rather than placing an unbounded series of opaque jobs in `data`.
+The adopted runtime evaluates normalized weekly/monthly rules at request time with a maintained Temporal implementation, so correctness does not depend on queued transition jobs. Shopify's `shop.ianaTimezone` is the sole timezone authority. Monthly dates are skipped rather than clamped when a month does not contain the anchor day, and invalid stored rules fail closed. Jobs remain appropriate only for future cache warming or reconciliation when evidence shows they are needed.
 
 ### Import and export
 

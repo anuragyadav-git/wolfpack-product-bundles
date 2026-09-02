@@ -85,6 +85,25 @@ export function usePpbFetcherEffects({
             settings.lowStockAlertThreshold;
           settings.originalLowStockAlertMessageRef.current =
             settings.lowStockAlertMessage;
+          settings.originalCountdownEnabledRef.current =
+            settings.countdownEnabled;
+          settings.originalCountdownLayoutRef.current =
+            settings.countdownLayout;
+          settings.originalCountdownPositionRef.current =
+            settings.countdownPosition;
+          settings.originalCountdownTitleRef.current = settings.countdownTitle;
+          settings.originalCountdownExpiryActionRef.current =
+            settings.countdownExpiryAction;
+          settings.originalCountdownExpiredMessageRef.current =
+            settings.countdownExpiredMessage;
+          settings.originalStickyAddToCartEnabledRef.current =
+            settings.stickyAddToCartEnabled;
+          settings.originalStickyAddToCartShowDesktopRef.current =
+            settings.stickyAddToCartShowDesktop;
+          settings.originalStickyAddToCartShowMobileRef.current =
+            settings.stickyAddToCartShowMobile;
+          settings.originalStickyAddToCartActionRef.current =
+            settings.stickyAddToCartAction;
           visibility.originalUpsellWidgetEnabledRef.current =
             visibility.upsellWidgetEnabled;
           visibility.originalUpsellWidgetDisplayModeRef.current =

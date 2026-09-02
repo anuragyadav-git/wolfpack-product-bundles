@@ -32,22 +32,28 @@ export function EnablePreviewModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className={styles.iconFrame}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#555"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
           </svg>
         </div>
-        <h2
-          id="enable-preview-modal-title"
-          className={styles.title}
-        >
+        <h2 id="enable-preview-modal-title" className={styles.title}>
           {t("common.previewGate.title")}
         </h2>
-        <p className={styles.body}>
-          {t("common.previewGate.body")}
-        </p>
+        <p className={styles.body}>{t("common.previewGate.body")}</p>
         <div className={styles.actions}>
-          <s-button variant="secondary" onClick={onClose}>{t("common.actions.maybeLater")}</s-button>
+          <s-button variant="secondary" onClick={onClose}>
+            {t("common.actions.maybeLater")}
+          </s-button>
           <s-button
             variant="primary"
             onClick={() => {

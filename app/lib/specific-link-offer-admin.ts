@@ -2,6 +2,11 @@ import {
   buildOfferOperationsAdminState,
   type OfferOperationsAdminState,
 } from './offer-policy-admin';
+import {
+  buildOfferCountryTargetingAdminState,
+  type OfferCountryTargetingAdminState,
+  type OfferCountryTargetingPolicyState,
+} from './offer-country-targeting';
 
 export type SpecificLinkOfferStatus =
   | 'not_generated'
@@ -9,7 +14,8 @@ export type SpecificLinkOfferStatus =
   | 'revoked'
   | 'expired';
 
-export interface SpecificLinkOfferAdminState extends OfferOperationsAdminState {
+export interface SpecificLinkOfferAdminState
+  extends OfferOperationsAdminState, OfferCountryTargetingAdminState {
   enabled: boolean;
   status: SpecificLinkOfferStatus;
   expiresAt: string | null;
@@ -21,12 +27,21 @@ interface SpecificLinkConditionState {
   revokedAt: Date | string | null;
 }
 
-export interface SpecificLinkPolicyState {
+export interface SpecificLinkPolicyState extends OfferCountryTargetingPolicyState {
   specificLinkRequired: boolean;
   priority: number;
   stopLowerPriority: boolean;
   startsAt: Date | string | null;
   endsAt: Date | string | null;
+  scheduleMode: 'always' | 'one_time' | 'recurring';
+  recurrenceFrequency: 'weekly' | 'monthly' | null;
+  recurrenceTimezone: string | null;
+  recurrenceAnchorDate: Date | string | null;
+  recurrenceWindowStartMinute: number | null;
+  recurrenceWindowEndMinute: number | null;
+  recurrenceTermination: 'never' | 'on_date' | 'after_runs';
+  recurrenceEndsOn: Date | string | null;
+  recurrenceRunCount: number | null;
   ruleVersion: number;
   conditions: ReadonlyArray<SpecificLinkConditionState>;
 }
@@ -57,6 +72,7 @@ function toDate(value: Date | string | null): Date | null {
 
 export function buildSpecificLinkOfferAdminState(
   policy: SpecificLinkPolicyState | null,
+  shopIanaTimezone: string,
   now = new Date(),
 ): SpecificLinkOfferAdminState {
   const condition = policy?.conditions[0];
@@ -75,7 +91,8 @@ export function buildSpecificLinkOfferAdminState(
     status,
     expiresAt: expiresAt?.toISOString() ?? null,
     ruleVersion: policy?.ruleVersion ?? null,
-    ...buildOfferOperationsAdminState(policy),
+    ...buildOfferOperationsAdminState(policy, shopIanaTimezone),
+    ...buildOfferCountryTargetingAdminState(policy),
   };
 }
 
@@ -87,8 +104,13 @@ export function resolveSpecificLinkOfferSave(
   if (rawEnabled === null) return { updateData: {} };
 
   const enabled = rawEnabled === 'true';
-  const state = buildSpecificLinkOfferAdminState(policy, now);
-  if (enabled && state.status !== 'active') {
+  const condition = policy?.conditions[0];
+  const expiresAt = toDate(condition?.expiresAt ?? null);
+  const revokedAt = toDate(condition?.revokedAt ?? null);
+  const linkIsActive = Boolean(condition)
+    && !revokedAt
+    && (!expiresAt || expiresAt.getTime() > now.getTime());
+  if (enabled && !linkIsActive) {
     return {
       issue: {
         path: 'offerDelivery.enabled',

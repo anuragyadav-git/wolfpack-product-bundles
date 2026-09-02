@@ -22,10 +22,11 @@ const findBundle = () => getDb().bundle.findFirst as jest.MockedFunction<any>;
 const createAnalytics = () => getDb().bundleAnalytics.create as jest.MockedFunction<any>;
 const mockAppProxy = authenticate.public.appProxy as jest.MockedFunction<any>;
 
-function request(bundleId = 'bundle-1', token?: string) {
+function request(bundleId = 'bundle-1', token?: string, country?: string) {
   const url = new URL('https://test.myshopify.com/apps/product-bundles/api/offer-eligibility.json');
   url.searchParams.set('bundleId', bundleId);
   if (token) url.searchParams.set('wpb_offer', token);
+  if (country) url.searchParams.set('country', country);
   return new Request(url);
 }
 
@@ -133,6 +134,7 @@ describe('api.offer-eligibility', () => {
       offerPolicy: {
         id: 'policy-1',
         specificLinkRequired: false,
+        scheduleMode: 'one_time',
         startsAt: new Date('2999-01-01T00:00:00.000Z'),
         endsAt: null,
         ruleVersion: 3,
@@ -149,6 +151,42 @@ describe('api.offer-eligibility', () => {
     expect(createAnalytics()).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({
         metadata: expect.objectContaining({ eligibilitySource: 'schedule' }),
+      }),
+    }));
+  });
+
+  it('uses the Shopify Liquid country forwarded by the storefront', async () => {
+    findBundle().mockResolvedValue({
+      id: 'bundle-1',
+      shopId: 'test.myshopify.com',
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: false,
+        startsAt: null,
+        endsAt: null,
+        countryTargetingEnabled: true,
+        countryTargetingMode: 'include',
+        countryCodes: ['CA'],
+        ruleVersion: 4,
+        conditions: [],
+      },
+    });
+
+    const response = await loader({
+      request: request('bundle-1', undefined, 'US'),
+      params: {},
+      context: {},
+    } as any);
+
+    expect(await response.json()).toEqual({
+      eligible: false,
+      reasonCode: 'country_not_included',
+      offerPolicyId: 'policy-1',
+      ruleVersion: 4,
+    });
+    expect(createAnalytics()).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        metadata: expect.objectContaining({ eligibilitySource: 'country' }),
       }),
     }));
   });

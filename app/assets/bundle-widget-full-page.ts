@@ -37,6 +37,7 @@ import { BundleProductModal } from './bundle-modal-component.js';
 import { renderBundlePurchaseOptions } from './widgets/shared/components/purchase-options.js';
 import { bundleSubscriptionStorefrontMethods } from './widgets/shared/subscription-storefront-methods.js';
 import { installDiscountTierPillFeedback } from './widgets/shared/discount-tier-feedback.js';
+import { SharedCountdownMethods } from './widgets/shared/countdown-timer.js';
 
 
 export class BundleWidgetFullPage {
@@ -65,6 +66,7 @@ export class BundleWidgetFullPage {
       fullPageRuntimeCartSettingsMethods,
       fullPageTierFloatingRuntimeMethods,
       fullPageUpsellHandoffMethods,
+      SharedCountdownMethods,
       bundleSubscriptionStorefrontMethods,
       bundleLevelCssMethods,
     );
@@ -188,6 +190,7 @@ export class BundleWidgetFullPage {
 
       // Attach event listeners
       this.attachEventListeners();
+      this.setupCountdown();
 
       // Render floating promo badge (if enabled and not session-dismissed)
       this._initFloatingBadge();

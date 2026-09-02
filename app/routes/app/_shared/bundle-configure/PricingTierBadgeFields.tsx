@@ -4,6 +4,8 @@ import type {
   PricingTierBadgeShape,
   PricingTierBadgeVisibility,
 } from "../../../../lib/pricing-tier-badge";
+import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
+import { translateAdmin } from "~/i18n/config";
 
 const DEFAULT_BADGE: PricingTierBadge = {
   enabled: false,
@@ -30,17 +32,31 @@ export function PricingTierBadgeFields({
   return (
     <s-stack direction="block" gap="small">
       <s-divider />
-      <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
+      <s-stack
+        direction="inline"
+        gap="base"
+        alignItems="center"
+        justifyContent="space-between"
+      >
         <s-stack direction="block" gap="small-100">
-          <s-heading>Tier badge</s-heading>
-          <s-text>Highlight this pricing tier on the storefront.</s-text>
+          <s-stack direction="inline" gap="small" alignItems="center">
+            <s-heading>{translateAdmin("tooltips.tierBadge.title")}</s-heading>
+            <ConfigureHelpPopover tooltipKey="tierBadge" />
+          </s-stack>
+          <s-text>
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.pricingtierbadgefields.highlightThisPricingTierOnTheStorefront"
+            )}
+          </s-text>
         </s-stack>
         <s-switch
           accessibilityLabel={`Enable tier badge for rule ${rule.id}`}
           checked={badge.enabled || undefined}
-          onChange={(event) => updateBadge({
-            enabled: (event.target as HTMLInputElement).checked,
-          })}
+          onChange={(event) =>
+            updateBadge({
+              enabled: (event.target as HTMLInputElement).checked,
+            })
+          }
         />
       </s-stack>
 
@@ -48,62 +64,105 @@ export function PricingTierBadgeFields({
         <s-stack direction="block" gap="small">
           <s-text-field
             id={`configure-discount-rules-${rule.id}-tierBadge-text`}
-            label="Badge text"
+            label={translateAdmin("adminAttributes.badgeText")}
             value={badge.text}
             disabled={!badge.enabled || undefined}
             error={validationErrors[`${base}.text`]}
-            onInput={(event) => updateBadge({
-              text: (event.target as HTMLInputElement).value,
-            })}
+            onInput={(event) =>
+              updateBadge({
+                text: (event.target as HTMLInputElement).value,
+              })
+            }
           />
-          <s-text>Available variables: {"{{saved_percentage}}"}, {"{{saved_total}}"}.</s-text>
-          <s-grid gridTemplateColumns="repeat(auto-fit, minmax(10rem, 1fr))" gap="small">
+          <s-text>
+            {translateAdmin(
+              "adminExtracted.shared.bundleConfigure.pricingtierbadgefields.availableVariables"
+            )}{" "}
+            {"{{saved_percentage}}"}, {"{{saved_total}}"}.
+          </s-text>
+          <s-grid
+            gridTemplateColumns="repeat(auto-fit, minmax(10rem, 1fr))"
+            gap="small"
+          >
             <s-select
-              label="Shape"
+              label={translateAdmin("adminAttributes.shape")}
               value={badge.shape}
               disabled={!badge.enabled || undefined}
               error={validationErrors[`${base}.shape`]}
-              onChange={(event) => updateBadge({
-                shape: (event.target as HTMLSelectElement).value as PricingTierBadgeShape,
-              })}
+              onChange={(event) =>
+                updateBadge({
+                  shape: (event.target as HTMLSelectElement)
+                    .value as PricingTierBadgeShape,
+                })
+              }
             >
-              <s-option value="pill">Pill</s-option>
-              <s-option value="folded">Folded</s-option>
-              <s-option value="banner_rounded">Banner rounded</s-option>
+              <s-option value="pill">
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.pricingtierbadgefields.pill"
+                )}
+              </s-option>
+              <s-option value="folded">
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.pricingtierbadgefields.folded"
+                )}
+              </s-option>
+              <s-option value="banner_rounded">
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.pricingtierbadgefields.bannerRounded"
+                )}
+              </s-option>
             </s-select>
             <s-select
-              label="Visibility"
+              label={translateAdmin("adminAttributes.visibility")}
               value={badge.visibility}
               disabled={!badge.enabled || undefined}
               error={validationErrors[`${base}.visibility`]}
-              onChange={(event) => updateBadge({
-                visibility: (event.target as HTMLSelectElement).value as PricingTierBadgeVisibility,
-              })}
+              onChange={(event) =>
+                updateBadge({
+                  visibility: (event.target as HTMLSelectElement)
+                    .value as PricingTierBadgeVisibility,
+                })
+              }
             >
-              <s-option value="always">Always</s-option>
-              <s-option value="selected">Selected tier only</s-option>
+              <s-option value="always">
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.pricingtierbadgefields.always"
+                )}
+              </s-option>
+              <s-option value="selected">
+                {translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.pricingtierbadgefields.selectedTierOnly"
+                )}
+              </s-option>
             </s-select>
           </s-grid>
-          <s-grid gridTemplateColumns="repeat(auto-fit, minmax(10rem, 1fr))" gap="small">
+          <s-grid
+            gridTemplateColumns="repeat(auto-fit, minmax(10rem, 1fr))"
+            gap="small"
+          >
             <s-text-field
-              label="Text color"
+              label={translateAdmin("adminAttributes.textColor")}
               value={badge.foregroundColor ?? ""}
-              placeholder="#ffffff"
+              placeholder={translateAdmin("adminAttributes.ffffff")}
               disabled={!badge.enabled || undefined}
               error={validationErrors[`${base}.foregroundColor`]}
-              onInput={(event) => updateBadge({
-                foregroundColor: (event.target as HTMLInputElement).value,
-              })}
+              onInput={(event) =>
+                updateBadge({
+                  foregroundColor: (event.target as HTMLInputElement).value,
+                })
+              }
             />
             <s-text-field
-              label="Background color"
+              label={translateAdmin("adminAttributes.backgroundColor")}
               value={badge.backgroundColor ?? ""}
-              placeholder="#1f2937"
+              placeholder={translateAdmin("adminAttributes.1f2937")}
               disabled={!badge.enabled || undefined}
               error={validationErrors[`${base}.backgroundColor`]}
-              onInput={(event) => updateBadge({
-                backgroundColor: (event.target as HTMLInputElement).value,
-              })}
+              onInput={(event) =>
+                updateBadge({
+                  backgroundColor: (event.target as HTMLInputElement).value,
+                })
+              }
             />
           </s-grid>
         </s-stack>

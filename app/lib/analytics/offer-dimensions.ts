@@ -2,6 +2,7 @@ export const OFFER_ELIGIBILITY_SOURCES = [
   "always",
   "specific_link",
   "schedule",
+  "country",
   "priority",
 ] as const;
 

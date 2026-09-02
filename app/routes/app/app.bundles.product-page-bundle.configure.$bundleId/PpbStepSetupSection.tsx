@@ -5,6 +5,7 @@ import { PpbStepConfigCard } from "./PpbStepConfigCard";
 import { PpbStepFlowCard } from "./PpbStepFlowCard";
 import { PpbStepSetupDetailsCard } from "./PpbStepSetupDetailsCard";
 import { getStepCategories } from "./PpbStepSetupShared";
+import { translateAdmin } from "~/i18n/config";
 
 export function PpbStepSetupSection() {
   const {
@@ -30,34 +31,44 @@ export function PpbStepSetupSection() {
                       slideDir === "forward"
                         ? productPageBundleStyles.slideForward
                         : slideDir === "backward"
-                          ? productPageBundleStyles.slideBackward
-                          : ""
+                        ? productPageBundleStyles.slideBackward
+                        : ""
                     }
                   >
                     {step.StepProduct &&
                       step.StepProduct.length > 0 &&
                       getStepCategories(step).length === 0 && (
-                        <s-banner
-                          tone="warning"
-                          heading="Action required"
-                          dismissible={false}
-                          hidden={false}
-                        >
-                          <p style={{ margin: 0, fontSize: 14 }}>
-                            <strong>Action needed:</strong> This step has
-                            {step.StepProduct.length} product
-                            {step.StepProduct.length !== 1 ? "s" : ""} from the
-                            previous system. Use <strong>+ Add Category</strong>
-                            below to re-add them to the new category system.
-                          </p>
-                        </s-banner>
+                        <s-box paddingBlockEnd="small-200">
+                          <s-banner
+                            tone="warning"
+                            heading={translateAdmin(
+                              "common.warningGroup.heading"
+                            )}
+                            dismissible={false}
+                            hidden={false}
+                          >
+                            <p style={{ margin: 0, fontSize: 14 }}>
+                              <strong>
+                                {translateAdmin(
+                                  "adminExtracted.appBundlesProductPageBundleConfigure.ppbstepsetupsection.actionNeeded"
+                                )}
+                              </strong>{" "}
+                              {translateAdmin(
+                                "adminDynamic.legacyStepProducts",
+                                {
+                                  count: step.StepProduct.length,
+                                }
+                              )}
+                            </p>
+                          </s-banner>
+                        </s-box>
                       )}
                     <PpbStepSetupDetailsCard
                       step={step}
                       isFirstStep={index === 0}
                     />
                   </div>
-                ),
+                )
             )}
           </PpbStepFlowCard>
           {stepsState.steps.map(
@@ -69,8 +80,8 @@ export function PpbStepSetupSection() {
                     slideDir === "forward"
                       ? productPageBundleStyles.slideForward
                       : slideDir === "backward"
-                        ? productPageBundleStyles.slideBackward
-                        : ""
+                      ? productPageBundleStyles.slideBackward
+                      : ""
                   }
                 >
                   <div
@@ -86,7 +97,7 @@ export function PpbStepSetupSection() {
                     <PpbStepConfigCard step={step} />
                   </div>
                 </div>
-              ),
+              )
           )}
         </div>
       )}

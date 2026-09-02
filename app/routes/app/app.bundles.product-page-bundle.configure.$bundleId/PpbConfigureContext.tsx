@@ -24,7 +24,7 @@ export function usePpbConfigureContext() {
   const context = useContext(PpbConfigureContext);
   if (!context) {
     throw new Error(
-      "usePpbConfigureContext must be used inside PpbConfigureProvider",
+      "usePpbConfigureContext must be used inside PpbConfigureProvider"
     );
   }
   return context;
