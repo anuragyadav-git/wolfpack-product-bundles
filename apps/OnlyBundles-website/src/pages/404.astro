@@ -1,0 +1,37 @@
+---
+const pageTitle = "Page not found | Only Bundles";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href="/only-bundles-favicon-32.png" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <main>
+      <p>404</p>
+      <h1>This page could not be found.</h1>
+      <a href="/">Return to Only Bundles</a>
+    </main>
+  </body>
+</html>
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(body) {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    color: #172b4d;
+    background: #f6f7f9;
+  }
+  main { max-width: 34rem; padding: clamp(1.5rem, 5vw, 3rem); text-align: center; }
+  p { margin: 0; font-weight: 700; }
+  h1 { margin-block: 0.75rem 1.5rem; font-size: clamp(1.75rem, 5vw, 2.75rem); }
+  a { color: inherit; font-weight: 650; }
+</style>

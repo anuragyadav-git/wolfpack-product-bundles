@@ -1,0 +1,35 @@
+---
+const pageTitle = "Only Bundles";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href="/only-bundles-favicon-32.png" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <main>
+      <img src="/only-bundles-icon.png" alt="" width="128" height="128" />
+      <h1>Only Bundles</h1>
+    </main>
+  </body>
+</html>
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(body) {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    color: #172b4d;
+    background: #f6f7f9;
+  }
+  main { text-align: center; }
+  img { display: block; margin-inline: auto; }
+  h1 { margin-block: 1rem 0; font-size: clamp(2rem, 6vw, 3.5rem); }
+</style>
