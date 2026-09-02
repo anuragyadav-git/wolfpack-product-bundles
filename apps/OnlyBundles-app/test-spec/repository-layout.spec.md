@@ -5,7 +5,7 @@ title: Repository Layout Test Spec
 type: test-spec
 status: active
 summary: Defines behavior checks for monorepo root discovery, path normalization, and root npm command delegation.
-last_audited: 2026-09-02
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -43,6 +43,8 @@ Verify that path-aware tooling can locate the repository root from either worksp
 | 4 | Preserve legacy root commands | Root package scripts | Commands delegate to the Shopify workspace | Existing command names remain stable |
 | 5 | Expose explicit workspace commands | Root package scripts | `app:*`, `website:*`, and `verify:all` exist | npm only; no orchestration layer |
 | 6 | Preserve exact renames during hook checks | Staged `R100` destination plus authored file | Exact rename is excluded; authored file remains checked | Prevents migration-only false positives without skipping edited renames |
+| 7 | Resolve SIT config from the monorepo root | Root `npm run dev:sit` wrapper | Shopify CLI receives the workspace-local `.` through `SHOPIFY_FLAG_PATH` | Shopify resolves the flag relative to the workspace process directory |
+| 8 | Resolve every Shopify CLI command | App workspace scripts containing `shopify` | Every CLI invocation receives `SHOPIFY_FLAG_PATH=.` | Covers development, configuration, generation, deployment, environment, and passthrough commands |
 
 ## Acceptance Criteria
 

@@ -60,6 +60,38 @@ describe("repository layout", () => {
     expect(manifest.scripts["graphify:rebuild"]).toBe(
       "npm run app:graphify:rebuild",
     );
+    expect(manifest.scripts["app:dev:sit"]).toBe(
+      "npm run dev:sit --workspace=wolfpack-product-bundles",
+    );
+  });
+
+  it("pins every Shopify CLI script to the app workspace", () => {
+    const repositoryRoot = findRepositoryRoot(process.cwd());
+    const manifest = JSON.parse(
+      fs.readFileSync(
+        path.join(repositoryRoot, "apps", "OnlyBundles-app", "package.json"),
+        "utf8",
+      ),
+    );
+    const shopifyScripts = Object.entries(manifest.scripts)
+      .filter(([, command]) => /\bshopify\b/.test(String(command)))
+      .map(([name, command]) => [name, String(command)]);
+
+    expect(shopifyScripts.map(([name]) => name)).toEqual([
+      "dev",
+      "dev:sit",
+      "config:link",
+      "generate",
+      "deploy",
+      "deploy:prod",
+      "deploy:sit",
+      "config:use",
+      "env",
+      "shopify",
+    ]);
+    for (const [, command] of shopifyScripts) {
+      expect(command).toMatch(/(?:^|&& )SHOPIFY_FLAG_PATH=\. shopify(?: |$)/);
+    }
   });
 
   it("exposes explicit app, website, and aggregate verification commands", () => {
