@@ -5,7 +5,7 @@ title: Shopify Storefront API Notes
 type: reference
 status: authoritative
 summary: Storefront GraphQL contracts used for product data, Shop Brand colors, and bundle runtime behavior.
-last_audited: 2026-09-01
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -20,6 +20,7 @@ source_paths:
   - app/services/theme-colors.server.ts
   - app/lib/shop-brand-colors.ts
   - app/assets/widgets/product-page/storefront-client.ts
+  - app/assets/sdk/hydration.ts
   - app/services/ppb-storefront-runtime.server.ts
 related_docs:
   - Architecture/Widget Architecture.md
@@ -43,6 +44,21 @@ it uses `Cache-Control: no-store`; browser or shared-proxy caching can otherwise
 continue presenting an untracked or stale quantity after Shopify inventory has
 changed. The route still batches product nodes and paginates variants through
 Shopify's native Storefront context.
+
+## Product Page SDK hydration
+
+The limited-release Product Page SDK uses the same
+`fetchPpbStorefrontProducts` client as the normal PPB widget. The Shopify-hosted
+`$app.ppb_storefront_runtime` supplies the shop-specific public Storefront token
+and API version; the SDK does not create another token, proxy route, credential,
+or fallback data source. Product nodes are batched through `nodes(ids:)`, and
+variant pagination, market context, availability, inventory, prices, options,
+images, descriptions, and weights remain owned by the shared client.
+
+The SDK does not dispatch `wbp:ready` until every configured product ID has
+resolved and the standard PPB normalizer has produced the public product and
+variant state. Transport, GraphQL, missing-runtime, or missing-product failures
+fail closed rather than exposing stale snapshot products.
 
 ## Parent-product PPB direct client
 

@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-09-01
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -24,6 +24,9 @@ source_paths:
   - app/assets/widgets/shared/specific-link-offer-eligibility.ts
   - app/assets/widgets/shared/localized-bundle-config.ts
   - app/assets/sdk/config-loader.ts
+  - app/assets/sdk/hydration.ts
+  - app/storefront/sdk.ts
+  - types/wolfpack-bundles.d.ts
   - app/assets/widgets/shared/discount-tier-feedback.ts
   - app/assets/widgets/shared-css/discount-tier-feedback.css
   - app/assets/widgets/shared/drawer-layer-manager.ts
@@ -532,6 +535,36 @@ There is no Wolfpack fallback for this surface. Storefront API failure fails
 closed rather than rendering stale catalog or price data. See
 [[Architecture/Storefront Outage Resilience]].
 
+### Limited-release Product Page SDK
+
+SDK mode preserves the public `window.WolfpackBundles` global and method names,
+but it does not expose configuration immediately after parsing. The SDK accepts
+the same complete schema-v3 Product Page snapshot as the normal PPB block,
+projects the active locale, evaluates offer eligibility, and then uses
+`fetchPpbStorefrontProducts` plus the normal PPB product processor to hydrate
+current Shopify products and variants. `wbp:ready` is dispatched only after all
+configured product IDs have resolved and normalization completes.
+
+Invalid configuration, missing `$app.ppb_storefront_runtime` Storefront API
+credentials, and hydration failure keep the container hidden and dispatch
+`wbp:init-failed` with `INVALID_CONFIGURATION`,
+`MISSING_STOREFRONT_RUNTIME`, or `PRODUCT_HYDRATION_FAILED`. An ineligible offer
+remains silently hidden. No SDK global is exposed on any failed path.
+
+The state getter freezes copied step/pricing configuration and returns copied
+selection maps. SDK mutations accept positive integer quantities and only
+known, available hydrated variants. The shared PPB condition-selection adapter
+maps selected variants to their parent products for category rules and supplies
+hydrated cent and gram metrics for amount and weight rules. Rejected mutations
+do not change selection state. Successful mutation events use `quantity` in
+their detail payload. Cart submission retains the signed Cart Transform runtime
+token request before Shopify Ajax cart submission.
+
+The SDK is support-enabled and limited to one Product Page Bundle runtime on an
+Online Store 2.0 page. There is no npm, public CDN, Hydrogen, or Full Page
+Bundle distribution. The public guide is `/developers/sdk/` on the static Only
+Bundles website.
+
 ---
 
 ## Build Process
@@ -542,6 +575,7 @@ Source files use ES modules. Shopify extensions require bundled IIFEs.
 npm run build:widgets          # build all
 npm run build:widgets:full-page
 npm run build:widgets:product-page
+npm run build:sdk
 ```
 
 **Forgetting to build = storefront sees old code.**

@@ -1,0 +1,12 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="Page not found" description="The requested Only Bundles page was not found." path="/404.html" noindex bare>
+  <section class="missing"><div class="missing-card"><img src="/only-bundles-icon.png" alt="" width="72" height="72" /><p class="eyebrow">404 · Box not found</p><h1>This page could not be found.</h1><p class="lede">The bundle may have moved, or the address may be incomplete. Return home or try the interactive demo.</p><div class="button-row"><a class="button button--primary" href="/">Return home</a><a class="button" href="/demo/">Try the demo</a></div></div></section>
+</BaseLayout>
+<style>
+  .missing { min-height: 100vh; display: grid; place-items: center; padding: 1rem; background: var(--cream); }
+  .missing-card { width: min(100%, 42rem); padding: clamp(2rem, 7vw, 5rem); background: white; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  img { margin-bottom: 2rem; border-radius: 1rem; }
+  h1 { max-width: 12ch; font-size: clamp(3rem, 8vw, 5.5rem); }
+</style>

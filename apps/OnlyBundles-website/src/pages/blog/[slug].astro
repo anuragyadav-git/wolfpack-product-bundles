@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinalCta from "../../components/FinalCta.astro";
+import { blogPages } from "../../data/content";
+export function getStaticPaths() { return blogPages.map((article) => ({ params: { slug: article.slug }, props: { article } })); }
+const { article } = Astro.props;
+---
+<BaseLayout title={article.title} description={article.description} path={`/blog/${article.slug}/`}>
+  <article><header class="page-hero"><div class="prose"><p class="eyebrow">Bundle strategy</p><h1>{article.title}</h1><p class="lede">{article.description}</p></div></header><div class="section prose"><p class="dek">{article.dek}</p>{article.sections.map(([title, copy]) => <section><h2>{title}</h2><p>{copy}</p></section>)}<p class="back"><a class="button button--primary" href="/blog/">Back to the journal</a></p></div></article>
+  <FinalCta />
+</BaseLayout>
+<style>
+  .dek { padding-left: 1.4rem; border-left: 4px solid var(--coral); font-family: Georgia, serif; font-size: clamp(1.45rem, 3vw, 2.2rem); line-height: 1.3; }
+  .back { margin-top: 4rem; }
+</style>

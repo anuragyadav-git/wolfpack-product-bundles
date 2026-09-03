@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
-  "revision": 1,
+  "revision": 4,
   "status": "complete",
   "chrome_mcp_required": true,
   "environment": "staging",
-  "base_url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/2",
-  "fixture": "Wolfpack SIT FPB bundle 2 with compatible shared product state carried between preset-only transitions",
+  "base_url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles/wpb/3",
+  "fixture": "Current authenticated FPB draft preview; carry compatible state through Standard, Classic, Compact, and Horizontal in that order",
   "authentication_mode": "connected default Chrome profile with existing test-store session; do not persist credentials",
   "setup": {
     "profile_policy": "default-profile-only",
@@ -447,7 +447,7 @@
     },
     {
       "id": "standard-desktop-regression",
-      "purpose": "Prove frozen Standard desktop output and shared surfaces remain unchanged after every slice.",
+      "purpose": "Prove Standard desktop price/action state geometry is invariant and shared surfaces remain aligned.",
       "precondition": "Standard preset persisted and cache-bypassed reload completed.",
       "viewport": "desktop-stress",
       "state": "default",
@@ -455,7 +455,7 @@
         "Capture default Standard grid/sidebar/timeline.",
         "Select one item, open and close details, then restore."
       ],
-      "expected_semantic_result": "Standard behavior and appearance match its pre-slice baseline.",
+      "expected_semantic_result": "Standard behavior is unchanged and the Add-to-quantity swap no longer moves the price or action envelope.",
       "dom_assertions": [
         "Runtime preset is STANDARD.",
         "Selection and modal flow remain functional."
@@ -465,7 +465,7 @@
         "No horizontal overflow or sticky overlap."
       ],
       "screenshot_path": "qa/actual/standard-desktop-regression.png",
-      "baseline_path": "qa/baselines/standard-desktop-frozen.png",
+      "baseline_path": "qa/baselines/standard-desktop-alignment.png",
       "allowed_masks": [],
       "console_expectations": {
         "new_violations": 0
@@ -483,7 +483,7 @@
     },
     {
       "id": "standard-mobile-regression",
-      "purpose": "Prove frozen Standard mobile output and shared tray/drawers remain unchanged after every slice.",
+      "purpose": "Prove Standard mobile price/action state geometry is invariant and shared tray/drawers remain aligned.",
       "precondition": "Standard preset active and mobile summary collapsed.",
       "viewport": "primary-mobile",
       "state": "default",
@@ -491,7 +491,7 @@
         "Capture Standard grid and collapsed tray.",
         "Open/close summary and product drawers by supported paths."
       ],
-      "expected_semantic_result": "Standard and shared mobile surfaces match the frozen baseline with focus restored.",
+      "expected_semantic_result": "Standard keeps its identity while price/action geometry remains stable and shared mobile surfaces regress cleanly.",
       "dom_assertions": [
         "Runtime preset is STANDARD.",
         "Drawer expanded state and focus restoration are correct."
@@ -501,7 +501,7 @@
         "No tray overlap, clipping, or horizontal overflow."
       ],
       "screenshot_path": "qa/actual/standard-mobile-regression.png",
-      "baseline_path": "qa/baselines/standard-mobile-frozen.png",
+      "baseline_path": "qa/baselines/standard-mobile-alignment.png",
       "allowed_masks": [],
       "console_expectations": {
         "new_violations": 0

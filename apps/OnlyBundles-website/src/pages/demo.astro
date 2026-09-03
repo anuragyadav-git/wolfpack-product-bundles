@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DemoExperience from "../components/DemoExperience.astro";
+import FinalCta from "../components/FinalCta.astro";
+---
+<BaseLayout title="Interactive demo" description="Use the actual Only Bundles production renderer with safe, deterministic preview data." path="/demo/">
+  <section class="demo-hero"><div class="shell"><p class="eyebrow">Interactive demo</p><div class="heading"><h1>Try the storefront experience merchants actually publish.</h1><p class="lede">Switch between all four full-page and all four product-page templates. This is the same production renderer used by the app, running with safe preview data and no live cart or network actions.</p></div></div></section>
+  <section class="demo-section"><div class="shell"><DemoExperience /></div></section>
+  <section class="section section--cream"><div class="shell grid-3"><article class="card"><span class="number">1</span><h3>Choose the surface</h3><p>Compare the actual full-page and product-page storefront controllers.</p></article><article class="card"><span class="number">2</span><h3>Change the template</h3><p>Inspect the eight templates currently available in Only Bundles.</p></article><article class="card"><span class="number">3</span><h3>Use the widget</h3><p>Make selections and review the real interaction states without changing a live store or cart.</p></article></div></section>
+  <FinalCta title="Ready to build it with your own catalogue?" />
+</BaseLayout>
+<style>
+  .demo-hero { padding-block: clamp(4rem, 8vw, 7rem) 3rem; background: var(--cream); }
+  .heading { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 3rem; align-items: end; }
+  .heading h1 { margin-bottom: 0; font-size: clamp(3rem, 6vw, 6rem); }
+  .demo-section { padding-block: 1rem clamp(4rem, 8vw, 7rem); background: var(--cream); }
+  .card p { color: var(--ink-soft); }
+  @media (max-width: 780px) { .heading { grid-template-columns: 1fr; gap: 1rem; } }
+</style>

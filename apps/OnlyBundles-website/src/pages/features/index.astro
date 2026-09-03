@@ -1,0 +1,21 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinalCta from "../../components/FinalCta.astro";
+import { featurePages } from "../../data/content";
+---
+<BaseLayout title="Features" description="Explore full-page and product-page bundles, merchandising tools, responsive templates, targeting, scheduling, and analytics." path="/features/">
+  <section class="page-hero"><div class="shell"><p class="eyebrow">Only Bundles features</p><h1>Everything a bundle journey needs. Nothing it cannot explain.</h1><p class="lede">Start with the storefront surface, add the rules and incentives that support it, then learn from the result.</p></div></section>
+  <section class="section"><div class="shell feature-grid">{featurePages.map((feature, index) => <a href={`/features/${feature.slug}/`}><span>0{index + 1}</span><p class="eyebrow">{feature.eyebrow}</p><h2>{feature.title}</h2><p>{feature.description}</p><b>Explore feature →</b></a>)}</div></section>
+  <FinalCta />
+</BaseLayout>
+<style>
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .feature-grid a { display: block; min-height: 26rem; padding: clamp(1.5rem, 4vw, 3rem); border: 1px solid var(--line); border-radius: var(--radius-lg); text-decoration: none; }
+  .feature-grid a:nth-child(3n + 1) { background: var(--cream); }
+  .feature-grid a:nth-child(3n + 2) { background: var(--sage-soft); }
+  .feature-grid span { float: right; font-weight: 900; opacity: 0.45; }
+  .feature-grid h2 { font-size: clamp(2rem, 4vw, 3.5rem); }
+  .feature-grid p:not(.eyebrow) { max-width: 34rem; color: var(--ink-soft); }
+  .feature-grid b { display: block; margin-top: 3rem; }
+  @media (max-width: 720px) { .feature-grid { grid-template-columns: 1fr; } }
+</style>

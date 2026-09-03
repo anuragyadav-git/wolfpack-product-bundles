@@ -1,0 +1,26 @@
+{
+  "name": "only-bundles-website",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "test": "node --test tests/*.test.mjs",
+    "release:check": "node scripts/validate-release.mjs",
+    "types": "WRANGLER_LOG_PATH=.wrangler/logs wrangler types worker-configuration.d.ts --include-runtime=false",
+    "types:check": "WRANGLER_LOG_PATH=.wrangler/logs wrangler types worker-configuration.d.ts --include-runtime=false --check",
+    "deploy:dry-run": "WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy --dry-run",
+    "verify": "npm run check && npm run build && npm run test && npm run types:check && npm run deploy:dry-run",
+    "deploy": "npm run release:check && WRANGLER_LOG_PATH=.wrangler/logs wrangler deploy",
+    "preview:upload": "WRANGLER_LOG_PATH=.wrangler/logs wrangler versions upload"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "astro": "^7.2.10",
+    "cookie": "^2.0.1",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.128.0"
+  }
+}

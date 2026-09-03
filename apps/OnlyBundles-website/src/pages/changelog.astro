@@ -1,0 +1,13 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="Changelog" description="Verified public updates to the Only Bundles website and interactive product education experience." path="/changelog/">
+  <section class="page-hero"><div class="shell"><p class="eyebrow">Changelog</p><h1>What changed, without invented history.</h1><p class="lede">This log begins with the public website. Product releases appear here only after their scope and date are verified.</p></div></section>
+  <section class="section"><div class="prose"><article class="release"><time datetime="2026-09-03">September 3, 2026</time><div><span class="pill">Website</span><h2>Only Bundles public website prepared</h2><p>Created the marketing site, interactive static demo, feature library, pricing, Help centre, journal, and Cloudflare deployment validation. Public release remains gated on approved legal policies and analytics setup.</p><ul><li>Introduced dedicated Full-page and Product-page bundle education.</li><li>Added a deterministic demo with eight template choices.</li><li>Published evidence-backed pricing, feature, and setup content.</li></ul></div></article></div></section>
+</BaseLayout>
+<style>
+  .release { display: grid; grid-template-columns: 10rem 1fr; gap: 2rem; }
+  time { font-weight: 900; }
+  h2 { margin-top: 1rem; font-size: clamp(2rem, 4vw, 3.5rem); }
+  @media (max-width: 600px) { .release { grid-template-columns: 1fr; } }
+</style>

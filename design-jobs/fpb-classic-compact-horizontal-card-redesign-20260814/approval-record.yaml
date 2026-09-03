@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
-  "revision": 1,
+  "revision": 4,
   "status": "complete",
   "design": {
     "status": "approved",
     "approver": "Aditya Awasthi",
-    "at": "2026-08-14T06:08:28Z",
+    "at": "2026-09-03",
     "evidence": [
       "direction-comparison.md",
       "visual-audit.md",
@@ -17,7 +17,7 @@
   "handoff": {
     "status": "approved",
     "approver": "Aditya Awasthi",
-    "at": "2026-08-14T06:17:21Z",
+    "at": "2026-09-03",
     "evidence": [
       "implementation-handoff.md",
       "acceptance-criteria.md",
@@ -28,7 +28,7 @@
   "implementation": {
     "status": "approved",
     "approver": "Aditya Awasthi",
-    "at": "2026-08-14T06:17:21Z",
+    "at": "2026-09-03",
     "evidence": [
       "codex-task.md",
       "implementation-handoff.md"
@@ -42,5 +42,13 @@
     "evidence": [],
     "waivers": []
   },
-  "superseded_approvals": []
+  "superseded_approvals": [
+    {
+      "revision": 1,
+      "design_status": "approved",
+      "handoff_status": "approved",
+      "implementation_status": "approved",
+      "superseded_reason": "Revision 4 expands the component boundary to all four FPB templates and all widget-owned surfaces."
+    }
+  ]
 }

@@ -5,7 +5,7 @@ title: Build Process
 type: operations
 status: authoritative
 summary: Build, minification, lint, and pre-commit requirements for deployable application and storefront assets.
-last_audited: 2026-09-01
+last_audited: 2026-09-02
 owners:
   - engineering
 domains:
@@ -13,12 +13,12 @@ domains:
 systems:
   - asset-pipeline
 source_paths:
-  - scripts/build-storefront.mjs
-  - scripts/build-cart-transform-function.mjs
-  - extensions/bundle-cart-transform-rs/Cargo.toml
-  - scripts/minify-assets.js
-  - scripts/rebuild-graphify.mjs
-  - scripts/rebuild-graphify-core.cjs
+  - apps/OnlyBundles-app/scripts/build-storefront.mjs
+  - apps/OnlyBundles-app/scripts/build-cart-transform-function.mjs
+  - apps/OnlyBundles-app/extensions/bundle-cart-transform-rs/Cargo.toml
+  - apps/OnlyBundles-app/scripts/minify-assets.js
+  - apps/OnlyBundles-app/scripts/rebuild-graphify.mjs
+  - apps/OnlyBundles-app/scripts/rebuild-graphify-core.cjs
   - .graphifyignore
   - .githooks/pre-commit
   - .githooks/post-commit
@@ -50,14 +50,14 @@ npm run build:widgets:product-page # PDP only
 
 | Source | Output |
 |---|---|
-| `app/storefront/full-page.ts` | `extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` |
-| `app/storefront/product-page.ts` | `extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` |
-| `app/storefront/sdk.ts` | `extensions/bundle-builder/assets/wolfpack-bundles-sdk.js` |
-| `app/storefront/app-embed.ts` | `extensions/bundle-builder/assets/bundle-app-embed.js` |
+| `apps/OnlyBundles-app/app/storefront/full-page.ts` | `apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js` |
+| `apps/OnlyBundles-app/app/storefront/product-page.ts` | `apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js` |
+| `apps/OnlyBundles-app/app/storefront/sdk.ts` | `apps/OnlyBundles-app/extensions/bundle-builder/assets/wolfpack-bundles-sdk.js` |
+| `apps/OnlyBundles-app/app/storefront/app-embed.ts` | `apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-app-embed.js` |
 
 **Both source AND bundled files must be committed.**
 
-`scripts/build-storefront.mjs` is the only JavaScript asset producer. esbuild follows ESM imports from each entry and emits minified IIFEs; `scripts/minify-assets.js` owns CSS only. Widget controllers and method modules import shared primitives directly from `app/assets/widgets/shared/`; do not introduce compatibility barrels or rely on browser globals to satisfy module dependencies. Do not add manual module arrays, import stripping, source concatenation, or a second JS minification pass.
+`apps/OnlyBundles-app/scripts/build-storefront.mjs` is the only JavaScript asset producer. esbuild follows ESM imports from each entry and emits minified IIFEs; `apps/OnlyBundles-app/scripts/minify-assets.js` owns CSS only. Widget controllers and method modules import shared primitives directly from `apps/OnlyBundles-app/app/assets/widgets/shared/`; do not introduce compatibility barrels or rely on browser globals to satisfy module dependencies. Do not add manual module arrays, import stripping, source concatenation, or a second JS minification pass.
 
 Keep split source modules semantically named by responsibility. Mechanical split names such as `chunk-01.js` or `part-01.css` are not acceptable long-term source structure.
 
@@ -65,8 +65,8 @@ Keep split source modules semantically named by responsibility. Mechanical split
 
 ```bash
 npm run build:cart-transform
-npx shopify app function build --path extensions/bundle-cart-transform-rs
-wc -c extensions/bundle-cart-transform-rs/target/wasm32-unknown-unknown/release/bundle_cart_transform_rs.wasm
+npx shopify app function build --path apps/OnlyBundles-app/extensions/bundle-cart-transform-rs
+wc -c apps/OnlyBundles-app/extensions/bundle-cart-transform-rs/target/wasm32-unknown-unknown/release/bundle_cart_transform_rs.wasm
 ```
 
 Shopify requires the final Function WASM to be under 256 kB. This repository
@@ -87,7 +87,7 @@ Function inputs already have stable cart-line indices or small lists.
 Shopify enforces **100,000 B** on app block CSS assets.
 
 ```bash
-wc -c extensions/bundle-builder/assets/*.css
+wc -c apps/OnlyBundles-app/extensions/bundle-builder/assets/*.css
 ```
 
 Do not fix an oversized file by making source CSS unreadable. Reduce the base asset by deleting unused/conflicting selectors and moving template-specific CSS into separately generated extension assets. Current split assets:
@@ -97,7 +97,7 @@ Do not fix an oversized file by making source CSS unreadable. Reduce the base as
 | `bundle-widget-full-page.css` | `bundle-widget-full-page-standard.css`, `bundle-widget-full-page-classic.css`, `bundle-widget-full-page-compact.css`, `bundle-widget-full-page-horizontal.css` |
 | `bundle-widget.css` | `bundle-widget-product-page-cascade.css`, `bundle-widget-product-page-cognive.css`, `bundle-widget-product-page-modal.css` |
 
-`scripts/minify-assets.js` validates every generated CSS asset against Shopify's limit.
+`apps/OnlyBundles-app/scripts/minify-assets.js` validates every generated CSS asset against Shopify's limit.
 
 ### Selector minification gotcha
 

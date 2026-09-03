@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-02
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-02
+**Last Updated:** 2026-09-03
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -112,7 +112,7 @@ Dashboard
 ├── Resources
 │   ├── Bundle Inspiration → selects the gallery preview panel
 │   ├── Support → opens Crisp
-│   ├── SDK Documentation → unavailable, non-interactive Coming soon state
+│   ├── SDK Documentation → opens the public `/developers/sdk/` guide in a new tab
 │   └── Bundle Gallery previews → unavailable, non-interactive Coming soon state
 │
 ├── Section: "Bundle Setup Steps" (visible when no bundles)
