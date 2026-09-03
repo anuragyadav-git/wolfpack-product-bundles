@@ -4,6 +4,7 @@ import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback"
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import {
   buildProductPageThemeEditorDeepLink,
+  resolveProductPagePlacementBlockHandle,
   resolveProductPageTemplateSuffix,
 } from "../../../lib/bundle-config/product-page-admin-sections";
 import {
@@ -180,11 +181,11 @@ export function usePpbPlacementHandlers({
           });
           return;
         }
-        const placementBlockHandle =
-          base.activeSection === "bundle_widget"
-            ? "bundle-upsell"
-            : "bundle-product-page-embed";
         const isBundleEmbedPlacement = base.activeSection === "bundle_embed";
+        const placementBlockHandle = resolveProductPagePlacementBlockHandle(
+          base.activeSection,
+          base.blockHandle || "bundle-product-page",
+        );
         const productIdForTemplate =
           base.bundleProduct?.id ??
           (base.bundle as any).shopifyProductId ??

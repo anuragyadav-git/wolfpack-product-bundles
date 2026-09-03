@@ -123,3 +123,16 @@ export function buildProductPageThemeEditorDeepLink(input: ProductPageThemeEdito
 
   return `https://${shopDomain}/admin/themes/current/editor?template=${templateHandle}&addAppBlockId=${input.apiKey}/${input.blockHandle}&target=newAppsSection&bundleId=${input.bundleId}${previewPath}`;
 }
+
+export function resolveProductPagePlacementBlockHandle(
+  activeSection: string | null | undefined,
+  defaultBlockHandle = "bundle-product-page",
+): string {
+  if (activeSection === "bundle_widget") {
+    return "bundle-upsell";
+  }
+  if (activeSection === "bundle_embed") {
+    return "bundle-product-page-embed";
+  }
+  return defaultBlockHandle || "bundle-product-page";
+}
