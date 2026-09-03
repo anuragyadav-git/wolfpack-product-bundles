@@ -309,4 +309,99 @@ describe("BundleDataManager", () => {
 
     expect(selected).toBe(bundle);
   });
+
+  it("selects a product-page bundle on its container product even when upsell widget targets a different product", () => {
+    const bundle = {
+      id: "bundle-container-1",
+      name: "Container PPB",
+      status: "active",
+      bundleType: "product_page",
+      shopifyProductId: "gid://shopify/Product/9617394139395",
+      steps: [{ id: "step-1", name: "Step 1" }],
+      bundleUpsellConfig: {
+        widgetConfiguration: {
+          displayConfiguration: {
+            showOnAllBundleProducts: false,
+            selectedProducts: [{ id: "gid://shopify/Product/9506413773059" }],
+            showOnSpecificProductPages: [{ id: "gid://shopify/Product/9506413773059" }],
+            collectionsSelectedData: [],
+            showOnSpecificCollectionPages: [],
+          },
+        },
+      },
+    };
+
+    const selected = BundleDataManager.selectBundle(
+      { "bundle-container-1": bundle },
+      {
+        bundleId: "bundle-container-1",
+        isContainerProduct: true,
+        containerBundleId: "bundle-container-1",
+        currentProductId: "9617394139395",
+      },
+    );
+
+    expect(selected).toBe(bundle);
+  });
+
+  it("selects a product-page bundle by explicit bundle ID even when upsell widget targets a different product", () => {
+    const bundle = {
+      id: "bundle-target-1",
+      name: "Explicit ID PPB",
+      status: "active",
+      bundleType: "product_page",
+      steps: [{ id: "step-1", name: "Step 1" }],
+      bundleUpsellConfig: {
+        widgetConfiguration: {
+          displayConfiguration: {
+            showOnAllBundleProducts: false,
+            selectedProducts: [{ id: "gid://shopify/Product/9506413773059" }],
+            showOnSpecificProductPages: [],
+            collectionsSelectedData: [],
+            showOnSpecificCollectionPages: [],
+          },
+        },
+      },
+    };
+
+    const selected = BundleDataManager.selectBundle(
+      { "bundle-target-1": bundle },
+      {
+        bundleId: "bundle-target-1",
+      },
+    );
+
+    expect(selected).toBe(bundle);
+  });
+
+  it("selects a product-page bundle by shopifyProductId even when upsell widget targets a different product", () => {
+    const bundle = {
+      id: "bundle-product-id-1",
+      name: "Product ID Match PPB",
+      status: "active",
+      bundleType: "product_page",
+      shopifyProductId: "gid://shopify/Product/9617394139395",
+      steps: [{ id: "step-1", name: "Step 1" }],
+      bundleUpsellConfig: {
+        widgetConfiguration: {
+          displayConfiguration: {
+            showOnAllBundleProducts: false,
+            selectedProducts: [{ id: "gid://shopify/Product/9506413773059" }],
+            showOnSpecificProductPages: [],
+            collectionsSelectedData: [],
+            showOnSpecificCollectionPages: [],
+          },
+        },
+      },
+    };
+
+    const selected = BundleDataManager.selectBundle(
+      { "bundle-product-id-1": bundle },
+      {
+        currentProductId: "9617394139395",
+      },
+    );
+
+    expect(selected).toBe(bundle);
+  });
 });

@@ -294,10 +294,6 @@ export class BundleDataManager {
     for (const bundle of bundles) {
       if (bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE ||
           bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE) {
-        if (!this._evaluateWidgetVisibility(bundle, config)) {
-          continue;
-        }
-
         // Priority 1: Manual bundle ID
         if (config.bundleId && bundle.id === config.bundleId) {
           return bundle;
@@ -328,7 +324,9 @@ export class BundleDataManager {
           bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE &&
           bundle.bundleUpsellConfig?.widgetConfiguration?.displayConfiguration
         ) {
-          return bundle;
+          if (this._evaluateWidgetVisibility(bundle, config)) {
+            return bundle;
+          }
         }
 
         // Priority 4: Theme editor context (show any bundle)
