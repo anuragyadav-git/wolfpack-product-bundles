@@ -2,6 +2,9 @@ package.json
 .shadowenv.d
 .vscode
 node_modules
-prisma
-public
-.shopify
+apps/OnlyBundles-app/prisma
+apps/OnlyBundles-app/public
+apps/OnlyBundles-app/.shopify
+apps/OnlyBundles-website/dist
+apps/OnlyBundles-website/.astro
+apps/OnlyBundles-website/.wrangler

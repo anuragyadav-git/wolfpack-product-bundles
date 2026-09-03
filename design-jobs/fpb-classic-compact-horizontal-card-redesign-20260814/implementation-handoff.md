@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-implementation-handoff
-title: FPB Classic Compact Horizontal Implementation Handoff
+title: FPB Four-Template Alignment Implementation Handoff
 type: design-job-artifact
 status: approved
-summary: Provides the bounded preset-CSS implementation and direct Chrome QA contract for three approved FPB card directions.
-last_audited: 2026-08-14
+summary: Provides the bounded preset-CSS implementation and direct Chrome QA contract for four-template alignment remediation.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -14,6 +14,7 @@ systems:
   - full-page-bundle-widget
 source_paths:
   - app/assets/widgets/full-page-css/templates/classic
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/templates/compact/overrides.css
   - app/assets/widgets/full-page-css/templates/horizontal/overrides.css
 related_docs:
@@ -31,12 +32,12 @@ keywords:
 # Implementation Handoff
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 4
 Artifact status: approved
 
 ## Identity and approved references
 
-Implement approved decisions CL-A, CO-A, and HO-A in order. References are `locked-decisions.yaml`, `direction-comparison.md`, `visual-audit.md`, and the C01-C15 ledger at `docs/competitor-analysis/fpb-template-parity-matrix.md`. The invalid `fpb-all-template-product-card-parity-20260806` job is non-authoritative and untouched.
+Implement ST-R4 first, then verify CL-A, CO-A, and HO-A in Standard → Classic → Compact → Horizontal order. References are `locked-decisions.yaml`, `direction-comparison.md`, `visual-audit.md`, and the C01-C15 ledger at `docs/competitor-analysis/fpb-feature-to-storefront-matrix.md`.
 
 ## Source-of-truth priority
 
@@ -48,11 +49,11 @@ Implement approved decisions CL-A, CO-A, and HO-A in order. References are `lock
 
 ## Goal
 
-Conservatively polish Classic, Compact, and Horizontal product-card framing, rhythm, typography, alignment, and responsive arrangement using only each active preset's raw CSS.
+Remove measured state-dependent price/action movement across Standard, Classic, and Compact using only each preset's raw CSS. Recheck Horizontal and every shared widget surface, but edit them only if direct Chrome evidence reproduces a placement defect.
 
 ## Non-goals
 
-No Standard changes; no shared base/responsive CSS; no renderer, grid-method, summary, modal/drawer, timeline, runtime, data, copy, API, schema, persistence, filtering, pagination, pricing, validation, or cart-flow changes; no new settings, abstraction, override layer, `!important`, or runtime styling.
+No visual redesign; no unmeasured shared-surface cleanup; no renderer, grid-method, runtime, data, copy, API, schema, persistence, filtering, pagination, pricing calculation, validation, or cart-flow changes; no new settings, abstraction, override layer, `!important`, or runtime styling.
 
 ## Current architecture map
 
@@ -68,7 +69,7 @@ Default, hover/focus, selected quantity, sale price, long title, mixed media, va
 
 ## Responsive transformations
 
-Classic caps at four intrinsic columns and shows two at 390/360. Compact caps at three and shows two at 390/360. Horizontal caps at two at container widths >=800px and becomes exactly one column below 800px. Test 1440x900, 1280x800, 768x1024, 390x844, 360x800 plus 799/800/801 container boundaries. No captured card width becomes a layout constant.
+Standard and Compact cap at three intrinsic columns, Classic at four, and Horizontal at two. Existing mobile transformations remain authoritative. Test 1440x900, 1280x800, 768x1024, 390x844, 360x800 plus 799/800/801 container boundaries. No captured card width becomes a layout constant.
 
 ## Interaction contract
 
@@ -96,7 +97,7 @@ Use the shared EB/Wolfpack fixture with only the active preset changed. Carry co
 
 ## Prohibited changes
 
-Do not edit Standard CSS, shared CSS, entrypoint composition, shared renderer, `product-grid-methods.ts`, summary renderers/styles, modal/drawer styles, timeline styles, JavaScript, Liquid, APIs, schema, data, copy, settings, or the invalid prior job. Stop if preset CSS and existing DOM cannot express a direction.
+Allowed initial owners are `templates/standard/overrides.css`, `templates/classic/desktop-products.css`, `templates/classic/mobile.css`, and `templates/compact/overrides.css`. Do not edit shared CSS, Horizontal CSS, entrypoint composition, renderer, JavaScript, Liquid, APIs, schema, data, copy, or settings without new measured evidence. Stop and re-scope under TDD if CSS and existing DOM cannot express the correction.
 
 ## Test commands discovered from repository
 
@@ -108,7 +109,7 @@ Use only direct Chrome DevTools MCP in the connected default profile against the
 
 ## Acceptance criteria
 
-All criteria in `acceptance-criteria.md` pass per slice and in the final three-template plus frozen-Standard regression. No horizontal overflow, clipping, sticky overlap, unstable rows, new app-owned console errors, failed widget requests, or unintended shared-surface change is allowed.
+All criteria in `acceptance-criteria.md` pass in the final four-template regression. Price, action-envelope, and surrounding row rectangles must have zero state delta at a fixed viewport. No horizontal overflow, clipping, sticky overlap, unstable rows, new app-owned console errors, failed widget requests, or unintended shared-surface change is allowed.
 
 ## Stopping criteria
 

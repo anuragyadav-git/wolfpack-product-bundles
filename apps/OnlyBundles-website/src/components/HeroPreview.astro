@@ -1,0 +1,32 @@
+<div class="preview-shell" aria-label="Preview of full-page and product-page bundle experiences">
+  <div class="preview-toolbar"><span></span><span></span><span></span><small>North &amp; Pine</small></div>
+  <div class="preview-body">
+    <div class="preview-heading"><div><small>Build your everyday set</small><strong>Choose your essentials</strong></div><span>Step 1 of 2</span></div>
+    <div class="products">
+      <article><img src="/products/sage-trail-bottle.webp" alt="Sage Trail Bottle" /><strong>Sage Trail Bottle</strong><span>$21.00</span><button type="button" aria-label="Sage Trail Bottle selected">✓ Selected</button></article>
+      <article><img src="/products/waffle-cotton-throw.webp" alt="Waffle Cotton Throw" /><strong>Waffle Cotton Throw</strong><span>$25.00</span><button type="button">Add +</button></article>
+    </div>
+    <div class="summary"><span>2 items · Save 10% at 3</span><strong>$46.00</strong></div>
+  </div>
+</div>
+<style>
+  .preview-shell { overflow: hidden; background: #fff; border: 0.65rem solid var(--forest-dark); border-radius: clamp(1.2rem, 3vw, 2.2rem); box-shadow: var(--shadow); transform: rotate(1.2deg); }
+  .preview-toolbar { display: flex; align-items: center; gap: 0.35rem; padding: 0.75rem 1rem; color: white; background: var(--forest-dark); }
+  .preview-toolbar span { width: 0.52rem; height: 0.52rem; border-radius: 50%; background: var(--sage); }
+  .preview-toolbar span:first-child { background: var(--coral); }
+  .preview-toolbar small { margin-left: auto; opacity: 0.75; }
+  .preview-body { padding: clamp(1rem, 3vw, 2rem); }
+  .preview-heading { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+  .preview-heading div { display: grid; }
+  .preview-heading small { color: var(--ink-soft); }
+  .preview-heading strong { font-family: Georgia, serif; font-size: clamp(1.25rem, 3vw, 2rem); }
+  .preview-heading > span { align-self: start; padding: 0.35rem 0.6rem; border-radius: 999px; background: var(--sage-soft); font-size: 0.72rem; font-weight: 800; }
+  .products { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  article { display: grid; gap: 0.35rem; padding: 0.55rem; border: 1px solid var(--line); border-radius: 0.9rem; }
+  article img { aspect-ratio: 1; width: 100%; object-fit: cover; border-radius: 0.6rem; }
+  article strong, article span { font-size: 0.75rem; line-height: 1.2; }
+  article span { color: var(--ink-soft); }
+  button { min-height: 2.3rem; border: 0; border-radius: 0.55rem; color: white; background: var(--forest); font-size: 0.75rem; font-weight: 800; }
+  .summary { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.85rem; padding: 0.8rem; color: white; background: var(--forest); border-radius: 0.8rem; font-size: 0.8rem; }
+  @media (max-width: 500px) { .preview-shell { transform: none; } .preview-heading > span { display: none; } }
+</style>

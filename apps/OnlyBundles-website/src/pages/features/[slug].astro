@@ -1,0 +1,21 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinalCta from "../../components/FinalCta.astro";
+import { featurePages } from "../../data/content";
+
+export function getStaticPaths() {
+  return featurePages.map((feature) => ({ params: { slug: feature.slug }, props: { feature } }));
+}
+const { feature } = Astro.props;
+---
+<BaseLayout title={feature.eyebrow} description={feature.description} path={`/features/${feature.slug}/`}>
+  <section class="page-hero"><div class="shell grid-2"><div><p class="eyebrow">{feature.eyebrow}</p><h1>{feature.title}</h1><p class="lede">{feature.description}</p><div class="button-row"><a class="button button--primary" href="/demo/">Try it in the demo</a><a class="button" href="/features/">All features</a></div></div><div class="media-frame"><img src={feature.image} alt={feature.imageAlt} /></div></div></section>
+  <section class="section"><div class="shell"><p class="feature-intro">{feature.intro}</p><div class="grid-3">{feature.points.map(([title, copy], index) => <article class="card"><span class="number">{index + 1}</span><h3>{title}</h3><p>{copy}</p></article>)}</div></div></section>
+  <FinalCta />
+</BaseLayout>
+<style>
+  .feature-intro { max-width: 54rem; margin: 0 0 4rem; font-family: Georgia, serif; font-size: clamp(1.7rem, 3.5vw, 3rem); line-height: 1.16; letter-spacing: -0.025em; }
+  .page-hero h1 { font-size: clamp(3rem, 6vw, 5.8rem); }
+  .button-row { margin-top: 2rem; }
+  .card p { color: var(--ink-soft); }
+</style>

@@ -1,0 +1,185 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { SHOPIFY_LISTING } from "../../data/content";
+
+const initializationExample = `const root = document.querySelector('[data-custom-bundle]');
+
+window.addEventListener('wbp:ready', () => {
+  const { steps, selections } = window.WolfpackBundles.state;
+  root.replaceChildren();
+
+  for (const step of steps) {
+    const heading = document.createElement('h2');
+    heading.textContent = step.name;
+    root.append(heading);
+
+    for (const product of step.products) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = \`Add \${product.title}\`;
+      button.addEventListener('click', () => {
+        const result = window.WolfpackBundles.addItem(step.id, product.variantId, 1);
+        if (!result.success) console.warn(result.error);
+      });
+      root.append(button);
+    }
+
+    console.log('Current selection', selections[step.id] || {});
+  }
+});
+
+window.addEventListener('wbp:init-failed', (event) => {
+  console.error(event.detail.code, event.detail.message);
+});`;
+---
+
+<BaseLayout
+  title="Only Bundles SDK"
+  description="Build a custom Product Page Bundle interface with the limited-release Only Bundles SDK for Shopify Online Store 2.0 themes."
+  path="/developers/sdk/"
+>
+  <section class="sdk-hero">
+    <div class="shell sdk-hero-grid">
+      <div>
+        <p class="eyebrow">Developer guide · Limited release</p>
+        <h1>Only Bundles SDK</h1>
+        <p class="lede">Build your own Product Page Bundle interface while Only Bundles owns hydrated Shopify product data, selection validation, pricing, and Cart Transform authorization.</p>
+        <div class="button-row">
+          <a class="button button--primary" href={SHOPIFY_LISTING}>Request SDK access through support ↗</a>
+          <a class="button button--secondary" href="#initialization">Start integrating</a>
+        </div>
+      </div>
+      <aside class="release-card" aria-label="SDK availability summary">
+        <strong>Limited release</strong>
+        <p>Access is support-enabled for approved stores. There is no self-service Theme Editor SDK toggle.</p>
+        <dl><div><dt>Surface</dt><dd>Product Page Bundles only</dd></div><div><dt>Theme</dt><dd>Online Store 2.0</dd></div><div><dt>Runtime</dt><dd><code>window.WolfpackBundles</code></dd></div></dl>
+      </aside>
+    </div>
+  </section>
+
+  <div class="shell guide-shell">
+    <nav class="toc" aria-label="SDK guide sections">
+      <strong>On this page</strong>
+      <a href="#availability">Availability</a><a href="#prerequisites">Prerequisites</a><a href="#initialization">Initialization</a><a href="#state">State</a><a href="#methods">Methods</a><a href="#events">Events</a><a href="#pricing">Pricing</a><a href="#cart-handling">Cart handling</a><a href="#debugging">Debugging</a><a href="#errors">Errors</a><a href="#limitations">Limitations</a><a href="#launch-checklist">Launch checklist</a>
+    </nav>
+
+    <article class="guide">
+      <section id="availability">
+        <p class="eyebrow">01 · Availability</p><h2>Support-enabled, not self-service</h2>
+        <p>The Only Bundles SDK is in limited release. It is enabled by the Only Bundles support team for an approved Product Page Bundle and delivered through the installed Shopify theme app extension. Use the support option on the <a href={SHOPIFY_LISTING}>Only Bundles Shopify listing</a> to request access.</p>
+      </section>
+
+      <section id="prerequisites">
+        <p class="eyebrow">02 · Prerequisites</p><h2>What must already be in place</h2>
+        <ul><li>An installed Only Bundles app and a synchronized Product Page Bundle.</li><li>An Online Store 2.0 theme with the Only Bundles product-page app block placed on the bundle product template.</li><li>SDK access enabled by support for that bundle.</li><li>Your custom storefront script loaded early enough to register event listeners before the SDK becomes ready.</li></ul>
+      </section>
+
+      <section id="initialization">
+        <p class="eyebrow">03 · Initialization</p><h2>Listen before you render</h2>
+        <p>The extension parses the synchronized schema-v3 bundle snapshot, applies the active Shopify locale, checks offer eligibility, and hydrates current products and variants from Shopify's Storefront API. Only then does it expose <code>window.WolfpackBundles</code> and dispatch <code>wbp:ready</code>.</p>
+        <pre><code>{initializationExample}</code></pre>
+      </section>
+
+      <section id="state">
+        <p class="eyebrow">04 · State</p><h2>A read-only snapshot</h2>
+        <p><code>WolfpackBundles.state</code> returns immutable configuration data and a copied selection map. Read a fresh snapshot after a mutation event; changing a returned object does not change SDK state.</p>
+        <div class="reference-grid">
+          <div><code>isReady</code><span>True only after hydration succeeds.</span></div><div><code>bundleId</code><span>Synchronized bundle identifier.</span></div><div><code>bundleName</code><span>Merchant-configured name.</span></div><div><code>steps</code><span>Localized steps with hydrated <code>products</code>.</span></div><div><code>selections</code><span><code>stepId → variantId → quantity</code>.</span></div><div><code>discountConfiguration</code><span>Configured pricing rules.</span></div>
+        </div>
+        <p>Hydrated products include IDs, title, image, descriptions, price and compare-at price in cents, availability, inventory quantity, normalized gram weight, options, and variants. Variants include their Shopify ID, title, prices, availability, inventory state, normalized weight, image, and selected options.</p>
+      </section>
+
+      <section id="methods">
+        <p class="eyebrow">05 · Methods</p><h2>Public methods</h2>
+        <div class="method-list">
+          <div><h3><code>addItem(stepId, variantId, quantity)</code></h3><p>Adds a positive integer quantity of a known, available hydrated variant. Invalid quantities, unavailable variants, unknown variants, per-product limits, and rule-breaking increases return <code>{`{ success: false, error }`}</code> without changing state.</p></div>
+          <div><h3><code>removeItem(stepId, variantId, quantity)</code></h3><p>Removes a positive integer quantity from a selected variant and deletes the selection when it reaches zero.</p></div>
+          <div><h3><code>clearStep(stepId)</code></h3><p>Clears selections for a known step.</p></div>
+          <div><h3><code>validateStep(stepId)</code></h3><p>Validates quantity, amount, weight, or category rules with current hydrated variant metrics.</p></div>
+          <div><h3><code>validateBundle()</code></h3><p>Returns <code>{`{ valid, errors }`}</code> for required steps. Default and free-gift steps do not block completion.</p></div>
+          <div><h3><code>getDisplayPrice()</code></h3><p>Returns the current subtotal, discounted total, savings, percentage, and formatted display total.</p></div>
+          <div><h3><code>addBundleToCart()</code></h3><p>Validates, obtains a signed Cart Transform runtime token, and submits the selected component variants to Shopify's Ajax cart.</p></div>
+        </div>
+      </section>
+
+      <section id="events">
+        <p class="eyebrow">06 · Events</p><h2>Window event reference</h2>
+        <div class="table-wrap"><table><thead><tr><th>Event</th><th>Detail</th></tr></thead><tbody>
+          <tr><td><code>wbp:ready</code></td><td><code>{`{ bundleId, steps }`}</code></td></tr><tr><td><code>wbp:init-failed</code></td><td><code>{`{ code, message }`}</code></td></tr><tr><td><code>wbp:item-added</code></td><td><code>{`{ stepId, variantId, quantity }`}</code></td></tr><tr><td><code>wbp:item-removed</code></td><td><code>{`{ stepId, variantId, quantity }`}</code></td></tr><tr><td><code>wbp:step-cleared</code></td><td><code>{`{ stepId }`}</code></td></tr><tr><td><code>wbp:discount-tier-reached</code></td><td><code>{`{ bundleId, tierId, tierIndex, tierCount, feedbackState }`}</code></td></tr><tr><td><code>wbp:cart-success</code></td><td><code>{`{ bundleId }`}</code></td></tr><tr><td><code>wbp:cart-failed</code></td><td><code>{`{ error }`}</code></td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="pricing">
+        <p class="eyebrow">07 · Pricing</p><h2>Display cents, checkout authority</h2>
+        <p><code>getDisplayPrice()</code> uses hydrated Shopify variant prices and current Only Bundles rules. <code>original</code>, <code>discounted</code>, and <code>savings</code> are integer cents. The formatted string is for display. Shopify cart and checkout remain authoritative.</p>
+      </section>
+
+      <section id="cart-handling">
+        <p class="eyebrow">08 · Cart handling</p><h2>Wait for the result event</h2>
+        <p><code>addBundleToCart()</code> does not redirect. Listen for <code>wbp:cart-success</code> to refresh your theme cart drawer or navigate, and for <code>wbp:cart-failed</code> to show a recoverable error. Never build your own bundle authorization fields or bypass the SDK's runtime-token request.</p>
+      </section>
+
+      <section id="debugging">
+        <p class="eyebrow">09 · Debugging</p><h2>Inspect events locally</h2>
+        <p>Add <code>?wbp_debug=true</code> to the product-page URL to log SDK state and events in the browser console. Confirm the served storefront build with <code>window.__BUNDLE_WIDGET_VERSION__</code> after a cache-bypassed reload.</p>
+      </section>
+
+      <section id="errors">
+        <p class="eyebrow">10 · Errors</p><h2>Initialization fails closed</h2>
+        <p>Technical initialization failures dispatch <code>wbp:init-failed</code> with one of these stable codes:</p>
+        <ul><li><code>INVALID_CONFIGURATION</code> — the synchronized snapshot is missing or invalid.</li><li><code>MISSING_STOREFRONT_RUNTIME</code> — Shopify Storefront API configuration is unavailable.</li><li><code>PRODUCT_HYDRATION_FAILED</code> — current Shopify catalog data could not be loaded.</li></ul>
+        <p>An ineligible offer remains silently hidden and does not expose the SDK global.</p>
+      </section>
+
+      <section id="limitations">
+        <p class="eyebrow">11 · Limitations</p><h2>Current release boundary</h2>
+        <ul><li>Product Page Bundles only; Full Page Bundles are not supported.</li><li>Online Store 2.0 themes only; Hydrogen and other headless storefronts are not supported.</li><li>Load one SDK bundle per page.</li><li>There is no npm or public CDN distribution.</li><li>Bundle creation, synchronization, gifts, add-ons, and Admin configuration stay in Only Bundles.</li></ul>
+      </section>
+
+      <section id="launch-checklist">
+        <p class="eyebrow">12 · Launch checklist</p><h2>Verify the real Shopify path</h2>
+        <ol><li>Ask Only Bundles support to enable SDK access.</li><li>Synchronize the Product Page Bundle and place its app block.</li><li>Register <code>wbp:ready</code> and <code>wbp:init-failed</code> listeners before initialization.</li><li>Render only hydrated products and variants from SDK state.</li><li>Handle every unsuccessful mutation result without assuming state changed.</li><li>Test quantity, amount, weight, and category rules on desktop and mobile.</li><li>Verify price, runtime-token cart success, cart failure, and the served widget version in a cache-bypassed storefront session.</li></ol>
+      </section>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .sdk-hero { padding-block: clamp(4rem, 9vw, 8rem); background: var(--cream); }
+  .sdk-hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr); gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .release-card { padding: clamp(1.5rem, 4vw, 2.5rem); color: white; background: var(--forest); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  .release-card > strong { color: var(--sage); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .release-card dl { display: grid; gap: 0.8rem; margin: 2rem 0 0; }
+  .release-card dl div { display: grid; grid-template-columns: 5rem 1fr; gap: 1rem; padding-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.18); }
+  .release-card dt { color: rgba(255,255,255,0.65); }
+  .release-card dd { margin: 0; font-weight: 750; }
+  .guide-shell { display: grid; grid-template-columns: minmax(11rem, 0.25fr) minmax(0, 0.75fr); gap: clamp(2rem, 7vw, 7rem); padding-block: clamp(3rem, 7vw, 7rem); }
+  .toc { position: sticky; top: 1rem; align-self: start; display: grid; gap: 0.55rem; padding: 1rem 0; }
+  .toc strong { margin-bottom: 0.5rem; }
+  .toc a { color: var(--ink-soft); text-decoration: none; }
+  .toc a:hover { color: var(--forest); text-decoration: underline; }
+  .guide { min-width: 0; }
+  .guide section { padding-block: 1rem clamp(3rem, 7vw, 6rem); scroll-margin-top: 1rem; }
+  .guide h2 { max-width: 18ch; }
+  .guide p, .guide li { max-width: 47rem; }
+  .guide li + li { margin-top: 0.55rem; }
+  pre { overflow-x: auto; padding: clamp(1rem, 3vw, 1.6rem); color: #eff8f0; background: #10271d; border-radius: var(--radius); font-size: 0.87rem; line-height: 1.65; }
+  .reference-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; margin-block: 2rem; }
+  .reference-grid div { display: grid; gap: 0.45rem; padding: 1rem; border: 1px solid var(--line); border-radius: 0.8rem; }
+  .reference-grid span { color: var(--ink-soft); }
+  .method-list { display: grid; gap: 1rem; }
+  .method-list > div { padding: 1.25rem; border-left: 0.25rem solid var(--sage); background: var(--cream); }
+  .method-list h3 { margin-bottom: 0.55rem; font-size: 1rem; }
+  .method-list p { margin: 0; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.9rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  @media (max-width: 800px) {
+    .sdk-hero-grid, .guide-shell { grid-template-columns: 1fr; }
+    .toc { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .toc strong { grid-column: 1 / -1; }
+  }
+  @media (max-width: 540px) {
+    .reference-grid { grid-template-columns: 1fr; }
+  }
+</style>

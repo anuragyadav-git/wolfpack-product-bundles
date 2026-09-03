@@ -58,7 +58,7 @@ Write tests **before** implementation. Cycle: Red → Green → Refactor.
 
 ### Test file locations
 ```
-tests/
+apps/OnlyBundles-app/tests/
 ├── unit/
 │   ├── lib/          ← helpers, utilities
 │   ├── services/     ← server services
@@ -70,7 +70,7 @@ tests/
 File naming: `{module-name}.test.ts`
 
 ### What must be tested
-- Every exported function in `app/lib/`
+- Every exported function in `apps/OnlyBundles-app/app/lib/`
 - Every auth guard path (authorized, unauthorized, missing env var)
 - Every route `action` and `loader` — happy path + error cases
 - Any function with conditional branching or security logic
@@ -106,7 +106,7 @@ If you need to verify visual parity with a competitor or design, do it with Chro
 
 ### Test Spec Files — Mandatory in TDD Sessions
 
-Create `test-spec/{module-name}.spec.md` alongside every TDD session.
+Create `apps/OnlyBundles-app/test-spec/{module-name}.spec.md` alongside every Shopify-app TDD session.
 
 ```markdown
 # Test Spec: {Module / Feature Name}
@@ -128,7 +128,7 @@ Create `test-spec/{module-name}.spec.md` alongside every TDD session.
 2. ✅ Write tests BEFORE implementation for all new code
 3. ✅ Run linter on modified files BEFORE every commit — see Lint Before Commit
 4. ❌ NO backwards-compatibility shims or migration hacks — see No Backwards Compatibility Rule
-5. ✅ CREATE a test spec file in `test-spec/` for every TDD session
+5. ✅ CREATE a test spec file in `apps/OnlyBundles-app/test-spec/` for every Shopify-app TDD session
 6. ❌ NO hardcoded fallback UI copy strings — never fabricate merchant-facing marketing copy
 7. ❌ NO unnecessary API fallback chains — use the single correct source per official docs
 8. ❌ NEVER commit Chrome DevTools investigation screenshots
@@ -219,7 +219,7 @@ Reason: [brief explanation]
 Let me know once it completes.
 ```
 
-The npm scripts run `scripts/generate-extension-templates.js` first — never call `shopify app deploy` directly.
+The root npm scripts delegate deployment to `apps/OnlyBundles-app` — never call `shopify app deploy` directly.
 
 ## 🔄 Deployment General Sync Rule
 
@@ -233,7 +233,7 @@ WPB_DEPLOYMENT_GENERAL_SYNC=true
 When true, it reads installed shops and saved bundles from Prisma, ensures
 current metafield definitions, replays the normal save-time storefront sync,
 attempts registered metaobject value sync, and ensures FPB add-on discounts.
-Update `scripts/deployment-general-sync.ts` and its service/tests **only when**
+Update `apps/OnlyBundles-app/scripts/deployment-general-sync.ts` and its service/tests **only when**
 the Prisma schema changes or the app's metafield/metaobject definitions or
 value-writing contracts change. Do not edit it for routine feature, UI, or
 deployment changes.
@@ -260,10 +260,10 @@ Never set both flags. Dry-run scans installed shops without mutating Shopify. Ap
 If asked or prompted about starting the dev environment, provide instructions only. Tell the user to start the SIT app config explicitly with the SIT TOML, not the standard PROD config:
 
 ```bash
-shopify app dev --config shopify.app.wolfpack-product-bundles-sit.toml
+npm run dev:sit
 ```
 
-Do not run dev against the standard PROD `shopify.web.toml` / production Shopify app configuration.
+Do not run dev against `apps/OnlyBundles-app/shopify.web.toml` / the production Shopify app configuration.
 
 ---
 
@@ -287,7 +287,7 @@ Required checks:
 For major Admin UI changes, recreate and use the temporary Admin LCP debug bridge in dev/SIT to optimize route-level LCP before relying on Shopify field data.
 
 Reference implementation and notes:
-- Diagnostics runtime: `app/lib/admin-web-vitals-diagnostics.client.ts`
+- Diagnostics runtime: `apps/OnlyBundles-app/app/lib/admin-web-vitals-diagnostics.client.ts`
 - Operating doc: `internal docs/Operations/Admin Performance.md`
 
 Expected dev workflow:
@@ -306,14 +306,14 @@ Do not keep the bridge in committed runtime code after the measurement cycle. If
 **ALWAYS build after modifying these source files:**
 
 Widget sources → `npm run build:widgets`:
-- `app/assets/bundle-widget-components.js`
-- `app/assets/bundle-modal-component.js`
-- `app/assets/bundle-widget-full-page.js`
-- `app/assets/bundle-widget-product-page.js`
+- `apps/OnlyBundles-app/app/assets/bundle-widget-components.js`
+- `apps/OnlyBundles-app/app/assets/bundle-modal-component.js`
+- `apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js`
+- `apps/OnlyBundles-app/app/assets/bundle-widget-product-page.js`
 
 SDK sources → `npm run build:sdk`:
-- `app/assets/sdk/` (state.js, events.js, config-loader.js, cart.js, validate-bundle.js, get-display-price.js, debug.js, wolfpack-bundles.js)
-- Output: `extensions/bundle-builder/assets/wolfpack-bundles-sdk.js`
+- `apps/OnlyBundles-app/app/assets/sdk/` (state.js, events.js, config-loader.js, cart.js, validate-bundle.js, get-display-price.js, debug.js, wolfpack-bundles.js)
+- Output: `apps/OnlyBundles-app/extensions/bundle-builder/assets/wolfpack-bundles-sdk.js`
 
 **Build commands:**
 ```bash
@@ -327,10 +327,10 @@ npm run build:sdk
 
 Examples:
 ```bash
-node --check app/assets/bundle-widget-full-page.js
-node --check app/assets/bundle-widget-product-page.js
-node --check app/assets/bundle-modal-component.js
-node --check app/assets/bundle-widget-components.js
+node --check apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js
+node --check apps/OnlyBundles-app/app/assets/bundle-widget-product-page.js
+node --check apps/OnlyBundles-app/app/assets/bundle-modal-component.js
+node --check apps/OnlyBundles-app/app/assets/bundle-widget-components.js
 ```
 
 **Forgetting to build = changes won't appear in the storefront.**
@@ -342,12 +342,12 @@ node --check app/assets/bundle-widget-components.js
 Always edit raw source CSS files, then run minifier:
 
 Raw sources:
-- `app/assets/widgets/full-page-css/bundle-widget-full-page.css`
-- `app/assets/widgets/product-page-css/bundle-widget.css`
+- `apps/OnlyBundles-app/app/assets/widgets/full-page-css/bundle-widget-full-page.css`
+- `apps/OnlyBundles-app/app/assets/widgets/product-page-css/bundle-widget.css`
 
 Minified output (deploy target):
-- `extensions/bundle-builder/assets/bundle-widget-full-page.css`
-- `extensions/bundle-builder/assets/bundle-widget.css`
+- `apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget-full-page.css`
+- `apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget.css`
 
 | Change type | Command |
 |---|---|
@@ -362,7 +362,7 @@ Script exits non-zero if any CSS file exceeds Shopify's **100,000 B** app-block 
 
 ## 🔢 Widget Version Rule
 
-Increment `WIDGET_VERSION` in `scripts/build-widget-bundles.js` before every widget deploy.
+Increment `WIDGET_VERSION` in `apps/OnlyBundles-app/scripts/build-storefront.mjs` before every widget deploy.
 
 | Change type | Version bump |
 |---|---|
@@ -401,9 +401,9 @@ Two-stage load strategy:
 - ✅ If bundle config structure changes, update server writer AND widget parser together
 
 **Relevant files:**
-- Widget: `app/assets/bundle-widget-full-page.js` — `loadBundleConfig()` (~line 325)
-- Liquid: `extensions/bundle-builder/blocks/bundle-full-page.liquid` — `data-bundle-config`
-- Server: `app/services/bundles/metafield-sync/bundle-config-metafield.server.ts`
+- Widget: `apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js` — `loadBundleConfig()` (~line 325)
+- Liquid: `apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-full-page.liquid` — `data-bundle-config`
+- Server: `apps/OnlyBundles-app/app/services/bundles/metafield-sync/bundle-config-metafield.server.ts`
 
 ---
 

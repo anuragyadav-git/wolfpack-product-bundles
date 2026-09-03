@@ -1,0 +1,43 @@
+---
+import BrandMark from "./BrandMark.astro";
+import { SHOPIFY_LISTING } from "../data/content";
+---
+<header>
+  <div class="shell nav-shell">
+    <BrandMark />
+    <nav aria-label="Primary navigation">
+      <a href="/features/">Features</a>
+      <a href="/demo/">Demo</a>
+      <a href="/pricing/">Pricing</a>
+      <a href="/help/">Help</a>
+      <a href="/blogs/">Tutorials</a>
+      <a href="/developers/sdk/">Developers</a>
+      <a href="/blog/">Blog</a>
+    </nav>
+    <a class="install" href={SHOPIFY_LISTING}>Install on Shopify <span aria-hidden="true">↗</span></a>
+    <details>
+      <summary aria-label="Open navigation">Menu</summary>
+      <div class="mobile-menu">
+        <a href="/features/">Features</a><a href="/demo/">Demo</a><a href="/pricing/">Pricing</a><a href="/help/">Help</a><a href="/blogs/">Tutorials</a><a href="/developers/sdk/">SDK</a><a href="/blog/">Blog</a><a href={SHOPIFY_LISTING}>Install on Shopify ↗</a>
+      </div>
+    </details>
+  </div>
+</header>
+<style>
+  header { position: relative; z-index: 20; background: color-mix(in srgb, var(--paper) 92%, transparent); border-bottom: 1px solid var(--line); }
+  .nav-shell { display: grid; grid-template-columns: auto 1fr auto; min-height: 4.7rem; align-items: center; gap: 2rem; }
+  nav { display: flex; justify-content: center; gap: clamp(1rem, 3vw, 2.2rem); }
+  nav a, .install { font-size: 0.92rem; font-weight: 750; text-decoration: none; }
+  nav a:hover { text-decoration: underline; text-underline-offset: 0.3rem; }
+  .install { padding: 0.62rem 1rem; color: white; background: var(--forest); border-radius: 999px; }
+  details { display: none; position: relative; }
+  summary { cursor: pointer; font-weight: 800; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  .mobile-menu { position: absolute; top: 2.4rem; right: 0; display: grid; width: min(18rem, calc(100vw - 2rem)); padding: 0.7rem; background: white; border: 1px solid var(--line); border-radius: 1rem; box-shadow: var(--shadow); }
+  .mobile-menu a { padding: 0.7rem; font-weight: 750; text-decoration: none; }
+  @media (max-width: 780px) {
+    .nav-shell { grid-template-columns: 1fr auto; }
+    nav, .install { display: none; }
+    details { display: block; }
+  }
+</style>

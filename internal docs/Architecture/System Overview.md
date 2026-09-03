@@ -5,7 +5,7 @@ title: System Overview
 type: architecture
 status: authoritative
 summary: High-level overview of the Only Bundles application stack, services, and deployment surfaces.
-last_audited: 2026-08-28
+last_audited: 2026-09-02
 owners:
   - engineering
 domains:
@@ -13,9 +13,10 @@ domains:
 systems:
   - application
 source_paths:
-  - app/
-  - extensions/
-  - prisma/schema.prisma
+  - apps/OnlyBundles-app/app/
+  - apps/OnlyBundles-app/extensions/
+  - apps/OnlyBundles-app/prisma/schema.prisma
+  - apps/OnlyBundles-website/
 related_docs:
   - Architecture/Widget Architecture.md
 tags:
@@ -35,6 +36,7 @@ keywords:
 | Database | PostgreSQL (production), SQLite (dev) |
 | ORM | Prisma |
 | Hosting | Render (app server) |
+| Public website | Astro static output on Cloudflare Workers assets |
 | CDN / Extensions | Shopify (via `shopify app deploy`) |
 | Auth | Shopify OAuth (session-based via `@shopify/shopify-app-remix`) |
 
@@ -62,12 +64,12 @@ See [[Architecture/Widget Architecture]] for FPB/PDP load strategy and versionin
 
 ---
 
-## Key Services in `app/services/`
+## Key Services in `apps/OnlyBundles-app/app/services/`
 
 - **`bundles/`**: Core bundle CRUD, settings merge, CSS generation
 - **`bundles/metafield-sync/`**: Writes bundle config to Shopify metafield for zero-latency widget load
 - **`subscriptions/`**: Shopify App Pricing verification and entitlement enforcement
-- **`unauthenticated.admin(shopDomain)`**: Admin GraphQL client for webhooks/background jobs — exported from `app/shopify.server.ts:140`
+- **`unauthenticated.admin(shopDomain)`**: Admin GraphQL client for webhooks/background jobs — exported from `apps/OnlyBundles-app/app/shopify.server.ts:140`
 
 ---
 

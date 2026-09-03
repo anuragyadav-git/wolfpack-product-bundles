@@ -1,9 +1,36 @@
 {
   "schema_version": 1,
   "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
-  "revision": 1,
+  "revision": 4,
   "status": "approved",
   "locked": [
+    {
+      "id": "ST-R4",
+      "question": "What baseline and geometry should govern the four-template alignment remediation?",
+      "options_considered": [
+        "Wolfpack Product Card Layout Contract",
+        "Competitor geometry as the primary baseline"
+      ],
+      "recommendation": "Wolfpack Product Card Layout Contract",
+      "selected_value": "Wolfpack Product Card Layout Contract with invariant preset-owned price and action tracks",
+      "rationale": "The measured defects are internal state shifts, so the existing Wolfpack contract is sufficient and preserves template identity.",
+      "evidence_ids": [
+        "VA-ST-STATE-04",
+        "VA-CL-STATE-05",
+        "VA-CO-STATE-06"
+      ],
+      "status": "approved",
+      "approved_by": "Aditya Awasthi",
+      "approved_at": "2026-09-03",
+      "revision_introduced": 4,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    },
     {
       "id": "CL-A",
       "question": "Which conservative direction should govern the FPB Classic card redesign?",

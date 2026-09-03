@@ -1,0 +1,17 @@
+---
+import { SHOPIFY_LISTING } from "../data/content";
+interface Props { title?: string; description?: string }
+const { title = "Make your next bundle easier to choose.", description = "Start with a focused offer, preview the full shopper journey, and publish it through Shopify." } = Astro.props;
+---
+<section class="section section--forest">
+  <div class="shell cta">
+    <div><p class="eyebrow">Start building</p><h2>{title}</h2><p class="lede">{description}</p></div>
+    <div class="button-row"><a class="button button--light" href={SHOPIFY_LISTING}>Install on Shopify ↗</a><a class="button" href="/demo/">Try the demo</a></div>
+  </div>
+</section>
+<style>
+  .cta { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; align-items: end; }
+  .cta h2 { margin-bottom: 1rem; }
+  .cta .button:not(.button--light) { color: white; border-color: rgba(255,255,255,0.5); }
+  @media (max-width: 760px) { .cta { grid-template-columns: 1fr; align-items: start; } }
+</style>

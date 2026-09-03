@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-card-visual-audit
-title: FPB Classic Compact Horizontal Card Visual Audit
+title: FPB Four-Template Storefront Alignment Visual Audit
 type: design-job-artifact
 status: complete
-summary: Records live EB and Wolfpack card geometry and the bounded visual gaps for three FPB presets.
-last_audited: 2026-08-14
+summary: Records measured Wolfpack placement defects across all four FPB templates, with priority on price and action stability.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -14,6 +14,7 @@ systems:
   - full-page-bundle-widget
 source_paths:
   - app/assets/widgets/full-page-css/templates/classic
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/templates/compact/overrides.css
   - app/assets/widgets/full-page-css/templates/horizontal/overrides.css
 related_docs:
@@ -31,7 +32,7 @@ keywords:
 # Visual Audit
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 4
 Artifact status: complete
 
 ## Conditions
@@ -40,6 +41,15 @@ Artifact status: complete
 - Viewports: comparable desktop `1440x900` and mobile `390x844`; Horizontal computed stress geometry at `1280x800`, `768x1024`, and `360x800`.
 - States: current fixture directly showed default, selected quantity, and sale-price cards. C01-C15 remains the behavioral ledger for long title, mixed media, variant, unavailable, disabled, hover/focus, and quantity boundaries.
 - Comparison limits: EB and Wolfpack stores have equivalent products but not identical selected state or currency. Screenshots are inspiration/structural evidence, not pixel-diff baselines. Chrome rendered every image, but its file-path policy rejected persistence.
+
+## Revision 4 alignment findings
+
+- The Wolfpack Product Card Layout Contract is the primary baseline. Prior competitor captures are used only where the contract leaves a visual choice ambiguous.
+- Current Standard desktop evidence at 1280x800 shows the price/action columns changing from `203.25px 35px` to `126.25px 112px` after selection. At the Chrome host's narrowest real window (`500px` inner width), the same tracks change from `144.109px 35px` to `91.1094px 88px`.
+- The Standard outer card, media, and body rectangles remain stable. The defect owner is therefore the icon-CTA price/action grid and its state-dependent second track, not the card shell.
+- Classic and Compact use an `auto-fit` price/action grid whose available track count changes with the action's intrinsic width. This is the same state-instability mechanism and should be replaced by explicit price plus action tracks owned by each preset.
+- Horizontal already declares an explicit action track. Its selected-only content-wrapper layout remains a separate measured remediation candidate and must not be changed unless the refreshed matrix reproduces vertical movement.
+- No shared summary, timeline, navigation, modal, or mobile-tray change is justified by current evidence. Those surfaces remain in the audit matrix but are not implementation targets without a measured failure.
 
 ## Observations
 
@@ -60,7 +70,10 @@ Artifact status: complete
 | VA-HO-05 | Horizontal surface | Grouping | Borderless rows with a long internal divider | Outlined row cards | screenshot observation | high | Add a restrained card frame and remove the disconnected-row feeling |
 | VA-ALL-01 | All grids | Overflow | None at captured widths | None at captured widths | computed geometry | high | Must remain false at all five widths |
 | VA-ALL-02 | All states | Row stability | Repository contract requires equal row height and non-growing state swaps | Selected EB cards stayed inside row geometry | repository plus screenshot | high | Hard invariant |
-| VA-ALL-03 | Shared surfaces | Summary/modal/timeline | Existing shared owners active | Outside card redesign | repository observation | high | No change |
+| VA-ALL-03 | Shared surfaces | Summary/modal/timeline | Existing shared owners active | In broader audit scope | repository observation | high | Change only for a measured placement defect |
+| VA-ST-STATE-04 | Standard price/action row | Default to selected state | Tracks change by 77px desktop and 53px at the narrow host width | Wolfpack contract requires non-growing state swaps | computed geometry | high | Make the action track invariant |
+| VA-CL-STATE-05 | Classic price/action row | Default to selected state | `auto-fit` track count depends on intrinsic action width | Wolfpack contract requires non-growing state swaps | CSS ownership plus prior QA | high | Use explicit preset-owned tracks |
+| VA-CO-STATE-06 | Compact price/action row | Default to selected state | `auto-fit` track count depends on intrinsic action width | Wolfpack contract requires non-growing state swaps | CSS ownership plus prior QA | high | Use explicit preset-owned tracks |
 
 ## Layout, geometry, typography, and surfaces
 
@@ -84,4 +97,8 @@ Across the three presets, the safest shared visual language is: neutral card sur
 | GAP-CO-GROUPING | visual | Add restrained grouping, align content, normalize action treatment | Compact 3/2 grid and interactions | Compact preset CSS only | decision-ready |
 | GAP-HO-GROUPING | visual/responsive | Restore row-card frame, compact vertical rhythm, use one column below 800px | 30/70 anatomy and interactions | Horizontal preset CSS only | decision-ready |
 | GAP-STATE-STABILITY | accessibility/behavior | Visible non-expanding focus/selected treatment | Existing DOM and event paths | Each active preset CSS | decision-ready |
-| GAP-SHARED-FREEZE | ownership | None | Standard and all shared owners remain byte-for-byte untouched | Regression gate | locked |
+| GAP-ST-PRICE-ACTION | visual/state | Hold one invariant quantity-width action track in icon mode | Price and action stay in the same columns | Standard preset CSS | implementation-ready |
+| GAP-CL-PRICE-ACTION | visual/state | Replace state-sensitive auto-fit with explicit tracks | Classic identity and card heights | Classic preset CSS | implementation-ready |
+| GAP-CO-PRICE-ACTION | visual/state | Replace state-sensitive auto-fit with explicit tracks | Compact identity and card heights | Compact preset CSS | implementation-ready |
+| GAP-HO-STATE-VERIFY | visual/state | Recheck selected-only vertical reflow before editing | Horizontal identity and explicit action track | Horizontal preset CSS | evidence-pending |
+| GAP-SHARED-AUDIT | ownership | Inspect all shared widget surfaces | No speculative styling changes | Existing narrowest raw CSS owner | evidence-pending |

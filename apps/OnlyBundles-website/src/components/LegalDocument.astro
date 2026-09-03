@@ -1,0 +1,38 @@
+---
+interface Props {
+  title: string;
+  summary: string;
+  effectiveDate: string;
+}
+
+const { title, summary, effectiveDate } = Astro.props;
+---
+
+<section class="legal-hero">
+  <div class="prose">
+    <p class="eyebrow">Legal</p>
+    <h1>{title}</h1>
+    <p class="lede">{summary}</p>
+    <p class="date"><strong>Effective:</strong> {effectiveDate} &middot; <strong>Last updated:</strong> {effectiveDate}</p>
+  </div>
+</section>
+
+<section class="section">
+  <article class="legal-document prose">
+    <slot />
+  </article>
+</section>
+
+<style>
+  .legal-hero { padding-block: clamp(4rem, 8vw, 7rem) 3rem; background: var(--cream); }
+  .legal-hero h1 { margin-bottom: 1rem; font-size: clamp(3rem, 7vw, 6rem); }
+  .date { margin-top: 1.5rem; color: var(--ink-soft); font-size: 0.9rem; }
+  .legal-document { max-width: 52rem; }
+  .legal-document :global(h2) { margin-top: 3rem; }
+  .legal-document :global(h3) { margin-top: 2rem; font-family: Inter, sans-serif; font-size: 1.05rem; }
+  .legal-document :global(li + li) { margin-top: 0.55rem; }
+  .legal-document :global(a) { color: var(--forest); font-weight: 750; }
+  .legal-document :global(.legal-table) { display: grid; gap: 0.75rem; margin-block: 1.5rem; }
+  .legal-document :global(.legal-row) { padding: 1rem; background: var(--cream); border: 1px solid var(--line); border-radius: 0.8rem; }
+  .legal-document :global(.legal-row strong) { display: block; margin-bottom: 0.25rem; }
+</style>

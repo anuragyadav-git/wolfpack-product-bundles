@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "fpb-classic-compact-horizontal-card-redesign-20260814",
-  "revision": 1,
+  "revision": 4,
   "status": "complete",
   "groups": {
     "color": [
@@ -13,7 +13,7 @@
         "confidence": "high",
         "merchant_configurable": true,
         "owner": "existing widget settings",
-        "notes": "Card surface for all three presets; never replace with a fixed production color."
+        "notes": "Card surface for all four presets; never replace with a fixed production color."
       },
       {
         "name": "--bundle-product-card-border-color",
@@ -111,7 +111,7 @@
         "confidence": "high",
         "merchant_configurable": true,
         "owner": "existing widget settings",
-        "notes": "Shared visual language across the three preset frames."
+        "notes": "Shared visual language across the four preset frames."
       }
     ],
     "border": [

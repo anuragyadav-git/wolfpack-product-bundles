@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-codex-task
-title: FPB Classic Compact Horizontal Codex Task
+title: FPB Four-Template Alignment Codex Task
 type: design-job-artifact
 status: complete
-summary: Converts the approved three-preset design into three independently verified CSS implementation slices.
-last_audited: 2026-08-14
+summary: Converts the approved four-template alignment contract into a narrow verified CSS implementation slice.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -14,6 +14,7 @@ systems:
   - full-page-bundle-widget
 source_paths:
   - app/assets/widgets/full-page-css/templates/classic
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/templates/compact/overrides.css
   - app/assets/widgets/full-page-css/templates/horizontal/overrides.css
 related_docs:
@@ -30,12 +31,12 @@ keywords:
 # Codex Task
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 3
+Artifact revision: 4
 Artifact status: complete
 
 ## Job, revision, goal, and non-goals
 
-Revision 3 remediation. Correct CL-A, then CO-A, then HO-A as independent preset-CSS slices. Preserve Standard and all shared behavior. Non-goals and stop conditions are exactly those in `implementation-handoff.md`.
+Revision 4 remediation. Correct the measured Standard, Classic, and Compact icon-CTA price/action track instability, then verify Horizontal and shared surfaces. Non-goals and stop conditions are exactly those in `implementation-handoff.md`.
 
 ## Approved references and source-of-truth priority
 
@@ -63,7 +64,7 @@ Reuse merchant and shared tokens. Use exact pixels only for the one-pixel frame 
 
 ## Allowed production areas and prohibited changes
 
-Edit only the preset raw CSS paths listed in `implementation-handoff.md`, then regenerate the existing minified CSS. Standard, shared CSS/runtime, renderers, data, and settings are prohibited.
+Edit only the raw preset CSS owners listed in `implementation-handoff.md`, then regenerate the existing minified CSS. Shared CSS/runtime, renderers, data, and settings are prohibited without new measured evidence.
 
 ## Tests and generated-asset commands
 
@@ -71,7 +72,7 @@ Per slice: `npm run minify:assets css`, `git diff --check`, `npm run graphify:re
 
 ## Chrome DevTools QA plan
 
-Execute `browser-test-plan.yaml` using direct Chrome DevTools MCP only. Cache-bypass reload after every build/deploy state change. Capture semantics, geometry, responsive behavior, console, network, accessibility, layout-shift/performance, and Standard non-regression. Do not deploy.
+Execute `browser-test-plan.yaml` using direct Chrome DevTools MCP only. Cache-bypass reload after the build and before each verification pass. Capture semantics, geometry, responsive behavior, console, network, and accessibility across Standard, Classic, Compact, and Horizontal. Do not deploy.
 
 ## Acceptance, stopping, final report, risks, and rollback
 

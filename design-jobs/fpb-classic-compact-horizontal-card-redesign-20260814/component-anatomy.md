@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-component-anatomy
-title: FPB Classic Compact Horizontal Component Anatomy
+title: FPB Four-Template Alignment Component Anatomy
 type: design-job-artifact
 status: complete
-summary: Maps the existing FPB product-card DOM and its shared behavior versus preset-owned presentation boundaries.
-last_audited: 2026-08-14
+summary: Maps all four FPB template owners and the product-card price and action alignment boundary.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -14,6 +14,7 @@ systems:
   - full-page-bundle-widget
 source_paths:
   - app/assets/widgets/shared/components/product-card.js
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/templates/classic
   - app/assets/widgets/full-page-css/templates/compact/overrides.css
   - app/assets/widgets/full-page-css/templates/horizontal/overrides.css
@@ -31,7 +32,7 @@ keywords:
 # Component Anatomy
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 4
 Artifact status: complete
 
 ## Component tree
@@ -39,7 +40,7 @@ Artifact status: complete
 ~~~text
 .bundle-widget-full-page[data-fpb-design-preset]
 └── .layout-sidebar
-    ├── shared category/timeline regions (frozen)
+    ├── shared category/timeline regions (audit-only unless a defect is measured)
     ├── .sidebar-content (catalog region)
     │   └── .full-page-product-grid
     │       └── .product-card.bw-product-card
@@ -59,7 +60,7 @@ Artifact status: complete
     │                   └── .product-card-action
     │                       ├── .product-add-btn, or
     │                       └── .inline-quantity-controls
-    └── shared desktop summary or mobile tray/drawer (frozen)
+    └── shared desktop summary or mobile tray/drawer (audit-only unless a defect is measured)
 ~~~
 
 ## Region ownership
@@ -73,10 +74,11 @@ Artifact status: complete
 | `price` | Current and compare-at prices | Existing price markup | Shared pricing methods | None | Active preset stylesheet for alignment only | Merchant price typography/color tokens | Same content and order |
 | `action` | Add or adjust quantity | Existing native buttons | Shared selection state | Shared add/remove/quantity handlers | Active preset stylesheet for stable geometry only | Existing control-hit-target/action tokens | Same controls; no replacement |
 | `variant-popover` | Choose an available variant | Existing shared selector | Shared variant state | Shared selector module | Existing preset selector rules only where already owned | Existing variant tokens | Existing mobile/desktop behavior unchanged |
-| `summary-surfaces` | Display selection, validation, total, and cart action | Existing shared sidebar/tray/drawer | Shared summary state | Shared summary methods | Frozen shared styles | Shared summary tokens | Sidebar at container width >=800px; tray/drawer below 800px |
+| `summary-surfaces` | Display selection, validation, total, and cart action | Existing shared sidebar/tray/drawer | Shared summary state | Shared summary methods | Existing shared styles; edit only for a reproduced cross-template defect | Shared summary tokens | Sidebar at container width >=800px; tray/drawer below 800px |
 
 ## Preset anatomy contracts
 
+- Standard: vertical image-first card with explicit media, title, variant, price, and action rows. Icon CTA mode reserves one invariant quantity-width action track in both default and selected states; the smaller Add button aligns to the track end.
 - Classic: vertical image-first card. A calm outer frame contains media, a two-line title track, optional variant track, and a stable price/action row. Four-column cap on desktop and two columns on phone remain recognizable.
 - Compact: vertical image-first card with denser internal rhythm. A subtle frame replaces the loose borderless composition. Three-column cap on desktop and two columns on phone remain recognizable.
 - Horizontal: one bounded row using the existing 30/70 media/content split. Title and variant occupy the upper content track; price and action share the lower track. Two-column cap applies only at and above the shared 800px shell boundary.

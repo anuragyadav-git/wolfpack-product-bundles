@@ -4,8 +4,8 @@ id: deployment
 title: Deployment
 type: operations
 status: active
-summary: Deployment commands, environment configuration, and Shopify-managed installation rules.
-last_audited: 2026-08-17
+summary: Deployment commands, environment configuration, Shopify-managed installation rules, and SDK release ordering.
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -14,10 +14,12 @@ systems:
   - deployment
 source_paths:
   - package.json
-  - shopify.app.toml
-  - shopify.app.wolfpack-product-bundles-sit.toml
+  - apps/OnlyBundles-app/shopify.app.toml
+  - apps/OnlyBundles-app/shopify.app.wolfpack-product-bundles-sit.toml
+  - apps/OnlyBundles-website/wrangler.jsonc
 related_docs:
   - Operations/Deployment General Sync.md
+  - Architecture/Public Website.md
 tags:
   - deployment
 keywords:
@@ -33,7 +35,7 @@ keywords:
 | Production | `wolfpack-product-bundles` | `npm run deploy:prod` |
 | SIT | `wolfpack-product-bundles-sit` | `npm run deploy:sit` |
 
-**Never run `shopify app deploy` directly.** The npm scripts run `scripts/generate-extension-templates.js` first to stamp the correct app handle into extension template JSON files.
+**Never run `shopify app deploy` directly.** Use the root npm commands, which delegate to the Shopify workspace and preserve its configured deployment sequence.
 
 ## App Server (Render)
 
@@ -64,9 +66,9 @@ install will reject that lockfile with `EUSAGE` before the build begins.
 
 ## Shopify Extension Deploy
 
-1. Increment `widgetVersion` in `scripts/build-storefront.mjs`
+1. Increment `widgetVersion` in `apps/OnlyBundles-app/scripts/build-storefront.mjs`
 2. Run `npm run build:widgets`
-3. Check CSS file sizes: `wc -c extensions/bundle-builder/assets/*.css` (must be < 100,000 B)
+3. Check CSS file sizes: `wc -c apps/OnlyBundles-app/extensions/bundle-builder/assets/*.css` (must be < 100,000 B)
 4. Run `npm run deploy:prod` or `npm run deploy:sit`
 5. Wait 2–10 min for Shopify CDN cache to propagate
 6. Verify: `console.log(window.__BUNDLE_WIDGET_VERSION__)` in storefront DevTools
@@ -76,7 +78,7 @@ For CSS changes, also verify the exact served CSS asset. `window.__BUNDLE_WIDGET
 ## Cart Transform WASM
 
 ```bash
-cd extensions/bundle-cart-transform-rs
+cd apps/OnlyBundles-app/extensions/bundle-cart-transform-rs
 rustup run stable cargo build --target=wasm32-unknown-unknown --release
 ```
 
@@ -103,8 +105,8 @@ npx prisma migrate deploy # production
 ## Environment Variables
 
 - App server env: Render dashboard
-- Prisma dev env: `prisma/.env` (not project root)
-- Extension env: `shopify.app.toml` + Shopify Partner Dashboard
+- App and Prisma dev env: `apps/OnlyBundles-app/.env`
+- Extension env: `apps/OnlyBundles-app/shopify.app.toml` + Shopify Partner Dashboard
 - Required access scopes come only from each environment's
   `[access_scopes].scopes` TOML value. Shopify-managed installation applies
   required scope changes during app deployment. Do not add a Render `SCOPES`
@@ -112,6 +114,36 @@ npx prisma migrate deploy # production
 - `currentAppInstallation.accessScopes` reports scopes already granted to an
   authenticated installation. It is a verification source, not a bootstrap
   source for required scopes.
+
+## Static Website (Cloudflare Workers)
+
+`apps/OnlyBundles-website` builds to static files and deploys through Wrangler. The production and preview commands are:
+
+```bash
+npm run website:verify
+npm run website:deploy
+npm run website:preview
+```
+
+The Worker is `only-bundles-website`. It publishes only to `workers.dev`; no custom domain, runtime bindings, build secrets, routes, Wrangler environments, or visitor analytics are configured. `npm run website:deploy` first runs the website release check. Privacy and Terms are approved, and no analytics token or analytics build variable is required. Preview uploads remain available for review without bypassing the production gate.
+
+Workers Builds uses the repository root so installation consumes the root lockfile:
+
+- Production branch: `PROD`
+- Build command: `npm run website:verify`
+- Production deploy command: `npm run website:deploy`
+- Non-production deploy command: `npm run website:preview`
+- Include paths: `apps/OnlyBundles-website/*`, `package.json`, `package-lock.json`, `.node-version`, `.nvmrc`
+
+Connect the Git repository only after the monorepo commits exist on `PROD`. Repository ownership is dashboard configuration and must not be hardcoded in source.
+
+For an SDK documentation release, deploy and verify the repaired Shopify
+extension in SIT first, then deploy it to production manually. Only after the
+served SDK version and real Product Page Bundle behavior are verified should
+`npm run website:deploy` publish the matching `/developers/sdk/` guide. Record
+the Cloudflare deployment version ID and verify the guide, header, mobile menu,
+footer, and sitemap on the production `workers.dev` hostname. Website deploy
+does not deploy the Shopify extension or Render application.
 
 ## Note on vercel.json
 
