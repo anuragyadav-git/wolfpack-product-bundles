@@ -25,132 +25,77 @@ keywords:
   - product bundles
 ---
 
-# 🎁 Only Bundles
+# Only Bundles
 
-> A powerful Shopify app that enables merchants to create customizable product bundles with dynamic pricing and real-time cart transformation.
+Only Bundles is the public name of the Shopify application formerly presented
+as Wolfpack Product Bundles. It creates full-page build-a-box and product-page
+mix-and-match experiences from products already in a merchant's catalog.
 
-[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://github.com/wolfpack/product-bundles)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Shopify](https://img.shields.io/badge/Shopify-App-96bf48.svg)](https://shopify.com)
+- Shopify listing: https://apps.shopify.com/wolfpack-product-bundles-1
+- Company product page: https://topnotchhsolutions.com/products/wolfpack
+- Developer: Top Notchh Solutions
 
----
+## Current public product
 
-## 📋 Table of Contents
+The public listing, checked on August 31, 2026, describes:
 
-- [Overview](#overview)
-- [Features](#features)
-- [Demo](#demo)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [How It Works](#how-it-works)
-- [Technology Stack](#technology-stack)
-- [Architecture](#architecture)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Deployment](#deployment)
-- [API Reference](#api-reference)
-- [Contributing](#contributing)
-- [License](#license)
+- Full-page and product-page bundle experiences.
+- Steps, categories, quantity rules, and live summaries.
+- Tiered discounts, gifts, add-ons, upsells, and selling plans.
+- Eight responsive templates: four full-page and four product-page layouts.
+- Storefront preview and design customization.
+- Engagement, order, attributed revenue, and conversion reporting.
 
----
+Public listing pricing on the same date:
 
-## 🌟 Overview
+- Free: one public bundle and up to two enabled steps or categories.
+- Growth: $19.99/month or $199/year, with a 14-day trial.
+- Growth includes unlimited public bundles and steps, all templates, advanced
+  design and analytics, and priority support.
 
-Only Bundles is a comprehensive Shopify application that allows merchants to:
+The billing constants in `app/constants/plans.ts` and
+`app/constants/pricing-data.ts` predate the current listing. Confirm the active
+Partner Dashboard billing configuration before changing enforcement or
+subscription amounts in code.
 
-- **Create Multi-Step Bundle Builders** - Guide customers through a structured product selection process
-- **Apply Dynamic Pricing** - Offer percentage-based, fixed amount, or tiered discounts
-- **Customize Appearance** - Control colors, fonts, spacing, and layout without code
-- **Handle Complex Cart Logic** - Automatically transform carts at checkout with Shopify Functions
-- **Support Multiple Bundle Types** - Product-page bundles and full-page dedicated bundle pages
+## Compatibility identity
 
-### Why Choose This App?
+The public rebrand does not rename technical contracts used by installed
+shops. Keep these stable unless a separately planned migration covers every
+producer and consumer:
 
-✅ **Flexible** - Supports various bundle configurations and pricing strategies
-✅ **Customizable** - Full design control through visual interface
-✅ **Performant** - Optimized widget loading and efficient database queries
-✅ **Scalable** - Built to handle high-traffic stores
-✅ **Reliable** - Webhook processing via Google Cloud Pub/Sub
+- Shopify app handle and deployed callback URLs.
+- Package and environment names.
+- Cart attributes such as `_wolfpackProductBundle:OfferId`.
+- Metafield namespaces, storage keys, SDK globals, and pixel identifiers.
+- SIT and production configuration filenames.
 
----
+Changing those values as a text replacement can break carts, checkout
+functions, existing bundle data, app authentication, and storefront embeds.
 
-## ✨ Features
+## Architecture
 
-### For Merchants
+- Remix application for the embedded Shopify admin.
+- Prisma with PostgreSQL for app data.
+- Shopify Theme App Extensions and storefront widget assets.
+- Rust Cart Transform function.
+- Shopify Discount Function and Checkout UI extension.
+- App proxy, metafield synchronization, web pixel attribution, and webhooks.
+- Full-page and product-page storefront runtimes built from `app/assets`.
 
-**Bundle Creation**
-- Multi-step bundle builder with unlimited steps
-- Drag-and-drop product selection
-- Minimum/maximum quantity controls
-- Category-based product organization
+## Local development
 
-**Pricing Options**
-- Percentage discounts (e.g., "20% off")
-- Fixed amount discounts (e.g., "$10 off")
-- Tiered pricing (more products = bigger discount)
-- Conditional requirements (minimum products, specific totals)
+Requirements:
 
-**Design Customization**
-- Visual design control panel
-- Separate styling for product-page and full-page widgets
-- Live preview of design changes
-- Pre-built color schemes
+- Node.js 22 through 25.
+- npm.
+- Shopify CLI and a development store.
+- PostgreSQL.
+- Rust stable with `wasm32-unknown-unknown` for production function builds.
 
-**Analytics & Insights**
-- Bundle performance tracking
-- Revenue attribution
-- Popular product combinations
-- Conversion rates
-
-### For Customers
-
-**Seamless Experience**
-- Intuitive step-by-step builder
-- Real-time price calculation
-- Visual progress indicators
-- Mobile-responsive design
-
-**Flexible Selection**
-- Choose from multiple product options per step
-- Select variants (size, color, etc.)
-- See bundle savings in real-time
-- One-click add to cart
-
----
-
-## 🎥 Demo
-
-### Product-Page Bundle
-![Product Page Bundle](docs/images/product-page-demo.gif)
-
-### Full-Page Bundle
-![Full Page Bundle](docs/images/full-page-demo.gif)
-
-### Design Control Panel
-![Design Panel](docs/images/design-panel-demo.gif)
-
-> **Try it live:** Visit our [demo store](https://demo.wolfpack-bundles.com)
-
----
-
-## 🚀 Installation
-
-### Prerequisites
-
-- Shopify Partner account
-- Shopify development store
-- Node.js 22 and npm
-- PostgreSQL database
-- Render.com account (or similar hosting)
-
-### Quick Install
+Install and prepare the repository:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/wolfpack/product-bundles.git
-cd product-bundles
-
-# 2. Install dependencies
 npm install
 
 # 3. Set up environment variables
@@ -165,22 +110,9 @@ npx prisma db seed
 npm run dev
 ```
 
-### Detailed Installation
-
-See our comprehensive [Installation Guide](docs/INSTALLATION_GUIDE.md) for step-by-step instructions including:
-- Shopify app setup
-- Database configuration
-- Google Cloud Pub/Sub setup
-- Development environment configuration
-
----
-
-## 🎯 Quick Start
-
-### 1. Create Your First Bundle
+Run the Shopify development environment:
 
 ```bash
-# Start the app
 npm run dev
 
 # Visit: http://localhost:3000
@@ -489,16 +421,9 @@ npm run dev:sit
 ### Development Workflow
 
 ```bash
-# Run tests
-npm test
-
-# Type checking
 npm run typecheck
-
-# Linting
 npm run lint
-
-# Build for production
+npm test
 npm run build
 
 # Verify the static website workspace
@@ -512,45 +437,19 @@ npm run deploy:sit
 npm run deploy:prod
 ```
 
-### Testing
+Build individual storefront surfaces:
 
 ```bash
-# Run all tests
-npm test
-
-# Run specific test
-npm test -- bundleService.test.ts
-
-# Coverage report
-npm test -- --coverage
-
-# Watch mode
-npm test -- --watch
+npm run build:widgets:full-page
+npm run build:widgets:product-page
+npm run build:sdk
 ```
 
-### Debugging
+## Deployment
 
-**Enable Debug Mode:**
-```javascript
-// Browser console
-window.BUNDLE_DEBUG = true;
+Production deployment builds the Rust Cart Transform function, deploys the
+Shopify app configuration, and runs the general synchronization task:
 
-// Server
-LOG_LEVEL=debug npm run dev
-```
-
----
-
-## 🚢 Deployment
-
-### Deploy to Render
-
-**Automatic Deployment (Recommended):**
-1. Connect GitHub repository to Render
-2. Push to `main` branch
-3. Render automatically builds and deploys
-
-**Manual Deployment:**
 ```bash
 # Commit changes
 git add .
@@ -629,95 +528,22 @@ mutation UpdateBundle($id: ID!, $input: BundleInput!) {
 }
 ```
 
-See [API_REFERENCE.md](docs/API_REFERENCE.md) for complete API documentation.
+Review `shopify.app.toml`, database migrations, webhook configuration, and
+Partner Dashboard billing before deploying. Do not rename legacy handles,
+URLs, or cart contracts as part of a display-name change.
 
----
+## Repository map
 
-## 🤝 Contributing
+- `app/routes`: embedded admin routes and API endpoints.
+- `app/assets`: storefront runtimes and shared bundle behavior.
+- `app/services`: Shopify, billing, sync, analytics, and bundle services.
+- `app/i18n/locales`: merchant-facing translations.
+- `extensions`: Shopify Functions and checkout/theme extensions.
+- `prisma`: database schema and migrations.
+- `scripts`: build, deployment, synchronization, and audit utilities.
+- `tests`: unit, integration, and end-to-end test harnesses.
 
-We welcome contributions! Please follow these steps:
+## Rebrand rule
 
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes**
-4. **Write/update tests**
-5. **Commit your changes**
-   ```bash
-   git commit -m "Add amazing feature"
-   ```
-6. **Push to your fork**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-7. **Create a Pull Request**
-
-### Development Guidelines
-
-- Follow existing code style
-- Write clear commit messages
-- Add tests for new features
-- Update documentation
-- Keep PRs focused and small
-
-### Code Style
-
-- Use TypeScript for type safety
-- Follow Prettier formatting
-- Use ESLint rules
-- Write meaningful variable names
-- Add comments for complex logic
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🆘 Support
-
-### Documentation
-
-- **Technical Docs:** [TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md)
-- **Prompt Guide:** [PROMPT_ENGINEERING_GUIDE.md](docs/PROMPT_ENGINEERING_GUIDE.md)
-- **API Reference:** [API_REFERENCE.md](docs/API_REFERENCE.md)
-
-### Getting Help
-
-- **Issues:** [GitHub Issues](https://github.com/wolfpack/product-bundles/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/wolfpack/product-bundles/discussions)
-- **Email:** support@wolfpack.com
-
-### Useful Links
-
-- [Shopify Dev Docs](https://shopify.dev)
-- [Remix Documentation](https://remix.run/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [Polaris Components](https://polaris.shopify.com)
-
----
-
-## 🙏 Acknowledgments
-
-- Shopify for their amazing platform and developer tools
-- The Remix team for the excellent framework
-- Prisma for making database management a breeze
-- Our beta testers and early adopters
-
----
-
-## 📊 Stats
-
-![GitHub stars](https://img.shields.io/github/stars/wolfpack/product-bundles?style=social)
-![GitHub forks](https://img.shields.io/github/forks/wolfpack/product-bundles?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/wolfpack/product-bundles?style=social)
-
----
-
-**Made with ❤️ by Only Bundles**
-
-**Last Updated:** December 28, 2025
+Merchant-visible copy uses **Only Bundles**. Legacy `wolfpack` identifiers are
+technical compatibility values, not public branding.
