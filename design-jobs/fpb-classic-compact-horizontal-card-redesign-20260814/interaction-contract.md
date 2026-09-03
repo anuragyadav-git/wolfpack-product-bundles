@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-interaction-contract
-title: FPB Classic Compact Horizontal Interaction Contract
+title: FPB Four-Template Alignment Interaction Contract
 type: design-job-artifact
 status: complete
-summary: Preserves shared FPB shopper interactions while constraining visual feedback to stable preset-owned geometry.
-last_audited: 2026-08-14
+summary: Preserves shared FPB shopper interactions while constraining all four templates to stable geometry.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -28,7 +28,7 @@ keywords:
 # Interaction Contract
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 3
+Artifact revision: 4
 Artifact status: complete
 
 | Control ID | Role | Accessible name | Pointer action | Keyboard action | State update | Focus behavior | Disabled or busy | Error recovery | Motion |

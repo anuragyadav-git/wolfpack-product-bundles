@@ -4,12 +4,15 @@ node_modules/
 .codex/
 .vscode/
 .cache/
-build/
-app/build/
-public/build/
-app/public/build/
-extensions/*/dist/
-.shopify/
+apps/OnlyBundles-app/build/
+apps/OnlyBundles-app/app/build/
+apps/OnlyBundles-app/public/build/
+apps/OnlyBundles-app/app/public/build/
+apps/OnlyBundles-app/extensions/*/dist/
+apps/OnlyBundles-app/.shopify/
+apps/OnlyBundles-website/dist/
+apps/OnlyBundles-website/.astro/
+apps/OnlyBundles-website/.wrangler/
 Wolfpack: Product Bundles/
 graphify-out/
 .agents/skills/storefront-design-director-workspace/

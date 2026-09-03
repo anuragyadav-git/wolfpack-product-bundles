@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-responsive-contract
-title: FPB Classic Compact Horizontal Responsive Contract
+title: FPB Four-Template Alignment Responsive Contract
 type: design-job-artifact
 status: complete
-summary: Defines intrinsic grid behavior and the approved Horizontal transition at the shared FPB summary boundary.
-last_audited: 2026-08-14
+summary: Defines responsive alignment invariants for all four FPB templates and shared surfaces.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -14,6 +14,7 @@ systems:
   - full-page-bundle-widget
 source_paths:
   - app/assets/widgets/full-page-css/templates/classic
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/templates/compact/overrides.css
   - app/assets/widgets/full-page-css/templates/horizontal/overrides.css
 related_docs:
@@ -30,17 +31,17 @@ keywords:
 # Responsive Contract
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 4
 Artifact status: complete
 
 ## Required viewports and container widths
 
 | ID | Width | Height | Placement width | Purpose | Required states |
 |---|---:|---:|---|---|---|
-| `primary-desktop` | 1440 | 900 | Record live catalog width | Primary four/three/two-column evidence | All nine states across the three loops |
+| `primary-desktop` | 1440 | 900 | Record live catalog width | Primary Standard/Classic/Compact/Horizontal evidence | All nine states across four loops |
 | `desktop-stress` | 1280 | 800 | Record live catalog width | Narrow desktop/sidebar stress | Default, selected-quantity, long-title, variant |
 | `tablet-portrait` | 768 | 1024 | Record live catalog width | Shared tray mode and Horizontal one-column proof | Default, focus, selected-quantity, long-title |
-| `primary-mobile` | 390 | 844 | Record live catalog width | Primary two/two/one-column evidence | All nine states across the three loops |
+| `primary-mobile` | 390 | 844 | Record live catalog width | Primary four-template mobile evidence | All nine states across four loops |
 | `narrow-mobile` | 360 | 800 | Record live catalog width | Minimum required width stress | Default, selected-quantity, sale-price, long-title |
 
 ## Region transformations
@@ -49,6 +50,7 @@ Artifact status: complete
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Shared shell/summary | Container `<800px` | Shared shell width | Catalog above sticky tray | Existing DOM order | Desktop sidebar hidden; shared tray/drawer shown | Page and drawer rules unchanged | Shared bottom tray | Preset cards only reflow | Existing 44px targets | Shared tray owns safe area | No horizontal overflow or tray overlap |
 | Shared shell/summary | Container `>=800px` | Shared shell width | Catalog beside sticky sidebar | Existing DOM order | Shared sidebar shown; tray hidden | Only selected-products region scrolls | Existing 10dvh sidebar inset | Preset cards only reflow | Existing 44px targets | N/A | No sidebar/card overlap |
+| Standard grid | All widths | `100%` of catalog | Intrinsic responsive grid capped at 3 columns | Source order | No replacement | Page scroll | None | Vertical contained media and explicit content rows | Invariant price plus action tracks in icon mode | Inherited | No clipped price, action, or focus |
 | Classic grid | All widths | `100%` of catalog | Intrinsic responsive grid capped at 4 columns; two columns at 390/360 | Source order | No replacement | Page scroll | None | Vertical contained media; readable two-line title reserve | Token gap/padding; no fixed captured card width | Inherited | No clipped focus or card content |
 | Compact grid | All widths | `100%` of catalog | Intrinsic responsive grid capped at 3 columns; two columns at 390/360 | Source order | No replacement | Page scroll | None | Vertical contained media; dense two-line title reserve | Token gap/padding; contained action | Inherited | No clipped focus or action |
 | Horizontal grid | `<800px` | `100%` of catalog | Exactly 1 column | Source order | No replacement | Page scroll | None | Existing 30/70 card split; contained media; title/variant above price/action | Token gap/padding; 44px action | Shared tray safe area | Final action remains clear of tray |
@@ -60,7 +62,7 @@ Artifact status: complete
 - Verify the shared shell and Horizontal grid at container widths 799px, 800px, and 801px.
 - At 799px, Horizontal is one column and the shared mobile tray is the only summary surface.
 - At 800px and 801px, Horizontal may use up to two intrinsic columns and the shared sidebar is the only summary surface.
-- Classic and Compact column changes remain content-driven by the existing catalog container; do not add viewport-only breakpoints or captured fixed card widths.
+- Standard, Classic, and Compact column changes remain content-driven by the existing catalog container; do not add viewport-only breakpoints or captured fixed card widths.
 
 ## Orientation, high zoom, and opposite-viewport non-regression
 

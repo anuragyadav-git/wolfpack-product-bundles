@@ -3,19 +3,20 @@ node_modules
 __pycache__/
 
 /.cache
-/build
-/app/build
-/public/*.webp
-/public/*.avif
-/public/build/
-/public/_dev
-/app/public/build
-/prisma/dev.sqlite
-/prisma/dev.sqlite-journal
+/apps/OnlyBundles-app/build
+/apps/OnlyBundles-app/app/build
+/apps/OnlyBundles-app/coverage/
+/apps/OnlyBundles-app/public/*.webp
+/apps/OnlyBundles-app/public/*.avif
+/apps/OnlyBundles-app/public/build/
+/apps/OnlyBundles-app/public/_dev
+/apps/OnlyBundles-app/app/public/build
+/apps/OnlyBundles-app/prisma/dev.sqlite
+/apps/OnlyBundles-app/prisma/dev.sqlite-journal
 database.sqlite
 
-.env
-.env.*
+apps/OnlyBundles-app/.env
+apps/OnlyBundles-app/.env.*
 .claude/settings.local.json
 .codex/config.toml
 
@@ -23,12 +24,17 @@ database.sqlite
 
 
 
-/extensions/*/dist
+/apps/OnlyBundles-app/extensions/*/dist
 
 # Ignore shopify files created during app dev
-.shopify/*
+apps/OnlyBundles-app/.shopify/*
 .shopify.lock
-prisma/dev.db
+apps/OnlyBundles-app/prisma/dev.db
+
+# Static website build and local Cloudflare state
+apps/OnlyBundles-website/dist/
+apps/OnlyBundles-website/.astro/
+apps/OnlyBundles-website/.wrangler/
 
 # Ignore pub/sub service account json credentials
 light-quest-455608-i3-fb32f16e0e1a.json
@@ -43,6 +49,7 @@ graphify-out/.graphify_*.json
 graphify-out/.graphify_*.json.sig
 graphify-out/.graphify_*.txt
 graphify-out/.graphify_root
+graphify-out/.graph.html.stale
 graphify-out/.pending_changes
 graphify-out/.rebuild.lock
 graphify-out/*.lock

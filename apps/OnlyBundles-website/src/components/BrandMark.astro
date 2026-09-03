@@ -1,0 +1,12 @@
+---
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+---
+<a class="brand" href="/" aria-label="Only Bundles home">
+  <img src="/only-bundles-icon.png" alt="Only Bundles" width="38" height="38" />
+  {!compact && <span>only bundles</span>}
+</a>
+<style>
+  .brand { display: inline-flex; align-items: center; gap: 0.55rem; color: var(--forest-dark); font-size: 1.12rem; font-weight: 900; letter-spacing: -0.04em; text-decoration: none; }
+  img { display: block; border-radius: 0.65rem; }
+</style>

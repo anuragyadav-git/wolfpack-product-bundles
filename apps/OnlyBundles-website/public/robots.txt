@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://only-bundles-website.onlybundlesapp.workers.dev/sitemap-index.xml

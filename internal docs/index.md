@@ -5,7 +5,7 @@ title: Only Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Only Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-09-01
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -50,10 +50,12 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 
 - [[Audit Report]] — What was stale or incorrect in the original `docs/` folder
 - [[Architecture/System Overview]] — App stack, services, deployment
+- [[Architecture/Repository Layout]] — npm workspace boundaries, root command compatibility, Prisma discovery, and the static website deployment surface
+- [[Architecture/Public Website]] — static public routes, interactive-demo boundary, canonical SDK guide, product-claim ownership, analytics, and legal release gate
 - [[Architecture/Only Bundles Brand and Compatibility Boundary]] — visible brand identity, preserved runtime identifiers, legacy URL boundary, and parent-tag transition
 - [[Architecture/Database Schema]] — Authoritative Prisma schema summary
 - [[Architecture/Cart Transform Function]] — Rust Shopify Function cart transform and checkout discount contract
-- [[Architecture/Widget Architecture]] — FPB + PDP widgets, app-embed-owned product-page upsells, load strategy, versioning
+- [[Architecture/Widget Architecture]] — FPB + PPB widgets, limited-release hydrated SDK, app-embed-owned product-page upsells, load strategy, versioning
 - [[Architecture/Product Card Layout Contract]] — Hard rule for row-level card size behavior across all templates and interaction states
 - [[Architecture/Admin Configure Page]] — shared FPB/PPB Admin configure-page adapter boundary, section rhythm, route-owned save semantics
 - [[Architecture/Bundle Subscriptions]] — shared provider-neutral FPB/PPB selling-plan discovery, signed cart handoff, Function ownership, and live release gate

@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import FinalCta from "../../components/FinalCta.astro";
+import { helpPages, SHOPIFY_LISTING } from "../../data/content";
+---
+<BaseLayout title="Help centre" description="Practical guidance for choosing, creating, publishing, and placing Only Bundles experiences on Shopify storefronts." path="/help/">
+  <section class="page-hero"><div class="shell"><p class="eyebrow">Only Bundles Help</p><h1>From first idea to a working storefront bundle.</h1><p class="lede">Follow the focused guides below, or explore the deeper production-audited tutorial library.</p><div class="button-row"><a class="button button--primary" href="/help/getting-started/">Start here</a><a class="button" href="/blogs/">Browse detailed tutorials</a></div></div></section>
+  <section class="section"><div class="shell help-grid">{helpPages.map((guide, index) => <a class="card" href={`/help/${guide.slug}/`}><span class="number">{index + 1}</span><h2>{guide.title}</h2><p>{guide.description}</p><b>Read guide →</b></a>)}</div></section>
+  <section class="section section--cream"><div class="shell grid-2"><div><p class="eyebrow">Need merchant-specific support?</p><h2>Open support through Shopify.</h2></div><div><p class="lede">For questions tied to an installed store, bundle, or theme, use the support path on the Shopify App Store listing so the request starts in the right merchant context.</p><a class="button button--primary" href={SHOPIFY_LISTING}>Open Shopify listing ↗</a></div></div></section>
+  <FinalCta />
+</BaseLayout>
+<style>
+  .button-row { margin-top: 2rem; }
+  .help-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .help-grid a { min-height: 20rem; text-decoration: none; }
+  .help-grid h2 { font-size: clamp(2rem, 4vw, 3.2rem); }
+  .help-grid p { color: var(--ink-soft); }
+  .help-grid b { display: block; margin-top: 2rem; }
+  @media (max-width: 700px) { .help-grid { grid-template-columns: 1fr; } }
+</style>

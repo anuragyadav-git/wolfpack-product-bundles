@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-acceptance-criteria
-title: FPB Classic Compact Horizontal Acceptance Criteria
+title: FPB Four-Template Alignment Acceptance Criteria
 type: design-job-artifact
 status: complete
-summary: Defines blocking CSS, behavior, responsive, accessibility, asset, and frozen-Standard checks.
-last_audited: 2026-08-14
+summary: Defines blocking CSS, behavior, responsive, accessibility, and asset checks for all four FPB templates.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -28,9 +28,10 @@ keywords:
 # Acceptance Criteria
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 4
 Artifact status: complete
 
+- [ ] Standard icon CTA price and action tracks retain identical x, y, width, and height between default and selected-quantity states.
 - [ ] Classic reads as CL-A: restrained frame, roomy image-first hierarchy, compact body rhythm, four desktop columns and two phone columns.
 - [ ] Compact reads as CO-A: subtle bounded card, dense image-first hierarchy, contained action, three desktop columns and two phone columns.
 - [ ] Horizontal reads as HO-A: bounded 30/70 row, two columns at/above 800px and one below 800px.
@@ -44,6 +45,6 @@ Artifact status: complete
 - [ ] Direct Chrome DevTools MCP strict preflight and all planned cases pass in the connected default profile.
 - [ ] Required PNG, computed-style, geometry, accessibility, console, network, Lighthouse, trace, and comparison evidence is complete and sanitized.
 - [ ] `npm run minify:assets css` passes, including Shopify's 100,000-byte asset gate; `git diff --check` and `npm run graphify:rebuild` pass per slice.
-- [ ] Frozen Standard desktop/mobile smoke passes after each slice and in the final regression.
-- [ ] Each preset is committed independently with mandatory impact-analysis body and unrelated/hook-generated changes excluded.
+- [ ] Standard, Classic, Compact, and Horizontal desktop/mobile regression passes after the implementation slice.
+- [ ] No commit is created unless requested; unrelated and hook-generated changes remain excluded.
 - [ ] `WIDGET_VERSION` is not bumped until the eventual deploy preparation, then receives one PATCH bump; no deployment is run autonomously.

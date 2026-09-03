@@ -4,8 +4,8 @@ id: fpb-three-preset-accessibility-checklist
 title: FPB Classic Compact Horizontal Accessibility Checklist
 type: design-job-artifact
 status: complete
-summary: Defines accessibility preservation and browser verification for the three CSS-only FPB preset redesigns.
-last_audited: 2026-08-14
+summary: Defines accessibility preservation and browser verification for the four-template CSS-only alignment remediation.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -28,7 +28,7 @@ keywords:
 # Accessibility Checklist
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 4
 Artifact status: complete
 
 - [x] Existing native semantics and accessible names are preserved; CSS adds no replacement controls.

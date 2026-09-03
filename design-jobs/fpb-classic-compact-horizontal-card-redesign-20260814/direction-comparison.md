@@ -1,11 +1,11 @@
 ---
 schema_version: 1
 id: fpb-three-preset-card-directions
-title: FPB Classic Compact Horizontal Controlled Directions
+title: FPB Four-Template Alignment Direction
 type: design-job-artifact
 status: approved
-summary: Defines one conservative evidence-led Wolfpack direction for each non-Standard FPB preset.
-last_audited: 2026-08-14
+summary: Defines the contract-led placement remediation direction for all four FPB templates.
+last_audited: 2026-09-03
 owners:
   - Aditya Awasthi
 domains:
@@ -14,6 +14,7 @@ systems:
   - full-page-bundle-widget
 source_paths:
   - app/assets/widgets/full-page-css/templates/classic
+  - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/templates/compact/overrides.css
   - app/assets/widgets/full-page-css/templates/horizontal/overrides.css
 related_docs:
@@ -31,14 +32,21 @@ keywords:
 # Direction Comparison
 
 Artifact job ID: fpb-classic-compact-horizontal-card-redesign-20260814
-Artifact revision: 1
+Artifact revision: 4
 Artifact status: approved
 
 ## Shared functional requirements
 
-Preserve C01-C15 behavior; equal row heights; stable default, focus, hover, selected, quantity, sale, variant, unavailable, and disabled states; 44px Wolfpack control targets; merchant-owned colors/copy; existing DOM; active-preset stylesheet composition; shared summary/modal/timeline behavior; and frozen Standard output.
+Preserve C01-C15 behavior; equal row heights; stable default, focus, hover, selected, quantity, sale, variant, unavailable, and disabled states; 44px Wolfpack control targets; merchant-owned colors/copy; existing DOM; active-preset stylesheet composition; and existing summary/modal/timeline behavior unless a measured alignment defect is reproduced.
 
-The user requested one controlled Wolfpack direction per preset, so no speculative alternate visual system is proposed.
+The user selected the established Wolfpack contract as the baseline, so no alternate visual system is proposed.
+
+## Direction ST-R4 — Stable Standard action track
+
+- Preserve Standard's current card anatomy, media, typography, and compact add control.
+- In icon CTA mode, reserve the quantity selector's responsive width for the action column in both default and selected states.
+- Align the smaller default Add button to the action track's inline end; replace it with quantity controls without changing the price column or surrounding rows.
+- Keep text CTA mode stacked and full-width.
 
 ## Direction CL-A — Framed Classic
 
@@ -69,10 +77,10 @@ The user requested one controlled Wolfpack direction per preset, so no speculati
 
 ## Recommendation and decision
 
-- Recommended direction: approve CL-A, CO-A, and HO-A as one bounded package, implemented and verified in the required Classic → Compact → Horizontal order.
-- Rationale: each direction fixes only the measured preset-specific weakness while converging on a quiet Wolfpack card language. None requires shared CSS, renderer changes, new settings, or runtime style injection.
+- Recommended direction: retain CL-A, CO-A, and HO-A, add ST-R4, and verify Standard → Classic → Compact → Horizontal. Implement only the measured price/action stability slice now; treat other widget-owned surfaces as audit-only until a defect is reproduced.
+- Rationale: explicit two-track card footers remove the measured state shift without changing product behavior, DOM, copy, or the visual identity of any preset.
 - Assumptions and stress cases: C01-C15 remains the behavioral ledger; current DOM supports every treatment; captured values guide relationships rather than becoming fixed layout constants.
-- Selected direction: CL-A Framed Classic, CO-A Structured Compact, and HO-A Bounded Horizontal.
-- Approved by and at: Aditya Awasthi at 2026-08-14T06:08:28Z.
-- Evidence IDs: `VA-CL-*`, `VA-CO-*`, `VA-HO-*`, `VA-ALL-*`, and all approved `REF-*` items.
+- Selected direction: ST-R4 Stable Standard action track, CL-A Framed Classic, CO-A Structured Compact, and HO-A Bounded Horizontal.
+- Approved by and at: Aditya Awasthi at 2026-09-03 through the explicit instruction to begin implementation after selecting the Wolfpack-contract baseline and all-template audit scope.
+- Evidence IDs: `VA-ST-*`, `VA-CL-*`, `VA-CO-*`, `VA-HO-*`, `VA-ALL-*`, and all approved `REF-*` items.
 - Rejections and reasons: no alternative direction generated because the user explicitly requested one controlled Wolfpack direction per preset.
