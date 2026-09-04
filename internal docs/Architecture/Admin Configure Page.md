@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-09-01
+last_audited: 2026-09-04
 owners:
   - engineering
 domains:
@@ -258,13 +258,16 @@ workflows use the shared Polaris `s-modal` lifecycle and route-owned open state.
 
 An Admin surface must not stack warning banners when multiple warnings are
 simultaneously actionable. `AdminWarningGroup` renders one warning directly,
-but two or more warnings collapse into one warning banner with the copy
-`Few actions are needed to publish the bundle.` and a `View` action. The action
+but two or more warnings collapse into one `Some items need your attention`
+warning banner with the copy `Few actions are needed to publish the bundle.`
+and a `Manage` action. The action
 opens a Polaris modal containing every warning, its explanatory copy, and its
 existing remediation action. Selecting a remediation closes the modal before
 running the action. FPB and PPB configure headers use this contract for the app
-embed and unlisted-product warnings; the shared subscriptions section uses the
-same contract when compatibility and validation warnings coexist.
+embed and unlisted-product warnings. PPB widget-placement feedback is also a
+warning in this group and is never rendered through the standalone critical
+operation-alert banner. The shared subscriptions section uses the same contract
+when compatibility and validation warnings coexist.
 
 The FPB and PPB Select Template workflows use the App Bridge React `Modal`
 with `variant="max"`. The current App Home `s-modal` API stops at

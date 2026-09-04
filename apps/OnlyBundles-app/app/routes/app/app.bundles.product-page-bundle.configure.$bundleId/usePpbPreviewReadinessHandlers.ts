@@ -5,7 +5,11 @@ import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness
 import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
 import { appendBundlePreviewToken } from "../../../lib/bundle-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
-import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
+import {
+  resolvePpbWidgetPlacementAction,
+  validatePpbWidgetPlacementFromAppBridge,
+} from "../../../lib/ppb-widget-placement.client";
+import { buildProductPageThemeEditorDeepLink } from "../../../lib/bundle-config/product-page-admin-sections";
 import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
 import {
   openPendingDashboardPreview,
@@ -122,19 +126,47 @@ export function usePpbPreviewReadinessHandlers({
         }
       }
       if (isStorefrontUrl) {
-        try {
-          const placement = await validatePpbWidgetPlacementBeforePreview(
-            window.location.href,
-          );
-          if (!placement.ready && placement.message) {
-            base.setOperationAlert({
-              id: "widget-placement",
-              heading: "Widget placement needed",
-              message: placement.message,
-            });
+        const templateSuffix = (base.formState.templateName || "").trim();
+        const installationLink = buildProductPageThemeEditorDeepLink({
+          shop: base.shop,
+          apiKey: base.apiKey,
+          blockHandle: base.blockHandle || "bundle-product-page",
+          bundleId: base.bundle.id,
+          productHandle: base.bundle.shopifyProductHandle,
+          productPreviewUrl: productUrl,
+          template: {
+            handle: templateSuffix ? `product.${templateSuffix}` : "product",
+          },
+        });
+        const placement = await validatePpbWidgetPlacementFromAppBridge({
+          shopify: base.shopify,
+          templateSuffix,
+          installationLink,
+        });
+        const placementAction = resolvePpbWidgetPlacementAction(placement);
+        if (placementAction.type !== "preview") {
+          if (placementAction.type === "setup") {
+            if (
+              !navigatePendingDashboardPreview(
+                pendingPreviewWindow,
+                placementAction.installationLink,
+              )
+            ) {
+              window.open(
+                placementAction.installationLink,
+                "_blank",
+                "noopener,noreferrer",
+              );
+            }
+          } else {
+            closePendingDashboardPreview(pendingPreviewWindow);
           }
-        } catch {
-          // Non-blocking placement validation
+          base.setOperationAlert({
+            id: "widget-placement",
+            heading: "Widget placement needed",
+            message: placementAction.message,
+          });
+          return false;
         }
       }
       const tokenToUse = preview?.previewToken || base.loaderData?.previewToken;

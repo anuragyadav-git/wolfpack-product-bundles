@@ -78,7 +78,7 @@ export function AdminWarningGroup({
               variant="secondary"
               onClick={() => modalRef.current?.showOverlay?.()}
             >
-              {t("common.actions.view")}
+              {t("common.actions.manage")}
             </s-button>
           </s-stack>
         </s-banner>

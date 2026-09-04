@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-09-03
+last_audited: 2026-09-04
 owners:
   - engineering
 domains:
@@ -26,6 +26,8 @@ source_paths:
   - app/assets/sdk/config-loader.ts
   - app/assets/sdk/hydration.ts
   - app/storefront/sdk.ts
+  - app/storefront/app-embed-marker.ts
+  - app/lib/ppb-widget-placement.client.ts
   - types/wolfpack-bundles.d.ts
   - app/assets/widgets/shared/discount-tier-feedback.ts
   - app/assets/widgets/shared-css/discount-tier-feedback.css
@@ -226,6 +228,21 @@ reserves a browser tab synchronously, and posts the existing authenticated
 configure `/prepare-preview` route. FPB navigates to the signed shareable URL;
 PPB appends the returned preview token to the parent product URL. Preparation
 failure closes the reserved tab and leaves the Polaris modal open with an error.
+
+PPB preview placement is verified with Shopify's Admin App API
+`shopify.app.extensions()` result for the current app. The gate matches the
+`bundle-product-page` activation target to the bundle product's effective
+product template before opening the storefront URL. Do not infer ownership by
+comparing the app-name segment stored in theme JSON with
+`currentAppInstallation.app.handle`: Shopify can emit different values there,
+including during dev preview. The setup path remains Shopify's canonical Theme
+Editor deep link using the app API key and block handle.
+
+Each app-embed runtime reads the `data-wpb-app-embed` marker immediately before
+its own compiled script. A global first-marker query is not an ownership signal:
+PROD and SIT can both be installed on the same theme and each emits a marker and
+script. The runtime falls back to a document query only when exactly one marker
+exists; an ambiguous document without an adjacent owner fails closed.
 
 The Design workspace is preview-first: template, component surface, and logical
 desktop/mobile selectors stay with the canvas, while one inspector exposes only

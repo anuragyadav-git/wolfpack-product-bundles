@@ -5,7 +5,7 @@ title: Admin Warning Group
 type: test-spec
 status: active
 summary: Verifies that simultaneous Admin warnings collapse into one summary banner with an actionable warning-list modal.
-last_audited: 2026-08-30
+last_audited: 2026-09-04
 owners:
   - wolfpack-engineering
 domains:
@@ -47,7 +47,7 @@ Prevent simultaneous Admin warnings from rendering as stacked banners while pres
 ## Acceptance Criteria
 
 - [x] No warning group renders more than one banner.
-- [x] Multiple warnings use the exact summary copy `Few actions are needed to publish the bundle.` and a `View` action.
+- [x] Multiple warnings use the heading `Some items need your attention`, the exact summary copy `Few actions are needed to publish the bundle.`, and a `Manage` action.
 - [x] Every active warning remains visible in the modal with its associated action.
 - [x] FPB and PPB configure headers use the shared warning group.
 - [x] Other co-existing warning groups use the same shared behavior.

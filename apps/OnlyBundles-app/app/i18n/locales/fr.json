@@ -609,7 +609,7 @@
       "body": "Pour le rendre visible, définissez le statut du produit du lot sur Actif dans Shopify Produits."
     },
     "warningGroup": {
-      "heading": "Action requise",
+      "heading": "Certains éléments nécessitent votre attention",
       "summary": "Quelques actions sont nécessaires pour publier le lot.",
       "modalTitle": "Actions nécessaires"
     },

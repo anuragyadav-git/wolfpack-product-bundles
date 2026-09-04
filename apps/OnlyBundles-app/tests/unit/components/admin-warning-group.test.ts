@@ -11,8 +11,8 @@ jest.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => ({
       "common.actions.close": "Close",
-      "common.actions.view": "View",
-      "common.warningGroup.heading": "Action required",
+      "common.actions.manage": "Manage",
+      "common.warningGroup.heading": "Some items need your attention",
       "common.warningGroup.modalTitle": "Actions needed",
       "common.warningGroup.summary": "Few actions are needed to publish the bundle.",
     })[key] ?? key,
@@ -61,9 +61,9 @@ describe("AdminWarningGroup", () => {
     );
 
     expect(html.match(/<s-banner/g)).toHaveLength(1);
-    expect(html).toContain("Action required");
+    expect(html).toContain("Some items need your attention");
     expect(html).toContain("Few actions are needed to publish the bundle.");
-    expect(html).toContain(">View</s-button>");
+    expect(html).toContain(">Manage</s-button>");
     expect(html).toContain("Enable app embed");
     expect(html).toContain("Enable Here");
     expect(html).toContain("Your bundle is Unlisted");

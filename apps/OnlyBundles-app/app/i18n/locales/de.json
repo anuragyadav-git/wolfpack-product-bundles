@@ -609,7 +609,7 @@
       "body": "Stelle den Status des Bundle-Produkts in Shopify Produkte auf Aktiv, damit es gefunden werden kann."
     },
     "warningGroup": {
-      "heading": "Aktion erforderlich",
+      "heading": "Einige Punkte benötigen Ihre Aufmerksamkeit",
       "summary": "Einige Aktionen sind erforderlich, um das Bundle zu veröffentlichen.",
       "modalTitle": "Erforderliche Aktionen"
     },

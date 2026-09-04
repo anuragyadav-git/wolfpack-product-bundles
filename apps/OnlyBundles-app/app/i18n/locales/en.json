@@ -620,7 +620,7 @@
       "body": "For discoverability, change the bundle product's status to Active in Shopify Products."
     },
     "warningGroup": {
-      "heading": "Action required",
+      "heading": "Some items need your attention",
       "summary": "Few actions are needed to publish the bundle.",
       "modalTitle": "Actions needed"
     },

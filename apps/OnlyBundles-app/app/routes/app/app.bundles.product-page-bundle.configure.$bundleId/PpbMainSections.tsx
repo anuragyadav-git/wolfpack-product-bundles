@@ -6,6 +6,7 @@ import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { PpbStepSetupSection } from "./PpbStepSetupSection";
 import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
 import { getDeferredConfigureSection } from "../_shared/bundle-configure/deferred-configure-sections";
+import { getPpbStandaloneOperationAlert } from "./ppb-warning-presentation";
 
 const PpbDiscountPricingSection = lazy(() =>
   import("./PpbDiscountPricingSection").then((module) => ({
@@ -56,7 +57,7 @@ export function PpbMainSections() {
   return (
     <>
       <AdminTaskAlertBanner
-        alert={flow.operationAlert}
+        alert={getPpbStandaloneOperationAlert(flow.operationAlert)}
         onDismiss={flow.clearOperationAlert}
       />
       <ConfigureValidationSummary

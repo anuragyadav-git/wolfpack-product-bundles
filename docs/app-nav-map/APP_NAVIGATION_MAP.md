@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-03
+last_audited: 2026-09-04
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-03
+**Last Updated:** 2026-09-04
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -457,11 +457,12 @@ disclosure and preserves the existing configure state.
 **Route file:** `app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/full-page-bundle/configure/:bundleId`
 
-When the app embed and parent-product status both require attention, FPB and
-PPB show one `Few actions are needed to publish the bundle.` warning. `View`
-opens the shared Actions Needed modal, which lists each warning with its
+When multiple publish conditions require attention, FPB and PPB show one
+`Some items need your attention` warning with a `Manage` action. Manage opens
+the shared Actions Needed modal, which lists each warning with its
 original remediation action. A single active warning remains directly
-actionable without the modal. The subscriptions section uses the same
+actionable without the modal. PPB widget placement participates in this group
+instead of rendering a separate critical banner. The subscriptions section uses the same
 single-banner/modal behavior when compatibility and plan-validation warnings
 coexist.
 
@@ -568,6 +569,12 @@ contract as FPB.
 
 The shared Actions Needed modal described in FPB is also mounted by PPB when
 multiple publish or subscription warnings are simultaneously active.
+
+PPB preview checks the current app's `bundle-product-page` theme-extension
+activation through Shopify's App API before recording or opening the preview.
+The block must target the linked product's effective product template. Missing
+placement opens the existing Shopify Theme Editor deep link; an unavailable
+activation result fails closed and closes the reserved preview tab.
 
 ```
 PPB Configure Page

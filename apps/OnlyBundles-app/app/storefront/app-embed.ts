@@ -18,8 +18,9 @@ import {
 } from './page-builder-embed.js';
 import { loadAndApplyGlobalSettingsControls } from './settings-controls.js';
 import { setStorefrontProxyRoot } from '../config/storefront-proxy-routes.js';
+import { findOwnedAppEmbedMarker } from './app-embed-marker.js';
 
-const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
+const embed = findOwnedAppEmbedMarker();
 if (embed?.dataset.storefrontProxyRoot) {
   setStorefrontProxyRoot(embed.dataset.storefrontProxyRoot);
 }
