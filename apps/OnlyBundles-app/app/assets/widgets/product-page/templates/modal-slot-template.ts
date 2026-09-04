@@ -112,22 +112,29 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
       return;
     }
 
+    const minQty = Number.parseFloat(step?.minQuantity);
+    const hasMinQty = Number.isFinite(minQty) && minQty > 0;
     const parsedRequired = Number.parseFloat(step?.conditionValue);
-    const hasRequiredCount = Number.isFinite(parsedRequired) && parsedRequired >= 0;
-    const rawRequired = hasRequiredCount ? parsedRequired : 1;
+    const hasRequiredCount = Number.isFinite(parsedRequired) && parsedRequired > 0;
+    const rawRequired = hasRequiredCount ? parsedRequired : (hasMinQty ? minQty : 1);
     const operator = String(step?.conditionOperator || '').toLowerCase();
     const requiredCount = ['greater_than', 'gt', '>'].includes(operator)
       ? rawRequired + 1
       : rawRequired;
-    const isOpenEnded = [
-      'greater_than',
-      'gt',
-      '>',
-      'greater_than_or_equal_to',
-      'greater_than_equal_to',
-      'gte',
-      '>=',
+    const isExplicitlyBounded = [
+      'equal_to',
+      'eq',
+      '=',
+      '==',
+      'less_than',
+      'lt',
+      '<',
+      'less_than_or_equal_to',
+      'less_than_equal_to',
+      'lte',
+      '<=',
     ].includes(operator);
+    const isOpenEnded = !isExplicitlyBounded;
     let emptyCount = Math.max(0, requiredCount - selectedCount);
 
     if (isOpenEnded) {
@@ -139,6 +146,10 @@ export const modalSlotTemplateMethods: Record<string, any> & ThisType<any> = {
       );
       this._modalSlotCapacityByStep[stepIndex] = capacity;
       emptyCount = capacity - selectedCount;
+    }
+
+    if (selectedCount === 0 && emptyCount === 0) {
+      emptyCount = 1;
     }
 
     for (let offset = 0; offset < emptyCount; offset += 1) {

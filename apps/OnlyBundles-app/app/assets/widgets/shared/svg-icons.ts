@@ -91,6 +91,26 @@ export function createSearchIcon(runtimeDocument: Document, size = 18) {
   return svg;
 }
 
+export function createMagnifierIcon(runtimeDocument: Document, size = 16) {
+  const svg = createSvgElement(runtimeDocument, 'svg', {
+    viewBox: '0 0 24 24',
+    width: String(size),
+    height: String(size),
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'aria-hidden': 'true',
+  });
+  svg.append(
+    createSvgElement(runtimeDocument, 'circle', { cx: '11', cy: '11', r: '8' }),
+    createSvgElement(runtimeDocument, 'path', { d: 'M21 21l-4.35-4.35' }),
+  );
+  return svg;
+}
+
+
 export function createPlusIcon(runtimeDocument: Document, size = 28) {
   const svg = createSvgElement(runtimeDocument, 'svg', {
     width: String(size),

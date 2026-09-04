@@ -13,11 +13,12 @@ import db from "../../../db.server";
 import { AppLogger } from "../../../lib/logger";
 import { resolveShopEntitlements } from "../../../services/subscriptions/subscription-service.server";
 import { BundleStatus, BundleType } from "../../../constants/bundle";
+import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
 import {
   handleCreateFpbPreview,
   handleRecordBundlePreview,
 } from "../shared/bundle-preview-action.server";
-import { handleCloneBundle, handleDeleteBundle } from "./handlers";
+import { handleCloneBundle, handleDeleteBundle, handleRenameBundle } from "./handlers";
 import { DashboardPage } from "./DashboardPage";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 import { getDashboardInitialImagePreloads } from "./dashboard-media-state";
@@ -164,6 +165,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         : bundle.publicNumber === null
         ? null
         : String(bundle.publicNumber),
+    previewToken:
+      bundle.status === BundleStatus.DRAFT
+        ? createBundlePreviewToken({ shop: session.shop, bundleId: bundle.id })
+        : null,
   }));
 
   // Billing + proxy-health run concurrently and stream through the deferred
@@ -307,6 +312,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return handleCloneBundle(admin, session, formData);
   if (intent === "deleteBundle")
     return handleDeleteBundle(admin, session, formData);
+  if (intent === "renameBundle")
+    return handleRenameBundle(admin, session, formData);
   if (intent === "createFpbPreview") {
     const bundleId = String(formData.get("bundleId") || "");
     if (!bundleId)

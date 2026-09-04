@@ -6,6 +6,7 @@ import {
   buildProductPageThemeEditorDeepLink,
   deriveCommonSellingPlanGroups,
   navigateToProductPageDefaults,
+  resolveProductPagePlacementBlockHandle,
   resolveProductPageTemplateSuffix,
   resolveProductPageThemeEditorTemplateHandle,
 } from "../../../app/lib/bundle-config/product-page-admin-sections";
@@ -15,7 +16,7 @@ import {
 } from "../../../app/lib/bundle-subscriptions";
 
 const configureHandlersSource = readFileSync(
-  join(process.cwd(), "app/services/bundles/bundle-configure-handlers.server.ts"),
+  join(__dirname, "../../../app/services/bundles/bundle-configure-handlers.server.ts"),
   "utf8"
 );
 const getThemeTemplatesSource = configureHandlersSource.slice(
@@ -232,5 +233,14 @@ describe("product page admin sections", () => {
     expect(getThemeTemplatesSource).not.toContain("formatProductTemplateTitle");
     expect(getThemeTemplatesSource).not.toContain('return "Default product"');
     expect(getThemeTemplatesSource).not.toContain(".replace(/^product\\./, \"\")");
+  });
+
+  it("resolves the correct placement block handle based on active admin section", () => {
+    expect(resolveProductPagePlacementBlockHandle("step_setup", "bundle-product-page")).toBe("bundle-product-page");
+    expect(resolveProductPagePlacementBlockHandle("discount_pricing", "bundle-product-page")).toBe("bundle-product-page");
+    expect(resolveProductPagePlacementBlockHandle("bundle_settings", "bundle-product-page")).toBe("bundle-product-page");
+    expect(resolveProductPagePlacementBlockHandle(undefined, "bundle-product-page")).toBe("bundle-product-page");
+    expect(resolveProductPagePlacementBlockHandle("bundle_widget", "bundle-product-page")).toBe("bundle-upsell");
+    expect(resolveProductPagePlacementBlockHandle("bundle_embed", "bundle-product-page")).toBe("bundle-product-page-embed");
   });
 });

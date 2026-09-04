@@ -8,6 +8,7 @@ export const BundleActionsButtons = memo(
   ({
     bundleId,
     onEdit,
+    onRename,
     onClone,
     onDelete,
     onPreview,
@@ -64,6 +65,16 @@ export const BundleActionsButtons = memo(
         <s-popover id={`more-popover-${bundleId}`}>
           {renderActionMenu && (
             <s-stack direction="block" gap="none">
+              {onRename && (
+                <s-button
+                  id={`rename-${bundleId}`}
+                  variant="tertiary"
+                  icon="edit"
+                  onClick={() => onRename(bundle)}
+                >
+                  {t("dashboard.actions.renameBundle", "Rename Bundle")}
+                </s-button>
+              )}
               <s-button
                 variant="tertiary"
                 icon="duplicate"

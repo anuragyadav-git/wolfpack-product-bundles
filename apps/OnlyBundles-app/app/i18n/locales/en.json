@@ -88,6 +88,8 @@
       "deleteBundle": "Delete bundle",
       "cloneSuccess": "Bundle cloned successfully",
       "deleteSuccess": "Bundle deleted",
+      "renameBundle": "Rename Bundle",
+      "renameSuccess": "Bundle renamed successfully",
       "themeEditorUnavailable": "Theme editor link is unavailable for this store."
     },
     "deleteModal": {
@@ -95,6 +97,15 @@
       "delete": "Delete",
       "cancel": "Cancel",
       "body": "This action cannot be undone. All bundle configuration, steps, and discount rules will be permanently deleted."
+    },
+    "renameModal": {
+      "heading": "Rename bundle",
+      "nameLabel": "Bundle name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "errorEmpty": "Bundle name cannot be empty.",
+      "errorTooLong": "Bundle name cannot exceed 255 characters.",
+      "errorFailed": "Failed to rename bundle."
     },
     "resources": {
       "bundleInspiration": "Bundle Inspiration",

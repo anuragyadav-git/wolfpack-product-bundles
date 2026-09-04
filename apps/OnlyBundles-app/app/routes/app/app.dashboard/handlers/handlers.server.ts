@@ -17,6 +17,7 @@ import { getBundleEditPath } from "../../../../lib/bundle-navigation";
 import { ensureBundleParentProduct } from "../../../../services/bundles/bundle-parent-product.server";
 import { createBundleWithPublicNumber } from "../../../../services/bundles/fpb-public-number.server";
 import { normalizePpbBundleEmbedConfig } from "../../../../lib/ppb-bundle-embed";
+import { syncBundleStorefrontNow } from "../../../../services/bundles/storefront-sync.server";
 
 const GET_PUBLICATIONS = `
   query {
@@ -429,5 +430,80 @@ export async function handleCreateBundle(
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     AppLogger.error("Failed to create bundle", { component: "app.dashboard", operation: "create-bundle" }, error);
     return json({ error: `Failed to create bundle: ${errorMessage}` }, { status: 500 });
+  }
+}
+
+/**
+ * Handle renaming a bundle
+ */
+export async function handleRenameBundle(
+  admin: ShopifyAdmin,
+  session: { shop: string },
+  formData: FormData
+) {
+  const bundleId = formData.get("bundleId") as string;
+  const rawBundleName = formData.get("bundleName");
+
+  if (!bundleId) {
+    return json({ success: false, error: "Missing bundleId" }, { status: 400 });
+  }
+
+  const bundleName = typeof rawBundleName === "string" ? rawBundleName.trim() : "";
+  if (!bundleName) {
+    return json({ success: false, error: "Bundle name cannot be empty" }, { status: 400 });
+  }
+
+  if (bundleName.length > 255) {
+    return json(
+      { success: false, error: "Bundle name cannot exceed 255 characters" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const existing = await db.bundle.findUnique({
+      where: { id: bundleId, shopId: session.shop },
+    });
+
+    if (!existing) {
+      return json({ success: false, error: ERROR_MESSAGES.BUNDLE_NOT_FOUND }, { status: 404 });
+    }
+
+    await db.bundle.update({
+      where: { id: bundleId, shopId: session.shop },
+      data: { name: bundleName },
+    });
+
+    try {
+      await syncBundleStorefrontNow({
+        admin,
+        shopDomain: session.shop,
+        bundleId,
+        bundleType: existing.bundleType as "full_page" | "product_page",
+        reason: "save",
+      });
+    } catch (syncError: any) {
+      AppLogger.warn(
+        "Storefront sync encountered warning after bundle rename",
+        { component: "app.dashboard", operation: "rename-bundle", bundleId },
+        syncError
+      );
+    }
+
+    AppLogger.info("Bundle renamed successfully", {
+      component: "app.dashboard",
+      operation: "rename-bundle",
+      bundleId,
+      bundleName,
+    });
+
+    return json({ success: true, bundleId, bundleName });
+  } catch (error: any) {
+    AppLogger.error(
+      "Failed to rename bundle",
+      { component: "app.dashboard", operation: "rename-bundle", bundleId },
+      error
+    );
+    return json({ success: false, error: "Failed to rename bundle" }, { status: 500 });
   }
 }

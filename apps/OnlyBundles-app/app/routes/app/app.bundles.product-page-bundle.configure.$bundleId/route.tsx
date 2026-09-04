@@ -27,6 +27,7 @@ import {
   handlePrepareStorefrontPreview,
   handleSyncStorefrontNow,
 } from "../shared/storefront-sync-action.server";
+import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 import { buildSpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
@@ -127,6 +128,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     blockHandle,
     shopLocales: shopifyData.shopLocales,
     shopCurrencyCode: shopifyData.shopCurrencyCode,
+    previewToken: createBundlePreviewToken({
+      shop: session.shop,
+      bundleId,
+    }),
   });
 };
 
