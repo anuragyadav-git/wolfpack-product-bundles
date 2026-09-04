@@ -5,7 +5,7 @@ title: Storefront Draft Preview Authorization
 type: architecture-decision
 status: accepted
 summary: Draft FPB and PPB storefront previews use one short-lived stateless token bound to the shop and bundle.
-last_audited: 2026-08-10
+last_audited: 2026-09-04
 owners:
   - engineering
 domains:
@@ -47,7 +47,7 @@ Active and unlisted bundles remain public. Draft bundles require a valid token. 
 
 FPB places the token on the canonical signed app-proxy document URL. The FPB document route verifies both Shopify's app-proxy signature and the bundle preview token before rendering draft configuration.
 
-PPB places the token on the Shopify product preview URL. The product-page widget forwards only `wpb_preview` to its bundle configuration request. Shopify signs that app-proxy request, and the API verifies the proxy shop before verifying the preview token. Other Shopify preview parameters stay on the product URL and are not forwarded to the app proxy.
+PPB places the token on the Shopify product preview URL. The product-page widget forwards only `wpb_preview` to its bundle configuration request when present in the URL search params. Shopify signs that app-proxy request, and the API verifies the proxy shop before verifying the preview token. Other Shopify preview parameters stay on the product URL and are not forwarded to the app proxy. Admin Dashboard and Configure actions append `?wpb_preview={token}` automatically when triggering storefront previews for bundles in draft state.
 
 ## Caching and persistence
 

@@ -151,6 +151,19 @@ async loadStepProducts(stepIndex: string|number) {
     }
   }
 
+  if (allProducts.length === 0) {
+    const fallbackProducts = [
+      ...(Array.isArray(step?.products) ? step.products : []),
+      ...(Array.isArray(step?.categories)
+        ? step.categories.flatMap((cat: any) => Array.isArray(cat?.products) ? cat.products : [])
+        : []),
+    ];
+    if (fallbackProducts.length > 0) {
+      allProducts = fallbackProducts;
+      fetchFailed = false;
+    }
+  }
+
   // Process and normalize product data
   const processedProducts = this._mergeDirectDefaultProductsIntoStep(
     stepIndex,
@@ -193,8 +206,8 @@ processProductsForStep(products: any[], step: any) {
   );
   const toCents = (value: any) => Math.round(parseFloat(value || '0') * 100);
   const normalizeVariant = (v: any) => ({
-    id: this.extractId(v.id),
-    selectionId: this.extractId(v.id),
+    id: this.extractId(v.id || v.selectionId),
+    selectionId: this.extractId(v.selectionId || v.id),
     title: v.title,
     price: toCents(v.price),
     compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
@@ -248,20 +261,20 @@ processProductsForStep(products: any[], step: any) {
           const imageUrl = variant?.image?.src || product.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
 
           return {
-            id: this.extractId(variant.id),
-            selectionId: this.extractId(variant.id),
+            id: this.extractId(variant.id || variant.selectionId),
+            selectionId: this.extractId(variant.selectionId || variant.id),
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
             compareAtPrice: variant.compareAtPrice ? toCents(variant.compareAtPrice) : null,
-            variantId: this.extractId(variant.id),
+            variantId: this.extractId(variant.id || variant.selectionId),
             available: isVariantSelectableForInventory(variant),
             quantityAvailable: typeof variant.quantityAvailable === 'number' ? variant.quantityAvailable : null,
             currentlyNotInStock: variant.currentlyNotInStock === true,
             weight: normalizeWeightToGrams(variant.weight, variant.weightUnit),
             weightUnit: 'GRAMS',
             // Preserve parent product data for variant selection in modal
-            parentProductId: this.extractId(product.id),
+            parentProductId: this.extractId(product.id || product.selectionId),
             parentTitle: product.title,
             variants: processedVariants,
             options: processedOptions,
@@ -302,15 +315,15 @@ processProductsForStep(products: any[], step: any) {
       ));
 
       return [{
-          id: this.extractId(product.id),
+          id: this.extractId(product.id || product.selectionId),
           title: product.title,
           imageUrl,
           price: defaultVariant
             ? toCents(defaultVariant.price)
             : toCents(product.price),
           compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
-          variantId: this.extractId(defaultVariant?.id || product.id),
-          selectionId: this.extractId(defaultVariant?.id || product.id),
+          variantId: this.extractId(defaultVariant?.id || defaultVariant?.selectionId || product.id || product.selectionId),
+          selectionId: this.extractId(defaultVariant?.selectionId || defaultVariant?.id || product.selectionId || product.id),
           available: defaultVariant ? isVariantSelectableForInventory(defaultVariant) : false,
           quantityAvailable: typeof defaultVariant?.quantityAvailable === 'number' ? defaultVariant.quantityAvailable : null,
           currentlyNotInStock: defaultVariant?.currentlyNotInStock === true,

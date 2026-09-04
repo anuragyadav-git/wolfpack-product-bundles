@@ -386,6 +386,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
           shop,
           appEmbedEnabled,
           bundleStatus: bundle.status,
+          previewToken: (bundle as any).previewToken ?? null,
         });
 
         if (action.kind === "error") {

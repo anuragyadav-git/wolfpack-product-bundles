@@ -13,6 +13,7 @@ import db from "../../../db.server";
 import { AppLogger } from "../../../lib/logger";
 import { resolveShopEntitlements } from "../../../services/subscriptions/subscription-service.server";
 import { BundleStatus, BundleType } from "../../../constants/bundle";
+import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
 import {
   handleCreateFpbPreview,
   handleRecordBundlePreview,
@@ -164,6 +165,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         : bundle.publicNumber === null
         ? null
         : String(bundle.publicNumber),
+    previewToken:
+      bundle.status === BundleStatus.DRAFT
+        ? createBundlePreviewToken({ shop: session.shop, bundleId: bundle.id })
+        : null,
   }));
 
   // Billing + proxy-health run concurrently and stream through the deferred

@@ -5,7 +5,8 @@ export type DashboardPreviewInput = {
   shop: string;
   /** Optional app-embed state retained for the preview gate caller. */
   appEmbedEnabled?: boolean;
-  bundleStatus?: "active" | "draft" | "unlisted" | "archived" | string;
+  /** Optional signed preview token for draft bundles */
+  previewToken?: string | null;
 };
 
 export type DashboardPreviewAction =
@@ -30,9 +31,13 @@ export function decideDashboardPreviewAction(
   }
 
   const shop = normalizeShop(input.shop);
+  const baseProductUrl = `https://${shop}/products/${input.shopifyProductHandle}`;
+  const url = input.previewToken
+    ? `${baseProductUrl}?wpb_preview=${encodeURIComponent(input.previewToken)}`
+    : baseProductUrl;
   return {
     kind: "open_url",
-    url: `https://${shop}/products/${input.shopifyProductHandle}`,
+    url,
   };
 }
 

@@ -61,7 +61,7 @@ describe('PPB template registry integration', () => {
     const fs = require('node:fs');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const path = require('node:path');
-    const source = fs.readFileSync(path.join(process.cwd(), 'app/assets/widgets/product-page/templates/cascade-template.ts'), 'utf8');
+    const source = fs.readFileSync(path.resolve(__dirname, '../../../app/assets/widgets/product-page/templates/cascade-template.ts'), 'utf8');
 
     expect(source).toContain('_getProductPageTemplateContract');
     expect(source).not.toContain('attachProductPageTemplateMethods');
