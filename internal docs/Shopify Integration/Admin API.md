@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-09-03
+last_audited: 2026-09-04
 owners:
   - engineering
 domains:
@@ -82,6 +82,18 @@ resource routes and mutations that can be requested directly authenticate at
 their own boundary. Avoid duplicating authentication only for a child loader
 whose sole owner is the authenticated layout, because parallel one-time ID-token
 exchanges can race.
+
+Call `authenticate.admin(request)` before parsing or validating a direct Admin
+resource request, and keep it outside broad application `try/catch` blocks.
+Shopify uses thrown responses for reauthorization and embedded redirects;
+catching those responses and converting them to generic JSON errors breaks the
+platform auth flow. An action-only resource route should also authenticate its
+direct loader before returning `405`.
+
+The `/auth/login` loader and action delegate shop validation and OAuth navigation
+to Shopify's `login(request)` helper. The `/auth/$` OAuth route calls
+`authenticate.admin(request)` and returns `null` after successful completion;
+it must not add a second generic Remix redirect.
 
 Existing non-expiring rows require a one-time operator cutover. Select only offline rows with no expiry or refresh metadata, then call Shopify's native `migrateToExpiringToken` and store the returned session through `PrismaSessionStorage`. Run this temporary utility in SIT first. Production apply requires explicit approval because each successful exchange irreversibly revokes the previous non-expiring token; abort and report the first failed shop.
 

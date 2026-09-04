@@ -97,6 +97,19 @@ beforeEach(() => {
 });
 
 describe("FPB configure action dispatch", () => {
+  it("propagates Shopify authentication responses before action handling", async () => {
+    const authResponse = new Response(null, {
+      status: 302,
+      headers: { Location: "https://admin.shopify.com" },
+    });
+    mockRequireAdminSession.mockRejectedValue(authResponse);
+
+    await expect(fpbAction(makeActionArgs("saveBundle"))).rejects.toBe(
+      authResponse,
+    );
+    expect(fpbHandlers.handleSaveBundle).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["saveBundle", "handleSaveBundle"],
     ["updateBundleStatus", "handleUpdateBundleStatus"],
@@ -168,6 +181,19 @@ describe("FPB configure action dispatch", () => {
 });
 
 describe("PPB configure action dispatch", () => {
+  it("propagates Shopify authentication responses before action handling", async () => {
+    const authResponse = new Response(null, {
+      status: 302,
+      headers: { Location: "https://admin.shopify.com" },
+    });
+    mockRequireAdminSession.mockRejectedValue(authResponse);
+
+    await expect(ppbAction(makeActionArgs("saveBundle"))).rejects.toBe(
+      authResponse,
+    );
+    expect(ppbHandlers.handleSaveBundle).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["saveBundle", "handleSaveBundle"],
     ["updateBundleStatus", "handleUpdateBundleStatus"],

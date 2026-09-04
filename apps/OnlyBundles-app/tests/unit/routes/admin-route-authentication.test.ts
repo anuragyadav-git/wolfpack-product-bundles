@@ -14,14 +14,14 @@ const AUTHENTICATION_POLICY: Record<
   "app.billing.tsx": { directCalls: 2 },
   "app.billing_.plans.tsx": { directCalls: 2 },
   "app.bundles.$bundleType.configure.$bundleId.prepare-preview.tsx": {
-    directCalls: 1,
+    directCalls: 2,
   },
   "app.bundles.create/route.tsx": { directCalls: 2 },
   "app.bundles.full-page-bundle.configure.$bundleId/route.tsx": {
     directCalls: 2,
   },
   "app.bundles.product-page-bundle.configure.$bundleId.validate-widget-placement.tsx": {
-    directCalls: 1,
+    directCalls: 2,
   },
   "app.bundles.product-page-bundle.configure.$bundleId/route.tsx": {
     directCalls: 2,

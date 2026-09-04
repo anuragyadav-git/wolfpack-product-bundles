@@ -769,8 +769,17 @@ authorization, force-verifies the Partner API subscription, then redirects back.
 
 ```
 / (landing)
-  └── not authenticated → /auth/login → OAuth → /auth/callback → /app/dashboard
+  └── not authenticated → /auth/login
+      └── Shopify login(request) validates shop + owns OAuth navigation
+          └── /auth/callback
+              └── Shopify authenticate.admin(request) completes auth
+                  └── authenticated /app entry → /app/dashboard
 ```
+
+Admin actions and directly requested Admin resource loaders authenticate before
+request parsing, route validation, or method responses. Shopify-thrown auth and
+redirect responses propagate unchanged; authenticated in-app redirects use the
+`redirect` helper returned by `authenticate.admin(request)`.
 
 ### Flow B: Create & Configure Bundle
 

@@ -9,9 +9,9 @@ import { AppLogger } from "../../lib/logger";
  * instructions for merchants to add the Bundle Builder block via Theme Customizer
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
-  try {
-    const { admin, session } = await authenticate.admin(request);
+  await authenticate.admin(request);
 
+  try {
     const body = await request.json();
     const { productHandle, bundleId } = body;
 
