@@ -213,6 +213,34 @@ export default function BillingPage() {
     navigateBackOrFallback(navigate, "/app/dashboard", {
       replaceFallback: true,
     });
+  const overviewItems = data.stats
+    ? [
+        {
+          id: "active-bundles",
+          icon: "check-circle" as const,
+          value: data.stats.activeBundles,
+          label: t("billing.route.activeBundles"),
+        },
+        {
+          id: "total-steps",
+          icon: "note" as const,
+          value: data.stats.totalSteps,
+          label: t("billing.route.totalSteps"),
+        },
+        {
+          id: "product-page",
+          icon: "product" as const,
+          value: data.stats.bundleTypes.productPage,
+          label: t("billing.route.productPage"),
+        },
+        {
+          id: "full-page",
+          icon: "globe" as const,
+          value: data.stats.bundleTypes.fullPage,
+          label: t("billing.route.fullPage"),
+        },
+      ]
+    : [];
 
   return (
     <>
@@ -242,34 +270,34 @@ export default function BillingPage() {
               />
             )}
 
-            {/* Current Plan Status */}
-            <s-section>
-              <s-stack direction="block" gap="base">
-                <s-stack
-                  direction="inline"
-                  justifyContent="space-between"
-                  alignItems="start"
+            <s-section heading={t("billing.route.currentPlan")}>
+              <s-stack direction="block" gap="large">
+                <s-grid
+                  gridTemplateColumns="@container billing-page (inline-size > 640px) 1fr auto, 1fr"
+                  gap="base"
+                  alignItems="center"
                 >
-                  <s-stack direction="block" gap="small-100">
-                    <s-stack
-                      direction="inline"
-                      alignItems="center"
-                      gap="small-100"
+                  <s-stack direction="inline" alignItems="center" gap="base">
+                    <s-box
+                      padding="small"
+                      background="subdued"
+                      borderRadius="base"
                     >
-                      <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-                        {t("billing.route.currentPlan")}
-                      </h2>
-                      {isGrowthPlan && (
-                        <div className={billingStyles.starIcon}>
-                          <s-icon type="check" />
-                        </div>
-                      )}
-                    </s-stack>
-                    <s-stack direction="inline" alignItems="center" gap="small">
-                      <span style={{ fontSize: 20, fontWeight: 700 }}>
-                        {PLANS[currentPlan].name}
-                      </span>
-                      <s-badge tone={isGrowthPlan ? "success" : "info"}>
+                      <s-icon
+                        type="credit-card"
+                        tone={isGrowthPlan ? "success" : "info"}
+                      />
+                    </s-box>
+                    <s-stack direction="block" gap="small-100">
+                      <s-heading>{PLANS[currentPlan].name}</s-heading>
+                      <s-badge
+                        tone={isGrowthPlan ? "success" : "info"}
+                        icon={
+                          data.subscription?.isActive
+                            ? "check-circle"
+                            : undefined
+                        }
+                      >
                         {data.subscription?.isActive
                           ? t("billing.route.active")
                           : t("billing.route.inactive")}
@@ -277,29 +305,35 @@ export default function BillingPage() {
                     </s-stack>
                   </s-stack>
                   {isGrowthPlan && (
-                    <s-stack direction="block" gap="small-400" alignItems="end">
-                      <span style={{ fontSize: 28, fontWeight: 700 }}>
-                        ${PLANS.growth.price}
-                      </span>
-                      <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
+                    <s-stack
+                      direction="inline"
+                      gap="small-100"
+                      alignItems="baseline"
+                    >
+                      <s-heading>${PLANS.growth.price}</s-heading>
+                      <s-text color="subdued">
                         {t("billing.cards.perMonth")}
-                      </p>
+                      </s-text>
                     </s-stack>
                   )}
-                </s-stack>
+                </s-grid>
 
                 <s-divider />
 
-                {/* Bundle Usage */}
-                <s-stack direction="block" gap="small">
-                  <s-stack
-                    direction="inline"
-                    justifyContent="space-between"
+                <s-stack direction="block" gap="base">
+                  <s-grid
+                    gridTemplateColumns="1fr auto"
+                    gap="base"
                     alignItems="center"
                   >
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                      {t("billing.route.bundleUsage")}
-                    </p>
+                    <s-stack direction="inline" alignItems="center" gap="small">
+                      <s-box>
+                        <s-icon type="product" color="subdued" />
+                      </s-box>
+                      <s-text type="strong">
+                        {t("billing.route.bundleUsage")}
+                      </s-text>
+                    </s-stack>
                     <s-badge
                       tone={
                         usagePercentage >= 90
@@ -316,7 +350,7 @@ export default function BillingPage() {
                           })
                         : t("billing.values.unlimited")}
                     </s-badge>
-                  </s-stack>
+                  </s-grid>
                   {isFreePlan && (
                     <CustomProgressBar
                       progress={usagePercentage}
@@ -338,76 +372,71 @@ export default function BillingPage() {
                   )}
                 </s-stack>
 
-                {isFreePlan && (
-                  <>
-                    <s-divider />
-                    <s-button variant="primary" href="/app/billing/plans">
-                      {t("common.actions.upgradeNow")}
-                    </s-button>
-                  </>
-                )}
-
-                {/* Quick Stats */}
                 {data.stats && (
                   <>
                     <s-divider />
-                    <s-stack direction="block" gap="small-100">
-                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                    <s-stack direction="block" gap="base">
+                      <s-text type="strong">
                         {t("billing.route.overview")}
-                      </p>
+                      </s-text>
                       <s-grid
                         gridTemplateColumns="@container billing-page (inline-size > 560px) 1fr 1fr 1fr 1fr, 1fr 1fr"
                         gap="base"
                       >
-                        <s-stack direction="block" gap="small-400">
-                          <span style={{ fontSize: 16, fontWeight: 700 }}>
-                            {data.stats.activeBundles}
-                          </span>
-                          <span style={{ fontSize: 12, color: "#6d7175" }}>
-                            {t("billing.route.activeBundles")}
-                          </span>
-                        </s-stack>
-                        <s-stack direction="block" gap="small-400">
-                          <span style={{ fontSize: 16, fontWeight: 700 }}>
-                            {data.stats.totalSteps}
-                          </span>
-                          <span style={{ fontSize: 12, color: "#6d7175" }}>
-                            {t("billing.route.totalSteps")}
-                          </span>
-                        </s-stack>
-                        <s-stack direction="block" gap="small-400">
-                          <span style={{ fontSize: 16, fontWeight: 700 }}>
-                            {data.stats.bundleTypes.productPage}
-                          </span>
-                          <span style={{ fontSize: 12, color: "#6d7175" }}>
-                            {t("billing.route.productPage")}
-                          </span>
-                        </s-stack>
-                        <s-stack direction="block" gap="small-400">
-                          <span style={{ fontSize: 16, fontWeight: 700 }}>
-                            {data.stats.bundleTypes.fullPage}
-                          </span>
-                          <span style={{ fontSize: 12, color: "#6d7175" }}>
-                            {t("billing.route.fullPage")}
-                          </span>
-                        </s-stack>
+                        {overviewItems.map((item) => (
+                          <s-box
+                            key={item.id}
+                            padding="base"
+                            background="subdued"
+                            border="base"
+                            borderRadius="base"
+                          >
+                            <s-stack direction="block" gap="small">
+                              <s-box>
+                                <s-icon type={item.icon} color="subdued" />
+                              </s-box>
+                              <s-heading>{item.value}</s-heading>
+                              <s-text color="subdued">{item.label}</s-text>
+                            </s-stack>
+                          </s-box>
+                        ))}
                       </s-grid>
                     </s-stack>
                   </>
                 )}
 
-                {/* Cancel Subscription */}
+                {isFreePlan && (
+                  <>
+                    <s-divider />
+                    <s-stack direction="inline" justifyContent="end">
+                      <s-box>
+                        <s-button
+                          variant="primary"
+                          icon="arrow-right"
+                          href="/app/billing/plans"
+                        >
+                          {t("common.actions.upgradeNow")}
+                        </s-button>
+                      </s-box>
+                    </s-stack>
+                  </>
+                )}
+
                 {isGrowthPlan && !showCancelConfirm && (
                   <>
                     <s-divider />
-                    <s-button
-                      variant="tertiary"
-                      tone="critical"
-                      onClick={openCancelConfirm}
-                      disabled={isCancelling || undefined}
-                    >
-                      {t("billing.route.cancelSubscription")}
-                    </s-button>
+                    <s-stack direction="inline" justifyContent="end">
+                      <s-box>
+                        <s-button
+                          variant="secondary"
+                          icon="edit"
+                          onClick={openCancelConfirm}
+                          disabled={isCancelling || undefined}
+                        >
+                          {t("billing.route.cancelSubscription")}
+                        </s-button>
+                      </s-box>
+                    </s-stack>
                   </>
                 )}
 
@@ -422,28 +451,22 @@ export default function BillingPage() {
                         hidden={false}
                       >
                         <s-stack direction="block" gap="small">
-                          <p style={{ margin: 0, fontSize: 14 }}>
+                          <s-paragraph>
                             {t("billing.route.downgradeBody", {
                               limit: PLANS.free.bundleLimit,
                             })}
-                          </p>
+                          </s-paragraph>
                           {data.subscription &&
                             data.subscription.currentBundleCount >
                               PLANS.free.bundleLimit && (
-                              <p
-                                style={{
-                                  margin: 0,
-                                  fontSize: 14,
-                                  fontWeight: 600,
-                                }}
-                              >
+                              <s-text type="strong">
                                 {t("billing.route.archiveWarning", {
                                   current: data.subscription.currentBundleCount,
                                   excess:
                                     data.subscription.currentBundleCount -
                                     PLANS.free.bundleLimit,
                                 })}
-                              </p>
+                              </s-text>
                             )}
                           <s-stack direction="inline" gap="small-100">
                             <s-button
@@ -465,41 +488,55 @@ export default function BillingPage() {
               </s-stack>
             </s-section>
 
-            {/* Plan Features */}
-            <s-section>
-              <s-stack direction="block" gap="base">
-                <s-heading>{t("billing.route.features")}</s-heading>
-                <div className={billingStyles.featuresGrid}>
-                  {PLANS[currentPlan].featureMessageIds.map((messageId) => (
-                    <s-stack
-                      key={messageId}
-                      direction="inline"
-                      alignItems="center"
-                      gap="small-100"
-                    >
-                      <div className={billingStyles.checkIcon}>
-                        <s-icon type="check" />
-                      </div>
-                      <s-text>{t(messageId)}</s-text>
+            <s-section heading={t("billing.route.features")}>
+              <s-grid
+                gridTemplateColumns="@container billing-page (inline-size > 700px) 1fr 1fr, 1fr"
+                gap="base"
+              >
+                {PLANS[currentPlan].featureMessageIds.map((messageId) => (
+                  <s-box
+                    key={messageId}
+                    padding="base"
+                    border="base"
+                    borderRadius="base"
+                  >
+                    <s-stack direction="inline" alignItems="center" gap="small">
+                      <s-box>
+                        <s-icon type="check-circle" tone="success" />
+                      </s-box>
+                      <s-box>
+                        <s-text>{t(messageId)}</s-text>
+                      </s-box>
                     </s-stack>
-                  ))}
-                </div>
-              </s-stack>
+                  </s-box>
+                ))}
+              </s-grid>
             </s-section>
 
-            {/* Help Section */}
-            <s-section>
-              <s-stack direction="block" gap="small-100">
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-                  {t("billing.route.needHelp")}
-                </h3>
-                <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                  {t("billing.route.helpBody")}
-                </p>
-                <s-button onClick={() => openSupportChat()}>
-                  {t("billing.actions.contactSupport")}
-                </s-button>
-              </s-stack>
+            <s-section heading={t("billing.route.needHelp")}>
+              <s-grid
+                gridTemplateColumns="@container billing-page (inline-size > 560px) 1fr auto, 1fr"
+                gap="base"
+                alignItems="center"
+              >
+                <s-stack direction="inline" alignItems="center" gap="base">
+                  <s-box
+                    padding="small"
+                    background="subdued"
+                    borderRadius="base"
+                  >
+                    <s-icon type="info" color="subdued" />
+                  </s-box>
+                  <s-paragraph color="subdued">
+                    {t("billing.route.helpBody")}
+                  </s-paragraph>
+                </s-stack>
+                <s-box>
+                  <s-button onClick={() => openSupportChat()}>
+                    {t("billing.actions.contactSupport")}
+                  </s-button>
+                </s-box>
+              </s-grid>
             </s-section>
           </s-stack>
         </div>
