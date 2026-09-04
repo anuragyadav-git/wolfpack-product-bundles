@@ -391,12 +391,16 @@ export default function BillingPage() {
                             border="base"
                             borderRadius="base"
                           >
-                            <s-stack direction="block" gap="small">
-                              <s-box>
+                            <s-stack direction="block" gap="base">
+                              <s-stack
+                                direction="inline"
+                                gap="small"
+                                alignItems="center"
+                              >
                                 <s-icon type={item.icon} color="subdued" />
-                              </s-box>
-                              <s-heading>{item.value}</s-heading>
-                              <s-text color="subdued">{item.label}</s-text>
+                                <s-text>{item.label}</s-text>
+                              </s-stack>
+                              <s-text type="strong">{item.value}</s-text>
                             </s-stack>
                           </s-box>
                         ))}
