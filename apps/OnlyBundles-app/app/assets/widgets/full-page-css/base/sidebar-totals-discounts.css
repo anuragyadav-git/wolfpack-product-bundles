@@ -27,7 +27,7 @@
 .side-panel-total-prices {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   flex-wrap: wrap;
   gap: 8px;
   min-width: 0;
@@ -65,7 +65,7 @@
 .side-panel-total-final {
   font-size: 18px;
   font-weight: 700;
-  color: var(--bundle-side-panel-total-final-color, #e65100);
+  color: var(--bundle-side-panel-total-final-color, #000);
 }
 
 .side-panel-nav {

@@ -546,13 +546,6 @@ renderSidePanel(panel: any) {
   totalLabel.className = 'side-panel-total-label';
   totalLabel.textContent = 'Total';
   totalHeading.appendChild(totalLabel);
-  if (discountBadgeLabel) {
-    const discountBadge = document.createElement('span');
-    discountBadge.className = 'fpb-summary-discount-badge';
-    discountBadge.setAttribute('data-wpb-discount-feedback-pill', '');
-    discountBadge.textContent = discountBadgeLabel;
-    totalHeading.appendChild(discountBadge);
-  }
   const prices = document.createElement('div');
   prices.className = 'side-panel-total-prices';
   if (shouldShowOriginalTotal) {
@@ -565,6 +558,13 @@ renderSidePanel(panel: any) {
   final.className = 'side-panel-total-final';
   final.textContent = CurrencyManager.convertAndFormat(finalPrice, currencyInfo);
   prices.appendChild(final);
+  if (discountBadgeLabel) {
+    const discountBadge = document.createElement('span');
+    discountBadge.className = 'fpb-summary-discount-badge';
+    discountBadge.setAttribute('data-wpb-discount-feedback-pill', '');
+    discountBadge.textContent = discountBadgeLabel;
+    prices.appendChild(discountBadge);
+  }
   totalSection.append(totalHeading, prices);
   if (isMobileSheet) {
     panel.appendChild(totalSection);

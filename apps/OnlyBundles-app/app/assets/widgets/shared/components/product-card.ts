@@ -8,6 +8,8 @@
 'use strict';
 
 import { createQuantityControlElement } from './quantity-control.js';
+import { createMagnifierIcon } from '../svg-icons.js';
+
 
 const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3C/svg%3E';
 const PRODUCT_DESCRIPTION_PREVIEW_LENGTH = 110;
@@ -119,6 +121,7 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
     overlay.setAttribute('aria-hidden', 'true');
     const magnifier = runtimeDocument.createElement('span');
     magnifier.className = 'bw-product-card__magnifier';
+    magnifier.append(createMagnifierIcon(runtimeDocument, 16));
     overlay.append(magnifier);
     media.append(overlay);
   }
