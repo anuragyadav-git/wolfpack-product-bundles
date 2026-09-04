@@ -47,12 +47,16 @@ export function AdminWarningGroup({
           dismissible={false}
           hidden={false}
         >
+          {warning.message}
           {warning.actionLabel && warning.onAction ? (
-            <s-button slot="primary-action" onClick={warning.onAction}>
+            <s-button
+              slot="secondary-actions"
+              variant="secondary"
+              onClick={warning.onAction}
+            >
               {warning.actionLabel}
             </s-button>
           ) : null}
-          {warning.message}
         </s-banner>
       </s-box>
     );
@@ -73,13 +77,17 @@ export function AdminWarningGroup({
             alignItems="center"
             gap="base"
           >
-            <s-text>{t("common.warningGroup.summary")}</s-text>
-            <s-button
-              variant="secondary"
-              onClick={() => modalRef.current?.showOverlay?.()}
-            >
-              {t("common.actions.manage")}
-            </s-button>
+            <s-box>
+              <s-text>{t("common.warningGroup.summary")}</s-text>
+            </s-box>
+            <s-box>
+              <s-button
+                variant="secondary"
+                onClick={() => modalRef.current?.showOverlay?.()}
+              >
+                {t("common.actions.manage")}
+              </s-button>
+            </s-box>
           </s-stack>
         </s-banner>
       </s-box>

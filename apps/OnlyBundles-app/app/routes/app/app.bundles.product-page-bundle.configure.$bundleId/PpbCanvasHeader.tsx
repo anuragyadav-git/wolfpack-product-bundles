@@ -4,7 +4,10 @@ import { getReadinessScoreColor } from "../../../components/bundle-configure/Bun
 import { useTranslation } from "react-i18next";
 import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
-import { buildPpbCanvasWarnings } from "./ppb-warning-presentation";
+import {
+  buildPpbCanvasWarnings,
+  getPpbStandaloneUnlistedWarning,
+} from "./ppb-warning-presentation";
 
 export function PpbCanvasHeader() {
   const { t } = useTranslation();
@@ -56,6 +59,8 @@ export function PpbCanvasHeader() {
       : null,
     operationAlert,
   });
+  const standaloneUnlistedWarning =
+    getPpbStandaloneUnlistedWarning(warnings);
 
   return (
     <>
@@ -124,7 +129,16 @@ export function PpbCanvasHeader() {
           </s-button>
         </div>
       </div>
-      {warnings.length > 0 ? (
+      {standaloneUnlistedWarning ? (
+        <div className={productPageBundleStyles.unlistedBannerGap}>
+          <UnlistedBundleBanner
+            shop={shop}
+            bundleProductId={bundleProductId}
+            loading={false}
+            onManage={standaloneUnlistedWarning.onAction}
+          />
+        </div>
+      ) : warnings.length > 0 ? (
         <AdminWarningGroup warnings={warnings} />
       ) : parentProductStatusUi.isLoading ? (
         <div className={productPageBundleStyles.unlistedBannerGap}>

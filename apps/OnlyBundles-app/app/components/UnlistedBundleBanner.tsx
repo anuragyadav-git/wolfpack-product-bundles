@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import styles from "./UnlistedBundleBanner.module.css";
 
 interface UnlistedBundleBannerProps {
   shop: string;
@@ -47,23 +46,29 @@ export function UnlistedBundleBanner({
 
   return (
     <s-box paddingBlockEnd="small-200">
-      <div className={styles.bannerFrame}>
-        <s-banner
-          tone="warning"
-          heading={t("common.unlistedBundle.title")}
-          dismissible={false}
-          hidden={false}
+      <s-banner
+        tone="warning"
+        heading={t("common.unlistedBundle.title")}
+        dismissible={false}
+        hidden={false}
+      >
+        <s-stack
+          direction="inline"
+          inlineSize="100%"
+          alignItems="center"
+          justifyContent="space-between"
+          gap="base"
         >
-          <div className={styles.bannerBody}>
+          <s-box>
             <s-text>{t("common.unlistedBundle.body")}</s-text>
-          </div>
-        </s-banner>
-        <div className={styles.manageAction}>
-          <s-button variant="secondary" tone="auto" onClick={onManage}>
-            {t("common.actions.manage")}
-          </s-button>
-        </div>
-      </div>
+          </s-box>
+          <s-box>
+            <s-button variant="secondary" tone="auto" onClick={onManage}>
+              {t("common.actions.manage")}
+            </s-button>
+          </s-box>
+        </s-stack>
+      </s-banner>
     </s-box>
   );
 }

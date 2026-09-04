@@ -43,6 +43,7 @@ Prevent simultaneous Admin warnings from rendering as stacked banners while pres
 | 2 | One active warning | One warning with an action | The warning renders directly with its original copy and action | Single-warning behavior remains concise |
 | 3 | Multiple active warnings | Two warnings with separate actions | One summary banner and one modal containing both warnings and actions | No stacked warning banners |
 | 4 | Merchant selects a modal warning action | Warning with an action callback | The modal closes before the callback runs | Prevents an overlay lingering over Shopify navigation |
+| 5 | PPB has only the unlisted-product warning | One unlisted warning | The shared `UnlistedBundleBanner` owns the standalone warning | Keeps FPB and PPB behavior aligned |
 
 ## Acceptance Criteria
 
@@ -51,3 +52,4 @@ Prevent simultaneous Admin warnings from rendering as stacked banners while pres
 - [x] Every active warning remains visible in the modal with its associated action.
 - [x] FPB and PPB configure headers use the shared warning group.
 - [x] Other co-existing warning groups use the same shared behavior.
+- [x] FPB and PPB use the shared unlisted banner when it is the only active warning.

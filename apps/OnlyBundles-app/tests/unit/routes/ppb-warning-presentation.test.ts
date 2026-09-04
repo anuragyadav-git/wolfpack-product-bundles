@@ -1,6 +1,7 @@
 import { getAdminWarningPresentation } from "../../../app/components/AdminWarningGroup";
 import {
   buildPpbCanvasWarnings,
+  getPpbStandaloneUnlistedWarning,
   getPpbStandaloneOperationAlert,
 } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/ppb-warning-presentation";
 
@@ -54,6 +55,18 @@ describe("PPB warning presentation", () => {
       "widget-placement",
     ]);
     expect(getAdminWarningPresentation(warnings)).toBe("multiple");
+    expect(getPpbStandaloneUnlistedWarning(warnings)).toBeNull();
+  });
+
+  it("uses the shared unlisted banner when unlisted is the only warning", () => {
+    const warnings = buildPpbCanvasWarnings({
+      appEmbedEnabled: true,
+      appEmbedWarning,
+      unlistedWarning,
+      operationAlert: null,
+    });
+
+    expect(getPpbStandaloneUnlistedWarning(warnings)).toEqual(unlistedWarning);
   });
 
   it("keeps non-placement operation errors in the standalone critical alert slot", () => {
