@@ -45,6 +45,10 @@ beforeEach(() => {
   (mockAuthenticate.admin as jest.MockedFunction<any>).mockResolvedValue({
     admin: {},
     session: { shop: "test-shop.myshopify.com" },
+    redirect: jest.fn(
+      (url: string) =>
+        new Response(null, { status: 302, headers: { Location: url } })
+    ),
   });
 });
 

@@ -18,7 +18,7 @@ import {
   handleCreateFpbPreview,
   handleRecordBundlePreview,
 } from "../shared/bundle-preview-action.server";
-import { handleCloneBundle, handleDeleteBundle } from "./handlers";
+import { handleCloneBundle, handleDeleteBundle, handleRenameBundle } from "./handlers";
 import { DashboardPage } from "./DashboardPage";
 import { ReduxProvider } from "../../../store/ReduxProvider";
 import { getDashboardInitialImagePreloads } from "./dashboard-media-state";
@@ -312,6 +312,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return handleCloneBundle(admin, session, formData);
   if (intent === "deleteBundle")
     return handleDeleteBundle(admin, session, formData);
+  if (intent === "renameBundle")
+    return handleRenameBundle(admin, session, formData);
   if (intent === "createFpbPreview") {
     const bundleId = String(formData.get("bundleId") || "");
     if (!bundleId)

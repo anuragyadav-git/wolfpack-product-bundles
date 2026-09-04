@@ -6,4 +6,5 @@ export {
   handleCloneBundle,
   handleDeleteBundle,
   handleCreateBundle,
+  handleRenameBundle,
 } from './handlers.server';
