@@ -1,0 +1,14 @@
+.bannerFrame {
+  position: relative;
+}
+
+.bannerBody {
+  min-block-size: 28px;
+  padding-inline-end: 88px;
+}
+
+.manageAction {
+  position: absolute;
+  inset-block-end: 16px;
+  inset-inline-end: 16px;
+}
