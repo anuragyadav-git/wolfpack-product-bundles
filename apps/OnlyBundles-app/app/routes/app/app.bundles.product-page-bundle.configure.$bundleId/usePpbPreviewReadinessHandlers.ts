@@ -137,8 +137,9 @@ export function usePpbPreviewReadinessHandlers({
           // Non-blocking placement validation
         }
       }
-      const previewUrl = isStorefrontUrl && preview?.previewToken
-        ? appendBundlePreviewToken(productUrl, preview.previewToken)
+      const tokenToUse = preview?.previewToken || base.loaderData?.previewToken;
+      const previewUrl = isStorefrontUrl && tokenToUse
+        ? appendBundlePreviewToken(productUrl, tokenToUse)
         : productUrl;
 
       if (!navigatePendingDashboardPreview(pendingPreviewWindow, previewUrl)) {

@@ -5,6 +5,7 @@ import {
   invokeCheckoutIntegrationProvider,
 } from '../../shared/checkout-integration-adapters.js';
 import { TemplateDesignSystem } from '../../shared/template-design-system.js';
+import { buildBundleConfigApiUrl } from '../../../../lib/bundle-preview-url.js';
 import { ppbExpandSingleStepCategoriesAsSteps } from '../single-step-categories.js';
 import { localizeBundleConfig } from '../../shared/localized-bundle-config.js';
 import { parseThemeSectionResponse } from '../../shared/theme-section-parser.js';
@@ -281,14 +282,23 @@ _parseBundleConfigPayload(rawValue: string) {
   async loadBundleData() {
     let bundleData: any = null;
     const bundleType = this.container.dataset.bundleType;
-    const bundleId = this.container.dataset.bundleId;
+    const datasetBundleId = this.container.dataset.bundleId;
     const configValue = this._parseBundleConfigPayload(this.container.dataset.bundleConfig);
+    const runtimeWindow = getWindow();
+    if (runtimeWindow && !(runtimeWindow as any).__WOLFPACK_STOREFRONT_PROXY_ROOT__) {
+      (runtimeWindow as any).__WOLFPACK_STOREFRONT_PROXY_ROOT__ = '/apps/product-bundles';
+    }
+    const locationSearch = runtimeWindow?.location?.search || '';
+    const previewToken = new URLSearchParams(locationSearch).get('wpb_preview');
 
-    if (this._isShopifyHostedPpbSnapshot(configValue)) {
+    const isHostedSnapshot = this._isShopifyHostedPpbSnapshot(configValue);
+
+    if (isHostedSnapshot && !previewToken) {
       bundleData = { [configValue.id]: configValue };
     }
     if (
       !bundleData
+      && !previewToken
       && this.container.dataset.wpbPpbEmbedSource === 'true'
       && configValue
       && typeof configValue.id === 'string'
@@ -297,15 +307,95 @@ _parseBundleConfigPayload(rawValue: string) {
       bundleData = { [configValue.id]: configValue };
     }
 
+    if (!bundleData && previewToken) {
+      let targetBundleId = datasetBundleId || (configValue && typeof configValue.id === 'string' ? configValue.id : null);
+      if (!targetBundleId && previewToken) {
+        try {
+          const payloadPart = previewToken.split('.')[0];
+          if (payloadPart) {
+            const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+            const decoded = typeof atob === 'function'
+              ? atob(normalized)
+              : typeof Buffer !== 'undefined'
+                ? Buffer.from(normalized, 'base64').toString('utf8')
+                : '';
+            if (decoded) {
+              const parsed = JSON.parse(decoded);
+              if (parsed && typeof parsed.bundleId === 'string') {
+                targetBundleId = parsed.bundleId;
+              }
+            }
+          }
+        } catch {
+          // Ignore parse errors on preview token payload.
+        }
+      }
+
+      if (targetBundleId) {
+        const RETRY_DELAY_MS = 3000;
+        const RETRYABLE_STATUSES = new Set([503, 504]);
+
+        const fetchBundleData = async () => {
+          const fetchImpl = getWindow()?.fetch || (typeof fetch === 'function' ? fetch : null);
+          if (!fetchImpl) {
+            throw new Error('Fetch unavailable');
+          }
+          const apiUrl = buildBundleConfigApiUrl(targetBundleId!, locationSearch);
+          const response = await fetchImpl(apiUrl);
+
+          if (!response.ok) {
+            let errorDetails = `${response.status} ${response.statusText}`;
+            try {
+              const errorData = await response.json();
+              errorDetails = JSON.stringify(errorData);
+            } catch {
+              // Ignore parse failures for error body.
+            }
+            const err = new Error(`API request failed: ${errorDetails}`) as Error & { status?: number };
+            err.status = response.status;
+            throw err;
+          }
+
+          const data = await response.json();
+          if (data.success && data.bundle) {
+            return { [data.bundle.id]: data.bundle };
+          }
+
+          throw new Error('Invalid API response structure');
+        };
+
+        try {
+          try {
+            bundleData = await fetchBundleData();
+          } catch (firstErr: any) {
+            if (RETRYABLE_STATUSES.has(firstErr.status)) {
+              await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+              bundleData = await fetchBundleData();
+            } else {
+              throw firstErr;
+            }
+          }
+        } catch {
+          // Ignore fetch error, fallback handled below.
+        }
+
+        if (bundleData) {
+          const fetchedBundle = Object.values(bundleData)[0] as any;
+          if (fetchedBundle?.id && (!this.config.bundleId || this.config.bundleId !== fetchedBundle.id)) {
+            this.config.bundleId = fetchedBundle.id;
+          }
+        }
+      }
+    }
+
     // Widget only works on container products with bundleConfig marker.
     if (!bundleData || (typeof bundleData === 'object' && Object.keys(bundleData).length === 0)) {
-      const runtimeWindow = getWindow();
       const isThemeEditor = runtimeWindow?.Shopify?.designMode ||
                            runtimeWindow?.isThemeEditorContext ||
                            runtimeWindow?.location?.pathname?.includes('/editor') ||
                            runtimeWindow?.location?.search?.includes('preview_theme_id');
 
-      const bundleIdFromDataset = bundleId || this.container.dataset.bundleId;
+      const bundleIdFromDataset = datasetBundleId || this.container.dataset.bundleId;
 
       if (isThemeEditor && bundleIdFromDataset) {
         this.showThemeEditorPreview(bundleIdFromDataset);
@@ -320,6 +410,12 @@ _parseBundleConfigPayload(rawValue: string) {
   },
 
 selectBundle() {
+  if (this.bundleData && !this.config.bundleId) {
+    const candidateId = Object.keys(this.bundleData)[0];
+    if (candidateId) {
+      this.config.bundleId = candidateId;
+    }
+  }
   const selectedBundle = BundleDataManager.selectBundle(this.bundleData, this.config);
   this.selectedBundle = ppbExpandSingleStepCategoriesAsSteps(
     localizeBundleConfig(selectedBundle, getWindow()?.Shopify?.locale || '')
@@ -333,15 +429,22 @@ selectBundle() {
 
 _getProductPageTemplateType() {
   const templateType = this.selectedBundle?.bundleDesignTemplate;
-  return templateType === 'PDP_INPAGE' || templateType === 'PDP_MODAL'
-    ? templateType
-    : '';
+  if (templateType === 'PDP_INPAGE' || templateType === 'PDP_MODAL') {
+    return templateType;
+  }
+  if (!templateType) {
+    return 'PDP_MODAL';
+  }
+  return '';
 },
 
 _getProductPageTemplateContract() {
+  const templateType = this._getProductPageTemplateType();
+  const designPreset = this._getProductPageDesignPreset()
+    || (templateType === 'PDP_MODAL' ? 'MODAL' : '');
   return resolvePpbTemplateContract({
-    templateType: this._getProductPageTemplateType(),
-    designPreset: this._getProductPageDesignPreset(),
+    templateType,
+    designPreset,
   });
 },
 

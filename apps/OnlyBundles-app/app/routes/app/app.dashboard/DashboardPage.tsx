@@ -59,6 +59,7 @@ import { hidePolarisModal } from "../_shared/bundle-configure/modal-utils";
 import {
   shouldRenderDashboardDeleteModal,
   shouldRenderDashboardPreviewModal,
+  shouldRenderDashboardRenameModal,
 } from "./dashboard-modal-state";
 import { BundleActionsButtons } from "./BundleActionsButtons";
 import {
@@ -119,6 +120,13 @@ export function DashboardPage({ banners }: DashboardPageProps) {
   const [deletedBundleIds, setDeletedBundleIds] = useState<ReadonlySet<string>>(
     () => new Set()
   );
+  const [bundleToRename, setBundleToRename] = useState<any | null>(null);
+  const [newBundleName, setNewBundleName] = useState<string>("");
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [renamedBundleNames, setRenamedBundleNames] = useState<
+    Record<string, string>
+  >({});
+  const renameModalRef = useRef<any>(null);
   const [currentThemeEditorUrl, setCurrentThemeEditorUrl] = useState<
     string | null
   >(null);
@@ -189,8 +197,38 @@ export function DashboardPage({ banners }: DashboardPageProps) {
         }
         setTaskAlert(null);
         shopify.toast.show(t("dashboard.actions.deleteSuccess"));
+      } else if (intent === "renameBundle") {
+        const renamedId =
+          typeof data.bundleId === "string"
+            ? data.bundleId
+            : bundleToRename?.id;
+        const renamedName =
+          typeof data.bundleName === "string"
+            ? data.bundleName
+            : newBundleName.trim();
+        if (renamedId) {
+          setRenamedBundleNames((current) => ({
+            ...current,
+            [renamedId]: renamedName,
+          }));
+        }
+        setTaskAlert(null);
+        shopify.toast.show(t("dashboard.actions.renameSuccess"));
+        renameModalRef.current?.hideOverlay?.();
+        setBundleToRename(null);
+        setNewBundleName("");
+        setRenameError(null);
       }
     } else if (data.error) {
+      if (intent === "renameBundle") {
+        setRenameError(
+          typeof data.error === "string"
+            ? data.error
+            : t("dashboard.renameModal.errorFailed")
+        );
+        fetcherIntentRef.current = null;
+        return;
+      }
       if (intent === "createFpbPreview") {
         closePendingDashboardPreview(pendingPreviewWindowRef.current);
         pendingPreviewWindowRef.current = null;
@@ -204,7 +242,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
       pendingDeleteBundleIdRef.current = null;
     }
     fetcherIntentRef.current = null;
-  }, [fetcher.state, fetcher.data, navigate, shopify, t]);
+  }, [fetcher.state, fetcher.data, navigate, shopify, t, bundleToRename, newBundleName]);
 
   const handleDirectChat = () => {
     openSupportChat();
@@ -251,6 +289,60 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     closeDeleteModal();
     deleteModalRef.current?.hideOverlay?.();
   }, [closeDeleteModal]);
+
+  const handleOpenRename = useCallback((bundle: any) => {
+    setBundleToRename(bundle);
+    setNewBundleName(bundle.name || "");
+    setRenameError(null);
+  }, []);
+
+  const handleCloseRename = useCallback(() => {
+    renameModalRef.current?.hideOverlay?.();
+    setBundleToRename(null);
+    setNewBundleName("");
+    setRenameError(null);
+  }, []);
+
+  const handleConfirmRename = useCallback(() => {
+    if (!bundleToRename) return;
+    const trimmed = newBundleName.trim();
+    if (!trimmed) {
+      setRenameError(t("dashboard.renameModal.errorEmpty"));
+      return;
+    }
+    if (trimmed.length > 255) {
+      setRenameError(t("dashboard.renameModal.errorTooLong"));
+      return;
+    }
+    setRenameError(null);
+    fetcherIntentRef.current = "renameBundle";
+    const formData = new FormData();
+    formData.append("intent", "renameBundle");
+    formData.append("bundleId", bundleToRename.id);
+    formData.append("bundleName", trimmed);
+    fetcher.submit(formData, { method: "post" });
+  }, [bundleToRename, newBundleName, fetcher, t]);
+
+  useEffect(() => {
+    const modal = renameModalRef.current;
+    if (!modal) return;
+    const handler = () => {
+      setBundleToRename(null);
+      setNewBundleName("");
+      setRenameError(null);
+    };
+    modal.addEventListener("hide", handler);
+    modal.addEventListener("afterhide", handler);
+    return () => {
+      modal.removeEventListener("hide", handler);
+      modal.removeEventListener("afterhide", handler);
+    };
+  }, [bundleToRename]);
+
+  useEffect(() => {
+    if (!bundleToRename) return;
+    renameModalRef.current?.showOverlay?.();
+  }, [bundleToRename]);
 
   useEffect(() => {
     const modal = deleteModalRef.current;
@@ -353,6 +445,9 @@ export function DashboardPage({ banners }: DashboardPageProps) {
   const renderDeleteModal = shouldRenderDashboardDeleteModal({
     bundleToDelete,
   });
+  const renderRenameModal = shouldRenderDashboardRenameModal({
+    bundleToRename,
+  });
   const renderPreviewModal = shouldRenderDashboardPreviewModal({
     isOpen: enablePreviewGate.modalProps.open,
   });
@@ -386,6 +481,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
           shop,
           appEmbedEnabled,
           bundleStatus: bundle.status,
+          previewToken: (bundle as any).previewToken ?? null,
         });
 
         if (action.kind === "error") {
@@ -542,10 +638,17 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     shopify.toast.show(t("dashboard.header.syncCollections"));
   }, [shopify, t]);
 
+  const displayBundles = useMemo(() => {
+    if (Object.keys(renamedBundleNames).length === 0) return bundles;
+    return bundles.map((b) =>
+      renamedBundleNames[b.id] ? { ...b, name: renamedBundleNames[b.id] } : b
+    );
+  }, [bundles, renamedBundleNames]);
+
   const { effectivePage, filteredBundles, pagedBundles, totalPages } = useMemo(
     () =>
       buildDashboardTablePage({
-        bundles,
+        bundles: displayBundles,
         excludedBundleIds: deletedBundleIds,
         bundleFilter,
         typeFilter,
@@ -555,10 +658,10 @@ export function DashboardPage({ banners }: DashboardPageProps) {
       }),
     [
       bundleFilter,
-      bundles,
       bundlesPerPage,
       currentPage,
       deletedBundleIds,
+      displayBundles,
       statusFilter,
       typeFilter,
     ]
@@ -600,6 +703,54 @@ export function DashboardPage({ banners }: DashboardPageProps) {
             {t("dashboard.deleteModal.cancel")}
           </s-button>
           <s-text color="subdued">{t("dashboard.deleteModal.body")}</s-text>
+        </s-modal>
+      )}
+      {renderRenameModal && (
+        <s-modal
+          ref={renameModalRef}
+          id="rename-bundle-modal"
+          heading={t("dashboard.renameModal.heading")}
+          size="small"
+        >
+          <s-button
+            slot="primary-action"
+            variant="primary"
+            loading={
+              fetcher.state === "submitting" &&
+              fetcherIntentRef.current === "renameBundle"
+                ? true
+                : undefined
+            }
+            onClick={handleConfirmRename}
+          >
+            {t("dashboard.renameModal.save")}
+          </s-button>
+          <s-button slot="secondary-actions" onClick={handleCloseRename}>
+            {t("dashboard.renameModal.cancel")}
+          </s-button>
+          <s-stack direction="block" gap="base">
+            {renameError && (
+              <s-banner tone="critical" dismissible={false}>
+                {renameError}
+              </s-banner>
+            )}
+            <s-text-field
+              label={t("dashboard.renameModal.nameLabel")}
+              value={newBundleName}
+              error={renameError || undefined}
+              autocomplete="off"
+              onInput={(e: Event) => {
+                setNewBundleName((e.target as HTMLInputElement).value ?? "");
+                if (renameError) setRenameError(null);
+              }}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleConfirmRename();
+                }
+              }}
+            />
+          </s-stack>
         </s-modal>
       )}
 
@@ -838,6 +989,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
                                     bundle={row.bundle}
                                     isEditing={editingBundleId === row.id}
                                     onEdit={handleEditBundle}
+                                    onRename={handleOpenRename}
                                     onClone={handleCloneBundle}
                                     onDelete={handleDeleteBundle}
                                     onPreview={handlePreviewBundle}

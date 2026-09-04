@@ -13,3 +13,11 @@ export function shouldRenderDashboardPreviewModal({
 }) {
   return isOpen;
 }
+
+export function shouldRenderDashboardRenameModal({
+  bundleToRename,
+}: {
+  bundleToRename: unknown | null;
+}) {
+  return Boolean(bundleToRename);
+}

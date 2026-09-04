@@ -54,6 +54,7 @@ canonical pricing calculation without legacy field fallbacks.
 | 7 | Classic mobile fixed bundle price | Qualified fixed price with final total `$5.00` | Add-to-cart action uses `$5.00` | Keeps the shared mobile summary contract |
 | 8 | Qualified discount with step tier labels | Saved success message plus separate tier title/subtitle | Success surface uses the success message; progress surface keeps tier labels | Matches EB step-based BOGO behavior |
 | 9 | Qualified BOGO summary state | `qualifiesForDiscount: true` with `hasDiscount: false` | Desktop and mobile summaries render the saved success message | BOGO qualification is not suppressed by percentage-discount flags |
+| 10 | FPB standard desktop pricing layout | Qualified discount on desktop summary | Strike out price, final price, and discount badge render in order inside `.side-panel-total-prices` with left alignment | Left-aligned under Total heading |
 
 ## Acceptance Criteria
 
@@ -65,3 +66,4 @@ canonical pricing calculation without legacy field fallbacks.
 - [ ] Qualified success copy is not replaced by step-tier labels.
 - [ ] Qualified BOGO success copy renders in desktop and mobile summaries.
 - [ ] Generated full-page widget includes the formatter before summary modules execute.
+- [ ] FPB standard desktop summary aligns strike out price, final price, and discount percentage badge to the left in that order.

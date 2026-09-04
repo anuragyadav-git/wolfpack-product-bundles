@@ -10,6 +10,7 @@ export interface BundleActionsButtonsProps {
   bundleId: string;
   bundleType: BundleType | string;
   onEdit: (bundle: any) => void;
+  onRename?: (bundle: any) => void;
   onClone: (bundleId: string) => void;
   onDelete: (bundleId: string) => void;
   onPreview: (bundle: any) => void;

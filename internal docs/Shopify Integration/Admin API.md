@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-08-27
+last_audited: 2026-09-03
 owners:
   - engineering
 domains:
@@ -72,6 +72,16 @@ await admin.graphql(/* query */);
 Shopify requires public apps to use expiring offline access tokens for new apps created on or after 2026-04-01, and for all public apps by 2027-01-01.
 
 Wolfpack uses Shopify's official `PrismaSessionStorage` adapter. `Session` persists the adapter fields `expires`, `refreshToken`, and `refreshTokenExpires`; `future.expiringOfflineAccessTokens` is enabled so the Remix package acquires and refreshes expiring offline tokens. Do not read `Session.accessToken` directly from Prisma. Request-bound routes call `authenticate.admin(request)` directly, while background work uses `unauthenticated.admin(shopDomain)`.
+
+Server-side navigation from an authenticated Admin loader or action must use the
+`redirect` helper returned by `authenticate.admin(request)`. Do not import
+Remix's generic `redirect` for these transitions: Shopify's helper preserves the
+embedded Admin context and safely handles navigation inside the Admin iframe.
+The `/app` layout is the authentication owner for matched child pages; child
+resource routes and mutations that can be requested directly authenticate at
+their own boundary. Avoid duplicating authentication only for a child loader
+whose sole owner is the authenticated layout, because parallel one-time ID-token
+exchanges can race.
 
 Existing non-expiring rows require a one-time operator cutover. Select only offline rows with no expiry or refresh metadata, then call Shopify's native `migrateToExpiringToken` and store the returned session through `PrismaSessionStorage`. Run this temporary utility in SIT first. Production apply requires explicit approval because each successful exchange irreversibly revokes the previous non-expiring token; abort and report the first failed shop.
 
