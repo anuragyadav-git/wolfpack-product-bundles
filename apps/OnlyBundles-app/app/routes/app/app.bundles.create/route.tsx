@@ -1,6 +1,5 @@
 import {
   json,
-  redirect,
   type ActionFunctionArgs,
   type HeadersFunction,
   type LinksFunction,
@@ -62,7 +61,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin, session } = await authenticate.admin(request);
+  const { admin, session, redirect } = await authenticate.admin(request);
   const shopifyShopGid = await ensureShopIdentity(admin, session.shop);
   const formData = await request.formData();
   const bundleName = formData.get("bundleName");

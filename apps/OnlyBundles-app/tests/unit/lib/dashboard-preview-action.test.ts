@@ -40,6 +40,20 @@ describe("decideDashboardPreviewAction", () => {
     });
   });
 
+  it("appends wpb_preview token to open_url for PPB when previewToken is provided", () => {
+    const result = decideDashboardPreviewAction({
+      bundleType: "product_page",
+      bundleId: "abc",
+      shopifyProductHandle: "summer-bundle",
+      shop: "s.myshopify.com",
+      previewToken: "test_token_123",
+    });
+    expect(result).toEqual({
+      kind: "open_url",
+      url: "https://s.myshopify.com/products/summer-bundle?wpb_preview=test_token_123",
+    });
+  });
+
   it("returns a contextual error message for PPB without a product handle", () => {
     const result = decideDashboardPreviewAction({
       bundleType: "product_page",

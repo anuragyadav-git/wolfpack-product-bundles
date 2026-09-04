@@ -148,6 +148,52 @@ describe('PPB Horizontal Slots empty placeholders', () => {
       'Product 2',
     ]);
   });
+
+  it('renders one empty slot when conditionValue is explicitly zero', () => {
+    const target = document.createElement('div');
+    const widget = createWidget();
+
+    widget._appendModalSlotEmptyCards(
+      target,
+      { name: 'Step 1', conditionValue: 0, conditionOperator: null, minQuantity: 0 },
+      0,
+      0
+    );
+
+    expect(getSlotLabels(target)).toEqual([
+      'Product 1',
+    ]);
+  });
+
+  it('renders slots according to minQuantity when conditionValue is absent', () => {
+    const target = document.createElement('div');
+    const widget = createWidget();
+
+    widget._appendModalSlotEmptyCards(
+      target,
+      { name: 'Step 1', minQuantity: 3, conditionValue: null },
+      0,
+      0
+    );
+
+    expect(getSlotLabels(target)).toEqual([
+      'Product 1',
+      'Product 2',
+      'Product 3',
+    ]);
+  });
+
+  it('keeps an operable slot open as items are selected when step has no condition operator', () => {
+    const widget = createWidget();
+    const step = { name: 'Step 1', conditionValue: null, conditionOperator: null, minQuantity: 0, maxQuantity: 10 };
+
+    const target = document.createElement('div');
+    widget._appendModalSlotEmptyCards(target, step, 0, 1);
+
+    expect(getSlotLabels(target)).toEqual([
+      'Product 2',
+    ]);
+  });
 });
 
 function createWidget(config = {}) {

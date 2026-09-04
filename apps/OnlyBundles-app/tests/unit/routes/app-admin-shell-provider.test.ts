@@ -61,12 +61,55 @@ const {
   useLocation,
   useNavigation,
 } = require("@remix-run/react");
+const { authenticate } = require("../../../app/shopify.server");
+const {
+  loadAdminLocaleResources,
+  resolveAdminLocaleFromRequest,
+} = require("../../../app/i18n/config");
 
 describe("app Admin shell provider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useLocation.mockReturnValue({ pathname: "/app/dashboard" });
     useNavigation.mockReturnValue({ state: "idle" });
+  });
+
+  it("authenticates the shared Admin layout before returning shop data", async () => {
+    authenticate.admin.mockResolvedValue({
+      session: { shop: "authenticated-shop.myshopify.com" },
+    });
+    resolveAdminLocaleFromRequest.mockReturnValue("fr");
+    const { loader } = await import("../../../app/routes/app/app");
+    const request = new Request("https://example.com/app/dashboard");
+
+    const data = await loader({ request, params: {}, context: {} } as any);
+
+    expect(authenticate.admin).toHaveBeenCalledWith(request);
+    expect(loadAdminLocaleResources).toHaveBeenCalledWith("fr");
+    expect(data).toEqual(
+      expect.objectContaining({
+        locale: "fr",
+        shop: "authenticated-shop.myshopify.com",
+      })
+    );
+  });
+
+  it("propagates Shopify authentication failures before loading Admin data", async () => {
+    const authFailure = new Response(null, {
+      status: 302,
+      headers: { Location: "/auth/login" },
+    });
+    authenticate.admin.mockRejectedValueOnce(authFailure);
+    const { loader } = await import("../../../app/routes/app/app");
+
+    await expect(
+      loader({
+        request: new Request("https://example.com/app/dashboard"),
+        params: {},
+        context: {},
+      } as any)
+    ).rejects.toBe(authFailure);
+    expect(loadAdminLocaleResources).not.toHaveBeenCalled();
   });
 
   it("renders the Admin tree without global React Polaris or Redux providers", async () => {
