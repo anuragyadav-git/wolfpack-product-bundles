@@ -1,7 +1,9 @@
 import { backfillOrderAttribution } from "../../../../app/services/analytics/order-backfill.server";
+import { createHmac } from "node:crypto";
 
 const mockOrderAttributionFindMany = jest.fn();
 const mockOrderAttributionCreateMany = jest.fn();
+const mockOrderAttributionUpdateMany = jest.fn();
 const mockMatchLineItemGroupsToBundles = jest.fn();
 const mockAdminGraphql = jest.fn();
 
@@ -11,6 +13,7 @@ jest.mock("../../../../app/db.server", () => ({
     orderAttribution: {
       findMany: (...args: unknown[]) => mockOrderAttributionFindMany(...args),
       createMany: (...args: unknown[]) => mockOrderAttributionCreateMany(...args),
+      updateMany: (...args: unknown[]) => mockOrderAttributionUpdateMany(...args),
     },
   },
 }));
@@ -34,6 +37,30 @@ jest.mock("../../../../app/lib/logger", () => ({
 const SHOP = "test-bundle-store123.myshopify.com";
 const SINCE = "2026-06-01T00:00:00.000Z";
 const UNTIL = "2026-07-01T00:00:00.000Z";
+const API_SECRET = "analytics-test-secret";
+
+function makeRuntimeToken(bundleId: string, shop = SHOP) {
+  const payloadPart = Buffer.from(JSON.stringify({
+    version: 1,
+    shop,
+    bundleId,
+    bundleType: "full_page",
+    offerGroupId: `${bundleId}_test`,
+    parentVariantId: "gid://shopify/ProductVariant/200",
+    bundleName: "Historical Bundle",
+    components: [],
+    addons: [],
+    countryRule: "",
+    priceAdjustment: null,
+  })).toString("base64url");
+  const runtimeSecret = createHmac("sha256", API_SECRET)
+    .update(`wpb-runtime-token:${shop}`)
+    .digest("hex");
+  const signature = createHmac("sha256", runtimeSecret)
+    .update(payloadPart)
+    .digest("base64url");
+  return `${payloadPart}.${signature}`;
+}
 
 function makeOrderNode(overrides: Partial<any> = {}) {
   return {
@@ -77,8 +104,10 @@ const admin = { graphql: (...args: unknown[]) => mockAdminGraphql(...args) } as 
 
 describe("backfillOrderAttribution", () => {
   beforeEach(() => {
+    process.env.SHOPIFY_API_SECRET = API_SECRET;
     mockOrderAttributionFindMany.mockReset();
     mockOrderAttributionCreateMany.mockReset();
+    mockOrderAttributionUpdateMany.mockReset();
     mockMatchLineItemGroupsToBundles.mockReset();
     mockAdminGraphql.mockReset();
   });
@@ -139,7 +168,7 @@ describe("backfillOrderAttribution", () => {
     // Dedup query includes both forms
     expect(mockOrderAttributionFindMany).toHaveBeenCalledWith({
       where: { shopId: SHOP, orderId: { in: ["gid://shopify/Order/1001", "1001"] } },
-      select: { orderId: true },
+      select: { orderId: true, bundleId: true },
     });
   });
 
@@ -263,5 +292,104 @@ describe("backfillOrderAttribution", () => {
       [{ productId: "gid://shopify/Product/100" }],
       [{ productId: "gid://shopify/Product/500" }],
     ]);
+  });
+
+  it("uses Shopify line-item custom attributes to retain a deleted bundle identity", async () => {
+    const runtimeToken = makeRuntimeToken("deleted-bundle-1");
+    mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode({
+      lineItems: {
+        nodes: [{
+          product: { id: "gid://shopify/Product/100" },
+          quantity: 1,
+          customAttributes: [{ key: "_wolfpack_bundle_runtime", value: runtimeToken }],
+        }],
+      },
+    })]));
+    mockOrderAttributionFindMany.mockResolvedValue([]);
+    mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
+
+    await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
+
+    expect(String(mockAdminGraphql.mock.calls[0][0])).toContain("customAttributes { key value }");
+    expect(mockMatchLineItemGroupsToBundles).not.toHaveBeenCalled();
+    expect(mockOrderAttributionCreateMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({ bundleId: "deleted-bundle-1" })],
+    });
+  });
+
+  it("ignores a tampered runtime token and falls back to current product matching", async () => {
+    const runtimeToken = `${makeRuntimeToken("forged-bundle")}-tampered`;
+    mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode({
+      lineItems: {
+        nodes: [{
+          product: { id: "gid://shopify/Product/100" },
+          quantity: 1,
+          customAttributes: [{ key: "_wolfpack_bundle_runtime", value: runtimeToken }],
+        }],
+      },
+    })]));
+    mockOrderAttributionFindMany.mockResolvedValue([]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([["current-bundle"]]);
+    mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
+
+    await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
+
+    expect(mockMatchLineItemGroupsToBundles).toHaveBeenCalledWith(
+      SHOP,
+      [[{ productId: "gid://shopify/Product/100" }]],
+    );
+    expect(mockOrderAttributionCreateMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({ bundleId: "current-bundle" })],
+    });
+  });
+
+  it("stores Shopify's order creation time instead of the backfill execution time", async () => {
+    mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode({
+      createdAt: "2026-06-15T10:00:00Z",
+    })]));
+    mockOrderAttributionFindMany.mockResolvedValue([]);
+    mockMatchLineItemGroupsToBundles.mockResolvedValue([[]]);
+    mockOrderAttributionCreateMany.mockResolvedValue({ count: 1 });
+
+    await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
+
+    expect(mockOrderAttributionCreateMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        createdAt: new Date("2026-06-15T10:00:00Z"),
+      })],
+    });
+  });
+
+  it("repairs an existing null attribution when Shopify retains a valid runtime token", async () => {
+    const runtimeToken = makeRuntimeToken("deleted-bundle-1");
+    mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode({
+      lineItems: {
+        nodes: [{
+          product: { id: "gid://shopify/Product/100" },
+          quantity: 1,
+          customAttributes: [{ key: "_wolfpack_bundle_runtime", value: runtimeToken }],
+        }],
+      },
+    })]));
+    mockOrderAttributionFindMany.mockResolvedValue([
+      { orderId: "gid://shopify/Order/1001", bundleId: null },
+    ]);
+    mockOrderAttributionUpdateMany.mockResolvedValue({ count: 1 });
+
+    const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
+
+    expect(mockOrderAttributionUpdateMany).toHaveBeenCalledWith({
+      where: {
+        shopId: SHOP,
+        orderId: { in: ["gid://shopify/Order/1001", "1001"] },
+        bundleId: null,
+      },
+      data: {
+        bundleId: "deleted-bundle-1",
+        createdAt: new Date("2026-06-15T10:00:00Z"),
+      },
+    });
+    expect(mockOrderAttributionCreateMany).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ created: 0, repaired: 1, skipped: 0 });
   });
 });

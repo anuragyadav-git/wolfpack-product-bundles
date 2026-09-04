@@ -5,7 +5,7 @@ title: Shopify Web Pixels
 type: shopify-integration
 status: authoritative
 summary: Documents the canonical Shopify Web Pixel event and settings contracts used by Wolfpack attribution.
-last_audited: 2026-09-01
+last_audited: 2026-09-04
 owners:
   - engineering
 domains:
@@ -77,5 +77,16 @@ this transport.
 
 When Shopify does not expose properties or a bundle was added without offer
 metadata, attribution still succeeds and all offer dimensions remain null.
+
+The Shopify Orders GraphQL reconciliation path also requests
+`Order.lineItems.customAttributes`. It verifies the preserved
+`_wolfpack_bundle_runtime` signature and uses that payload's historical
+`bundleId` before consulting current product configuration. This is required
+for orders whose bundle was later deleted: matching only against current
+`Bundle` and `StepProduct` rows misclassifies those completed checkouts as
+non-bundle orders. Reconciled rows retain Shopify's `Order.createdAt` so revenue
+stays in the checkout's actual reporting period. An existing null attribution
+row is repaired in place when the signed order attribute proves bundle
+identity.
 
 Official reference: [Shopify `checkout_completed` Web Pixel event](https://shopify.dev/docs/api/web-pixels-api/standard-events/checkout_completed).

@@ -267,7 +267,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({
         success: true,
         backfill: result,
-        message: `Backfill complete: ${result.created} rows created, ${result.skipped} already present.`,
+        message: `Backfill complete: ${result.created} rows created, ${result.repaired} repaired, ${result.skipped} already present.`,
       });
     } catch (error: any) {
       return json(

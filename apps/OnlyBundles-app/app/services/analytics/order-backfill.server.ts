@@ -13,9 +13,14 @@
 import db from "../../db.server";
 import { matchLineItemGroupsToBundles, orderIdMatchForms } from "../../lib/analytics/bundle-matcher.server";
 import { AppLogger } from "../../lib/logger";
+import {
+  generateCartTransformRuntimeTokenSecret,
+  verifyRuntimeCartToken,
+} from "../cart-transform-runtime-token.server";
 
 export interface BackfillResult {
   created: number;
+  repaired: number;
   skipped: number;
   pages: number;
 }
@@ -42,7 +47,11 @@ const ORDERS_QUERY = `
           }
         }
         lineItems(first: 50) {
-          nodes { product { id } quantity }
+          nodes {
+            product { id }
+            quantity
+            customAttributes { key value }
+          }
         }
       }
     }
@@ -66,7 +75,12 @@ interface OrderNode {
       } | null;
     } | null;
   } | null;
-  lineItems?: { nodes?: Array<{ product?: { id?: string | null } | null }> | null } | null;
+  lineItems?: {
+    nodes?: Array<{
+      product?: { id?: string | null } | null;
+      customAttributes?: Array<{ key?: string | null; value?: string | null }> | null;
+    }> | null;
+  } | null;
 }
 
 function extractOrderNumber(gid: string): string | null {
@@ -79,6 +93,28 @@ function toRevenueCents(amount?: string | null): number {
   return Math.round(parseFloat(amount) * 100);
 }
 
+function verifiedRuntimeBundleIds(node: OrderNode, shopId: string): string[] {
+  let secret: string;
+  try {
+    secret = generateCartTransformRuntimeTokenSecret(shopId);
+  } catch {
+    return [];
+  }
+
+  const bundleIds = new Set<string>();
+  for (const lineItem of node.lineItems?.nodes ?? []) {
+    const runtimeToken = lineItem.customAttributes?.find(
+      (attribute) => attribute.key === "_wolfpack_bundle_runtime",
+    )?.value;
+    if (!runtimeToken) continue;
+    const payload = verifyRuntimeCartToken(runtimeToken, secret);
+    if (payload?.shop === shopId && payload.bundleId) {
+      bundleIds.add(payload.bundleId);
+    }
+  }
+  return [...bundleIds];
+}
+
 export async function backfillOrderAttribution(
   admin: AdminClient,
   shopId: string,
@@ -89,6 +125,7 @@ export async function backfillOrderAttribution(
 
   let cursor: string | null = null;
   let created = 0;
+  let repaired = 0;
   let skipped = 0;
   let pages = 0;
 
@@ -113,11 +150,42 @@ export async function backfillOrderAttribution(
     const lookupForms = orderIds.flatMap((value) => orderIdMatchForms(value));
     const existing = await db.orderAttribution.findMany({
       where: { shopId, orderId: { in: lookupForms } },
-      select: { orderId: true },
+      select: { orderId: true, bundleId: true },
     });
-    const storedForms = new Set(existing.map((r: { orderId: string }) => r.orderId));
-    const alreadyStored = new Set(
-      orderIds.filter((id) => orderIdMatchForms(id).some((f) => storedForms.has(f)))
+
+    const existingRowsForOrder = (orderId: string) => {
+      const forms = new Set(orderIdMatchForms(orderId));
+      return existing.filter((row: { orderId: string; bundleId: string | null }) => (
+        forms.has(row.orderId)
+      ));
+    };
+
+    const explicitBundleIdsByOrder = nodes.map((node) => (
+      verifiedRuntimeBundleIds(node, shopId)
+    ));
+    const fallbackNodeIndexes = nodes.flatMap((node, index) => {
+      const existingRows = existingRowsForOrder(node.id);
+      const alreadyAttributed = existingRows.some((row: { bundleId: string | null }) => (
+        row.bundleId !== null
+      ));
+      return !alreadyAttributed && explicitBundleIdsByOrder[index].length === 0
+        ? [index]
+        : [];
+    });
+    const fallbackMatches = fallbackNodeIndexes.length > 0
+      ? await matchLineItemGroupsToBundles(
+          shopId,
+          fallbackNodeIndexes.map((index) => (
+            (nodes[index].lineItems?.nodes ?? []).map((lineItem) => ({
+              productId: lineItem.product?.id ?? null,
+            }))
+          )),
+        )
+      : [];
+    const fallbackMatchesByIndex = new Map(
+      fallbackNodeIndexes.map((nodeIndex, resultIndex) => (
+        [nodeIndex, fallbackMatches[resultIndex] ?? []] as const
+      )),
     );
 
     const rows: Array<{
@@ -133,21 +201,39 @@ export async function backfillOrderAttribution(
       landingPage: string | null;
       revenue: number;
       currency: string;
+      createdAt: Date;
     }> = [];
 
-    const unstoredNodes = nodes.filter((node) => !alreadyStored.has(node.id));
-    skipped += nodes.length - unstoredNodes.length;
-    const lineItemGroups = unstoredNodes.map((node) =>
-      (node.lineItems?.nodes ?? []).map((li) => ({
-        productId: li.product?.id ?? null,
-      })),
-    );
-    const bundleIdsByOrder = lineItemGroups.length > 0
-      ? await matchLineItemGroupsToBundles(shopId, lineItemGroups)
-      : [];
+    for (const [nodeIndex, node] of nodes.entries()) {
+      const existingRows = existingRowsForOrder(node.id);
+      if (existingRows.some((row: { bundleId: string | null }) => row.bundleId !== null)) {
+        skipped += 1;
+        continue;
+      }
 
-    for (const [nodeIndex, node] of unstoredNodes.entries()) {
-      const bundleIds = bundleIdsByOrder[nodeIndex] ?? [];
+      const bundleIds = explicitBundleIdsByOrder[nodeIndex].length > 0
+        ? explicitBundleIdsByOrder[nodeIndex]
+        : fallbackMatchesByIndex.get(nodeIndex) ?? [];
+
+      if (existingRows.length > 0) {
+        if (bundleIds.length === 0) {
+          skipped += 1;
+          continue;
+        }
+        await db.orderAttribution.updateMany({
+          where: {
+            shopId,
+            orderId: { in: orderIdMatchForms(node.id) },
+            bundleId: null,
+          },
+          data: {
+            bundleId: bundleIds[0],
+            createdAt: new Date(node.createdAt),
+          },
+        });
+        repaired += 1;
+      }
+
       const visit = node.customerJourneySummary?.lastVisit ?? null;
       const utm = visit?.utmParameters ?? null;
       const revenue = toRevenueCents(node.totalPriceSet?.shopMoney?.amount);
@@ -166,13 +252,15 @@ export async function backfillOrderAttribution(
         landingPage: visit?.landingPage ?? null,
         revenue,
         currency,
+        createdAt: new Date(node.createdAt),
       };
 
       if (bundleIds.length > 0) {
-        for (const bundleId of bundleIds) {
+        const newBundleIds = existingRows.length > 0 ? bundleIds.slice(1) : bundleIds;
+        for (const bundleId of newBundleIds) {
           rows.push({ ...baseRow, bundleId });
         }
-      } else {
+      } else if (existingRows.length === 0) {
         rows.push({ ...baseRow, bundleId: null });
       }
     }
@@ -193,9 +281,10 @@ export async function backfillOrderAttribution(
     component: "order-backfill",
     shopId,
     created,
+    repaired,
     skipped,
     pages,
   });
 
-  return { created, skipped, pages };
+  return { created, repaired, skipped, pages };
 }

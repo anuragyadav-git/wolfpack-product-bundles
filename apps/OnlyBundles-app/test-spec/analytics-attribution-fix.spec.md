@@ -1,3 +1,31 @@
+---
+schema_version: 1
+id: analytics-attribution-fix
+title: Analytics Attribution Fix and Orders Backfill
+type: test-spec
+status: active
+summary: Verifies Shopify-native checkout and revenue reconciliation for bundle orders missed by the Web Pixel.
+last_audited: 2026-09-04
+owners:
+  - engineering
+domains:
+  - analytics
+systems:
+  - order-attribution
+  - shopify-admin-graphql
+source_paths:
+  - apps/OnlyBundles-app/app/services/analytics/order-backfill.server.ts
+  - apps/OnlyBundles-app/app/lib/analytics/bundle-matcher.server.ts
+related_docs:
+  - internal docs/Shopify Integration/Web Pixels.md
+tags:
+  - analytics
+  - orders
+keywords:
+  - checked-out
+  - revenue
+---
+
 # Test Spec: Analytics Attribution Fix + Orders Backfill
 
 **Spec ID:** analytics-attribution-fix
@@ -9,6 +37,8 @@ Analytics dashboard was showing $0 revenue despite paid orders. Root causes:
 1. **Fix B** — product-ID format mismatch between what the pixel sends (numeric) and what the DB stores (GID) causes bundle matching to fail silently, leaving `bundleId=null` on every attribution row.
 2. **Fix A/C** — pixel derives `shopId` from `document.location.hostname` which can be null or the wrong domain in Shopify's checkout sandbox, causing rows to be lost or written under the wrong shop.
 3. **Safety net** — Shopify Orders GraphQL backfill so revenue attribution can be reconciled from the source of truth even if the pixel fails.
+4. **Historical identity** — reconciliation must use Shopify's preserved line-item custom attributes and the signed Wolfpack runtime token before consulting current bundle configuration. Product matching alone cannot identify an order after its bundle is deleted.
+5. **Historical date** — reconciled rows must retain Shopify's order `createdAt`; using the backfill execution time puts revenue in the wrong reporting period.
 
 ## Test Cases
 
@@ -42,16 +72,24 @@ Service that queries Shopify Orders GraphQL and populates `OrderAttribution` for
 | 6 | Empty date range | No orders in Shopify | 0 rows created, no errors | Empty page handled |
 | 7 | Bundle match via component product | Order contains a StepProduct of bundle-X | 1 row created with `bundleId="bundle-X"` | Uses shared matcher |
 | 8 | Revenue converted to cents | Shopify `totalPriceSet.shopMoney.amount = "195.29"` | DB row has `revenue = 19529` | Multiply by 100, round |
+| 9 | Deleted bundle is identified from the signed runtime token | Shopify line item has `_wolfpack_bundle_runtime`; current bundle/product rows no longer exist | Row uses the verified token's historical `bundleId` | Shopify order custom attributes are the durable source |
+| 10 | Invalid runtime token is ignored | Shopify line item has a tampered runtime token | Fall back to current product matching | Never trust unsigned cart input |
+| 11 | Historical checkout date is retained | Shopify order was created on July 30 and backfill runs on September 4 | Row `createdAt` is July 30 | Keeps the order in its actual reporting window |
+| 12 | Existing null attribution is repaired | A prior pixel/backfill row exists for the order with `bundleId=null`, and the signed token identifies the bundle | Existing row is updated with the historical bundle ID | Makes the fix effective for already-ingested orders |
 
 ## Acceptance Criteria
 
-- [ ] All bundle-matcher tests pass
-- [ ] All order-backfill tests pass
-- [ ] `api.attribution.tsx` uses the shared matcher (no inline duplicate)
-- [ ] Zero new ESLint errors on modified files
-- [ ] Pixel setting `shop_domain` declared in TOML and read in `index.ts`
-- [ ] `activateUtmPixel` signature accepts `shopDomain` and all 3 call sites pass `session.shop`
-- [ ] Backfill UI button renders on Analytics page and dispatches `intent=backfill`
+- [x] All bundle-matcher tests pass
+- [x] All order-backfill tests pass
+- [x] `api.attribution.tsx` uses the shared matcher (no inline duplicate)
+- [x] Zero new ESLint errors on modified files
+- [x] Pixel setting `shop_domain` declared in TOML and read in `index.ts`
+- [x] `activateUtmPixel` signature accepts `shopDomain` and all 3 call sites pass `session.shop`
+- [x] Backfill UI button renders on Analytics page and dispatches `intent=backfill`
+- [x] Shopify Orders query requests `lineItems.customAttributes`
+- [x] Signed runtime identity takes precedence over mutable current bundle configuration
+- [x] Reconciled rows retain the Shopify order creation timestamp
+- [x] Existing null attribution rows can be repaired idempotently
 
 ## Out of Scope
 
