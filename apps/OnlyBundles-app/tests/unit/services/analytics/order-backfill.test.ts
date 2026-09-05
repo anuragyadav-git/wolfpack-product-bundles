@@ -67,7 +67,7 @@ function makeOrderNode(overrides: Partial<any> = {}) {
     id: "gid://shopify/Order/1001",
     name: "#1001",
     createdAt: "2026-06-15T10:00:00Z",
-    totalPriceSet: { shopMoney: { amount: "195.29", currencyCode: "INR" } },
+    currentTotalPriceSet: { shopMoney: { amount: "195.29", currencyCode: "INR" } },
     customerJourneySummary: {
       lastVisit: {
         landingPage: "https://shop.example/pages/564-2?utm_source=facebook",
@@ -258,7 +258,7 @@ describe("backfillOrderAttribution", () => {
     mockAdminGraphql.mockResolvedValue(
       makeGraphqlResponse([
         makeOrderNode({
-          totalPriceSet: { shopMoney: { amount: "195.29", currencyCode: "INR" } },
+          currentTotalPriceSet: { shopMoney: { amount: "195.29", currencyCode: "INR" } },
         }),
       ])
     );
@@ -301,6 +301,7 @@ describe("backfillOrderAttribution", () => {
         nodes: [{
           product: { id: "gid://shopify/Product/100" },
           quantity: 1,
+          discountedTotalSet: { shopMoney: { amount: "45.00" } },
           customAttributes: [{ key: "_wolfpack_bundle_runtime", value: runtimeToken }],
         }],
       },
@@ -311,10 +312,50 @@ describe("backfillOrderAttribution", () => {
     await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
 
     expect(String(mockAdminGraphql.mock.calls[0][0])).toContain("customAttributes { key value }");
+    expect(String(mockAdminGraphql.mock.calls[0][0])).toContain("discountedTotalSet(withCodeDiscounts: true)");
     expect(mockMatchLineItemGroupsToBundles).not.toHaveBeenCalled();
     expect(mockOrderAttributionCreateMany).toHaveBeenCalledWith({
-      data: [expect.objectContaining({ bundleId: "deleted-bundle-1" })],
+      data: [expect.objectContaining({
+        bundleId: "deleted-bundle-1",
+        bundleRevenue: 4_500,
+      })],
     });
+  });
+
+  it("refreshes canonical Shopify order and bundle values for an existing bundle row", async () => {
+    const runtimeToken = makeRuntimeToken("bundle-1");
+    mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode({
+      currentTotalPriceSet: { shopMoney: { amount: "90.00", currencyCode: "USD" } },
+      lineItems: {
+        nodes: [{
+          product: { id: "gid://shopify/Product/100" },
+          quantity: 1,
+          discountedTotalSet: { shopMoney: { amount: "40.00" } },
+          customAttributes: [{ key: "_wolfpack_bundle_runtime", value: runtimeToken }],
+        }],
+      },
+    })]));
+    mockOrderAttributionFindMany.mockResolvedValue([
+      { orderId: "gid://shopify/Order/1001", bundleId: "bundle-1" },
+    ]);
+    mockOrderAttributionUpdateMany.mockResolvedValue({ count: 1 });
+
+    const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
+
+    expect(mockOrderAttributionUpdateMany).toHaveBeenCalledWith({
+      where: {
+        shopId: SHOP,
+        orderId: { in: ["gid://shopify/Order/1001", "1001"] },
+        bundleId: "bundle-1",
+      },
+      data: expect.objectContaining({
+        revenue: 9_000,
+        bundleRevenue: 4_000,
+        currency: "USD",
+        createdAt: new Date("2026-06-15T10:00:00Z"),
+      }),
+    });
+    expect(result).toMatchObject({ created: 0, repaired: 1, skipped: 0 });
   });
 
   it("ignores a tampered runtime token and falls back to current product matching", async () => {
@@ -386,6 +427,9 @@ describe("backfillOrderAttribution", () => {
       },
       data: {
         bundleId: "deleted-bundle-1",
+        revenue: 19529,
+        bundleRevenue: 0,
+        currency: "INR",
         createdAt: new Date("2026-06-15T10:00:00Z"),
       },
     });

@@ -834,6 +834,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "Estadísticas clave",
+      "sales": "Ventas",
+      "totalOrderRevenue": "Ingresos totales de pedidos",
+      "totalOrderRevenueDefinition": "Valor total de los pedidos que contienen al menos un paquete.",
+      "totalBundleRevenue": "Ingresos totales de paquetes",
+      "totalBundleRevenueDefinition": "Valor combinado de los artículos de paquetes en pedidos completados.",
+      "ordersWithBundles": "Pedidos con paquetes",
+      "ordersWithBundlesDefinition": "Pedidos completados que contienen al menos un paquete.",
+      "averageOrderValue": "Valor medio del pedido",
+      "averageOrderValueDefinition": "Ingresos totales de pedidos divididos por pedidos con paquetes.",
+      "addToCartValue": "Valor de añadir al carrito",
+      "addToCartValueDefinition": "Ingresos totales de paquetes divididos por sesiones exitosas de añadir al carrito.",
+      "totalBundlesPurchased": "Total de paquetes comprados",
+      "totalBundlesPurchasedDefinition": "Paquetes únicos por pedido; la cantidad repetida cuenta una vez.",
+      "bundleRevenue": "Ingresos de paquetes"
+    },
     "offers": {
       "title": "Oferta de rendimiento",
       "description": "Compara las decisiones de oferta seguras para la privacidad con el compromiso del paquete, la actividad de añadir al carrito, los pedidos completados y los ingresos.",
@@ -958,7 +975,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "Embudo de paquete",
-          "howShoppersMoveThroughYourBundles": "Cómo se mueven los compradores a través de sus paquetes"
+          "howShoppersMoveThroughYourBundles": "Cómo se mueven los compradores a través de sus paquetes",
+          "bundleViews": "Vistas de paquete",
+          "conversion": "Conversión"
         },
         "liveactivityfeed": {
           "liveActivity": "Actividad en vivo",
@@ -1110,7 +1129,7 @@
         "apply": "Aplicar",
         "backfillSelectedWindow": "Anular ventana seleccionada",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Coincide con los artículos de la línea de pedidos para empaquetar e importar los ingresos disponibles, la página de destino y los detalles de UTM.",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Se omiten los registros de atribuciones existentes, por lo que ejecutar la misma ventana de nuevo no crea duplicados.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Las filas de paquetes existentes se actualizan desde Shopify cuando es posible; no se crean duplicados.",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Los pedidos Shopify y el rastreo de tienda no se modifican.",
         "customUtmAttributes": "Atributos UTM personalizados",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Introduzca los nombres de parámetros separados por comas o nuevas líneas. Only Bundles captura valores de URL coincidentes en futuras visitas y los almacena con atribución de pago.",

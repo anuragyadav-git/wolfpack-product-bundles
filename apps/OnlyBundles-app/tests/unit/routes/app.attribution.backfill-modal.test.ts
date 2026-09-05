@@ -15,14 +15,11 @@ jest.mock("@shopify/app-bridge-react", () => ({
 
 jest.mock("../../../app/components/analytics", () => ({
   BundlePerformanceMatrix: () => null,
-  FunnelHero: () => null,
+  BundleConversionFunnel: () => null,
+  BundleKeyStatistics: () => null,
+  BundleSalesTrends: () => null,
   LiveActivityFeed: () => null,
   TopCampaigns: () => null,
-}));
-
-jest.mock("../../../app/components/analytics/lazy", () => ({
-  LazyEngagementPulse: () => null,
-  LazyRevenueAttribution: () => null,
 }));
 
 describe("BackfillWindowModal", () => {
@@ -42,7 +39,7 @@ describe("BackfillWindowModal", () => {
     expect(view).toContain("Backfill analytics window");
     expect(view).toContain("Last 7 days");
     expect(view).toContain("queries Shopify orders");
-    expect(view).toContain("Existing attribution records are skipped");
+    expect(view).toContain("Existing bundle rows are refreshed from Shopify");
     expect(view).toContain("Backfill selected window");
     expect(view).toContain("Close");
   });

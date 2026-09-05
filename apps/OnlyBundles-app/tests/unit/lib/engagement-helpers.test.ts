@@ -79,6 +79,28 @@ describe("computeBundleFunnel", () => {
     expect(snap.addedToCart).toBe(0);
     expect(snap.revenueCents).toBe(0);
   });
+
+  it("counts one completed order when the order contains multiple bundles", () => {
+    const snap = computeBundleFunnel([], [
+      {
+        orderId: "gid://shopify/Order/1",
+        bundleId: "bundle-a",
+        revenue: 10_000,
+        bundleRevenue: 3_000,
+        createdAt: D("2026-06-01T00:00Z"),
+      },
+      {
+        orderId: "gid://shopify/Order/1",
+        bundleId: "bundle-b",
+        revenue: 10_000,
+        bundleRevenue: 2_000,
+        createdAt: D("2026-06-01T00:00Z"),
+      },
+    ]);
+
+    expect(snap.checkedOut).toBe(1);
+    expect(snap.revenueCents).toBe(5_000);
+  });
 });
 
 describe("computeOfferFunnel", () => {

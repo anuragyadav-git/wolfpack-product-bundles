@@ -16,6 +16,7 @@ import { AppLogger } from "../../lib/logger";
 import { matchLineItemsToBundles, normalizeToOrderGid } from "../../lib/analytics/bundle-matcher.server";
 import { sanitizeCustomUtmAttributes } from "../../lib/analytics/attribution-controls";
 import { normalizeOfferAnalyticsDimensions } from "../../lib/analytics/offer-dimensions";
+import { collectBundleLineRevenue } from "../../lib/analytics/bundle-line-revenue";
 
 function linePropertyMap(value: unknown): Record<string, unknown> {
   if (Array.isArray(value)) {
@@ -137,6 +138,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     // Match line items to bundles. See matchLineItemsToBundles for the two-pass
     // strategy — it also normalizes numeric vs GID productId formats.
     const bundleIds = await matchLineItemsToBundles(shopId, lineItems ?? []);
+    const bundleRevenueById = collectBundleLineRevenue(lineItems ?? [], bundleIds);
 
     // Create attribution record(s) — one per bundle, or one with null bundleId if no bundles matched
     if (bundleIds.length > 0) {
@@ -145,6 +147,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           ...offerDimensionsForBundle(lineItems, bundleId),
           shopId,
           bundleId,
+          bundleRevenue: bundleRevenueById[bundleId] ?? 0,
           orderId: normalizedOrderId,
           orderNumber: orderNumber || null,
           utmSource,
@@ -164,6 +167,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         data: {
           shopId,
           bundleId: null,
+          bundleRevenue: 0,
           orderId: normalizedOrderId,
           orderNumber: orderNumber || null,
           utmSource,

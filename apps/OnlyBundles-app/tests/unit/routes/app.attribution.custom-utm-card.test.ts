@@ -27,14 +27,11 @@ jest.mock("@shopify/app-bridge-react", () => ({
 
 jest.mock("../../../app/components/analytics", () => ({
   BundlePerformanceMatrix: () => null,
-  FunnelHero: () => null,
+  BundleConversionFunnel: () => null,
+  BundleKeyStatistics: () => null,
+  BundleSalesTrends: () => null,
   LiveActivityFeed: () => null,
   TopCampaigns: () => null,
-}));
-
-jest.mock("../../../app/components/analytics/lazy", () => ({
-  LazyEngagementPulse: () => null,
-  LazyRevenueAttribution: () => null,
 }));
 
 describe("CustomUtmTrackingCard", () => {

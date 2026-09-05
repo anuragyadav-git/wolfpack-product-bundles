@@ -13,6 +13,7 @@
 import db from "../../db.server";
 import { matchLineItemGroupsToBundles, orderIdMatchForms } from "../../lib/analytics/bundle-matcher.server";
 import { AppLogger } from "../../lib/logger";
+import { collectBundleLineRevenue } from "../../lib/analytics/bundle-line-revenue";
 import {
   generateCartTransformRuntimeTokenSecret,
   verifyRuntimeCartToken,
@@ -39,7 +40,7 @@ const ORDERS_QUERY = `
         id
         name
         createdAt
-        totalPriceSet { shopMoney { amount currencyCode } }
+        currentTotalPriceSet { shopMoney { amount currencyCode } }
         customerJourneySummary {
           lastVisit {
             landingPage
@@ -50,6 +51,7 @@ const ORDERS_QUERY = `
           nodes {
             product { id }
             quantity
+            discountedTotalSet(withCodeDiscounts: true) { shopMoney { amount } }
             customAttributes { key value }
           }
         }
@@ -62,7 +64,7 @@ interface OrderNode {
   id: string;
   name?: string | null;
   createdAt: string;
-  totalPriceSet?: { shopMoney?: { amount?: string | null; currencyCode?: string | null } | null } | null;
+  currentTotalPriceSet?: { shopMoney?: { amount?: string | null; currencyCode?: string | null } | null } | null;
   customerJourneySummary?: {
     lastVisit?: {
       landingPage?: string | null;
@@ -79,6 +81,9 @@ interface OrderNode {
     nodes?: Array<{
       product?: { id?: string | null } | null;
       customAttributes?: Array<{ key?: string | null; value?: string | null }> | null;
+      discountedTotalSet?: {
+        shopMoney?: { amount?: string | null } | null;
+      } | null;
     }> | null;
   } | null;
 }
@@ -113,6 +118,33 @@ function verifiedRuntimeBundleIds(node: OrderNode, shopId: string): string[] {
     }
   }
   return [...bundleIds];
+}
+
+function bundleRevenueById(
+  node: OrderNode,
+  shopId: string,
+  bundleIds: string[],
+): Record<string, number> {
+  let secret: string;
+  try {
+    secret = generateCartTransformRuntimeTokenSecret(shopId);
+  } catch {
+    return Object.fromEntries(bundleIds.map((bundleId) => [bundleId, 0]));
+  }
+
+  const lines = (node.lineItems?.nodes ?? []).map((lineItem) => {
+    const runtimeToken = lineItem.customAttributes?.find(
+      (attribute) => attribute.key === "_wolfpack_bundle_runtime",
+    )?.value;
+    const payload = runtimeToken
+      ? verifyRuntimeCartToken(runtimeToken, secret)
+      : null;
+    return {
+      ...lineItem,
+      bundleId: payload?.shop === shopId ? payload.bundleId : null,
+    };
+  });
+  return collectBundleLineRevenue(lines, bundleIds);
 }
 
 export async function backfillOrderAttribution(
@@ -201,45 +233,26 @@ export async function backfillOrderAttribution(
       landingPage: string | null;
       revenue: number;
       currency: string;
+      bundleRevenue: number;
       createdAt: Date;
     }> = [];
 
     for (const [nodeIndex, node] of nodes.entries()) {
       const existingRows = existingRowsForOrder(node.id);
-      if (existingRows.some((row: { bundleId: string | null }) => row.bundleId !== null)) {
-        skipped += 1;
-        continue;
-      }
-
-      const bundleIds = explicitBundleIdsByOrder[nodeIndex].length > 0
+      const existingBundleIds = existingRows.flatMap(
+        (row: { bundleId: string | null }) => row.bundleId ? [row.bundleId] : [],
+      );
+      const hasExplicitBundleIdentity = explicitBundleIdsByOrder[nodeIndex].length > 0;
+      const bundleIds = hasExplicitBundleIdentity
         ? explicitBundleIdsByOrder[nodeIndex]
-        : fallbackMatchesByIndex.get(nodeIndex) ?? [];
-
-      if (existingRows.length > 0) {
-        if (bundleIds.length === 0) {
-          skipped += 1;
-          continue;
-        }
-        await db.orderAttribution.updateMany({
-          where: {
-            shopId,
-            orderId: { in: orderIdMatchForms(node.id) },
-            bundleId: null,
-          },
-          data: {
-            bundleId: bundleIds[0],
-            createdAt: new Date(node.createdAt),
-          },
-        });
-        repaired += 1;
-      }
+        : fallbackMatchesByIndex.get(nodeIndex) ?? existingBundleIds;
 
       const visit = node.customerJourneySummary?.lastVisit ?? null;
       const utm = visit?.utmParameters ?? null;
-      const revenue = toRevenueCents(node.totalPriceSet?.shopMoney?.amount);
-      const currency = node.totalPriceSet?.shopMoney?.currencyCode ?? "USD";
+      const revenue = toRevenueCents(node.currentTotalPriceSet?.shopMoney?.amount);
+      const currency = node.currentTotalPriceSet?.shopMoney?.currencyCode ?? "USD";
       const orderNumber = extractOrderNumber(node.id);
-
+      const revenueByBundleId = bundleRevenueById(node, shopId, bundleIds);
       const baseRow = {
         shopId,
         orderId: node.id,
@@ -255,13 +268,63 @@ export async function backfillOrderAttribution(
         createdAt: new Date(node.createdAt),
       };
 
+      if (existingBundleIds.length > 0) {
+        if (!hasExplicitBundleIdentity) {
+          skipped += 1;
+          continue;
+        }
+        for (const bundleId of existingBundleIds) {
+          await db.orderAttribution.updateMany({
+            where: {
+              shopId,
+              orderId: { in: orderIdMatchForms(node.id) },
+              bundleId,
+            },
+            data: {
+              revenue,
+              bundleRevenue: revenueByBundleId[bundleId] ?? 0,
+              currency,
+              createdAt: new Date(node.createdAt),
+            },
+          });
+        }
+        repaired += 1;
+        continue;
+      }
+
+      if (existingRows.length > 0) {
+        if (bundleIds.length === 0) {
+          skipped += 1;
+          continue;
+        }
+        await db.orderAttribution.updateMany({
+          where: {
+            shopId,
+            orderId: { in: orderIdMatchForms(node.id) },
+            bundleId: null,
+          },
+          data: {
+            bundleId: bundleIds[0],
+            revenue,
+            bundleRevenue: revenueByBundleId[bundleIds[0]] ?? 0,
+            currency,
+            createdAt: new Date(node.createdAt),
+          },
+        });
+        repaired += 1;
+      }
+
       if (bundleIds.length > 0) {
         const newBundleIds = existingRows.length > 0 ? bundleIds.slice(1) : bundleIds;
         for (const bundleId of newBundleIds) {
-          rows.push({ ...baseRow, bundleId });
+          rows.push({
+            ...baseRow,
+            bundleId,
+            bundleRevenue: revenueByBundleId[bundleId] ?? 0,
+          });
         }
       } else if (existingRows.length === 0) {
-        rows.push({ ...baseRow, bundleId: null });
+        rows.push({ ...baseRow, bundleId: null, bundleRevenue: 0 });
       }
     }
 

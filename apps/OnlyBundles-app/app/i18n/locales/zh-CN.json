@@ -834,6 +834,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "关键统计数据",
+      "sales": "销售",
+      "totalOrderRevenue": "订单总收入",
+      "totalOrderRevenueDefinition": "包含至少一个捆绑包的订单总价值。",
+      "totalBundleRevenue": "捆绑包总收入",
+      "totalBundleRevenueDefinition": "已完成订单中捆绑商品的合计价值。",
+      "ordersWithBundles": "包含捆绑包的订单",
+      "ordersWithBundlesDefinition": "包含至少一个捆绑包的已完成订单。",
+      "averageOrderValue": "平均订单价值",
+      "averageOrderValueDefinition": "订单总收入除以包含捆绑包的订单数。",
+      "addToCartValue": "加入购物车价值",
+      "addToCartValueDefinition": "捆绑包总收入除以成功加入购物车的会话数。",
+      "totalBundlesPurchased": "购买的捆绑包总数",
+      "totalBundlesPurchasedDefinition": "每个订单中的唯一捆绑包；重复数量只计一次。",
+      "bundleRevenue": "捆绑包收入"
+    },
     "offers": {
       "title": "报价业绩",
       "description": "比较隐私安全的报价决定与捆绑接口、添加到购物车活动、已完成订单和收入。",
@@ -958,7 +975,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "捆绑通风",
-          "howShoppersMoveThroughYourBundles": "购物者如何通过您的捆包移动"
+          "howShoppersMoveThroughYourBundles": "购物者如何通过您的捆包移动",
+          "bundleViews": "Bundle 视图",
+          "conversion": "转换"
         },
         "liveactivityfeed": {
           "liveActivity": "在线活动",
@@ -1110,7 +1129,7 @@
         "apply": "应用",
         "backfillSelectedWindow": "回填选中窗口",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "匹配订单行项目来捆绑和导入可用收入、着陆页面和UTM的详细信息。",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "现有的归属记录被跳过，因此再次运行同一个窗口不会造成重复。",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "现有捆绑包记录会尽可能从 Shopify 刷新，并且不会创建重复记录。",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "店铺订单和前台跟踪不被修改。",
         "customUtmAttributes": "自定义 UTM 属性",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "输入用逗号或新行分隔的参数名称。Only Bundles 捕获器在未来访问时匹配的 URL 值，并将它们存储到结帐属性。",

@@ -1,14 +1,15 @@
 import { useFetcher, useNavigate } from "@remix-run/react";
-import { Suspense, useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import "../../../components/analytics/shared/tokens.css";
 import {
-  FunnelHero,
+  BundleConversionFunnel,
+  BundleKeyStatistics,
   BundlePerformanceMatrix,
+  BundleSalesTrends,
   TopCampaigns,
 } from "../../../components/analytics";
-import { LazyBundleMetricChart } from "../../../components/analytics/lazy";
 import styles from "../../../styles/routes/app-attribution.module.css";
 import type { AttributionDashboardData } from "../app.attribution";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
@@ -588,10 +589,10 @@ function AttributionDashboardContent({
     days,
     from,
     to,
-    prevFrom,
-    prevTo,
+    views,
     funnelSnapshot,
-    bundleMetricTrend,
+    bundleCommerceSummary,
+    bundleSalesTrend,
     bundleMatrix,
     topCampaignsRows,
     customUtmParameters,
@@ -611,31 +612,6 @@ function AttributionDashboardContent({
     message?: string;
     error?: string;
   }>();
-
-  const [compare, setCompare] = useState(true);
-
-  const comparePeriodLabel = useMemo(() => {
-    if (!prevFrom || !prevTo) return null;
-    const fmt = (s: string) => {
-      const [, m, d] = s.split("-");
-      const months = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
-      return `${months[parseInt(m, 10) - 1]} ${parseInt(d, 10)}`;
-    };
-    return `${fmt(prevFrom)} – ${fmt(prevTo)}`;
-  }, [prevFrom, prevTo]);
 
   useEffect(() => {
     const result = exportFetcher.data;
@@ -714,7 +690,7 @@ function AttributionDashboardContent({
             onSelectionChange={onOfferSelectionChange}
           />
         )}
-        {/* Date range selector + Compare toggle + Export */}
+        {/* Date range selector + export and backfill actions */}
         {accessMode === "SUMMARY" && (
           <s-box paddingBlockEnd="small-200">
             <s-banner tone="info">
@@ -724,33 +700,10 @@ function AttributionDashboardContent({
         )}
         {accessMode === "ADVANCED" && (
           <div className={styles.headerRow}>
-            <div className={styles.comparePillSlot}>
-              <div className={styles.datePickerWrap}>
-                <DateRangeSelector days={days} from={from} to={to} />
-              </div>
-              {compare && comparePeriodLabel && (
-                <span className={styles.comparePill}>
-                  {translateAdmin("adminDynamic.comparedWith", {
-                    period: comparePeriodLabel,
-                  })}
-                </span>
-              )}
+            <div className={styles.datePickerWrap}>
+              <DateRangeSelector days={days} from={from} to={to} />
             </div>
             <div className={styles.analyticsActions}>
-              <div className={styles.analyticsActionButton}>
-                <s-button
-                  inlineSize="fill"
-                  variant={compare ? "primary" : "secondary"}
-                  icon={compare ? "check" : "chart-line"}
-                  onClick={() => setCompare((v) => !v)}
-                >
-                  {translateAdmin(
-                    compare
-                      ? "adminDynamic.compareOn"
-                      : "adminDynamic.compareOff"
-                  )}
-                </s-button>
-              </div>
               <div className={styles.analyticsActionButton}>
                 <s-button
                   inlineSize="fill"
@@ -791,23 +744,22 @@ function AttributionDashboardContent({
         )}
         {/* ────────── Revamped analytics sections (wpb-analytics-revamp-1) ─────── */}
 
-        <FunnelHero
-          snapshot={funnelSnapshot}
-          windowLabel={from && to ? `${from} → ${to}` : `Last ${days} days`}
-          formatRevenue={formatRevenue}
-          formatCount={(n) => n.toLocaleString()}
-          showHeader={false}
+        <BundleKeyStatistics
+          summary={bundleCommerceSummary}
+          formatMoney={formatRevenue}
         />
 
-        {accessMode === "ADVANCED" && (
-          <Suspense fallback={null}>
-            <LazyBundleMetricChart
-              trend={bundleMetricTrend}
-              rangeDays={days}
-              formatRevenue={formatRevenue}
-            />
-          </Suspense>
-        )}
+        <BundleConversionFunnel
+          bundleViews={views.totalViews}
+          addedToCart={funnelSnapshot.addedToCart}
+          orders={funnelSnapshot.checkedOut}
+          formatCount={(n) => n.toLocaleString()}
+        />
+
+        <BundleSalesTrends
+          trend={bundleSalesTrend}
+          formatMoney={formatRevenue}
+        />
 
         {accessMode === "ADVANCED" && (
           <BundlePerformanceMatrix

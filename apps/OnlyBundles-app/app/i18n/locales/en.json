@@ -845,6 +845,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "Key statistics",
+      "sales": "Sales",
+      "totalOrderRevenue": "Total order revenue",
+      "totalOrderRevenueDefinition": "Total value of orders that contain at least one bundle.",
+      "totalBundleRevenue": "Total bundle revenue",
+      "totalBundleRevenueDefinition": "Combined value of bundle items in completed orders.",
+      "ordersWithBundles": "Orders with bundles",
+      "ordersWithBundlesDefinition": "Completed orders that contain at least one bundle.",
+      "averageOrderValue": "Average order value",
+      "averageOrderValueDefinition": "Total order revenue divided by orders with bundles.",
+      "addToCartValue": "Add to cart value",
+      "addToCartValueDefinition": "Total bundle revenue divided by successful add-to-cart sessions.",
+      "totalBundlesPurchased": "Total bundle purchased",
+      "totalBundlesPurchasedDefinition": "Unique bundles purchased per order; repeated quantity counts once.",
+      "bundleRevenue": "Bundle revenue"
+    },
     "offers": {
       "title": "Offer performance",
       "description": "Compare privacy-safe offer decisions with bundle engagement, add-to-cart activity, completed orders, and revenue.",
@@ -969,7 +986,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "Bundle Funnel",
-          "howShoppersMoveThroughYourBundles": "How shoppers move through your bundles"
+          "howShoppersMoveThroughYourBundles": "How shoppers move through your bundles",
+          "bundleViews": "Bundle Views",
+          "conversion": "Conversion"
         },
         "liveactivityfeed": {
           "liveActivity": "Live Activity",
@@ -1121,7 +1140,7 @@
         "apply": "Apply",
         "backfillSelectedWindow": "Backfill selected window",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Matches order line items to bundles and imports available revenue, landing-page, and UTM details.",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Existing attribution records are skipped, so running the same window again does not create duplicates.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Existing bundle rows are refreshed from Shopify when possible; no duplicate records are created.",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopify orders and storefront tracking are not modified.",
         "customUtmAttributes": "Custom UTM attributes",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Enter parameter names separated by commas or new lines. Only Bundles captures matching URL values on future visits and stores them with checkout attribution.",

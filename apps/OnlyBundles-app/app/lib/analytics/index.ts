@@ -44,6 +44,17 @@ export type {
 
 export { filterAndSortCampaignResults } from "./campaign-results";
 
+export type {
+  BundleCommerceRow,
+  BundleCommerceSummary,
+  BundleSalesTrendPoint,
+} from "./bundle-commerce-metrics";
+
+export {
+  buildBundleSalesTrend,
+  computeBundleCommerceSummary,
+} from "./bundle-commerce-metrics";
+
 export {
   computeBundleFunnel,
   computeOfferFunnel,

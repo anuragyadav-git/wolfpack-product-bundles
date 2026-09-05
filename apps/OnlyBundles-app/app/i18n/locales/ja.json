@@ -834,6 +834,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "主要な統計",
+      "sales": "売上",
+      "totalOrderRevenue": "注文総売上",
+      "totalOrderRevenueDefinition": "少なくとも1つのバンドルを含む注文の合計金額です。",
+      "totalBundleRevenue": "バンドル総売上",
+      "totalBundleRevenueDefinition": "完了した注文に含まれるバンドル商品の合計金額です。",
+      "ordersWithBundles": "バンドルを含む注文",
+      "ordersWithBundlesDefinition": "少なくとも1つのバンドルを含む完了済み注文です。",
+      "averageOrderValue": "平均注文額",
+      "averageOrderValueDefinition": "注文総売上をバンドルを含む注文数で割った値です。",
+      "addToCartValue": "カート追加あたりの価値",
+      "addToCartValueDefinition": "バンドル総売上をカート追加に成功したセッション数で割った値です。",
+      "totalBundlesPurchased": "購入されたバンドル合計",
+      "totalBundlesPurchasedDefinition": "注文ごとの一意のバンドル数です。数量の重複は1回として数えます。",
+      "bundleRevenue": "バンドル売上"
+    },
     "offers": {
       "title": "パフォーマンスを提供",
       "description": "プライバシーに保護されたオファーの決定をバンドルエンゲージメント、カートへの追加アクティビティ、完了した注文、収益と比較します。",
@@ -958,7 +975,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "バンドルファネル",
-          "howShoppersMoveThroughYourBundles": "お客さまのバンドルの移動方法"
+          "howShoppersMoveThroughYourBundles": "お客さまのバンドルの移動方法",
+          "bundleViews": "バンドルビュー",
+          "conversion": "変換"
         },
         "liveactivityfeed": {
           "liveActivity": "ライブアクティビティ",
@@ -1110,7 +1129,7 @@
         "apply": "適用",
         "backfillSelectedWindow": "選択したウィンドウをバックフィルする",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "バンドルおよびインポート可能な収益、ランディングページ、およびUTMの詳細に対応する注文行項目が一致します。",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "既存のアトリビューションレコードはスキップされるため、再び同じウィンドウを実行しても重複は作成されません。",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "既存のバンドル行は可能な場合にShopifyから更新され、重複レコードは作成されません。",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopifyの注文とストアフトラッキングは変更されません。",
         "customUtmAttributes": "UTMのカスタム属性",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Only Bundlesは、今後の訪問時に一致するURL値をキャプチャし、チェックアウト属性で保存します。",

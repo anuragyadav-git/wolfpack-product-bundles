@@ -732,6 +732,7 @@ model OrderAttribution {
   customUtmAttributes    Json     @default("{}")
   landingPage            String? // The URL customer landed on
   revenue                Int // cents
+  bundleRevenue          Int      @default(0) // bundle-line value in cents
   currency               String   @default("USD")
   createdAt              DateTime @default(now())
 

@@ -834,6 +834,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "Statistiques clés",
+      "sales": "Ventes",
+      "totalOrderRevenue": "Revenu total des commandes",
+      "totalOrderRevenueDefinition": "Valeur totale des commandes contenant au moins un lot.",
+      "totalBundleRevenue": "Revenu total des lots",
+      "totalBundleRevenueDefinition": "Valeur combinée des articles de lots dans les commandes terminées.",
+      "ordersWithBundles": "Commandes avec lots",
+      "ordersWithBundlesDefinition": "Commandes terminées contenant au moins un lot.",
+      "averageOrderValue": "Valeur moyenne des commandes",
+      "averageOrderValueDefinition": "Revenu total des commandes divisé par les commandes avec lots.",
+      "addToCartValue": "Valeur d'ajout au panier",
+      "addToCartValueDefinition": "Revenu total des lots divisé par les sessions d'ajout au panier réussies.",
+      "totalBundlesPurchased": "Total des lots achetés",
+      "totalBundlesPurchasedDefinition": "Lots uniques par commande ; une quantité répétée compte une fois.",
+      "bundleRevenue": "Revenu des lots"
+    },
     "offers": {
       "title": "Performance de l'offre",
       "description": "Comparez les décisions des offres sécurisées en matière de protection de la vie privée avec l'engagement du paquet, l'activité d'ajout au panier, les commandes terminées et les revenus.",
@@ -958,7 +975,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "Entonnoir",
-          "howShoppersMoveThroughYourBundles": "Comment les acheteurs se déplacent à travers vos paquets"
+          "howShoppersMoveThroughYourBundles": "Comment les acheteurs se déplacent à travers vos paquets",
+          "bundleViews": "Vues groupées",
+          "conversion": "Conversion"
         },
         "liveactivityfeed": {
           "liveActivity": "Activité en direct",
@@ -1110,7 +1129,7 @@
         "apply": "Appliquer",
         "backfillSelectedWindow": "Remplissage de la fenêtre sélectionnée",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Correspond aux articles de la ligne de commande pour les regroupements et les importations de produits disponibles, de la page d'atterrissage et des détails UTM.",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Les enregistrements d'attribution existants sont ignorés, donc l'exécution de la même fenêtre ne crée pas de doublons.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Les lignes de lots existantes sont actualisées depuis Shopify lorsque possible ; aucun doublon n'est créé.",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Les commandes Shopify et le suivi de la vitrine ne sont pas modifiés.",
         "customUtmAttributes": "Attributs UTM personnalisés",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Entrez les noms de paramètres séparés par des virgules ou de nouvelles lignes. Only Bundles capture les valeurs d'URL correspondantes sur les visites futures et les stocke avec l'attribut checkout.",

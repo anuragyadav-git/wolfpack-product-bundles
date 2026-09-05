@@ -1,8 +1,7 @@
 /**
  * Analytics — UTM Attribution Dashboard
  *
- * Rebuilt with recharts time-series chart, AOV, period-over-period comparison,
- * UTM medium breakdown, and landing page performance analysis.
+ * Bundle performance, conversion, sales, and UTM attribution reporting.
  */
 
 import {
@@ -23,8 +22,11 @@ import {
   computeOfferFunnel,
   buildBundlePerformanceMatrix,
   buildBundleMetricTrendSeries,
+  buildBundleSalesTrend,
+  computeBundleCommerceSummary,
   type OrderAttributionRow,
 } from "../../lib/analytics";
+import { loadFreeAttributionSummary } from "../../services/analytics/free-attribution-summary.server";
 import {
   normalizeAttributionWindow,
   normalizeSavedCustomUtmParameters,
@@ -497,7 +499,7 @@ async function loadAttributionDashboardData({
         source: a.utmSource || "direct",
       };
     }
-    byCampaignMap[campaign].revenue += a.revenue;
+    byCampaignMap[campaign].revenue += a.bundleRevenue;
     byCampaignMap[campaign].orders += 1;
   }
   const byCampaign = Object.entries(byCampaignMap)
@@ -517,7 +519,7 @@ async function loadAttributionDashboardData({
         orders: 0,
       };
     }
-    byBundleMap[a.bundleId].revenue += a.revenue;
+    byBundleMap[a.bundleId].revenue += a.bundleRevenue;
     byBundleMap[a.bundleId].orders += 1;
   }
   const byBundle = Object.values(byBundleMap).sort(
@@ -559,8 +561,10 @@ async function loadAttributionDashboardData({
   }
 
   const attrRows: OrderAttributionRow[] = currentAttributions.map((a) => ({
+    orderId: a.orderId,
     bundleId: a.bundleId,
     revenue: a.revenue,
+    bundleRevenue: a.bundleRevenue,
     createdAt: a.createdAt,
   }));
   const bundleMetricTrend = buildBundleMetricTrendSeries(
@@ -602,10 +606,28 @@ async function loadAttributionDashboardData({
   const funnelSnapshot = computeBundleFunnel(
     engagementRowsTyped,
     currentAttributions.map((a) => ({
+      orderId: a.orderId,
       bundleId: a.bundleId,
       revenue: a.revenue,
+      bundleRevenue: a.bundleRevenue,
       createdAt: a.createdAt,
     }))
+  );
+  const bundleCommerceRows = currentAttributions.map((attribution) => ({
+    orderId: attribution.orderId,
+    bundleId: attribution.bundleId,
+    revenue: attribution.revenue,
+    bundleRevenue: attribution.bundleRevenue,
+    createdAt: attribution.createdAt,
+  }));
+  const bundleCommerceSummary = computeBundleCommerceSummary(
+    bundleCommerceRows,
+    funnelSnapshot.addedToCart,
+  );
+  const bundleSalesTrend = buildBundleSalesTrend(
+    bundleCommerceRows,
+    since,
+    until,
   );
   const offerOptionMap = new Map<
     string,
@@ -646,9 +668,11 @@ async function loadAttributionDashboardData({
   const offerFunnelSnapshot = computeOfferFunnel(
     engagementRowsTyped,
     currentAttributions.map((a) => ({
+      orderId: a.orderId,
       bundleId: a.bundleId,
       offerPolicyId: a.offerPolicyId,
       revenue: a.revenue,
+      bundleRevenue: a.bundleRevenue,
       createdAt: a.createdAt,
     })),
     selectedOfferPolicyId
@@ -679,8 +703,10 @@ async function loadAttributionDashboardData({
     matrixBundles,
     engagementRowsTyped,
     currentAttributions.map((a) => ({
+      orderId: a.orderId,
       bundleId: a.bundleId,
-      revenue: a.revenue,
+      revenue: a.bundleRevenue,
+      bundleRevenue: a.bundleRevenue,
       createdAt: a.createdAt,
     })),
     viewEvents
@@ -727,6 +753,8 @@ async function loadAttributionDashboardData({
     views: { totalViews, prevTotalViews, viewsByBundle },
     // wpb-analytics-revamp-1 additions
     funnelSnapshot,
+    bundleCommerceSummary,
+    bundleSalesTrend,
     engagementToOrderPct,
     bundleMatrix,
     topCampaignsRows,
@@ -738,92 +766,6 @@ async function loadAttributionDashboardData({
     customUtmParameters: normalizeSavedCustomUtmParameters(
       shop?.customUtmParameters
     ),
-  };
-}
-
-async function loadFreeAttributionSummary(shopId: string) {
-  const now = new Date();
-  const until = new Date(now);
-  until.setUTCHours(23, 59, 59, 999);
-  const since = new Date(until);
-  since.setUTCDate(since.getUTCDate() - 29);
-  since.setUTCHours(0, 0, 0, 0);
-  const createdAt = { gte: since, lte: until };
-  const [views, addsToCart, purchases, orders] = await Promise.all([
-    db.bundleAnalytics.count({ where: { shopId, event: "view", createdAt } }),
-    db.bundleAnalytics.count({
-      where: { shopId, event: "add_to_cart", createdAt },
-    }),
-    db.bundleAnalytics.count({
-      where: { shopId, event: "purchase", createdAt },
-    }),
-    db.orderAttribution.aggregate({
-      where: { shopId, bundleId: { not: null }, createdAt },
-      _count: { _all: true },
-      _sum: { revenue: true },
-    }),
-  ]);
-  const checkedOut = Math.max(purchases, orders._count._all);
-  const revenueCents = orders._sum.revenue ?? 0;
-  const from = since.toISOString().slice(0, 10);
-  const to = until.toISOString().slice(0, 10);
-  return {
-    accessMode: "SUMMARY" as const,
-    days: 30,
-    from,
-    to,
-    prevFrom: null,
-    prevTo: null,
-    summary: {
-      totalRevenue: revenueCents,
-      totalOrders: checkedOut,
-      bundleOrders: checkedOut,
-      aov: checkedOut > 0 ? Math.round(revenueCents / checkedOut) : 0,
-      prevTotalRevenue: 0,
-      prevTotalOrders: 0,
-      prevAov: 0,
-    },
-    timeSeries: [],
-    byPlatform: [],
-    byMedium: [],
-    byCampaign: [],
-    byBundle: [],
-    byLandingPage: [],
-    bundleMetricTrend: [],
-    views: { totalViews: views, prevTotalViews: 0, viewsByBundle: [] },
-    funnelSnapshot: {
-      impressions: views,
-      engaged: views,
-      addedToCart: addsToCart,
-      checkedOut,
-      revenueCents,
-      dropOffEngagedToAtc:
-        views > 0
-          ? Math.max(0, 100 - Math.round((addsToCart / views) * 100))
-          : 0,
-      dropOffAtcToCheckout:
-        addsToCart > 0
-          ? Math.max(0, 100 - Math.round((checkedOut / addsToCart) * 100))
-          : 0,
-    },
-    engagementToOrderPct:
-      views > 0 ? Math.round((checkedOut / views) * 100) : null,
-    bundleMatrix: [],
-    topCampaignsRows: [],
-    offerAnalytics: {
-      selectedOfferPolicyId: null,
-      options: [],
-      funnelSnapshot: {
-        impressions: 0,
-        engaged: 0,
-        addedToCart: 0,
-        checkedOut: 0,
-        revenueCents: 0,
-        dropOffEngagedToAtc: 0,
-        dropOffAtcToCheckout: 0,
-      },
-    },
-    customUtmParameters: [],
   };
 }
 

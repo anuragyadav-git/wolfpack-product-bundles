@@ -5,7 +5,7 @@ title: Database Schema
 type: architecture
 status: authoritative
 summary: Documents the canonical Prisma models, enums, ownership boundaries, and migration rules for Wolfpack persistence.
-last_audited: 2026-09-01
+last_audited: 2026-09-05
 owners:
   - engineering
 domains:
@@ -76,6 +76,17 @@ keys, so deleting or replacing an offer policy does not rewrite completed
 analytics. Both models index `(shopId, offerPolicyId, createdAt)` for the
 offer-filtered dashboard and CSV paths. Bundle-only rows keep all four values
 null.
+
+`revenue` stores Shopify's whole-order value. `bundleRevenue` stores the
+discounted value of the specific bundle represented by that row. Keeping the
+two values separate is required because one Shopify order can contain multiple
+bundles: order revenue and order count are deduplicated by `orderId`, while
+bundle revenue and unique bundle purchases are deduplicated by
+`(orderId, bundleId)`. New checkout rows use the Web Pixel checkout line value;
+the manual Analytics backfill refreshes it from Admin GraphQL
+`LineItem.discountedTotalSet(withCodeDiscounts: true)` when a verified runtime
+bundle token identifies the line. Lines without authoritative bundle identity
+remain at zero rather than guessing allocation.
 
 ### Shop
 

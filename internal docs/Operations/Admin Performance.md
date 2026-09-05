@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-09-02
+last_audited: 2026-09-05
 owners:
   - engineering
 domains:
@@ -37,6 +37,7 @@ source_paths:
   - app/routes/app/app._index.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
   - app/routes/app/app.attribution/AttributionDashboard.tsx
+  - app/components/analytics/BundleConversionFunnel.tsx
 related_docs:
   - internal docs/Operations/LCP and CLS Playbook.md
 tags:
@@ -315,10 +316,9 @@ rendered during that transition. Same-screen revalidation and form submission
 do not start the Admin header indicator.
 
 Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
-`vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
-manifest verification must show that the app layout and every non-analytics
-route avoid `vendor-charts`; only the lazy attribution dashboard and its chart
-helpers may reference that chunk.
+`vendor-state`. The Analytics route uses its local accessible SVG funnel and
+must not reach `vendor-charts`. Production manifest verification must show that
+the app layout and every embedded Admin route avoid `vendor-charts`.
 
 Merchant workflow roots should use descriptive `s-query-container` names when
 their responsive behavior depends on embedded app width. Current shared roots
@@ -335,7 +335,7 @@ CSS module behind a lazy React component produced a visible unstyled interval
 in the Vite-served embedded app, including after hot reloads.
 The pixel status promise resolves independently into a native top banner, while
 the title and critical funnel heading remain immediately available and the
-dashboard data/chart boundary uses the shared CSS-free Polaris loading state.
+dashboard data boundary uses the shared CSS-free Polaris loading state.
 Analytics has one page-level banner owner: UTM pixel status. Zero-value metric
 surfaces communicate the no-data state without a second banner, and backfill
 action results use Shopify toast feedback. Informational banners inside the
@@ -519,3 +519,30 @@ Design lazy boundary and cannot account for Settings landing LCP. Treat this as
 local dev-tunnel evidence requiring a focused route-response and candidate
 follow-up, not Shopify field p75. The temporary observer and parent bridge were
 removed before commit.
+
+## 2026-09-05 Analytics conversion-funnel dependency removal
+
+`/app/attribution` replaces the funnel bars, Bundle Split area chart, and
+campaign-row revenue meters with a dependency-free accessible SVG conversion
+funnel. The BOGOS-style bundle commerce extension adds six text KPI cards and
+two small dependency-free SVG sales trends; it does not restore Recharts or the
+route-specific chart chunk.
+The visualization consumes the existing `views.totalViews`,
+`funnelSnapshot.addedToCart`, and `funnelSnapshot.checkedOut` values. Commerce
+metrics separate the Shopify whole-order value from the discounted bundle-line
+value so multi-bundle orders do not duplicate order revenue or order counts.
+The attribution pixel now preserves Shopify Web Pixel `finalLinePrice`, while
+manual backfill reads Admin GraphQL `currentTotalPriceSet` and
+`discountedTotalSet(withCodeDiscounts: true)`; the app stores that verified
+bundle-line value separately from whole-order revenue.
+
+The route shell continues to render `h2#wpb-critical-funnel-hero-title` before
+the deferred Analytics payload. The resolved SVG remains inside the dashboard
+boundary, uses a labelled horizontal overflow region at narrow widths, and
+does not add work to the critical shell. The 2026-09-05 production build emitted
+no `vendor-charts` asset, and the Analytics manifest entry contains no chart
+dependency import. A cache-bypassed embedded SIT measurement on
+`agent-5sfidg3m` retained `h2#wpb-critical-funnel-hero-title` as the app-owned
+LCP candidate at 1784ms. This is a dev-tunnel spot check, not Shopify field p75
+evidence. The temporary cross-origin observer and parent bridge were removed
+immediately after the measurement.

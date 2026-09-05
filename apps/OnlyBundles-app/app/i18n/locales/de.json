@@ -834,6 +834,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "Wichtige Kennzahlen",
+      "sales": "Verkäufe",
+      "totalOrderRevenue": "Gesamter Bestellumsatz",
+      "totalOrderRevenueDefinition": "Gesamtwert der Bestellungen mit mindestens einem Bundle.",
+      "totalBundleRevenue": "Gesamter Bundle-Umsatz",
+      "totalBundleRevenueDefinition": "Gesamtwert der Bundle-Artikel in abgeschlossenen Bestellungen.",
+      "ordersWithBundles": "Bestellungen mit Bundles",
+      "ordersWithBundlesDefinition": "Abgeschlossene Bestellungen mit mindestens einem Bundle.",
+      "averageOrderValue": "Durchschnittlicher Bestellwert",
+      "averageOrderValueDefinition": "Gesamter Bestellumsatz geteilt durch Bestellungen mit Bundles.",
+      "addToCartValue": "Wert pro Warenkorbzugabe",
+      "addToCartValueDefinition": "Gesamter Bundle-Umsatz geteilt durch erfolgreiche Warenkorb-Sitzungen.",
+      "totalBundlesPurchased": "Gekaufte Bundles insgesamt",
+      "totalBundlesPurchasedDefinition": "Eindeutige Bundles pro Bestellung; wiederholte Mengen zählen einmal.",
+      "bundleRevenue": "Bundle-Umsatz"
+    },
     "offers": {
       "title": "Angebotsleistung",
       "description": "Vergleichen Sie die Entscheidungen im Bereich des privatwirtschaftlichen Angebots mit Bündelung und Aktivität, ausgefüllten Aufträgen und Einnahmen.",
@@ -958,7 +975,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "Bündel-Trichter",
-          "howShoppersMoveThroughYourBundles": "Wie sich Käufer durch deine Bundles bewegen"
+          "howShoppersMoveThroughYourBundles": "Wie sich Käufer durch deine Bundles bewegen",
+          "bundleViews": "Bundle-Ansichten",
+          "conversion": "Konvertierung"
         },
         "liveactivityfeed": {
           "liveActivity": "Live-Aktivität",
@@ -1110,7 +1129,7 @@
         "apply": "Anwenden",
         "backfillSelectedWindow": "Ausgewähltes Fenster Backfill",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Matches order line items to bundles and import available revenue, landing-page and UTM details.",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Bestehende Attribute werden übersprungen, so dass das erneute Ausführen des gleichen Fensters keine Duplikate erzeugt.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Bestehende Bundle-Zeilen werden nach Möglichkeit aus Shopify aktualisiert; es werden keine Duplikate erstellt.",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopify Bestellungen und Storefront Tracking werden nicht geändert.",
         "customUtmAttributes": "Eigene UTM-Attribute",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Geben Sie die durch Kommas oder neue Zeilen getrennten Parameternamen ein. Only Bundles erfasst die URL-Werte bei zukünftigen Besuchen und speichert diese mit Kassenattribution.",

@@ -8,9 +8,11 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface OrderAttributionRow {
+  orderId?: string;
   bundleId: string | null;
   offerPolicyId?: string | null;
   revenue: number; // cents
+  bundleRevenue?: number; // cents
   createdAt: Date;
 }
 

@@ -64,7 +64,7 @@ export interface BundleMatrixRow {
  *
  * Engagement = distinct sessionIds with a session-engaged event.
  * AddedToCart = distinct sessionIds with a bundle-add-to-cart-success event.
- * CheckedOut = bundle-attributed completed checkout rows.
+ * CheckedOut = distinct Shopify orders containing a bundle.
  */
 export function computeBundleFunnel(
   engagementRows: BundleEngagementRow[],
@@ -84,14 +84,21 @@ export function computeBundleFunnel(
   const engaged = engagedSessionIds.size;
   const addedToCart = addedToCartSessionIds.size;
 
-  let checkedOut = 0;
+  const checkedOutOrderIds = new Set<string>();
+  const revenuePurchaseKeys = new Set<string>();
   let revenueCents = 0;
-  for (const r of attributionRows) {
+  for (const [index, r] of attributionRows.entries()) {
     if (r.bundleId !== null) {
-      checkedOut += 1;
-      revenueCents += r.revenue;
+      const orderKey = r.orderId ?? `row-${index}`;
+      checkedOutOrderIds.add(orderKey);
+      const purchaseKey = `${orderKey}\u0000${r.bundleId}`;
+      if (!revenuePurchaseKeys.has(purchaseKey)) {
+        revenuePurchaseKeys.add(purchaseKey);
+        revenueCents += r.bundleRevenue ?? r.revenue;
+      }
     }
   }
+  const checkedOut = checkedOutOrderIds.size;
 
   const dropOffEngagedToAtc =
     engaged > 0 ? Math.max(0, Math.min(100, 100 - Math.round((addedToCart / engaged) * 100))) : 0;

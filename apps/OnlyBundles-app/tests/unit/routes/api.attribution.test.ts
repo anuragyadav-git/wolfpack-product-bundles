@@ -177,4 +177,46 @@ describe("api.attribution", () => {
       })],
     });
   });
+
+  it("stores Shopify checkout line value separately from whole-order revenue", async () => {
+    mockMatchLineItemsToBundles.mockResolvedValue(["bundle-123"]);
+
+    await action({
+      request: makeRequest({
+        orderId: "791",
+        shopId: "test.myshopify.com",
+        totalPrice: "50.00",
+        currencyCode: "USD",
+        lineItems: [
+          {
+            properties: {
+              _bundle_display_properties: JSON.stringify({
+                offerAnalytics: { bundleId: "bundle-123" },
+              }),
+            },
+            finalLinePrice: { amount: 12.5 },
+          },
+          {
+            properties: {
+              _bundle_display_properties: JSON.stringify({
+                offerAnalytics: { bundleId: "bundle-123" },
+              }),
+            },
+            finalLinePrice: { amount: 7.5 },
+          },
+          { finalLinePrice: { amount: 30 } },
+        ],
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(getDb().orderAttribution.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({
+        bundleId: "bundle-123",
+        revenue: 5_000,
+        bundleRevenue: 2_000,
+      })],
+    });
+  });
 });

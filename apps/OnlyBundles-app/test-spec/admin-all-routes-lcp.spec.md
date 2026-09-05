@@ -5,7 +5,7 @@ title: Test Spec - Admin All Routes LCP
 type: test-spec
 status: active
 summary: Enforces strict route-level Admin LCP and production chunk isolation.
-last_audited: 2026-08-25
+last_audited: 2026-09-05
 owners:
   - engineering
 domains:
@@ -40,7 +40,7 @@ Keep the authenticated Admin shell lightweight and enforce the strict app-owned 
 | 2 | Shared Admin shell dependencies | Production Admin layout | No legacy Polaris React provider, stylesheet, translations, or global Redux provider | App Bridge and `polaris.js` load from the document head |
 | 3 | Shared app bootstrap | `/app` and `/app/dashboard` loader requests | Neither request reads first-create eligibility | Eligibility remains create-handler-owned |
 | 4 | Route-owned state | Dashboard, Billing, FPB configure, PPB configure | Each state consumer owns its Redux provider | Non-state routes avoid `vendor-state` |
-| 5 | Production chunk isolation | Vite production manifest | Non-state routes cannot reach `vendor-state`; non-Analytics routes cannot reach `vendor-charts` | Analytics code and CSS remain atomic |
+| 5 | Production chunk isolation | Vite production manifest | Non-state routes cannot reach `vendor-state`; no embedded Admin route reaches `vendor-charts` | Analytics uses dependency-free SVG funnel and sales charts |
 
 ## Acceptance Criteria
 - [x] Route-keyed LCP p75 passes only when it is below 2500ms.
@@ -48,4 +48,5 @@ Keep the authenticated Admin shell lightweight and enforce the strict app-owned 
 - [x] The shared `/app` layout does not own Redux or React Polaris.
 - [x] The shared app loader does not read `firstCreateTourEligible`.
 - [x] Production manifest checks pass.
+- [x] Analytics does not import or request `vendor-charts`.
 - [x] The temporary diagnostics were removed after the measurement and optimization cycle.
