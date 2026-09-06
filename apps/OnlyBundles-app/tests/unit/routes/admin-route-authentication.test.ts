@@ -36,6 +36,7 @@ const AUTHENTICATION_POLICY: Record<
     directCalls: 0,
     owner: "app.settings.tsx",
   },
+  "app.sidekick.bundles.tsx": { directCalls: 2 },
   "app.store-files.tsx": { directCalls: 1 },
   "app.upload-store-file.tsx": { directCalls: 2 },
 };

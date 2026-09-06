@@ -1,0 +1,17 @@
+[[extensions]]
+name = "Create product bundle"
+description = "Create a draft Only Bundles product bundle after merchant review"
+handle = "sidekick-create-bundle"
+type = "admin_link"
+uid = "d76cd5a4-b3ab-9e23-879e-750011d10d988ec30806"
+
+[[extensions.targeting]]
+target = "admin.app.intent.link"
+url = "/app/bundles/create"
+tools = "./tools.json"
+instructions = "./instructions.md"
+
+  [[extensions.targeting.intents]]
+  type = "shopify/product"
+  action = "import"
+  schema = "./product-import-schema.json"

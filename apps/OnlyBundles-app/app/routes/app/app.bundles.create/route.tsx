@@ -8,6 +8,7 @@ import {
 import {
   Form,
   useActionData,
+  useFetcher,
   useNavigate,
   useNavigation,
   useSearchParams,
@@ -26,6 +27,31 @@ import {
 } from "../../../services/app-events.server";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
+import {
+  initializeSidekickBundleIntentBridge,
+  resolveSidekickAppBridge,
+  type SidekickBundleDraft,
+} from "../../../lib/sidekick-create-bundle";
+
+type SidekickAppBridge = {
+  tools: {
+    register: (
+      name: string,
+      handler: (input: unknown) => unknown | Promise<unknown>,
+    ) => () => void;
+  };
+  intents: {
+    request: {
+      value: unknown;
+      subscribe: (callback: (request: unknown) => void) => () => void;
+    };
+    response: {
+      ok: (output: { id: string }) => Promise<void>;
+      error: (message: string) => Promise<void>;
+      closed: () => Promise<void>;
+    };
+  };
+};
 
 export const links: LinksFunction = () => [
   {
@@ -66,6 +92,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const bundleName = formData.get("bundleName");
   const bundleType = formData.get("bundleType");
+  const submissionMode = formData.get("submissionMode");
+  const isSidekickSubmission = submissionMode === "sidekick";
   const createFormData = new FormData();
   if (typeof bundleName === "string")
     createFormData.set("bundleName", bundleName);
@@ -80,13 +108,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     actor: "merchant",
     routeFamily: "create",
     attributes: {
-      entry_point: "create_route",
+      entry_point: isSidekickSubmission ? "sidekick" : "create_route",
     },
   });
   const result = await handleCreateBundle(admin, session, createFormData);
   const data = (await result.json()) as {
     error?: string;
     bundleId?: string;
+    bundleProductId?: string;
     redirectTo?: string;
     showFirstLoadTour?: boolean;
     success?: boolean;
@@ -106,6 +135,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         template_id: typeof bundleType === "string" ? bundleType : null,
       },
     });
+    if (isSidekickSubmission && data.bundleId && data.bundleProductId) {
+      return json({
+        success: true,
+        bundleId: data.bundleId,
+        bundleProductId: data.bundleProductId,
+        redirectTo: data.redirectTo,
+      });
+    }
     if (!data.showFirstLoadTour) {
       return redirect(data.redirectTo);
     }
@@ -126,6 +163,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       error_message_safe: data.error ?? "Bundle creation failed",
     },
   });
+  if (isSidekickSubmission) {
+    return json(
+      { success: false, errorCode: "bundle_create_failed" },
+      { status: result.status },
+    );
+  }
   return json(data, { status: result.status });
 };
 
@@ -133,9 +176,12 @@ export default function CreateBundleEntry() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const actionData = useActionData<typeof action>();
+  const sidekickFetcher = useFetcher<typeof action>();
   const navigation = useNavigation();
   const { t } = useTranslation();
-  const isSubmitting = navigation.state === "submitting";
+  const isSubmitting =
+    navigation.state === "submitting" ||
+    sidekickFetcher.state === "submitting";
 
   const [bundleType, setBundleType] = useState<string | null>(() =>
     searchParams.has("bundleType")
@@ -148,7 +194,51 @@ export default function CreateBundleEntry() {
   const bundleNameRef = useRef<any>(null);
   const nameModalRef = useRef<any>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const sidekickSubmissionPendingRef = useRef(false);
   const [bundleName, setBundleName] = useState("");
+  const [isSidekickIntent, setIsSidekickIntent] = useState(false);
+
+  const getSidekick = useCallback(
+    () =>
+      resolveSidekickAppBridge<SidekickAppBridge>(
+        typeof window === "undefined"
+          ? undefined
+          : (window as unknown as { shopify?: SidekickAppBridge }),
+      ),
+    [],
+  );
+
+  const applySidekickDraft = useCallback((draft: SidekickBundleDraft) => {
+    setIsSidekickIntent(true);
+    if (draft.bundleType) {
+      setBundleType(draft.bundleType);
+      setBundleTypeError(null);
+    }
+    if (draft.title) {
+      setBundleName(draft.title);
+      setBundleNameError(null);
+    }
+    if (draft.bundleType && draft.title) {
+      showPolarisModal(nameModalRef);
+    }
+  }, []);
+
+  useEffect(() => {
+    const sidekick = getSidekick();
+    if (!sidekick) return;
+
+    return initializeSidekickBundleIntentBridge({
+        tools: sidekick.tools,
+        request: sidekick.intents.request,
+        applyDraft: applySidekickDraft,
+        onInvalidIntent: () => {
+          setIsSidekickIntent(true);
+          void sidekick.intents.response.error(
+            t("common.alerts.operationFailed"),
+          );
+        },
+      });
+  }, [applySidekickDraft, getSidekick, t]);
 
   useEffect(() => {
     const el = bundleNameRef.current;
@@ -160,15 +250,45 @@ export default function CreateBundleEntry() {
   }, []);
 
   const serverError =
-    actionData && "error" in actionData ? String(actionData.error) : null;
+    actionData && "error" in actionData
+      ? String(actionData.error)
+      : sidekickFetcher.data && "errorCode" in sidekickFetcher.data
+        ? t("common.alerts.operationFailed")
+        : null;
+
+  useEffect(() => {
+    if (!sidekickSubmissionPendingRef.current || !sidekickFetcher.data) return;
+    sidekickSubmissionPendingRef.current = false;
+    const sidekick = getSidekick();
+    if (!sidekick) return;
+
+    if (
+      "success" in sidekickFetcher.data &&
+      sidekickFetcher.data.success === true &&
+      "bundleProductId" in sidekickFetcher.data &&
+      typeof sidekickFetcher.data.bundleProductId === "string"
+    ) {
+      void sidekick.intents.response.ok({
+        id: sidekickFetcher.data.bundleProductId,
+      });
+      return;
+    }
+
+    void sidekick.intents.response.error(t("common.alerts.operationFailed"));
+  }, [getSidekick, sidekickFetcher.data, t]);
 
   useEffect(() => {
     if (serverError) showPolarisModal(nameModalRef);
   }, [serverError]);
 
   const handleBackToDashboard = useCallback(() => {
+    if (isSidekickIntent) {
+      const sidekick = getSidekick();
+      if (sidekick) void sidekick.intents.response.closed();
+      return;
+    }
     navigate("/app/dashboard", { replace: true });
-  }, [navigate]);
+  }, [getSidekick, isSidekickIntent, navigate]);
 
   const handleSelectBundleType = useCallback((type: string) => {
     setBundleType(type);
@@ -200,8 +320,17 @@ export default function CreateBundleEntry() {
       return;
     }
     setBundleNameError(null);
+    if (isSidekickIntent && bundleType) {
+      const formData = new FormData();
+      formData.set("bundleName", name);
+      formData.set("bundleType", bundleType);
+      formData.set("submissionMode", "sidekick");
+      sidekickSubmissionPendingRef.current = true;
+      sidekickFetcher.submit(formData, { method: "post" });
+      return;
+    }
     submitButtonRef.current?.click();
-  }, [bundleName, t]);
+  }, [bundleName, bundleType, isSidekickIntent, sidekickFetcher, t]);
 
   return (
     <>
@@ -334,6 +463,7 @@ export default function CreateBundleEntry() {
               ref={bundleNameRef}
               label={t("createBundle.fields.name")}
               name="bundleName"
+              value={bundleName}
               placeholder={t("createBundle.fields.namePlaceholder")}
               autocomplete="off"
               onInput={handleBundleNameInput}

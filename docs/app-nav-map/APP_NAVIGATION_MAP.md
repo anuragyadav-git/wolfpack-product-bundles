@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-04
+last_audited: 2026-09-06
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-04
+**Last Updated:** 2026-09-06
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -180,6 +180,28 @@ The first-install eligibility claim is consumed only after the bundle and its
 required Shopify parent product are created. The subsequent widget-status check
 is noncritical; a timeout or error leaves creation successful and the configure
 redirect intact.
+
+#### Shopify Sidekick Create Bridge
+
+Shopify's `admin.app.intent.link` opens the same `/app/bundles/create` page for a
+`shopify/product` `import` intent. Incoming intent data and the registered
+`stage_bundle_draft` tool can prefill the name and bundle type, but do not submit
+the form. The merchant must click Save. A Sidekick-marked POST reuses the normal
+create handler and returns the new parent Product GID to
+`shopify.intents.response.ok({id})`; ordinary submissions keep the redirects
+listed above. Back navigation during an active intent resolves it as closed and
+does not create a bundle.
+
+#### Shopify Sidekick Bundle Data Route
+
+**Route file:** `app/routes/app/app.sidekick.bundles.tsx`
+
+**URL:** `/app/sidekick/bundles`
+
+The headless `admin.app.tools.data` extension posts bundle search and summary
+operations to this authenticated resource route. The route returns current-shop,
+read-only JSON with `app://` links to existing FPB or PPB configure pages. It is
+not a merchant-facing page; GET returns `405` after authentication.
 
 #### Shopify Bundled Products Edit Bridge
 

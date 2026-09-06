@@ -6,6 +6,9 @@ application_url = "https://wolfpack-product-bundles-sit.onrender.com"
 embedded = true
 handle = "wolfpack-product-bundles-sit"
 
+[sidekick]
+extensions_summary = "Search and inspect Only Bundles product bundles, open bundle configuration pages, and create a draft product bundle after merchant confirmation"
+
 [webhooks]
 api_version = "2026-07"
 

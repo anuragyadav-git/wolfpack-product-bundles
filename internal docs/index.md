@@ -5,7 +5,7 @@ title: Only Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Only Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-09-03
+last_audited: 2026-09-06
 owners:
   - engineering
 domains:
@@ -69,6 +69,7 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
 - [[Shopify Integration/Admin API]] — Rate limits, native Prisma session storage, expiring-token migration gates
 - [[Shopify Integration/Embedded Admin Resource Authentication]] — App Bridge ID-token fetch ownership for authenticated backend requests and file downloads
+- [[Shopify Integration/Sidekick]] — Shopify-native read-only bundle discovery, embedded configure links, and merchant-confirmed product-bundle creation
 - [[Shopify Integration/Storefront API]] — Storefront GraphQL field gotchas, product description HTML, and Shop Brand color-pair inheritance
 - [[Shopify Integration/Cart Transform API]] — Operations, targets, API versions (2025-10)
 - [[Shopify Integration/Checkout UI Extension]] — Preact targets, build rules

@@ -1,0 +1,49 @@
+[
+  {
+    "$schema": "https://extensions.shopifycdn.com/shopifycloud/schemas/v1/tool.json",
+    "name": "search_bundles",
+    "description": "Search product bundles owned by Only Bundles for the current shop. Returns factual bundle summaries and app links.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Optional case-insensitive bundle name search, up to 255 characters."
+        },
+        "bundle_type": {
+          "type": "string",
+          "enum": ["full_page", "product_page"],
+          "description": "Optional Only Bundles bundle type filter."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "draft", "unlisted", "archived"],
+          "description": "Optional bundle status filter. Archived bundles are excluded when this is omitted."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Maximum number of bundles to return. Defaults to 10."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  {
+    "$schema": "https://extensions.shopifycdn.com/shopifycloud/schemas/v1/tool.json",
+    "name": "get_bundle_summary",
+    "description": "Get a factual summary and app configuration link for one Only Bundles bundle in the current shop.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bundle_id": {
+          "type": "string",
+          "description": "The Only Bundles bundle ID returned by search_bundles."
+        }
+      },
+      "required": ["bundle_id"],
+      "additionalProperties": false
+    }
+  }
+]
