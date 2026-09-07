@@ -5,7 +5,7 @@ title: Public Website
 type: architecture
 status: active
 summary: Defines the static Only Bundles public site, production-renderer demo, limited-release SDK guide, legal content, and release gate.
-last_audited: 2026-09-03
+last_audited: 2026-09-07
 owners:
   - product
   - engineering
@@ -102,11 +102,38 @@ in the current app or authoritative internal feature notes.
 same source stylesheets and the Settings Design preview fixture builder. It is
 therefore a production-renderer preview, not a separately modelled simulator.
 
+The production renderer mounts directly in `/demo/`; there is no device frame,
+iframe, scale transform, or manual Desktop/Mobile mode. The template controls
+sit above the storefront surface so they do not compress its desktop container
+into an artificial narrow column. The renderer receives the browser's actual
+available inline size and its production media and container queries therefore
+own component placement. A narrow mobile browser renders the production mobile
+layout, while a desktop browser renders the production desktop layout.
+
+The direct mount must preserve the storefront bootstrap contract. Every preview
+root uses `bundle-widget-container`; full-page roots additionally use
+`bundle-widget-full-page`, which activates the `fpb-shell` and `fpb-catalog`
+container-query owners. Template changes wait for every stylesheet in
+`getStorefrontPreviewStylesheetManifest` to finish loading before the production
+controller renders or the demo announces readiness. This is the same ordering
+used by the Settings Design preview.
+
+On desktop, the marketing page bounds the direct storefront surface with a
+content-driven block size and vertical scrolling so a tall fixture does not
+expand the full page. This changes neither the renderer's inline size nor its
+internal CSS. At the mobile breakpoint the bound is removed and the widget
+returns to natural document flow, avoiding a nested mobile scroll region.
+
+The only public state encoded in the URL is the `template` query. Selecting a
+template replaces the direct production mount and preserves the browser's real
+responsive context; the demo wrapper does not add rules targeting storefront
+widget components.
+
 The public boundary deliberately overrides analytics, selection persistence,
 controls scripts, external navigation, network, and cart actions. Products,
 prices, and preselected quantities are deterministic Shopify-shaped preview
 data from `buildStorefrontPreviewFixture`; no merchant data or live store is
-connected. The only query interface is `template`, with the four current FPB
+connected. The query accepts the four current FPB
 and four current PPB template keys. Any invalid value normalizes to `standard`.
 
 ## Legal release gate
