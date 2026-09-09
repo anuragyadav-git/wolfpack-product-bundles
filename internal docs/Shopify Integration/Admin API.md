@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-09-08
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -96,7 +96,7 @@ it must not add a second generic Remix redirect.
 
 The temporary legacy-token cutover helper is no longer part of the deployable
 application. The configured database returned zero non-expiring offline rows on
-2026-09-08. Repeat that zero-count query in every release environment before
+2026-09-09. Repeat that zero-count query in every release environment before
 shipping this strict state; a non-expiring row must be repaired through a fresh
 merchant app launch and Shopify's current authorization flow, not a permanent
 compatibility branch in session storage.

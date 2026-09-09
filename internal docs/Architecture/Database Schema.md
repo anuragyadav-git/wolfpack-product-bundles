@@ -214,11 +214,12 @@ Controls FPB widget layout rendering mode.
   `StepProduct`. The membership query must inspect both `BundleStep.products`
   and every related `StepCategory.products`; checking only the step JSON misses
   products selected through the current FPB and PPB category editors.
-- On 2026-09-08 the configured database had no legacy Page columns and returned
+- On 2026-09-09 the configured database was reverified with the corrected
+  step-and-category membership query. It had no legacy Page columns and returned
   zero legacy offline sessions, numeric order IDs, and PPB legacy embed rows.
   A signed PPB preview exposed category JSON products without a canonical
   `StepProduct` row; the corrected global query found an additional FPB draft
   with the same shape. Both Agent-store fixtures were repaired through their
   normal Admin save flows after the save boundary was corrected. The full
-  step-and-category query then returned zero offenders for the configured
-  database. That result is not evidence for another release environment.
+  step-and-category query returned zero offenders for the configured database.
+  That result is not evidence for another release environment.
