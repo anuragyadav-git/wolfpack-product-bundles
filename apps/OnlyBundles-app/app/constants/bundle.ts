@@ -5,11 +5,7 @@
  * Import these instead of using inline string literals or duplicated arrays.
  */
 
-import {
-  DiscountMethod,
-  ConditionType,
-  ConditionOperator,
-} from "../types/pricing";
+import { DiscountMethod } from "../types/pricing";
 
 // ============================================
 // ENUMS
@@ -37,12 +33,6 @@ export const BUNDLE_STATUS_OPTIONS = [
   { label: "Draft", value: BundleStatus.DRAFT },
   { label: "Archived", value: BundleStatus.ARCHIVED },
   { label: "Unlisted (Ad Campaigns)", value: BundleStatus.UNLISTED },
-] as const;
-
-/** Bundle type options for Settings design selectors */
-export const BUNDLE_TYPE_OPTIONS = [
-  { label: "Product Page Bundle", value: BundleType.PRODUCT_PAGE },
-  { label: "Full Page Bundle", value: BundleType.FULL_PAGE },
 ] as const;
 
 // ============================================
@@ -80,17 +70,4 @@ export const DISCOUNT_METHOD_OPTIONS = [
   { label: "Percentage Off", value: DiscountMethod.PERCENTAGE_OFF },
   { label: "Fixed Bundle Price", value: DiscountMethod.FIXED_BUNDLE_PRICE },
   { label: "Buy X, get Y", value: DiscountMethod.BUY_X_GET_Y },
-] as const;
-
-/** Condition type options for discount rules */
-export const DISCOUNT_CONDITION_TYPE_OPTIONS = [
-  { label: "Quantity", value: ConditionType.QUANTITY },
-  { label: "Amount", value: ConditionType.AMOUNT },
-] as const;
-
-/** Operator options for discount rules */
-export const DISCOUNT_OPERATOR_OPTIONS = [
-  { label: "Greater than or equal (\u2265)", value: ConditionOperator.GTE },
-  { label: "Less than or equal (\u2264)", value: ConditionOperator.LTE },
-  { label: "Equal to (=)", value: ConditionOperator.EQ },
 ] as const;

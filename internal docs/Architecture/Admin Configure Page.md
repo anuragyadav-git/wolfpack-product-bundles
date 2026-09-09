@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-09-04
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -15,14 +15,16 @@ systems:
 source_paths:
   - app/components/AdminWarningGroup.tsx
   - app/components/bundle-configure/TemplatePreviewFeedbackModal.tsx
+  - app/components/bundle-configure/BundleReadinessOverlay.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/addon-draft.types.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/
   - app/routes/app/_shared/bundle-configure/
   - app/constants/help-tooltips.ts
   - public/tooltip-*.png
   - app/lib/bundle-configure-loader.server.ts
   - app/hooks/useBundleConfigurationState.ts
-  - app/store/slices/configureRouteStateSlice.ts
+  - app/hooks/configure-route-state.ts
 related_docs:
   - docs/app-nav-map/APP_NAVIGATION_MAP.md
 tags:
@@ -39,7 +41,66 @@ The FPB configure page is the canonical Admin configure design. FPB and PPB keep
 
 The only bundle configuration routes are the type-specific FPB and PPB configure pages. Bundle creation, cloning, and editing navigate directly to the appropriate configure route. The retired `/app/bundles/create/configure/:bundleId` configuration wizard and its route-specific state, actions, preview helper, and modal controllers are not part of the supported architecture.
 
-Shared configure primitives should accept adapter props for route-owned state and actions. FPB continues to use `useConfigureBundleFlow()`, and PPB continues to use `usePpbConfigureFlow()`. Shared components must not read route loaders or submit forms directly.
+Shared configure primitives accept adapter props for route-owned state and
+actions. FPB continues to use `useConfigureBundleFlow()`, and PPB continues to
+use `usePpbConfigureFlow()` as route-level composition owners, but their
+aggregate controller results must stop at the route composition boundary.
+Feature and leaf components receive explicit values and callbacks for their own
+responsibility; they do not receive the whole configure flow. Shared components
+must not read route loaders or submit forms directly.
+
+Configure modules are split by cohesion rather than line count. A module may
+remain long when it owns one lifecycle or business transaction. Extraction is
+warranted when a responsibility has an independent owner or variation point and
+the resulting boundary reduces dependencies. File-length guards, oversized-file
+allowlists, pass-through flow bags, and generic save engines are not part of the
+architecture. FPB and PPB save handlers remain separate because their
+persistence and storefront synchronization semantics differ.
+
+The FPB composition hook calls action and save controllers with explicit,
+type-checked dependency objects containing only the fields each controller
+reads. Intermediate hook results are not spread into progressively larger flow
+bags; all cohesive owner results are merged once, solely for the route render
+contract returned by `useConfigureBundleFlow()`.
+
+The PPB composition hook follows the same boundary without combining PPB and
+FPB into a generic engine. Save, fetcher-effect, preview, placement, and modal
+hooks receive explicit, type-checked projections from their cohesive state
+owners. The complete PPB flow is merged only for the route render contract; it
+is not placed in React context or forwarded as an internal service locator.
+`ConfigureBundleFlow` renders the canvas directly, and `PpbMainSections` is the
+single feature-projection owner. The route shell projects
+header, contextual-save-form, sidebar, and storefront-placement supplement
+contracts explicitly, including nested state objects narrowed to the fields the
+shell owner actually reads. Bundle Visibility similarly owns only its link,
+App Embed, offer-operation, and country-targeting contract and imports App
+Bridge directly for merchant feedback. Bundle Settings leaves receive only
+their status, media, countdown, default-product, cart-display, quantity, custom
+CSS, category-step, or sticky-cart state and callbacks. PPB Bundle Widget and
+Bundle Embed likewise receive explicit copy, targeting, localization,
+validation, and placement contracts; neither placement surface reads the
+aggregate configure context. PPB Images & GIFs owns only its asset-tab, step
+banner, and loading-animation inputs. PPB Free Gifts and Add-ons stays one
+cohesive active-step feature but receives only its add-on, localization,
+message, picker, and modal inputs. The PPB subscriptions adapter is one such leaf
+boundary: route composition passes the shared subscription component only its
+bundle compatibility inputs, discovery fetcher, localized configuration,
+validation state, and owned callbacks.
+
+PPB Discount and Pricing is split into named rule-editor and display-option
+contracts. Quantity, progress, and messaging owners receive only their own
+pricing state and callbacks. Step Setup follows the same rule: its composer
+receives named Step Flow, details, categories, rules, and Step Config contracts,
+then adds only the active step and first-step flag required by each leaf. There
+is no PPB configure provider or aggregate configure context.
+
+Deferred PPB overlays are composed from the route flow at one explicit overlay
+boundary. Page selection, selected resources, template selection, sync and
+variable utilities, discount translations, readiness, guided tour,
+multi-language text, and preview gating each receive only their owned inputs.
+No overlay reads the aggregate configure context. Localized pricing values are
+normalized to the persisted required-string shape before returning to their
+state owners.
 
 Rich visual help is owned by the shared `ConfigureHelpPopover` Polaris surface.
 Its non-submitting `s-button` opens an `s-popover`, allowing an optimized image,
@@ -80,6 +141,15 @@ the disabled region, and their preview, localized copy, targeting, selected
 resources, browsed-product behavior, and Theme Editor placement actions remain
 visible but inert while disabled.
 
+Images & GIFs is an explicit shared configure navigation section because its
+route-owned editors persist storefront fields that have no other bundle-level
+owner. FPB owns its promo banner, per-step tab/banner images, and floating promo
+badge there. PPB owns its per-step banners and per-bundle loading animation.
+The store-level FPB loading screen and shared slot icon remain owned by Settings
+Design; the configure section does not recreate those store-level controls.
+Media previews use Polaris `s-image`, and product/list media use `s-thumbnail`;
+the app does not maintain a custom responsive-picture wrapper for Admin media.
+
 Step Setup uses the same section rhythm for both bundle types:
 
 1. Step Flow
@@ -93,6 +163,19 @@ existing horizontal rule beneath the step-chip navigation separates the two
 sections; their headings, help actions, step controls, and field content remain
 independently owned. Category, Rules Configuration, and Step Config continue as
 separate cards below.
+
+Ordinary configure actions such as Add Step, Add Category, Add Rule, clone,
+delete, selected-resource removal, reset, and Edit Product use Polaris
+`s-button`; selected-resource counts use `s-clickable-chip`. Bundle-product
+Replace and Sync
+live in an `s-menu`; Shopify owns its open state, focus, keyboard behavior, and
+dismissal, so neither configure route keeps a parallel menu-state flag. Custom
+HTML buttons remain limited to
+interaction shapes without a Polaris equivalent: step, category, and tab
+navigation chips; drag handles and complex accordion headers; the guided-tour
+overlay; and controls projected into App Bridge title bars, save bars, or the
+maximum-size template modal. Those exceptions keep only their local interaction
+role and must not duplicate Shopify-owned dialog, focus, or form behavior.
 
 Step 1 is the required storefront entry step, so its enable switch remains on
 and cannot be changed. Later steps may be disabled without deleting their saved
@@ -247,12 +330,13 @@ column, keep fields shrinkable with `min-width: 0`, expose 44px action targets,
 and reserve bottom space for Shopify's contextual save bar.
 
 The existing compact `BundleReadinessOverlay` trigger and external props remain
-unchanged. Its checklist is a native modal dialog: desktop uses a bounded
-floating panel and phone containers use a full-width bottom sheet above the safe
-area. Escape, safe backdrop dismissal, focus trapping, internal scrolling, and
-focus restoration are shared behavior. `LocalAppModal` applies the same native
-dialog contract to app-owned discard workflows. Configure multi-language
-workflows use the shared Polaris `s-modal` lifecycle and route-owned open state.
+unchanged. Its checklist, checklist actions, and collapsed trigger use Polaris
+`s-modal` and `s-clickable`; Shopify owns Escape, backdrop dismissal, focus
+trapping, internal scrolling, keyboard activation, and focus restoration. The
+app listens to the modal's `hide` event once to synchronize route-owned open
+state; `afterhide` is a later phase of that same close and must not repeat
+cleanup. `LocalAppModal` and configure multi-language workflows use the same
+Polaris lifecycle.
 
 ## Admin Warning Presentation Contract
 
@@ -298,8 +382,8 @@ preview URL. Failed preview preparation does not open the feedback modal.
 
 ## First-Create Tour and State Boundary
 
-Both type-specific configure routes mount `ReduxProvider` locally; the shared
-`/app` layout does not. Hidden save inputs and route-owned configure controllers
+Both type-specific configure routes own their React reducer and local state;
+there is no configure Redux provider. Hidden save inputs and route-owned configure controllers
 remain mounted for the full route lifetime, so section changes and deferred
 overlays must not discard unsaved values.
 

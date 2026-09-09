@@ -26,7 +26,7 @@ export type HelpTooltipKey =
   | "countdownTimer"
   | "bundleSubscriptions";
 
-export interface HelpTooltipDetails {
+interface HelpTooltipDetails {
   imageSrc?: string;
 }
 

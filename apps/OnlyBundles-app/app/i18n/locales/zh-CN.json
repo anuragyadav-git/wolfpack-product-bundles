@@ -88,6 +88,8 @@
       "deleteBundle": "删除包",
       "cloneSuccess": "成功克隆包",
       "deleteSuccess": "数据包已删除",
+      "renameBundle": "重命名捆绑包",
+      "renameSuccess": "捆绑包已成功重命名",
       "themeEditorUnavailable": "主题编辑器链接在此商店不可用。"
     },
     "deleteModal": {
@@ -95,6 +97,15 @@
       "delete": "删除",
       "cancel": "取消",
       "body": "此操作无法撤消。所有捆绑配置、步骤和折扣规则将被永久删除。"
+    },
+    "renameModal": {
+      "heading": "重命名捆绑包",
+      "nameLabel": "捆绑包名称",
+      "save": "保存",
+      "cancel": "取消",
+      "errorEmpty": "捆绑包名称不能为空。",
+      "errorTooLong": "捆绑包名称不能超过255个字符。",
+      "errorFailed": "无法重命名捆绑包。"
     },
     "resources": {
       "bundleInspiration": "捆绑的灵魂效果",

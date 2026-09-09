@@ -28,7 +28,7 @@ function renderFeatureValue(
   return <span className={styles.value}>{translate(value)}</span>;
 }
 
-export interface FeatureComparisonTableProps {
+interface FeatureComparisonTableProps {
   features?: FeatureComparisonRow[];
 }
 

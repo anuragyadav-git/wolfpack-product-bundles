@@ -31,7 +31,7 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     const payload = await executeSidekickBundleOperation({
       shop: session.shop,
-      body: body as Record<string, unknown>,
+      body,
     });
     return cors(json(payload, { headers: responseHeaders }));
   } catch (error) {

@@ -1,27 +1,48 @@
-import { PpbCategoryRulesList } from "./PpbCategoryRulesList";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import {
+  PpbCategoryRulesList,
+  type PpbCategoryRulesAdapter,
+  type PpbCategoryRulesListProps,
+} from "./PpbCategoryRulesList";
 import { getStepCategories } from "./PpbStepSetupShared";
 import { PpbStepRulesList } from "./PpbStepRulesList";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
+import { deriveControlDependencies } from "../../../lib/bundle-config/control-dependencies";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbRulesConfigurationCard({ step }: { step: any }) {
-  const {
-    addCategoryConditionRule,
-    clearCategoryConditionRules,
-    conditionsState,
-    deriveControlDependencies,
-    productPageBundleStyles,
-    QuestionHelpTooltip,
-  } = usePpbConfigureContext();
-  const stepCategories = getStepCategories(step);
+type RulesStep = {
+  id: string;
+  StepCategory?: PpbCategoryRulesListProps["stepCategories"];
+  [key: string]: unknown;
+};
+
+export type PpbRulesConfigurationCardProps = Pick<
+  PpbConfigureFlow,
+  "addCategoryConditionRule" | "clearCategoryConditionRules" | "conditionsState"
+> & {
+  categoryRulesAdapter: PpbCategoryRulesAdapter;
+  step: RulesStep;
+};
+
+export function PpbRulesConfigurationCard({
+  addCategoryConditionRule,
+  categoryRulesAdapter,
+  clearCategoryConditionRules,
+  conditionsState,
+  step,
+}: PpbRulesConfigurationCardProps) {
+  const stepCategories = getStepCategories(
+    step,
+  ) as PpbCategoryRulesListProps["stepCategories"];
   const categoryRulesAvailable = deriveControlDependencies({
     categoryCount: stepCategories.length,
   }).categoryRulesVisible;
   const hasStepRules =
     (conditionsState.stepConditions[step.id] || []).length > 0;
   const hasCategoryRules = stepCategories.some(
-    (category: any) => (category.conditions || []).length > 0
+    (category) => (category.conditions ?? []).length > 0
   );
   const activeRuleMode = hasCategoryRules
     ? "category"
@@ -85,20 +106,11 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
         )}
       </p>
-      <button
-        type="button"
-        className={productPageBundleStyles.linkButton}
-        style={{ marginBottom: 12, display: "inline-block" }}
-        onClick={() =>
-          window.open(
-            TUTORIAL_LINKS.productPageRules,
-            "_blank",
-            "noopener,noreferrer"
-          )
-        }
-      >
-        {translateAdmin("common.actions.learnMore")}
-      </button>
+      <s-box paddingBlockEnd="base">
+        <s-link href={TUTORIAL_LINKS.productPageRules} target="_blank">
+          {translateAdmin("common.actions.learnMore")}
+        </s-link>
+      </s-box>
       <div
         style={{
           display: "flex",
@@ -120,9 +132,13 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
         ))}
       </div>
       {activeRuleMode === "category" ? (
-        <PpbCategoryRulesList step={step} stepCategories={stepCategories} />
+        <PpbCategoryRulesList
+          adapter={categoryRulesAdapter}
+          step={step}
+          stepCategories={stepCategories}
+        />
       ) : (
-        <PpbStepRulesList step={step} />
+        <PpbStepRulesList conditionsState={conditionsState} step={step} />
       )}
     </div>
   );

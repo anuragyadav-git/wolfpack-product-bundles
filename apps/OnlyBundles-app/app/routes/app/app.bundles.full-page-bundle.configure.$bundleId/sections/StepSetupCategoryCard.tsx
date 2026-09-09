@@ -1,21 +1,27 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { CommonStepCategoryAccordionAdapter } from "../../_shared/bundle-configure/CommonStepCategoryAccordion";
 import { FpbStepCategoryAccordion } from "./StepSetupCategoryAccordion";
 import { FpbStepCategoryFooter } from "./StepSetupCategoryFooter";
 import { translateAdmin } from "~/i18n/config";
+import { QuestionHelpTooltip } from "../SmallComponents";
 
 export function FpbStepCategoryCard({
-  flow,
+  adapter,
+  styles,
   step,
+  onAddCategory,
+  onDisplayVariantsChange,
 }: {
-  flow: ConfigureBundleFlowContext;
+  adapter: CommonStepCategoryAccordionAdapter;
+  styles: Record<string, string>;
   step: any;
+  onAddCategory: () => void;
+  onDisplayVariantsChange: (enabled: boolean) => void;
 }) {
-  const { fullPageBundleStyles, QuestionHelpTooltip } = flow;
   const categories = (step.StepCategory as any[] | undefined) ?? [];
 
   return (
     <>
-      <div className={fullPageBundleStyles.card}>
+      <div className={styles.card}>
         <div
           style={{
             display: "flex",
@@ -41,7 +47,7 @@ export function FpbStepCategoryCard({
           )}
         </p>
         {categories.length === 0 && (
-          <div className={fullPageBundleStyles.emptyState}>
+          <div className={styles.emptyState}>
             {translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategorycard.noCategoryDefinedYet"
             )}
@@ -50,13 +56,18 @@ export function FpbStepCategoryCard({
         {categories.map((cat: any, catIndex: number) => (
           <FpbStepCategoryAccordion
             key={cat.id ?? catIndex}
-            flow={flow}
+            adapter={adapter}
             step={step}
             cat={cat}
             catIndex={catIndex}
           />
         ))}
-        <FpbStepCategoryFooter flow={flow} step={step} />
+        <FpbStepCategoryFooter
+          styles={styles}
+          step={step}
+          onAddCategory={onAddCategory}
+          onDisplayVariantsChange={onDisplayVariantsChange}
+        />
       </div>
     </>
   );

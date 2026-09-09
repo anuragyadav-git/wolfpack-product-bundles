@@ -167,6 +167,9 @@ describe("handleRenameBundle", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.success).toBe(true);
+    if (!("bundleName" in body)) {
+      throw new Error("Expected the successful rename response");
+    }
     expect(body.bundleName).toBe("New Name");
   });
 });

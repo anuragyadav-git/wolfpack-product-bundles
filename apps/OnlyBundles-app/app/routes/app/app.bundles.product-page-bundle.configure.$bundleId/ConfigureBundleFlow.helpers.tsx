@@ -278,9 +278,9 @@ function compactVisibilityProductReference(product: any) {
   const imageUrl = getVisibilityImageUrl(product);
 
   return {
-    id: graphqlId,
+    id: graphqlId ?? undefined,
     productId: getVisibilityResourceNumericId(product),
-    graphqlId,
+    graphqlId: graphqlId ?? undefined,
     handle: product?.handle ?? "",
     title: product?.title ?? "Untitled product",
     images: compactVisibilityImages(product),
@@ -314,9 +314,9 @@ export function normalizeVisibilityProductPageTarget(product: any) {
 function compactVisibilityCollectionReference(collection: any) {
   const graphqlId = getVisibilityResourceId(collection);
   return {
-    id: graphqlId,
+    id: graphqlId ?? undefined,
     collectionId: getVisibilityResourceNumericId(collection),
-    graphqlId,
+    graphqlId: graphqlId ?? undefined,
     handle: collection?.handle ?? "",
     title: collection?.title ?? "Untitled collection",
   };

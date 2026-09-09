@@ -1,30 +1,34 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { ComponentProps } from "react";
 import { FpbAddonTierEditor } from "./FreeGiftAddonTierEditor";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import { ADDONS_HELP_ARTICLE_URL } from "../configure-constants";
 
 export function FpbAddonProductsCard({
-  flow,
+  enabled,
+  title,
+  translationsAvailable,
+  styles,
+  tierEditor,
+  onEnabledChange,
+  onOpenTranslations,
+  onTitleChange,
 }: {
-  flow: ConfigureBundleFlowContext;
+  enabled: boolean;
+  title: string;
+  translationsAvailable: boolean;
+  styles: Record<string, string>;
+  tierEditor: ComponentProps<typeof FpbAddonTierEditor>;
+  onEnabledChange: (enabled: boolean) => void;
+  onOpenTranslations: () => void;
+  onTitleChange: (title: string) => void;
 }) {
-  const {
-    addonDraft,
-    ADDONS_HELP_ARTICLE_URL,
-    fullPageBundleStyles,
-    openAddonSectionMultiLanguageModal,
-    shopLocales,
-    updateAddonDraft,
-  } = flow;
-
   return (
     <>
-      <div
-        className={`${fullPageBundleStyles.card} ${fullPageBundleStyles.addonsCard}`}
-      >
-        <div className={fullPageBundleStyles.addonsHeaderLine}>
-          <div className={fullPageBundleStyles.addonsTitleCluster}>
-            <h3 className={fullPageBundleStyles.panelTitle}>
+      <div className={`${styles.card} ${styles.addonsCard}`}>
+        <div className={styles.addonsHeaderLine}>
+          <div className={styles.addonsTitleCluster}>
+            <h3 className={styles.panelTitle}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonproductscard.addOnsWithBundles"
               )}
@@ -33,17 +37,15 @@ export function FpbAddonProductsCard({
               accessibilityLabel={translateAdmin(
                 "adminAttributes.enableAddOnsWithBundles"
               )}
-              checked={addonDraft.addonProductsEnabled === true || undefined}
-              onChange={(e) => {
-                updateAddonDraft({
-                  addonProductsEnabled: (e.target as HTMLInputElement).checked,
-                });
-              }}
+              checked={enabled || undefined}
+              onChange={(e) =>
+                onEnabledChange((e.target as HTMLInputElement).checked)
+              }
             />
-            <s-press-button
+            <s-button
               variant="tertiary"
               tone="neutral"
-              icon="play"
+              icon="info"
               accessibilityLabel={translateAdmin(
                 "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
               )}
@@ -58,18 +60,14 @@ export function FpbAddonProductsCard({
               {translateAdmin(
                 "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
               )}
-            </s-press-button>
+            </s-button>
           </div>
-          <div className={fullPageBundleStyles.addonsHeaderActions}>
+          <div className={styles.addonsHeaderActions}>
             <s-button
               variant="secondary"
               icon="language-translate"
-              disabled={
-                !addonDraft.addonProductsEnabled ||
-                shopLocales.length === 0 ||
-                undefined
-              }
-              onClick={openAddonSectionMultiLanguageModal}
+              disabled={!enabled || !translationsAvailable || undefined}
+              onClick={onOpenTranslations}
             >
               {translateAdmin(
                 "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
@@ -77,28 +75,24 @@ export function FpbAddonProductsCard({
             </s-button>
           </div>
         </div>
-        <DisabledConfigurationRegion
-          disabled={!addonDraft.addonProductsEnabled}
-        >
+        <DisabledConfigurationRegion disabled={!enabled}>
           <s-stack direction="block" gap="small">
-            <p className={fullPageBundleStyles.panelDescription}>
+            <p className={styles.panelDescription}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonproductscard.enableCustomersToAddExtraItemsToTheirBundlesAtADiscountedPriceFo"
               )}
             </p>
-            <div className={fullPageBundleStyles.addonsFormStack}>
+            <div className={styles.addonsFormStack}>
               <s-text-field
                 label={translateAdmin("adminAttributes.addOnSectionTitle")}
-                value={addonDraft.addonProductsTitle ?? ""}
-                disabled={!addonDraft.addonProductsEnabled || undefined}
-                onInput={(e) => {
-                  updateAddonDraft({
-                    addonProductsTitle: (e.target as HTMLInputElement).value,
-                  });
-                }}
+                value={title}
+                disabled={!enabled || undefined}
+                onInput={(e) =>
+                  onTitleChange((e.target as HTMLInputElement).value)
+                }
                 autocomplete="off"
               />
-              <FpbAddonTierEditor flow={flow} />
+              <FpbAddonTierEditor {...tierEditor} />
             </div>
           </s-stack>
         </DisabledConfigurationRegion>

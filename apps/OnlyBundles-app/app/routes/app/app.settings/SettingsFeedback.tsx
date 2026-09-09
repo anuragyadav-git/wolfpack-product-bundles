@@ -3,6 +3,10 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
 import { translateAdmin } from "~/i18n/config";
+import {
+  showPolarisModal,
+  useModalHideListener,
+} from "../_shared/bundle-configure/modal-utils";
 
 export function SettingsContextualSaveBar({
   isOpen,
@@ -54,34 +58,29 @@ export function SettingsHelpModal({
   article: "inventory" | null;
   onClose: () => void;
 }) {
+  const modalRef = useRef<any>(null);
+  useModalHideListener(modalRef, onClose);
+
+  useEffect(() => {
+    if (article) showPolarisModal(modalRef);
+  }, [article]);
+
   if (!article) {
     return null;
   }
 
   return (
-    <div className={styles.settingsModalBackdrop} role="presentation">
-      <section
-        className={styles.settingsModal}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="settings-help-title"
-      >
-        <div className={styles.ebSectionHeader}>
-          <h2 id="settings-help-title">
-            {translateAdmin(
-              "adminExtracted.appSettings.settingsfeedback.productLevelInventoryTracking"
-            )}
-          </h2>
-          <button
-            type="button"
-            className={styles.settingsModalDismiss}
-            aria-label={translateAdmin("adminAttributes.dismissHelpModal")}
-            onClick={onClose}
-          >
-            X
-          </button>
-        </div>
-        <div className={styles.settingsHelpBody}>
+    <s-modal
+      ref={modalRef}
+      id="settings-help-modal"
+      heading={translateAdmin(
+        "adminExtracted.appSettings.settingsfeedback.productLevelInventoryTracking"
+      )}
+    >
+      <s-button slot="secondary-actions" onClick={onClose}>
+        {translateAdmin("common.actions.close")}
+      </s-button>
+      <div className={styles.settingsHelpBody}>
           <p>
             {translateAdmin(
               "adminExtracted.appSettings.settingsfeedback.enableTheInventoryTrackingToggleInAdditionalConfigurationsToAppl"
@@ -114,9 +113,8 @@ export function SettingsHelpModal({
               )}
             </li>
           </ul>
-        </div>
-      </section>
-    </div>
+      </div>
+    </s-modal>
   );
 }
 

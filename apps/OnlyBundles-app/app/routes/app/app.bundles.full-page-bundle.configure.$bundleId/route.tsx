@@ -9,19 +9,18 @@ import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import { fetchBundleConfigureShopifyData } from "../../../lib/bundle-configure-loader.server";
 import {
-  handleSaveBundle,
   handleUpdateBundleStatus,
-  handleSyncProduct,
   handleUpdateBundleProduct,
-  handleUpdateBundleDesignTemplate,
-} from "./handlers";
+} from "../../../services/bundles/bundle-configure-handlers.server";
+import { handleSaveBundle } from "./handlers/save-bundle.server";
+import { handleSyncProduct } from "./handlers/sync-product.server";
+import { handleUpdateBundleDesignTemplate } from "./handlers/page-handlers.server";
 import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import {
   handleSyncStorefrontNow,
   handlePrepareStorefrontPreview,
 } from "../shared/storefront-sync-action.server";
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
-import { ReduxProvider } from "../../../store/ReduxProvider";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 import { buildSpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
 import {
@@ -245,9 +244,5 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 };
 
 export default function FullPageBundleConfigureRoute() {
-  return (
-    <ReduxProvider>
-      <ConfigureBundleFlow />
-    </ReduxProvider>
-  );
+  return <ConfigureBundleFlow />;
 }

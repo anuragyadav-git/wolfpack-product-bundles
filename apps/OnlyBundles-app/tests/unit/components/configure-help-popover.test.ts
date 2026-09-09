@@ -127,8 +127,8 @@ describe("configure help catalog", () => {
       expect("fallbackDescription" in tooltip).toBe(false);
 
       const pngPath = path.join(
-        process.cwd(),
-        "public",
+        __dirname,
+        "../../../public",
         path.basename(imageSrc, ".avif") + ".png",
       );
       expect(fs.existsSync(pngPath)).toBe(true);

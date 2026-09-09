@@ -6,6 +6,10 @@ import {
   mergePpbAddonFooterTranslationValues,
 } from "../../../lib/bundle-configure-translations";
 import type { StepSetupMultiLanguageTarget } from "./ConfigureBundleFlow.helpers";
+import type {
+  RuleMessages,
+  RuleMessagesByLocale,
+} from "../../../lib/bundle-configure-translations";
 
 export function usePpbMultiLanguageHandlers({
   shopLocales,
@@ -41,12 +45,11 @@ export function usePpbMultiLanguageHandlers({
   setBundleWidgetMultiLangText: React.Dispatch<
     React.SetStateAction<Record<string, Record<string, string>>>
   >;
-  ruleMessages: Record<string, { discountText?: string; successMessage?: string }>;
-  ruleMessagesByLocale: Record<
-    string,
-    Record<string, { discountText?: string; successMessage?: string }>
+  ruleMessages: RuleMessages;
+  ruleMessagesByLocale: RuleMessagesByLocale;
+  setRuleMessagesByLocale: React.Dispatch<
+    React.SetStateAction<RuleMessagesByLocale>
   >;
-  setRuleMessagesByLocale: React.Dispatch<React.SetStateAction<any>>;
   setDiscountMessagingMultiLanguageEnabled: React.Dispatch<
     React.SetStateAction<boolean>
   >;

@@ -2,7 +2,7 @@ import { useFetcher } from "@remix-run/react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { action } from "../app.attribution";
+import type { action } from "./action.server";
 import {
   getUtmPixelStatusBannerModel,
   UTM_PIXEL_PRIVACY_MESSAGE,

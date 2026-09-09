@@ -12,7 +12,11 @@ import {
   isBannerDismissedInSession,
 } from "../../../app/lib/banner-session-state";
 
-const mockUsePpbConfigureContext = jest.fn();
+const mockUseAppBridge = jest.fn(() => ({resourcePicker: jest.fn()}));
+
+jest.mock("@shopify/app-bridge-react", () => ({
+  useAppBridge: () => mockUseAppBridge(),
+}));
 
 class MockSessionStorage {
   private store = new Map<string, string>();
@@ -30,32 +34,24 @@ class MockSessionStorage {
   }
 }
 
-jest.mock(
-  "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({
-    usePpbConfigureContext: () => mockUsePpbConfigureContext(),
-  })
-);
-
 const baseFlow = {
   buildDefaultProductEntryFromPicker: jest.fn(),
   clearValidationError: jest.fn(),
   defaultProductsData: {},
   markAsDirty: jest.fn(),
   setDefaultProductsData: jest.fn(),
-  shopify: {},
 };
 
-const ppbContext = {
-  ...baseFlow,
-  QuestionHelpTooltip: () => null,
-  productPageBundleStyles: {
-    defaultProductsPickerActions: "",
-    defaultProductsPickerGroup: "",
-    settingInlineSwitch: "",
-    settingTitle: "",
-    settingTitleRow: "",
+const ppbDefaultProductProps = {
+  clearValidationError: jest.fn(),
+  defaultProductsData: {
+    isDefaultProductsEnabled: false,
+    defaultProductsTitle: "",
+    products: [],
   },
+  markAsDirty: jest.fn(),
+  setDefaultProductsData: jest.fn(),
+  validationErrors: {},
 };
 
 describe("Pre Selected Product discount tip with session state", () => {
@@ -64,7 +60,6 @@ describe("Pre Selected Product discount tip with session state", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUsePpbConfigureContext.mockReturnValue(ppbContext);
     mockStorage = new MockSessionStorage();
     (globalThis as any).window = {
       sessionStorage: mockStorage,
@@ -87,8 +82,8 @@ describe("Pre Selected Product discount tip with session state", () => {
   });
 
   it.each([
-    ["FPB", () => FpbDefaultProductsSettings({ flow: baseFlow as any })],
-    ["PPB", () => PpbDefaultProductsSettings()],
+    ["FPB", () => React.createElement(FpbDefaultProductsSettings, baseFlow as any)],
+    ["PPB", () => PpbDefaultProductsSettings(ppbDefaultProductProps)],
   ])(
     "renders in %s parent section when not dismissed in session",
     (_, render) => {
@@ -98,8 +93,8 @@ describe("Pre Selected Product discount tip with session state", () => {
   );
 
   it.each([
-    ["FPB", () => FpbDefaultProductsSettings({ flow: baseFlow as any })],
-    ["PPB", () => PpbDefaultProductsSettings()],
+    ["FPB", () => React.createElement(FpbDefaultProductsSettings, baseFlow as any)],
+    ["PPB", () => PpbDefaultProductsSettings(ppbDefaultProductProps)],
   ])(
     "keeps configured controls visible and inert in disabled %s state",
     (_, render) => {

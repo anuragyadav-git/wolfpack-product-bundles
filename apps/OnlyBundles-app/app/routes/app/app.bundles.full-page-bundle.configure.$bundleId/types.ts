@@ -1,8 +1,8 @@
 /**
  * Type definitions for Full Page Bundle Configuration.
  *
- * Shared types (StepProduct, BundleStep, ActionResponse, etc.) live in
- * app/types/bundle-configure.ts and are re-exported here for convenience.
+ * Shared types live in app/types/bundle-configure.ts; this module owns only
+ * Full Page Bundle route contracts.
  */
 
 import type { PricingRule } from "../../../types/pricing";
@@ -12,16 +12,6 @@ import type {
   BundleStep,
 } from "../../../types/bundle-configure";
 import type { SpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
-
-export type {
-  StepProduct,
-  BundleStep,
-  BundleStatusSectionProps,
-  ActionResponse,
-  SyncProductResponse,
-  ThemeTemplatesResponse,
-  WidgetValidationResponse,
-} from "../../../types/bundle-configure";
 
 export interface BundlePricing {
   id: string;
@@ -48,6 +38,9 @@ export interface BundleData {
   loadingGif?: string | null;
   steps: BundleStep[];
   pricing?: BundlePricing;
+  bundleSubscriptionConfig?: unknown;
+  personalizationData?: unknown;
+  showStepTimeline?: boolean | null;
 }
 
 export interface LoaderData {

@@ -1,27 +1,45 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import { FilePicker } from "../../../../components/shared/FilePicker";
+
+interface FpbMediaStep {
+  bannerImageUrl?: string | null;
+  id: string;
+  imageUrl?: string | null;
+  name: string;
+}
+
+export interface FpbImagesGifsPanelProps {
+  activeAssetTabIndex: number;
+  activeSection: string;
+  floatingBadgeEnabled: boolean;
+  floatingBadgeText: string;
+  fullPageBundleStyles: Record<string, string>;
+  markAsDirty: () => void;
+  promoBannerBgImage: string | null;
+  setActiveAssetTabIndex: (index: number) => void;
+  setFloatingBadgeEnabled: (enabled: boolean) => void;
+  setFloatingBadgeText: (text: string) => void;
+  setPromoBannerBgImage: (url: string | null) => void;
+  steps: FpbMediaStep[];
+  updateStepField: (stepId: string, field: string, value: unknown) => void;
+}
 
 export function FpbImagesGifsPanel({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    activeAssetTabIndex,
-    activeSection,
-    FilePicker,
-    floatingBadgeEnabled,
-    floatingBadgeText,
-    fullPageBundleStyles,
-    markAsDirty,
-    promoBannerBgImage,
-    setActiveAssetTabIndex,
-    setFloatingBadgeEnabled,
-    setFloatingBadgeText,
-    setPromoBannerBgImage,
-    stepsState,
-  } = flow;
+  activeAssetTabIndex,
+  activeSection,
+  floatingBadgeEnabled,
+  floatingBadgeText,
+  fullPageBundleStyles,
+  markAsDirty,
+  promoBannerBgImage,
+  setActiveAssetTabIndex,
+  setFloatingBadgeEnabled,
+  setFloatingBadgeText,
+  setPromoBannerBgImage,
+  steps,
+  updateStepField,
+}: FpbImagesGifsPanelProps) {
 
   return (
     <>
@@ -136,7 +154,7 @@ export function FpbImagesGifsPanel({
               />
             </s-stack>
           </s-section>
-          {stepsState.steps.length > 0 && (
+          {steps.length > 0 && (
             <s-section>
               <s-stack direction="block" gap="base">
                 <s-stack direction="inline">
@@ -175,7 +193,7 @@ export function FpbImagesGifsPanel({
                 </s-stack>
                 <div>
                   <div className={fullPageBundleStyles.tabRow}>
-                    {stepsState.steps.map((step, i) => (
+                    {steps.map((step, i) => (
                       <button
                         key={`asset-step-${step.id}`}
                         onClick={() => setActiveAssetTabIndex(i)}
@@ -190,7 +208,7 @@ export function FpbImagesGifsPanel({
                     ))}
                   </div>
                 </div>
-                {stepsState.steps.map(
+                {steps.map(
                   (step, index) =>
                     activeAssetTabIndex === index && (
                       <s-stack key={step.id} direction="block" gap="base">
@@ -223,9 +241,9 @@ export function FpbImagesGifsPanel({
                             label={translateAdmin(
                               "adminAttributes.chooseTabIcon"
                             )}
-                            value={(step as any).imageUrl ?? null}
+                            value={step.imageUrl ?? null}
                             onChange={(url) => {
-                              stepsState.updateStepField(
+                              updateStepField(
                                 step.id,
                                 "imageUrl",
                                 url ?? null
@@ -264,9 +282,9 @@ export function FpbImagesGifsPanel({
                             label={translateAdmin(
                               "adminAttributes.chooseBannerImage"
                             )}
-                            value={(step as any).bannerImageUrl ?? null}
+                            value={step.bannerImageUrl ?? null}
                             onChange={(url) => {
-                              stepsState.updateStepField(
+                              updateStepField(
                                 step.id,
                                 "bannerImageUrl",
                                 url ?? null

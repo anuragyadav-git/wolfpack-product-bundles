@@ -1,13 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ElementRef } from "react";
 import {
   hidePolarisModal,
   showPolarisModal,
   useModalHideListener,
 } from "../_shared/bundle-configure/modal-utils";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
 const PPB_PAGE_SELECTION_MODAL_ID = "ppb-page-selection-modal";
+type PolarisModalElement = ElementRef<"s-modal">;
 
 export function dismissPpbPageSelectionModal(
   modalRef: { current: { hideOverlay?: () => void } | null },
@@ -17,14 +18,21 @@ export function dismissPpbPageSelectionModal(
   closePageSelectionModal();
 }
 
-export function PpbPageSelectionModal() {
-  const {
-    availablePages,
-    closePageSelectionModal,
-    handlePageSelection,
-    isPageSelectionModalOpen,
-  } = usePpbConfigureContext();
-  const modalRef = useRef<any>(null);
+export type PpbPageSelectionModalProps = Pick<
+  PpbConfigureFlow,
+  | "availablePages"
+  | "closePageSelectionModal"
+  | "handlePageSelection"
+  | "isPageSelectionModalOpen"
+>;
+
+export function PpbPageSelectionModal({
+  availablePages,
+  closePageSelectionModal,
+  handlePageSelection,
+  isPageSelectionModalOpen,
+}: PpbPageSelectionModalProps) {
+  const modalRef = useRef<PolarisModalElement | null>(null);
 
   useEffect(() => {
     isPageSelectionModalOpen
@@ -55,7 +63,6 @@ export function PpbPageSelectionModal() {
                 key={template.id ?? template.handle ?? template.title}
                 variant="secondary"
                 icon="theme-template"
-                inlineSize="fill"
                 onClick={() => {
                   dismissPpbPageSelectionModal(
                     modalRef,

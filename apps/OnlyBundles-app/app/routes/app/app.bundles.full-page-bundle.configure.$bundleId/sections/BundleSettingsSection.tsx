@@ -1,31 +1,66 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
-import { FpbBundleCssSettings } from "./BundleSettingsCss";
-import { FpbDefaultProductsSettings } from "./BundleSettingsDefaultProducts";
-import { FpbQuantitySettings } from "./BundleSettingsQuantity";
-import { FpbBundleCartSettings } from "./BundleSettingsBundleCart";
-import { FpbSummaryTextSettings } from "./BundleSettingsSummaryText";
-import { FpbBundleTemplateSettings } from "./BundleSettingsTemplate";
-import { FpbTimelineSettings } from "./BundleSettingsTimeline";
+import {
+  FpbBundleCssSettings,
+  type FpbBundleCssSettingsProps,
+} from "./BundleSettingsCss";
+import {
+  FpbDefaultProductsSettings,
+  type FpbDefaultProductsSettingsProps,
+} from "./BundleSettingsDefaultProducts";
+import {
+  FpbQuantitySettings,
+  type FpbQuantitySettingsProps,
+} from "./BundleSettingsQuantity";
+import {
+  FpbBundleCartSettings,
+  type FpbBundleCartSettingsProps,
+} from "./BundleSettingsBundleCart";
+import {
+  FpbSummaryTextSettings,
+  type FpbSummaryTextSettingsProps,
+} from "./BundleSettingsSummaryText";
+import {
+  FpbBundleTemplateSettings,
+  type FpbBundleTemplateSettingsProps,
+} from "./BundleSettingsTemplate";
+import {
+  FpbTimelineSettings,
+  type FpbTimelineSettingsProps,
+} from "./BundleSettingsTimeline";
+
+interface BundleSettingsSectionProps {
+  activeSection: string;
+  bundleCart: FpbBundleCartSettingsProps;
+  css: FpbBundleCssSettingsProps;
+  defaultProducts: FpbDefaultProductsSettingsProps;
+  quantity: FpbQuantitySettingsProps;
+  summaryText: FpbSummaryTextSettingsProps;
+  template: FpbBundleTemplateSettingsProps;
+  timeline: FpbTimelineSettingsProps;
+}
 
 export function BundleSettingsSection({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const { activeSection } = flow;
+  activeSection,
+  bundleCart,
+  css,
+  defaultProducts,
+  quantity,
+  summaryText,
+  template,
+  timeline,
+}: BundleSettingsSectionProps) {
 
   if (activeSection !== "bundle_settings") return null;
 
   return (
     <div data-tour-target="fpb-bundle-settings">
       <s-stack direction="block" gap="base">
-        <FpbDefaultProductsSettings flow={flow} />
-        <FpbQuantitySettings flow={flow} />
-        <FpbSummaryTextSettings flow={flow} />
-        <FpbBundleCartSettings flow={flow} />
-        <FpbBundleTemplateSettings flow={flow} />
-        <FpbTimelineSettings flow={flow} />
-        <FpbBundleCssSettings flow={flow} />
+        <FpbDefaultProductsSettings {...defaultProducts} />
+        <FpbQuantitySettings {...quantity} />
+        <FpbSummaryTextSettings {...summaryText} />
+        <FpbBundleCartSettings {...bundleCart} />
+        <FpbBundleTemplateSettings {...template} />
+        <FpbTimelineSettings {...timeline} />
+        <FpbBundleCssSettings {...css} />
       </s-stack>
     </div>
   );

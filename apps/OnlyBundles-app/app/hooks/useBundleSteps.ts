@@ -16,6 +16,7 @@ import { createBundleStep } from "../lib/bundle-config/step-defaults";
 interface BundleStep {
   id: string;
   name: string;
+  isFreeGift?: boolean | null;
   collections?: any[];
   products?: any[];
   StepProduct?: any[];

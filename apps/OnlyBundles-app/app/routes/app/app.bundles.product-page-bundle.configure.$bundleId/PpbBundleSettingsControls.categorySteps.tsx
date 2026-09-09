@@ -1,12 +1,18 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbCategoryStepSettings() {
-  const {
-    markAsDirty,
-    setUseSingleStepCategoriesAsBundleSteps,
-    useSingleStepCategoriesAsBundleSteps,
-  } = usePpbConfigureContext();
+export type PpbCategoryStepSettingsProps = Pick<
+  PpbConfigureFlow,
+  | "markAsDirty"
+  | "setUseSingleStepCategoriesAsBundleSteps"
+  | "useSingleStepCategoriesAsBundleSteps"
+>;
+
+export function PpbCategoryStepSettings({
+  markAsDirty,
+  setUseSingleStepCategoriesAsBundleSteps,
+  useSingleStepCategoriesAsBundleSteps,
+}: PpbCategoryStepSettingsProps) {
 
   return (
     <s-section>
@@ -30,7 +36,7 @@ export function PpbCategoryStepSettings() {
             }}
           />
         </s-stack>
-        <s-text tone={"subdued" as any}>
+        <s-text tone="neutral">
           {translateAdmin(
             "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundlesettingscontrolsCategorysteps.showOneCategoryAtATimeWithStepNavigation"
           )}

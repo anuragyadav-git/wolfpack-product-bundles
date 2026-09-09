@@ -88,6 +88,8 @@
       "deleteBundle": "Supprimer le bundle",
       "cloneSuccess": "Bundle dupliqué avec succès",
       "deleteSuccess": "Bundle supprimé",
+      "renameBundle": "Renommer le bundle",
+      "renameSuccess": "Bundle renommé avec succès",
       "themeEditorUnavailable": "Le lien de l'éditeur de thème est indisponible."
     },
     "deleteModal": {
@@ -95,6 +97,15 @@
       "delete": "Supprimer",
       "cancel": "Annuler",
       "body": "Cette action est irréversible. Toute la configuration, les étapes et les règles de remise seront définitivement supprimées."
+    },
+    "renameModal": {
+      "heading": "Renommer le bundle",
+      "nameLabel": "Nom du bundle",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "errorEmpty": "Le nom du bundle ne peut pas être vide.",
+      "errorTooLong": "Le nom du bundle ne peut pas dépasser 255 caractères.",
+      "errorFailed": "Impossible de renommer le bundle."
     },
     "resources": {
       "bundleInspiration": "Inspiration de bundle",

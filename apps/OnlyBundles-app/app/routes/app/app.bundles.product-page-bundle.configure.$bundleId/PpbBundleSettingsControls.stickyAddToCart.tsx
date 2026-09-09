@@ -1,20 +1,32 @@
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbStickyAddToCartSettings() {
-  const {
-    markAsDirty,
-    stickyAddToCartAction,
-    stickyAddToCartEnabled,
-    stickyAddToCartShowDesktop,
-    stickyAddToCartShowMobile,
-    setStickyAddToCartAction,
-    setStickyAddToCartEnabled,
-    setStickyAddToCartShowDesktop,
-    setStickyAddToCartShowMobile,
-  } = usePpbConfigureContext();
+export type PpbStickyAddToCartSettingsProps = Pick<
+  PpbConfigureFlow,
+  | "markAsDirty"
+  | "stickyAddToCartAction"
+  | "stickyAddToCartEnabled"
+  | "stickyAddToCartShowDesktop"
+  | "stickyAddToCartShowMobile"
+  | "setStickyAddToCartAction"
+  | "setStickyAddToCartEnabled"
+  | "setStickyAddToCartShowDesktop"
+  | "setStickyAddToCartShowMobile"
+>;
+
+export function PpbStickyAddToCartSettings({
+  markAsDirty,
+  stickyAddToCartAction,
+  stickyAddToCartEnabled,
+  stickyAddToCartShowDesktop,
+  stickyAddToCartShowMobile,
+  setStickyAddToCartAction,
+  setStickyAddToCartEnabled,
+  setStickyAddToCartShowDesktop,
+  setStickyAddToCartShowMobile,
+}: PpbStickyAddToCartSettingsProps) {
 
   return (
     <s-section>

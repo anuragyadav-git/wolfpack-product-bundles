@@ -1,91 +1,78 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DefaultStepTimelineIcon } from "../../_shared/bundle-configure/DefaultStepTimelineIcon";
 import { translateAdmin } from "~/i18n/config";
+import { FilePicker } from "../../../../components/shared/FilePicker";
 
 export function FpbStepConfigCard({
-  flow,
+  styles,
   step,
+  pickerOpen,
+  onClosePicker,
+  onImageChange,
+  onRemoveImage,
+  onTitleChange,
+  onTogglePicker,
 }: {
-  flow: ConfigureBundleFlowContext;
+  styles: Record<string, string>;
   step: any;
+  pickerOpen: boolean;
+  onClosePicker: () => void;
+  onImageChange: (url: string | null) => void;
+  onRemoveImage: () => void;
+  onTitleChange: (title: string) => void;
+  onTogglePicker: () => void;
 }) {
-  const {
-    FilePicker,
-    fullPageBundleStyles,
-    markAsDirty,
-    setShowIconPickerForStep,
-    showIconPickerForStep,
-    stepsState,
-  } = flow;
-
   return (
     <>
-      <div className={fullPageBundleStyles.card}>
-        <h3 className={fullPageBundleStyles.stepConfigTitle}>
+      <div className={styles.card}>
+        <h3 className={styles.stepConfigTitle}>
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupconfigcard.stepConfig"
           )}
         </h3>
-        <div className={fullPageBundleStyles.stepConfigRow}>
-          <div className={fullPageBundleStyles.stepConfigIconBox}>
+        <div className={styles.stepConfigRow}>
+          <div className={styles.stepConfigIconBox}>
             {(step as any).stepImage ? (
               <>
-                <img
-                  src={(step as any).stepImage}
-                  alt={translateAdmin("adminAttributes.stepIcon")}
-                  className={fullPageBundleStyles.iconImg}
-                />
-                <button
-                  type="button"
-                  className={fullPageBundleStyles.iconRemoveButton}
-                  aria-label={translateAdmin("adminAttributes.removeStepIcon")}
-                  onClick={() => {
-                    stepsState.updateStepField(step.id, "stepImage", null);
-                    setShowIconPickerForStep(null);
-                    markAsDirty();
-                  }}
-                >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M6 6l8 8M14 6l-8 8"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
+                <div className={styles.iconImg}>
+                  <s-image
+                    src={(step as any).stepImage}
+                    alt={translateAdmin("adminAttributes.stepIcon")}
+                    aspectRatio="1/1"
+                    objectFit="contain"
+                  />
+                </div>
+                <span className={styles.iconRemoveButton}>
+                  <s-button
+                    variant="tertiary"
+                    tone="critical"
+                    icon="delete"
+                    accessibilityLabel={translateAdmin(
+                      "adminAttributes.removeStepIcon"
+                    )}
+                    onClick={onRemoveImage}
+                  />
+                </span>
               </>
             ) : (
-              <div className={fullPageBundleStyles.iconPlaceholder}>
+              <div className={styles.iconPlaceholder}>
                 <DefaultStepTimelineIcon
-                  className={fullPageBundleStyles.defaultTimelineIcon}
+                  className={styles.defaultTimelineIcon}
                   step={step}
                 />
               </div>
             )}
           </div>
-          <div className={fullPageBundleStyles.iconUploadButton}>
+          <div className={styles.iconUploadButton}>
             <s-button
-              inlineSize="fill"
               icon="replace"
-              onClick={() =>
-                setShowIconPickerForStep((prev: string | null) =>
-                  prev === step.id ? null : step.id
-                )
-              }
+              onClick={onTogglePicker}
             >
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
               )}
             </s-button>
           </div>
-          <div className={fullPageBundleStyles.fieldsColumn}>
+          <div className={styles.fieldsColumn}>
             <s-text-field
               label={translateAdmin("adminAttributes.stepTitle")}
               placeholder={translateAdmin(
@@ -93,26 +80,19 @@ export function FpbStepConfigCard({
               )}
               value={(step as any).pageTitle ?? ""}
               onInput={(e) => {
-                stepsState.updateStepField(
-                  step.id,
-                  "pageTitle",
-                  (e.target as HTMLInputElement).value
-                );
-                markAsDirty();
+                onTitleChange((e.target as HTMLInputElement).value);
               }}
               autocomplete="off"
             />
           </div>
         </div>
-        {showIconPickerForStep === step.id && (
+        {pickerOpen && (
           <FilePicker
             autoOpen
-            onClose={() => setShowIconPickerForStep(null)}
+            onClose={onClosePicker}
             value={(step as any).stepImage ?? null}
             onChange={(url: string | null) => {
-              stepsState.updateStepField(step.id, "stepImage", url);
-              setShowIconPickerForStep(null);
-              markAsDirty();
+              onImageChange(url);
             }}
             label=""
           />

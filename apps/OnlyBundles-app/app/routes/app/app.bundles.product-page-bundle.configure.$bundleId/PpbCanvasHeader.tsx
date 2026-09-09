@@ -2,36 +2,60 @@ import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { useTranslation } from "react-i18next";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import { UnlistedBundleBanner } from "../../../components/UnlistedBundleBanner";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import {
   buildPpbCanvasWarnings,
   getPpbStandaloneUnlistedWarning,
 } from "./ppb-warning-presentation";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbCanvasHeader() {
+type PpbCanvasHeaderFlowProps = Pick<
+  PpbConfigureFlow,
+  | "appEmbedEnabled"
+  | "handleBackClick"
+  | "handlePreviewBundle"
+  | "isPreviewBundleLoading"
+  | "loadedBundleProduct"
+  | "openThemeEditorForAppEmbed"
+  | "openProductInAdmin"
+  | "operationAlert"
+  | "readinessScore"
+  | "setReadinessOpen"
+  | "shop"
+  | "themeEditorUrl"
+>;
+
+export type PpbCanvasHeaderProps = PpbCanvasHeaderFlowProps & {
+  bundle: Pick<PpbConfigureFlow["bundle"], "shopifyProductId">;
+  fetcher: Pick<PpbConfigureFlow["fetcher"], "state">;
+  parentProductStatusUi: Pick<
+    PpbConfigureFlow["parentProductStatusUi"],
+    "isLoading" | "showUnlistedBanner"
+  >;
+};
+
+export function PpbCanvasHeader({
+  appEmbedEnabled,
+  bundle,
+  fetcher,
+  handleBackClick,
+  handlePreviewBundle,
+  isPreviewBundleLoading,
+  loadedBundleProduct,
+  openThemeEditorForAppEmbed,
+  openProductInAdmin,
+  operationAlert,
+  parentProductStatusUi,
+  readinessScore,
+  setReadinessOpen,
+  shop,
+  themeEditorUrl,
+}: PpbCanvasHeaderProps) {
   const { t } = useTranslation();
-  const {
-    UnlistedBundleBanner,
-    appEmbedEnabled,
-    bundle,
-    fetcher,
-    handleBackClick,
-    handlePreviewBundle,
-    isPreviewBundleLoading,
-    loadedBundleProduct,
-    openThemeEditorForAppEmbed,
-    openProductInAdmin,
-    operationAlert,
-    parentProductStatusUi,
-    productPageBundleStyles,
-    readinessScore,
-    setReadinessOpen,
-    shop,
-    themeEditorUrl,
-  } = usePpbConfigureContext();
   const bundleProductId =
-    loadedBundleProduct?.id ?? (bundle as any).shopifyProductId ?? null;
+    loadedBundleProduct?.id ?? bundle.shopifyProductId ?? null;
   const numericProductId = bundleProductId?.split("/").pop() || null;
   const hasUnlistedWarning =
     parentProductStatusUi.showUnlistedBanner && Boolean(numericProductId);
@@ -74,14 +98,15 @@ export function PpbCanvasHeader() {
       <div className={productPageBundleStyles.canvasHeader}>
         <div className={productPageBundleStyles.canvasTitleGroup}>
           <div className={productPageBundleStyles.canvasTitleRow}>
-            <button
-              type="button"
-              className={productPageBundleStyles.canvasBackButton}
+            <s-button
+              variant="tertiary"
+              tone="neutral"
+              icon="arrow-left"
               onClick={handleBackClick}
-              aria-label={translateAdmin("adminAttributes.backToDashboard")}
-            >
-              ←
-            </button>
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.backToDashboard"
+              )}
+            />
             <h1 className={productPageBundleStyles.canvasTitle}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.configureBundleFlow"

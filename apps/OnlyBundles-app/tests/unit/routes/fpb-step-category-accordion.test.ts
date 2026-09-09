@@ -3,13 +3,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { FpbStepCategoryAccordion } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupCategoryAccordion";
 
-function makeFlow(overrides: Record<string, unknown> = {}) {
+function makeAdapter(overrides: Record<string, unknown> = {}) {
   return {
     categoryActiveTabs: {},
     categoryOpen: { "step-1__cat-1": true },
     draggedCatKey: null,
     dragOverCatKey: null,
-    fullPageBundleStyles: {},
+    styles: {},
     handleCatDragEnd: jest.fn(),
     handleCatDragStart: jest.fn(),
     handleCatDrop: jest.fn(),
@@ -37,7 +37,7 @@ function renderAccordion(categories: any[]) {
   const step = makeStep(categories);
   return renderToStaticMarkup(
     React.createElement(FpbStepCategoryAccordion, {
-      flow: makeFlow(),
+      adapter: makeAdapter(),
       step,
       cat: categories[0],
       catIndex: 0,
@@ -62,7 +62,7 @@ describe("FpbStepCategoryAccordion", () => {
       { id: "cat-2", name: "Second Category", products: [], collections: [] },
     ]);
 
-    expect(view).toContain('aria-label="Category name"');
+    expect(view).toContain('label="Category Name"');
     expect(view).toContain('value="First Category"');
     expect(view).toContain("Products");
     expect(view).toContain("Collections");

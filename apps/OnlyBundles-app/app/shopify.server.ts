@@ -8,7 +8,7 @@ import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prism
 import prisma from "./db.server";
 import { CartTransformService } from "./services/cart-transform-service.server";
 import { AddOnDiscountFunctionService } from "./services/addon-discount-function-service.server";
-import { ensureVariantBundleMetafieldDefinitions } from "./services/bundles/metafield-sync.server";
+import { ensureVariantBundleMetafieldDefinitions } from "./services/bundles/metafield-sync/operations/definitions.server";
 import { syncThemeColors } from "./services/theme-colors.server";
 import { activateUtmPixel } from "./services/pixel-activation.server";
 import { AppLogger } from "./lib/logger";
@@ -69,8 +69,8 @@ const shopify = shopifyApp({
         AppLogger.error("Failed to create shop record", { shop: session.shop }, error);
       }
 
-      // Sync $app:serverUrl metafield so the theme widget can read the app server URL.
-      // Runs on install/re-install; URL is a static deploy-time value so syncing once is sufficient.
+      // Sync $app:serverUrl for the Checkout UI extension's authenticated backend origin.
+      // Runs on install/re-install; the storefront widgets do not consume this metafield.
       try {
         const appUrl = process.env.SHOPIFY_APP_URL;
         if (appUrl) {
@@ -266,9 +266,8 @@ const shopify = shopifyApp({
     : {}),
 });
 
-export default shopify;
 export const addDocumentResponseHeaders = shopify.addDocumentResponseHeaders;
 export const authenticate = shopify.authenticate;
+export type ShopifyAdmin = Awaited<ReturnType<typeof authenticate.admin>>["admin"];
 export const unauthenticated = shopify.unauthenticated;
 export const login = shopify.login;
-export { sessionStorage };

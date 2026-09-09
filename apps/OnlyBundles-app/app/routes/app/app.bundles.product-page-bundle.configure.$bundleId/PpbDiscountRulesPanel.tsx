@@ -1,4 +1,3 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import {
   getBogoDiscountInputValue,
   getBogoDiscountStoredValue,
@@ -7,17 +6,33 @@ import { DiscountPricingTipBanner } from "../_shared/bundle-configure/DiscountPr
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { PricingTierBadgeFields } from "../_shared/bundle-configure/PricingTierBadgeFields";
 import { translateAdmin } from "~/i18n/config";
+import {
+  DiscountMethod,
+  amountToCents,
+  centsToAmount,
+} from "../../../types/pricing";
+import { DISCOUNT_METHOD_OPTIONS } from "../../../constants/bundle";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbDiscountRulesPanel() {
-  const {
-    DISCOUNT_METHOD_OPTIONS,
-    DiscountMethod,
-    pricingState,
-    setGlobalSuccessMessage,
-    setRuleMessages,
-    setRuleMessagesByLocale,
-    setSuccessMessageByLocale,
-  } = usePpbConfigureContext();
+export type PpbDiscountRulesPanelProps = Pick<
+  PpbConfigureFlow,
+  | "pricingState"
+  | "setGlobalSuccessMessage"
+  | "setRuleMessages"
+  | "setRuleMessagesByLocale"
+  | "setSuccessMessageByLocale"
+  | "validationErrors"
+>;
+
+export function PpbDiscountRulesPanel({
+  pricingState,
+  setGlobalSuccessMessage,
+  setRuleMessages,
+  setRuleMessagesByLocale,
+  setSuccessMessageByLocale,
+  validationErrors,
+}: PpbDiscountRulesPanelProps) {
 
   return (
     <s-section>
@@ -83,9 +98,15 @@ export function PpbDiscountRulesPanel() {
               </s-select>
             </div>
             {pricingState.discountType === DiscountMethod.BUY_X_GET_Y ? (
-              <PpbBuyXGetYRules />
+              <PpbBuyXGetYRules
+                pricingState={pricingState}
+                validationErrors={validationErrors}
+              />
             ) : (
-              <PpbStandardDiscountRules />
+              <PpbStandardDiscountRules
+                pricingState={pricingState}
+                validationErrors={validationErrors}
+              />
             )}
           </s-stack>
         </DisabledConfigurationRegion>
@@ -94,12 +115,15 @@ export function PpbDiscountRulesPanel() {
   );
 }
 
-function PpbBuyXGetYRules() {
-  const {
-    pricingState,
-    productPageBundleStyles,
-    validationErrors = {},
-  } = usePpbConfigureContext();
+type PpbDiscountRuleListProps = Pick<
+  PpbDiscountRulesPanelProps,
+  "pricingState" | "validationErrors"
+>;
+
+function PpbBuyXGetYRules({
+  pricingState,
+  validationErrors = {},
+}: PpbDiscountRuleListProps) {
 
   return (
     <s-stack direction="block" gap="small">
@@ -285,20 +309,15 @@ function PpbBuyXGetYRules() {
           </s-stack>
         </div>
       ))}
-      <PpbAddDiscountRuleButton />
+      <PpbAddDiscountRuleButton pricingState={pricingState} />
     </s-stack>
   );
 }
 
-function PpbStandardDiscountRules() {
-  const {
-    amountToCents,
-    centsToAmount,
-    DiscountMethod,
-    pricingState,
-    productPageBundleStyles,
-    validationErrors = {},
-  } = usePpbConfigureContext();
+function PpbStandardDiscountRules({
+  pricingState,
+  validationErrors = {},
+}: PpbDiscountRuleListProps) {
 
   return (
     <s-stack direction="block" gap="small">
@@ -479,20 +498,20 @@ function PpbStandardDiscountRules() {
           </s-stack>
         </div>
       ))}
-      <PpbAddDiscountRuleButton />
+      <PpbAddDiscountRuleButton pricingState={pricingState} />
     </s-stack>
   );
 }
 
-function PpbAddDiscountRuleButton() {
-  const { pricingState } = usePpbConfigureContext();
+function PpbAddDiscountRuleButton({
+  pricingState,
+}: Pick<PpbDiscountRulesPanelProps, "pricingState">) {
 
   if (pricingState.discountRules.length < 4) {
     return (
       <s-button
         variant="secondary"
         icon="plus"
-        inlineSize="fill"
         onClick={pricingState.addDiscountRule}
       >
         {translateAdmin(

@@ -1,20 +1,21 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { ComponentProps } from "react";
 import { FpbStepRuleModeContent } from "./StepSetupRuleModeContent";
 import { TUTORIAL_LINKS } from "../../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
+import { QuestionHelpTooltip } from "../SmallComponents";
 
 export function FpbStepRulesCard({
-  flow,
+  styles,
+  ruleMode,
   step,
 }: {
-  flow: ConfigureBundleFlowContext;
+  styles: Record<string, string>;
+  ruleMode: Omit<ComponentProps<typeof FpbStepRuleModeContent>, "step">;
   step: any;
 }) {
-  const { fullPageBundleStyles, QuestionHelpTooltip } = flow;
-
   return (
     <>
-      <div className={fullPageBundleStyles.card}>
+      <div className={styles.card}>
         <div
           style={{
             display: "flex",
@@ -41,21 +42,12 @@ export function FpbStepRulesCard({
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
           )}
         </p>
-        <button
-          type="button"
-          className={fullPageBundleStyles.linkButton}
-          style={{ marginBottom: 12, display: "inline-block" }}
-          onClick={() =>
-            window.open(
-              TUTORIAL_LINKS.fullPageRules,
-              "_blank",
-              "noopener,noreferrer"
-            )
-          }
-        >
-          {translateAdmin("common.actions.learnMore")}
-        </button>
-        <FpbStepRuleModeContent flow={flow} step={step} />
+        <s-box paddingBlockEnd="base">
+          <s-link href={TUTORIAL_LINKS.fullPageRules} target="_blank">
+            {translateAdmin("common.actions.learnMore")}
+          </s-link>
+        </s-box>
+        <FpbStepRuleModeContent {...ruleMode} step={step} />
       </div>
     </>
   );

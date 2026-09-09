@@ -23,43 +23,6 @@
   width: min(320px, calc(100vw - 32px));
 }
 
-.dialog {
-  position: fixed;
-  inset: auto auto 16px 16px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  width: min(320px, calc(100vw - 32px));
-  max-width: none;
-  max-height: min(80dvh, 560px);
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid #e1e3e5;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-  color: inherit;
-}
-
-.dialog:not([open]) {
-  display: none;
-}
-
-.dialog::backdrop {
-  background: rgba(0, 0, 0, 0.18);
-  animation: fadeInOverlay 0.2s ease forwards;
-}
-
-@keyframes fadeInOverlay {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 /* Collapsed trigger — gauge, score label, and chevron */
 .collapsed {
   appearance: none;
@@ -372,14 +335,6 @@
     width: min(320px, calc(100vw - 24px));
   }
 
-  .dialog {
-    inset: auto 0 0;
-    width: 100%;
-    max-height: min(78dvh, 680px);
-    border-width: 1px 0 0;
-    border-radius: 16px 16px 0 0;
-  }
-
   .panelItems {
     max-height: min(58dvh, 520px);
   }
@@ -390,7 +345,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dialog::backdrop,
   .collapsed,
   .arcProgress,
   .scoreLabel,

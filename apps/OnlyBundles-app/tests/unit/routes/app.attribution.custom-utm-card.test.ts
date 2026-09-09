@@ -25,12 +25,19 @@ jest.mock("@shopify/app-bridge-react", () => ({
   }),
 }));
 
-jest.mock("../../../app/components/analytics", () => ({
+jest.mock("../../../app/components/analytics/BundlePerformanceMatrix", () => ({
   BundlePerformanceMatrix: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleConversionFunnel", () => ({
   BundleConversionFunnel: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleKeyStatistics", () => ({
   BundleKeyStatistics: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleSalesTrends", () => ({
   BundleSalesTrends: () => null,
-  LiveActivityFeed: () => null,
+}));
+jest.mock("../../../app/components/analytics/TopCampaigns", () => ({
   TopCampaigns: () => null,
 }));
 
@@ -76,8 +83,10 @@ describe("CustomUtmTrackingCard", () => {
     expect(view).toContain("Currently tracking");
     expect(view).toContain("utm_influencer");
     expect(view).toContain("partner_id");
-    expect(view).toContain('aria-label="Remove utm_influencer"');
-    expect(view).toContain('aria-label="Remove partner_id"');
+    expect(view).toContain("<s-clickable-chip");
+    expect(view).toContain('accessibilityLabel="Remove utm_influencer"');
+    expect(view).toContain('accessibilityLabel="Remove partner_id"');
+    expect(view).toContain("removable");
   });
 
   it("disables contextual save actions while saving", async () => {

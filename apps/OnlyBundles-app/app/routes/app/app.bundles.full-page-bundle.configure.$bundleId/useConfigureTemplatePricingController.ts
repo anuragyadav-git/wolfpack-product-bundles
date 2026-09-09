@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from "react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { type BundleReadinessItem } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { DiscountMethod } from "../../../types/pricing";
 import {
@@ -8,15 +9,66 @@ import {
 import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-configure.module.css";
 import { FPB_DESIGN_CONTROL_PANEL_URL } from "./configure-constants";
 import { buildVisibilityDisplayConfiguration } from "./visibility-helpers";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { useConfigureVisibilityTemplateState } from "./useConfigureVisibilityTemplateState";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
+import type { useConfigureContentState } from "./useConfigureContentState";
 import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
 
+type ConfigureTemplatePricingDependencies = Pick<
+  ReturnType<typeof useConfigureBundleController>,
+  | "appEmbedEnabled"
+  | "bundle"
+  | "conditionsState"
+  | "formState"
+  | "loadedBundleProduct"
+  | "navigate"
+  | "pricingState"
+  | "productStatus"
+  | "ruleMessages"
+  | "stepsState"
+> &
+  Pick<ReturnType<typeof useConfigureContentState>, "textOverridesByLocale"> &
+  Pick<
+    ReturnType<typeof useConfigureVisibilityTemplateState>,
+    | "autoSelectBrowsedProduct"
+    | "bundleDesignPresetId"
+    | "bundleDesignTemplate"
+    | "hasPreview"
+    | "lastTemplateRequestRef"
+    | "lastTemplateResponseRef"
+    | "pendingDesignPresetId"
+    | "pendingDesignTemplate"
+    | "savedBundleUpsellConfig"
+    | "selectTemplateOpenButtonRef"
+    | "setBundleDesignPresetId"
+    | "setBundleDesignTemplate"
+    | "setIsSelectTemplateModalOpen"
+    | "setPendingDesignPresetId"
+    | "setPendingDesignTemplate"
+    | "setTemplateModalStep"
+    | "setTemplateSaveError"
+    | "templateFetcher"
+    | "templateSubmissionStartedRef"
+    | "upsellWidgetButtonText"
+    | "upsellWidgetCollectionsSelectedData"
+    | "upsellWidgetDescription"
+    | "upsellWidgetDisplayOn"
+    | "upsellWidgetEnabled"
+    | "upsellWidgetImageUrl"
+    | "upsellWidgetLanguageMode"
+    | "upsellWidgetSelectedProducts"
+    | "upsellWidgetSpecificCollectionPages"
+    | "upsellWidgetSpecificProductPages"
+    | "upsellWidgetTitle"
+  >;
+
 export function useConfigureTemplatePricingController(
-  flow: ConfigureBundleFlowDraft
+  dependencies: ConfigureTemplatePricingDependencies
 ) {
+  const shopify = useAppBridge();
   const {
     appEmbedEnabled,
     autoSelectBrowsedProduct,
@@ -25,6 +77,7 @@ export function useConfigureTemplatePricingController(
     bundleDesignTemplate,
     conditionsState,
     formState,
+    hasPreview,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
     loadedBundleProduct,
@@ -58,7 +111,7 @@ export function useConfigureTemplatePricingController(
     upsellWidgetSpecificCollectionPages,
     upsellWidgetSpecificProductPages,
     upsellWidgetTitle,
-  } = flow;
+  } = dependencies;
 
   const resetSelectTemplateModal = useCallback(() => {
     setIsSelectTemplateModalOpen(false);
@@ -104,10 +157,10 @@ export function useConfigureTemplatePricingController(
     templateSubmissionStartedRef,
   ]);
   const openDesignControlPanel = useCallback(() => {
-    void flow.shopify.saveBar
+    void shopify.saveBar
       .leaveConfirmation()
       .then(() => navigate(FPB_DESIGN_CONTROL_PANEL_URL));
-  }, [flow.shopify, navigate]);
+  }, [navigate, shopify]);
 
   useEffect(() => {
     if (!lastTemplateRequestRef.current) {
@@ -299,7 +352,7 @@ export function useConfigureTemplatePricingController(
   const readinessItems = useMemo<BundleReadinessItem[]>(() => {
     const hasProducts =
       stepsState.steps.reduce((totalProducts: number, step: any) => {
-        const legacyProducts = Array.isArray(step.StepProduct)
+        const stepProductCount = Array.isArray(step.StepProduct)
           ? step.StepProduct.length
           : 0;
         const categoryProductCount = Array.isArray((step as any).StepCategory)
@@ -312,7 +365,7 @@ export function useConfigureTemplatePricingController(
               0
             )
           : 0;
-        return totalProducts + legacyProducts + categoryProductCount;
+        return totalProducts + stepProductCount + categoryProductCount;
       }, 0) >= 3;
     const hasBundleVisibility = formState.bundleStatus === "active";
     const parentProductActive =
@@ -346,7 +399,7 @@ export function useConfigureTemplatePricingController(
         label: "Preview Bundle",
         description: "Check your bundle looks and works right",
         points: 10,
-        done: flow.hasPreview,
+        done: hasPreview,
       },
       {
         key: "visible",
@@ -365,7 +418,7 @@ export function useConfigureTemplatePricingController(
     ];
   }, [
     appEmbedEnabled,
-    flow.hasPreview,
+    hasPreview,
     formState.bundleStatus,
     loadedBundleProduct?.status,
     pricingState.discountEnabled,
@@ -376,7 +429,7 @@ export function useConfigureTemplatePricingController(
     (sum, item) => sum + (item.done ? item.points : 0),
     0
   );
-  Object.assign(flow, {
+  return {
     buildBundleUpsellConfig,
     buildVisibilityDisplayConfiguration,
     bundleQuantityOptionsEligible,
@@ -393,5 +446,5 @@ export function useConfigureTemplatePricingController(
     openSelectTemplateModal,
     readinessItems,
     readinessScore,
-  });
+  };
 }

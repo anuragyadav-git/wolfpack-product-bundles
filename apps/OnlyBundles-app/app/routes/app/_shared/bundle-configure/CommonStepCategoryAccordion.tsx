@@ -3,6 +3,10 @@ import React, { useRef, useState } from "react";
 import { moveArrayItem } from "../../../../lib/bundle-config/reorder-items";
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { translateAdmin } from "~/i18n/config";
+import {
+  SelectedCollectionsPanel,
+  SelectedProductsPanel,
+} from "./CommonStepCategorySelectedItems";
 
 export interface CommonStepCategoryAccordionAdapter {
   categoryActiveTabs: Record<string, number>;
@@ -254,11 +258,10 @@ export function CommonStepCategoryAccordion({
           className={styles.categoryActions}
           onClick={(event: React.MouseEvent) => event.stopPropagation()}
         >
-          <button
-            type="button"
-            className={styles.categoryIconButton}
-            aria-label={translateAdmin("adminAttributes.clone")}
-            title={translateAdmin("adminAttributes.clone")}
+          <s-button
+            variant="tertiary"
+            icon="duplicate"
+            accessibilityLabel={translateAdmin("adminAttributes.clone")}
             onClick={() => {
               stepsState.updateStepField(step.id, "StepCategory", [
                 ...stepCategories,
@@ -273,14 +276,12 @@ export function CommonStepCategoryAccordion({
               ]);
               markAsDirty();
             }}
-          >
-            <s-icon type="duplicate" />
-          </button>
-          <button
-            type="button"
-            className={styles.categoryDeleteIconButton}
-            aria-label={translateAdmin("dashboard.deleteModal.delete")}
-            title={translateAdmin("dashboard.deleteModal.delete")}
+          ></s-button>
+          <s-button
+            variant="tertiary"
+            tone="critical"
+            icon="delete"
+            accessibilityLabel={translateAdmin("dashboard.deleteModal.delete")}
             onClick={() => {
               const updated = stepCategories.filter(
                 (_category: any, index: number) => index !== catIndex
@@ -288,9 +289,7 @@ export function CommonStepCategoryAccordion({
               stepsState.updateStepField(step.id, "StepCategory", updated);
               markAsDirty();
             }}
-          >
-            <s-icon type="delete" />
-          </button>
+          ></s-button>
         </div>
         <button
           type="button"
@@ -311,39 +310,28 @@ export function CommonStepCategoryAccordion({
         <div className={styles.categoryAccordionBody}>
           {shouldRenderCategoryNameField && (
             <div className={styles.categoryFieldGroup}>
-              <label
-                className={styles.categoryFieldLabel}
-                htmlFor={`configure-category-name-${catKey}`}
-              >
-                {translateAdmin(
-                  "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.categoryName"
-                )}
-              </label>
               <div className={styles.catNameRow}>
                 <div className={styles.categoryInputStack}>
-                  <input
+                  <s-text-field
                     id={`configure-${categoryPath.replace(
                       /[^a-zA-Z0-9_-]/g,
                       "-"
                     )}-name`}
-                    className={styles.categoryNameInput}
-                    type="text"
+                    label={translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.categoryName"
+                    )}
                     value={cat.name ?? ""}
                     placeholder={`Category ${catIndex + 1}`}
-                    aria-label={translateAdmin("adminAttributes.categoryName")}
-                    aria-invalid={
-                      validationErrors[`${categoryPath}.name`]
-                        ? true
-                        : undefined
-                    }
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    error={validationErrors[`${categoryPath}.name`]}
+                    onInput={(event: Event) => {
+                      const value = (event.currentTarget as HTMLInputElement).value;
                       const updated = stepCategories.map(
                         (category: any, index: number) =>
                           index === catIndex
                             ? {
                                 ...category,
-                                name: event.target.value,
-                                title: event.target.value,
+                                name: value,
+                                title: value,
                               }
                             : category
                       );
@@ -356,11 +344,6 @@ export function CommonStepCategoryAccordion({
                       clearValidationError?.(`${categoryPath}.name`);
                     }}
                   />
-                  {validationErrors[`${categoryPath}.name`] && (
-                    <s-text tone="critical">
-                      {validationErrors[`${categoryPath}.name`]}
-                    </s-text>
-                  )}
                 </div>
                 <s-button
                   variant="secondary"
@@ -457,306 +440,6 @@ export function CommonStepCategoryAccordion({
   );
 }
 
-function SelectedProductsPanel({
-  products,
-  draggedProductIndex,
-  handlePickProducts,
-  hidePolarisModal,
-  modalId,
-  modalRef,
-  removeProduct,
-  reorderProduct,
-  setDraggedProductIndex,
-  showPolarisModal,
-  styles,
-}: {
-  products: any[];
-  draggedProductIndex: number | null;
-  handlePickProducts: () => Promise<void>;
-  hidePolarisModal: (modalRef: React.RefObject<any>) => void;
-  modalId: string;
-  modalRef: React.RefObject<any>;
-  removeProduct: (productId: string) => void;
-  reorderProduct: (fromIndex: number, toIndex: number) => void;
-  setDraggedProductIndex: (index: number | null) => void;
-  showPolarisModal: (modalRef: React.RefObject<any>) => void;
-  styles: Record<string, string>;
-}) {
-  return (
-    <div>
-      <p className={styles.categoryPickerHelp}>
-        {translateAdmin(
-          "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.productsSelectedHereWillBeDisplayedOnThisStep"
-        )}
-      </p>
-      <div className={styles.productActions}>
-        <s-button
-          variant="primary"
-          icon={getConfigureActionIcon("add-product")}
-          onClick={handlePickProducts}
-        >
-          {translateAdmin(
-            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
-          )}
-        </s-button>
-        {products.length > 0 && (
-          <button
-            type="button"
-            className={styles.categorySelectedItemsChip}
-            onClick={() => showPolarisModal(modalRef)}
-          >
-            {translateAdmin("adminDynamic.selectedCount", {
-              count: products.length,
-            })}
-          </button>
-        )}
-      </div>
-      <s-modal
-        id={modalId}
-        ref={modalRef}
-        heading={translateAdmin("adminAttributes.selectedProducts")}
-      >
-        {products.length > 0 ? (
-          <ul className={styles.selectedItemList}>
-            {products.map((product: any, index: number) => (
-              <li
-                key={product.id ?? index}
-                className={styles.categorySelectedItemRow}
-                onDragOver={(event: React.DragEvent) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                onDrop={(event: React.DragEvent) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  if (draggedProductIndex === null) return;
-                  reorderProduct(draggedProductIndex, index);
-                  setDraggedProductIndex(null);
-                }}
-              >
-                <button
-                  type="button"
-                  className={styles.categorySelectedItemDrag}
-                  aria-label={`Reorder ${product.title || "selected product"}`}
-                  draggable="true"
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                  }}
-                  onDragStart={(event: React.DragEvent) => {
-                    event.stopPropagation();
-                    setDraggedProductIndex(index);
-                  }}
-                  onDragEnd={(event: React.DragEvent) => {
-                    event.stopPropagation();
-                    setDraggedProductIndex(null);
-                  }}
-                >
-                  ::
-                </button>
-                <img
-                  className={styles.categorySelectedItemImage}
-                  src={getProductImageUrl(product)}
-                  alt={product.title || product.name || "Product"}
-                />
-                <span className={styles.categorySelectedItemName}>
-                  {product.title || product.name || "Unnamed Product"}
-                </span>
-                <button
-                  type="button"
-                  className={styles.categorySelectedItemRemove}
-                  aria-label={`Remove ${product.title || "selected product"}`}
-                  onClick={() => removeProduct(product.id)}
-                >
-                  <s-icon type="delete" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            {translateAdmin(
-              "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.noProductsSelectedForThisCategoryYet"
-            )}
-          </p>
-        )}
-        <s-button
-          slot="secondary-actions"
-          variant="secondary"
-          commandFor={modalId}
-          command="--hide"
-          onClick={() => hidePolarisModal(modalRef)}
-        >
-          {translateAdmin("dashboard.storefrontSetup.close")}
-        </s-button>
-        <s-button
-          slot="primary-action"
-          variant="primary"
-          icon={getConfigureActionIcon("add-product")}
-          onClick={handlePickProducts}
-        >
-          {translateAdmin(
-            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
-          )}
-        </s-button>
-      </s-modal>
-    </div>
-  );
-}
-
-function SelectedCollectionsPanel({
-  collections,
-  draggedCollectionIndex,
-  handlePickCollections,
-  hidePolarisModal,
-  modalId,
-  modalRef,
-  removeCollection,
-  reorderCollection,
-  setDraggedCollectionIndex,
-  showPolarisModal,
-  styles,
-}: {
-  collections: any[];
-  draggedCollectionIndex: number | null;
-  handlePickCollections: () => Promise<void>;
-  hidePolarisModal: (modalRef: React.RefObject<any>) => void;
-  modalId: string;
-  modalRef: React.RefObject<any>;
-  removeCollection: (collectionId: string) => void;
-  reorderCollection: (fromIndex: number, toIndex: number) => void;
-  setDraggedCollectionIndex: (index: number | null) => void;
-  showPolarisModal: (modalRef: React.RefObject<any>) => void;
-  styles: Record<string, string>;
-}) {
-  return (
-    <div>
-      <p className={styles.categoryPickerHelp}>
-        {translateAdmin(
-          "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.collectionsSelectedHereWillBeDisplayedOnThisStep"
-        )}
-      </p>
-      <div className={styles.productActions}>
-        <s-button
-          variant="primary"
-          icon={getConfigureActionIcon("add-collection")}
-          onClick={handlePickCollections}
-        >
-          {translateAdmin(
-            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addCollections"
-          )}
-        </s-button>
-        {collections.length > 0 && (
-          <button
-            type="button"
-            className={styles.categorySelectedItemsChip}
-            onClick={() => showPolarisModal(modalRef)}
-          >
-            {translateAdmin("adminDynamic.selectedCount", {
-              count: collections.length,
-            })}
-          </button>
-        )}
-      </div>
-      <s-modal
-        id={modalId}
-        ref={modalRef}
-        heading={translateAdmin("adminAttributes.selectedCollections")}
-      >
-        {collections.length > 0 ? (
-          <ul className={styles.selectedItemList}>
-            {collections.map((collection: any, index: number) => (
-              <li
-                key={collection.id ?? index}
-                className={styles.categorySelectedItemRow}
-                onDragOver={(event: React.DragEvent) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-                onDrop={(event: React.DragEvent) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  if (draggedCollectionIndex === null) return;
-                  reorderCollection(draggedCollectionIndex, index);
-                  setDraggedCollectionIndex(null);
-                }}
-              >
-                <button
-                  type="button"
-                  className={styles.categorySelectedItemDrag}
-                  aria-label={`Reorder ${
-                    collection.title || "selected collection"
-                  }`}
-                  draggable="true"
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                  }}
-                  onDragStart={(event: React.DragEvent) => {
-                    event.stopPropagation();
-                    setDraggedCollectionIndex(index);
-                  }}
-                  onDragEnd={(event: React.DragEvent) => {
-                    event.stopPropagation();
-                    setDraggedCollectionIndex(null);
-                  }}
-                >
-                  ::
-                </button>
-                <span className={styles.categorySelectedItemName}>
-                  {collection.title || "Unnamed Collection"}
-                </span>
-                <button
-                  type="button"
-                  className={styles.categorySelectedItemRemove}
-                  aria-label={`Remove ${
-                    collection.title || "selected collection"
-                  }`}
-                  onClick={() => removeCollection(collection.id)}
-                >
-                  <s-icon type="delete" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-            {translateAdmin(
-              "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.noCollectionsSelectedForThisCategoryYet"
-            )}
-          </p>
-        )}
-        <s-button
-          slot="secondary-actions"
-          variant="secondary"
-          commandFor={modalId}
-          command="--hide"
-          onClick={() => hidePolarisModal(modalRef)}
-        >
-          {translateAdmin("dashboard.storefrontSetup.close")}
-        </s-button>
-        <s-button
-          slot="primary-action"
-          variant="primary"
-          icon={getConfigureActionIcon("add-collection")}
-          onClick={handlePickCollections}
-        >
-          {translateAdmin(
-            "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addCollections"
-          )}
-        </s-button>
-      </s-modal>
-    </div>
-  );
-}
-
-function getProductImageUrl(product: any) {
-  return (
-    product.imageUrl ||
-    product.image?.url ||
-    product.images?.[0]?.url ||
-    product.images?.[0]?.originalSrc ||
-    "/bundle.avif"
-  );
-}
 
 function ChevronUpIcon() {
   return (

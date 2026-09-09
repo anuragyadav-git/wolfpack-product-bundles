@@ -42,12 +42,7 @@ interface SubscriptionValidationResponse {
 
 export function usePpbBaseConfigureState() {
   const loaderData = useLoaderData<LoaderData>();
-  const bundle =
-    loaderData.bundle as unknown as import("../../../hooks/useBundleConfigurationState").BundleData & {
-      loadingGif?: string | null;
-      shopifyProductHandle?: string;
-      bundleSubscriptionConfig?: unknown;
-    };
+  const bundle = loaderData.bundle;
   const {
     bundleProduct: loadedBundleProduct,
     shop,
@@ -55,7 +50,7 @@ export function usePpbBaseConfigureState() {
     blockHandle,
     shopLocales = [],
     shopCurrencyCode,
-  } = loaderData as any;
+  } = loaderData;
   const themeEditorUrl = buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed");
   const navigate = useNavigate();
   const shopify = useAppBridge();
@@ -96,7 +91,7 @@ export function usePpbBaseConfigureState() {
   );
   const configState = useBundleConfigurationState({
     bundle,
-    bundleProduct: loadedBundleProduct,
+    bundleProduct: loadedBundleProduct ?? null,
     shopify,
     shopCurrencyCode,
   });

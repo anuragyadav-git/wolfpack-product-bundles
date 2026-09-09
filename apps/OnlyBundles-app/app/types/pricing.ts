@@ -32,20 +32,12 @@ export enum DiscountMethod {
 /**
  * Condition types - what triggers the discount
  */
-export enum ConditionType {
+enum ConditionType {
   QUANTITY = 'quantity',  // Based on number of items (e.g., >= 3 items)
   AMOUNT = 'amount'       // Based on cart subtotal (e.g., >= ₹500)
 }
 
-/**
- * Condition operators — used for step setup UI only (not pricing rules).
- * Pricing rules always use implicit ≥ (greater than or equal).
- */
-export enum ConditionOperator {
-  GTE = 'gte',  // Greater than or equal (≥)
-  LTE = 'lte',  // Less than or equal (≤)
-  EQ = 'eq'     // Equal (=)
-}
+export type PricingConditionOperator = 'gte' | 'gt' | 'lte' | 'lt' | 'eq';
 
 /**
  * Flat pricing rule — condition and discount fields are top-level.
@@ -55,6 +47,7 @@ export interface PricingRule {
   id: string;
   // Condition (flat)
   conditionType: 'quantity' | 'amount';  // Trigger type
+  conditionOperator?: PricingConditionOperator; // Defaults to gte at the runtime boundary
   conditionValue: number;                  // Threshold: qty count or amount in CENTS
   // Discount (flat)
   discountValue: number;                   // % (0-100), cents for fixed, cents for bundle price
@@ -115,9 +108,9 @@ export interface PricingRuleTierText {
  * - {{conditionText}}: "2 items" or "₹50"
  * - {{discountText}}: "20% off" or "₹10 off" or "bundle for ₹100"
  * - {{discountConditionDiff}}: remaining qty/amount to unlock discount
- * - {{discountValue}}: numerical discount reward value
- * - {{discountValueUnit}}: symbol for discount reward (% or currency)
- * - {{discountUnit}}: currency symbol for amount-based rules
+ * - {{discountValue}}: percentage number or localized fixed-money string
+ * - {{discountValueUnit}}: "%" for percentage rewards; empty for fixed money
+ * - {{discountUnit}}: empty for localized amount-based progress values
  * - {{discountedItems}}: qty of items discounted/free in BXY
  */
 export interface PricingMessages {
@@ -154,6 +147,13 @@ export function validatePricingRule(rule: any): rule is PricingRule {
   }
 
   if (rule.conditionType !== 'quantity' && rule.conditionType !== 'amount') {
+    return false;
+  }
+
+  if (
+    rule.conditionOperator !== undefined &&
+    !['gte', 'gt', 'lte', 'lt', 'eq'].includes(rule.conditionOperator)
+  ) {
     return false;
   }
 
@@ -275,59 +275,6 @@ export function createNewPricingRule(method: DiscountMethod): PricingRule {
     };
   }
   return base;
-}
-
-/**
- * Helper: Get human-readable operator text
- */
-export function getOperatorText(operator: ConditionOperator): string {
-  const operatorMap: Record<ConditionOperator, string> = {
-    [ConditionOperator.GTE]: 'at least (≥)',
-    [ConditionOperator.LTE]: 'at most (≤)',
-    [ConditionOperator.EQ]: 'exactly (=)'
-  };
-
-  return operatorMap[operator] || operator;
-}
-
-/**
- * Helper: Get human-readable discount method text
- */
-export function getDiscountMethodText(method: DiscountMethod): string {
-  const methodMap: Record<DiscountMethod, string> = {
-    [DiscountMethod.PERCENTAGE_OFF]: 'Percentage Off',
-    [DiscountMethod.FIXED_AMOUNT_OFF]: 'Fixed Amount Off',
-    [DiscountMethod.FIXED_BUNDLE_PRICE]: 'Fixed Bundle Price',
-    [DiscountMethod.BUY_X_GET_Y]: 'Buy X, Get Y'
-  };
-
-  return methodMap[method] || method;
-}
-
-/**
- * Helper: Generate human-readable preview of a pricing rule (flat shape)
- */
-export function generateRulePreview(
-  rule: PricingRule,
-  method: DiscountMethod,
-  currencySymbol: string = '₹'
-): string {
-  const conditionText = rule.conditionType === 'quantity'
-    ? `${rule.conditionValue} items`
-    : `${currencySymbol}${(rule.conditionValue / 100).toFixed(2)}`;
-
-  let discountText: string;
-  if (method === DiscountMethod.PERCENTAGE_OFF) {
-    discountText = `${rule.discountValue}% off`;
-  } else if (method === DiscountMethod.FIXED_AMOUNT_OFF) {
-    discountText = `${currencySymbol}${(rule.discountValue / 100).toFixed(2)} off`;
-  } else if (method === DiscountMethod.BUY_X_GET_Y) {
-    discountText = `buy ${rule.customerBuys ?? rule.conditionValue} get ${rule.customerGets ?? 1} free`;
-  } else {
-    discountText = `bundle for ${currencySymbol}${(rule.discountValue / 100).toFixed(2)}`;
-  }
-
-  return `When customer has at least ${conditionText}, apply ${discountText}`;
 }
 
 /**

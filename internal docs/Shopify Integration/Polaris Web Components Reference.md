@@ -5,7 +5,7 @@ title: Polaris App Home Web Components Reference
 type: reference
 status: authoritative
 summary: Canonical source for Polaris web component usage in the Wolfpack admin UI, with the Shopify App Home web components documentation as the source of truth.
-last_audited: 2026-08-27
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -14,6 +14,7 @@ systems:
   - admin-ui
 source_paths:
   - internal docs/Shopify Integration/Polaris Web Components Reference.md
+  - app/routes/app/app.attribution/AttributionDateRangeControls.tsx
 related_docs:
   - internal docs/Architecture/Diagrams/Admin UI Frontend Architecture.md
   - internal docs/Architecture/Admin Configure Page.md
@@ -45,6 +46,11 @@ When implementing or auditing admin-facing UI in this repo, treat that documenta
 - Prefer Polaris web components (`s-*`) for all Admin UI before custom HTML.
 - Use component props from the official App Home reference as canonical for rendering behavior.
 - For status/feedback, treat `tone`, `color`, and `variant` values from the reference as authoritative and map them directly to components instead of inventing alternative visual tokens.
+- Use `commandFor` with `s-popover`, `s-menu`, and `s-modal` so Shopify owns
+  opening, dismissal, focus, and keyboard behavior. Do not add document-level
+  outside-click listeners for these overlays. Interactive filter or preset
+  pills use `s-clickable-chip`; route state continues to own only the selected
+  value and resulting navigation or mutation.
 
 ## Alert decision rules
 

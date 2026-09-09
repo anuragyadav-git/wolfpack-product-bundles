@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Await, useLoaderData, useNavigate } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 import { navigateBackOrFallback } from "../../../lib/navigation";
-import type { loader } from "../app.attribution";
+import type { loader } from "./loader.server";
 import styles from "./AttributionRouteShell.module.css";
 import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
 import {

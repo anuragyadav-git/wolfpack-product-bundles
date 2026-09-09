@@ -1,38 +1,73 @@
-import type { ConfigureBundleFlowContext } from "./useConfigureBundleFlow";
+import type { BundleStatus } from "../../../constants/bundle";
+import type {
+  NormalizedPricingDisplayOptions,
+  serializePricingDisplayOptions,
+} from "../../../lib/pricing-display-options";
+import type {
+  DiscountMethod,
+  PricingRule,
+  PricingRuleTierText,
+} from "../../../types/pricing";
 import { serializeFpbSaveSteps } from "./fpb-save-transport";
 
+interface ConfigureHiddenInputsProps {
+  bundleDescription: string;
+  bundleName: string;
+  bundleProduct: unknown;
+  bundleStatus: BundleStatus;
+  conditions: Record<string, unknown[]>;
+  discountMessagingMultiLanguageEnabled: boolean;
+  normalizedPricingDisplayOptions: NormalizedPricingDisplayOptions;
+  normalizedRuleMessages: Record<string, unknown>;
+  pricing: {
+    discountEnabled: boolean;
+    discountMessagingEnabled: boolean;
+    discountRules: PricingRule[];
+    discountType: DiscountMethod;
+    showDiscountProgressBar: boolean;
+    showFooter: boolean;
+  };
+  ruleMessagesByLocale: Record<string, unknown>;
+  selectedCollections: Record<string, unknown[]>;
+  serializePricingDisplayOptions: typeof serializePricingDisplayOptions;
+  steps: unknown[];
+  templateName: string;
+  tierTextByLocaleByRuleId: Record<
+    string,
+    Record<string, PricingRuleTierText>
+  >;
+  tierTextByRuleId: Record<string, PricingRuleTierText>;
+}
+
 export function ConfigureHiddenInputs({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    bundleProduct,
-    conditionsState,
-    discountMessagingMultiLanguageEnabled,
-    formState,
-    normalizedPricingDisplayOptions,
-    normalizedRuleMessages,
-    pricingState,
-    ruleMessages,
-    ruleMessagesByLocale,
-    selectedCollections,
-    serializePricingDisplayOptions,
-    stepsState,
-    tierTextByLocaleByRuleId,
-    tierTextByRuleId,
-  } = flow;
+  bundleDescription,
+  bundleName,
+  bundleProduct,
+  bundleStatus,
+  conditions,
+  discountMessagingMultiLanguageEnabled,
+  normalizedPricingDisplayOptions,
+  normalizedRuleMessages,
+  pricing,
+  ruleMessagesByLocale,
+  selectedCollections,
+  serializePricingDisplayOptions,
+  steps,
+  templateName,
+  tierTextByLocaleByRuleId,
+  tierTextByRuleId,
+}: ConfigureHiddenInputsProps) {
 
   return (
     <>
-      <input type="hidden" name="bundleName" value={formState.bundleName} />
+      <input type="hidden" name="bundleName" value={bundleName} />
       <input
         type="hidden"
         name="bundleDescription"
-        value={formState.bundleDescription}
+        value={bundleDescription}
       />
-      <input type="hidden" name="templateName" value={formState.templateName} />
-      <input type="hidden" name="bundleStatus" value={formState.bundleStatus} />
+      <input type="hidden" name="templateName" value={templateName} />
+      <input type="hidden" name="bundleStatus" value={bundleStatus} />
       <input
         type="hidden"
         name="bundleProduct"
@@ -42,23 +77,23 @@ export function ConfigureHiddenInputs({
         type="hidden"
         name="stepsData"
         value={JSON.stringify(
-          serializeFpbSaveSteps(stepsState.steps, selectedCollections)
+          serializeFpbSaveSteps(steps, selectedCollections)
         )}
       />
       <input
         type="hidden"
         name="discountData"
         value={JSON.stringify({
-          discountEnabled: pricingState.discountEnabled,
-          discountType: pricingState.discountType,
-          discountRules: pricingState.discountRules,
-          showFooter: pricingState.showFooter,
-          showDiscountProgressBar: pricingState.showDiscountProgressBar,
-          discountMessagingEnabled: pricingState.discountMessagingEnabled,
+          discountEnabled: pricing.discountEnabled,
+          discountType: pricing.discountType,
+          discountRules: pricing.discountRules,
+          showFooter: pricing.showFooter,
+          showDiscountProgressBar: pricing.showDiscountProgressBar,
+          discountMessagingEnabled: pricing.discountMessagingEnabled,
           ruleMessages: normalizedRuleMessages,
           pricingDisplayOptions: serializePricingDisplayOptions({
             existingMessages: {
-              showDiscountMessaging: pricingState.discountMessagingEnabled,
+              showDiscountMessaging: pricing.discountMessagingEnabled,
               ruleMessages: normalizedRuleMessages,
             },
             options: normalizedPricingDisplayOptions,
@@ -78,7 +113,7 @@ export function ConfigureHiddenInputs({
       <input
         type="hidden"
         name="stepConditions"
-        value={JSON.stringify(conditionsState.stepConditions)}
+        value={JSON.stringify(conditions)}
       />
     </>
   );

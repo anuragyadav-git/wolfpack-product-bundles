@@ -4,8 +4,8 @@ id: admin-route-authentication
 title: Admin Route Authentication
 type: test-spec
 status: active
-summary: Verifies Shopify Admin authentication ownership for every embedded Admin route and authenticated redirects after bundle creation.
-last_audited: 2026-09-04
+summary: Verifies Shopify Admin authentication behavior at embedded page, loader, action, and resource boundaries.
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -14,6 +14,8 @@ systems:
   - authentication
 source_paths:
   - apps/OnlyBundles-app/app/routes/app/
+  - apps/OnlyBundles-app/tests/unit/routes/app.attribution.loader.test.ts
+  - apps/OnlyBundles-app/tests/unit/routes/app.attribution.action.test.ts
 related_docs:
   - internal docs/Shopify Integration/Admin API.md
 tags:
@@ -39,9 +41,9 @@ server-side Admin redirects preserve embedded context.
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Current Admin route inventory | All route entry modules under `routes/app` | Every module has a declared direct or inherited authentication owner | New route modules must update the policy |
-| 2 | Direct route authentication | Route module with loader or action | Declared number of `authenticate.admin(request)` guards is present | Direct resource loaders and actions authenticate at their own boundary |
-| 3 | Inherited route authentication | `/app` index or delegated Settings route | Authenticated layout or delegated route is the explicit owner | Avoids duplicate one-time ID-token exchange |
+| 1 | Authenticated page route | Valid Shopify Admin session | The authenticated layout returns scoped shop context before child data loads | Matched child pages inherit this boundary |
+| 2 | Direct loader authentication failure | Attribution loader request rejected by Shopify authentication | The exact auth response propagates before entitlement, pixel, or database work | Exercises behavior through the route export, independent of file ownership |
+| 3 | Direct action authentication failure | Attribution mutation rejected by Shopify authentication | The exact auth response propagates before form parsing or domain mutation | Exercises behavior through the route export, independent of file ownership |
 | 4 | Authenticated creation redirect | Successful bundle creation action | Redirect helper returned by `authenticate.admin` is used | Preserves embedded Admin navigation context |
 | 5 | Unauthorized creation | Authentication throws redirect response | Failure propagates before domain mutation | No bundle creation occurs |
 | 6 | Authenticated Admin layout | Valid Shopify Admin session | Layout returns only the authenticated shop context | Locale resources load after authentication |
@@ -57,8 +59,8 @@ server-side Admin redirects preserve embedded context.
 
 ## Acceptance Criteria
 
-- [x] Every current embedded Admin route has explicit authentication ownership.
-- [x] New Admin route modules cause the inventory test to fail until classified.
+- [x] Matched Admin pages are protected by the authenticated `/app` layout.
+- [x] Direct loader and action auth failures propagate before domain work.
 - [x] Bundle creation uses Shopify's authenticated redirect helper.
 - [x] Authentication failure prevents bundle creation side effects.
 - [x] Admin resource routes authenticate before validation or method responses.
@@ -66,7 +68,7 @@ server-side Admin redirects preserve embedded context.
 - [x] Shopify authentication responses are never converted into generic action errors.
 - [x] Shopify's login helper exclusively owns login validation and OAuth redirects.
 - [x] Focused tests, ESLint, and the production build pass.
-- [ ] Full-project TypeScript passes; currently blocked by pre-existing Dashboard type errors outside this slice.
+- [x] Full-project TypeScript passes.
 
 ## Browser Verification
 

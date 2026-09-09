@@ -14,6 +14,7 @@ interface ConditionRule {
   type: string;
   operator: string;
   value: string;
+  autoNext?: boolean | string;
 }
 
 interface UseBundleConditionsProps {

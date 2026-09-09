@@ -1,25 +1,37 @@
-import React from "react";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
+import { FilePicker } from "../../../components/shared/FilePicker";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbImagesGifsSection() {
-  const {
-    activeAssetTabIndex,
-    activeSection,
-    FilePicker,
-    loadingGif,
-    markAsDirty,
-    productPageBundleStyles,
-    setActiveAssetTabIndex,
-    setLoadingGif,
-    stepsState,
-  } = usePpbConfigureContext();
+export type PpbImagesGifsSectionProps = Pick<
+  PpbConfigureFlow,
+  | "activeAssetTabIndex"
+  | "activeSection"
+  | "loadingGif"
+  | "markAsDirty"
+  | "setActiveAssetTabIndex"
+  | "setLoadingGif"
+  | "stepsState"
+>;
+
+function getStepBannerImageUrl(step: Record<string, unknown>) {
+  return typeof step.bannerImageUrl === "string" ? step.bannerImageUrl : null;
+}
+
+export function PpbImagesGifsSection({
+  activeAssetTabIndex,
+  activeSection,
+  loadingGif,
+  markAsDirty,
+  setActiveAssetTabIndex,
+  setLoadingGif,
+  stepsState,
+}: PpbImagesGifsSectionProps) {
+  if (activeSection !== "images_gifs") return null;
 
   return (
-    <>
-      {activeSection === "images_gifs" && (
-        <div data-tour-target="ppb-design-settings">
+    <div data-tour-target="ppb-design-settings">
           <s-stack direction="block" gap="base">
             <div
               style={{
@@ -145,7 +157,7 @@ export function PpbImagesGifsSection() {
                               label={translateAdmin(
                                 "adminAttributes.chooseBannerImage"
                               )}
-                              value={(step as any).bannerImageUrl ?? null}
+                              value={getStepBannerImageUrl(step)}
                               onChange={(url) => {
                                 stepsState.updateStepField(
                                   step.id,
@@ -279,7 +291,13 @@ export function PpbImagesGifsSection() {
                     }
                   >
                     {loadingGif ? (
-                      <img src={loadingGif} alt="" />
+                      <s-image
+                        src={loadingGif}
+                        alt=""
+                        accessibilityRole="presentation"
+                        inlineSize="auto"
+                        objectFit="contain"
+                      />
                     ) : (
                       <span
                         className={
@@ -293,8 +311,6 @@ export function PpbImagesGifsSection() {
               </s-stack>
             </s-section>
           </s-stack>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

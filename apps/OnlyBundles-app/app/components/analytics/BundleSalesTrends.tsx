@@ -1,7 +1,7 @@
-import type { BundleSalesTrendPoint } from "../../lib/analytics";
+import type { BundleSalesTrendPoint } from "../../lib/analytics/bundle-commerce-metrics";
 import { translateAdmin } from "~/i18n/config";
 
-export interface BundleSalesTrendsProps {
+interface BundleSalesTrendsProps {
   trend: BundleSalesTrendPoint[];
   formatMoney: (cents: number) => string;
 }

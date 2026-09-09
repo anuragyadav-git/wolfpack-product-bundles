@@ -326,7 +326,7 @@ describe("Settings Design preview model", () => {
     expect(DESIGN_PREVIEW_FIXTURE.products.every((product) => (
       // Fixture paths are constrained by the assertion above to public root PNGs.
       // eslint-disable-next-line security/detect-non-literal-fs-filename
-      existsSync(join(process.cwd(), "public", product.imageUrl.slice(1)))
+      existsSync(join(__dirname, "../../../public", product.imageUrl.slice(1)))
     ))).toBe(true);
     expect(DESIGN_PREVIEW_FIXTURE.validationMessage).toBeTruthy();
     expect(DESIGN_PREVIEW_FIXTURE.upsell).toBeTruthy();

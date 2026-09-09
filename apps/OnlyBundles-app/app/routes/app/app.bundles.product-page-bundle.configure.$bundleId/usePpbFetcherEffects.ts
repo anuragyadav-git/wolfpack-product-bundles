@@ -3,13 +3,18 @@ import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
-import { removeLegacyPpbEmbedTextOverrides } from "../../../lib/ppb-bundle-embed";
 import { i18n } from "../../../i18n/config";
 import {
   isPersistentAdminOperationError,
   showAdminTransientErrorToast,
 } from "../../../lib/admin-alert-feedback";
 import { getEntitlementAlertCopyKeys } from "../../../lib/subscriptions/alerts";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type { usePpbVisibilityState } from "./usePpbVisibilityState";
+import type { usePpbBundleSettingsState } from "./usePpbBundleSettingsState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
+import type { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
+import type { usePpbSaveHandlers } from "./usePpbSaveHandlers";
 
 export function usePpbFetcherEffects({
   base,
@@ -19,12 +24,61 @@ export function usePpbFetcherEffects({
   sharedHandlers,
   saveHandlers,
 }: {
-  base: any;
-  visibility: any;
-  settings: any;
-  templateState: any;
-  sharedHandlers: any;
-  saveHandlers: any;
+  base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
+    | "allowQuantityChanges" | "appEmbedEnabled" | "cartRedirectToCheckout"
+    | "clearOperationAlert" | "fetcher" | "lastProcessedFetcherDataRef" | "loadingGif"
+    | "markAsSaved" | "markSpecificLinkOfferSaved" | "openPageSelectionModal"
+    | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
+    | "originalLoadingGifRef" | "originalSdkModeRef" | "originalShowProductPricesRef"
+    | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
+    | "originalTextOverridesRef" | "revalidator" | "sdkMode" | "setAvailablePages"
+    | "setIsLoadingPages" | "setOperationAlert" | "shopify" | "showProductPrices"
+    | "subscriptionConfig" | "textOverrides" | "textOverridesByLocale"
+  >;
+  visibility: Pick<ReturnType<typeof usePpbVisibilityState>,
+    | "autoSelectBrowsedProduct" | "bundleEmbedAddBrowsedProduct"
+    | "bundleEmbedCollectionsSelectedData" | "bundleEmbedDisplayOn" | "bundleEmbedEnabled"
+    | "bundleEmbedMultiLangText" | "bundleEmbedSelectedProducts"
+    | "bundleEmbedSpecificCollectionPages" | "bundleEmbedSpecificProductPages"
+    | "bundleEmbedSubTitle" | "bundleEmbedTitle" | "originalAutoSelectBrowsedProductRef"
+    | "originalBundleEmbedAddBrowsedProductRef" | "originalBundleEmbedCollectionsSelectedDataRef"
+    | "originalBundleEmbedDisplayOnRef" | "originalBundleEmbedEnabledRef"
+    | "originalBundleEmbedMultiLangTextRef" | "originalBundleEmbedSelectedProductsRef"
+    | "originalBundleEmbedSpecificCollectionPagesRef" | "originalBundleEmbedSpecificProductPagesRef"
+    | "originalBundleEmbedSubTitleRef" | "originalBundleEmbedTitleRef"
+    | "originalUpsellWidgetButtonTextRef" | "originalUpsellWidgetDescriptionRef"
+    | "originalUpsellWidgetDisplayModeRef" | "originalUpsellWidgetDisplayOnRef"
+    | "originalUpsellWidgetEnabledRef" | "originalUpsellWidgetImageUrlRef"
+    | "originalUpsellWidgetTitleRef" | "upsellWidgetButtonText" | "upsellWidgetDescription"
+    | "upsellWidgetDisplayMode" | "upsellWidgetDisplayOn" | "upsellWidgetEnabled"
+    | "upsellWidgetImageUrl" | "upsellWidgetTitle"
+  >;
+  settings: Pick<ReturnType<typeof usePpbBundleSettingsState>,
+    | "countdownEnabled" | "countdownExpiredMessage" | "countdownExpiryAction"
+    | "countdownLayout" | "countdownPosition" | "countdownTitle" | "defaultProductsData"
+    | "lowStockAlertEnabled" | "lowStockAlertMessage" | "lowStockAlertThreshold"
+    | "originalCountdownEnabledRef" | "originalCountdownExpiredMessageRef"
+    | "originalCountdownExpiryActionRef" | "originalCountdownLayoutRef"
+    | "originalCountdownPositionRef" | "originalCountdownTitleRef"
+    | "originalDefaultProductsDataRef" | "originalLowStockAlertEnabledRef"
+    | "originalLowStockAlertMessageRef" | "originalLowStockAlertThresholdRef"
+    | "originalStickyAddToCartActionRef" | "originalStickyAddToCartEnabledRef"
+    | "originalStickyAddToCartShowDesktopRef" | "originalStickyAddToCartShowMobileRef"
+    | "stickyAddToCartAction" | "stickyAddToCartEnabled" | "stickyAddToCartShowDesktop"
+    | "stickyAddToCartShowMobile"
+  >;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>,
+    | "lastTemplateRequestRef" | "lastTemplateResponseRef" | "pendingPlacementModalRef"
+    | "setBundleDesignPresetId" | "setBundleDesignTemplate"
+    | "setIsPreparingPlacementTemplates" | "setTemplateModalStep" | "setTemplateSaveError"
+    | "templateFetcher" | "templateSubmissionStartedRef"
+  >;
+  sharedHandlers: Pick<ReturnType<typeof useSharedBundleHandlers>,
+    "enhanceTemplateListWithUserSelection"
+  >;
+  saveHandlers: Pick<ReturnType<typeof usePpbSaveHandlers>,
+    "clearValidationErrors" | "setServerFieldErrors"
+  >;
 }) {
   const { fetcher } = base;
   const lastFetcherIntentRef = useRef<string | null>(null);
@@ -60,23 +114,9 @@ export function usePpbFetcherEffects({
           base.originalSdkModeRef.current = base.sdkMode;
           base.originalSubscriptionConfigRef.current =
             base.subscriptionConfig;
-          const canonicalTextOverrides =
-            removeLegacyPpbEmbedTextOverrides(base.textOverrides);
-          const canonicalTextOverridesByLocale = Object.fromEntries(
-            Object.entries(base.textOverridesByLocale).map(
-              ([locale, values]: any) => [
-                locale,
-                removeLegacyPpbEmbedTextOverrides(
-                  values as Record<string, string>,
-                ),
-              ],
-            ),
-          );
-          base.setTextOverrides(canonicalTextOverrides);
-          base.setTextOverridesByLocale(canonicalTextOverridesByLocale);
-          base.originalTextOverridesRef.current = canonicalTextOverrides;
+          base.originalTextOverridesRef.current = base.textOverrides;
           base.originalTextOverridesByLocaleRef.current =
-            canonicalTextOverridesByLocale;
+            base.textOverridesByLocale;
           settings.originalDefaultProductsDataRef.current =
             settings.defaultProductsData;
           settings.originalLowStockAlertEnabledRef.current =

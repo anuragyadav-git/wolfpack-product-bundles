@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 
-export interface UpgradeConfirmationModalProps {
+interface UpgradeConfirmationModalProps {
   open: boolean;
   isLoading: boolean;
   onConfirm: () => void;

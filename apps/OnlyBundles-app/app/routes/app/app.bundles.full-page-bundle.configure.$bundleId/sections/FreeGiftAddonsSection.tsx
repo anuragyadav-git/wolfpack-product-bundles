@@ -1,23 +1,27 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { ComponentProps } from "react";
 import { FpbAddonFooterMessaging } from "./FreeGiftAddonFooterMessaging";
 import { FpbAddonProductsCard } from "./FreeGiftAddonProductsCard";
 import { FpbAddonReferenceStepCard } from "./FreeGiftAddonReferenceStepCard";
 
 export function FreeGiftAddonsSection({
-  flow,
+  activeSection,
+  referenceStep,
+  products,
+  footerMessaging,
 }: {
-  flow: ConfigureBundleFlowContext;
+  activeSection: string;
+  referenceStep: ComponentProps<typeof FpbAddonReferenceStepCard>;
+  products: ComponentProps<typeof FpbAddonProductsCard>;
+  footerMessaging: ComponentProps<typeof FpbAddonFooterMessaging>;
 }) {
-  const { activeSection } = flow;
-
   if (activeSection !== "free_gift_addons") return null;
 
   return (
     <div data-tour-target="fpb-free-gift-addons">
       <s-stack direction="block" gap="small-100">
-        <FpbAddonReferenceStepCard flow={flow} />
-        <FpbAddonProductsCard flow={flow} />
-        <FpbAddonFooterMessaging flow={flow} />
+        <FpbAddonReferenceStepCard {...referenceStep} />
+        <FpbAddonProductsCard {...products} />
+        <FpbAddonFooterMessaging {...footerMessaging} />
       </s-stack>
     </div>
   );

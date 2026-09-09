@@ -37,8 +37,8 @@ import { getCurrentShopifyAppIdentity } from "../../services/subscriptions/shopi
 // Import shared billing components
 import {
   UpgradeSuccessBanner,
-  SubscriptionErrorBanner,
-} from "../../components/billing";
+} from "../../components/billing/UpgradeSuccessBanner";
+import { SubscriptionErrorBanner } from "../../components/billing/SubscriptionErrorBanner";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { session } = await authenticate.admin(request);

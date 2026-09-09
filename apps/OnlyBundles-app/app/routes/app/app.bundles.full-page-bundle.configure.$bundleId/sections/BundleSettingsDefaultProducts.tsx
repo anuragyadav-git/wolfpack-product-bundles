@@ -1,23 +1,31 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { DefaultProductDiscountTipBanner } from "../../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
+import {
+  buildDefaultProductEntryFromPicker,
+  type DefaultProductsData,
+} from "../../../../lib/bundle-config/default-products";
 import { translateAdmin } from "~/i18n/config";
 
+export interface FpbDefaultProductsSettingsProps {
+  clearValidationError: (path: string) => void;
+  defaultProductsData: DefaultProductsData;
+  markAsDirty: () => void;
+  setDefaultProductsData: (
+    update: (previous: DefaultProductsData) => DefaultProductsData,
+  ) => void;
+  validationErrors?: Record<string, string | undefined>;
+}
+
 export function FpbDefaultProductsSettings({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    buildDefaultProductEntryFromPicker,
-    defaultProductsData,
-    markAsDirty,
-    setDefaultProductsData,
-    shopify,
-    validationErrors = {},
-    clearValidationError,
-  } = flow;
+  clearValidationError,
+  defaultProductsData,
+  markAsDirty,
+  setDefaultProductsData,
+  validationErrors = {},
+}: FpbDefaultProductsSettingsProps) {
+  const shopify = useAppBridge();
 
   return (
     <>
@@ -36,7 +44,7 @@ export function FpbDefaultProductsSettings({
             .filter(Boolean)
             .map((id: string) => ({ id }));
           const handleDefaultProductPicker = async () => {
-            const picked = await (shopify as any).resourcePicker({
+            const picked = await shopify.resourcePicker({
               type: "product",
               multiple: true,
               action: "select",
@@ -58,7 +66,7 @@ export function FpbDefaultProductsSettings({
                   ReturnType<typeof buildDefaultProductEntryFromPicker>
                 > => Boolean(p)
               );
-            setDefaultProductsData((prev: any) => ({
+            setDefaultProductsData((prev) => ({
               isDefaultProductsEnabled: true,
               defaultProductsTitle: prev.defaultProductsTitle ?? "",
               products: defaultProducts,
@@ -87,7 +95,7 @@ export function FpbDefaultProductsSettings({
                   checked={defaultProductsEnabled || undefined}
                   onChange={(e) => {
                     const checked = (e.target as HTMLInputElement).checked;
-                    setDefaultProductsData((prev: any) => ({
+                    setDefaultProductsData((prev) => ({
                       ...prev,
                       isDefaultProductsEnabled: checked,
                       defaultProductsTitle: prev.defaultProductsTitle ?? "",
@@ -113,7 +121,7 @@ export function FpbDefaultProductsSettings({
                     disabled={!defaultProductsEnabled || undefined}
                     onInput={(e) => {
                       const value = (e.target as HTMLInputElement).value;
-                      setDefaultProductsData((prev: any) => ({
+                      setDefaultProductsData((prev) => ({
                         ...prev,
                         defaultProductsTitle: value,
                       }));

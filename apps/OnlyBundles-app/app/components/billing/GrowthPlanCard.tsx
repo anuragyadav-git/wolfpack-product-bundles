@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 
-export interface GrowthPlanCardProps {
+interface GrowthPlanCardProps {
   isCurrentPlan: boolean;
   isUpgrading: boolean;
   onSelectPlan: () => void;
@@ -110,7 +110,6 @@ export function GrowthPlanCard({
                   disabled={(isHydrated && isCurrentPlan) || undefined}
                   loading={isUpgrading || undefined}
                   onClick={isCurrentPlan ? undefined : onSelectPlan}
-                  inlineSize="fill"
                 >
                   {isCurrentPlan
                     ? t("billing.cards.currentPlan")

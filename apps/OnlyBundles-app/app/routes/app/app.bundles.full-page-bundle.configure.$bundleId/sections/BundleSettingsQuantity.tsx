@@ -1,37 +1,50 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { areFpbProductSlotsAvailable } from "../../../../lib/fpb-product-slots-availability";
 import { translateAdmin } from "~/i18n/config";
+import { FilePicker } from "../../../../components/shared/FilePicker";
+import { QuestionHelpTooltip } from "../SmallComponents";
+
+export interface FpbQuantitySettingsProps {
+  activeTabIndex: number;
+  clearValidationError: (path: string) => void;
+  maxQtyPerProduct: string;
+  markAsDirty: () => void;
+  productSlotIconUrl: string;
+  productSlotsEnabled: boolean;
+  quantityValidationEnabled: boolean;
+  setMaxQtyPerProduct: (value: string) => void;
+  setProductSlotIconUrl: (url: string) => void;
+  setProductSlotsEnabled: (enabled: boolean) => void;
+  setQuantityValidationEnabled: (enabled: boolean) => void;
+  setShowSlotIconPicker: (open: boolean) => void;
+  showSlotIconPicker: boolean;
+  stepConditions: unknown;
+  steps: unknown[];
+  validationErrors?: Record<string, string | undefined>;
+}
 
 export function FpbQuantitySettings({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    activeTabIndex,
-    conditionsState,
-    FilePicker,
-    markAsDirty,
-    maxQtyPerProduct,
-    productSlotIconUrl,
-    productSlotsEnabled,
-    quantityValidationEnabled,
-    QuestionHelpTooltip,
-    setMaxQtyPerProduct,
-    setProductSlotIconUrl,
-    setProductSlotsEnabled,
-    setQuantityValidationEnabled,
-    setShowSlotIconPicker,
-    showSlotIconPicker,
-    stepsState,
-    validationErrors = {},
-    clearValidationError,
-  } = flow;
-  const settingsStep = stepsState.steps[activeTabIndex] || stepsState.steps[0];
+  activeTabIndex,
+  clearValidationError,
+  maxQtyPerProduct,
+  markAsDirty,
+  productSlotIconUrl,
+  productSlotsEnabled,
+  quantityValidationEnabled,
+  setMaxQtyPerProduct,
+  setProductSlotIconUrl,
+  setProductSlotsEnabled,
+  setQuantityValidationEnabled,
+  setShowSlotIconPicker,
+  showSlotIconPicker,
+  stepConditions,
+  steps,
+  validationErrors = {},
+}: FpbQuantitySettingsProps) {
+  const hasSettingsStep = Boolean(steps[activeTabIndex] || steps[0]);
   const productSlotsAvailable = areFpbProductSlotsAvailable(
-    stepsState.steps,
-    conditionsState.stepConditions
+    steps,
+    stepConditions
   );
 
   return (
@@ -85,7 +98,7 @@ export function FpbQuantitySettings({
             />
           </DisabledConfigurationRegion>
           {/* Product Slots sub-section */}
-          {settingsStep && (
+          {hasSettingsStep && (
             <>
               <s-divider />
               <s-stack direction="block" gap="small-400">
@@ -163,15 +176,12 @@ export function FpbQuantitySettings({
                 }}
               >
                 {productSlotIconUrl ? (
-                  <img
+                  <s-image
                     src={productSlotIconUrl}
                     alt=""
-                    style={{
-                      display: "block",
-                      width: 56,
-                      height: 56,
-                      objectFit: "contain",
-                    }}
+                    accessibilityRole="presentation"
+                    objectFit="contain"
+                    aspectRatio="1/1"
                   />
                 ) : (
                   <span
@@ -229,29 +239,19 @@ export function FpbQuantitySettings({
                       "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.changeIcon"
                     )}
                   </s-button>
-                  <button
-                    type="button"
-                    disabled={!productSlotsAvailable}
+                  <s-button
+                    variant="tertiary"
+                    tone="neutral"
+                    disabled={!productSlotsAvailable || undefined}
                     onClick={() => {
                       setProductSlotIconUrl("");
                       markAsDirty();
-                    }}
-                    style={{
-                      appearance: "none",
-                      border: 0,
-                      padding: 0,
-                      background: "transparent",
-                      color: productSlotsAvailable ? "#005bd3" : "#8c9196",
-                      font: "inherit",
-                      fontSize: 13,
-                      lineHeight: "20px",
-                      cursor: productSlotsAvailable ? "pointer" : "default",
                     }}
                   >
                     {translateAdmin(
                       "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.reset"
                     )}
-                  </button>
+                  </s-button>
                 </div>
               </div>
             </div>

@@ -1,27 +1,45 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbQuantitySettings() {
-  const {
-    markAsDirty,
-    lowStockAlertEnabled,
-    lowStockAlertMessage,
-    lowStockAlertThreshold,
-    maxQtyPerProduct,
-    productPageBundleStyles,
-    quantityValidationEnabled,
-    QuestionHelpTooltip,
-    setMaxQtyPerProduct,
-    setLowStockAlertEnabled,
-    setLowStockAlertMessage,
-    setLowStockAlertThreshold,
-    setQuantityValidationEnabled,
-    setVariantSelectorEnabled,
-    variantSelectorEnabled,
-    validationErrors = {},
-    clearValidationError,
-  } = usePpbConfigureContext();
+export type PpbQuantitySettingsProps = Pick<
+  PpbConfigureFlow,
+  | "clearValidationError"
+  | "lowStockAlertEnabled"
+  | "lowStockAlertMessage"
+  | "lowStockAlertThreshold"
+  | "markAsDirty"
+  | "maxQtyPerProduct"
+  | "quantityValidationEnabled"
+  | "setLowStockAlertEnabled"
+  | "setLowStockAlertMessage"
+  | "setLowStockAlertThreshold"
+  | "setMaxQtyPerProduct"
+  | "setQuantityValidationEnabled"
+  | "setVariantSelectorEnabled"
+  | "validationErrors"
+  | "variantSelectorEnabled"
+>;
+
+export function PpbQuantitySettings({
+  clearValidationError,
+  lowStockAlertEnabled,
+  lowStockAlertMessage,
+  lowStockAlertThreshold,
+  markAsDirty,
+  maxQtyPerProduct,
+  quantityValidationEnabled,
+  setLowStockAlertEnabled,
+  setLowStockAlertMessage,
+  setLowStockAlertThreshold,
+  setMaxQtyPerProduct,
+  setQuantityValidationEnabled,
+  setVariantSelectorEnabled,
+  validationErrors,
+  variantSelectorEnabled,
+}: PpbQuantitySettingsProps) {
 
   return (
     <s-section>

@@ -1,26 +1,32 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { Dispatch, SetStateAction } from "react";
+import type { useBundlePricing } from "../../../../hooks/useBundlePricing";
+import type { PricingRuleTierText } from "../../../../types/pricing";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import { QuestionHelpTooltip } from "../SmallComponents";
 
 export function FpbProgressBarOptions({
-  flow,
+  markAsDirty,
+  pricingState,
+  setTierTextByRuleId,
+  styles,
+  tierTextByRuleId,
+  translationsAvailable,
+  onOpenTranslations,
 }: {
-  flow: ConfigureBundleFlowContext;
+  markAsDirty: () => void;
+  pricingState: ReturnType<typeof useBundlePricing>;
+  setTierTextByRuleId: Dispatch<
+    SetStateAction<Record<string, PricingRuleTierText>>
+  >;
+  styles: Record<string, string>;
+  tierTextByRuleId: Record<string, PricingRuleTierText>;
+  translationsAvailable: boolean;
+  onOpenTranslations: () => void;
 }) {
-  const {
-    fullPageBundleStyles,
-    markAsDirty,
-    pricingState,
-    QuestionHelpTooltip,
-    setIsProgressBarMultiLangModalOpen,
-    setTierTextByRuleId,
-    shopLocales,
-    tierTextByRuleId,
-  } = flow;
-
   return (
     <>
-      <div className={fullPageBundleStyles.displayOptionRow}>
+      <div className={styles.displayOptionRow}>
         <s-stack
           direction="inline"
           gap="small"
@@ -28,11 +34,11 @@ export function FpbProgressBarOptions({
           justifyContent="space-between"
         >
           <s-stack direction="inline" gap="small" alignItems="center">
-            <div className={fullPageBundleStyles.displayOptionText}>
-              <p className={fullPageBundleStyles.displayOptionTitle}>
+            <div className={styles.displayOptionText}>
+              <p className={styles.displayOptionTitle}>
                 {translateAdmin("tooltips.discountProgressBar.title")}
               </p>
-              <p className={fullPageBundleStyles.displayOptionDescription}>
+              <p className={styles.displayOptionDescription}>
                 {translateAdmin(
                   "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.editTheProgressBarContentAndSettings"
                 )}
@@ -55,10 +61,10 @@ export function FpbProgressBarOptions({
               !pricingState.showDiscountProgressBar ||
               (pricingState.pricingDisplayOptions.progressBar.type ||
                 "step_based") !== "step_based" ||
-              shopLocales.length === 0 ||
+              !translationsAvailable ||
               undefined
             }
-            onClick={() => setIsProgressBarMultiLangModalOpen(true)}
+            onClick={onOpenTranslations}
           >
             {translateAdmin(
               "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
@@ -68,7 +74,7 @@ export function FpbProgressBarOptions({
         <DisabledConfigurationRegion
           disabled={!pricingState.showDiscountProgressBar}
         >
-          <div className={fullPageBundleStyles.nestedDisplayOptions}>
+          <div className={styles.nestedDisplayOptions}>
             <s-stack direction="block" gap="small">
               <s-stack direction="inline" gap="small" alignItems="center">
                 <s-choice-list
@@ -129,7 +135,7 @@ export function FpbProgressBarOptions({
                     pricingState.discountRules.map((rule, index) => (
                       <div
                         key={rule.id}
-                        className={fullPageBundleStyles.discountRuleCard}
+                        className={styles.discountRuleCard}
                       >
                         <s-stack direction="block" gap="small-100">
                           <p
@@ -154,7 +160,7 @@ export function FpbProgressBarOptions({
                                 const val = (e.target as HTMLInputElement)
                                   .value;
                                 setTierTextByRuleId(
-                                  (prev: Record<string, any>) => ({
+                                  (prev) => ({
                                     ...prev,
                                     [rule.id]: {
                                       tierText: val,
@@ -178,7 +184,7 @@ export function FpbProgressBarOptions({
                                 const val = (e.target as HTMLInputElement)
                                   .value;
                                 setTierTextByRuleId(
-                                  (prev: Record<string, any>) => ({
+                                  (prev) => ({
                                     ...prev,
                                     [rule.id]: {
                                       tierText: prev[rule.id]?.tierText ?? "",

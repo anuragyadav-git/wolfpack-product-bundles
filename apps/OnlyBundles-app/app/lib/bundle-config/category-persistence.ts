@@ -20,6 +20,32 @@ function objectRecord(value: unknown): Record<string, unknown> | null {
   return value as Record<string, unknown>;
 }
 
+function productIdentity(value: unknown, index: number): string {
+  const product = objectRecord(value);
+  const rawId = stringValue(product?.id)?.trim() ?? "";
+  const gidMatch = /^gid:\/\/shopify\/Product\/(\d+)$/.exec(rawId);
+  if (gidMatch) return `shopify:${gidMatch[1]}`;
+  if (/^\d+$/.test(rawId)) return `shopify:${rawId}`;
+  return `submitted:${rawId}:${index}`;
+}
+
+export function materializeCanonicalStepProducts(
+  step: Record<string, unknown>,
+): unknown[] {
+  const directProducts = asObjectArray(step.StepProduct);
+  const categoryProducts = asObjectArray(step.StepCategory).flatMap(
+    (category) => asObjectArray(objectRecord(category)?.products),
+  );
+  const seenProductIds = new Set<string>();
+
+  return [...directProducts, ...categoryProducts].filter((product, index) => {
+    const identity = productIdentity(product, index);
+    if (seenProductIds.has(identity)) return false;
+    seenProductIds.add(identity);
+    return true;
+  });
+}
+
 export function buildStepCategoryCreateInput(category: Record<string, unknown>, index: number) {
   const categoryId = stringValue(category.id);
   const sortOrder = numberValue(category.sortOrder) ?? index;

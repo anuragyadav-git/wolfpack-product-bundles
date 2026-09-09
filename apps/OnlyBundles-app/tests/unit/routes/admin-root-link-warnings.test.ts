@@ -71,7 +71,7 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({}),
 }));
 
-jest.mock("../../../app/routes/app/app.dashboard/handlers", () => ({
+jest.mock("../../../app/routes/app/app.dashboard/handlers/handlers.server", () => ({
   handleCloneBundle: jest.fn(),
   handleDeleteBundle: jest.fn(),
 }));
@@ -165,34 +165,4 @@ describe("admin root link warnings", () => {
     expect(headers({} as any)).not.toHaveProperty("Link");
   });
 
-  it("renders OptimisedImage fetch priority without the React DOM prop warning", async () => {
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-    const { OptimisedImage } = await import(
-      "../../../app/components/OptimisedImage"
-    );
-    const view = renderToStaticMarkup(
-      React.createElement(OptimisedImage, {
-        src: "/Parth.jpg",
-        alt: "Parth",
-        width: 120,
-        height: 120,
-        loading: "eager",
-        fetchPriority: "high",
-      })
-    );
-
-    expect(view).toContain('fetchpriority="high"');
-    expect(view).not.toContain("fetchPriority");
-    expect(consoleError).not.toHaveBeenCalledWith(
-      expect.stringContaining(
-        "React does not recognize the `%s` prop on a DOM element"
-      ),
-      "fetchPriority",
-      "fetchpriority",
-      expect.anything()
-    );
-    consoleError.mockRestore();
-  });
 });

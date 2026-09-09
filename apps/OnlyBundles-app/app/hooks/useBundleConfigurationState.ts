@@ -11,48 +11,25 @@
  * Used by both full-page and product-page bundle configuration routes.
  */
 
-import { useCallback, useRef, useMemo, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import {
-  clearConfigureOperationAlert as clearConfigureOperationAlertAction,
-  closeConfigureModal,
-  initializeConfigureRouteState,
-  markConfigureRouteDirty,
-  openConfigureModal,
-  resetConfigureRouteNavigation,
-  setActiveConfigureSection,
-  setActiveConfigureTabIndex,
-  setAvailablePages as setAvailablePagesAction,
-  setBundleProductDraft,
-  setConfigureForceNavigation,
-  setConfigureOperationAlert as setConfigureOperationAlertAction,
-  setConfigureLoadingPages,
-  setConfigureProductImageUrl,
-  setConfigureProductStatus,
-  setConfigureProductTitle,
-  setConfigureRuleMessages,
-  setConfigureSelectedCollections,
-  setConfigureSelectedPage,
-  setCurrentConfigureModalStepId,
-  setDismissedConfigureBanners,
-  setShowAutoPlacementBanner as setShowAutoPlacementBannerAction,
-} from "../store/slices/configureRouteStateSlice";
+import { useCallback, useRef, useMemo, useEffect, useReducer } from "react";
 import { showAdminTransientErrorToast, type AdminTaskAlert } from "../lib/admin-alert-feedback";
-import { closeModal, openModal } from "../store/slices/uiSlice";
 import { useBundleForm } from "./useBundleForm";
 import { useBundleSteps } from "./useBundleSteps";
 import { useBundleConditions } from "./useBundleConditions";
 import { useBundlePricing } from "./useBundlePricing";
 import { type BundleStatus } from "../constants/bundle";
 import { normalizePricingRuleMessages } from "../lib/pricing-display-options";
+import {
+  createInitialConfigureRouteState,
+  reduceConfigureRouteState,
+} from "./configure-route-state";
+import type { BundleProductData } from "../types/bundle-configure";
 
 // ============================================
 // TYPES
 // ============================================
 
-export type { BundleStatus };
-
-export interface BundleData {
+interface BundleData {
   id: string;
   name: string;
   description?: string;
@@ -64,18 +41,7 @@ export interface BundleData {
   pricing?: any;
 }
 
-export interface BundleProductData {
-  id: string;
-  title: string;
-  handle?: string;
-  status: string;
-  featuredImage?: { url: string };
-  featuredMedia?: { image?: { url?: string | null } | null } | null;
-  media?: { nodes?: Array<{ image?: { url?: string | null } | null } | null> } | null;
-  images?: { originalSrc: string }[];
-}
-
-export interface UseBundleConfigurationProps {
+interface UseBundleConfigurationProps {
   bundle: BundleData;
   bundleProduct: BundleProductData | null;
   shopify: any;
@@ -86,11 +52,13 @@ export interface UseBundleConfigurationProps {
 // HOOK IMPLEMENTATION
 // ============================================
 
-export function getBundleProductImageUrl(loadedBundleProduct?: any): string {
+export function getBundleProductImageUrl(
+  loadedBundleProduct?: Partial<BundleProductData> | null,
+): string {
   return (
     loadedBundleProduct?.featuredImage?.url ||
     loadedBundleProduct?.featuredMedia?.image?.url ||
-    loadedBundleProduct?.media?.nodes?.find((node: any) => node?.image?.url)?.image?.url ||
+    loadedBundleProduct?.media?.nodes?.find((node) => node?.image?.url)?.image?.url ||
     loadedBundleProduct?.images?.[0]?.originalSrc ||
     ""
   );
@@ -109,8 +77,11 @@ export function useBundleConfigurationState({
   shopify,
   shopCurrencyCode,
 }: UseBundleConfigurationProps) {
-  const dispatch = useAppDispatch();
-  const configureRouteState = useAppSelector((state) => state.configureRouteState);
+  const [configureRouteState, dispatch] = useReducer(
+    reduceConfigureRouteState,
+    undefined,
+    createInitialConfigureRouteState,
+  );
   // ===== DIRTY FLAG SYSTEM =====
   const isDirty = configureRouteState.isDirty;
   const isResettingRef = useRef(false);
@@ -119,12 +90,12 @@ export function useBundleConfigurationState({
 
   const markAsDirty = useCallback(() => {
     if (!isResettingRef.current) {
-      dispatch(markConfigureRouteDirty(true));
+      dispatch({ type: "setDirty", value: true });
     }
   }, [dispatch]);
 
   const setIsDirty = useCallback((value: boolean) => {
-    dispatch(markConfigureRouteDirty(value));
+    dispatch({ type: "setDirty", value });
   }, [dispatch]);
 
   // ===== CUSTOM HOOKS =====
@@ -203,64 +174,56 @@ export function useBundleConfigurationState({
   const isCollectionsModalOpen = configureRouteState.modals.collections;
   const currentModalStepId = configureRouteState.currentModalStepId;
   const setCurrentModalStepId = useCallback((stepId: string) => {
-    dispatch(setCurrentConfigureModalStepId(stepId));
+    dispatch({ type: "setCurrentModalStepId", value: stepId });
   }, [dispatch]);
 
   // Modal handlers
   const openPageSelectionModal = useCallback(() => {
-    dispatch(openConfigureModal({ modal: "pageSelection" }));
-    dispatch(openModal("bundleConfig_pageSelection"));
+    dispatch({ type: "openModal", modal: "pageSelection" });
   }, [dispatch]);
 
   const closePageSelectionModal = useCallback(() => {
-    dispatch(closeConfigureModal("pageSelection"));
-    dispatch(closeModal("bundleConfig_pageSelection"));
+    dispatch({ type: "closeModal", modal: "pageSelection" });
   }, [dispatch]);
 
   const openWidgetInstallModal = useCallback(() => {
-    dispatch(openConfigureModal({ modal: "widgetInstall" }));
-    dispatch(openModal("bundleConfig_widgetInstall"));
+    dispatch({ type: "openModal", modal: "widgetInstall" });
   }, [dispatch]);
 
   const closeWidgetInstallModal = useCallback(() => {
-    dispatch(closeConfigureModal("widgetInstall"));
-    dispatch(closeModal("bundleConfig_widgetInstall"));
+    dispatch({ type: "closeModal", modal: "widgetInstall" });
   }, [dispatch]);
 
   const openProductsModal = useCallback((stepId: string) => {
-    dispatch(openConfigureModal({ modal: "products", stepId }));
-    dispatch(openModal("bundleConfig_products"));
+    dispatch({ type: "openModal", modal: "products", stepId });
   }, [dispatch]);
 
   const closeProductsModal = useCallback(() => {
-    dispatch(closeConfigureModal("products"));
-    dispatch(closeModal("bundleConfig_products"));
+    dispatch({ type: "closeModal", modal: "products" });
   }, [dispatch]);
 
   const openCollectionsModal = useCallback((stepId: string) => {
-    dispatch(openConfigureModal({ modal: "collections", stepId }));
-    dispatch(openModal("bundleConfig_collections"));
+    dispatch({ type: "openModal", modal: "collections", stepId });
   }, [dispatch]);
 
   const closeCollectionsModal = useCallback(() => {
-    dispatch(closeConfigureModal("collections"));
-    dispatch(closeModal("bundleConfig_collections"));
+    dispatch({ type: "closeModal", modal: "collections" });
   }, [dispatch]);
 
   // ===== LOADING STATES =====
   const isLoadingPages = configureRouteState.isLoadingPages;
   const setIsLoadingPages = useCallback((value: boolean) => {
-    dispatch(setConfigureLoadingPages(value));
+    dispatch({ type: "setLoadingPages", value });
   }, [dispatch]);
 
   // ===== DATA STATES =====
   const availablePages = configureRouteState.availablePages;
   const selectedPage = configureRouteState.selectedPage;
   const setAvailablePages = useCallback((value: any[]) => {
-    dispatch(setAvailablePagesAction(value));
+    dispatch({ type: "setAvailablePages", value });
   }, [dispatch]);
   const setSelectedPage = useCallback((value: any | null) => {
-    dispatch(setConfigureSelectedPage(value));
+    dispatch({ type: "setSelectedPage", value });
   }, [dispatch]);
 
   // Bundle product state
@@ -269,19 +232,19 @@ export function useBundleConfigurationState({
   const productTitle = configureRouteState.productTitle;
   const productImageUrl = configureRouteState.productImageUrl;
   const setProductTitle = useCallback((value: string) => {
-    dispatch(setConfigureProductTitle(value));
+    dispatch({ type: "setProductTitle", value });
   }, [dispatch]);
   const setProductImageUrl = useCallback((value: string) => {
-    dispatch(setConfigureProductImageUrl(value));
+    dispatch({ type: "setProductImageUrl", value });
   }, [dispatch]);
 
   // Wrapped setters that trigger dirty flag
   const setBundleProduct = useCallback((value: any) => {
-    dispatch(setBundleProductDraft(value));
+    dispatch({ type: "setBundleProduct", value });
   }, [dispatch]);
 
   const setProductStatus = useCallback((value: string) => {
-    dispatch(setConfigureProductStatus(value));
+    dispatch({ type: "setProductStatus", value });
   }, [dispatch]);
 
   // Collections state
@@ -300,7 +263,7 @@ export function useBundleConfigurationState({
     value: Record<string, any[]> | ((prev: Record<string, any[]>) => Record<string, any[]>)
   ) => {
     const nextValue = typeof value === "function" ? value(configureRouteState.selectedCollections) : value;
-    dispatch(setConfigureSelectedCollections(nextValue));
+    dispatch({ type: "setSelectedCollections", value: nextValue });
   }, [configureRouteState.selectedCollections, dispatch]);
 
   // Rule messages state
@@ -315,17 +278,17 @@ export function useBundleConfigurationState({
 
   useEffect(() => {
     if (shouldResetConfigureNavigation(configuredBundleIdRef.current, bundle.id)) {
-      dispatch(resetConfigureRouteNavigation());
+      dispatch({ type: "resetNavigation" });
       configuredBundleIdRef.current = bundle.id;
     }
-    dispatch(initializeConfigureRouteState({
+    dispatch({ type: "initialize", value: {
       bundleProduct: loadedBundleProduct || null,
       productStatus: loadedBundleProduct?.status || "",
       productTitle: loadedBundleProduct?.title || "",
       productImageUrl: getBundleProductImageUrl(loadedBundleProduct),
       selectedCollections: initialSelectedCollections,
       ruleMessages: initialRuleMessages,
-    }));
+    } });
   }, [
     bundle.id,
     dispatch,
@@ -342,7 +305,7 @@ export function useBundleConfigurationState({
       Record<string, { discountText: string; successMessage: string }>)
   ) => {
     const nextValue = typeof value === "function" ? value(configureRouteState.ruleMessages) : value;
-    dispatch(setConfigureRuleMessages(nextValue));
+    dispatch({ type: "setRuleMessages", value: nextValue });
   }, [configureRouteState.ruleMessages, dispatch]);
 
   // ===== UI STATES =====
@@ -350,13 +313,13 @@ export function useBundleConfigurationState({
   const activeSection = configureRouteState.activeSection;
   const forceNavigation = configureRouteState.forceNavigation;
   const setActiveTabIndex = useCallback((value: number) => {
-    dispatch(setActiveConfigureTabIndex(value));
+    dispatch({ type: "setActiveTabIndex", value });
   }, [dispatch]);
   const setActiveSection = useCallback((value: string) => {
-    dispatch(setActiveConfigureSection(value));
+    dispatch({ type: "setActiveSection", value });
   }, [dispatch]);
   const setForceNavigation = useCallback((value: boolean) => {
-    dispatch(setConfigureForceNavigation(value));
+    dispatch({ type: "setForceNavigation", value });
   }, [dispatch]);
 
   // Banner states
@@ -366,21 +329,21 @@ export function useBundleConfigurationState({
     [configureRouteState.dismissedBanners],
   );
   const setShowAutoPlacementBanner = useCallback((value: boolean) => {
-    dispatch(setShowAutoPlacementBannerAction(value));
+    dispatch({ type: "setShowAutoPlacementBanner", value });
   }, [dispatch]);
   const setDismissedBanners = useCallback((
     value: Set<string> | ((prev: Set<string>) => Set<string>)
   ) => {
     const previous = new Set<string>(configureRouteState.dismissedBanners);
     const nextValue = typeof value === "function" ? value(previous) : value;
-    dispatch(setDismissedConfigureBanners(Array.from(nextValue)));
+    dispatch({ type: "setDismissedBanners", value: Array.from(nextValue) });
   }, [configureRouteState.dismissedBanners, dispatch]);
   const operationAlert = configureRouteState.operationAlert;
   const setOperationAlert = useCallback((value: AdminTaskAlert) => {
-    dispatch(setConfigureOperationAlertAction(value));
+    dispatch({ type: "setOperationAlert", value });
   }, [dispatch]);
   const clearOperationAlert = useCallback(() => {
-    dispatch(clearConfigureOperationAlertAction());
+    dispatch({ type: "setOperationAlert", value: null });
   }, [dispatch]);
 
   // ===== ORIGINAL VALUES REF (for discard) =====
@@ -454,7 +417,7 @@ export function useBundleConfigurationState({
 
       isResettingRef.current = false;
       setIsDirty(false);
-      dispatch(clearConfigureOperationAlertAction());
+      dispatch({ type: "setOperationAlert", value: null });
 
       shopify.toast.show("Changes discarded", { isError: false });
     } catch (error: any) {

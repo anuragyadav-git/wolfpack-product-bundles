@@ -16,18 +16,26 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: jest.fn(() => ({ toast: { show: jest.fn() } })),
 }));
 
-jest.mock("../../../app/components/analytics", () => ({
+jest.mock("../../../app/components/analytics/BundlePerformanceMatrix", () => ({
   BundlePerformanceMatrix: () => React.createElement("div", null, "bundle-matrix-ready"),
+}));
+jest.mock("../../../app/components/analytics/BundleConversionFunnel", () => ({
   BundleConversionFunnel: ({ bundleViews, addedToCart, orders }: Record<string, number>) =>
     React.createElement(
       "div",
       { "data-testid": "bundle-conversion-funnel" },
       `${bundleViews}:${addedToCart}:${orders}`,
     ),
+}));
+jest.mock("../../../app/components/analytics/BundleKeyStatistics", () => ({
   BundleKeyStatistics: ({ summary }: { summary: { totalOrderRevenue: number } }) =>
     React.createElement("div", null, String(summary.totalOrderRevenue)),
+}));
+jest.mock("../../../app/components/analytics/BundleSalesTrends", () => ({
   BundleSalesTrends: ({ trend }: { trend: Array<{ date: string }> }) =>
     React.createElement("div", null, trend.map((point) => point.date).join(",")),
+}));
+jest.mock("../../../app/components/analytics/TopCampaigns", () => ({
   TopCampaigns: () => null,
 }));
 

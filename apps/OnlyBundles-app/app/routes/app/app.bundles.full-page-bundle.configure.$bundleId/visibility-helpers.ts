@@ -6,6 +6,8 @@ export type VisibilityDisplayConfiguration = {
   showOnSpecificCollectionPages: unknown[];
 };
 
+export type VisibilityResource = Record<string, unknown>;
+
 export type StepSetupMultiLanguageTarget =
   | { type: "text-overrides" }
   | { type: "step"; stepId: string }
@@ -16,6 +18,13 @@ export type StepSetupMultiLanguageTarget =
 
 export function asVisibilityArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
+}
+
+export function asVisibilityResources(value: unknown): VisibilityResource[] {
+  return asVisibilityArray(value).filter(
+    (entry): entry is VisibilityResource =>
+      Boolean(entry) && typeof entry === "object" && !Array.isArray(entry),
+  );
 }
 
 export function getVisibilityDisplayTarget(

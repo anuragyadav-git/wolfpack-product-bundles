@@ -12,7 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 // TYPES
 // ============================================
 
-export interface BillingLoaderData {
+interface BillingLoaderData {
   upgraded: boolean;
   callbackError: string | null;
 }

@@ -8,8 +8,84 @@ import { i18n } from "../../../i18n/config";
 import {
   mergePpbBundleEmbedTranslations,
   mergePpbBundleWidgetTranslations,
-  removeLegacyPpbEmbedTextOverrides,
 } from "../../../lib/ppb-bundle-embed";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type { usePpbVisibilityState } from "./usePpbVisibilityState";
+import type { usePpbDisplayOptionsState } from "./usePpbDisplayOptionsState";
+import type { usePpbBundleSettingsState } from "./usePpbBundleSettingsState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
+import type { usePpbCategoryHandlers } from "./usePpbCategoryHandlers";
+
+type BaseDependencies = Pick<ReturnType<typeof usePpbBaseConfigureState>,
+  | "allowQuantityChanges" | "bundle" | "bundleProduct" | "cartRedirectToCheckout"
+  | "checkAppEmbedStatusBeforePreview" | "conditionsState" | "discardSpecificLinkOfferChanges"
+  | "fetcher" | "formState" | "hookHandleDiscard" | "loadingGif" | "offerDeliveryState"
+  | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
+  | "originalLoadingGifRef" | "originalSdkModeRef" | "originalShowProductPricesRef"
+  | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
+  | "originalTextOverridesRef" | "pricingState" | "ruleMessages" | "sdkMode"
+  | "selectedCollections" | "setActiveSection" | "setAllowQuantityChanges"
+  | "setCartRedirectToCheckout" | "setLoadingGif" | "setOperationAlert" | "setSdkMode"
+  | "setShowProductPrices" | "setSubscriptionConfigState" | "setTextOverrides"
+  | "setTextOverridesByLocale" | "showProductPrices" | "stepsState" | "subscriptionConfig"
+  | "textOverrides" | "textOverridesByLocale"
+>;
+type VisibilityDependencies = Pick<ReturnType<typeof usePpbVisibilityState>,
+  | "autoSelectBrowsedProduct" | "bundleEmbedAddBrowsedProduct"
+  | "bundleEmbedCollectionsSelectedData" | "bundleEmbedDisplayOn" | "bundleEmbedEnabled"
+  | "bundleEmbedMultiLangText" | "bundleEmbedSelectedProducts"
+  | "bundleEmbedSpecificCollectionPages" | "bundleEmbedSpecificProductPages"
+  | "bundleEmbedSubTitle" | "bundleEmbedTitle" | "bundleWidgetMultiLangText"
+  | "originalAutoSelectBrowsedProductRef" | "originalBundleEmbedAddBrowsedProductRef"
+  | "originalBundleEmbedCollectionsSelectedDataRef" | "originalBundleEmbedDisplayOnRef"
+  | "originalBundleEmbedEnabledRef" | "originalBundleEmbedMultiLangTextRef"
+  | "originalBundleEmbedSelectedProductsRef" | "originalBundleEmbedSpecificCollectionPagesRef"
+  | "originalBundleEmbedSpecificProductPagesRef" | "originalBundleEmbedSubTitleRef"
+  | "originalBundleEmbedTitleRef" | "originalUpsellWidgetButtonTextRef"
+  | "originalUpsellWidgetDescriptionRef" | "originalUpsellWidgetDisplayModeRef"
+  | "originalUpsellWidgetDisplayOnRef" | "originalUpsellWidgetEnabledRef"
+  | "originalUpsellWidgetImageUrlRef" | "originalUpsellWidgetTitleRef"
+  | "savedBundleUpsellConfig" | "setAutoSelectBrowsedProduct"
+  | "setBundleEmbedAddBrowsedProduct" | "setBundleEmbedCollectionsSelectedData"
+  | "setBundleEmbedDisplayOn" | "setBundleEmbedEnabled" | "setBundleEmbedMultiLangText"
+  | "setBundleEmbedSelectedProducts" | "setBundleEmbedSpecificCollectionPages"
+  | "setBundleEmbedSpecificProductPages" | "setBundleEmbedSubTitle" | "setBundleEmbedTitle"
+  | "setUpsellWidgetButtonText" | "setUpsellWidgetDescription" | "setUpsellWidgetDisplayMode"
+  | "setUpsellWidgetDisplayOn" | "setUpsellWidgetEnabled" | "setUpsellWidgetImageUrl"
+  | "setUpsellWidgetTitle" | "upsellWidgetButtonText" | "upsellWidgetCollectionsSelectedData"
+  | "upsellWidgetDescription" | "upsellWidgetDisplayMode" | "upsellWidgetDisplayOn"
+  | "upsellWidgetEnabled" | "upsellWidgetImageUrl" | "upsellWidgetSelectedProducts"
+  | "upsellWidgetSpecificCollectionPages" | "upsellWidgetSpecificProductPages"
+  | "upsellWidgetTitle"
+>;
+type DisplayDependencies = Pick<ReturnType<typeof usePpbDisplayOptionsState>,
+  | "discountMessagingMultiLanguageEnabled" | "globalSuccessMessage" | "progressBarEnabled"
+  | "progressBarProgressText" | "progressBarSuccessText" | "progressBarType"
+  | "qtyOptionsDefaultRuleId" | "qtyOptionsEnabled" | "qtyRuleLabels"
+  | "qtyRuleSubtexts" | "qtyRuleTextsByLocaleByRuleId" | "ruleMessagesByLocale"
+  | "successMessageByLocale" | "tierTextByLocaleByRuleId" | "tierTextByRuleId"
+>;
+type SettingsDependencies = Pick<ReturnType<typeof usePpbBundleSettingsState>,
+  | "bundleBannerDesktopUrl" | "bundleBannerMobileUrl" | "bundleCartSubtitle"
+  | "bundleCartTitle" | "bundleLevelCss" | "countdownEnabled" | "countdownExpiredMessage"
+  | "countdownExpiryAction" | "countdownLayout" | "countdownPosition" | "countdownTitle"
+  | "defaultProductsData" | "lowStockAlertEnabled" | "lowStockAlertMessage"
+  | "lowStockAlertThreshold" | "maxQtyPerProduct" | "originalCountdownEnabledRef"
+  | "originalCountdownExpiredMessageRef" | "originalCountdownExpiryActionRef"
+  | "originalCountdownLayoutRef" | "originalCountdownPositionRef" | "originalCountdownTitleRef"
+  | "originalDefaultProductsDataRef" | "originalLowStockAlertEnabledRef"
+  | "originalLowStockAlertMessageRef" | "originalLowStockAlertThresholdRef"
+  | "originalStickyAddToCartActionRef" | "originalStickyAddToCartEnabledRef"
+  | "originalStickyAddToCartShowDesktopRef" | "originalStickyAddToCartShowMobileRef"
+  | "preSelectedProductVariantId" | "quantityValidationEnabled" | "setCountdownEnabled"
+  | "setCountdownExpiredMessage" | "setCountdownExpiryAction" | "setCountdownLayout"
+  | "setCountdownPosition" | "setCountdownTitle" | "setDefaultProductsData"
+  | "setLowStockAlertEnabled" | "setLowStockAlertMessage" | "setLowStockAlertThreshold"
+  | "setStickyAddToCartAction" | "setStickyAddToCartEnabled" | "setStickyAddToCartShowDesktop"
+  | "setStickyAddToCartShowMobile" | "showTextOnAddButton" | "stickyAddToCartAction"
+  | "stickyAddToCartEnabled" | "stickyAddToCartShowDesktop" | "stickyAddToCartShowMobile"
+  | "useSingleStepCategoriesAsBundleSteps" | "variantSelectorEnabled"
+>;
 
 export function usePpbSaveHandlers({
   base,
@@ -19,12 +95,12 @@ export function usePpbSaveHandlers({
   templateState,
   categoryHandlers,
 }: {
-  base: any;
-  visibility: any;
-  display: any;
-  settings: any;
-  templateState: any;
-  categoryHandlers: any;
+  base: BaseDependencies;
+  visibility: VisibilityDependencies;
+  display: DisplayDependencies;
+  settings: SettingsDependencies;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>, "setActiveTabIndex">;
+  categoryHandlers: Pick<ReturnType<typeof usePpbCategoryHandlers>, "setCategoryOpen">;
 }) {
   const validation = useConfigureValidation({
     kind: "ppb",
@@ -245,20 +321,14 @@ export function usePpbSaveHandlers({
       );
       formData.append(
         "textOverrides",
-        Object.keys(removeLegacyPpbEmbedTextOverrides(base.textOverrides)).length > 0
-          ? JSON.stringify(removeLegacyPpbEmbedTextOverrides(base.textOverrides))
+        Object.keys(base.textOverrides).length > 0
+          ? JSON.stringify(base.textOverrides)
           : "",
-      );
-      const canonicalTextOverridesByLocale = Object.fromEntries(
-        Object.entries(base.textOverridesByLocale).map(([locale, values]: any) => [
-          locale,
-          removeLegacyPpbEmbedTextOverrides(values as Record<string, string>),
-        ]),
       );
       formData.append(
         "textOverridesByLocale",
-        Object.keys(canonicalTextOverridesByLocale).length > 0
-          ? JSON.stringify(canonicalTextOverridesByLocale)
+        Object.keys(base.textOverridesByLocale).length > 0
+          ? JSON.stringify(base.textOverridesByLocale)
           : "",
       );
       formData.append(

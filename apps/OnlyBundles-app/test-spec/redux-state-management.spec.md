@@ -1,64 +1,77 @@
-# Test Spec: Redux State Management
+---
+schema_version: 1
+id: redux-state-management
+title: Route Local State Remediation Test Spec
+type: test-spec
+status: active
+summary: Defines behavior preserved while Redux and RTK Query are replaced with route-local React state and App Bridge-authenticated fetch.
+last_audited: 2026-09-09
+owners:
+  - engineering
+domains:
+  - admin
+systems:
+  - react
+  - remix
+source_paths:
+  - app/hooks/useBundleConfigurationState.ts
+  - app/hooks/configure-route-state.ts
+  - app/hooks/useDashboardState.ts
+  - app/components/shared/FilePicker.tsx
+  - app/lib/admin-store-files.client.ts
+related_docs:
+  - internal docs/Architecture/State Management.md
+  - internal docs/Shopify Integration/Embedded Admin Resource Authentication.md
+tags:
+  - tdd
+  - state-management
+keywords:
+  - route-local reducer
+  - App Bridge fetch
+  - FilePicker
+---
+
+# Test Spec: Route Local State Remediation
+
 **Spec ID:** redux-state-management  **Created:** 2026-06-21
 
 ## Purpose
-Move Admin client UI, preferences, design settings, and shared configure draft state from `AppStateService` to Redux Toolkit, and use RTK Query only for approved standalone Admin API calls.
+
+Preserve Admin configure, dashboard, and store-file behavior while removing the route-local Redux store and RTK Query layer.
 
 ## Test Cases
-### UiSlice
-| # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Open and close keyed modal | `openModal("billing_cancelConfirm")`, `closeModal(...)` | Modal key flips true then false | Preserves existing modal IDs |
-| 2 | Add and hide toast | `showToast({ message, isError })`, `hideToast(id)` | Toast is visible with ID, then removed | ID may be injected for deterministic tests |
-| 3 | Update navigation and loading | Partial navigation, boolean loading | Existing navigation fields are preserved | Matches `AppStateService` behavior |
 
-### PreferencesSlice
-| # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Merge preferences | `{ theme: "dark" }` | Other defaults remain | localStorage persistence handled by middleware/listener |
-| 2 | Add recent bundle | Same ID repeatedly, more than 10 IDs | ID is deduped, newest first, max 10 | Matches current service cap |
+### Configure Route Reducer
 
-### DesignSettingsSlice
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Set settings by bundle type | full page/product page settings | Correct bucket updates and dirty clears | Server persistence unchanged |
-| 2 | Update selected setting | selected type + key/value | Selected bucket changes and dirty is true | No-op when selected settings are absent |
+| 1 | Initialize loaded state | Product, collections, and rule messages | Loaded fields replace defaults and dirty is false | Used by FPB and PPB |
+| 2 | Open and close modal | Modal key and optional step ID | Only that modal changes and step ID is retained | No global modal mirror |
+| 3 | Edit persisted draft | Product, collections, or rule messages | Field changes and dirty becomes true | Save Bar behavior retained |
+| 4 | Reset navigation | Changed tab, section, and force flag | Step Setup defaults are restored | Bundle changes reset navigation |
 
-### BundleConfigureSlice
-| # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Update form field | form baseline, field update | Form changes and dirty is true | Shared configure draft only |
-| 2 | Remove step | step with related conditions/collections | Step and related keyed data are removed | Matches cleanup in old service |
-| 3 | Clear draft | any draft state | Default draft state restored | Used by discard/reset flows |
+### Store File Client
 
-### AdminApi
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | List store files | `{ cursor, query }` | GET `/app/store-files?...` | Query params omit empty values |
-| 2 | Upload store file | `File/FormData` | POST `/app/upload-store-file` | Multipart body is passed through |
-| 3 | Poll upload status | `fileId` | GET `/app/upload-store-file?fileId=...` | Used by FilePicker |
-| 4 | Ensure product template | product handle + bundle ID | POST `/api/ensure-product-template` JSON | Standalone client mutation only |
+| 1 | List files | Cursor and search query | Standard GET to authenticated `/app/store-files` | App Bridge intercepts `fetch` |
+| 2 | Upload file | Multipart `FormData` | Standard POST with original body | Do not set content type manually |
+| 3 | Poll upload | Shopify file GID | Encoded GET query | Same resource route |
+| 4 | Backend error | Non-2xx JSON or text response | Throw an error carrying backend detail | FilePicker maps it to existing failure UI |
+| 5 | Empty file results | Empty store library, with and without a search query | Render the matching localized empty-state message | No hardcoded English fallback copy |
 
-### AdminRouteStateSlice
-| # | Scenario | Input | Expected Output | Notes |
-|---|---|---|---|---|
-| 1 | Dashboard delete modal | `openDashboardDeleteModal(bundleId)`, close | Modal opens with bundle ID, then clears | Replaces local dashboard hook state |
-| 2 | Billing route feedback | initialize from loader, dismiss/show banners | Success/error banners match loader and actions | Replaces local billing hook state |
-| 3 | Cart transform modal and form | open, set fields, close/reset | Modal opens, form values update, close clears | Replaces local cart-transform hook state |
-| 4 | Dashboard filters and pagination | search/type/status/per-page/page actions | Filters update, filter/per-page changes reset page to 1 | Replaces dashboard route filter `useState` |
+### Dashboard State
 
-### ConfigureRouteStateSlice
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Initialize shared configure route state | bundle product, collections, rule messages | Product, collection, rule-message, navigation defaults are set | Used by FPB and PPB configure hooks |
-| 2 | Configure modal flow | open products/collections/page/widget modals, close | Modal booleans and current step ID update | Replaces modal `useState` in `useBundleConfigurationState` |
-| 3 | Page and product draft data | pages, selected page, product title/status/image | Values are stored and dirty is marked for product edits | Keeps persistence unchanged |
-| 4 | Selected collections and rule messages | replacement and updater-style values | State updates exactly and marks dirty | Supports existing setter call sites |
-| 5 | Navigation and banners | active tab/section, force nav, auto banner, dismissed IDs | Values update without affecting server state | Replaces route navigation `useState` |
+| 1 | Delete modal lifecycle | Open with bundle ID, then close | Local state opens, then clears ID | No global modal store |
+| 2 | Filter or page-size change | Search/type/status/per-page input | Current page resets to 1 | Pagination behavior retained |
 
 ## Acceptance Criteria
-- [ ] All listed unit tests pass
-- [ ] Existing hook return shapes remain compatible
-- [ ] No production code imports `appStateService`
-- [ ] RTK Query owns only approved standalone endpoints
-- [ ] State architecture docs are linked from `internal docs/index.md`
+
+- [x] All listed behavior tests pass.
+- [x] Existing configure hook return shapes and dashboard flows remain compatible.
+- [x] Standard `fetch` owns App Bridge-authenticated store-file requests.
+- [x] No production code imports Redux, RTK Query, or `app/store`.
+- [x] The unused centralized Redux-era state type registry is removed.
+- [x] `@reduxjs/toolkit` and `react-redux` are removed from dependencies and Vite chunks.

@@ -1,16 +1,28 @@
-import type { PricingConfiguration, PricingMessages, PricingRule } from "../types/pricing";
+import type {
+  PricingConditionOperator,
+  PricingConfiguration,
+  PricingMessages,
+  PricingRule,
+} from "../types/pricing";
 import { parsePricingTierBadge } from "./pricing-tier-badge";
 
 type BxyDiscountType = 'percentage' | 'fixed_amount';
 type BxyApplyMode = 'lowest_priced' | 'latest_added';
 
 const VALID_CONDITION_TYPES = new Set(['quantity', 'amount']);
+const VALID_CONDITION_OPERATORS = new Set<PricingConditionOperator>([
+  'gte',
+  'gt',
+  'lte',
+  'lt',
+  'eq',
+]);
 const VALID_BXY_DISCOUNT_TYPES = new Set<BxyDiscountType>(['percentage', 'fixed_amount']);
 const VALID_BXY_APPLY_MODES = new Set<BxyApplyMode>(['lowest_priced', 'latest_added']);
 
 /**
  * Parse a raw DB JSON value into a validated flat PricingRule.
- * Only accepts the flat shape — use migrateNestedRule first for old records.
+ * Only accepts the flat canonical shape.
  * Throws if required fields are missing or invalid.
  */
 export function parsePricingRule(raw: unknown): PricingRule {
@@ -39,9 +51,20 @@ export function parsePricingRule(raw: unknown): PricingRule {
     throw new Error(`parsePricingRule: discountValue must be a non-negative number, got ${r.discountValue}`);
   }
 
+  const conditionOperator =
+    r.conditionOperator === undefined || r.conditionOperator === null || r.conditionOperator === ''
+      ? 'gte'
+      : r.conditionOperator;
+  if (!VALID_CONDITION_OPERATORS.has(conditionOperator as PricingConditionOperator)) {
+    throw new Error(
+      `parsePricingRule: invalid conditionOperator '${conditionOperator}' — must be 'gte', 'gt', 'lte', 'lt', or 'eq'`,
+    );
+  }
+
   const rule: PricingRule = {
     id: r.id,
     conditionType: conditionType as 'quantity' | 'amount',
+    conditionOperator: conditionOperator as PricingConditionOperator,
     conditionValue,
     discountValue,
   };
@@ -77,43 +100,8 @@ export function parsePricingRule(raw: unknown): PricingRule {
 }
 
 /**
- * Convert an old nested-shape rule (condition: {type,operator,value}, discount: {method,value})
- * to the new flat shape. For already-flat rules, acts as a pass-through.
- * Used by the one-time DB data migration script.
- */
-export function migrateNestedRule(raw: Record<string, unknown>): PricingRule {
-  // Already flat — pass through
-  if (typeof raw.conditionType === 'string' && VALID_CONDITION_TYPES.has(raw.conditionType)) {
-    return parsePricingRule(raw);
-  }
-
-  const condition = raw.condition as Record<string, unknown> | undefined;
-  const discount = raw.discount as Record<string, unknown> | undefined;
-
-  const conditionType = (condition?.type as string) || 'quantity';
-  const conditionValue = Number(condition?.value ?? 0);
-  const discountValue = Number(discount?.value ?? raw.discountValue ?? 0);
-
-  const flat: Record<string, unknown> = {
-    id: raw.id,
-    conditionType,
-    conditionValue,
-    discountValue,
-  };
-
-  // BXY migration: map getQty → customerGets, conditionValue → customerBuys
-  if (discount?.method === 'buy_x_get_y') {
-    flat.customerBuys = conditionValue;
-    flat.customerGets = Number(raw.getQty ?? 1);
-    // buyStepId, getStepId are intentionally dropped
-  }
-
-  return parsePricingRule(flat);
-}
-
-/**
  * Parse a raw DB object into a validated PricingConfiguration.
- * Rules must already be in flat format (use migrateNestedRule for old data).
+ * Rules must already be in flat canonical format.
  */
 export function parsePricingConfiguration(raw: unknown): PricingConfiguration {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {

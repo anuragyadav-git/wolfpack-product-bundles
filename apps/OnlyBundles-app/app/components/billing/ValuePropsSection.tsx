@@ -3,7 +3,7 @@ import valuePropStyles from "../../styles/billing/value-props.module.css";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 import { useTranslation } from "react-i18next";
 
-export interface ValuePropsSectionProps {
+interface ValuePropsSectionProps {
   valueProps?: ValueProp[];
 }
 

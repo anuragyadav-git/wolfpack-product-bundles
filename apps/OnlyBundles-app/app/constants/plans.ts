@@ -7,7 +7,7 @@
 
 import type { SubscriptionPlan } from "@prisma/client";
 
-export interface PlanConfig {
+interface PlanConfig {
   id: SubscriptionPlan;
   name: string;
   price: number;

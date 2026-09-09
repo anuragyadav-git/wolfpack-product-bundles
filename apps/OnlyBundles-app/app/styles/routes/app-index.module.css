@@ -70,10 +70,9 @@
   overflow: hidden;
 }
 
-.wolfIcon img {
+.wolfIcon s-image {
   width: 44px;
   height: 44px;
-  object-fit: contain;
 }
 
 .brandName {
@@ -116,54 +115,6 @@
   justify-content: center;
   gap: 14px;
   flex-wrap: wrap;
-}
-
-.btnPrimary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #5c6ac4, #9c6ade);
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 13px 28px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  transition:
-    opacity 0.15s,
-    transform 0.15s;
-  box-shadow: 0 4px 16px rgba(92, 106, 196, 0.4);
-  letter-spacing: 0.01em;
-}
-
-.btnPrimary:hover {
-  opacity: 0.92;
-  transform: translateY(-1px);
-}
-
-.btnSecondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 14px;
-  font-weight: 500;
-  padding: 13px 22px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.15s;
-  backdrop-filter: blur(4px);
-}
-
-.btnSecondary:hover {
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  text-decoration: none;
 }
 
 /* ── Feature Grid ─────────────────────────────────────────── */

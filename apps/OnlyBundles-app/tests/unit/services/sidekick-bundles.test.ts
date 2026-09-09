@@ -137,6 +137,9 @@ describe("executeSidekickBundleOperation", () => {
   });
 
   it.each([
+    null,
+    [],
+    "search_bundles",
     { operation: "unknown", input: {} },
     { operation: "search_bundles", input: { status: "deleted" } },
     { operation: "search_bundles", input: { limit: 21 } },

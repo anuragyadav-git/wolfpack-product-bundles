@@ -1,20 +1,53 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
-import { PlusIcon } from "./PpbStepSetupShared";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import {
+  CATEGORY_CONDITION_OPERATOR_OPTIONS,
+  STEP_CONDITION_TYPE_OPTIONS,
+} from "../../../constants/bundle";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
+
+export type PpbCategoryRulesAdapter = Pick<
+  PpbConfigureFlow,
+  | "addCategoryConditionRule"
+  | "categoryRulesOpen"
+  | "removeCategoryConditionRule"
+  | "setCategoryRulesOpen"
+  | "updateCategoryAutoNextRule"
+  | "updateCategoryConditionRule"
+>;
+
+type CategoryConditionRule = {
+  id?: string | number;
+  condition?: string;
+  operator?: string;
+  type?: string;
+  value?: string | number;
+};
+
+type RuleCategory = {
+  id?: string;
+  name?: string;
+  title?: string;
+  conditions?: CategoryConditionRule[];
+  autoNextStepOnConditionMet?: boolean;
+};
+
+export type PpbCategoryRulesListProps = {
+  adapter: PpbCategoryRulesAdapter;
+  step: { id: string };
+  stepCategories: RuleCategory[];
+};
 
 export function PpbCategoryRulesList({
+  adapter,
   step,
   stepCategories,
-}: {
-  step: any;
-  stepCategories: any[];
-}) {
-  const { categoryRulesOpen, productPageBundleStyles, setCategoryRulesOpen } =
-    usePpbConfigureContext();
+}: PpbCategoryRulesListProps) {
+  const { categoryRulesOpen, setCategoryRulesOpen } = adapter;
 
   return (
     <div className={productPageBundleStyles.categoryRulesList}>
-      {stepCategories.map((cat: any, catIndex: number) => {
+      {stepCategories.map((cat, catIndex) => {
         const catKey = `${step.id}__${cat.id ?? catIndex}`;
         const rules = Array.isArray(cat.conditions) ? cat.conditions : [];
         const isRulesOpen = categoryRulesOpen[catKey] ?? catIndex === 0;
@@ -46,6 +79,7 @@ export function PpbCategoryRulesList({
             </button>
             {isRulesOpen && (
               <PpbCategoryRuleBody
+                adapter={adapter}
                 step={step}
                 cat={cat}
                 catIndex={catIndex}
@@ -60,25 +94,24 @@ export function PpbCategoryRulesList({
 }
 
 function PpbCategoryRuleBody({
+  adapter,
   step,
   cat,
   catIndex,
   rules,
 }: {
-  step: any;
-  cat: any;
+  adapter: PpbCategoryRulesAdapter;
+  step: { id: string };
+  cat: RuleCategory;
   catIndex: number;
-  rules: any[];
+  rules: CategoryConditionRule[];
 }) {
   const {
     addCategoryConditionRule,
-    CATEGORY_CONDITION_OPERATOR_OPTIONS,
-    productPageBundleStyles,
     removeCategoryConditionRule,
-    STEP_CONDITION_TYPE_OPTIONS,
     updateCategoryAutoNextRule,
     updateCategoryConditionRule,
-  } = usePpbConfigureContext();
+  } = adapter;
 
   return (
     <div className={productPageBundleStyles.categoryRuleBody}>
@@ -92,7 +125,7 @@ function PpbCategoryRuleBody({
         )}
       </p>
       <div className={productPageBundleStyles.rulesList}>
-        {rules.map((rule: any, ruleIndex: number) => {
+        {rules.map((rule, ruleIndex) => {
           const ruleId = String(rule.id ?? ruleIndex);
 
           return (
@@ -120,66 +153,65 @@ function PpbCategoryRuleBody({
                 </s-button>
               </div>
               <div className={productPageBundleStyles.categoryRuleFields}>
-                <select
-                  className={productPageBundleStyles.ruleInlineSelect}
+                <s-select
+                  label={translateAdmin("dashboard.table.type")}
+                  labelAccessibilityVisibility="exclusive"
                   value={rule.type ?? "quantity"}
-                  onChange={(e) =>
+                  onChange={(e: Event) =>
                     updateCategoryConditionRule(
                       step.id,
                       catIndex,
                       ruleId,
                       "type",
-                      (e.target as HTMLSelectElement).value
+                      (e.currentTarget as HTMLSelectElement).value
                     )
                   }
-                  aria-label={translateAdmin("dashboard.table.type")}
                 >
                   {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                    <s-option key={opt.value} value={opt.value}>
                       {opt.label}
-                    </option>
+                    </s-option>
                   ))}
-                </select>
-                <select
-                  className={productPageBundleStyles.ruleInlineSelect}
+                </s-select>
+                <s-select
+                  label={translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                  )}
+                  labelAccessibilityVisibility="exclusive"
                   value={
                     rule.condition ?? rule.operator ?? "greaterThanOrEqualTo"
                   }
-                  onChange={(e) =>
+                  onChange={(e: Event) =>
                     updateCategoryConditionRule(
                       step.id,
                       catIndex,
                       ruleId,
                       "condition",
-                      (e.target as HTMLSelectElement).value
+                      (e.currentTarget as HTMLSelectElement).value
                     )
                   }
-                  aria-label={translateAdmin(
-                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                  )}
                 >
                   {[...CATEGORY_CONDITION_OPERATOR_OPTIONS].map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                    <s-option key={opt.value} value={opt.value}>
                       {opt.label}
-                    </option>
+                    </s-option>
                   ))}
-                </select>
-                <input
-                  type="number"
-                  className={productPageBundleStyles.ruleInlineNumber}
+                </s-select>
+                <s-number-field
+                  label={translateAdmin("adminAttributes.value")}
+                  labelAccessibilityVisibility="exclusive"
                   min={0}
-                  value={rule.value ?? ""}
-                  onChange={(e) =>
+                  value={String(rule.value ?? "")}
+                  onInput={(e: Event) =>
                     updateCategoryConditionRule(
                       step.id,
                       catIndex,
                       ruleId,
                       "value",
-                      (e.target as HTMLInputElement).value
+                      (e.currentTarget as HTMLInputElement).value
                     )
                   }
-                  autoComplete="off"
-                  aria-label={translateAdmin("adminAttributes.value")}
+                  autocomplete="off"
                 />
               </div>
             </div>
@@ -199,16 +231,15 @@ function PpbCategoryRuleBody({
           }
         />
       )}
-      <button
-        type="button"
-        className={productPageBundleStyles.addSectionButton}
+      <s-button
+        variant="secondary"
+        icon="plus"
         onClick={() => addCategoryConditionRule(step.id, catIndex)}
       >
-        <PlusIcon />
         {translateAdmin(
           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
         )}
-      </button>
+      </s-button>
     </div>
   );
 }

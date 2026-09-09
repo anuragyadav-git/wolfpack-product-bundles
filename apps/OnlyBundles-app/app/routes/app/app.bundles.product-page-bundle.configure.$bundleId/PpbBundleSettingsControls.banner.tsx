@@ -1,15 +1,23 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import { FilePicker } from "../../../components/shared/FilePicker";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbBundleBannerSettings() {
-  const {
-    bundleBannerDesktopUrl,
-    bundleBannerMobileUrl,
-    FilePicker,
-    markAsDirty,
-    setBundleBannerDesktopUrl,
-    setBundleBannerMobileUrl,
-  } = usePpbConfigureContext();
+export type PpbBundleBannerSettingsProps = Pick<
+  PpbConfigureFlow,
+  | "bundleBannerDesktopUrl"
+  | "bundleBannerMobileUrl"
+  | "markAsDirty"
+  | "setBundleBannerDesktopUrl"
+  | "setBundleBannerMobileUrl"
+>;
+
+export function PpbBundleBannerSettings({
+  bundleBannerDesktopUrl,
+  bundleBannerMobileUrl,
+  markAsDirty,
+  setBundleBannerDesktopUrl,
+  setBundleBannerMobileUrl,
+}: PpbBundleBannerSettingsProps) {
 
   return (
     <s-section>

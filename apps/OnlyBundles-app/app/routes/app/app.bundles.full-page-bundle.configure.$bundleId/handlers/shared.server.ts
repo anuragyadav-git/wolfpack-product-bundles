@@ -1,4 +1,4 @@
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import { AppLogger } from "../../../../lib/logger";
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
 import { safeJsonParse } from "../../../../services/bundles/bundle-configure-handlers.server";
@@ -12,6 +12,7 @@ import {
   serializePricingDisplayOptions,
 } from "../../../../lib/pricing-display-options";
 import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
+import { parsePricingRule } from "../../../../lib/pricing-rule-parser";
 
 const DEFAULT_PROGRESS_MESSAGE = "Add {conditionText} to get {discountText}";
 const DEFAULT_SUCCESS_MESSAGE = "Congratulations! You got {discountText}";
@@ -29,32 +30,9 @@ function buildFullPageBundlePricing(pricing: any) {
   return {
     enabled: pricing.enabled,
     method: pricing.method || "percentage_off",
-    rules: safeJsonParse(pricing.rules, []).map((rule: any) => {
-      const conditionValue =
-        Number(
-          rule.conditionValue ?? rule.condition?.value ?? rule.value ?? 0,
-        ) || 0;
-      const discountValue =
-        Number(rule.discountValue ?? rule.discount?.value ?? 0) || 0;
-      const flat: Record<string, unknown> = {
-        id: rule.id,
-        conditionType: rule.conditionType || rule.condition?.type || "quantity",
-        conditionValue,
-        discountValue,
-      };
-      if (rule.customerBuys !== undefined)
-        flat.customerBuys = Number(rule.customerBuys);
-      if (rule.customerGets !== undefined)
-        flat.customerGets = Number(rule.customerGets);
-      if (rule.bxyDiscountType !== undefined)
-        flat.bxyDiscountType = rule.bxyDiscountType;
-      if (rule.bxyApplyMode !== undefined)
-        flat.bxyApplyMode = rule.bxyApplyMode;
-      if (rule.fixedBundlePrice !== undefined)
-        flat.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
-      if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
-      return flat;
-    }),
+    rules: safeJsonParse(pricing.rules, []).map((rule: unknown) =>
+      parsePricingRule(rule),
+    ),
     display: {
       showFooter: pricing.showFooter !== false,
       showDiscountProgressBar: pricing.showProgressBar === true,
@@ -77,12 +55,7 @@ function buildRuntimeProductReferences(products: any[] = []) {
 
 function buildFullPageBundleMetafieldSteps(steps: any[] = []) {
   return steps.map((step: any, index: number) => {
-    const rawStepProducts =
-      Array.isArray(step.StepProduct) && step.StepProduct.length > 0
-        ? step.StepProduct
-        : Array.isArray(step.products)
-          ? step.products
-          : [];
+    const rawStepProducts = Array.isArray(step.StepProduct) ? step.StepProduct : [];
 
     const stepProducts = buildRuntimeProductReferences(rawStepProducts)
       .map((product: any) => ({
@@ -216,13 +189,17 @@ export function buildFullPageBundleMetafieldConfig(
   bundle: any,
   overrides: Record<string, unknown> = {},
 ) {
+  if (bundle?.bundleType !== BundleType.FULL_PAGE) {
+    throw new Error("FPB metafield config requires bundleType full_page");
+  }
+
   return {
     bundleId: bundle.id,
     id: bundle.id,
     name: bundle.name,
     description: bundle.description || "",
     status: bundle.status,
-    bundleType: bundle.bundleType || BundleType.FULL_PAGE,
+    bundleType: BundleType.FULL_PAGE,
     publicNumber: bundle.publicNumber,
     templateName: bundle.templateName || null,
     shopifyProductId: bundle.shopifyProductId || null,
@@ -328,26 +305,9 @@ export function buildFpbBaseConfig(
     pricing: {
       enabled: discountData.discountEnabled,
       method: discountData.discountType,
-      rules: (discountData.discountRules || []).map((rule: any) => {
-        const flat: Record<string, unknown> = {
-          id: rule.id,
-          conditionType: rule.conditionType || "quantity",
-          conditionValue: Number(rule.conditionValue ?? rule.value ?? 0) || 0,
-          discountValue: Number(rule.discountValue ?? 0) || 0,
-        };
-        if (rule.customerBuys !== undefined)
-          flat.customerBuys = Number(rule.customerBuys);
-        if (rule.customerGets !== undefined)
-          flat.customerGets = Number(rule.customerGets);
-        if (rule.bxyDiscountType !== undefined)
-          flat.bxyDiscountType = rule.bxyDiscountType;
-        if (rule.bxyApplyMode !== undefined)
-          flat.bxyApplyMode = rule.bxyApplyMode;
-        if (rule.fixedBundlePrice !== undefined)
-          flat.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
-        if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
-        return flat;
-      }),
+      rules: (discountData.discountRules || []).map((rule: unknown) =>
+        parsePricingRule(rule),
+      ),
       display: {
         showFooter: discountData.showFooter !== false,
         showDiscountProgressBar: discountData.showDiscountProgressBar === true,

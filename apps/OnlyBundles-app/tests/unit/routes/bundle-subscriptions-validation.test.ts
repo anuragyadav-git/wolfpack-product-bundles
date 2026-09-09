@@ -415,7 +415,7 @@ describe("bundle subscription validation handler", () => {
       ...baseBundle,
       steps: [{
         ...baseBundle.steps[0],
-        StepProduct: [],
+        StepProduct: [{ productId, variants: [] }],
         StepCategory: [{
           id: "cat-1",
           products: [{ id: productId }],

@@ -1,25 +1,17 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { PpbBundleEmbedSection } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleEmbedSection";
-import { PpbBundleWidgetSection } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleWidgetSection";
-import { PpbFreeGiftAddonsSection } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbFreeGiftAddonsSection";
-
-const mockUsePpbConfigureContext = jest.fn();
-
-jest.mock(
-  "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({
-    usePpbConfigureContext: () => mockUsePpbConfigureContext(),
-  })
-);
-
-jest.mock(
-  "../../../app/components/bundle-configure/LiveUpsellWidgetPreview",
-  () => ({
-    LiveUpsellWidgetPreview: ({ title }: { title: string }) =>
-      React.createElement("div", null, title),
-  })
-);
+import {
+  PpbBundleEmbedSection,
+  type PpbBundleEmbedSectionProps,
+} from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleEmbedSection";
+import {
+  PpbBundleWidgetSection,
+  type PpbBundleWidgetSectionProps,
+} from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleWidgetSection";
+import {
+  PpbFreeGiftAddonsSection,
+  type PpbFreeGiftAddonsSectionProps,
+} from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbFreeGiftAddonsSection";
 
 const noop = jest.fn();
 
@@ -105,10 +97,10 @@ describe("PPB disabled configuration surfaces", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("keeps saved Widget settings visible and disables the full dependent surface", () => {
-    mockUsePpbConfigureContext.mockReturnValue(makeFlow());
+    const props = makeFlow() as unknown as PpbBundleWidgetSectionProps;
 
     const view = renderToStaticMarkup(
-      React.createElement(PpbBundleWidgetSection)
+      React.createElement(PpbBundleWidgetSection, props)
     );
 
     expect(view).toContain("Saved widget title");
@@ -122,12 +114,12 @@ describe("PPB disabled configuration surfaces", () => {
   });
 
   it("keeps saved Embed settings inert while leaving placement available", () => {
-    mockUsePpbConfigureContext.mockReturnValue(
-      makeFlow({ activeSection: "bundle_embed" })
-    );
+    const props = makeFlow({
+      activeSection: "bundle_embed",
+    }) as unknown as PpbBundleEmbedSectionProps;
 
     const view = renderToStaticMarkup(
-      React.createElement(PpbBundleEmbedSection)
+      React.createElement(PpbBundleEmbedSection, props)
     );
 
     expect(view).toContain("Saved embed title");
@@ -141,12 +133,12 @@ describe("PPB disabled configuration surfaces", () => {
   });
 
   it("restores interaction without changing saved values when Widget is enabled", () => {
-    mockUsePpbConfigureContext.mockReturnValue(
-      makeFlow({ upsellWidgetEnabled: true })
-    );
+    const props = makeFlow({
+      upsellWidgetEnabled: true,
+    }) as unknown as PpbBundleWidgetSectionProps;
 
     const view = renderToStaticMarkup(
-      React.createElement(PpbBundleWidgetSection)
+      React.createElement(PpbBundleWidgetSection, props)
     );
 
     expect(view).toContain("Saved widget title");
@@ -160,8 +152,7 @@ describe("PPB disabled configuration surfaces", () => {
     const setBundleEmbedSelectedProducts = jest.fn();
     const setBundleEmbedSpecificProductPages = jest.fn();
     const setBundleEmbedDisplayOn = jest.fn();
-    mockUsePpbConfigureContext.mockReturnValue(
-      makeFlow({
+    const props = makeFlow({
         activeSection: "bundle_embed",
         bundleEmbedEnabled: true,
         setBundleEmbedCollectionsSelectedData,
@@ -169,10 +160,9 @@ describe("PPB disabled configuration surfaces", () => {
         setBundleEmbedSelectedProducts,
         setBundleEmbedSpecificCollectionPages,
         setBundleEmbedSpecificProductPages,
-      })
-    );
+      }) as unknown as PpbBundleEmbedSectionProps;
 
-    const view = PpbBundleEmbedSection();
+    const view = PpbBundleEmbedSection(props);
     const targeting = findElement(
       view,
       (element) =>
@@ -190,8 +180,7 @@ describe("PPB disabled configuration surfaces", () => {
 
   it("disables the PPB gifting step without clearing its saved configuration", () => {
     const updateStepField = jest.fn();
-    mockUsePpbConfigureContext.mockReturnValue(
-      makeFlow({
+    const props = makeFlow({
         activeSection: "free_gift_addons",
         activeTabIndex: 0,
         productPageBundleStyles: new Proxy(
@@ -218,10 +207,9 @@ describe("PPB disabled configuration surfaces", () => {
           updateStepField,
         },
         templateVariablesModalRef: { current: null },
-      })
-    );
+      }) as unknown as PpbFreeGiftAddonsSectionProps;
 
-    const view = PpbFreeGiftAddonsSection();
+    const view = PpbFreeGiftAddonsSection(props);
     const switchControl = findElement(
       view,
       (element) =>

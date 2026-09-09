@@ -1,8 +1,11 @@
+import type { ComponentProps } from "react";
+
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { getConfigureActionIcon } from "../../../lib/bundle-config/configure-action-icons";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
+import { getVisibilityResourceId } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
 const TARGETS = [
   { value: "all_products", label: "All products in bundle" },
@@ -10,21 +13,79 @@ const TARGETS = [
   { value: "specific_collections", label: "Specific collections" },
 ] as const;
 
-export function PpbBundleEmbedSection() {
-  const flow = usePpbConfigureContext();
-  if (flow.activeSection !== "bundle_embed") return null;
+export type PpbBundleEmbedSectionProps = Pick<
+  PpbConfigureFlow,
+  | "activeSection"
+  | "bundleEmbedAddBrowsedProduct"
+  | "bundleEmbedCollectionsSelectedData"
+  | "bundleEmbedDisplayOn"
+  | "bundleEmbedEnabled"
+  | "bundleEmbedSelectedProducts"
+  | "bundleEmbedSubTitle"
+  | "bundleEmbedTitle"
+  | "clearValidationError"
+  | "handlePlaceWidget"
+  | "markAsDirty"
+  | "openMultiLanguageModal"
+  | "openVisibilityCollectionPicker"
+  | "openVisibilityProductPicker"
+  | "removeVisibilityCollectionTarget"
+  | "removeVisibilityProductTarget"
+  | "setBundleEmbedAddBrowsedProduct"
+  | "setBundleEmbedCollectionsSelectedData"
+  | "setBundleEmbedDisplayOn"
+  | "setBundleEmbedEnabled"
+  | "setBundleEmbedSelectedProducts"
+  | "setBundleEmbedSpecificCollectionPages"
+  | "setBundleEmbedSpecificProductPages"
+  | "setBundleEmbedSubTitle"
+  | "setBundleEmbedTitle"
+  | "shopLocales"
+  | "validationErrors"
+>;
 
-  const disabled = !flow.bundleEmbedEnabled;
+export function PpbBundleEmbedSection({
+  activeSection,
+  bundleEmbedAddBrowsedProduct,
+  bundleEmbedCollectionsSelectedData,
+  bundleEmbedDisplayOn,
+  bundleEmbedEnabled,
+  bundleEmbedSelectedProducts,
+  bundleEmbedSubTitle,
+  bundleEmbedTitle,
+  clearValidationError,
+  handlePlaceWidget,
+  markAsDirty,
+  openMultiLanguageModal,
+  openVisibilityCollectionPicker,
+  openVisibilityProductPicker,
+  removeVisibilityCollectionTarget,
+  removeVisibilityProductTarget,
+  setBundleEmbedAddBrowsedProduct,
+  setBundleEmbedCollectionsSelectedData,
+  setBundleEmbedDisplayOn,
+  setBundleEmbedEnabled,
+  setBundleEmbedSelectedProducts,
+  setBundleEmbedSpecificCollectionPages,
+  setBundleEmbedSpecificProductPages,
+  setBundleEmbedSubTitle,
+  setBundleEmbedTitle,
+  shopLocales,
+  validationErrors,
+}: PpbBundleEmbedSectionProps) {
+  if (activeSection !== "bundle_embed") return null;
+
+  const disabled = !bundleEmbedEnabled;
   const changeTarget = (value: string) => {
-    if (value === flow.bundleEmbedDisplayOn) return;
-    flow.setBundleEmbedSelectedProducts([]);
-    flow.setBundleEmbedSpecificProductPages([]);
-    flow.setBundleEmbedCollectionsSelectedData([]);
-    flow.setBundleEmbedSpecificCollectionPages([]);
-    flow.setBundleEmbedDisplayOn(value);
-    flow.clearValidationError("embed.products");
-    flow.clearValidationError("embed.collections");
-    flow.markAsDirty();
+    if (value === bundleEmbedDisplayOn) return;
+    setBundleEmbedSelectedProducts([]);
+    setBundleEmbedSpecificProductPages([]);
+    setBundleEmbedCollectionsSelectedData([]);
+    setBundleEmbedSpecificCollectionPages([]);
+    setBundleEmbedDisplayOn(value);
+    clearValidationError("embed.products");
+    clearValidationError("embed.collections");
+    markAsDirty();
   };
 
   return (
@@ -49,12 +110,12 @@ export function PpbBundleEmbedSection() {
                   accessibilityLabel={translateAdmin(
                     "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundleembedsection.embedBundleBuilderOnProductPages"
                   )}
-                  checked={flow.bundleEmbedEnabled || undefined}
+                  checked={bundleEmbedEnabled || undefined}
                   onChange={(event: Event) => {
-                    flow.setBundleEmbedEnabled(
+                    setBundleEmbedEnabled(
                       (event.target as HTMLInputElement).checked
                     );
-                    flow.markAsDirty();
+                    markAsDirty();
                   }}
                 />
               </s-stack>
@@ -62,21 +123,21 @@ export function PpbBundleEmbedSection() {
                 variant="secondary"
                 icon="language-translate"
                 disabled={
-                  disabled || (flow.shopLocales?.length ?? 0) === 0 || undefined
+                  disabled || (shopLocales?.length ?? 0) === 0 || undefined
                 }
                 onClick={() =>
-                  flow.openMultiLanguageModal(
+                  openMultiLanguageModal(
                     "Bundle Embed",
                     [
                       {
                         key: "title",
                         label: "Title",
-                        fallback: flow.bundleEmbedTitle,
+                        fallback: bundleEmbedTitle,
                       },
                       {
                         key: "subTitle",
                         label: "Sub Title",
-                        fallback: flow.bundleEmbedSubTitle,
+                        fallback: bundleEmbedSubTitle,
                         multiline: true,
                       },
                     ],
@@ -101,27 +162,27 @@ export function PpbBundleEmbedSection() {
                 <s-text-field
                   id="configure-embed-title"
                   label={translateAdmin("adminAttributes.title")}
-                  value={flow.bundleEmbedTitle}
+                  value={bundleEmbedTitle}
                   required
                   disabled={disabled || undefined}
-                  error={flow.validationErrors["embed.title"]}
+                  error={validationErrors["embed.title"]}
                   onInput={(event: Event) => {
-                    flow.setBundleEmbedTitle(
+                    setBundleEmbedTitle(
                       (event.target as HTMLInputElement).value
                     );
-                    flow.clearValidationError("embed.title");
-                    flow.markAsDirty();
+                    clearValidationError("embed.title");
+                    markAsDirty();
                   }}
                 />
                 <s-text-field
                   label={translateAdmin("adminAttributes.subTitle")}
-                  value={flow.bundleEmbedSubTitle}
+                  value={bundleEmbedSubTitle}
                   disabled={disabled || undefined}
                   onInput={(event: Event) => {
-                    flow.setBundleEmbedSubTitle(
+                    setBundleEmbedSubTitle(
                       (event.target as HTMLInputElement).value
                     );
-                    flow.markAsDirty();
+                    markAsDirty();
                   }}
                 />
 
@@ -134,7 +195,7 @@ export function PpbBundleEmbedSection() {
                   label={translateAdmin("adminAttributes.productPageTargeting")}
                   labelAccessibilityVisibility="exclusive"
                   name="ppbEmbedDisplayOn"
-                  values={[flow.bundleEmbedDisplayOn]}
+                  values={[bundleEmbedDisplayOn]}
                   disabled={disabled || undefined}
                   onChange={(event: Event) => {
                     const value = (
@@ -154,40 +215,40 @@ export function PpbBundleEmbedSection() {
                   ))}
                 </s-choice-list>
 
-                {flow.bundleEmbedDisplayOn === "specific_products" && (
+                {bundleEmbedDisplayOn === "specific_products" && (
                   <EmbedResourcePicker
                     buttonLabel="Select products"
                     icon={getConfigureActionIcon("add-product")}
                     disabled={disabled}
                     onOpen={async () => {
-                      await flow.openVisibilityProductPicker("embed");
-                      flow.clearValidationError("embed.products");
+                      await openVisibilityProductPicker("embed");
+                      clearValidationError("embed.products");
                     }}
                     onRemove={(index) =>
-                      flow.removeVisibilityProductTarget("embed", index)
+                      removeVisibilityProductTarget("embed", index)
                     }
-                    resources={flow.bundleEmbedSelectedProducts}
-                    resourceId={flow.getVisibilityResourceId}
-                    validationError={flow.validationErrors["embed.products"]}
+                    resources={bundleEmbedSelectedProducts}
+                    resourceId={getVisibilityResourceId}
+                    validationError={validationErrors["embed.products"]}
                     validationId="configure-embed-products"
                   />
                 )}
 
-                {flow.bundleEmbedDisplayOn === "specific_collections" && (
+                {bundleEmbedDisplayOn === "specific_collections" && (
                   <EmbedResourcePicker
                     buttonLabel="Select collections"
                     icon={getConfigureActionIcon("add-collection")}
                     disabled={disabled}
                     onOpen={async () => {
-                      await flow.openVisibilityCollectionPicker("embed");
-                      flow.clearValidationError("embed.collections");
+                      await openVisibilityCollectionPicker("embed");
+                      clearValidationError("embed.collections");
                     }}
                     onRemove={(index) =>
-                      flow.removeVisibilityCollectionTarget("embed", index)
+                      removeVisibilityCollectionTarget("embed", index)
                     }
-                    resources={flow.bundleEmbedCollectionsSelectedData}
-                    resourceId={flow.getVisibilityResourceId}
-                    validationError={flow.validationErrors["embed.collections"]}
+                    resources={bundleEmbedCollectionsSelectedData}
+                    resourceId={getVisibilityResourceId}
+                    validationError={validationErrors["embed.collections"]}
                     validationId="configure-embed-collections"
                   />
                 )}
@@ -197,13 +258,13 @@ export function PpbBundleEmbedSection() {
                   label={translateAdmin(
                     "adminAttributes.addBrowsedProductToBundle"
                   )}
-                  checked={flow.bundleEmbedAddBrowsedProduct || undefined}
+                  checked={bundleEmbedAddBrowsedProduct || undefined}
                   disabled={disabled || undefined}
                   onChange={(event: Event) => {
-                    flow.setBundleEmbedAddBrowsedProduct(
+                    setBundleEmbedAddBrowsedProduct(
                       (event.target as HTMLInputElement).checked
                     );
-                    flow.markAsDirty();
+                    markAsDirty();
                   }}
                 />
               </s-stack>
@@ -233,7 +294,7 @@ export function PpbBundleEmbedSection() {
                 <s-button
                   variant="primary"
                   icon="theme-edit"
-                  onClick={flow.handlePlaceWidget}
+                  onClick={handlePlaceWidget}
                 >
                   {translateAdmin(
                     "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundleembedsection.placeBlock"
@@ -261,7 +322,7 @@ function EmbedResourcePicker({
 }: {
   buttonLabel: string;
   disabled: boolean;
-  icon: string;
+  icon: ComponentProps<"s-button">["icon"];
   onOpen: () => void | Promise<void>;
   onRemove: (index: number) => void;
   resources: Array<{ id?: string; title?: string; [key: string]: unknown }>;
@@ -273,7 +334,7 @@ function EmbedResourcePicker({
     <s-stack direction="block" gap="small">
       <s-button
         variant="secondary"
-        icon={icon as any}
+        icon={icon}
         disabled={disabled || undefined}
         onClick={onOpen}
       >

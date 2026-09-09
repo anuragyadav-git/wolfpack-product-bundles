@@ -8,7 +8,6 @@
 import {
   parsePricingRule,
   parsePricingConfiguration,
-  migrateNestedRule,
 } from "../../../app/lib/pricing-rule-parser";
 
 // ---------------------------------------------------------------------------
@@ -119,6 +118,21 @@ describe("parsePricingRule — valid flat format", () => {
     expect(result.conditionValue).toBe(3);
     expect(result.discountValue).toBe(20);
   });
+
+  it.each(["gte", "gt", "lte", "lt", "eq"])(
+    "preserves the canonical %s pricing operator",
+    (conditionOperator) => {
+      const result = parsePricingRule({
+        id: `operator-${conditionOperator}`,
+        conditionType: "quantity",
+        conditionOperator,
+        conditionValue: 3,
+        discountValue: 20,
+      });
+
+      expect(result.conditionOperator).toBe(conditionOperator);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -148,77 +162,15 @@ describe("parsePricingRule — invalid input", () => {
   it("throws when input is a string", () => {
     expect(() => parsePricingRule("foo")).toThrow();
   });
-});
 
-// ---------------------------------------------------------------------------
-// migrateNestedRule — converts old nested shape to flat
-// ---------------------------------------------------------------------------
-
-describe("migrateNestedRule — nested → flat conversion", () => {
-  it("converts a nested percentage quantity rule", () => {
-    const nested = {
-      id: "r1",
-      condition: { type: "quantity", operator: "gte", value: 3 },
-      discount: { method: "percentage_off", value: 15 },
-    };
-    const result = migrateNestedRule(nested);
-    expect(result).toMatchObject({
-      id: "r1",
+  it("rejects a retired long-form pricing operator", () => {
+    expect(() => parsePricingRule({
+      id: "legacy-operator",
       conditionType: "quantity",
+      conditionOperator: "greater_than_or_equal_to",
       conditionValue: 3,
-      discountValue: 15,
-    });
-    expect((result as any).condition).toBeUndefined();
-    expect((result as any).discount).toBeUndefined();
-    expect((result as any).operator).toBeUndefined();
-  });
-
-  it("converts a nested amount fixed rule", () => {
-    const nested = {
-      id: "r2",
-      condition: { type: "amount", operator: "gte", value: 10000 },
-      discount: { method: "fixed_amount_off", value: 500 },
-    };
-    const result = migrateNestedRule(nested);
-    expect(result.conditionType).toBe("amount");
-    expect(result.conditionValue).toBe(10000);
-    expect(result.discountValue).toBe(500);
-  });
-
-  it("converts BXY nested rule and drops step IDs", () => {
-    const nested = {
-      id: "r3",
-      condition: { type: "quantity", operator: "gte", value: 2 },
-      discount: { method: "buy_x_get_y", value: 0 },
-      getQty: 1,
-      buyStepId: "step-1",
-      getStepId: "step-2",
-    };
-    const result = migrateNestedRule(nested);
-    expect(result.conditionType).toBe("quantity");
-    expect(result.conditionValue).toBe(2);
-    expect(result.discountValue).toBe(0);
-    expect(result.customerBuys).toBe(2);
-    expect(result.customerGets).toBe(1);
-    expect((result as any).buyStepId).toBeUndefined();
-    expect((result as any).getStepId).toBeUndefined();
-  });
-
-  it("passes through already-flat rules unchanged", () => {
-    const flat = { id: "r4", conditionType: "quantity", conditionValue: 2, discountValue: 10 };
-    const result = migrateNestedRule(flat as any);
-    expect(result).toMatchObject(flat);
-  });
-
-  it("falls back to top-level discountValue when discount object is absent", () => {
-    const nested = {
-      id: "r5",
-      condition: { type: "quantity", operator: "gte", value: 2 },
       discountValue: 20,
-    };
-    const result = migrateNestedRule(nested as any);
-    expect(result.conditionValue).toBe(2);
-    expect(result.discountValue).toBe(20);
+    })).toThrow("conditionOperator");
   });
 });
 

@@ -1,4 +1,5 @@
 import db from "../db.server";
+import type { Prisma } from "@prisma/client";
 import { BundleStatus, BundleType } from "../constants/bundle";
 import { getBundleEditPath } from "../lib/bundle-navigation";
 
@@ -18,22 +19,7 @@ const bundleSelect = {
   _count: { select: { steps: true } },
 } as const;
 
-type SelectedBundle = {
-  id: string;
-  name: string;
-  status: string;
-  bundleType: string;
-  createdAt: Date;
-  updatedAt: Date;
-  shopifyProductId: string | null;
-  pricing: { enabled: boolean; method: string } | null;
-  _count: { steps: number };
-};
-
-type SidekickRequestBody = {
-  operation?: unknown;
-  input?: unknown;
-};
+type SelectedBundle = Prisma.BundleGetPayload<{ select: typeof bundleSelect }>;
 
 export class SidekickBundleRequestError extends Error {
   constructor(
@@ -116,7 +102,7 @@ function parseSearchInput(value: unknown) {
 
 async function searchBundles(shop: string, input: unknown) {
   const filters = parseSearchInput(input);
-  const bundles = (await db.bundle.findMany({
+  const bundles = await db.bundle.findMany({
     where: {
       shopId: shop,
       ...(filters.query
@@ -136,7 +122,7 @@ async function searchBundles(shop: string, input: unknown) {
     orderBy: { updatedAt: "desc" },
     take: filters.limit + 1,
     select: bundleSelect,
-  })) as SelectedBundle[];
+  });
 
   return {
     results: bundles.slice(0, filters.limit).map((bundle) =>
@@ -155,10 +141,10 @@ async function getBundleSummary(shop: string, input: unknown) {
     throw new SidekickBundleRequestError(400, "invalid_bundle_id");
   }
 
-  const bundle = (await db.bundle.findFirst({
+  const bundle = await db.bundle.findFirst({
     where: { id: bundleId, shopId: shop },
     select: bundleSelect,
-  })) as SelectedBundle | null;
+  });
 
   if (!bundle) {
     throw new SidekickBundleRequestError(404, "bundle_not_found");
@@ -172,7 +158,7 @@ export async function executeSidekickBundleOperation({
   body,
 }: {
   shop: string;
-  body: SidekickRequestBody;
+  body: unknown;
 }) {
   if (!isRecord(body)) {
     throw new SidekickBundleRequestError(400, "invalid_request");

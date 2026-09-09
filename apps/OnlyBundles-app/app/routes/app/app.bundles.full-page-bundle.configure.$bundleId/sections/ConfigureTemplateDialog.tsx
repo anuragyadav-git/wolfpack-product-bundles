@@ -1,23 +1,46 @@
 import { Modal } from "@shopify/app-bridge-react";
 import { useState } from "react";
-import { OptimisedImage } from "../../../../components/OptimisedImage";
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { openThemeEditorInNewTab } from "../../../../lib/theme-editor-navigation.client";
 import { TemplateReadyScreen } from "../../../../components/bundle-configure/TemplateReadyScreen";
 import { TemplatePreviewFeedbackModal } from "../../../../components/bundle-configure/TemplatePreviewFeedbackModal";
 import { translateAdmin } from "~/i18n/config";
+import { fullPageTemplateOptions } from "../configure-constants";
 
-export function FpbTemplateDialog({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
+type TemplateModalStep =
+  | "templates"
+  | "colorsAndCorners"
+  | "textAndImages"
+  | "enableThemeExtension"
+  | "confirm";
+
+export interface FpbTemplateDialogProps {
+  template: {
+    closeSelectTemplateModal: () => void;
+    fullPageBundleStyles: Record<string, string>;
+    handleTemplateNext: () => void;
+    handleTemplatePreview: (
+      onPreviewOpened: (previewUrl: string) => void
+    ) => void | Promise<void>;
+    isPreviewBundleLoading: boolean;
+    isSelectTemplateModalOpen: boolean;
+    pendingDesignPresetId: string | null;
+    pendingDesignTemplate: string | null;
+    setPendingDesignPresetId: (presetId: string | null) => void;
+    setPendingDesignTemplate: (template: string | null) => void;
+    setTemplateModalStep: (step: TemplateModalStep) => void;
+    templateFetcher: { state: string };
+    templateModalStep: TemplateModalStep;
+    templateSaveError: string | null;
+    themeEditorUrl: string | null;
+  };
+}
+
+export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
   const [previewFeedbackUrl, setPreviewFeedbackUrl] = useState<string | null>(
     null
   );
   const {
     fullPageBundleStyles,
-    fullPageTemplateOptions,
     handleTemplateNext,
     handleTemplatePreview,
     isPreviewBundleLoading,
@@ -31,14 +54,15 @@ export function FpbTemplateDialog({
     templateModalStep,
     templateSaveError,
     themeEditorUrl,
-  } = flow;
+    closeSelectTemplateModal,
+  } = template;
 
   return (
     <>
       <Modal
         id="fpb-template-customization-modal"
         open={isSelectTemplateModalOpen}
-        onHide={flow.closeSelectTemplateModal}
+        onHide={closeSelectTemplateModal}
         variant="max"
       >
         <ui-title-bar title={translateAdmin("adminAttributes.customization")} />
@@ -109,16 +133,12 @@ export function FpbTemplateDialog({
                               fullPageBundleStyles.templateOptionImageFrame
                             }
                           >
-                            <OptimisedImage
+                            <s-image
                               src={tpl.image}
                               alt={tpl.label}
-                              className={
-                                fullPageBundleStyles.templateOptionImage
-                              }
-                              width={400}
-                              height={300}
+                              aspectRatio="4/3"
+                              objectFit="cover"
                               loading="eager"
-                              fetchPriority="high"
                             />
                           </span>
                           <span

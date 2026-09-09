@@ -5,7 +5,6 @@ import { authenticate } from "../../../app/shopify.server";
 import { fetchBundleConfigureShopifyData } from "../../../app/lib/bundle-configure-loader.server";
 import { loader } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route";
 import { useConfigureContentState } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/useConfigureContentState";
-import type { ConfigureBundleFlowDraft } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/configure-flow-types";
 
 jest.mock("../../../app/shopify.server", () => ({
   authenticate: { admin: jest.fn() },
@@ -25,10 +24,13 @@ jest.mock("../../../app/lib/bundle-configure-loader.server", () => ({
   fetchBundleConfigureShopifyData: jest.fn(),
 }));
 
-jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/ConfigureBundleFlow", () => ({
-  __esModule: true,
-  default: () => null,
-}));
+jest.mock(
+  "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/ConfigureBundleFlow",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
 
 const mockAuthenticate = authenticate.admin as jest.MockedFunction<
   typeof authenticate.admin
@@ -76,7 +78,7 @@ describe("FPB configure proxy root", () => {
   it("returns the environment-specific root from the authenticated loader", async () => {
     const response = await loader({
       request: new Request(
-        "https://app.example.com/app/bundles/full-page-bundle/configure/bundle-1",
+        "https://app.example.com/app/bundles/full-page-bundle/configure/bundle-1"
       ),
       params: { bundleId: "bundle-1" },
       context: {},
@@ -85,30 +87,28 @@ describe("FPB configure proxy root", () => {
     await expect(response.json()).resolves.toEqual(
       expect.objectContaining({
         storefrontProxyRoot: "/apps/product-bundles-sit",
-      }),
+      })
     );
   });
 
   it("builds the Admin bundle URL from the loader-provided root", () => {
     delete process.env.STOREFRONT_PROXY_ROOT;
-    const flow: ConfigureBundleFlowDraft = {
+    const dependencies = {
       bundle: { publicNumber: 7 },
       shop: "agent-store.myshopify.com",
       storefrontProxyRoot: "/apps/product-bundles-sit",
-      operationAlert: null,
-      setOperationAlert: jest.fn(),
-      clearOperationAlert: jest.fn(),
-    };
+    } as never;
+    let bundlePageUrl = "";
 
     function Harness() {
-      useConfigureContentState(flow);
+      bundlePageUrl = useConfigureContentState(dependencies).bundlePageUrl;
       return null;
     }
 
     renderToStaticMarkup(React.createElement(Harness));
 
-    expect(flow.bundlePageUrl).toBe(
-      "https://agent-store.myshopify.com/apps/product-bundles-sit/wpb/7",
+    expect(bundlePageUrl).toBe(
+      "https://agent-store.myshopify.com/apps/product-bundles-sit/wpb/7"
     );
   });
 });

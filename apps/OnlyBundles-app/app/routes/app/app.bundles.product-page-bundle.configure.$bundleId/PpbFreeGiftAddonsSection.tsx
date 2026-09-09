@@ -1,28 +1,41 @@
 import React from "react";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
+import { FilePicker } from "../../../components/shared/FilePicker";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { showPolarisModal } from "../_shared/bundle-configure/modal-utils";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbFreeGiftAddonsSection() {
-  const {
-    activeSection,
-    activeTabIndex,
-    FilePicker,
-    markAsDirty,
-    openAddonMultiLanguageModal,
-    productPageBundleStyles,
-    ruleMessages,
-    setRuleMessages,
-    setShowIconPickerForStep,
-    shopLocales = [],
-    showIconPickerForStep,
-    showPolarisModal,
-    stepsState,
-    templateVariablesModalRef,
-  } = usePpbConfigureContext();
+export type PpbFreeGiftAddonsSectionProps = Pick<
+  PpbConfigureFlow,
+  | "activeSection"
+  | "activeTabIndex"
+  | "markAsDirty"
+  | "openAddonMultiLanguageModal"
+  | "ruleMessages"
+  | "setRuleMessages"
+  | "setShowIconPickerForStep"
+  | "shopLocales"
+  | "showIconPickerForStep"
+  | "stepsState"
+  | "templateVariablesModalRef"
+>;
 
+export function PpbFreeGiftAddonsSection({
+  activeSection,
+  activeTabIndex,
+  markAsDirty,
+  openAddonMultiLanguageModal,
+  ruleMessages,
+  setRuleMessages,
+  setShowIconPickerForStep,
+  shopLocales = [],
+  showIconPickerForStep,
+  stepsState,
+  templateVariablesModalRef,
+}: PpbFreeGiftAddonsSectionProps) {
   return (
     <>
       {activeSection === "free_gift_addons" &&
@@ -86,13 +99,16 @@ export function PpbFreeGiftAddonsSection() {
                       <div className={productPageBundleStyles.iconColumn}>
                         <div className={productPageBundleStyles.iconBox}>
                           {step.addonIconUrl ? (
-                            <img
-                              src={step.addonIconUrl}
-                              alt={translateAdmin(
-                                "adminAttributes.addOnsStepIcon"
-                              )}
-                              className={productPageBundleStyles.iconImg}
-                            />
+                            <div className={productPageBundleStyles.iconImg}>
+                              <s-image
+                                src={step.addonIconUrl}
+                                alt={translateAdmin(
+                                  "adminAttributes.addOnsStepIcon"
+                                )}
+                                aspectRatio="1/1"
+                                objectFit="contain"
+                              />
+                            </div>
                           ) : (
                             <div
                               className={

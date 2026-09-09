@@ -1,100 +1,101 @@
-import { readFpbConfigureRouteFamilySource } from "./fpb-configure-route-source";
+import React from "react";
 
-describe("FPB Add-ons selected products modal picker stack", () => {
-  const routeSource = readFpbConfigureRouteFamilySource();
-  const normalizedRouteSource = routeSource.replace(/\s+/g, " ");
+import { FpbSelectedItemsModals } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureSelectedItemsModals";
 
-  it("closes the selected-products modal before opening the resource picker from that modal", () => {
-    const handlerStart = routeSource.indexOf(
-      "const handleAddonSelectedProductAdd = useCallback",
-    );
-    const handlerEnd = routeSource.indexOf(
-      "const handleDisableAddonStepConfirm",
-      handlerStart,
-    );
-    const handlerSource = routeSource.slice(handlerStart, handlerEnd);
+function childElements(element: React.ReactElement): React.ReactElement[] {
+  return React.Children.toArray(element.props.children).filter(
+    React.isValidElement
+  ) as React.ReactElement[];
+}
 
-    expect(handlerSource).toContain("reopenSelectedProductsModal");
-    expect(handlerSource).toContain(
-      "flow.setIsAddonSelectedProductsModalOpen(false)",
-    );
-    expect(handlerSource).toContain(
-      "flow.hidePolarisModal(flow.addonSelectedProductsModalRef)",
-    );
+function descendants(element: React.ReactElement): React.ReactElement[] {
+  const children = childElements(element);
+  return children.flatMap((child) => [child, ...descendants(child)]);
+}
 
-    const closeBeforePicker = handlerSource.indexOf(
-      "flow.hidePolarisModal(flow.addonSelectedProductsModalRef)",
-    );
-    const pickerOpen = handlerSource.indexOf("resourcePicker");
-    expect(closeBeforePicker).toBeGreaterThan(-1);
-    expect(pickerOpen).toBeGreaterThan(closeBeforePicker);
+describe("FPB selected-items modal behavior", () => {
+  const onAdd = jest.fn();
+  const onCloseAddon = jest.fn();
+  const onRemove = jest.fn();
+  const onOpenProduct = jest.fn();
+
+  beforeEach(() => jest.clearAllMocks());
+
+  function renderModals() {
+    return FpbSelectedItemsModals({
+      products: {
+        modalRef: { current: null },
+        selected: [
+          {
+            id: "gid://shopify/Product/1",
+            productId: "1",
+            title: "Selected product",
+            variants: [{ id: "gid://shopify/ProductVariant/2" }],
+          },
+        ],
+        onClose: jest.fn(),
+        onOpenInAdmin: onOpenProduct,
+      },
+      addonProducts: {
+        modalRef: { current: null },
+        tierIndex: 2,
+        selected: [
+          { id: "gid://shopify/Product/3", title: "Add-on product" },
+        ],
+        onAdd,
+        onClose: onCloseAddon,
+        onRemove,
+      },
+      collections: {
+        modalRef: { current: null },
+        selected: [],
+        onClose: jest.fn(),
+      },
+      variables: {
+        templateModalRef: { current: null },
+        discountModalRef: { current: null },
+        addonModalRef: { current: null },
+        onCloseTemplate: jest.fn(),
+      },
+      disableAddon: {
+        modalRef: { current: null },
+        onCancel: jest.fn(),
+        onConfirm: jest.fn(),
+      },
+      styles: new Proxy({}, { get: (_, key) => String(key) }),
+    } as never) as React.ReactElement;
+  }
+
+  it("delegates add-on close and picker actions with the active tier", () => {
+    const modals = childElements(renderModals());
+    const addonModalChildren = childElements(modals[1]);
+
+    addonModalChildren.at(-2)?.props.onClick();
+    addonModalChildren.at(-1)?.props.onClick();
+
+    expect(onCloseAddon).toHaveBeenCalledTimes(1);
+    expect(onAdd).toHaveBeenCalledWith(2, {
+      reopenSelectedProductsModal: true,
+    });
   });
 
-  it("reopens the selected-products modal after picker completion only for modal-launched add", () => {
-    const handlerStart = routeSource.indexOf(
-      "const handleAddonSelectedProductAdd = useCallback",
+  it("delegates selected product navigation and add-on removal", () => {
+    const modals = childElements(renderModals());
+    const productOpenButton = descendants(modals[0]).find(
+      (element) =>
+        element.type === "s-button" &&
+        element.props.children === "Selected product"
     );
-    const handlerEnd = routeSource.indexOf(
-      "const handleDisableAddonStepConfirm",
-      handlerStart,
-    );
-    const handlerSource = routeSource.slice(handlerStart, handlerEnd);
-    const modalStart = routeSource.indexOf(
-      'id="addon-selected-products-modal"',
-    );
-    const modalEnd = routeSource.indexOf(
-      "{/* Selected Collections Modal */}",
-      modalStart,
-    );
-    const modalSource = routeSource.slice(modalStart, modalEnd);
-    expect(handlerSource).toContain(
-      "setAddonSelectedProductsTierIndex(tierIndex)",
-    );
-    expect(handlerSource).toContain(
-      "setIsAddonSelectedProductsModalOpen(true)",
-    );
-    expect(modalSource.replace(/\s+/g, " ")).toContain(
-      "handleAddonSelectedProductAdd(addonSelectedProductsTierIndex ?? 0, { reopenSelectedProductsModal: true, })",
-    );
-    expect(normalizedRouteSource).toContain(
-      "handleAddonSelectedProductAdd(idx)",
-    );
-    expect(normalizedRouteSource).not.toContain(
-      "handleAddonSelectedProductAdd(idx, { reopenSelectedProductsModal: true })",
-    );
-  });
+    productOpenButton?.props.onClick();
 
-  it("imperatively hides the selected-products modal when closing it", () => {
-    const closeStart = normalizedRouteSource.indexOf(
-      "const handleCloseAddonSelectedProductsModal = () =>",
+    const removeButton = descendants(modals[1]).find(
+      (element) =>
+        element.type === "s-button" &&
+        element.props.accessibilityLabel === "Remove Add-on product"
     );
-    const closeEnd = normalizedRouteSource.indexOf(
-      "useModalHideListener(productsModalRef",
-      closeStart,
-    );
-    const closeSource = normalizedRouteSource.slice(closeStart, closeEnd);
+    removeButton?.props.onClick();
 
-    expect(closeSource).toContain("setIsAddonSelectedProductsModalOpen(false)");
-    expect(closeSource).toContain("setAddonSelectedProductsTierIndex(null)");
-    expect(closeSource).toContain(
-      "hidePolarisModal(addonSelectedProductsModalRef)",
-    );
-  });
-
-  it("wires the selected-products modal close action to the Polaris hide command", () => {
-    const modalStart = routeSource.indexOf(
-      'id="addon-selected-products-modal"',
-    );
-    const modalEnd = routeSource.indexOf(
-      "{/* Selected Collections Modal */}",
-      modalStart,
-    );
-    const modalSource = routeSource.slice(modalStart, modalEnd);
-
-    expect(modalSource).toContain('id="addon-selected-products-modal"');
-    expect(modalSource).toContain('slot="secondary-actions"');
-    expect(modalSource).toContain('variant="secondary"');
-    expect(modalSource).toContain('commandFor="addon-selected-products-modal"');
-    expect(modalSource).toContain('command="--hide"');
+    expect(onOpenProduct).toHaveBeenCalledWith("1");
+    expect(onRemove).toHaveBeenCalledWith(2, 0);
   });
 });

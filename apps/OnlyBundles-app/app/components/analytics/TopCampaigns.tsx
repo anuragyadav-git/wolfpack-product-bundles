@@ -10,10 +10,10 @@ import {
   type CampaignResultRow,
   type CampaignResultSortDirection,
   type CampaignResultSortKey,
-} from "../../lib/analytics";
+} from "../../lib/analytics/campaign-results";
 import { translateAdmin } from "~/i18n/config";
 
-export interface TopCampaignsProps {
+interface TopCampaignsProps {
   rows: CampaignResultRow[];
   formatRevenue: (cents: number) => string;
 }

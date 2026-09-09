@@ -1,43 +1,18 @@
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
 import { buildCountdownRuntimeConfig } from "../../../../lib/bundle-countdown";
 import { AppLogger } from "../../../../lib/logger";
 import {
   updateBundleProductMetafields,
-} from "../../../../services/bundles/metafield-sync.server";
+} from "../../../../services/bundles/metafield-sync/operations/bundle-product.server";
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
 import { formatStepCategoryForRuntime } from "../../../../lib/bundle-config/category-runtime";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { safeJsonParse } from "../../../../services/bundles/bundle-configure-handlers.server";
+import { parsePricingRule } from "../../../../lib/pricing-rule-parser";
 
 function buildRuntimePricingRule(rule: any): Record<string, unknown> {
-  const flatRule: Record<string, unknown> = {
-    id: rule.id,
-    conditionType: rule.conditionType || "quantity",
-    conditionValue: Number(rule.conditionValue ?? 0) || 0,
-    discountValue: Number(rule.discountValue ?? 0) || 0,
-  };
-
-  if (rule.fixedBundlePrice !== undefined) {
-    flatRule.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
-  }
-  if (rule.customerBuys !== undefined) {
-    flatRule.customerBuys = Number(rule.customerBuys) || 0;
-  }
-  if (rule.customerGets !== undefined) {
-    flatRule.customerGets = Number(rule.customerGets) || 0;
-  }
-  if (rule.bxyDiscountType !== undefined) {
-    flatRule.bxyDiscountType = rule.bxyDiscountType;
-  }
-  if (rule.bxyApplyMode !== undefined) {
-    flatRule.bxyApplyMode = rule.bxyApplyMode;
-  }
-  if (rule.tierBadge !== undefined) {
-    flatRule.tierBadge = rule.tierBadge;
-  }
-
-  return flatRule;
+  return parsePricingRule(rule) as unknown as Record<string, unknown>;
 }
 
 /** Build the base bundle configuration object passed to metafield update functions. */
@@ -294,17 +269,18 @@ function pushUniqueCollection(
 }
 
 function normalizeSyncCategories(step: any): Array<Record<string, unknown>> {
+  const stepProducts = Array.isArray(step.StepProduct) ? step.StepProduct : [];
   return (Array.isArray(step.StepCategory) ? step.StepCategory : []).map(
     (category: any, index: number) => {
-      const formatted = formatStepCategoryForRuntime(category, index);
+      const formatted = formatStepCategoryForRuntime(
+        category,
+        index,
+        stepProducts,
+      );
       return {
         ...formatted,
-        products: Array.isArray(category.products)
-          ? category.products
-              .map((value: Parameters<typeof normalizeSyncProduct>[0]) =>
-                normalizeSyncProduct(value),
-              )
-              .filter(Boolean)
+        products: Array.isArray(formatted.products)
+          ? formatted.products
           : [],
         collections: Array.isArray(formatted.collections)
           ? formatted.collections
@@ -328,9 +304,6 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
     for (const product of Array.isArray(step.StepProduct)
       ? step.StepProduct
       : []) {
-      pushUniqueProduct(products, seenProductIds, product);
-    }
-    for (const product of Array.isArray(step.products) ? step.products : []) {
       pushUniqueProduct(products, seenProductIds, product);
     }
     for (const collection of Array.isArray(step.collections)
@@ -392,24 +365,9 @@ function buildSyncPricingConfig(pricing: any): Record<string, unknown> | null {
   return {
     enabled: pricing.enabled,
     method: pricing.method,
-    rules: safeJsonParse(pricing.rules, []).map((rule: any) => {
-      const flat: Record<string, unknown> = {
-        id: rule.id,
-        conditionType: rule.conditionType || rule.type || "quantity",
-        conditionValue: parseFloat(rule.conditionValue ?? rule.value ?? 0) || 0,
-        discountValue:
-          parseFloat(rule.discountValue ?? rule.discount?.value ?? 0) || 0,
-      };
-      if (rule.customerBuys !== undefined)
-        flat.customerBuys = Number(rule.customerBuys);
-      if (rule.customerGets !== undefined)
-        flat.customerGets = Number(rule.customerGets);
-      if (rule.bxyDiscountType !== undefined)
-        flat.bxyDiscountType = rule.bxyDiscountType;
-      if (rule.bxyApplyMode !== undefined)
-        flat.bxyApplyMode = rule.bxyApplyMode;
-      return flat;
-    }),
+    rules: safeJsonParse(pricing.rules, []).map((rule: unknown) =>
+      parsePricingRule(rule),
+    ),
     messages: {
       progress:
         syncFirstRuleMsg?.discountText ||
@@ -435,6 +393,10 @@ export function buildSyncBundleConfiguration(
   shopifyProductId: string,
   extra: Record<string, unknown> = {},
 ): Record<string, unknown> {
+  if (bundle?.bundleType !== BundleType.PRODUCT_PAGE) {
+    throw new Error("PPB sync requires bundleType product_page");
+  }
+
   const bundleDesignPresetId = bundle.bundleDesignPresetId ?? null;
   return {
     shopId: bundle.shopId,
@@ -444,7 +406,7 @@ export function buildSyncBundleConfiguration(
     description: bundle.description || "",
     status: bundle.status || BundleStatus.ACTIVE,
     templateName: bundle.templateName || null,
-    bundleType: bundle.bundleType || BundleType.PRODUCT_PAGE,
+    bundleType: BundleType.PRODUCT_PAGE,
     shopifyProductId,
     type: "cart_transform",
     bundleDesignTemplate: bundle.bundleDesignTemplate ?? null,

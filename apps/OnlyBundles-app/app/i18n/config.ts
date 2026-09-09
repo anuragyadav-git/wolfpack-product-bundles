@@ -11,7 +11,7 @@ export const SUPPORTED_LOCALES = [
   "pt-BR",
   "zh-CN",
 ] as const;
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
 type LocaleCatalog = Record<string, unknown>;
 type LocaleLoader = () => Promise<{ default: LocaleCatalog }>;
@@ -24,10 +24,6 @@ const localeLoaders: Partial<Record<SupportedLocale, LocaleLoader>> = {
   "pt-BR": () => import("./locales/pt-BR.json"),
   "zh-CN": () => import("./locales/zh-CN.json"),
 };
-
-export function isSupportedLocale(locale: string): locale is SupportedLocale {
-  return (SUPPORTED_LOCALES as readonly string[]).includes(locale);
-}
 
 export function normalizeAdminLocale(
   locale: string | null | undefined

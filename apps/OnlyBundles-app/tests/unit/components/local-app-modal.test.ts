@@ -2,14 +2,8 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { LocalAppModal } from "../../../app/components/bundle-configure/LocalAppModal";
 
-jest.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => key === "common.actions.close" ? "Close" : key,
-  }),
-}));
-
 describe("LocalAppModal", () => {
-  it("renders app-owned modal workflows in a native modal dialog", () => {
+  it("delegates app-owned modal behavior to the Polaris modal", () => {
     const markup = renderToStaticMarkup(
       React.createElement(
         LocalAppModal,
@@ -22,9 +16,8 @@ describe("LocalAppModal", () => {
       ),
     );
 
-    expect(markup).toContain("<dialog");
-    expect(markup).toContain('aria-modal="true"');
-    expect(markup).toContain('aria-labelledby="local-app-modal-title"');
+    expect(markup).toContain("<s-modal");
+    expect(markup).not.toContain("<dialog");
     expect(markup).toContain("Discard changes");
     expect(markup).toContain("Unsaved changes");
   });

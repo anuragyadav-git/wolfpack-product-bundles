@@ -1,7 +1,7 @@
-import type { BundleCommerceSummary } from "../../lib/analytics";
+import type { BundleCommerceSummary } from "../../lib/analytics/bundle-commerce-metrics";
 import { translateAdmin } from "~/i18n/config";
 
-export interface BundleKeyStatisticsProps {
+interface BundleKeyStatisticsProps {
   summary: BundleCommerceSummary;
   formatMoney: (cents: number) => string;
 }

@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { OptimisedImage } from "../../../components/OptimisedImage";
 import dashboardStyles from "./dashboard.module.css";
 
 type DashboardTopCardsProps = {
@@ -24,14 +23,12 @@ export function DashboardTopCards({
           </div>
           <div className={dashboardStyles.supportCardBody}>
             <div className={dashboardStyles.supportAvatarWrap}>
-              <OptimisedImage
-                src="/Parth.jpeg"
+              <s-image
+                src="/Parth.avif"
                 alt={t("dashboard.support.imageAlt")}
-                className={dashboardStyles.supportAvatarImage}
-                width={120}
-                height={120}
+                aspectRatio="1/1"
+                objectFit="cover"
                 loading="eager"
-                fetchPriority="high"
               />
             </div>
             <div className={dashboardStyles.supportContent}>
@@ -51,7 +48,6 @@ export function DashboardTopCards({
             <div className={dashboardStyles.supportCta}>
               <s-button
                 variant="primary"
-                inlineSize="fill"
                 onClick={handleDirectChat}
               >
                 {t("dashboard.support.cta")}
@@ -90,7 +86,11 @@ export function DashboardTopCards({
             </s-stack>
           </s-stack>
           <div className={dashboardStyles.supportIssuesCta}>
-            <s-button icon="chat" inlineSize="fill" onClick={handleDirectChat}>
+            <s-button
+              icon="chat"
+              accessibilityLabel={t("dashboard.supportIssues.cta")}
+              onClick={handleDirectChat}
+            >
               {t("dashboard.supportIssues.cta")}
             </s-button>
             <span

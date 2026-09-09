@@ -1,22 +1,26 @@
 import { useFetcher, useNavigate } from "@remix-run/react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation } from "react-i18next";
 import "../../../components/analytics/shared/tokens.css";
-import {
-  BundleConversionFunnel,
-  BundleKeyStatistics,
-  BundlePerformanceMatrix,
-  BundleSalesTrends,
-  TopCampaigns,
-} from "../../../components/analytics";
+import { BundleConversionFunnel } from "../../../components/analytics/BundleConversionFunnel";
+import { BundleKeyStatistics } from "../../../components/analytics/BundleKeyStatistics";
+import { BundlePerformanceMatrix } from "../../../components/analytics/BundlePerformanceMatrix";
+import { BundleSalesTrends } from "../../../components/analytics/BundleSalesTrends";
+import { TopCampaigns } from "../../../components/analytics/TopCampaigns";
 import styles from "../../../styles/routes/app-attribution.module.css";
-import type { AttributionDashboardData } from "../app.attribution";
+import type { AttributionDashboardData } from "./loader.server";
 import { analyzeCustomUtmInput } from "../../../lib/analytics/attribution-controls";
 import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import { OfferAnalyticsCard } from "./OfferAnalyticsCard";
 import { translateAdmin } from "~/i18n/config";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
+import {
+  BackfillWindowModal,
+  DateRangeSelector,
+} from "./AttributionDateRangeControls";
+
+export { BackfillWindowModal } from "./AttributionDateRangeControls";
 
 type AttributionDashboardViewData = Omit<
   AttributionDashboardData,
@@ -36,241 +40,6 @@ function formatRevenue(cents: number, currency = "USD"): string {
     maximumFractionDigits: 0,
   }).format(cents / 100);
 }
-
-// ─── DateRangeSelector ───────────────────────────────────────
-
-function formatDateLabel(d: Date): string {
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-function formatRangeLabel(days: number, from?: string, to?: string): string {
-  if (from && to) {
-    const start = new Date(from + "T00:00:00Z");
-    const end = new Date(to + "T00:00:00Z");
-    const startStr = formatDateLabel(start);
-    const endStr = formatDateLabel(end);
-    if (start.getUTCFullYear() === end.getUTCFullYear()) {
-      const startNoYear = start.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        timeZone: "UTC",
-      });
-      return `${startNoYear} – ${endStr}`;
-    }
-    return `${startStr} – ${endStr}`;
-  }
-  return `Last ${days} days`;
-}
-
-interface DateRangeSelectorProps {
-  days: number;
-  from?: string;
-  to?: string;
-}
-
-function DateRangeSelector({ days, from, to }: DateRangeSelectorProps) {
-  const navigate = useNavigate();
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const [fromDate, setFromDate] = useState(from || "");
-  const [toDate, setToDate] = useState(to || "");
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const triggerLabel = formatRangeLabel(days, from, to);
-  const today = new Date().toISOString().split("T")[0];
-
-  useEffect(() => {
-    setFromDate(from || "");
-    setToDate(to || "");
-  }, [from, to]);
-
-  // Close on outside click
-  useEffect(() => {
-    if (!popoverOpen) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setPopoverOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [popoverOpen]);
-
-  function navigateTo(daysN?: number, fromStr?: string, toStr?: string) {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("days");
-    url.searchParams.delete("from");
-    url.searchParams.delete("to");
-    if (fromStr && toStr) {
-      url.searchParams.set("from", fromStr);
-      url.searchParams.set("to", toStr);
-    } else {
-      url.searchParams.set("days", String(daysN ?? 30));
-    }
-    setPopoverOpen(false);
-    navigate(`${url.pathname}?${url.searchParams.toString()}`);
-  }
-
-  function handleApply() {
-    if (!fromDate || !toDate) return;
-    navigateTo(undefined, fromDate, toDate);
-  }
-
-  return (
-    <div ref={containerRef} className={styles.dateSelector}>
-      <s-button icon="calendar" onClick={() => setPopoverOpen((v) => !v)}>
-        {triggerLabel}
-      </s-button>
-
-      {popoverOpen && (
-        <div className={styles.datePopover}>
-          {/* Preset chips */}
-          <div className={styles.presetChips}>
-            {([7, 30, 90] as const).map((d) => (
-              <button
-                key={d}
-                type="button"
-                className={`${styles.presetChip}${
-                  !from && days === d ? ` ${styles.presetChipActive}` : ""
-                }`}
-                onClick={() => navigateTo(d)}
-              >
-                {translateAdmin("adminDynamic.lastDays", { days: d })}
-              </button>
-            ))}
-          </div>
-
-          {/* Native date range inputs */}
-          <div className={styles.dateInputStack}>
-            <div>
-              <label className={styles.dateInputLabel}>
-                {translateAdmin(
-                  "adminExtracted.appAttribution.attributiondashboard.from"
-                )}
-              </label>
-              <input
-                type="date"
-                value={fromDate}
-                max={toDate || today}
-                onChange={(e) => setFromDate(e.target.value)}
-                className={styles.dateInput}
-              />
-            </div>
-            <div>
-              <label className={styles.dateInputLabel}>
-                {translateAdmin(
-                  "adminExtracted.appAttribution.attributiondashboard.to"
-                )}
-              </label>
-              <input
-                type="date"
-                value={toDate}
-                min={fromDate}
-                max={today}
-                onChange={(e) => setToDate(e.target.value)}
-                className={styles.dateInput}
-              />
-            </div>
-          </div>
-
-          <div className={styles.calendarApplyRow}>
-            <s-button
-              variant="primary"
-              disabled={!fromDate || !toDate || undefined}
-              onClick={handleApply}
-            >
-              {translateAdmin(
-                "adminExtracted.appAttribution.attributiondashboard.apply"
-              )}
-            </s-button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-interface BackfillWindowModalProps {
-  days: number;
-  from?: string;
-  to?: string;
-  isSubmitting: boolean;
-  onConfirm: () => void;
-}
-
-export function BackfillWindowModal({
-  days,
-  from,
-  to,
-  isSubmitting,
-  onConfirm,
-}: BackfillWindowModalProps) {
-  const selectedWindow = formatRangeLabel(days, from, to);
-
-  return (
-    <s-modal
-      id="analytics-backfill-window-modal"
-      heading={translateAdmin("adminAttributes.backfillAnalyticsWindow")}
-      size="base"
-    >
-      <s-button
-        slot="primary-action"
-        variant="primary"
-        icon="refresh"
-        loading={isSubmitting || undefined}
-        disabled={isSubmitting || undefined}
-        commandFor="analytics-backfill-window-modal"
-        command="--hide"
-        onClick={onConfirm}
-      >
-        {translateAdmin(
-          "adminExtracted.appAttribution.attributiondashboard.backfillSelectedWindow"
-        )}
-      </s-button>
-      <s-button
-        slot="secondary-actions"
-        commandFor="analytics-backfill-window-modal"
-        command="--hide"
-      >
-        {translateAdmin("dashboard.storefrontSetup.close")}
-      </s-button>
-
-      <s-stack direction="block" gap="base">
-        <s-paragraph>
-          {translateAdmin("adminDynamic.selectedWindow", {
-            window: selectedWindow,
-          })}
-        </s-paragraph>
-        <s-unordered-list>
-          <s-list-item>
-            {translateAdmin(
-              "adminExtracted.appAttribution.attributiondashboard.matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP"
-            )}
-          </s-list-item>
-          <s-list-item>
-            {translateAdmin(
-              "adminExtracted.appAttribution.attributiondashboard.existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD"
-            )}
-          </s-list-item>
-          <s-list-item>
-            {translateAdmin(
-              "adminExtracted.appAttribution.attributiondashboard.shopifyOrdersAndStorefrontTrackingAreNotModified"
-            )}
-          </s-list-item>
-        </s-unordered-list>
-      </s-stack>
-    </s-modal>
-  );
-}
-
-// ─── Main Component ───────────────────────────────────────────
 
 export function removeCustomUtmParameter(
   parameters: string[],
@@ -398,18 +167,15 @@ export function CustomUtmTrackingCard({
               )}
             >
               {savedParameters.map((parameter) => (
-                <span key={parameter} className={styles.customUtmChip}>
-                  <span className={styles.customUtmChipText}>{parameter}</span>
-                  <button
-                    type="button"
-                    className={styles.customUtmChipRemove}
-                    aria-label={`Remove ${parameter}`}
-                    disabled={isSaving || undefined}
-                    onClick={() => handleRemoveSavedParameter(parameter)}
-                  >
-                    <s-icon type="x" size="small"></s-icon>
-                  </button>
-                </span>
+                <s-clickable-chip
+                  key={parameter}
+                  removable
+                  accessibilityLabel={`Remove ${parameter}`}
+                  disabled={isSaving || undefined}
+                  onRemove={() => handleRemoveSavedParameter(parameter)}
+                >
+                  {parameter}
+                </s-clickable-chip>
               ))}
             </div>
           </div>
@@ -706,7 +472,6 @@ function AttributionDashboardContent({
             <div className={styles.analyticsActions}>
               <div className={styles.analyticsActionButton}>
                 <s-button
-                  inlineSize="fill"
                   variant="secondary"
                   icon="download"
                   loading={exportFetcher.state !== "idle" || undefined}
@@ -718,7 +483,6 @@ function AttributionDashboardContent({
               </div>
               <div className={styles.analyticsActionButton}>
                 <s-button
-                  inlineSize="fill"
                   variant="secondary"
                   icon="refresh"
                   loading={backfillFetcher.state !== "idle" || undefined}

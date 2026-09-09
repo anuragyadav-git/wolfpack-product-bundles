@@ -88,6 +88,8 @@
       "deleteBundle": "バンドルを削除",
       "cloneSuccess": "バンドルが複製されました",
       "deleteSuccess": "バンドルが削除されました",
+      "renameBundle": "バンドル名を変更",
+      "renameSuccess": "バンドル名を変更しました",
       "themeEditorUnavailable": "このストアではテーマエディターのリンクを利用できません。"
     },
     "deleteModal": {
@@ -95,6 +97,15 @@
       "delete": "削除",
       "cancel": "キャンセル",
       "body": "この操作は取り消せません。バンドルの設定、ステップ、割引ルールがすべて完全に削除されます。"
+    },
+    "renameModal": {
+      "heading": "バンドル名を変更",
+      "nameLabel": "バンドル名",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "errorEmpty": "バンドル名を入力してください。",
+      "errorTooLong": "バンドル名は255文字以内で入力してください。",
+      "errorFailed": "バンドル名を変更できませんでした。"
     },
     "resources": {
       "bundleInspiration": "バンドルのインスピレーション",

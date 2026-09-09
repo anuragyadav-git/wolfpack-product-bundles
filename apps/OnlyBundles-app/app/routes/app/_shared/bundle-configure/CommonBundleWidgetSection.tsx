@@ -15,7 +15,7 @@ interface WidgetResource {
   [key: string]: unknown;
 }
 
-interface CommonBundleWidgetSectionProps {
+export interface CommonBundleWidgetSectionProps {
   addBrowsedProduct: boolean;
   buttonText: string;
   collections: WidgetResource[];

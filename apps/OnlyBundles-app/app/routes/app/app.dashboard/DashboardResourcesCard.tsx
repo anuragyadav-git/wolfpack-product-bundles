@@ -20,13 +20,14 @@ export function DashboardResourcesCard({
     <div className={dashboardStyles.resourcesCard}>
       <div className={dashboardStyles.resourcesLayout}>
         <div className={dashboardStyles.resourcesList}>
-          <button
-            type="button"
-            className={`${dashboardStyles.resourceItem} ${
-              activeResource === "bundle-inspirations"
-                ? dashboardStyles.resourceItemActive
-                : ""
-            }`}
+          <s-clickable
+            {...{
+              className: `${dashboardStyles.resourceItem} ${
+                activeResource === "bundle-inspirations"
+                  ? dashboardStyles.resourceItemActive
+                  : ""
+              }`,
+            }}
             onClick={() => setActiveResource("bundle-inspirations")}
           >
             <div className={dashboardStyles.resourceItemIcon}>
@@ -35,10 +36,9 @@ export function DashboardResourcesCard({
             <span className={dashboardStyles.resourceItemLabel}>
               {t("dashboard.resources.bundleInspiration")}
             </span>
-          </button>
-          <button
-            type="button"
-            className={dashboardStyles.resourceItem}
+          </s-clickable>
+          <s-clickable
+            {...{ className: dashboardStyles.resourceItem }}
             onClick={handleDirectChat}
           >
             <div className={dashboardStyles.resourceItemIcon}>
@@ -47,9 +47,9 @@ export function DashboardResourcesCard({
             <span className={dashboardStyles.resourceItemLabel}>
               {t("dashboard.resources.support")}
             </span>
-          </button>
+          </s-clickable>
           <s-clickable
-            {...({ className: dashboardStyles.resourceItem } as any)}
+            {...{ className: dashboardStyles.resourceItem }}
             href={SDK_DOCUMENTATION_URL}
             target="_blank"
             accessibilityLabel={t("dashboard.resources.sdkDocumentation")}

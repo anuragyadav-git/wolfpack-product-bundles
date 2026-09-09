@@ -21,19 +21,96 @@ import {
   getGuidedTourTransition,
   type TourStep,
 } from "../../../components/bundle-configure/tourSteps";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { useConfigureModalController } from "./useConfigureModalController";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
+import type { useConfigureAddonState } from "./useConfigureAddonState";
+import type { useConfigureContentState } from "./useConfigureContentState";
+import type { useConfigureSubscriptionState } from "./useConfigureSubscriptionState";
+import type { useConfigureLocalizationState } from "./useConfigureLocalizationState";
+import type { useConfigureVisibilityTemplateState } from "./useConfigureVisibilityTemplateState";
+import type { useConfigureTemplatePricingController } from "./useConfigureTemplatePricingController";
 import { useConfigureAddonActionHandlers } from "./useConfigureAddonActionHandlers";
 import { useConfigureVisibilityActionHandlers } from "./useConfigureVisibilityActionHandlers";
+
+type ConfigureActionSource = ReturnType<
+  typeof useConfigureBundleController
+> &
+  ReturnType<typeof useConfigureAddonState> &
+  ReturnType<typeof useConfigureContentState> &
+  ReturnType<typeof useConfigureSubscriptionState> &
+  ReturnType<typeof useConfigureLocalizationState> &
+  ReturnType<typeof useConfigureVisibilityTemplateState> &
+  ReturnType<typeof useConfigureTemplatePricingController> &
+  ReturnType<typeof useConfigureModalController>;
+
+type ConfigureActionDependencies = Pick<
+  ConfigureActionSource,
+  | "activeSection"
+  | "activeTabIndex"
+  | "addonDraft"
+  | "addonSelectedProductsModalRef"
+  | "apiKey"
+  | "appEmbedEnabled"
+  | "bundle"
+  | "bundleProduct"
+  | "checkAppEmbedStatusBeforePreview"
+  | "clearOperationAlert"
+  | "closeSelectTemplateModal"
+  | "fetcher"
+  | "forceNavigation"
+  | "formState"
+  | "isDirty"
+  | "markAsDirty"
+  | "navigate"
+  | "openThemeEditorForAppEmbed"
+  | "refreshParentProductStatusFromShopify"
+  | "selectedCollections"
+  | "setActiveSection"
+  | "setActiveTabIndex"
+  | "setAddonSelectedProductsTierIndex"
+  | "setBundleProduct"
+  | "setHasPreview"
+  | "setIsAddonSelectedProductsModalOpen"
+  | "setIsDisableAddonStepModalOpen"
+  | "setIsSyncModalOpen"
+  | "setOperationAlert"
+  | "setProductImageUrl"
+  | "setProductTitle"
+  | "setReadinessOpen"
+  | "setRuleMessages"
+  | "setSelectedCollections"
+  | "setShowIconPickerForStep"
+  | "setSlideDir"
+  | "setSlideKey"
+  | "setUpsellWidgetCollectionsSelectedData"
+  | "setUpsellWidgetSelectedProducts"
+  | "setUpsellWidgetSpecificCollectionPages"
+  | "setUpsellWidgetSpecificProductPages"
+  | "shop"
+  | "shopify"
+  | "stepsState"
+  | "storefrontProxyRoot"
+  | "themeEditorUrl"
+  | "triggerAppEmbedBannerFeedback"
+  | "triggerSaveBarIrritation"
+  | "updateAddonDraft"
+  | "upsellWidgetCollectionsSelectedData"
+  | "upsellWidgetSelectedProducts"
+>;
 
 function recordBundlePreview(bundleLink: string, routeFamily: string) {
   const formData = new FormData();
   formData.append("intent", "recordBundlePreview");
   formData.append("bundleLink", bundleLink);
   formData.append("routeFamily", routeFamily);
-  void fetch(window.location.href, { method: "POST", body: formData }).catch(() => {});
+  void fetch(window.location.href, { method: "POST", body: formData }).catch(
+    () => {}
+  );
 }
 
-export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
+export function useConfigureActionController(
+  flow: ConfigureActionDependencies
+) {
   const [isPreviewBundleLoading, setIsPreviewBundleLoading] = useState(false);
   const sharedHandlers = useSharedBundleHandlers({
     stepsState: flow.stepsState,
@@ -55,21 +132,42 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     setSlideKey: flow.setSlideKey,
     setShowIconPickerForStep: flow.setShowIconPickerForStep,
   });
-  Object.assign(flow, sharedHandlers);
-  const addonActionHandlers = useConfigureAddonActionHandlers(flow);
-  const visibilityActionHandlers = useConfigureVisibilityActionHandlers(flow);
+  const addonActionHandlers = useConfigureAddonActionHandlers({
+    addonDraft: flow.addonDraft,
+    addonSelectedProductsModalRef: flow.addonSelectedProductsModalRef,
+    setAddonSelectedProductsTierIndex: flow.setAddonSelectedProductsTierIndex,
+    setIsAddonSelectedProductsModalOpen:
+      flow.setIsAddonSelectedProductsModalOpen,
+    setIsDisableAddonStepModalOpen: flow.setIsDisableAddonStepModalOpen,
+    updateAddonDraft: flow.updateAddonDraft,
+  });
+  const visibilityActionHandlers = useConfigureVisibilityActionHandlers({
+    markAsDirty: flow.markAsDirty,
+    setUpsellWidgetCollectionsSelectedData:
+      flow.setUpsellWidgetCollectionsSelectedData,
+    setUpsellWidgetSelectedProducts: flow.setUpsellWidgetSelectedProducts,
+    setUpsellWidgetSpecificCollectionPages:
+      flow.setUpsellWidgetSpecificCollectionPages,
+    setUpsellWidgetSpecificProductPages:
+      flow.setUpsellWidgetSpecificProductPages,
+    upsellWidgetCollectionsSelectedData:
+      flow.upsellWidgetCollectionsSelectedData,
+    upsellWidgetSelectedProducts: flow.upsellWidgetSelectedProducts,
+  });
   const closeDisabledPreviewModal = useCallback(() => undefined, []);
 
   const handleBackClick = useCallback(() => {
     if (
       blockUnsavedAdminNavigation(
         flow.isDirty && !flow.forceNavigation,
-        flow.triggerSaveBarIrritation,
+        flow.triggerSaveBarIrritation
       )
     ) {
       return;
     }
-    navigateBackOrFallback(flow.navigate, "/app/dashboard", { replaceFallback: true });
+    navigateBackOrFallback(flow.navigate, "/app/dashboard", {
+      replaceFallback: true,
+    });
   }, [flow]);
   const enablePreviewGate = {
     modalProps: {
@@ -98,7 +196,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       flow.checkAppEmbedStatusBeforePreview,
       {
         onValidationBlocked: finishPreviewBundleLoading,
-      },
+      }
     );
     if (!appEmbedEnabled) {
       flow.triggerAppEmbedBannerFeedback();
@@ -107,30 +205,26 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     try {
       preparedPreview = await prepareStorefrontPreviewForOpen();
     } catch (error: any) {
-      AppLogger.warn("Storefront preview preparation warning in FPB:", {}, error);
+      AppLogger.warn(
+        "Storefront preview preparation warning in FPB:",
+        {},
+        error
+      );
     }
     const publicNumber = flow.bundle.publicNumber ?? 1;
     const shareablePreviewUrl =
       preparedPreview?.shareablePreviewUrl ||
-      buildFpbStorefrontUrl(
-        flow.shop,
-        publicNumber,
-        flow.storefrontProxyRoot,
-      );
+      buildFpbStorefrontUrl(flow.shop, publicNumber, flow.storefrontProxyRoot);
 
     const executePreviewBundle = (): string | false => {
       if (flow.bundle.bundleType === "full_page") {
         if (
           !navigatePendingDashboardPreview(
             pendingPreviewWindow,
-            shareablePreviewUrl,
+            shareablePreviewUrl
           )
         ) {
-          window.open(
-            shareablePreviewUrl,
-            "_blank",
-            "noopener,noreferrer",
-          );
+          window.open(shareablePreviewUrl, "_blank", "noopener,noreferrer");
         }
         markBundlePreviewComplete({
           bundleId: flow.bundle.id,
@@ -164,7 +258,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         }
       } else if (!productUrl && flow.bundleProduct?.id) {
         const productId = flow.bundleProduct.id.includes(
-          "gid://shopify/Product/",
+          "gid://shopify/Product/"
         )
           ? flow.bundleProduct.id.split("/").pop()
           : flow.bundleProduct.id;
@@ -174,7 +268,9 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         productUrl = `https://admin.shopify.com/store/${shopDomain}/products/${productId}`;
       }
       if (productUrl) {
-        if (!navigatePendingDashboardPreview(pendingPreviewWindow, productUrl)) {
+        if (
+          !navigatePendingDashboardPreview(pendingPreviewWindow, productUrl)
+        ) {
           open(productUrl, "_blank", "noopener,noreferrer");
         }
         recordBundlePreview(productUrl, "fpb_configure");
@@ -188,8 +284,10 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
         });
         flow.clearOperationAlert();
         flow.shopify.toast.show(
-          isPreviewUrl ? i18n.t("common.success.previewOpened") : "Product opened",
-          { isError: false },
+          isPreviewUrl
+            ? i18n.t("common.success.previewOpened")
+            : "Product opened",
+          { isError: false }
         );
       } else {
         closePendingDashboardPreview(pendingPreviewWindow);
@@ -210,21 +308,18 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     (section: string) => {
       if (section === flow.activeSection) return;
       if (
-        blockUnsavedAdminNavigation(
-          flow.isDirty,
-          flow.triggerSaveBarIrritation,
-        )
+        blockUnsavedAdminNavigation(flow.isDirty, flow.triggerSaveBarIrritation)
       ) {
         return;
       }
       flow.setActiveSection(section);
     },
-    [flow],
+    [flow]
   );
   const openProductInAdmin = useCallback(
     (productId: string) => {
       const numericProductId = productId.startsWith("gid://")
-        ? (productId.split("/").pop() ?? productId)
+        ? productId.split("/").pop() ?? productId
         : productId;
       const productGid = productId.startsWith("gid://")
         ? productId
@@ -233,12 +328,12 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
       const openFallback = () => {
         try {
-          flow.shopify.navigate(adminProductUrl);
+          (flow.shopify as any).navigate(adminProductUrl);
         } catch (error: any) {
           AppLogger.warn(
             "Falling back to a new tab for Admin product navigation",
             { productId },
-            error as any,
+            error as any
           );
           window.open(adminProductUrl, "_blank");
         }
@@ -257,7 +352,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
               AppLogger.warn(
                 "Falling back after Product editor intent failed",
                 { productId },
-                error as any,
+                error as any
               );
               openFallback();
             });
@@ -267,13 +362,13 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
           AppLogger.warn(
             "Falling back after Product editor intent failed",
             { productId },
-            error as any,
+            error as any
           );
         }
       }
       openFallback();
     },
-    [flow],
+    [flow]
   );
   const handleReadinessItemClick = useCallback(
     (key: string) => {
@@ -307,7 +402,7 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
           break;
       }
     },
-    [flow, handlePreviewBundle, handleSectionChange, openProductInAdmin],
+    [flow, handlePreviewBundle, handleSectionChange, openProductInAdmin]
   );
   const handleGuidedTourStepChange = useCallback(
     (step: TourStep) => {
@@ -317,19 +412,20 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       }
       flow.setReadinessOpen(transition.readinessOpen);
     },
-    [flow],
+    [flow]
   );
-  const handleTemplatePreview = useCallback(async (
-    onPreviewOpened?: (previewUrl: string) => void,
-  ) => {
-    const previewUrl = await handlePreviewBundle();
-    if (previewUrl) {
-      window.setTimeout(() => {
-        flow.closeSelectTemplateModal();
-        onPreviewOpened?.(previewUrl);
-      }, 500);
-    }
-  }, [flow, handlePreviewBundle]);
+  const handleTemplatePreview = useCallback(
+    async (onPreviewOpened?: (previewUrl: string) => void) => {
+      const previewUrl = await handlePreviewBundle();
+      if (previewUrl) {
+        window.setTimeout(() => {
+          flow.closeSelectTemplateModal();
+          onPreviewOpened?.(previewUrl);
+        }, 500);
+      }
+    },
+    [flow, handlePreviewBundle]
+  );
   const handleAddNewStep = useCallback(() => {
     flow.stepsState.addStep();
     flow.setSlideDir("forward");
@@ -345,12 +441,15 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
       });
       return;
     }
-    openThemeEditorInNewTab(buildFpbUpsellThemeEditorUrl({
-      shop: flow.shop,
-      apiKey: flow.apiKey,
-    }));
+    openThemeEditorInNewTab(
+      buildFpbUpsellThemeEditorUrl({
+        shop: flow.shop,
+        apiKey: flow.apiKey,
+      })
+    );
   }, [flow]);
-  Object.assign(flow, {
+  return {
+    ...sharedHandlers,
     ...addonActionHandlers,
     ...visibilityActionHandlers,
     enablePreviewGate,
@@ -365,5 +464,5 @@ export function useConfigureActionController(flow: ConfigureBundleFlowDraft) {
     handleSectionChange,
     handleTemplatePreview,
     openProductInAdmin,
-  });
+  };
 }

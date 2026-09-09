@@ -27,6 +27,35 @@ describe("FPB runtime metafield config", () => {
     ],
   };
 
+  it("preserves the canonical Full Page type", () => {
+    const config = buildFullPageBundleMetafieldConfig({
+      id: "bundle-1",
+      name: "Bundle",
+      status: "active",
+      bundleType: "full_page",
+      publicNumber: 1,
+      steps: [],
+    });
+
+    expect(config.bundleType).toBe("full_page");
+  });
+
+  it.each([undefined, "product_page"])(
+    "rejects non-FPB bundle type %s",
+    (bundleType) => {
+      expect(() =>
+        buildFullPageBundleMetafieldConfig({
+          id: "bundle-1",
+          name: "Bundle",
+          status: "active",
+          bundleType,
+          publicNumber: 1,
+          steps: [],
+        }),
+      ).toThrow("FPB metafield config requires bundleType full_page");
+    },
+  );
+
   it("preserves enriched products in the full-page metafield config", () => {
     const config = buildFullPageBundleMetafieldConfig({
       id: "bundle-1",
@@ -64,7 +93,7 @@ describe("FPB runtime metafield config", () => {
     });
   });
 
-  it("preserves fixedBundlePrice in base config pricing rules", () => {
+  it("serializes fixed bundle price through canonical discountValue only", () => {
     const config = buildFpbBaseConfig(
       {
         id: "bundle-1",
@@ -91,9 +120,10 @@ describe("FPB runtime metafield config", () => {
           {
             id: "rule-1",
             conditionType: "quantity",
+            conditionOperator: "lt",
             conditionValue: 2,
-            discountValue: 770,
-            fixedBundlePrice: 4999,
+            discountValue: 4999,
+            fixedBundlePrice: 9999,
           },
         ],
       },
@@ -108,10 +138,10 @@ describe("FPB runtime metafield config", () => {
       ]),
     });
     expect(config.pricing.rules[0]).toMatchObject({
-      discountValue: 770,
-      fixedBundlePrice: 4999,
+      conditionOperator: "lt",
+      discountValue: 4999,
     });
+    expect(config.pricing.rules[0]).not.toHaveProperty("fixedBundlePrice");
     expect(config).not.toHaveProperty("fullPageLayout");
-    expect(config).not.toHaveProperty("shopifyPageHandle");
   });
 });

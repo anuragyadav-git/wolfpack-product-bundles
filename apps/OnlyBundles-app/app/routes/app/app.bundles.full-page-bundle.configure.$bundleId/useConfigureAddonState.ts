@@ -4,14 +4,22 @@ import {
   buildAddonDraftFromPersonalizationData,
   buildPersonalizationDataFromDraft,
 } from "./addon-helpers";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { AddonDraft, AddonDraftUpdate } from "./addon-draft.types";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
 
-export function useConfigureAddonState(flow: ConfigureBundleFlowDraft) {
-  const { bundle, markAsDirty } = flow;
-  const [addonDraft, setAddonDraft] = useState(() =>
-    buildAddonDraftFromPersonalizationData((bundle as any).personalizationData),
+type ConfigureAddonStateDependencies = {
+  bundle: ReturnType<typeof useConfigureBundleController>["bundle"];
+  markAsDirty: () => void;
+};
+
+export function useConfigureAddonState(
+  dependencies: ConfigureAddonStateDependencies
+) {
+  const { bundle, markAsDirty } = dependencies;
+  const [addonDraft, setAddonDraft] = useState<AddonDraft>(() =>
+    buildAddonDraftFromPersonalizationData((bundle as any).personalizationData)
   );
-  const originalAddonDraftRef = useRef<any>(addonDraft);
+  const originalAddonDraftRef = useRef<AddonDraft>(addonDraft);
   const [activeAddonTierIndex, setActiveAddonTierIndex] = useState<
     number | null
   >(0);
@@ -22,14 +30,15 @@ export function useConfigureAddonState(flow: ConfigureBundleFlowDraft) {
     setIsAddonSelectedProductsModalOpen,
   ] = useState(false);
   const updateAddonDraft = useCallback(
-    (updates: Record<string, any>) => {
-      setAddonDraft((current: any) => ({ ...current, ...updates }));
+    (updates: AddonDraftUpdate) => {
+      setAddonDraft((current) => ({ ...current, ...updates }));
       markAsDirty();
     },
-    [markAsDirty],
+    [markAsDirty]
   );
-  const addonTierCount =
-    Array.isArray(addonDraft.addonTiers) ? addonDraft.addonTiers.length : 0;
+  const addonTierCount = Array.isArray(addonDraft.addonTiers)
+    ? addonDraft.addonTiers.length
+    : 0;
 
   useEffect(() => {
     setActiveAddonTierIndex((currentIndex) => {
@@ -37,7 +46,7 @@ export function useConfigureAddonState(flow: ConfigureBundleFlowDraft) {
     });
   }, [addonTierCount]);
 
-  Object.assign(flow, {
+  return {
     activeAddonTierIndex,
     addonDraft,
     addonSelectedProductsTierIndex,
@@ -51,5 +60,5 @@ export function useConfigureAddonState(flow: ConfigureBundleFlowDraft) {
     setAddonSelectedProductsTierIndex,
     setIsAddonSelectedProductsModalOpen,
     updateAddonDraft,
-  });
+  };
 }

@@ -1,5 +1,8 @@
 import React from "react";
+import {flushSync} from "react-dom";
+import {createRoot, type Root} from "react-dom/client";
 import {renderToStaticMarkup} from "react-dom/server";
+import {JSDOM} from "jsdom";
 
 import {
   BundleReadinessOverlay,
@@ -22,6 +25,33 @@ jest.mock("react-i18next", () => ({
 }));
 
 describe("BundleReadinessOverlay trigger", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    const dom = new JSDOM("<!doctype html><html><body></body></html>", {
+      pretendToBeVisual: true,
+    });
+    Object.assign(globalThis, {
+      window: dom.window,
+      document: dom.window.document,
+      Event: dom.window.Event,
+      MouseEvent: dom.window.MouseEvent,
+      HTMLElement: dom.window.HTMLElement,
+      HTMLDialogElement: dom.window.HTMLDialogElement,
+      IS_REACT_ACT_ENVIRONMENT: true,
+    });
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    flushSync(() => root.unmount());
+    container.remove();
+    jest.useRealTimers();
+  });
+
   it.each([
     [0, "#f49300"],
     [65, "#f49300"],
@@ -88,7 +118,7 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(markup).toContain("Products selected");
   });
 
-  it("renders the open checklist as an accessible modal dialog", () => {
+  it("includes the checklist content and score when open", () => {
     const Overlay = BundleReadinessOverlay as unknown as React.ComponentType<Record<string, unknown>>;
     const markup = renderToStaticMarkup(
       React.createElement(Overlay, {
@@ -97,12 +127,78 @@ describe("BundleReadinessOverlay trigger", () => {
       }),
     );
 
-    expect(markup).toContain("<dialog");
-    expect(markup).toContain('aria-modal="true"');
-    expect(markup).toContain('aria-labelledby="bundle-readiness-title"');
     expect(markup).toContain("Products selected");
     expect(markup).toContain('aria-label="Readiness Score: 0"');
     expect(markup).toContain('data-tour-target="fpb-readiness-score"');
     expect(markup).toContain('hidden=""');
+  });
+
+  it("closes exactly once when the modal is dismissed", () => {
+    const onOpenChange = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleReadinessOverlay, {
+          items: [
+            {
+              key: "products",
+              label: "Products selected",
+              points: 60,
+              done: false,
+            },
+          ],
+          open: true,
+          onOpenChange,
+        }),
+      );
+    });
+
+    const modal = container.querySelector("s-modal");
+    expect(modal).not.toBeNull();
+
+    flushSync(() => {
+      modal?.dispatchEvent(new Event("hide", {bubbles: true}));
+      modal?.dispatchEvent(new Event("afterhide", {bubbles: true}));
+    });
+
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("opens an incomplete item and closes the checklist exactly once", () => {
+    const onItemClick = jest.fn();
+    const onOpenChange = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleReadinessOverlay, {
+          items: [
+            {
+              key: "products",
+              label: "Products selected",
+              description: "Choose products",
+              points: 60,
+              done: false,
+            },
+          ],
+          open: true,
+          onItemClick,
+          onOpenChange,
+        }),
+      );
+    });
+
+    const action = Array.from(
+      container.querySelectorAll<HTMLElement>("button, s-clickable"),
+    ).find((element) => element.textContent?.includes("Products selected"));
+
+    flushSync(() => {
+      action?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    });
+
+    expect(onItemClick).toHaveBeenCalledTimes(1);
+    expect(onItemClick).toHaveBeenCalledWith("products");
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 });

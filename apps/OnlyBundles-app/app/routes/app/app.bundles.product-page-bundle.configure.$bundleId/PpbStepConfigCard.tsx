@@ -1,16 +1,36 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DefaultStepTimelineIcon } from "../_shared/bundle-configure/DefaultStepTimelineIcon";
 import { translateAdmin } from "~/i18n/config";
+import { FilePicker } from "../../../components/shared/FilePicker";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbStepConfigCard({ step }: { step: any }) {
-  const {
-    FilePicker,
-    markAsDirty,
-    productPageBundleStyles,
-    setShowIconPickerForStep,
-    showIconPickerForStep,
-    stepsState,
-  } = usePpbConfigureContext();
+type PpbStep = {
+  id: string;
+  isDefault?: boolean;
+  isFreeGift?: boolean | null;
+  [key: string]: unknown;
+};
+
+export type PpbStepConfigCardProps = Pick<
+  PpbConfigureFlow,
+  | "markAsDirty"
+  | "setShowIconPickerForStep"
+  | "showIconPickerForStep"
+  | "stepsState"
+> & { step: PpbStep };
+
+export function PpbStepConfigCard({
+  markAsDirty,
+  setShowIconPickerForStep,
+  showIconPickerForStep,
+  step,
+  stepsState,
+}: PpbStepConfigCardProps) {
+  const stepRecord: Record<string, unknown> = step;
+  const stepImage =
+    typeof stepRecord.stepImage === "string" ? stepRecord.stepImage : null;
+  const pageTitle =
+    typeof stepRecord.pageTitle === "string" ? stepRecord.pageTitle : "";
 
   return (
     <div className={productPageBundleStyles.card}>
@@ -21,51 +41,46 @@ export function PpbStepConfigCard({ step }: { step: any }) {
       </h3>
       <div className={productPageBundleStyles.stepConfigRow}>
         <div className={productPageBundleStyles.stepConfigIconBox}>
-          {(step as any).stepImage ? (
+          {stepImage ? (
             <>
-              <img
-                src={(step as any).stepImage}
-                alt={translateAdmin("adminAttributes.stepIcon")}
-                className={productPageBundleStyles.iconImg}
-              />
-              <button
-                type="button"
-                className={productPageBundleStyles.iconRemoveButton}
-                aria-label={translateAdmin("adminAttributes.removeStepIcon")}
-                onClick={() => {
-                  stepsState.updateStepField(step.id, "stepImage", null);
-                  setShowIconPickerForStep(null);
-                  markAsDirty();
-                }}
-              >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M6 6l8 8M14 6l-8 8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
+              <div className={productPageBundleStyles.iconImg}>
+                <s-image
+                  src={stepImage}
+                  alt={translateAdmin("adminAttributes.stepIcon")}
+                  aspectRatio="1/1"
+                  objectFit="contain"
+                />
+              </div>
+              <span className={productPageBundleStyles.iconRemoveButton}>
+                <s-button
+                  variant="tertiary"
+                  tone="critical"
+                  icon="delete"
+                  accessibilityLabel={translateAdmin(
+                    "adminAttributes.removeStepIcon"
+                  )}
+                  onClick={() => {
+                    stepsState.updateStepField(step.id, "stepImage", null);
+                    setShowIconPickerForStep(null);
+                    markAsDirty();
+                  }}
+                />
+              </span>
             </>
           ) : (
             <div className={productPageBundleStyles.iconPlaceholder}>
               <DefaultStepTimelineIcon
                 className={productPageBundleStyles.defaultTimelineIcon}
-                step={step}
+                step={{
+                  isDefault: step.isDefault,
+                  isFreeGift: step.isFreeGift === true,
+                }}
               />
             </div>
           )}
         </div>
         <div className={productPageBundleStyles.iconUploadButton}>
           <s-button
-            inlineSize="fill"
             icon="replace"
             onClick={() =>
               setShowIconPickerForStep((prev) =>
@@ -84,7 +99,7 @@ export function PpbStepConfigCard({ step }: { step: any }) {
             placeholder={translateAdmin(
               "adminAttributes.egCustomizedTShirtBundleForYou"
             )}
-            value={(step as any).pageTitle ?? ""}
+            value={pageTitle}
             onInput={(e) => {
               stepsState.updateStepField(
                 step.id,
@@ -101,7 +116,7 @@ export function PpbStepConfigCard({ step }: { step: any }) {
         <FilePicker
           autoOpen
           onClose={() => setShowIconPickerForStep(null)}
-          value={(step as any).stepImage ?? null}
+          value={stepImage}
           onChange={(url: string | null) => {
             stepsState.updateStepField(step.id, "stepImage", url);
             setShowIconPickerForStep(null);

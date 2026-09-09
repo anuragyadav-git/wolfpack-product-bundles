@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import type { Session } from "@shopify/shopify-api";
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import { AppLogger } from "../../../../lib/logger";
 import db from "../../../../db.server";
 import { parseConditionValue } from "../../../../lib/parse-condition-value";
@@ -9,7 +9,10 @@ import { parsePPBBundleVisibility, parsePPBBundleSettings } from "./parsers";
 import { normaliseShopifyProductId } from "../../../../services/bundles/bundle-configure-handlers.server";
 import { BundleStatus } from "../../../../constants/bundle";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
-import { buildStepCategoryCreateInput } from "../../../../lib/bundle-config/category-persistence";
+import {
+  buildStepCategoryCreateInput,
+  materializeCanonicalStepProducts,
+} from "../../../../lib/bundle-config/category-persistence";
 import { resolveBundleStepEnabled } from "../../../../lib/bundle-config/step-enablement";
 import {
   normalizePricingDisplayOptions,
@@ -27,10 +30,7 @@ import {
   configureValidationFailure,
   validateBundleConfigureFormData,
 } from "../../../../lib/bundle-config/configure-validation";
-import {
-  batchCheckStorefrontVariants,
-  validateVariantIdFromShopify,
-} from "../../../../lib/variant-existence.server";
+import { validatePersistedStepProductVariants } from "../../../../lib/bundle-config/step-product-variant-validation.server";
 import {
   getBundleSubscriptionCompatibilityIssues,
   normalizeBundleSubscriptionConfig,
@@ -49,153 +49,6 @@ import {
 } from "../../../../lib/offer-policy-admin";
 import { resolveOfferCountryTargetingSave } from "../../../../lib/offer-country-targeting";
 import { fetchShopConfiguration } from "../../../../lib/bundle-configure-loader.server";
-
-type ParsedVariantRef = string | number;
-
-function extractStepProductVariantReference(rawVariant: unknown): ParsedVariantRef | null {
-  if (rawVariant === null || rawVariant === undefined) {
-    return null;
-  }
-
-  if (typeof rawVariant === "string" || typeof rawVariant === "number") {
-    return rawVariant;
-  }
-
-  if (typeof rawVariant !== "object") {
-    return null;
-  }
-
-  const candidate = rawVariant as Record<string, unknown>;
-  const directReference =
-    candidate.variantId ??
-    candidate.variantGraphqlId ??
-    candidate.id ??
-    candidate.variant_gid ??
-    candidate.variantGraphql;
-
-  if (typeof directReference === "string" || typeof directReference === "number") {
-    return directReference;
-  }
-
-  return null;
-}
-
-function toStringVariant(rawVariant: unknown): string {
-  return String(rawVariant ?? "");
-}
-
-async function validatePersistedStepProductVariants(
-  shopDomain: string,
-  stepsData: Array<Record<string, unknown>>,
-): Promise<Response | null> {
-  const references: Array<{
-    numericId: string;
-    rawVariantId: ParsedVariantRef;
-    stepId: unknown;
-    stepIndex: number;
-    productIndex: number;
-    variantIndex: number;
-  }> = [];
-
-  for (let stepIndex = 0; stepIndex < stepsData.length; stepIndex += 1) {
-    const step = stepsData[stepIndex];
-    const products = Array.isArray(step.StepProduct) ? step.StepProduct : [];
-
-    for (let productIndex = 0; productIndex < products.length; productIndex += 1) {
-      const product = products[productIndex] as Record<string, unknown>;
-      const variantRefs = Array.isArray(product.variants) ? product.variants : [];
-
-      for (let variantIndex = 0; variantIndex < variantRefs.length; variantIndex += 1) {
-        const rawVariantId = extractStepProductVariantReference(variantRefs[variantIndex]);
-        if (rawVariantId === null) {
-          return json(
-            {
-              success: false,
-              error: `ppb-save blocked on step ${stepIndex + 1}, product ${productIndex + 1}: empty variant reference at position ${variantIndex + 1}.`,
-              context: {
-                route: "ppb-save",
-                stepIndex: stepIndex + 1,
-                productIndex: productIndex + 1,
-                variantIndex: variantIndex + 1,
-                variantId: "",
-                reason: "invalid-format",
-              },
-              fieldErrors: [{
-                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
-                message: "Select a valid product variant.",
-              }],
-            },
-            { status: 400 },
-          );
-        }
-        const parsed = await validateVariantIdFromShopify(rawVariantId);
-
-        if (!parsed.isValidFormat) {
-          return json(
-            {
-              success: false,
-              error: `ppb-save blocked on step ${stepIndex + 1}, product ${productIndex + 1}: invalid variant format for "${toStringVariant(rawVariantId)}".`,
-              context: {
-                route: "ppb-save",
-                stepIndex: stepIndex + 1,
-                productIndex: productIndex + 1,
-                variantIndex: variantIndex + 1,
-                variantId: toStringVariant(rawVariantId),
-                reason: "invalid-format",
-              },
-              fieldErrors: [{
-                path: `steps.${String(step.id ?? `step-${stepIndex + 1}`)}.products.${productIndex + 1}.variants.${variantIndex + 1}`,
-                message: "Select a valid product variant.",
-              }],
-            },
-            { status: 400 },
-          );
-        }
-
-        references.push({
-          numericId: parsed.numericId,
-          rawVariantId,
-          stepId: step.id,
-          stepIndex,
-          productIndex,
-          variantIndex,
-        });
-      }
-    }
-  }
-
-  const lookups = await batchCheckStorefrontVariants(
-    shopDomain,
-    [...new Set(references.map(({ numericId }) => numericId))],
-  );
-  for (const reference of references) {
-    const variantLookup = lookups.get(reference.numericId);
-    if (variantLookup?.ok) continue;
-    const status = variantLookup?.status ?? 0;
-    return json(
-      {
-        success: false,
-        error: `ppb-save blocked variant in step ${reference.stepIndex + 1}, product ${reference.productIndex + 1}: ${toStringVariant(reference.rawVariantId)} is not available on storefront (${status}).`,
-        context: {
-          route: "ppb-save",
-          stepIndex: reference.stepIndex + 1,
-          productIndex: reference.productIndex + 1,
-          variantIndex: reference.variantIndex + 1,
-          variantId: toStringVariant(reference.rawVariantId),
-          status,
-          reason: variantLookup?.message || "not-found",
-        },
-        fieldErrors: [{
-          path: `steps.${String(reference.stepId ?? `step-${reference.stepIndex + 1}`)}.products.${reference.productIndex + 1}.variants.${reference.variantIndex + 1}`,
-          message: "This product variant is not available on the storefront.",
-        }],
-      },
-      { status: 400 },
-    );
-  }
-
-  return null;
-}
 
 export async function handleSaveBundle(
   admin: ShopifyAdmin,
@@ -258,6 +111,9 @@ export async function handleSaveBundle(
       ? JSON.parse(textOverridesByLocaleRaw)
       : null;
     const stepsData = JSON.parse(formData.get("stepsData") as string);
+    for (const step of stepsData) {
+      step.StepProduct = materializeCanonicalStepProducts(step);
+    }
     const discountData = JSON.parse(formData.get("discountData") as string);
     const stepConditionsData: Record<string, any[]> = formData.get("stepConditions")
       ? JSON.parse(formData.get("stepConditions") as string)
@@ -325,9 +181,8 @@ export async function handleSaveBundle(
       }
     });
 
-    // VALIDATION + NORMALISATION: Validate and normalise all product IDs in one pass at the boundary.
-    // normaliseShopifyProductId rejects UUIDs (corrupted browser state) and converts numeric IDs to GIDs.
-    // IDs are mutated in place so the Prisma .map() below can use product.id directly.
+    // VALIDATION + NORMALISATION: Validate and normalise the canonical product
+    // membership after current direct and category selections are materialized.
     const stepValidationErrors = [];
     for (const step of stepsData) {
       if (Array.isArray(step.StepProduct)) {
@@ -369,49 +224,17 @@ export async function handleSaveBundle(
       );
     }
 
-    const variantValidationResponse = await validatePersistedStepProductVariants(
-      session.shop,
-      stepsData,
-    );
+    const variantValidationResponse =
+      await validatePersistedStepProductVariants({
+        route: "ppb-save",
+        shopDomain: session.shop,
+        stepsData,
+      });
     if (variantValidationResponse) {
       return variantValidationResponse;
     }
 
     AppLogger.debug("[VALIDATION] All product IDs are valid Shopify GIDs");
-
-    // FIXED_BUNDLE_PRICE: Store the fixed price directly (NO conversion)
-    // The cart transform will calculate the percentage dynamically based on actual cart total
-    if (
-      discountData.discountEnabled &&
-      discountData.discountType === "fixed_bundle_price"
-    ) {
-      AppLogger.debug(
-        "[FIXED_BUNDLE_PRICE] Storing fixed bundle price (will be converted at runtime)",
-      );
-
-      // For fixed_bundle_price, keep the target bundle price in cents.
-      // The pricing editor stores the current target price in discountValue.
-      const processedRules = (discountData.discountRules || []).map(
-        (rule: any) => {
-          const fixedPrice = Number(rule.discountValue ?? 0) || 0;
-          AppLogger.debug(
-            `[FIXED_BUNDLE_PRICE] Rule fixed price: ${fixedPrice}`,
-          );
-
-          // Store the fixed price in a dedicated field for runtime calculation
-          return {
-            ...rule,
-            fixedBundlePrice: fixedPrice, // The target bundle price
-          };
-        },
-      );
-
-      discountData.discountRules = processedRules;
-      AppLogger.debug(
-        "[FIXED_BUNDLE_PRICE] Stored fixed price for runtime calculation:",
-        processedRules,
-      );
-    }
 
     const normalizedPricingDisplayOptions = normalizePricingDisplayOptions({
       rules: discountData.discountRules || [],

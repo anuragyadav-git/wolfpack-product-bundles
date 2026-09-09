@@ -1,10 +1,58 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
-import { PpbDiscountMessagingOptions } from "./PpbDiscountMessagingOptions";
+import {
+  PpbDiscountMessagingOptions,
+  type PpbDiscountMessagingOptionsProps,
+} from "./PpbDiscountMessagingOptions";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import { DiscountMethod } from "../../../types/pricing";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbDiscountDisplayOptions() {
-  const { displayOptionsInactive } = usePpbConfigureContext();
+type PpbBundleQuantityOptionsProps = Pick<
+  PpbConfigureFlow,
+  | "bundleQuantityOptionsEligible"
+  | "markAsDirty"
+  | "pricingState"
+  | "qtyOptionsDefaultRuleId"
+  | "qtyOptionsEnabled"
+  | "qtyRuleLabels"
+  | "qtyRuleSubtexts"
+  | "setIsBundleQuantityMultiLangModalOpen"
+  | "setQtyOptionsDefaultRuleId"
+  | "setQtyOptionsEnabled"
+  | "setQtyRuleLabels"
+  | "setQtyRuleSubtexts"
+  | "shopLocales"
+>;
+
+type PpbProgressBarOptionsProps = Pick<
+  PpbConfigureFlow,
+  | "markAsDirty"
+  | "pricingState"
+  | "progressBarEnabled"
+  | "progressBarType"
+  | "setIsProgressBarMultiLangModalOpen"
+  | "setProgressBarEnabled"
+  | "setProgressBarType"
+  | "setTierTextByRuleId"
+  | "shopLocales"
+  | "tierTextByRuleId"
+>;
+
+export type PpbDiscountDisplayOptionsProps = {
+  displayOptionsInactive: PpbConfigureFlow["displayOptionsInactive"];
+  messaging: PpbDiscountMessagingOptionsProps;
+  progress: PpbProgressBarOptionsProps;
+  quantity: PpbBundleQuantityOptionsProps;
+};
+
+export function PpbDiscountDisplayOptions({
+  displayOptionsInactive,
+  messaging,
+  progress,
+  quantity,
+}: PpbDiscountDisplayOptionsProps) {
 
   return (
     <s-section>
@@ -22,34 +70,30 @@ export function PpbDiscountDisplayOptions() {
               )}
             </p>
           </s-stack>
-          <PpbBundleQuantityOptions />
-          <PpbProgressBarOptions />
-          <PpbDiscountMessagingOptions />
+          <PpbBundleQuantityOptions {...quantity} />
+          <PpbProgressBarOptions {...progress} />
+          <PpbDiscountMessagingOptions {...messaging} />
         </s-stack>
       </DisabledConfigurationRegion>
     </s-section>
   );
 }
 
-function PpbBundleQuantityOptions() {
-  const {
-    bundleQuantityOptionsEligible,
-    DiscountMethod,
-    markAsDirty,
-    pricingState,
-    productPageBundleStyles,
-    qtyOptionsDefaultRuleId,
-    qtyOptionsEnabled,
-    qtyRuleLabels,
-    qtyRuleSubtexts,
-    QuestionHelpTooltip,
-    setIsBundleQuantityMultiLangModalOpen,
-    setQtyOptionsDefaultRuleId,
-    setQtyOptionsEnabled,
-    setQtyRuleLabels,
-    setQtyRuleSubtexts,
-    shopLocales,
-  } = usePpbConfigureContext();
+function PpbBundleQuantityOptions({
+  bundleQuantityOptionsEligible,
+  markAsDirty,
+  pricingState,
+  qtyOptionsDefaultRuleId,
+  qtyOptionsEnabled,
+  qtyRuleLabels,
+  qtyRuleSubtexts,
+  setIsBundleQuantityMultiLangModalOpen,
+  setQtyOptionsDefaultRuleId,
+  setQtyOptionsEnabled,
+  setQtyRuleLabels,
+  setQtyRuleSubtexts,
+  shopLocales,
+}: PpbBundleQuantityOptionsProps) {
 
   if (pricingState.discountType === DiscountMethod.BUY_X_GET_Y) {
     return null;
@@ -209,20 +253,18 @@ function PpbBundleQuantityOptions() {
   );
 }
 
-function PpbProgressBarOptions() {
-  const {
-    markAsDirty,
-    productPageBundleStyles,
-    progressBarEnabled,
-    progressBarType,
-    QuestionHelpTooltip,
-    setIsProgressBarMultiLangModalOpen,
-    setProgressBarEnabled,
-    setProgressBarType,
-    setTierTextByRuleId,
-    shopLocales,
-    tierTextByRuleId,
-  } = usePpbConfigureContext();
+function PpbProgressBarOptions({
+  markAsDirty,
+  pricingState,
+  progressBarEnabled,
+  progressBarType,
+  setIsProgressBarMultiLangModalOpen,
+  setProgressBarEnabled,
+  setProgressBarType,
+  setTierTextByRuleId,
+  shopLocales,
+  tierTextByRuleId,
+}: PpbProgressBarOptionsProps) {
 
   return (
     <div className={productPageBundleStyles.displayOptionRow}>
@@ -295,6 +337,8 @@ function PpbProgressBarOptions() {
             </s-choice-list>
             {progressBarType === "step_based" ? (
               <PpbProgressTierTextFields
+                markAsDirty={markAsDirty}
+                pricingState={pricingState}
                 setTierTextByRuleId={setTierTextByRuleId}
                 tierTextByRuleId={tierTextByRuleId}
               />
@@ -307,14 +351,14 @@ function PpbProgressBarOptions() {
 }
 
 function PpbProgressTierTextFields({
+  markAsDirty,
+  pricingState,
   setTierTextByRuleId,
   tierTextByRuleId,
-}: {
-  setTierTextByRuleId: (updater: any) => void;
-  tierTextByRuleId: Record<string, { tierText: string; tierSubtext: string }>;
-}) {
-  const { markAsDirty, pricingState, productPageBundleStyles } =
-    usePpbConfigureContext();
+}: Pick<
+  PpbProgressBarOptionsProps,
+  "markAsDirty" | "pricingState" | "setTierTextByRuleId" | "tierTextByRuleId"
+>) {
 
   if (pricingState.discountRules.length === 0) {
     return (
@@ -328,7 +372,7 @@ function PpbProgressTierTextFields({
 
   return (
     <s-stack direction="block" gap="small">
-      {pricingState.discountRules.map((rule: any, index: number) => (
+      {pricingState.discountRules.map((rule, index) => (
         <div key={rule.id} className={productPageBundleStyles.discountRuleCard}>
           <s-stack direction="block" gap="small-100">
             <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>

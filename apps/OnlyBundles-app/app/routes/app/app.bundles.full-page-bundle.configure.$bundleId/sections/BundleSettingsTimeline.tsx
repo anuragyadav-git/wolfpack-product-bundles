@@ -1,19 +1,21 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { translateAdmin } from "~/i18n/config";
+import { FilePicker } from "../../../../components/shared/FilePicker";
+
+export interface FpbTimelineSettingsProps {
+  bundleBannerDesktopUrl: string;
+  bundleBannerMobileUrl: string;
+  markAsDirty: () => void;
+  setBundleBannerDesktopUrl: (url: string) => void;
+  setBundleBannerMobileUrl: (url: string) => void;
+}
 
 export function FpbTimelineSettings({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    bundleBannerDesktopUrl,
-    bundleBannerMobileUrl,
-    FilePicker,
-    markAsDirty,
-    setBundleBannerDesktopUrl,
-    setBundleBannerMobileUrl,
-  } = flow;
+  bundleBannerDesktopUrl,
+  bundleBannerMobileUrl,
+  markAsDirty,
+  setBundleBannerDesktopUrl,
+  setBundleBannerMobileUrl,
+}: FpbTimelineSettingsProps) {
 
   return (
     <>

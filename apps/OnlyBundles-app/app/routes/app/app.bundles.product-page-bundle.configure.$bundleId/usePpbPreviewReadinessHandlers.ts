@@ -23,6 +23,9 @@ import {
   getGuidedTourTransition,
   type TourStep,
 } from "../../../components/bundle-configure/tourSteps";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type { usePpbVisibilityState } from "./usePpbVisibilityState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
 
 function recordBundlePreview(bundleLink: string) {
   const formData = new FormData();
@@ -37,9 +40,21 @@ export function usePpbPreviewReadinessHandlers({
   visibility,
   templateState,
 }: {
-  base: any;
-  visibility: any;
-  templateState: any;
+  base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
+    | "apiKey" | "appEmbedEnabled" | "blockHandle" | "bundle" | "bundleProduct"
+    | "clearOperationAlert" | "forceNavigation" | "formState" | "isDirty"
+    | "loadedBundleProduct" | "loaderData" | "navigate" | "openThemeEditorForAppEmbed"
+    | "pricingState" | "productStatus" | "refreshParentProductStatusFromShopify"
+    | "setActiveSection" | "setOperationAlert" | "shop" | "shopify" | "stepsState"
+    | "themeEditorUrl" | "triggerSaveBarIrritation"
+  >;
+  visibility: Pick<ReturnType<typeof usePpbVisibilityState>,
+    "bundleEmbedEnabled" | "upsellWidgetEnabled"
+  >;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>,
+    | "hasPreview" | "setActiveTabIndex" | "setHasPreview" | "setReadinessOpen"
+    | "setSlideDir" | "setSlideKey"
+  >;
 }) {
   const [isPreviewBundleLoading, setIsPreviewBundleLoading] = useState(false);
   const closeDisabledPreviewModal = useCallback(() => undefined, []);
@@ -75,7 +90,7 @@ export function usePpbPreviewReadinessHandlers({
       let productUrl = pickPpbPreviewUrl({
         appEmbedEnabled: true,
         bundleStatus: bundleStatusForPreview,
-        productHandle: base.bundle.shopifyProductHandle,
+        productHandle: base.bundle.shopifyProductHandle ?? null,
         bundleProduct: base.bundleProduct,
         shop: base.shop,
       });
@@ -204,7 +219,7 @@ export function usePpbPreviewReadinessHandlers({
   const readinessItems = useMemo<BundleReadinessItem[]>(() => {
     const hasProducts =
       base.stepsState.steps.reduce((totalProducts: number, step: any) => {
-        const legacyProducts = Array.isArray(step.StepProduct)
+        const stepProductCount = Array.isArray(step.StepProduct)
           ? step.StepProduct.length
           : 0;
         const categoryProductCount = Array.isArray((step as any).StepCategory)
@@ -217,7 +232,7 @@ export function usePpbPreviewReadinessHandlers({
               0,
             )
           : 0;
-        return totalProducts + legacyProducts + categoryProductCount;
+        return totalProducts + stepProductCount + categoryProductCount;
       }, 0) >= 3;
     const widgetPlaced =
       visibility.upsellWidgetEnabled || visibility.bundleEmbedEnabled;
@@ -308,16 +323,7 @@ export function usePpbPreviewReadinessHandlers({
       const storeHandle = base.shop?.replace(".myshopify.com", "");
       const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
       const openFallback = () => {
-        try {
-          base.shopify.navigate(adminProductUrl);
-        } catch (error: any) {
-          AppLogger.warn(
-            "Falling back to a new tab for Admin product navigation",
-            { productId },
-            error as any,
-          );
-          window.open(adminProductUrl, "_blank");
-        }
+        window.open(adminProductUrl, "_blank", "noopener,noreferrer");
         base.refreshParentProductStatusFromShopify();
       };
       const intentsApi = (base.shopify as any).intents;

@@ -5,10 +5,10 @@
  * Issue: [edit-bundle-flow-tests-1]
  */
 
-import { handleSaveBundle } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
+import { handleSaveBundle } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server";
 import {
   updateBundleProductMetafields,
-} from "../../../app/services/bundles/metafield-sync.server";
+} from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
 import { AddOnDiscountFunctionService } from "../../../app/services/addon-discount-function-service.server";
 
@@ -59,7 +59,7 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn().mockResolvedValue(undefined),
   updateComponentProductMetafields: jest.fn().mockResolvedValue(undefined),
 }));
@@ -73,10 +73,6 @@ jest.mock("../../../app/services/bundles/storefront-sync.server", () => ({
     description: bundle.description ?? null,
     shopifyProductId: bundle.shopifyProductId ?? null,
     shopifyProductHandle: bundle.shopifyProductHandle ?? null,
-    shopifyPageId: bundle.shopifyPageId ?? null,
-    shopifyPageHandle: bundle.shopifyPageHandle ?? null,
-    shopifyPreviewPageId: bundle.shopifyPreviewPageId ?? null,
-    shopifyPreviewPageHandle: bundle.shopifyPreviewPageHandle ?? null,
   })),
   syncBundleStorefrontNow: jest.fn().mockResolvedValue({
     skipped: false,
@@ -102,14 +98,10 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../../app/services/widget-installation.server", () => ({
+jest.mock("../../../app/services/widget-installation/widget-installation-core.server", () => ({
   WidgetInstallationService: {
     validateProductBundleWidgetSetup: jest.fn(),
   },
-}));
-
-jest.mock("../../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
 }));
 
 jest.mock("../../../app/lib/variant-existence.server", () => ({
@@ -193,9 +185,11 @@ function makeStep(
     minQuantity: 1,
     maxQuantity: 5,
     enabled: true,
-    products: [{ id: "validation-product" }],
+    products: [],
     collections: [],
-    StepProduct: [],
+    StepProduct: [
+      { id: "gid://shopify/Product/1", title: "Validation product", variants: [] },
+    ],
     StepCategory: [],
     ...overrides,
   };
@@ -996,6 +990,54 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
+  it("materializes category-selected products as deduplicated canonical StepProduct rows", async () => {
+    const categoryProduct = {
+      id: "gid://shopify/Product/222",
+      title: "Category product",
+      imageUrl: "https://cdn.example.test/category-product.jpg",
+      variants: [{ id: "gid://shopify/ProductVariant/333", title: "Default" }],
+    };
+    const stepsData = [
+      makeStep({
+        StepProduct: [],
+        StepCategory: [
+          {
+            id: "category-1",
+            name: "Category 1",
+            products: [categoryProduct],
+            collections: [],
+          },
+          {
+            id: "category-2",
+            name: "Category 2",
+            products: [categoryProduct],
+            collections: [],
+          },
+        ],
+      }),
+    ];
+
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(stepsData) }),
+    );
+
+    expect(response.status).toBe(200);
+    const stepCreate = getDb().bundle.update.mock.calls[0][0].data.steps.create[0];
+    expect(stepCreate.StepProduct.create).toEqual([
+      expect.objectContaining({
+        productId: "gid://shopify/Product/222",
+        title: "Category product",
+        imageUrl: "https://cdn.example.test/category-product.jpg",
+        variants: categoryProduct.variants,
+        position: 1,
+      }),
+    ]);
+    expect(stepCreate.StepCategory.create).toHaveLength(2);
+  });
+
   it("persists PPB add-on tier quantity and discount configuration", async () => {
     const addonTiers = [{
       tierId: "tier-1",
@@ -1062,7 +1104,7 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(body.error).toContain("Prisma error");
   });
 
-  it("stores fixedBundlePrice on rule when discountType is fixed_bundle_price", async () => {
+  it("stores fixed bundle targets only in canonical discountValue", async () => {
     const discountData = makeDiscountData({
       discountEnabled: true,
       discountType: "fixed_bundle_price",
@@ -1072,7 +1114,8 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
     const updateCall = getDb().bundle.update.mock.calls[0][0];
     const pricingRules = updateCall.data.pricing.upsert.create.rules;
-    expect(pricingRules[0].fixedBundlePrice).toBe(7900);
+    expect(pricingRules[0].discountValue).toBe(7900);
+    expect(pricingRules[0]).not.toHaveProperty("fixedBundlePrice");
   });
 
   it("derives direct boxSelection from Product Page quantity discount display options", async () => {

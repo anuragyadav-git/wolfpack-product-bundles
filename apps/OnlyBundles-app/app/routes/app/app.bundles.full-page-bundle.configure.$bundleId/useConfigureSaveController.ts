@@ -4,7 +4,15 @@ import { serializePricingDisplayOptions } from "../../../lib/pricing-display-opt
 import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness";
 import { resolveFpbProductSlotsEnabled } from "../../../lib/fpb-product-slots-availability";
 import { ADDON_MESSAGE_KEY } from "./configure-constants";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { useConfigureActionController } from "./useConfigureActionController";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
+import type { useConfigureAddonState } from "./useConfigureAddonState";
+import type { useConfigureContentState } from "./useConfigureContentState";
+import type { useConfigureSubscriptionState } from "./useConfigureSubscriptionState";
+import type { useConfigureLocalizationState } from "./useConfigureLocalizationState";
+import type { useConfigureVisibilityTemplateState } from "./useConfigureVisibilityTemplateState";
+import type { useConfigureTemplatePricingController } from "./useConfigureTemplatePricingController";
+import type { useConfigureModalController } from "./useConfigureModalController";
 import { serializeFpbSaveSteps } from "./fpb-save-transport";
 import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
 import { i18n } from "../../../i18n/config";
@@ -14,7 +22,156 @@ import {
 } from "../../../lib/admin-alert-feedback";
 import { getEntitlementAlertCopyKeys } from "../../../lib/subscriptions/alerts";
 
-export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
+type ConfigureSaveSource = ReturnType<
+  typeof useConfigureBundleController
+> &
+  ReturnType<typeof useConfigureAddonState> &
+  ReturnType<typeof useConfigureContentState> &
+  ReturnType<typeof useConfigureSubscriptionState> &
+  ReturnType<typeof useConfigureLocalizationState> &
+  ReturnType<typeof useConfigureVisibilityTemplateState> &
+  ReturnType<typeof useConfigureTemplatePricingController> &
+  ReturnType<typeof useConfigureModalController> &
+  ReturnType<typeof useConfigureActionController>;
+
+type ConfigureSaveDependencies = Pick<
+  ConfigureSaveSource,
+  | "addonDraft"
+  | "allowQuantityChanges"
+  | "autoSelectBrowsedProduct"
+  | "buildBundleUpsellConfig"
+  | "buildPersonalizationDataFromDraft"
+  | "bundle"
+  | "bundleBannerDesktopUrl"
+  | "bundleBannerMobileUrl"
+  | "bundleLevelCss"
+  | "bundleProduct"
+  | "cartRedirectToCheckout"
+  | "clearOperationAlert"
+  | "conditionsState"
+  | "countdownEnabled"
+  | "countdownExpiredMessage"
+  | "countdownExpiryAction"
+  | "countdownLayout"
+  | "countdownPosition"
+  | "countdownTitle"
+  | "defaultProductsData"
+  | "discardSpecificLinkOfferChanges"
+  | "discountMessagingMultiLanguageEnabled"
+  | "fetcher"
+  | "finishPreviewBundleLoading"
+  | "floatingBadgeEnabled"
+  | "floatingBadgeText"
+  | "formState"
+  | "globalSuccessMessage"
+  | "hookHandleDiscard"
+  | "lastProcessedFetcherDataRef"
+  | "loadingGif"
+  | "lowStockAlertEnabled"
+  | "lowStockAlertMessage"
+  | "lowStockAlertThreshold"
+  | "markSpecificLinkOfferSaved"
+  | "maxQtyPerProduct"
+  | "normalizeDefaultProductsData"
+  | "normalizedPricingDisplayOptions"
+  | "normalizedRuleMessages"
+  | "offerDeliveryState"
+  | "originalAddonDraftRef"
+  | "originalAllowQuantityChangesRef"
+  | "originalAutoSelectBrowsedProductRef"
+  | "originalCartRedirectToCheckoutRef"
+  | "originalCountdownEnabledRef"
+  | "originalCountdownExpiredMessageRef"
+  | "originalCountdownExpiryActionRef"
+  | "originalCountdownLayoutRef"
+  | "originalCountdownPositionRef"
+  | "originalCountdownTitleRef"
+  | "originalDiscountMessagingMultiLanguageEnabledRef"
+  | "originalFloatingBadgeEnabledRef"
+  | "originalFloatingBadgeTextRef"
+  | "originalLoadingGifRef"
+  | "originalLowStockAlertEnabledRef"
+  | "originalLowStockAlertMessageRef"
+  | "originalLowStockAlertThresholdRef"
+  | "originalPromoBannerBgImageRef"
+  | "originalRuleMessagesByLocaleRef"
+  | "originalSearchBarEnabledRef"
+  | "originalShowProductPricesRef"
+  | "originalShowStepTimelineRef"
+  | "originalSubscriptionConfigRef"
+  | "originalTextOverridesByLocaleRef"
+  | "originalTextOverridesRef"
+  | "originalUpsellWidgetButtonTextRef"
+  | "originalUpsellWidgetDisplayModeRef"
+  | "originalUpsellWidgetDisplayOnRef"
+  | "originalUpsellWidgetEnabledRef"
+  | "originalValuesRef"
+  | "pricingState"
+  | "productSlotIconUrl"
+  | "productSlotsEnabled"
+  | "productStatus"
+  | "promoBannerBgImage"
+  | "quantityValidationEnabled"
+  | "resetSubscriptionConfig"
+  | "revalidator"
+  | "ruleMessages"
+  | "ruleMessagesByLocale"
+  | "searchBarEnabled"
+  | "selectedCollections"
+  | "setActiveSection"
+  | "setActiveTabIndex"
+  | "setAddonDraft"
+  | "setAllowQuantityChanges"
+  | "setAutoSelectBrowsedProduct"
+  | "setCartRedirectToCheckout"
+  | "setCategoryOpen"
+  | "setCountdownEnabled"
+  | "setCountdownExpiredMessage"
+  | "setCountdownExpiryAction"
+  | "setCountdownLayout"
+  | "setCountdownPosition"
+  | "setCountdownTitle"
+  | "setDiscountMessagingMultiLanguageEnabled"
+  | "setFloatingBadgeEnabled"
+  | "setFloatingBadgeText"
+  | "setHasPreview"
+  | "setIsDirty"
+  | "setLoadingGif"
+  | "setLowStockAlertEnabled"
+  | "setLowStockAlertMessage"
+  | "setLowStockAlertThreshold"
+  | "setOperationAlert"
+  | "setPromoBannerBgImage"
+  | "setRuleMessagesByLocale"
+  | "setSearchBarEnabled"
+  | "setShowDiscardModal"
+  | "setShowProductPrices"
+  | "setShowStepTimeline"
+  | "setTextOverrides"
+  | "setTextOverridesByLocale"
+  | "setUpsellWidgetButtonText"
+  | "setUpsellWidgetDisplayMode"
+  | "setUpsellWidgetDisplayOn"
+  | "setUpsellWidgetEnabled"
+  | "shopify"
+  | "showProductPrices"
+  | "showStepTimeline"
+  | "showTextOnAddButton"
+  | "stepsState"
+  | "subscriptionConfig"
+  | "successMessageByLocale"
+  | "textOverrides"
+  | "textOverridesByLocale"
+  | "tierTextByLocaleByRuleId"
+  | "tierTextByRuleId"
+  | "upsellWidgetButtonText"
+  | "upsellWidgetDisplayMode"
+  | "upsellWidgetDisplayOn"
+  | "upsellWidgetEnabled"
+  | "variantSelectorEnabled"
+>;
+
+export function useConfigureSaveController(flow: ConfigureSaveDependencies) {
   const lastFetcherIntentRef = useRef<string | null>(null);
   const validation = useConfigureValidation({
     kind: "fpb",
@@ -22,7 +179,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     revealIssue: (validationIssue) => {
       if (!validationIssue.stepId) return;
       const stepIndex = flow.stepsState.steps.findIndex(
-        (step: any) => String(step.id) === validationIssue.stepId,
+        (step: any) => String(step.id) === validationIssue.stepId
       );
       if (stepIndex >= 0) flow.setActiveTabIndex(stepIndex);
       if (validationIssue.categoryId) {
@@ -58,8 +215,8 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       formData.append(
         "stepsData",
         JSON.stringify(
-          serializeFpbSaveSteps(flow.stepsState.steps, flow.selectedCollections),
-        ),
+          serializeFpbSaveSteps(flow.stepsState.steps, flow.selectedCollections)
+        )
       );
       const enrichedRuleMessages = Object.fromEntries(
         Object.entries(flow.normalizedRuleMessages).map(([id, msg]: any) => [
@@ -68,7 +225,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             ...msg,
             successMessage: flow.globalSuccessMessage || msg.successMessage,
           },
-        ]),
+        ])
       );
       formData.append(
         "discountData",
@@ -98,36 +255,36 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             Object.keys(flow.tierTextByLocaleByRuleId).length > 0
               ? flow.tierTextByLocaleByRuleId
               : null,
-        }),
+        })
       );
       formData.append(
         "stepConditions",
-        JSON.stringify(flow.conditionsState.stepConditions),
+        JSON.stringify(flow.conditionsState.stepConditions)
       );
       formData.append("bundleProduct", JSON.stringify(flow.bundleProduct));
       formData.append(
         "bundleSubscriptionConfig",
-        JSON.stringify(flow.subscriptionConfig),
+        JSON.stringify(flow.subscriptionConfig)
       );
       formData.append("promoBannerBgImage", flow.promoBannerBgImage ?? "");
       formData.append("loadingGif", flow.loadingGif ?? "");
       formData.append(
         "floatingBadgeEnabled",
-        String(flow.floatingBadgeEnabled),
+        String(flow.floatingBadgeEnabled)
       );
       formData.append("floatingBadgeText", flow.floatingBadgeText);
       formData.append("showProductPrices", String(flow.showProductPrices));
       formData.append(
         "cartRedirectToCheckout",
-        String(flow.cartRedirectToCheckout),
+        String(flow.cartRedirectToCheckout)
       );
       formData.append(
         "allowQuantityChanges",
-        String(flow.allowQuantityChanges),
+        String(flow.allowQuantityChanges)
       );
       formData.append(
         "lowStockAlertEnabled",
-        String(flow.lowStockAlertEnabled),
+        String(flow.lowStockAlertEnabled)
       );
       formData.append("lowStockAlertThreshold", flow.lowStockAlertThreshold);
       formData.append("lowStockAlertMessage", flow.lowStockAlertMessage);
@@ -136,30 +293,24 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
       formData.append("countdownPosition", flow.countdownPosition);
       formData.append("countdownTitle", flow.countdownTitle);
       formData.append("countdownExpiryAction", flow.countdownExpiryAction);
-      formData.append(
-        "countdownExpiredMessage",
-        flow.countdownExpiredMessage,
-      );
+      formData.append("countdownExpiredMessage", flow.countdownExpiredMessage);
       formData.append("searchBarEnabled", String(flow.searchBarEnabled));
       formData.append(
         "variantSelectorEnabled",
-        String(flow.variantSelectorEnabled),
+        String(flow.variantSelectorEnabled)
       );
-      formData.append(
-        "showTextOnAddButton",
-        String(flow.showTextOnAddButton),
-      );
+      formData.append("showTextOnAddButton", String(flow.showTextOnAddButton));
       formData.append(
         "textOverrides",
         Object.keys(flow.textOverrides).length > 0
           ? JSON.stringify(flow.textOverrides)
-          : "",
+          : ""
       );
       formData.append(
         "textOverridesByLocale",
         Object.keys(flow.textOverridesByLocale).length > 0
           ? JSON.stringify(flow.textOverridesByLocale)
-          : "",
+          : ""
       );
       formData.append(
         "bundleTextConfig",
@@ -168,28 +319,28 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             title: flow.textOverrides.yourBundle ?? "",
             subTitle: flow.textOverrides.reviewBundle ?? "",
           },
-        }),
+        })
       );
       const addonMessages = flow.ruleMessages[ADDON_MESSAGE_KEY] || null;
       const personalizationData = flow.buildPersonalizationDataFromDraft(
         flow.addonDraft,
-        addonMessages,
+        addonMessages
       );
       formData.append(
         "personalizationData",
-        personalizationData ? JSON.stringify(personalizationData) : "",
+        personalizationData ? JSON.stringify(personalizationData) : ""
       );
       formData.append("validationAddonDraft", JSON.stringify(flow.addonDraft));
       formData.append(
         "bundleUpsellConfig",
-        JSON.stringify(flow.buildBundleUpsellConfig()),
+        JSON.stringify(flow.buildBundleUpsellConfig())
       );
       formData.append("upsellWidgetEnabled", String(flow.upsellWidgetEnabled));
       formData.append("upsellWidgetDisplayMode", flow.upsellWidgetDisplayMode);
       formData.append("upsellWidgetDisplayOn", flow.upsellWidgetDisplayOn);
       formData.append(
         "autoSelectBrowsedProduct",
-        String(flow.autoSelectBrowsedProduct),
+        String(flow.autoSelectBrowsedProduct)
       );
       formData.append("bundleBannerDesktopUrl", flow.bundleBannerDesktopUrl);
       formData.append("bundleBannerMobileUrl", flow.bundleBannerMobileUrl);
@@ -200,9 +351,9 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           resolveFpbProductSlotsEnabled(
             flow.productSlotsEnabled,
             flow.stepsState.steps,
-            flow.conditionsState.stepConditions,
-          ),
-        ),
+            flow.conditionsState.stepConditions
+          )
+        )
       );
       formData.append("maxQtyPerProduct", flow.maxQtyPerProduct);
       formData.append("productSlotIconUrl", flow.productSlotIconUrl);
@@ -212,61 +363,67 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           isEnabled: flow.quantityValidationEnabled,
           allowedQuantity:
             Number.parseInt(flow.maxQtyPerProduct || "1", 10) || 1,
-        }),
+        })
       );
       formData.append(
         "defaultProductsData",
-        JSON.stringify(buildDefaultProductsData()),
+        JSON.stringify(buildDefaultProductsData())
       );
       formData.append(
         "specificLinkOfferEnabled",
-        String(flow.offerDeliveryState.enabled),
+        String(flow.offerDeliveryState.enabled)
       );
-      formData.append("offerPriority", String(flow.offerDeliveryState.priority));
+      formData.append(
+        "offerPriority",
+        String(flow.offerDeliveryState.priority)
+      );
       formData.append(
         "offerStopLowerPriority",
-        String(flow.offerDeliveryState.stopLowerPriority),
+        String(flow.offerDeliveryState.stopLowerPriority)
       );
-      formData.append("offerScheduleMode", flow.offerDeliveryState.scheduleMode);
+      formData.append(
+        "offerScheduleMode",
+        flow.offerDeliveryState.scheduleMode
+      );
       formData.append("offerStartsAt", flow.offerDeliveryState.startsAt ?? "");
       formData.append("offerEndsAt", flow.offerDeliveryState.endsAt ?? "");
       formData.append(
         "offerRecurrenceFrequency",
-        flow.offerDeliveryState.recurrenceFrequency ?? "",
+        flow.offerDeliveryState.recurrenceFrequency ?? ""
       );
       formData.append(
         "offerRecurrenceAnchorDate",
-        flow.offerDeliveryState.recurrenceAnchorDate ?? "",
+        flow.offerDeliveryState.recurrenceAnchorDate ?? ""
       );
       formData.append(
         "offerRecurrenceWindowStart",
-        flow.offerDeliveryState.recurrenceWindowStart ?? "",
+        flow.offerDeliveryState.recurrenceWindowStart ?? ""
       );
       formData.append(
         "offerRecurrenceWindowEnd",
-        flow.offerDeliveryState.recurrenceWindowEnd ?? "",
+        flow.offerDeliveryState.recurrenceWindowEnd ?? ""
       );
       formData.append(
         "offerRecurrenceTermination",
-        flow.offerDeliveryState.recurrenceTermination,
+        flow.offerDeliveryState.recurrenceTermination
       );
       formData.append(
         "offerRecurrenceEndsOn",
-        flow.offerDeliveryState.recurrenceEndsOn ?? "",
+        flow.offerDeliveryState.recurrenceEndsOn ?? ""
       );
       formData.append(
         "offerRecurrenceRunCount",
         flow.offerDeliveryState.recurrenceRunCount == null
           ? ""
-          : String(flow.offerDeliveryState.recurrenceRunCount),
+          : String(flow.offerDeliveryState.recurrenceRunCount)
       );
       formData.append(
         "countryTargetingEnabled",
-        String(flow.offerDeliveryState.countryTargetingEnabled),
+        String(flow.offerDeliveryState.countryTargetingEnabled)
       );
       formData.append(
         "countryTargetingMode",
-        flow.offerDeliveryState.countryTargetingMode,
+        flow.offerDeliveryState.countryTargetingMode
       );
       flow.offerDeliveryState.countryCodes.forEach((countryCode: string) => {
         formData.append("countryCodes", countryCode);
@@ -315,7 +472,13 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             discountMessagingEnabled:
               flow.pricingState.discountMessagingEnabled,
             pricingDisplayOptions: JSON.stringify(
-              flow.pricingState.pricingDisplayOptions,
+              flow.pricingState.pricingDisplayOptions
+            ),
+            tierTextByRuleId: JSON.stringify(
+              flow.pricingState.tierTextByRuleId
+            ),
+            tierTextByLocaleByRuleId: JSON.stringify(
+              flow.pricingState.tierTextByLocaleByRuleId
             ),
             selectedCollections: JSON.stringify(flow.selectedCollections),
             ruleMessages: JSON.stringify(flow.normalizedRuleMessages),
@@ -367,15 +530,18 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
             flow.upsellWidgetButtonText;
           flow.originalAutoSelectBrowsedProductRef.current =
             flow.autoSelectBrowsedProduct;
-          flow.originalSubscriptionConfigRef.current =
-            flow.subscriptionConfig;
+          flow.originalSubscriptionConfigRef.current = flow.subscriptionConfig;
           flow.markSpecificLinkOfferSaved();
           flow.setIsDirty(false);
           flow.clearOperationAlert();
-          flow.shopify.toast.show(i18n.t("common.success.changesSaved"), { isError: false });
+          flow.shopify.toast.show(i18n.t("common.success.changesSaved"), {
+            isError: false,
+          });
         } else if ("productId" in result && result.productId) {
           flow.clearOperationAlert();
-          flow.shopify.toast.show(i18n.t("common.success.productSynced"), { isError: false });
+          flow.shopify.toast.show(i18n.t("common.success.productSynced"), {
+            isError: false,
+          });
         } else if ("themeId" in result && result.themeId) {
           // No-op: handled by individual callbacks.
         } else if (
@@ -394,7 +560,9 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           flow.shopify.toast.show(i18n.t("common.success.previewOpened"));
         } else if ("synced" in result && result.synced) {
           flow.clearOperationAlert();
-          flow.shopify.toast.show(i18n.t("common.success.bundleSynced"), { isError: false });
+          flow.shopify.toast.show(i18n.t("common.success.bundleSynced"), {
+            isError: false,
+          });
           flow.revalidator.revalidate();
           const syncInstallLink = (result as any).widgetInstallationLink;
           if (syncInstallLink) {
@@ -402,7 +570,9 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
           }
         } else {
           flow.clearOperationAlert();
-          flow.shopify.toast.show(i18n.t("common.success.operationComplete"), { isError: false });
+          flow.shopify.toast.show(i18n.t("common.success.operationComplete"), {
+            isError: false,
+          });
         }
       } else {
         if (Array.isArray((result as any).fieldErrors)) {
@@ -412,7 +582,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         }
         if (isPersistentAdminOperationError(requestIntent)) {
           const alertCopy = getEntitlementAlertCopyKeys(
-            (result as any).entitlementFailure?.code,
+            (result as any).entitlementFailure?.code
           );
           flow.setOperationAlert({
             id: "bundle-save",
@@ -422,7 +592,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
         } else {
           showAdminTransientErrorToast(
             flow.shopify,
-            i18n.t("common.alerts.operationFailed"),
+            i18n.t("common.alerts.operationFailed")
           );
         }
         flow.finishPreviewBundleLoading?.();
@@ -440,53 +610,47 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     flow.setSearchBarEnabled(flow.originalSearchBarEnabledRef.current);
     flow.setShowProductPrices(flow.originalShowProductPricesRef.current);
     flow.setCartRedirectToCheckout(
-      flow.originalCartRedirectToCheckoutRef.current,
+      flow.originalCartRedirectToCheckoutRef.current
     );
     flow.setAllowQuantityChanges(flow.originalAllowQuantityChangesRef.current);
-    flow.setLowStockAlertEnabled(
-      flow.originalLowStockAlertEnabledRef.current,
-    );
+    flow.setLowStockAlertEnabled(flow.originalLowStockAlertEnabledRef.current);
     flow.setLowStockAlertThreshold(
-      flow.originalLowStockAlertThresholdRef.current,
+      flow.originalLowStockAlertThresholdRef.current
     );
-    flow.setLowStockAlertMessage(
-      flow.originalLowStockAlertMessageRef.current,
-    );
+    flow.setLowStockAlertMessage(flow.originalLowStockAlertMessageRef.current);
     flow.setCountdownEnabled(flow.originalCountdownEnabledRef.current);
     flow.setCountdownLayout(flow.originalCountdownLayoutRef.current);
     flow.setCountdownPosition(flow.originalCountdownPositionRef.current);
     flow.setCountdownTitle(flow.originalCountdownTitleRef.current);
     flow.setCountdownExpiryAction(
-      flow.originalCountdownExpiryActionRef.current,
+      flow.originalCountdownExpiryActionRef.current
     );
     flow.setCountdownExpiredMessage(
-      flow.originalCountdownExpiredMessageRef.current,
+      flow.originalCountdownExpiredMessageRef.current
     );
     flow.setTextOverrides(flow.originalTextOverridesRef.current);
     flow.setTextOverridesByLocale(
-      flow.originalTextOverridesByLocaleRef.current,
+      flow.originalTextOverridesByLocaleRef.current
     );
     flow.setAddonDraft(flow.originalAddonDraftRef.current);
     flow.setDiscountMessagingMultiLanguageEnabled(
-      flow.originalDiscountMessagingMultiLanguageEnabledRef.current,
+      flow.originalDiscountMessagingMultiLanguageEnabledRef.current
     );
     flow.setRuleMessagesByLocale(flow.originalRuleMessagesByLocaleRef.current);
     flow.setUpsellWidgetEnabled(flow.originalUpsellWidgetEnabledRef.current);
     flow.setUpsellWidgetDisplayMode(
-      flow.originalUpsellWidgetDisplayModeRef.current,
+      flow.originalUpsellWidgetDisplayModeRef.current
     );
     flow.setUpsellWidgetDisplayOn(
-      flow.originalUpsellWidgetDisplayOnRef.current,
+      flow.originalUpsellWidgetDisplayOnRef.current
     );
     flow.setUpsellWidgetButtonText(
-      flow.originalUpsellWidgetButtonTextRef.current,
+      flow.originalUpsellWidgetButtonTextRef.current
     );
     flow.setAutoSelectBrowsedProduct(
-      flow.originalAutoSelectBrowsedProductRef.current,
+      flow.originalAutoSelectBrowsedProductRef.current
     );
-    flow.resetSubscriptionConfig(
-      flow.originalSubscriptionConfigRef.current,
-    );
+    flow.resetSubscriptionConfig(flow.originalSubscriptionConfigRef.current);
     flow.discardSpecificLinkOfferChanges();
     validation.clearValidationErrors();
   }, [flow, validation]);
@@ -495,7 +659,7 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     handleDiscard();
   }, [closeDiscardModal, handleDiscard]);
 
-  Object.assign(flow, {
+  return {
     buildDefaultProductsData,
     closeDiscardModal,
     handleConfirmDiscard,
@@ -503,5 +667,5 @@ export function useConfigureSaveController(flow: ConfigureBundleFlowDraft) {
     handleSave,
     serializePricingDisplayOptions,
     ...validation,
-  });
+  };
 }

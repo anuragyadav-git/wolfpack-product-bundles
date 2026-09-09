@@ -13,12 +13,19 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: jest.fn(),
 }));
 
-jest.mock("../../../app/components/analytics", () => ({
+jest.mock("../../../app/components/analytics/BundlePerformanceMatrix", () => ({
   BundlePerformanceMatrix: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleConversionFunnel", () => ({
   BundleConversionFunnel: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleKeyStatistics", () => ({
   BundleKeyStatistics: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleSalesTrends", () => ({
   BundleSalesTrends: () => null,
-  LiveActivityFeed: () => null,
+}));
+jest.mock("../../../app/components/analytics/TopCampaigns", () => ({
   TopCampaigns: () => null,
 }));
 

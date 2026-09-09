@@ -26,5 +26,8 @@ describe("DashboardTopCards BFS review fixes", () => {
     expect(view).toContain("dashboard.supportIssues.storeDesignHelp");
     expect(view).toContain("dashboard.supportIssues.description");
     expect(view).toContain("dashboard.supportIssues.cta");
+    expect(view).toContain(
+      'accessibilityLabel="dashboard.supportIssues.cta"',
+    );
   });
 });

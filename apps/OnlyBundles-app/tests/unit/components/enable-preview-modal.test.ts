@@ -27,7 +27,11 @@ function findElementByText(
   text: string,
 ): React.ReactElement | null {
   if (!React.isValidElement(node)) return null;
-  const children = React.Children.toArray(node.props.children);
+  const children = React.Children.toArray([
+    node.props.children,
+    node.props.primaryAction,
+    node.props.secondaryAction,
+  ]);
   if (children.some((child) => child === text)) return node;
   for (const child of children) {
     const match = findElementByText(child, text);
@@ -64,6 +68,8 @@ describe("EnablePreviewModal", () => {
     expect(html).toContain("Configure visibility to preview the bundle.");
     expect(html).toContain("Maybe later");
     expect(html).toContain("Set up visibility");
+    expect(html).toContain("<s-modal");
+    expect(html).not.toContain('role="dialog"');
   });
 
   it("uses setup visibility callback before direct Theme Editor navigation", () => {

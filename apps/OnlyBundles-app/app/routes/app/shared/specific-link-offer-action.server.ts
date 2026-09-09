@@ -2,7 +2,7 @@ import { json } from '@remix-run/node';
 import type { Session } from '@shopify/shopify-api';
 import db from '../../../db.server';
 import { BundleType } from '../../../constants/bundle';
-import type { ShopifyAdmin } from '../../../lib/auth-guards.server';
+import type { ShopifyAdmin } from '../../../shopify.server';
 import { buildFpbStorefrontUrl } from '../../../lib/fpb-storefront-url';
 import {
   buildSpecificLinkOfferUrl,

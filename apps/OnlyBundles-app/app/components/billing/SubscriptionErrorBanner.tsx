@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { openSupportChat } from "../../lib/support-chat.client";
 
-export interface SubscriptionErrorBannerProps {
+interface SubscriptionErrorBannerProps {
   errorCode: string | null;
   onRetry: () => void;
   onDismiss: () => void;

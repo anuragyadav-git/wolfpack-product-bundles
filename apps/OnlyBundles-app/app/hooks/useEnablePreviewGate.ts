@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type EnablePreviewGateInput = {
+type EnablePreviewGateInput = {
   appEmbedEnabled: boolean;
   themeEditorUrl: string | null;
   blockBehavior?: "modal" | "feedback";
 };
 
-export type EnablePreviewGateDecision =
+type EnablePreviewGateDecision =
   | { mode: "proceed" }
   | { mode: "block_with_modal" }
   | { mode: "block_with_feedback" }
@@ -33,7 +33,7 @@ export function shouldAutoShowOnMount(bundleVisibilityPending: boolean, hasBeenS
   return bundleVisibilityPending && !hasBeenShownThisSession;
 }
 
-export type UseEnablePreviewGateOptions = EnablePreviewGateInput & {
+type UseEnablePreviewGateOptions = EnablePreviewGateInput & {
   refreshStatus?: () => Promise<{ appEmbedEnabled: boolean } | null>;
   onSilentBlock?: () => void;
   /**

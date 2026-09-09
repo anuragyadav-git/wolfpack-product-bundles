@@ -1,5 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import type { PpbSelectTemplateDialogProps } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbSelectTemplateDialog";
 
 jest.mock("@shopify/app-bridge-react", () => ({
   Modal: ({ children, open }: { children: React.ReactNode; open?: boolean }) =>
@@ -37,11 +38,6 @@ const ppbContext = {
   themeEditorUrl: null,
 };
 
-jest.mock(
-  "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({ usePpbConfigureContext: () => ppbContext })
-);
-
 describe("Admin template save loading", () => {
   it("keeps the PPB template step visible with a loading Next action while saving", async () => {
     const { PpbSelectTemplateDialog } = await import(
@@ -54,7 +50,10 @@ describe("Admin template save loading", () => {
     ppbContext.templateFetcher.state = "submitting";
 
     const view = renderToStaticMarkup(
-      React.createElement(PpbSelectTemplateDialog)
+      React.createElement(
+        PpbSelectTemplateDialog,
+        ppbContext as unknown as PpbSelectTemplateDialogProps,
+      )
     );
 
     expect(view).toMatch(/<s-button[^>]*loading="true"[^>]*>Next<\/s-button>/);
@@ -67,10 +66,9 @@ describe("Admin template save loading", () => {
     const { FpbTemplateDialog } = await import(
       "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureTemplateDialog"
     );
-    const flow = {
+    const template = {
       closeSelectTemplateModal: jest.fn(),
       fullPageBundleStyles: {},
-      fullPageTemplateOptions: [],
       handleTemplateNext: jest.fn(),
       handleTemplatePreview: jest.fn(),
       isPreviewBundleLoading: false,
@@ -87,7 +85,7 @@ describe("Admin template save loading", () => {
     };
 
     const view = renderToStaticMarkup(
-      React.createElement(FpbTemplateDialog, { flow: flow as any })
+      React.createElement(FpbTemplateDialog, { template: template as never })
     );
 
     expect(view).toMatch(/<s-button[^>]*loading="true"[^>]*>Next<\/s-button>/);

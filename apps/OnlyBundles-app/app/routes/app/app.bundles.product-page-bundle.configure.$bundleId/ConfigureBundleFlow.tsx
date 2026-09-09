@@ -3,10 +3,6 @@ import productPageBundleStyles from "../../../styles/routes/product-page-bundle-
 
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
 import { revealDeferredConfigureOverlays } from "../_shared/bundle-configure/deferred-configure-overlays";
-import {
-  PpbConfigureProvider,
-  usePpbConfigureContext,
-} from "./PpbConfigureContext";
 import { PpbCanvasHeader } from "./PpbCanvasHeader";
 import {
   PpbConfigureSidebar,
@@ -14,7 +10,10 @@ import {
 } from "./PpbConfigureSidebar";
 import { PpbMainSections } from "./PpbMainSections";
 import { PpbSaveForm } from "./PpbSaveForm";
-import { usePpbConfigureFlow } from "./usePpbConfigureFlow";
+import {
+  usePpbConfigureFlow,
+  type PpbConfigureFlow,
+} from "./usePpbConfigureFlow";
 
 const PpbConfigureOverlays = lazy(() =>
   import("./PpbConfigureOverlays").then((module) => ({
@@ -22,8 +21,7 @@ const PpbConfigureOverlays = lazy(() =>
   }))
 );
 
-function ConfigureBundleCanvas() {
-  const flow = usePpbConfigureContext();
+function ConfigureBundleCanvas({ flow }: { flow: PpbConfigureFlow }) {
   const { blockConfigurationChangeWhileSaving, isSaveInFlight } = flow;
   const [showOverlays, setShowOverlays] = useState(false);
 
@@ -45,19 +43,89 @@ function ConfigureBundleCanvas() {
       blockConfigurationChangeWhileSaving={blockConfigurationChangeWhileSaving}
       isSaveInFlight={isSaveInFlight}
       styles={productPageBundleStyles}
-      saveForm={<PpbSaveForm />}
-      header={<PpbCanvasHeader />}
-      sidebar={<PpbConfigureSidebar />}
-      supplementaryContent={<PpbConfigureSupplement />}
+      saveForm={
+        <PpbSaveForm
+          bundleProduct={flow.bundleProduct}
+          conditionsState={flow.conditionsState}
+          discountMessagingMultiLanguageEnabled={
+            flow.discountMessagingMultiLanguageEnabled
+          }
+          fetcher={flow.fetcher}
+          formState={flow.formState}
+          handleSave={flow.handleSave}
+          isDirty={flow.isDirty}
+          pricingState={flow.pricingState}
+          progressBarEnabled={flow.progressBarEnabled}
+          progressBarProgressText={flow.progressBarProgressText}
+          progressBarSuccessText={flow.progressBarSuccessText}
+          progressBarType={flow.progressBarType}
+          qtyOptionsDefaultRuleId={flow.qtyOptionsDefaultRuleId}
+          qtyOptionsEnabled={flow.qtyOptionsEnabled}
+          qtyRuleLabels={flow.qtyRuleLabels}
+          qtyRuleSubtexts={flow.qtyRuleSubtexts}
+          qtyRuleTextsByLocaleByRuleId={flow.qtyRuleTextsByLocaleByRuleId}
+          ruleMessages={flow.ruleMessages}
+          ruleMessagesByLocale={flow.ruleMessagesByLocale}
+          saveBarRef={flow.saveBarRef}
+          setShowDiscardModal={flow.setShowDiscardModal}
+          stepsState={flow.stepsState}
+          tierTextByLocaleByRuleId={flow.tierTextByLocaleByRuleId}
+          tierTextByRuleId={flow.tierTextByRuleId}
+        />
+      }
+      header={
+        <PpbCanvasHeader
+          appEmbedEnabled={flow.appEmbedEnabled}
+          bundle={flow.bundle}
+          fetcher={flow.fetcher}
+          handleBackClick={flow.handleBackClick}
+          handlePreviewBundle={flow.handlePreviewBundle}
+          isPreviewBundleLoading={flow.isPreviewBundleLoading}
+          loadedBundleProduct={flow.loadedBundleProduct}
+          openThemeEditorForAppEmbed={flow.openThemeEditorForAppEmbed}
+          openProductInAdmin={flow.openProductInAdmin}
+          operationAlert={flow.operationAlert}
+          parentProductStatusUi={flow.parentProductStatusUi}
+          readinessScore={flow.readinessScore}
+          setReadinessOpen={flow.setReadinessOpen}
+          shop={flow.shop}
+          themeEditorUrl={flow.themeEditorUrl}
+        />
+      }
+      sidebar={
+        <PpbConfigureSidebar
+          activeSection={flow.activeSection}
+          appEmbedEnabled={flow.appEmbedEnabled}
+          bundle={flow.bundle}
+          bundleProduct={flow.bundleProduct}
+          formState={flow.formState}
+          handleBundleProductSelect={flow.handleBundleProductSelect}
+          handleSectionChange={flow.handleSectionChange}
+          handleSyncProduct={flow.handleSyncProduct}
+          openProductInAdmin={flow.openProductInAdmin}
+          openSelectTemplateModal={flow.openSelectTemplateModal}
+          parentProductStatusUi={flow.parentProductStatusUi}
+          pricingState={flow.pricingState}
+          productImageUrl={flow.productImageUrl}
+          productTitle={flow.productTitle}
+          selectTemplateOpenButtonRef={flow.selectTemplateOpenButtonRef}
+        />
+      }
+      supplementaryContent={
+        <PpbConfigureSupplement
+          handlePlaceWidget={flow.handlePlaceWidget}
+          isPreparingPlacementTemplates={flow.isPreparingPlacementTemplates}
+        />
+      }
       overlays={
         showOverlays ? (
           <Suspense fallback={null}>
-            <PpbConfigureOverlays />
+            <PpbConfigureOverlays flow={flow} />
           </Suspense>
         ) : null
       }
     >
-      <PpbMainSections />
+      <PpbMainSections flow={flow} />
     </CommonConfigureShell>
   );
 }
@@ -65,9 +133,5 @@ function ConfigureBundleCanvas() {
 export default function ConfigureBundleFlow() {
   const flow = usePpbConfigureFlow();
 
-  return (
-    <PpbConfigureProvider value={flow}>
-      <ConfigureBundleCanvas />
-    </PpbConfigureProvider>
-  );
+  return <ConfigureBundleCanvas flow={flow} />;
 }

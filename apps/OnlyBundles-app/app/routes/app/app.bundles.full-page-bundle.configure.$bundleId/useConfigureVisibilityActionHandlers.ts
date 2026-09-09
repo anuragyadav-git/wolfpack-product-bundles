@@ -1,4 +1,5 @@
-import { useCallback } from "react";
+import { useCallback, type Dispatch, type SetStateAction } from "react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import {
   buildVisibilitySelectionIds,
   getVisibilityPickerSelection,
@@ -6,17 +7,45 @@ import {
   normalizeVisibilityCollectionPageTarget,
   normalizeVisibilityProductForDisplayConfiguration,
   normalizeVisibilityProductPageTarget,
+  type VisibilityResource,
 } from "./visibility-helpers";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+
+type VisibilityActionDependencies = {
+  markAsDirty: () => void;
+  upsellWidgetCollectionsSelectedData: VisibilityResource[];
+  upsellWidgetSelectedProducts: VisibilityResource[];
+  setUpsellWidgetCollectionsSelectedData: Dispatch<
+    SetStateAction<VisibilityResource[]>
+  >;
+  setUpsellWidgetSelectedProducts: Dispatch<
+    SetStateAction<VisibilityResource[]>
+  >;
+  setUpsellWidgetSpecificCollectionPages: Dispatch<
+    SetStateAction<VisibilityResource[]>
+  >;
+  setUpsellWidgetSpecificProductPages: Dispatch<
+    SetStateAction<VisibilityResource[]>
+  >;
+};
 
 export function useConfigureVisibilityActionHandlers(
-  flow: ConfigureBundleFlowDraft,
+  dependencies: VisibilityActionDependencies
 ) {
+  const shopify = useAppBridge();
+  const {
+    markAsDirty,
+    setUpsellWidgetCollectionsSelectedData,
+    setUpsellWidgetSelectedProducts,
+    setUpsellWidgetSpecificCollectionPages,
+    setUpsellWidgetSpecificProductPages,
+    upsellWidgetCollectionsSelectedData,
+    upsellWidgetSelectedProducts,
+  } = dependencies;
   const openVisibilityProductPicker = useCallback(
     async (target: "widget" | "embed") => {
       const currentProducts =
-        target === "widget" ? flow.upsellWidgetSelectedProducts : [];
-      const picked = await (flow.shopify as any).resourcePicker({
+        target === "widget" ? upsellWidgetSelectedProducts : [];
+      const picked = await shopify.resourcePicker({
         type: "product",
         multiple: true,
         action: "select",
@@ -24,23 +53,29 @@ export function useConfigureVisibilityActionHandlers(
       });
       const selection = getVisibilityPickerSelection(picked);
       if (!selection) return;
-      const selectedProducts = selection.map((product: any) =>
-        normalizeVisibilityProductForDisplayConfiguration(product),
+      const selectedProducts = selection.map((product) =>
+        normalizeVisibilityProductForDisplayConfiguration(product)
       );
-      const pageTargets = selectedProducts.map((product: any) =>
-        normalizeVisibilityProductPageTarget(product),
+      const pageTargets = selectedProducts.map((product) =>
+        normalizeVisibilityProductPageTarget(product)
       );
-      flow.setUpsellWidgetSelectedProducts(selectedProducts);
-      flow.setUpsellWidgetSpecificProductPages(pageTargets);
-      flow.markAsDirty();
+      setUpsellWidgetSelectedProducts(selectedProducts);
+      setUpsellWidgetSpecificProductPages(pageTargets);
+      markAsDirty();
     },
-    [flow],
+    [
+      markAsDirty,
+      setUpsellWidgetSelectedProducts,
+      setUpsellWidgetSpecificProductPages,
+      shopify,
+      upsellWidgetSelectedProducts,
+    ]
   );
   const openVisibilityCollectionPicker = useCallback(
     async (target: "widget" | "embed") => {
       const currentCollections =
-        target === "widget" ? flow.upsellWidgetCollectionsSelectedData : [];
-      const picked = await (flow.shopify as any).resourcePicker({
+        target === "widget" ? upsellWidgetCollectionsSelectedData : [];
+      const picked = await shopify.resourcePicker({
         type: "collection",
         multiple: true,
         action: "select",
@@ -48,45 +83,59 @@ export function useConfigureVisibilityActionHandlers(
       });
       const selection = getVisibilityPickerSelection(picked);
       if (!selection) return;
-      const collectionsSelectedData = selection.map((collection: any) =>
-        normalizeVisibilityCollectionForDisplayConfiguration(collection),
+      const collectionsSelectedData = selection.map((collection) =>
+        normalizeVisibilityCollectionForDisplayConfiguration(collection)
       );
-      const pageTargets = collectionsSelectedData.map((collection: any) =>
-        normalizeVisibilityCollectionPageTarget(collection),
+      const pageTargets = collectionsSelectedData.map((collection) =>
+        normalizeVisibilityCollectionPageTarget(collection)
       );
-      flow.setUpsellWidgetCollectionsSelectedData(collectionsSelectedData);
-      flow.setUpsellWidgetSpecificCollectionPages(pageTargets);
-      flow.markAsDirty();
+      setUpsellWidgetCollectionsSelectedData(collectionsSelectedData);
+      setUpsellWidgetSpecificCollectionPages(pageTargets);
+      markAsDirty();
     },
-    [flow],
+    [
+      markAsDirty,
+      setUpsellWidgetCollectionsSelectedData,
+      setUpsellWidgetSpecificCollectionPages,
+      shopify,
+      upsellWidgetCollectionsSelectedData,
+    ]
   );
   const removeVisibilityProductTarget = useCallback(
     (target: "widget" | "embed", indexToRemove: number) => {
       if (target === "widget") {
-        flow.setUpsellWidgetSelectedProducts((prev: unknown[]) =>
-          prev.filter((_, index) => index !== indexToRemove),
+        setUpsellWidgetSelectedProducts((prev) =>
+          prev.filter((_, index) => index !== indexToRemove)
         );
-        flow.setUpsellWidgetSpecificProductPages((prev: unknown[]) =>
-          prev.filter((_, index) => index !== indexToRemove),
+        setUpsellWidgetSpecificProductPages((prev) =>
+          prev.filter((_, index) => index !== indexToRemove)
         );
       }
-      flow.markAsDirty();
+      markAsDirty();
     },
-    [flow],
+    [
+      markAsDirty,
+      setUpsellWidgetSelectedProducts,
+      setUpsellWidgetSpecificProductPages,
+    ]
   );
   const removeVisibilityCollectionTarget = useCallback(
     (target: "widget" | "embed", indexToRemove: number) => {
       if (target === "widget") {
-        flow.setUpsellWidgetCollectionsSelectedData((prev: unknown[]) =>
-          prev.filter((_, index) => index !== indexToRemove),
+        setUpsellWidgetCollectionsSelectedData((prev) =>
+          prev.filter((_, index) => index !== indexToRemove)
         );
-        flow.setUpsellWidgetSpecificCollectionPages((prev: unknown[]) =>
-          prev.filter((_, index) => index !== indexToRemove),
+        setUpsellWidgetSpecificCollectionPages((prev) =>
+          prev.filter((_, index) => index !== indexToRemove)
         );
       }
-      flow.markAsDirty();
+      markAsDirty();
     },
-    [flow],
+    [
+      markAsDirty,
+      setUpsellWidgetCollectionsSelectedData,
+      setUpsellWidgetSpecificCollectionPages,
+    ]
   );
 
   return {

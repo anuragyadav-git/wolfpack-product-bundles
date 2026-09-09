@@ -1,19 +1,30 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import {
+  ADDON_TEMPLATE_VARIABLES,
+  DISCOUNT_TEMPLATE_VARIABLES,
+} from "./ConfigureBundleFlow.helpers";
+import { hidePolarisModal } from "../_shared/bundle-configure/modal-utils";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbUtilityModals() {
-  const {
-    ADDON_TEMPLATE_VARIABLES,
-    DISCOUNT_TEMPLATE_VARIABLES,
-    discountVariablesModalRef,
-    fetcher,
-    handleSyncBundleConfirm,
-    hidePolarisModal,
-    productPageBundleStyles,
-    setIsSyncModalOpen,
-    syncModalRef,
-    templateVariablesModalRef,
-  } = usePpbConfigureContext();
+export type PpbUtilityModalsProps = Pick<
+  PpbConfigureFlow,
+  | "discountVariablesModalRef"
+  | "fetcher"
+  | "handleSyncBundleConfirm"
+  | "setIsSyncModalOpen"
+  | "syncModalRef"
+  | "templateVariablesModalRef"
+>;
+
+export function PpbUtilityModals({
+  discountVariablesModalRef,
+  fetcher,
+  handleSyncBundleConfirm,
+  setIsSyncModalOpen,
+  syncModalRef,
+  templateVariablesModalRef,
+}: PpbUtilityModalsProps) {
 
   return (
     <>
@@ -77,7 +88,7 @@ export function PpbUtilityModals() {
             )}
           </p>
           <div className={productPageBundleStyles.templateVariableGrid}>
-            {ADDON_TEMPLATE_VARIABLES.map(([variable, description]: any) => (
+            {ADDON_TEMPLATE_VARIABLES.map(([variable, description]) => (
               <div
                 key={variable}
                 className={productPageBundleStyles.templateVariableItem}
@@ -107,7 +118,7 @@ export function PpbUtilityModals() {
       >
         <div>
           {DISCOUNT_TEMPLATE_VARIABLES.map(
-            ([variable, description]: any, index) => (
+            ([variable, description], index) => (
               <div key={variable}>
                 {index > 0 && <s-divider />}
                 <div className={productPageBundleStyles.discountVariableRow}>

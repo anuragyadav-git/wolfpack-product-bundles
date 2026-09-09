@@ -5,7 +5,7 @@ export type SidekickBundleDraft = {
   bundleType?: BundleType;
 };
 
-export type SidekickBundleDraftValidation = {
+type SidekickBundleDraftValidation = {
   draft: SidekickBundleDraft;
   errors: string[];
 };

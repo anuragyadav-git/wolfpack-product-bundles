@@ -5,7 +5,7 @@ title: Shopify Sidekick Integration Test Spec
 type: test-spec
 status: active
 summary: Verifies read-only bundle discovery and merchant-confirmed bundle creation through Shopify Sidekick app extensions.
-last_audited: 2026-09-06
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -51,6 +51,7 @@ Verify that Sidekick can retrieve tenant-scoped bundle summaries and open their 
 | 4 | Invalid request | Unknown operation, filter, or oversized query | 400 response | Do not query Prisma |
 | 5 | Authenticated sandbox fetch | Valid Shopify session-token request | CORS-wrapped, no-store JSON | No custom token or endpoint fallback |
 | 6 | Data-only execution | Any data tool request | No database or Shopify mutation | Sidekick data target remains read-only |
+| 7 | Parsed JSON is not an object | `null`, array, or primitive body | Service returns `invalid_request` before reading an operation | Route forwards unknown JSON without an unsafe cast |
 
 ### BundleCreateIntent
 
@@ -74,3 +75,4 @@ Verify that Sidekick can retrieve tenant-scoped bundle summaries and open their 
 - [x] Data responses stay below 4,000 tokens; warm authenticated responses meet one second, and isolated SQL execution is below one millisecond. Longer first-connection timings through the development tunnel are attributed to the verified Free, unpooled Render SIT database connection path rather than Sidekick handler execution.
 - [x] No bundle is created before explicit merchant confirmation.
 - [x] Direct edits of existing bundles and analytics retrieval remain out of scope.
+- [x] The resource route forwards parsed JSON as unknown and the service owns object validation.

@@ -20,15 +20,14 @@ describe("Admin Step Config default icon", () => {
   it("labels the picker action Replace when no image is uploaded", () => {
     const view = renderToStaticMarkup(
       React.createElement(FpbStepConfigCard, {
-        flow: {
-          FilePicker: () => null,
-          fullPageBundleStyles: {},
-          markAsDirty: jest.fn(),
-          setShowIconPickerForStep: jest.fn(),
-          showIconPickerForStep: null,
-          stepsState: { updateStepField: jest.fn() },
-        } as any,
+        styles: {},
         step: { id: "step-1", stepImage: null },
+        pickerOpen: false,
+        onClosePicker: jest.fn(),
+        onImageChange: jest.fn(),
+        onRemoveImage: jest.fn(),
+        onTitleChange: jest.fn(),
+        onTogglePicker: jest.fn(),
       }),
     );
 

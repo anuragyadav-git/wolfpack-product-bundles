@@ -88,6 +88,8 @@
       "deleteBundle": "Excluir bundle",
       "cloneSuccess": "Bundle clonado com sucesso",
       "deleteSuccess": "Bundle excluído",
+      "renameBundle": "Renomear bundle",
+      "renameSuccess": "Bundle renomeado com sucesso",
       "themeEditorUnavailable": "O link do editor de tema não está disponível para esta loja."
     },
     "deleteModal": {
@@ -95,6 +97,15 @@
       "delete": "Excluir",
       "cancel": "Cancelar",
       "body": "Esta ação não pode ser desfeita. Toda a configuração do bundle, etapas e regras de desconto serão excluídas permanentemente."
+    },
+    "renameModal": {
+      "heading": "Renomear bundle",
+      "nameLabel": "Nome do bundle",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "errorEmpty": "O nome do bundle não pode ficar vazio.",
+      "errorTooLong": "O nome do bundle não pode exceder 255 caracteres.",
+      "errorFailed": "Não foi possível renomear o bundle."
     },
     "resources": {
       "bundleInspiration": "Inspiração de bundle",

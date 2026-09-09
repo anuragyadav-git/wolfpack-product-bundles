@@ -35,8 +35,6 @@ function renderSidebar(parentProductStatusUi: {
         openSelectTemplateModal: jest.fn(),
         parentProductStatusUi,
         pricingState: { discountEnabled: false, discountType: "" },
-        productMenuOpen: false,
-        setProductMenuOpen: jest.fn(),
         styles,
         VisibilityBadge: () => React.createElement("span"),
       },

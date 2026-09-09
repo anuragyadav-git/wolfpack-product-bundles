@@ -3,10 +3,13 @@ import {
   useEffect,
   useCallback,
   useRef,
-  type KeyboardEvent,
-  type MouseEvent,
+  type ElementRef,
 } from "react";
 import { useTranslation } from "react-i18next";
+import {
+  showPolarisModal,
+  useModalHideListener,
+} from "../../routes/app/_shared/bundle-configure/modal-utils";
 import styles from "./BundleReadinessOverlay.module.css";
 
 const READINESS_TRIGGER_COLLAPSE_DELAY_MS = 5_000;
@@ -50,10 +53,7 @@ export function BundleReadinessOverlay({
   const [expanded, setExpanded] = useState(open ?? false);
   const [showTriggerDetails, setShowTriggerDetails] = useState(true);
   const [animatedScore, setAnimatedScore] = useState(0);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const wasExpandedRef = useRef(expanded);
+  const modalRef = useRef<ElementRef<"s-modal"> | null>(null);
   const gaugeWasExpandedRef = useRef(expanded);
 
   useEffect(() => {
@@ -69,31 +69,7 @@ export function BundleReadinessOverlay({
   }, [open]);
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog || !expanded) return;
-
-    previousFocusRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : triggerRef.current;
-
-    if (!dialog.open && typeof dialog.showModal === "function") {
-      dialog.showModal();
-    }
-
-    const firstTarget = dialog.querySelector<HTMLElement>(
-      '[data-readiness-incomplete="true"], s-button, button:not([disabled])'
-    );
-    firstTarget?.focus();
-  }, [expanded]);
-
-  useEffect(() => {
-    if (wasExpandedRef.current && !expanded) {
-      window.requestAnimationFrame(() => {
-        (previousFocusRef.current ?? triggerRef.current)?.focus();
-      });
-    }
-    wasExpandedRef.current = expanded;
+    if (expanded) showPolarisModal(modalRef);
   }, [expanded]);
 
   const score = items.reduce((sum, i) => sum + (i.done ? i.points : 0), 0);
@@ -121,11 +97,9 @@ export function BundleReadinessOverlay({
   const closeChecklist = useCallback(() => {
     setExpanded(false);
     onOpenChange?.(false);
-
-    window.requestAnimationFrame(() => {
-      (previousFocusRef.current ?? triggerRef.current)?.focus();
-    });
   }, [onOpenChange]);
+
+  useModalHideListener(modalRef, closeChecklist);
 
   const toggle = useCallback(() => {
     if (expanded) {
@@ -149,52 +123,7 @@ export function BundleReadinessOverlay({
     [closeChecklist, onItemClick]
   );
 
-  const handleItemKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLButtonElement>, key: string) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        activateItem(key);
-      }
-    },
-    [activateItem]
-  );
-
   if (hideCollapsedTrigger && !expanded) return null;
-
-  const handleDialogKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
-    if (event.key !== "Tab") return;
-
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    const focusable = Array.from(
-      dialog.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), s-button, [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )
-    ).filter((element) => !element.hasAttribute("hidden"));
-    if (focusable.length === 0) return;
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
-
-  const handleDialogBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target !== event.currentTarget) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const outside =
-      event.clientX < rect.left ||
-      event.clientX > rect.right ||
-      event.clientY < rect.top ||
-      event.clientY > rect.bottom;
-    if (outside) closeChecklist();
-  };
 
   const renderDonut = (accessible: boolean) => (
     <svg
@@ -264,18 +193,11 @@ export function BundleReadinessOverlay({
   return (
     <>
       {expanded && (
-        <dialog
+        <s-modal
           id="bundle-readiness-dialog"
-          ref={dialogRef}
-          className={styles.dialog}
-          aria-modal="true"
-          aria-labelledby="bundle-readiness-title"
-          onCancel={(event) => {
-            event.preventDefault();
-            closeChecklist();
-          }}
-          onClick={handleDialogBackdropClick}
-          onKeyDown={handleDialogKeyDown}
+          ref={modalRef}
+          heading={t("common.readiness.title")}
+          size="small"
         >
           <div className={styles.panel}>
             <div className={styles.panelItems}>
@@ -284,18 +206,18 @@ export function BundleReadinessOverlay({
                 const showActionChevron = !item.done && Boolean(onItemClick);
 
                 return (
-                  <button
+                  <s-clickable
                     key={item.key}
-                    type="button"
+                    {...{
+                      className: `${styles.panelItem} ${
+                        item.done ? styles.panelItemDone : ""
+                      } ${showActionChevron ? styles.panelItemClickable : ""}`,
+                    }}
                     data-readiness-incomplete={!item.done || undefined}
-                    className={`${styles.panelItem} ${
-                      item.done ? styles.panelItemDone : ""
-                    } ${showActionChevron ? styles.panelItemClickable : ""}`}
                     onClick={() => {
                       activateItem(item.key);
                     }}
-                    onKeyDown={(event) => handleItemKeyDown(event, item.key)}
-                    aria-label={t("common.readiness.itemAccessibility", {
+                    accessibilityLabel={t("common.readiness.itemAccessibility", {
                       label: item.label,
                     })}
                   >
@@ -378,7 +300,7 @@ export function BundleReadinessOverlay({
                         </svg>
                       </div>
                     )}
-                  </button>
+                  </s-clickable>
                 );
               })}
             </div>
@@ -390,12 +312,10 @@ export function BundleReadinessOverlay({
                 : t("common.readiness.notReady")}
             </div>
           </div>
-          <button
-            type="button"
-            className={styles.expandedScore}
+          <s-clickable
+            {...{ className: styles.expandedScore }}
             onClick={closeChecklist}
-            aria-label={t("common.readiness.toggleAccessibility")}
-            aria-expanded="true"
+            accessibilityLabel={t("common.readiness.toggleAccessibility")}
           >
             {renderDonut(true)}
             <span className={styles.expandedScoreCopy}>
@@ -412,8 +332,8 @@ export function BundleReadinessOverlay({
             <span className={styles.expandedScoreChevron} aria-hidden="true">
               {chevron}
             </span>
-          </button>
-        </dialog>
+          </s-clickable>
+        </s-modal>
       )}
 
       <div
@@ -423,22 +343,22 @@ export function BundleReadinessOverlay({
         }`}
       >
         {!hideCollapsedTrigger && (
-          <button
-            ref={triggerRef}
-            type="button"
+          <s-clickable
+            {...{
+              className: `${styles.collapsed} ${
+                showTriggerContext
+                  ? styles.collapsedExpanded
+                  : styles.collapsedMinimal
+              }`,
+            }}
             data-tour-target="fpb-readiness-score"
-            className={`${styles.collapsed} ${
-              showTriggerContext
-                ? styles.collapsedExpanded
-                : styles.collapsedMinimal
-            }`}
             data-readiness-trigger-state={
               showTriggerContext ? "expanded" : "collapsed"
             }
-            onClick={toggle}
-            aria-label={t("common.readiness.toggleAccessibility")}
             aria-expanded={expanded}
             aria-controls={expanded ? "bundle-readiness-dialog" : undefined}
+            onClick={toggle}
+            accessibilityLabel={t("common.readiness.toggleAccessibility")}
           >
             {renderDonut(false)}
             <div
@@ -455,7 +375,7 @@ export function BundleReadinessOverlay({
             <span className={styles.chevronWrapper} aria-hidden="true">
               {chevron}
             </span>
-          </button>
+          </s-clickable>
         )}
       </div>
     </>

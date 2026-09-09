@@ -134,6 +134,23 @@ describe("app.attribution loader — campaign aggregation", () => {
     ]);
   });
 
+  it("propagates Shopify authentication failures before loading route data", async () => {
+    const authResponse = new Response(null, { status: 401 });
+    mockRequireAdminSession.mockRejectedValueOnce(authResponse);
+
+    await expect(
+      loader({
+        request: new Request("https://test.myshopify.com/app/attribution"),
+        params: {},
+        context: {},
+      } as any)
+    ).rejects.toBe(authResponse);
+
+    expect(mockResolveShopEntitlements).not.toHaveBeenCalled();
+    expect(mockGetPixelStatus).not.toHaveBeenCalled();
+    expect(getDb().orderAttribution.findMany).not.toHaveBeenCalled();
+  });
+
   it("excludes attribution rows without bundleId from campaign totals", async () => {
     const response = await loader({
       request: new Request("https://test.myshopify.com/app/attribution?days=1"),

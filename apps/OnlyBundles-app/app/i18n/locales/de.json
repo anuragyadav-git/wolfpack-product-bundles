@@ -88,6 +88,8 @@
       "deleteBundle": "Bundle löschen",
       "cloneSuccess": "Bundle erfolgreich dupliziert",
       "deleteSuccess": "Bundle gelöscht",
+      "renameBundle": "Bundle umbenennen",
+      "renameSuccess": "Bundle erfolgreich umbenannt",
       "themeEditorUnavailable": "Der Theme-Editor-Link ist für diesen Shop nicht verfügbar."
     },
     "deleteModal": {
@@ -95,6 +97,15 @@
       "delete": "Löschen",
       "cancel": "Abbrechen",
       "body": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Bundle-Konfigurationen, Schritte und Rabattregeln werden dauerhaft gelöscht."
+    },
+    "renameModal": {
+      "heading": "Bundle umbenennen",
+      "nameLabel": "Bundle-Name",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "errorEmpty": "Der Bundle-Name darf nicht leer sein.",
+      "errorTooLong": "Der Bundle-Name darf höchstens 255 Zeichen lang sein.",
+      "errorFailed": "Das Bundle konnte nicht umbenannt werden."
     },
     "resources": {
       "bundleInspiration": "Bundle-Inspiration",

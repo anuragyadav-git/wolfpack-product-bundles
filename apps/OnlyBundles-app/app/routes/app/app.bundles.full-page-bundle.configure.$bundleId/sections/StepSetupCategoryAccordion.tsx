@@ -1,42 +1,22 @@
-import { CommonStepCategoryAccordion } from "../../_shared/bundle-configure/CommonStepCategoryAccordion";
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import {
+  CommonStepCategoryAccordion,
+  type CommonStepCategoryAccordionAdapter,
+} from "../../_shared/bundle-configure/CommonStepCategoryAccordion";
 
 export function FpbStepCategoryAccordion({
-  flow,
+  adapter,
   step,
   cat,
   catIndex,
 }: {
-  flow: ConfigureBundleFlowContext;
+  adapter: CommonStepCategoryAccordionAdapter;
   step: any;
   cat: any;
   catIndex: number;
 }) {
   return (
     <CommonStepCategoryAccordion
-      adapter={{
-        categoryActiveTabs: flow.categoryActiveTabs,
-        categoryOpen: flow.categoryOpen,
-        draggedCatKey: flow.draggedCatKey,
-        dragOverCatKey: flow.dragOverCatKey,
-        handleCatDragEnd: flow.handleCatDragEnd,
-        handleCatDragStart: flow.handleCatDragStart,
-        handleCatDrop: flow.handleCatDrop,
-        hidePolarisModal: flow.hidePolarisModal,
-        markAsDirty: flow.markAsDirty,
-        openStepCategoryMultiLanguageModal:
-          flow.openStepCategoryMultiLanguageModal,
-        setCategoryActiveTabs: flow.setCategoryActiveTabs,
-        setCategoryOpen: flow.setCategoryOpen,
-        setDragOverCatKey: flow.setDragOverCatKey,
-        shopify: flow.shopify,
-        showPolarisModal: flow.showPolarisModal,
-        stepsState: flow.stepsState,
-        styles: flow.fullPageBundleStyles,
-        translationActionsDisabled: (flow.shopLocales?.length ?? 0) === 0,
-        validationErrors: flow.validationErrors,
-        clearValidationError: flow.clearValidationError,
-      }}
+      adapter={adapter}
       step={step}
       cat={cat}
       catIndex={catIndex}

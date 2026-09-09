@@ -3,31 +3,48 @@ import { useState } from "react";
 import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.client";
 import { TemplateReadyScreen } from "../../../components/bundle-configure/TemplateReadyScreen";
 import { TemplatePreviewFeedbackModal } from "../../../components/bundle-configure/TemplatePreviewFeedbackModal";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { productPageTemplateOptions } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbSelectTemplateDialog() {
+export type PpbSelectTemplateDialogProps = Pick<
+  PpbConfigureFlow,
+  | "closeSelectTemplateDialog"
+  | "handleTemplateNext"
+  | "handleTemplatePreview"
+  | "isPreviewBundleLoading"
+  | "isSelectTemplateModalOpen"
+  | "pendingDesignPresetId"
+  | "pendingDesignTemplate"
+  | "setPendingDesignPresetId"
+  | "setPendingDesignTemplate"
+  | "setTemplateModalStep"
+  | "templateFetcher"
+  | "templateModalStep"
+  | "templateSaveError"
+  | "themeEditorUrl"
+>;
+
+export function PpbSelectTemplateDialog({
+  closeSelectTemplateDialog,
+  handleTemplateNext,
+  handleTemplatePreview,
+  isPreviewBundleLoading,
+  isSelectTemplateModalOpen,
+  pendingDesignPresetId,
+  pendingDesignTemplate,
+  setPendingDesignPresetId,
+  setPendingDesignTemplate,
+  setTemplateModalStep,
+  templateFetcher,
+  templateModalStep,
+  templateSaveError,
+  themeEditorUrl,
+}: PpbSelectTemplateDialogProps) {
   const [previewFeedbackUrl, setPreviewFeedbackUrl] = useState<string | null>(
     null
   );
-  const {
-    closeSelectTemplateDialog,
-    handleTemplateNext,
-    handleTemplatePreview,
-    isPreviewBundleLoading,
-    isSelectTemplateModalOpen,
-    pendingDesignPresetId,
-    pendingDesignTemplate,
-    productPageBundleStyles,
-    productPageTemplateOptions,
-    setPendingDesignPresetId,
-    setPendingDesignTemplate,
-    setTemplateModalStep,
-    templateFetcher,
-    templateModalStep,
-    templateSaveError,
-    themeEditorUrl,
-  } = usePpbConfigureContext();
 
   return (
     <>
@@ -107,12 +124,11 @@ export function PpbSelectTemplateDialog() {
                               productPageBundleStyles.templateOptionImageFrame
                             }
                           >
-                            <img
+                            <s-image
                               src={templateOption.image}
                               alt={templateOption.label}
-                              className={
-                                productPageBundleStyles.templateOptionImage
-                              }
+                              aspectRatio="4/3"
+                              objectFit="cover"
                             />
                           </span>
                           <span

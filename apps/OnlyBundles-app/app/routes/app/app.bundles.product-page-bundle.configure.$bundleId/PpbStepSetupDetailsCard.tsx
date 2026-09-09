@@ -1,24 +1,36 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
+
+type PpbStep = PpbConfigureFlow["stepsState"]["steps"][number];
+
+export type PpbStepSetupDetailsCardProps = Pick<
+  PpbConfigureFlow,
+  | "clearValidationError"
+  | "cloneStep"
+  | "deleteStep"
+  | "markAsDirty"
+  | "openStepMultiLanguageModal"
+  | "shopLocales"
+  | "stepsState"
+  | "validationErrors"
+> & {
+  step: PpbStep;
+  isFirstStep: boolean;
+};
 
 export function PpbStepSetupDetailsCard({
-  step,
+  clearValidationError,
+  cloneStep,
+  deleteStep,
   isFirstStep,
-}: {
-  step: any;
-  isFirstStep: boolean;
-}) {
-  const {
-    cloneStep,
-    deleteStep,
-    markAsDirty,
-    openStepMultiLanguageModal,
-    productPageBundleStyles,
-    shopLocales,
-    stepsState,
-    validationErrors = {},
-    clearValidationError,
-  } = usePpbConfigureContext();
+  markAsDirty,
+  openStepMultiLanguageModal,
+  shopLocales,
+  step,
+  stepsState,
+  validationErrors = {},
+}: PpbStepSetupDetailsCardProps) {
 
   return (
     <div className={productPageBundleStyles.stepSetupDetails}>
