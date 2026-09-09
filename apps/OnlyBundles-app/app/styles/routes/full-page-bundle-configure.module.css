@@ -116,32 +116,7 @@
 }
 
 .readinessButton {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  height: 28px;
-  min-height: 28px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: #ffffff;
-  transition: filter 120ms ease;
-}
-
-.readinessButton:hover {
-  filter: brightness(0.9);
-}
-
-.readinessScore {
-  margin-right: 8px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.readinessLabel {
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
+  display: none;
 }
 
 .editGrid {
@@ -2962,8 +2937,13 @@
 }
 
 @media (max-width: 767px) {
+  .canvasActions {
+    flex-wrap: nowrap;
+  }
+
   .readinessButton {
-    display: none;
+    display: inline-block;
+    flex: 0 0 auto;
   }
 
   .visibilityPlacementCard {

@@ -6,10 +6,6 @@ import {
   type ElementRef,
 } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  showPolarisModal,
-  useModalHideListener,
-} from "../../routes/app/_shared/bundle-configure/modal-utils";
 import styles from "./BundleReadinessOverlay.module.css";
 
 const READINESS_TRIGGER_COLLAPSE_DELAY_MS = 5_000;
@@ -33,7 +29,6 @@ interface Props {
   bundleId?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  hideCollapsedTrigger?: boolean;
   onItemClick?: (key: string) => void;
 }
 
@@ -46,15 +41,15 @@ export function BundleReadinessOverlay({
   items,
   open,
   onOpenChange,
-  hideCollapsedTrigger = false,
   onItemClick,
 }: Props) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(open ?? false);
+  const [expanded, setExpanded] = useState(false);
   const [showTriggerDetails, setShowTriggerDetails] = useState(true);
   const [animatedScore, setAnimatedScore] = useState(0);
-  const modalRef = useRef<ElementRef<"s-modal"> | null>(null);
-  const gaugeWasExpandedRef = useRef(expanded);
+  const popoverRef = useRef<ElementRef<"s-popover"> | null>(null);
+  const expandedRef = useRef(false);
+  const gaugeWasExpandedRef = useRef(false);
 
   useEffect(() => {
     const timeout = scheduleReadinessTriggerCollapse(() => {
@@ -63,14 +58,6 @@ export function BundleReadinessOverlay({
 
     return () => clearTimeout(timeout);
   }, []);
-
-  useEffect(() => {
-    if (open !== undefined) setExpanded(open);
-  }, [open]);
-
-  useEffect(() => {
-    if (expanded) showPolarisModal(modalRef);
-  }, [expanded]);
 
   const score = items.reduce((sum, i) => sum + (i.done ? i.points : 0), 0);
   const color = getReadinessScoreColor(score);
@@ -94,48 +81,55 @@ export function BundleReadinessOverlay({
   const arcLength = circumference * 0.75;
   const progressLength = (animatedScore / 100) * arcLength;
 
-  const closeChecklist = useCallback(() => {
-    setExpanded(false);
-    onOpenChange?.(false);
+  const syncExpandedState = useCallback((nextExpanded: boolean) => {
+    if (expandedRef.current === nextExpanded) return;
+    expandedRef.current = nextExpanded;
+    setExpanded(nextExpanded);
+    onOpenChange?.(nextExpanded);
   }, [onOpenChange]);
 
-  useModalHideListener(modalRef, closeChecklist);
+  useEffect(() => {
+    const popover = popoverRef.current;
+    if (!popover) return;
 
-  const toggle = useCallback(() => {
-    if (expanded) {
-      closeChecklist();
-      return;
+    const handleShow = () => syncExpandedState(true);
+    const handleHide = () => syncExpandedState(false);
+    const handleCommand = (event: Event) => {
+      if (!onItemClick) return;
+      const source = (event as Event & { source?: Element }).source;
+      const key = source?.getAttribute("data-readiness-key");
+      if (!key) return;
+
+      syncExpandedState(false);
+      onItemClick(key);
+    };
+    popover.addEventListener("show", handleShow);
+    popover.addEventListener("hide", handleHide);
+    popover.addEventListener("command", handleCommand);
+
+    return () => {
+      popover.removeEventListener("show", handleShow);
+      popover.removeEventListener("hide", handleHide);
+      popover.removeEventListener("command", handleCommand);
+    };
+  }, [onItemClick, syncExpandedState]);
+
+  useEffect(() => {
+    if (open === false && expandedRef.current) {
+      popoverRef.current?.hidePopover();
     }
-
-    setExpanded(true);
-    onOpenChange?.(true);
-  }, [closeChecklist, expanded, onOpenChange]);
+  }, [open]);
 
   const allDone = items.every((i) => i.done);
-  const showTriggerContext = showTriggerDetails || expanded;
+  const showTriggerContext = showTriggerDetails;
 
-  const activateItem = useCallback(
-    (key: string) => {
-      if (!onItemClick) return;
-      closeChecklist();
-      onItemClick(key);
-    },
-    [closeChecklist, onItemClick]
-  );
-
-  if (hideCollapsedTrigger && !expanded) return null;
-
-  const renderDonut = (accessible: boolean) => (
+  const renderDonut = () => (
     <svg
       width="48"
       height="48"
       viewBox="0 0 56 56"
       className={styles.arc}
-      role={accessible ? "img" : undefined}
-      aria-label={
-        accessible ? `${t("common.readiness.title")}: ${score}` : undefined
-      }
-      aria-hidden={accessible ? undefined : true}
+      aria-hidden="true"
     >
       <circle
         cx="28"
@@ -192,175 +186,31 @@ export function BundleReadinessOverlay({
 
   return (
     <>
-      {expanded && (
-        <s-modal
-          id="bundle-readiness-dialog"
-          ref={modalRef}
-          heading={t("common.readiness.title")}
-          size="small"
-        >
-          <div className={styles.panel}>
-            <div className={styles.panelItems}>
-              {items.map((item) => {
-                const showActionHint = !item.done && Boolean(item.description);
-                const showActionChevron = !item.done && Boolean(onItemClick);
-
-                return (
-                  <s-clickable
-                    key={item.key}
-                    {...{
-                      className: `${styles.panelItem} ${
-                        item.done ? styles.panelItemDone : ""
-                      } ${showActionChevron ? styles.panelItemClickable : ""}`,
-                    }}
-                    data-readiness-incomplete={!item.done || undefined}
-                    onClick={() => {
-                      activateItem(item.key);
-                    }}
-                    accessibilityLabel={t("common.readiness.itemAccessibility", {
-                      label: item.label,
-                    })}
-                  >
-                    <div className={styles.itemIndicator}>
-                      {item.done ? (
-                        <svg width="18" height="18" viewBox="0 0 20 20">
-                          <circle
-                            cx="10"
-                            cy="10"
-                            r="7.5"
-                            fill="none"
-                            stroke="#008f65"
-                            strokeWidth="1.8"
-                          />
-                          <path
-                            d="M6.5 10.5l2.2 2.2L14 7.8"
-                            stroke="#008f65"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            fill="none"
-                          />
-                        </svg>
-                      ) : (
-                        <svg width="18" height="18" viewBox="0 0 20 20">
-                          <circle
-                            cx="10"
-                            cy="10"
-                            r="8.5"
-                            fill="none"
-                            stroke="#c9cccf"
-                            strokeWidth="1.5"
-                          />
-                        </svg>
-                      )}
-                    </div>
-                    <div className={styles.itemContent}>
-                      <div className={styles.itemMainRow}>
-                        <span className={styles.itemLabel}>{item.label}</span>
-                        {item.done && (
-                          <span
-                            className={`${styles.itemPoints} ${styles.itemPointsDone}`}
-                          >
-                            {t("common.readiness.points", {
-                              points: item.points,
-                            })}
-                          </span>
-                        )}
-                      </div>
-                      {showActionHint && (
-                        <span className={styles.itemDesc}>
-                          {item.description}
-                        </span>
-                      )}
-                      {!item.done && (
-                        <span
-                          className={`${styles.itemPoints} ${styles.itemPointsPending}`}
-                        >
-                          {t("common.readiness.points", {
-                            points: item.points,
-                          })}
-                        </span>
-                      )}
-                    </div>
-                    {showActionChevron && (
-                      <div className={styles.itemChevron} aria-hidden="true">
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 10 10"
-                          fill="none"
-                        >
-                          <path
-                            d="M3 1.5L7 5L3 8.5"
-                            stroke="#8c8c8c"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </s-clickable>
-                );
-              })}
-            </div>
-            <div
-              className={allDone ? styles.statusReady : styles.statusNotReady}
-            >
-              {allDone
-                ? t("common.readiness.ready")
-                : t("common.readiness.notReady")}
-            </div>
-          </div>
-          <s-clickable
-            {...{ className: styles.expandedScore }}
-            onClick={closeChecklist}
-            accessibilityLabel={t("common.readiness.toggleAccessibility")}
-          >
-            {renderDonut(true)}
-            <span className={styles.expandedScoreCopy}>
-              <span
-                id="bundle-readiness-title"
-                className={styles.expandedScoreTitle}
-              >
-                {t("common.readiness.title")}
-              </span>
-              <span className={styles.expandedScoreHelper}>
-                {t("common.readiness.helper")}
-              </span>
-            </span>
-            <span className={styles.expandedScoreChevron} aria-hidden="true">
-              {chevron}
-            </span>
-          </s-clickable>
-        </s-modal>
-      )}
-
       <div
-        hidden={expanded}
         className={`${styles.container} ${
           showTriggerContext ? styles.containerIntro : styles.containerCollapsed
         }`}
       >
-        {!hideCollapsedTrigger && (
-          <s-clickable
-            {...{
-              className: `${styles.collapsed} ${
-                showTriggerContext
-                  ? styles.collapsedExpanded
-                  : styles.collapsedMinimal
-              }`,
-            }}
-            data-tour-target="fpb-readiness-score"
-            data-readiness-trigger-state={
-              showTriggerContext ? "expanded" : "collapsed"
-            }
-            aria-expanded={expanded}
-            aria-controls={expanded ? "bundle-readiness-dialog" : undefined}
-            onClick={toggle}
-            accessibilityLabel={t("common.readiness.toggleAccessibility")}
+        <s-clickable
+          inlineSize="100%"
+          data-tour-target="fpb-readiness-score"
+          data-readiness-trigger-state={
+            showTriggerContext ? "expanded" : "collapsed"
+          }
+          aria-expanded={expanded}
+          aria-controls="bundle-readiness-popover"
+          commandFor="bundle-readiness-popover"
+          command="--toggle"
+          accessibilityLabel={t("common.readiness.toggleAccessibility")}
+        >
+          <div
+            className={`${styles.collapsed} ${
+              showTriggerContext
+                ? styles.collapsedExpanded
+                : styles.collapsedMinimal
+            }`}
           >
-            {renderDonut(false)}
+            {renderDonut()}
             <div
               className={styles.scoreLabel}
               aria-hidden={!showTriggerContext}
@@ -372,12 +222,148 @@ export function BundleReadinessOverlay({
                 {t("common.readiness.helper")}
               </span>
             </div>
-            <span className={styles.chevronWrapper} aria-hidden="true">
+            <span
+              className={`${styles.chevronWrapper} ${
+                showTriggerContext ? "" : styles.chevronHidden
+              }`}
+              aria-hidden="true"
+            >
               {chevron}
             </span>
-          </s-clickable>
-        )}
+          </div>
+        </s-clickable>
       </div>
+
+      <s-popover
+        id="bundle-readiness-popover"
+        ref={popoverRef}
+        inlineSize="360px"
+        maxInlineSize="100%"
+        maxBlockSize="480px"
+      >
+        <div className={styles.panel}>
+          <div className={styles.panelItems}>
+            {items.map((item) => {
+                const showActionHint = !item.done && Boolean(item.description);
+                const showActionChevron = !item.done && Boolean(onItemClick);
+
+                return (
+                  <s-clickable
+                    key={item.key}
+                    inlineSize="100%"
+                    disabled={item.done}
+                    commandFor={
+                      showActionChevron
+                        ? "bundle-readiness-popover"
+                        : undefined
+                    }
+                    command={showActionChevron ? "--hide" : undefined}
+                    data-readiness-key={
+                      showActionChevron ? item.key : undefined
+                    }
+                    data-readiness-incomplete={!item.done || undefined}
+                    accessibilityLabel={t("common.readiness.itemAccessibility", {
+                      label: item.label,
+                    })}
+                  >
+                    <div
+                      className={`${styles.panelItem} ${
+                        item.done ? styles.panelItemDone : ""
+                      } ${showActionChevron ? styles.panelItemClickable : ""}`}
+                    >
+                      <div className={styles.itemIndicator}>
+                        {item.done ? (
+                          <svg width="18" height="18" viewBox="0 0 20 20">
+                            <circle
+                              cx="10"
+                              cy="10"
+                              r="7.5"
+                              fill="none"
+                              stroke="#008f65"
+                              strokeWidth="1.8"
+                            />
+                            <path
+                              d="M6.5 10.5l2.2 2.2L14 7.8"
+                              stroke="#008f65"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              fill="none"
+                            />
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 20 20">
+                            <circle
+                              cx="10"
+                              cy="10"
+                              r="8.5"
+                              fill="none"
+                              stroke="#c9cccf"
+                              strokeWidth="1.5"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <div className={styles.itemContent}>
+                        <div className={styles.itemMainRow}>
+                          <span className={styles.itemLabel}>{item.label}</span>
+                          {item.done && (
+                            <span
+                              className={`${styles.itemPoints} ${styles.itemPointsDone}`}
+                            >
+                              {t("common.readiness.points", {
+                                points: item.points,
+                              })}
+                            </span>
+                          )}
+                        </div>
+                        {showActionHint && (
+                          <span className={styles.itemDesc}>
+                            {item.description}
+                          </span>
+                        )}
+                        {!item.done && (
+                          <span
+                            className={`${styles.itemPoints} ${styles.itemPointsPending}`}
+                          >
+                            {t("common.readiness.points", {
+                              points: item.points,
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      {showActionChevron && (
+                        <div className={styles.itemChevron} aria-hidden="true">
+                          <svg
+                            width="10"
+                            height="10"
+                            viewBox="0 0 10 10"
+                            fill="none"
+                          >
+                            <path
+                              d="M3 1.5L7 5L3 8.5"
+                              stroke="#8c8c8c"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </s-clickable>
+                );
+            })}
+          </div>
+          <div
+            className={allDone ? styles.statusReady : styles.statusNotReady}
+          >
+            {allDone
+              ? t("common.readiness.ready")
+              : t("common.readiness.notReady")}
+          </div>
+        </div>
+      </s-popover>
     </>
   );
 }

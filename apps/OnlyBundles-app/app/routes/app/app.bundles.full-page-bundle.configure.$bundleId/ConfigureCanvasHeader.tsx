@@ -4,7 +4,6 @@ import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
 import { AppEmbedBanner } from "../../../components/AppEmbedBanner";
 import { UnlistedBundleBanner } from "../../../components/UnlistedBundleBanner";
-import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { useTranslation } from "react-i18next";
 import { translateAdmin } from "~/i18n/config";
 
@@ -21,7 +20,6 @@ interface ConfigureCanvasHeaderProps {
   openProductInAdmin: (productId: string) => void;
   parentProductStatusUi: ParentProductStatusUi;
   readinessScore: number;
-  setReadinessOpen: (open: boolean) => void;
   shop: string;
   themeEditorUrl: string | null;
 }
@@ -39,7 +37,6 @@ export function ConfigureCanvasHeader({
   openProductInAdmin,
   parentProductStatusUi,
   readinessScore,
-  setReadinessOpen,
   shop,
   themeEditorUrl,
 }: ConfigureCanvasHeaderProps) {
@@ -80,26 +77,16 @@ export function ConfigureCanvasHeader({
           </div>
         </div>
         <div className={fullPageBundleStyles.canvasActions}>
-          <span
-            className={fullPageBundleStyles.readinessButton}
-            style={{
-              backgroundColor: getReadinessScoreColor(readinessScore),
-              borderColor: getReadinessScoreColor(readinessScore),
-            }}
-          >
-            <s-press-button
-              variant="tertiary"
-              tone="neutral"
+          <span className={fullPageBundleStyles.readinessButton}>
+            <s-button
+              variant="secondary"
               accessibilityLabel={`${readinessScore} Readiness Score`}
-              onClick={() => setReadinessOpen(true)}
+              commandFor="bundle-readiness-popover"
+              command="--show"
+              data-tour-target="fpb-readiness-score"
             >
-              <span className={fullPageBundleStyles.readinessScore}>
-                {readinessScore}
-              </span>
-              <span className={fullPageBundleStyles.readinessLabel}>
-                {translateAdmin("common.readiness.title")}
-              </span>
-            </s-press-button>
+              {readinessScore} {translateAdmin("common.readiness.title")}
+            </s-button>
           </span>
           <s-button
             variant="secondary"

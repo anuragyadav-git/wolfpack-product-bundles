@@ -84,18 +84,14 @@ export function PpbConfigureOverlays({ flow }: { flow: PpbConfigureFlow }) {
         activeMultiLanguageValues={flow.activeMultiLanguageValues}
         enablePreviewGate={flow.enablePreviewGate}
         handleGuidedTourStepChange={flow.handleGuidedTourStepChange}
-        handleReadinessItemClick={flow.handleReadinessItemClick}
         isMultiLanguageModalOpen={flow.isMultiLanguageModalOpen}
         loaderData={flow.loaderData}
         multiLanguageFields={flow.multiLanguageFields}
         multiLanguageTitle={flow.multiLanguageTitle}
-        readinessItems={flow.readinessItems}
-        readinessOpen={flow.readinessOpen}
         saveStepSetupMultiLanguageValues={
           flow.saveStepSetupMultiLanguageValues
         }
         setIsMultiLanguageModalOpen={flow.setIsMultiLanguageModalOpen}
-        setReadinessOpen={flow.setReadinessOpen}
         setTextOverridesLocale={flow.setTextOverridesLocale}
         shop={flow.shop}
         shopLocales={flow.shopLocales}

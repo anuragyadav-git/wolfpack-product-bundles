@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { BundleReadinessOverlay } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
@@ -87,7 +88,6 @@ function ConfigureBundleCanvas({ flow }: { flow: PpbConfigureFlow }) {
           operationAlert={flow.operationAlert}
           parentProductStatusUi={flow.parentProductStatusUi}
           readinessScore={flow.readinessScore}
-          setReadinessOpen={flow.setReadinessOpen}
           shop={flow.shop}
           themeEditorUrl={flow.themeEditorUrl}
         />
@@ -118,11 +118,19 @@ function ConfigureBundleCanvas({ flow }: { flow: PpbConfigureFlow }) {
         />
       }
       overlays={
-        showOverlays ? (
-          <Suspense fallback={null}>
-            <PpbConfigureOverlays flow={flow} />
-          </Suspense>
-        ) : null
+        <>
+          <BundleReadinessOverlay
+            items={flow.readinessItems}
+            open={flow.readinessOpen}
+            onOpenChange={flow.setReadinessOpen}
+            onItemClick={flow.handleReadinessItemClick}
+          />
+          {showOverlays ? (
+            <Suspense fallback={null}>
+              <PpbConfigureOverlays flow={flow} />
+            </Suspense>
+          ) : null}
+        </>
       }
     >
       <PpbMainSections flow={flow} />

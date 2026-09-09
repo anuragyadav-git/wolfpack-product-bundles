@@ -577,8 +577,9 @@ Responsive configure behavior:
 - FPB and PPB keep the full Bundle Product and Bundle Setup sidebar on wide screens.
 - Tablet and phone containers show Bundle Product first and replace the long setup sidebar with a compact native disclosure labelled with the active parent or nested section.
 - Selecting a section closes the mobile disclosure without changing save, dirty-state, or route adapter behavior.
-- The compact readiness trigger remains floating without covering editor actions. Opening it uses a labelled native modal dialog: a bounded floating checklist on desktop and a full-width, safe-area-aware bottom sheet on phones.
-- The readiness dialog supports Escape, safe backdrop dismissal, focus trapping, internal scrolling, and focus restoration without changing the existing readiness calculation or route adapter props.
+- The readiness score renders eagerly. Wide screens use only the floating 64px square trigger; phones hide it and show a native `s-button` in the same action row as Preview Bundle. Both open the same anchored Polaris popover through `commandFor`.
+- The non-blocking readiness popover contains only the checklist and readiness status, owns a bounded internal scroll region, and relies on Shopify for placement, Escape and outside dismissal, keyboard activation, and trigger-focus restoration. It never opens automatically on page load or repeats the score gauge inside the popover.
+- The guided configure tour is desktop-only and is suppressed below 768px; mobile retains the readiness popover without the tour overlay.
 - Configure multi-language workflows share one staged Polaris `s-modal`; Apply updates route-owned draft state and Cancel/Escape/backdrop-close discard edits.
 - FPB and PPB expose curated visual help beside non-obvious setup, pricing, visibility, storefront, urgency, and subscription controls. Each info action opens the shared Polaris popover without changing configure state or activating the SaveBar.
 

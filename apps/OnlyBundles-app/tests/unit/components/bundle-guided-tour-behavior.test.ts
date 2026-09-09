@@ -1,6 +1,8 @@
 import {
   getBundleGuidedTourStorageKey,
+  isBundleGuidedTourDesktopViewport,
   isBundleGuidedTourDismissKey,
+  pickVisibleTourTarget,
 } from "../../../app/components/bundle-configure/BundleGuidedTour";
 import {
   getGuidedTourTransition,
@@ -21,6 +23,24 @@ describe("BundleGuidedTour behavior", () => {
     expect(isBundleGuidedTourDismissKey("Escape")).toBe(true);
     expect(isBundleGuidedTourDismissKey("Enter")).toBe(false);
     expect(isBundleGuidedTourDismissKey("Tab")).toBe(false);
+  });
+
+  it("enables the guided tour only at desktop widths", () => {
+    expect(isBundleGuidedTourDesktopViewport(767)).toBe(false);
+    expect(isBundleGuidedTourDesktopViewport(768)).toBe(true);
+    expect(isBundleGuidedTourDesktopViewport(1280)).toBe(true);
+  });
+
+  it("targets the visible readiness control when responsive copies exist", () => {
+    const hidden = {
+      getClientRects: () => ({length: 0}),
+    } as HTMLElement;
+    const visible = {
+      getClientRects: () => ({length: 1}),
+    } as HTMLElement;
+
+    expect(pickVisibleTourTarget([hidden, visible])).toBe(visible);
+    expect(pickVisibleTourTarget([hidden])).toBe(hidden);
   });
 
   it("changes section without opening an overlay that would cover the tour", () => {

@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
 import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
+import { BundleReadinessOverlay } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-configure.module.css";
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
 import { getDeferredConfigureSection } from "../_shared/bundle-configure/deferred-configure-sections";
@@ -201,7 +202,6 @@ function ConfigureBundleFlow() {
           openProductInAdmin={flow.openProductInAdmin}
           parentProductStatusUi={flow.parentProductStatusUi}
           readinessScore={flow.readinessScore}
-          setReadinessOpen={flow.setReadinessOpen}
           shop={flow.shop}
           themeEditorUrl={flow.themeEditorUrl}
         />
@@ -227,43 +227,44 @@ function ConfigureBundleFlow() {
         />
       }
       overlays={
-        showOverlays ? (
-          <Suspense fallback={null}>
-            <ConfigureRouteModals
-              globalOverlays={{
-                readiness: {
-                  items: flow.readinessItems,
-                  open: flow.readinessOpen,
-                  onOpenChange: flow.setReadinessOpen,
-                  onItemClick: flow.handleReadinessItemClick,
-                },
-                guidedTour: {
-                  shop: flow.shop,
-                  enabled: flow.loaderData.showFirstLoadTour === true,
-                  onStepChange: flow.handleGuidedTourStepChange,
-                },
-                language: {
-                  open: flow.isMultiLanguageModalOpen,
-                  title: flow.multiLanguageTitle,
-                  layout: flow.multiLanguageLayout,
-                  saveLabel:
-                    flow.multiLanguageLayout === "compact"
-                      ? "Save and close"
-                      : undefined,
-                  locales: flow.shopLocales,
-                  activeLocale: flow.textOverridesLocale,
-                  fields: flow.multiLanguageFields,
-                  valuesByLocale: flow.activeMultiLanguageValues,
-                  onActiveLocaleChange: flow.setTextOverridesLocale,
-                  onSave: flow.saveStepSetupMultiLanguageValues,
-                  onClose: () => flow.setIsMultiLanguageModalOpen(false),
-                },
-                discard: {
-                  open: flow.showDiscardModal,
-                  onDiscard: flow.handleConfirmDiscard,
-                  onContinue: flow.closeDiscardModal,
-                },
-              }}
+        <>
+          <BundleReadinessOverlay
+            items={flow.readinessItems}
+            open={flow.readinessOpen}
+            onOpenChange={flow.setReadinessOpen}
+            onItemClick={flow.handleReadinessItemClick}
+          />
+          {showOverlays ? (
+            <Suspense fallback={null}>
+              <ConfigureRouteModals
+                globalOverlays={{
+                  guidedTour: {
+                    shop: flow.shop,
+                    enabled: flow.loaderData.showFirstLoadTour === true,
+                    onStepChange: flow.handleGuidedTourStepChange,
+                  },
+                  language: {
+                    open: flow.isMultiLanguageModalOpen,
+                    title: flow.multiLanguageTitle,
+                    layout: flow.multiLanguageLayout,
+                    saveLabel:
+                      flow.multiLanguageLayout === "compact"
+                        ? "Save and close"
+                        : undefined,
+                    locales: flow.shopLocales,
+                    activeLocale: flow.textOverridesLocale,
+                    fields: flow.multiLanguageFields,
+                    valuesByLocale: flow.activeMultiLanguageValues,
+                    onActiveLocaleChange: flow.setTextOverridesLocale,
+                    onSave: flow.saveStepSetupMultiLanguageValues,
+                    onClose: () => flow.setIsMultiLanguageModalOpen(false),
+                  },
+                  discard: {
+                    open: flow.showDiscardModal,
+                    onDiscard: flow.handleConfirmDiscard,
+                    onContinue: flow.closeDiscardModal,
+                  },
+                }}
               selectedItems={{
                 products: {
                   modalRef: flow.productsModalRef,
@@ -371,9 +372,10 @@ function ConfigureBundleFlow() {
                   themeEditorUrl: flow.themeEditorUrl,
                 },
               }}
-            />
-          </Suspense>
-        ) : null
+              />
+            </Suspense>
+          ) : null}
+        </>
       }
     >
       <AdminTaskAlertBanner

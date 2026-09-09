@@ -116,7 +116,6 @@ describe("Admin workspace back actions", () => {
             showUnlistedBanner: false,
           },
           readinessScore: 0,
-          setReadinessOpen: jest.fn(),
           shop: "store.myshopify.com",
           themeEditorUrl: null,
         } as any),
@@ -125,6 +124,40 @@ describe("Admin workspace back actions", () => {
 
     activateBack("adminAttributes.backToDashboard");
     expect(handleBackClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("wires the FPB readiness action to the shared Polaris popover", () => {
+    flushSync(() => {
+      root.render(
+        React.createElement(ConfigureCanvasHeader, {
+          appEmbedEnabled: true,
+          bundleProduct: null,
+          bundleProductId: null,
+          fetcherState: "idle",
+          fullPageBundleStyles: {},
+          handleBackClick: jest.fn(),
+          handlePreviewBundle: jest.fn(),
+          isPreviewBundleLoading: false,
+          openThemeEditorForAppEmbed: jest.fn(),
+          openProductInAdmin: jest.fn(),
+          parentProductStatusUi: {
+            isLoading: false,
+            showUnlistedBanner: false,
+          },
+          readinessScore: 0,
+          shop: "store.myshopify.com",
+          themeEditorUrl: null,
+        } as any),
+      );
+    });
+
+    const readinessAction = container.querySelector(
+      's-button[commandfor="bundle-readiness-popover"]',
+    );
+    expect(readinessAction?.getAttribute("command")).toBe("--show");
+    expect(readinessAction?.getAttribute("data-tour-target")).toBe(
+      "fpb-readiness-score",
+    );
   });
 
   it("delegates the PPB back action to its route owner", () => {
@@ -145,7 +178,6 @@ describe("Admin workspace back actions", () => {
           operationAlert: null,
           parentProductStatusUi: {isLoading: false, showUnlistedBanner: false},
           readinessScore: 0,
-          setReadinessOpen: jest.fn(),
           shop: "store.myshopify.com",
           themeEditorUrl: null,
         } as unknown as React.ComponentProps<typeof PpbCanvasHeader>),

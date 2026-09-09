@@ -41,6 +41,18 @@ describe("BundleReadinessOverlay trigger", () => {
       HTMLDialogElement: dom.window.HTMLDialogElement,
       IS_REACT_ACT_ENVIRONMENT: true,
     });
+    dom.window.customElements.define(
+      "s-clickable",
+      class extends dom.window.HTMLElement {},
+    );
+    dom.window.customElements.define(
+      "s-popover",
+      class extends dom.window.HTMLElement {
+        hidePopover() {
+          this.dispatchEvent(new dom.window.Event("hide", {bubbles: true}));
+        }
+      },
+    );
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -86,6 +98,10 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(markup).toContain(
       "Complete all steps to maximise your bundle&#x27;s success.",
     );
+    expect(markup).toContain("<s-popover");
+    expect(markup).not.toContain("<s-modal");
+    expect(markup).toContain('commandFor="bundle-readiness-popover"');
+    expect(markup).toContain('command="--toggle"');
   });
 
   it("collapses after five seconds", () => {
@@ -104,36 +120,56 @@ describe("BundleReadinessOverlay trigger", () => {
     jest.useRealTimers();
   });
 
-  it("can hide the floating trigger when another surface owns the control", () => {
-    const Overlay = BundleReadinessOverlay as unknown as React.ComponentType<Record<string, unknown>>;
-    const markup = renderToStaticMarkup(
-      React.createElement(Overlay, {
-        items: [{ key: "products", label: "Products selected", points: 60, done: true }],
-        open: true,
-        hideCollapsedTrigger: true,
-      }),
+  it("changes the trigger state to compact after five seconds", () => {
+    jest.useFakeTimers();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleReadinessOverlay, {
+          items: [
+            {
+              key: "products",
+              label: "Products selected",
+              points: 60,
+              done: true,
+            },
+          ],
+        }),
+      );
+    });
+
+    const trigger = container.querySelector(
+      '[data-tour-target="fpb-readiness-score"]',
+    );
+    expect(trigger?.getAttribute("data-readiness-trigger-state")).toBe(
+      "expanded",
     );
 
-    expect(markup).not.toContain('data-tour-target="fpb-readiness-score"');
-    expect(markup).toContain("Products selected");
+    flushSync(() => {
+      jest.advanceTimersByTime(5_000);
+    });
+
+    expect(trigger?.getAttribute("data-readiness-trigger-state")).toBe(
+      "collapsed",
+    );
   });
 
-  it("includes the checklist content and score when open", () => {
+  it("keeps the checklist in the native popover without duplicating the trigger score", () => {
     const Overlay = BundleReadinessOverlay as unknown as React.ComponentType<Record<string, unknown>>;
     const markup = renderToStaticMarkup(
       React.createElement(Overlay, {
         items: [{ key: "products", label: "Products selected", points: 60, done: false }],
-        open: true,
       }),
     );
 
     expect(markup).toContain("Products selected");
-    expect(markup).toContain('aria-label="Readiness Score: 0"');
     expect(markup).toContain('data-tour-target="fpb-readiness-score"');
-    expect(markup).toContain('hidden=""');
+    expect(markup).toContain('id="bundle-readiness-popover"');
+    expect(markup).not.toContain('aria-label="Readiness Score: 0"');
+    expect(markup.match(/Readiness Score/g)).toHaveLength(1);
   });
 
-  it("closes exactly once when the modal is dismissed", () => {
+  it("synchronizes route state exactly once for each popover lifecycle change", () => {
     const onOpenChange = jest.fn();
 
     flushSync(() => {
@@ -147,25 +183,24 @@ describe("BundleReadinessOverlay trigger", () => {
               done: false,
             },
           ],
-          open: true,
           onOpenChange,
         }),
       );
     });
 
-    const modal = container.querySelector("s-modal");
-    expect(modal).not.toBeNull();
+    const popover = container.querySelector("s-popover");
+    expect(popover).not.toBeNull();
 
     flushSync(() => {
-      modal?.dispatchEvent(new Event("hide", {bubbles: true}));
-      modal?.dispatchEvent(new Event("afterhide", {bubbles: true}));
+      popover?.dispatchEvent(new Event("show", {bubbles: true}));
+      popover?.dispatchEvent(new Event("hide", {bubbles: true}));
+      popover?.dispatchEvent(new Event("afterhide", {bubbles: true}));
     });
 
-    expect(onOpenChange).toHaveBeenCalledTimes(1);
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
   });
 
-  it("opens an incomplete item and closes the checklist exactly once", () => {
+  it("closes before activating an incomplete checklist item", () => {
     const onItemClick = jest.fn();
     const onOpenChange = jest.fn();
 
@@ -181,24 +216,71 @@ describe("BundleReadinessOverlay trigger", () => {
               done: false,
             },
           ],
-          open: true,
           onItemClick,
           onOpenChange,
         }),
       );
     });
 
-    const action = Array.from(
-      container.querySelectorAll<HTMLElement>("button, s-clickable"),
-    ).find((element) => element.textContent?.includes("Products selected"));
-
+    const popover = container.querySelector("s-popover");
     flushSync(() => {
-      action?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+      popover?.dispatchEvent(new Event("show", {bubbles: true}));
+    });
+
+    const action = Array.from(
+      container.querySelectorAll<HTMLElement>("s-popover s-clickable"),
+    ).find((element) => element.textContent?.includes("Products selected"));
+    expect(action).toBeDefined();
+    expect(action?.getAttribute("commandfor")).toBe(
+      "bundle-readiness-popover",
+    );
+    expect(action?.getAttribute("command")).toBe("--hide");
+
+    const commandEvent = new Event("command", {bubbles: true});
+    Object.defineProperty(commandEvent, "source", {value: action});
+    flushSync(() => {
+      popover?.dispatchEvent(commandEvent);
     });
 
     expect(onItemClick).toHaveBeenCalledTimes(1);
     expect(onItemClick).toHaveBeenCalledWith("products");
-    expect(onOpenChange).toHaveBeenCalledTimes(1);
-    expect(onOpenChange).toHaveBeenCalledWith(false);
+    expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(onOpenChange.mock.invocationCallOrder[1]).toBeLessThan(
+      onItemClick.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("does not activate a completed checklist item", () => {
+    const onItemClick = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleReadinessOverlay, {
+          items: [
+            {
+              key: "embed",
+              label: "App Embed Enabled",
+              points: 15,
+              done: true,
+            },
+          ],
+          onItemClick,
+        }),
+      );
+    });
+
+    const completedItem = container.querySelector<HTMLElement>(
+      's-popover s-clickable[accessibilityLabel="common.readiness.itemAccessibility"]',
+    );
+    expect(completedItem?.hasAttribute("disabled")).toBe(true);
+
+    const popover = container.querySelector("s-popover");
+    const commandEvent = new Event("command", {bubbles: true});
+    Object.defineProperty(commandEvent, "source", {value: completedItem});
+    flushSync(() => {
+      popover?.dispatchEvent(commandEvent);
+    });
+
+    expect(onItemClick).not.toHaveBeenCalled();
   });
 });

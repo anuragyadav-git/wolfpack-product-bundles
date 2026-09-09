@@ -31,6 +31,7 @@ const SPOTLIGHT_PAD = 8;
 const VIEWPORT_PAD = 12;
 const MAX_TARGET_LOOKUP_FRAMES = 30;
 const STABLE_FRAME_COUNT = 4;
+const DESKTOP_VIEWPORT_MIN_WIDTH = 768;
 
 export function getBundleGuidedTourStorageKey(shop: string) {
   return `wpb_first_bundle_tour_seen_${shop}`;
@@ -38,6 +39,18 @@ export function getBundleGuidedTourStorageKey(shop: string) {
 
 export function isBundleGuidedTourDismissKey(key: string) {
   return key === "Escape";
+}
+
+export function isBundleGuidedTourDesktopViewport(viewportWidth: number) {
+  return viewportWidth >= DESKTOP_VIEWPORT_MIN_WIDTH;
+}
+
+export function pickVisibleTourTarget(elements: readonly HTMLElement[]) {
+  return (
+    elements.find((element) => element.getClientRects().length > 0) ??
+    elements[0] ??
+    null
+  );
 }
 
 function getTooltipWidth() {
@@ -53,6 +66,7 @@ export function BundleGuidedTour({
   onDismiss,
 }: Props) {
   const [visible, setVisible] = useState(false);
+  const [desktopViewport, setDesktopViewport] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(
     null
@@ -69,6 +83,16 @@ export function BundleGuidedTour({
 
   const storageKey = getBundleGuidedTourStorageKey(shop);
 
+  useEffect(() => {
+    const syncViewport = () => {
+      setDesktopViewport(isBundleGuidedTourDesktopViewport(window.innerWidth));
+    };
+
+    syncViewport();
+    window.addEventListener("resize", syncViewport);
+    return () => window.removeEventListener("resize", syncViewport);
+  }, []);
+
   const getTooltipHeight = useCallback(() => {
     const measuredHeight =
       dialogRef.current?.getBoundingClientRect().height ?? TOOLTIP_HEIGHT;
@@ -80,11 +104,14 @@ export function BundleGuidedTour({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!enabled) return;
+    if (!enabled || !desktopViewport) {
+      setVisible(false);
+      return;
+    }
     if (!localStorage.getItem(storageKey)) {
       setVisible(true);
     }
-  }, [enabled, storageKey]);
+  }, [desktopViewport, enabled, storageKey]);
 
   useEffect(() => {
     if (!visible) return;
@@ -139,8 +166,12 @@ export function BundleGuidedTour({
   }, [centeredBottomStyle]);
 
   const queryTarget = useCallback((targetSection: string) => {
-    return document.querySelector<HTMLElement>(
-      `[data-tour-target="${targetSection}"]`
+    return pickVisibleTourTarget(
+      Array.from(
+        document.querySelectorAll<HTMLElement>(
+          `[data-tour-target="${targetSection}"]`
+        )
+      )
     );
   }, []);
 

@@ -3,12 +3,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { FpbGlobalOverlays } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureGlobalOverlays";
 
 jest.mock(
-  "../../../app/components/bundle-configure/BundleReadinessOverlay",
-  () => ({
-    BundleReadinessOverlay: () => React.createElement("div", null, "readiness"),
-  })
-);
-jest.mock(
   "../../../app/components/bundle-configure/BundleGuidedTour",
   () => ({
     BundleGuidedTour: () => React.createElement("div", null, "tour"),
@@ -28,10 +22,9 @@ jest.mock(
 );
 
 describe("FpbGlobalOverlays", () => {
-  it("composes its four owned overlays from narrow feature props", () => {
+  it("composes its three deferred overlays from narrow feature props", () => {
     const markup = renderToStaticMarkup(
       React.createElement(FpbGlobalOverlays, {
-        readiness: { items: [] },
         guidedTour: { shop: "example.myshopify.com" },
         language: {
           open: false,
@@ -52,7 +45,6 @@ describe("FpbGlobalOverlays", () => {
       } as never)
     );
 
-    expect(markup).toContain("readiness");
     expect(markup).toContain("tour");
     expect(markup).toContain("language");
     expect(markup).toContain("discard");

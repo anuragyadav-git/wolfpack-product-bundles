@@ -1,6 +1,5 @@
 import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
-import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { useTranslation } from "react-i18next";
 import { translateAdmin } from "~/i18n/config";
 import { UnlistedBundleBanner } from "../../../components/UnlistedBundleBanner";
@@ -22,7 +21,6 @@ type PpbCanvasHeaderFlowProps = Pick<
   | "openProductInAdmin"
   | "operationAlert"
   | "readinessScore"
-  | "setReadinessOpen"
   | "shop"
   | "themeEditorUrl"
 >;
@@ -49,7 +47,6 @@ export function PpbCanvasHeader({
   operationAlert,
   parentProductStatusUi,
   readinessScore,
-  setReadinessOpen,
   shop,
   themeEditorUrl,
 }: PpbCanvasHeaderProps) {
@@ -115,26 +112,16 @@ export function PpbCanvasHeader({
           </div>
         </div>
         <div className={productPageBundleStyles.canvasActions}>
-          <span
-            className={productPageBundleStyles.readinessButton}
-            style={{
-              backgroundColor: getReadinessScoreColor(readinessScore),
-              borderColor: getReadinessScoreColor(readinessScore),
-            }}
-          >
-            <s-press-button
-              variant="tertiary"
-              tone="neutral"
+          <span className={productPageBundleStyles.readinessButton}>
+            <s-button
+              variant="secondary"
               accessibilityLabel={`${readinessScore} Readiness Score`}
-              onClick={() => setReadinessOpen(true)}
+              commandFor="bundle-readiness-popover"
+              command="--show"
+              data-tour-target="fpb-readiness-score"
             >
-              <span className={productPageBundleStyles.readinessScore}>
-                {readinessScore}
-              </span>
-              <span className={productPageBundleStyles.readinessLabel}>
-                {translateAdmin("common.readiness.title")}
-              </span>
-            </s-press-button>
+              {readinessScore} {translateAdmin("common.readiness.title")}
+            </s-button>
           </span>
           <s-button
             variant="secondary"

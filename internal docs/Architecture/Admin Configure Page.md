@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-09-08
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -96,8 +96,10 @@ is no PPB configure provider or aggregate configure context.
 
 Deferred PPB overlays are composed from the route flow at one explicit overlay
 boundary. Page selection, selected resources, template selection, sync and
-variable utilities, discount translations, readiness, guided tour,
+variable utilities, discount translations, guided tour,
 multi-language text, and preview gating each receive only their owned inputs.
+The lightweight readiness trigger and popover render eagerly outside that lazy
+boundary so the control cannot disappear while the browser waits for idle time.
 No overlay reads the aggregate configure context. Localized pricing values are
 normalized to the persisted required-string shape before returning to their
 state owners.
@@ -329,14 +331,18 @@ controls through adapters and slots. Narrow containers stack the editor into one
 column, keep fields shrinkable with `min-width: 0`, expose 44px action targets,
 and reserve bottom space for Shopify's contextual save bar.
 
-The existing compact `BundleReadinessOverlay` trigger and external props remain
-unchanged. Its checklist, checklist actions, and collapsed trigger use Polaris
-`s-modal` and `s-clickable`; Shopify owns Escape, backdrop dismissal, focus
-trapping, internal scrolling, keyboard activation, and focus restoration. The
-app listens to the modal's `hide` event once to synchronize route-owned open
-state; `afterhide` is a later phase of that same close and must not repeat
-cleanup. `LocalAppModal` and configure multi-language workflows use the same
-Polaris lifecycle.
+`BundleReadinessOverlay` is secondary, contextual information, so its checklist
+uses an anchored Polaris `s-popover` instead of a blocking modal. Wide
+viewports expose only the floating 64px score control; mobile viewports hide
+that control and expose a native `s-button` beside Preview Bundle. Both use
+`commandFor` to open the same eagerly rendered popover, which is never opened
+programmatically on page load. Shopify owns placement, Escape and outside
+dismissal, keyboard activation, and trigger-focus restoration. The checklist
+owns its bounded internal scroll region and does not repeat the score gauge
+inside the open surface. The app listens to the popover's `show` and `hide`
+events once to synchronize route-owned open state; `afterhide` is a later phase
+of the same close and must not repeat cleanup. `LocalAppModal` and configure
+multi-language workflows remain modal because they are blocking tasks.
 
 ## Admin Warning Presentation Contract
 
@@ -396,5 +402,7 @@ restore the previously focused control, and release the body scroll lock.
 The dialog measures its rendered height before choosing an above-target,
 below-target, or viewport-contained position. It recomputes that position after
 viewport changes and uses a bounded internal scroll region for long copy on
-short desktop and mobile viewports. Guided transitions keep the readiness modal
-closed so it cannot cover the tour while the readiness trigger is highlighted.
+short desktop viewports. The guided tour does not start or remain visible below
+768px, where its spotlight and dialog would compete with the mobile configure
+surface. Guided transitions keep the readiness popover closed so it cannot
+cover the tour while the readiness trigger is highlighted.

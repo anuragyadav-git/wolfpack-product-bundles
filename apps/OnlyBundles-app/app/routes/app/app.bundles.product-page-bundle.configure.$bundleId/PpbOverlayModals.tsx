@@ -1,5 +1,4 @@
 import { BundleGuidedTour } from "../../../components/bundle-configure/BundleGuidedTour";
-import { BundleReadinessOverlay } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { EnablePreviewModal } from "../../../components/EnablePreviewModal";
 import { MultiLanguageTextModal } from "../../../components/bundle-configure/MultiLanguageTextModal";
 import { PPB_TOUR_STEPS } from "../../../components/bundle-configure/tourSteps";
@@ -10,16 +9,12 @@ export type PpbOverlayModalsProps = Pick<
   | "activeMultiLanguageValues"
   | "enablePreviewGate"
   | "handleGuidedTourStepChange"
-  | "handleReadinessItemClick"
   | "isMultiLanguageModalOpen"
   | "loaderData"
   | "multiLanguageFields"
   | "multiLanguageTitle"
-  | "readinessItems"
-  | "readinessOpen"
   | "saveStepSetupMultiLanguageValues"
   | "setIsMultiLanguageModalOpen"
-  | "setReadinessOpen"
   | "setTextOverridesLocale"
   | "shop"
   | "shopLocales"
@@ -30,16 +25,12 @@ export function PpbOverlayModals({
   activeMultiLanguageValues,
   enablePreviewGate,
   handleGuidedTourStepChange,
-  handleReadinessItemClick,
   isMultiLanguageModalOpen,
   loaderData,
   multiLanguageFields,
   multiLanguageTitle,
-  readinessItems,
-  readinessOpen,
   saveStepSetupMultiLanguageValues,
   setIsMultiLanguageModalOpen,
-  setReadinessOpen,
   setTextOverridesLocale,
   shop,
   shopLocales,
@@ -48,12 +39,6 @@ export function PpbOverlayModals({
 
   return (
     <>
-      <BundleReadinessOverlay
-        items={readinessItems}
-        open={readinessOpen}
-        onOpenChange={setReadinessOpen}
-        onItemClick={handleReadinessItemClick}
-      />
       <BundleGuidedTour
         steps={PPB_TOUR_STEPS}
         shop={shop}

@@ -38,7 +38,6 @@ describe("PPB configure shell boundaries", () => {
       operationAlert: null,
       parentProductStatusUi: { isLoading: false, showUnlistedBanner: false },
       readinessScore: 80,
-      setReadinessOpen: jest.fn(),
       shop: "test.myshopify.com",
       themeEditorUrl: "",
     } satisfies PpbCanvasHeaderProps;
@@ -49,6 +48,8 @@ describe("PPB configure shell boundaries", () => {
 
     expect(view).toContain("Preview Bundle");
     expect(view).toContain("80");
+    expect(view).toContain('commandFor="bundle-readiness-popover"');
+    expect(view).toContain('command="--show"');
   });
 
   it("serializes the existing save payload from explicit feature state", () => {

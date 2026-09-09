@@ -75,6 +75,9 @@ jest.mock("../../../app/routes/app/_shared/bundle-configure/CommonConfigureShell
 jest.mock("../../../app/components/ProxyHealthBanner", () => ({
   ProxyHealthBanner: () => React.createElement("aside", null, "Proxy warning"),
 }));
+jest.mock("../../../app/components/bundle-configure/BundleReadinessOverlay", () => ({
+  BundleReadinessOverlay: () => React.createElement("div", null, "Readiness control"),
+}));
 jest.mock("@remix-run/react", () => ({
   Await: ({ children, resolve }: { children: (value: unknown) => React.ReactNode; resolve: unknown }) =>
     React.createElement(React.Fragment, null, children(resolve)),
@@ -131,6 +134,7 @@ describe("Admin LCP noncritical readiness", () => {
 
     const view = renderToStaticMarkup(React.createElement(ConfigureBundleFlow));
     expect(view).toContain("Configure canvas");
+    expect(view).toContain("Readiness control");
     expect(view).not.toContain("Configure overlays");
   });
 
@@ -141,6 +145,7 @@ describe("Admin LCP noncritical readiness", () => {
 
     const view = renderToStaticMarkup(React.createElement(ConfigureBundleFlow));
     expect(view).toContain("Configure canvas");
+    expect(view).toContain("Readiness control");
     expect(view).not.toContain("Configure overlays");
   });
 
