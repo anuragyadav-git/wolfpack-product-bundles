@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-09-08
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -401,7 +401,9 @@ briefly after shell mount so chart and analytics chunks do not compete with the
 Admin shell title paint. Support chat auto-load also uses the delayed fallback
 instead of `requestIdleCallback`, because Chrome can run idle callbacks before
 LCP on quiet traces; explicit support-click loading still opens chat
-immediately.
+immediately. Delayed SDK loading does not hide the launcher: the app queues
+`chat:show` for every viewport and has no phone-only media-query or close-event
+suppression.
 
 If attribution remains above target in field data, keep optimizing the route
 shell and parent Admin boot path first. Do not add attribution image preloads:

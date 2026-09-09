@@ -111,6 +111,7 @@ Dashboard
 │           └── [Button] "Delete" → opens Delete Confirmation Modal
 ├── Existing founder support card → direct support chat
 ├── Existing support issues card → feature/storefront/uninstall help and direct support chat
+├── Global Crisp launcher → visible on desktop and mobile; explicit support actions load and open chat immediately
 ├── Resources
 │   ├── Bundle Inspiration → selects the gallery preview panel
 │   ├── Support → opens Crisp

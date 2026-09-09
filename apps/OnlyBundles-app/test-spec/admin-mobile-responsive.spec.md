@@ -4,8 +4,8 @@ id: admin-mobile-responsive
 title: Admin Mobile Responsive Behavior
 type: test-spec
 status: active
-summary: Behavior contracts for responsive Admin navigation, bundle tables, support chat, overlays, and supporting merchant routes.
-last_audited: 2026-08-13
+summary: Behavior contracts for responsive Admin navigation, bundle tables, persistent support chat, overlays, and supporting merchant routes.
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -68,12 +68,10 @@ Keep merchant actions and navigation behavior intact while Admin surfaces adapt 
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Embedded app starts in a narrow viewport | Matching phone media query | Floating chat is hidden and the close listener is registered | Row actions remain reachable |
-| 2 | Embedded app starts in a desktop viewport | Non-matching phone media query | Floating chat remains visible | Desktop support behavior is unchanged |
-| 3 | Viewport crosses the phone boundary | Media query change | Chat visibility follows the current viewport | No reload required |
-| 4 | Merchant explicitly requests support | Existing `openSupportChat` caller | Chat is shown before it opens | Works even when the launcher is hidden |
-| 5 | Explicit chat closes on a phone | Crisp close event | Floating chat is hidden again | Prevents later action overlap |
-| 6 | App shell unmounts | Presentation cleanup | Media-query and Crisp event listeners are removed | No duplicate listeners after remount |
+| 1 | Embedded app starts in any viewport | Admin app shell mounts | Floating Crisp launcher is shown | Includes phone viewports |
+| 2 | Viewport crosses the phone boundary | Browser width changes | Crisp launcher remains visible | No responsive hide/show listener |
+| 3 | Merchant explicitly requests support | Existing `openSupportChat` caller | Chat is shown before it opens | Existing callers remain unchanged |
+| 4 | App shell unmounts | Loader cleanup | Delayed SDK-load timer is removed | No presentation listener exists |
 
 ## Acceptance Criteria
 
