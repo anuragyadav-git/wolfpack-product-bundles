@@ -1489,6 +1489,8 @@
     "uploadFailed": "Falha no envio",
     "searchFiles": "Procurar arquivos",
     "searchFiles2": "Search files…",
+    "noFilesMatchSearch": "Nenhum arquivo corresponde à sua pesquisa.",
+    "noImageFilesFound": "Nenhum arquivo de imagem foi encontrado na sua loja.",
     "uploadProcessing": "Processamento de upload",
     "loadingFiles": "Carregando arquivos",
     "uploading": "Carregando...",

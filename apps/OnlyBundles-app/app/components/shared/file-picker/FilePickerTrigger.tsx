@@ -1,4 +1,3 @@
-import type { KeyboardEvent } from "react";
 import { MobileIcon, MonitorIcon } from "./FilePickerIcons";
 import { truncateStoreFileText } from "./utils";
 import { translateAdmin } from "~/i18n/config";
@@ -61,15 +60,10 @@ export function FilePickerTrigger({
             boxSizing: "border-box",
           }}
         >
-          <img
+          <s-image
             src={value}
             alt={currentFilename ?? "Background image"}
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "block",
-              objectFit: "contain",
-            }}
+            objectFit="contain"
           />
           <div
             style={{
@@ -128,18 +122,16 @@ export function FilePickerTrigger({
         }}
       >
         <s-stack direction="inline" gap="small" alignItems="start">
-          <img
-            src={value}
-            alt={currentFilename ?? "Background image"}
-            style={{
-              width: "52px",
-              height: "52px",
-              objectFit: "cover",
-              borderRadius: "4px",
-              flexShrink: 0,
-              border: "1px solid #e1e3e5",
-            }}
-          />
+          <s-box inlineSize="52px" blockSize="52px">
+            <s-image
+              src={value}
+              alt={currentFilename ?? "Background image"}
+              objectFit="cover"
+              aspectRatio="1/1"
+              borderWidth="small"
+              borderRadius="small"
+            />
+          </s-box>
           <s-stack direction="block" gap="small-100">
             <s-text color="subdued">
               {truncateStoreFileText(currentFilename ?? value, 24)}
@@ -172,71 +164,69 @@ export function FilePickerTrigger({
     );
   }
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!disabled && (event.key === "Enter" || event.key === " ")) handleOpen();
+  const surfaceStyle = {
+    width: "100%",
+    border: "2px dashed #c9cccf",
+    borderRadius: "8px",
+    padding: "var(--wpb-file-picker-trigger-padding, 28px 16px)",
+    background: "#fafbfb",
+    cursor: disabled || triggerIsUploading ? "default" : "pointer",
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    textAlign: "center" as const,
+    boxSizing: "border-box" as const,
+    height: fitPreviewToTrigger
+      ? "var(--wpb-file-picker-trigger-height, 180px)"
+      : undefined,
   };
+  const triggerContent = triggerIsUploading ? (
+    <>
+      <s-spinner
+        size="base"
+        accessibilityLabel={translateAdmin("adminAttributes.uploadingImage")}
+      />
+      <s-text color="subdued">
+        {uploadStatus === "uploading" ? "Uploading…" : "Processing…"}
+      </s-text>
+    </>
+  ) : (
+    <>
+      {triggerIcon === "mobile" ? <MobileIcon /> : <MonitorIcon />}
+      <s-text type="strong">{label}</s-text>
+      {hint && <s-text color="subdued">{hint}</s-text>}
+    </>
+  );
+  const clickableSurface = (
+    <s-clickable
+      accessibilityLabel={label}
+      disabled={disabled || triggerIsUploading || undefined}
+      onClick={!disabled && !triggerIsUploading ? handleOpen : undefined}
+    >
+      <div style={showUploadButton ? undefined : surfaceStyle}>{triggerContent}</div>
+    </s-clickable>
+  );
+
+  if (!showUploadButton || triggerIsUploading) return clickableSurface;
 
   return (
-    <div
-      role="button"
-      tabIndex={disabled ? -1 : 0}
-      aria-disabled={disabled || undefined}
-      onClick={!disabled && !triggerIsUploading ? handleOpen : undefined}
-      onKeyDown={!disabled && !triggerIsUploading ? handleKeyDown : undefined}
-      style={{
-        width: "100%",
-        border: "2px dashed #c9cccf",
-        borderRadius: "8px",
-        padding: "var(--wpb-file-picker-trigger-padding, 28px 16px)",
-        background: "#fafbfb",
-        cursor: disabled || triggerIsUploading ? "default" : "pointer",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "8px",
-        textAlign: "center",
-        boxSizing: "border-box",
-        height: fitPreviewToTrigger
-          ? "var(--wpb-file-picker-trigger-height, 180px)"
-          : undefined,
-      }}
-    >
-      {triggerIsUploading ? (
-        <>
-          <s-spinner
-            size="base"
-            accessibilityLabel={translateAdmin(
-              "adminAttributes.uploadingImage"
-            )}
-          />
-          <s-text color="subdued">
-            {uploadStatus === "uploading" ? "Uploading…" : "Processing…"}
-          </s-text>
-        </>
-      ) : (
-        <>
-          {triggerIcon === "mobile" ? <MobileIcon /> : <MonitorIcon />}
-          <s-text type="strong">{label}</s-text>
-          {hint && <s-text color="subdued">{hint}</s-text>}
-          {showUploadButton ? (
-            <s-button
-              variant="secondary"
-              disabled={disabled || undefined}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (uploadButtonAction === "openPicker") {
-                  handleOpen();
-                  return;
-                }
-                handleTriggerUpload(event);
-              }}
-            >
-              {uploadLabel}
-            </s-button>
-          ) : null}
-        </>
-      )}
+    <div style={surfaceStyle}>
+      {clickableSurface}
+      <s-button
+        variant="secondary"
+        disabled={disabled || undefined}
+        onClick={(event) => {
+          if (uploadButtonAction === "openPicker") {
+            handleOpen();
+            return;
+          }
+          handleTriggerUpload(event);
+        }}
+      >
+        {uploadLabel}
+      </s-button>
     </div>
   );
 }

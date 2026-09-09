@@ -1489,6 +1489,8 @@
     "uploadFailed": "Error al cargar",
     "searchFiles": "Buscar archivos",
     "searchFiles2": "Buscar archivos…",
+    "noFilesMatchSearch": "Ningún archivo coincide con tu búsqueda.",
+    "noImageFilesFound": "No se encontraron archivos de imagen en tu tienda.",
     "uploadProcessing": "Proceso de carga",
     "loadingFiles": "Cargando archivos",
     "uploading": "Subiendo",

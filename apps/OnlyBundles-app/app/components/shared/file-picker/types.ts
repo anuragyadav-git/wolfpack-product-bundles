@@ -48,7 +48,8 @@ export type FilePickerDialogProps = {
   progressLabel: string;
   progressTone: "subdued" | "success";
   handleClose: () => void;
-  handleUploadClick: () => void;
+  acceptedTypes: string;
+  handleDropZoneInput: (event: Event) => void;
   handleLoadMore: () => void;
   handleSelect: () => void;
 };

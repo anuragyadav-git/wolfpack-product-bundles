@@ -1489,6 +1489,8 @@
     "uploadFailed": "Échec de l'envoi",
     "searchFiles": "Rechercher des fichiers",
     "searchFiles2": "Rechercher les fichiers…",
+    "noFilesMatchSearch": "Aucun fichier ne correspond à votre recherche.",
+    "noImageFilesFound": "Aucun fichier image n’a été trouvé dans votre boutique.",
     "uploadProcessing": "Traitement du téléchargement",
     "loadingFiles": "Chargement des fichiers",
     "uploading": "Envoi en cours",

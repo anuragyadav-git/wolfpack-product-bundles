@@ -23,8 +23,9 @@ export function FilePickerDialog({
   progressCircleStatus,
   progressLabel,
   progressTone,
+  acceptedTypes,
   handleClose,
-  handleUploadClick,
+  handleDropZoneInput,
   handleLoadMore,
   handleSelect,
 }: FilePickerDialogProps) {
@@ -62,15 +63,16 @@ export function FilePickerDialog({
               disabled={isBlocked || undefined}
               onInput={(event) => setSearch(event.currentTarget.value)}
             />
-            <s-button
-              icon="upload"
-              onClick={handleUploadClick}
-              disabled={isBlocked || undefined}
-            >
-              {translateAdmin(
+            <s-drop-zone
+              accept={acceptedTypes}
+              accessibilityLabel={translateAdmin("adminAttributes.uploadImage")}
+              label={translateAdmin(
                 "adminExtracted.shared.filePicker.filepickerdialog.uploadImage"
               )}
-            </s-button>
+              disabled={isBlocked || undefined}
+              error={sizeError ?? undefined}
+              onInput={handleDropZoneInput}
+            />
           </s-grid>
 
           {sizeError ? <s-text tone="critical">{sizeError}</s-text> : null}
@@ -175,8 +177,8 @@ function FileGrid({
     return (
       <s-text color="subdued">
         {search
-          ? "No files match your search."
-          : "No image files found in your store."}
+          ? translateAdmin("adminAttributes.noFilesMatchSearch")
+          : translateAdmin("adminAttributes.noImageFilesFound")}
       </s-text>
     );
   }
@@ -186,28 +188,35 @@ function FileGrid({
       {filteredFiles.map((file) => {
         const isSelected = selectedUrl === file.url;
         return (
-          <button
+          <div
             key={file.id}
-            type="button"
             className={styles.fileButton}
             data-selected={isSelected || undefined}
-            onClick={() => setSelectedUrl(file.url)}
-            disabled={isBlocked}
-            aria-pressed={isSelected}
           >
-            <img
-              src={`${file.url}${file.url.includes("?") ? "&" : "?"}width=160`}
-              alt={file.alt || file.filename}
-              className={styles.fileImage}
-              loading="lazy"
-            />
-            <span className={styles.fileName}>
-              {truncateStoreFileText(file.filename, 24)}
-            </span>
-            <span className={styles.fileDate}>
-              {formatStoreFileDate(file.createdAt)}
-            </span>
-          </button>
+            <s-clickable
+              onClick={() => setSelectedUrl(file.url)}
+              disabled={isBlocked || undefined}
+              accessibilityLabel={`${file.filename}${isSelected ? ", selected" : ""}`}
+            >
+              <div className={styles.fileImage}>
+                <s-image
+                  src={`${file.url}${file.url.includes("?") ? "&" : "?"}width=160`}
+                  alt={file.alt || file.filename}
+                  loading="lazy"
+                  objectFit="cover"
+                  aspectRatio="1/1"
+                />
+              </div>
+              <div className={styles.fileName}>
+                <s-text>{truncateStoreFileText(file.filename, 24)}</s-text>
+              </div>
+              <div className={styles.fileDate}>
+                <s-text color="subdued">
+                  {formatStoreFileDate(file.createdAt)}
+                </s-text>
+              </div>
+            </s-clickable>
+          </div>
         );
       })}
     </div>

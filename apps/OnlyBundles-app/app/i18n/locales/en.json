@@ -1500,6 +1500,8 @@
     "uploadFailed": "Upload failed",
     "searchFiles": "Search files",
     "searchFiles2": "Search files…",
+    "noFilesMatchSearch": "No files match your search.",
+    "noImageFilesFound": "No image files found in your store.",
     "uploadProcessing": "Upload processing",
     "loadingFiles": "Loading files",
     "uploading": "Uploading",

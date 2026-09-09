@@ -5,13 +5,7 @@ import {
   useId,
   useRef,
   useState,
-  type ChangeEvent,
 } from "react";
-import {
-  useLazyGetUploadStoreFileStatusQuery,
-  useLazyListStoreFilesQuery,
-  useUploadStoreFileMutation,
-} from "../../store/api/adminApi";
 import { FilePickerDialog } from "./file-picker/FilePickerDialog";
 import { FilePickerTrigger } from "./file-picker/FilePickerTrigger";
 import type { FilePickerProps, UploadStatus } from "./file-picker/types";
@@ -25,8 +19,12 @@ import {
 } from "./file-picker/utils";
 import {
   resolveFilePickerInitialOpen,
-  shouldApplyUploadMutationResult,
 } from "../../lib/file-picker-upload-state";
+import {
+  getUploadStoreFileStatus,
+  listStoreFiles,
+  uploadStoreFile,
+} from "../../lib/admin-store-files.client";
 import {
   hidePolarisModal,
   showPolarisModal,
@@ -60,6 +58,7 @@ export function FilePicker({
   )}`;
   const dialogRef = useRef<any>(null);
   const [files, setFiles] = useState<StoreFile[]>([]);
+  const [filesLoading, setFilesLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedUrl, setSelectedUrl] = useState<string | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -74,15 +73,28 @@ export function FilePicker({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasCurrentUploadAttemptRef = useRef(false);
 
-  const [loadStoreFiles, filesQuery] = useLazyListStoreFilesQuery();
-  const [uploadStoreFile, uploadResult] = useUploadStoreFileMutation();
-  const [loadUploadStatus, statusQuery] =
-    useLazyGetUploadStoreFileStatusQuery();
-  const resetUploadMutationRef = useRef(uploadResult.reset);
-  resetUploadMutationRef.current = uploadResult.reset;
-
-  const filesLoading = filesQuery.isFetching;
   const isBlocked = uploadStatus === "uploading" || uploadStatus === "polling";
+
+  const loadStoreFiles = useCallback(async (args: {
+    cursor?: string | null;
+    query?: string | null;
+  } = {}) => {
+    setFilesLoading(true);
+    try {
+      const result = await listStoreFiles(args);
+      setFiles((prev) => {
+        const existingIds = new Set(prev.map((file) => file.id));
+        const unique = result.files.filter((file) => !existingIds.has(file.id));
+        return [...prev, ...unique];
+      });
+      setHasNextPage(result.pageInfo.hasNextPage);
+      setCursor(result.pageInfo.endCursor ?? null);
+    } catch {
+      setHasNextPage(false);
+    } finally {
+      setFilesLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (disabled && open) setOpen(false);
@@ -95,59 +107,6 @@ export function FilePicker({
   }, [files.length, loadStoreFiles, open]);
 
   useEffect(() => {
-    if (!filesQuery.data) return;
-    const { files: newFiles, pageInfo } = filesQuery.data;
-    setFiles((prev) => {
-      const existingIds = new Set(prev.map((file) => file.id));
-      const unique = newFiles.filter((file) => !existingIds.has(file.id));
-      return [...prev, ...unique];
-    });
-    setHasNextPage(pageInfo.hasNextPage);
-    setCursor(pageInfo.endCursor ?? null);
-  }, [filesQuery.data]);
-
-  useEffect(() => {
-    if (
-      !shouldApplyUploadMutationResult({
-        hasCurrentAttempt: hasCurrentUploadAttemptRef.current,
-        isSuccess: uploadResult.isSuccess,
-        isError: uploadResult.isError,
-      }) ||
-      !uploadResult.isSuccess ||
-      !uploadResult.data
-    )
-      return;
-    const result = uploadResult.data;
-    if (result.ok && result.fileId) {
-      setPendingFileId(result.fileId);
-      pollCountRef.current = 0;
-      setPollTrigger(0);
-      setUploadStatus("polling");
-      return;
-    }
-    setUploadStatus("error");
-    setUploadError(result.error ?? "Upload failed. Please try again.");
-    setUploadFromTrigger(false);
-    hasCurrentUploadAttemptRef.current = false;
-  }, [uploadResult.data, uploadResult.isError, uploadResult.isSuccess]);
-
-  useEffect(() => {
-    if (
-      !shouldApplyUploadMutationResult({
-        hasCurrentAttempt: hasCurrentUploadAttemptRef.current,
-        isSuccess: uploadResult.isSuccess,
-        isError: uploadResult.isError,
-      }) ||
-      !uploadResult.isError
-    )
-      return;
-    setUploadStatus("error");
-    setUploadError("Upload failed. Please try again.");
-    setUploadFromTrigger(false);
-    hasCurrentUploadAttemptRef.current = false;
-  }, [uploadResult.isError, uploadResult.isSuccess]);
-
-  useEffect(() => {
     if (uploadStatus !== "polling" || !pendingFileId) return;
     if (pollCountRef.current >= MAX_POLLS) {
       setUploadStatus("timeout");
@@ -156,68 +115,48 @@ export function FilePicker({
       return;
     }
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       pollCountRef.current += 1;
-      void loadUploadStatus(pendingFileId);
+      try {
+        const result = await getUploadStoreFileStatus(pendingFileId);
+        if (!hasCurrentUploadAttemptRef.current) return;
+        if (result.fileStatus === "READY" && result.file) {
+          if (uploadFromTrigger) {
+            onChange(result.file.url);
+            setUploadFromTrigger(false);
+          } else {
+            setFiles((prev) => {
+              const existingIds = new Set(prev.map((file) => file.id));
+              if (existingIds.has(result.file!.id)) return prev;
+              return [result.file!, ...prev];
+            });
+            setSelectedUrl(result.file.url);
+          }
+          setUploadStatus("success");
+          setPendingFileId(null);
+          hasCurrentUploadAttemptRef.current = false;
+          return;
+        }
+        if (result.fileStatus === "FAILED") {
+          setUploadStatus("error");
+          setUploadError("Upload processing failed. Please try again.");
+          setPendingFileId(null);
+          setUploadFromTrigger(false);
+          hasCurrentUploadAttemptRef.current = false;
+          return;
+        }
+        setPollTrigger((current) => current + 1);
+      } catch {
+        setUploadStatus("error");
+        setUploadError("Upload processing failed. Please try again.");
+        setPendingFileId(null);
+        setUploadFromTrigger(false);
+        hasCurrentUploadAttemptRef.current = false;
+      }
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [loadUploadStatus, pendingFileId, pollTrigger, uploadStatus]);
-
-  useEffect(() => {
-    if (
-      !statusQuery.isSuccess ||
-      !statusQuery.data ||
-      uploadStatus !== "polling"
-    )
-      return;
-    const result = statusQuery.data;
-
-    if (result.fileStatus === "READY" && result.file) {
-      if (uploadFromTrigger) {
-        onChange(result.file.url);
-        setUploadFromTrigger(false);
-      } else {
-        setFiles((prev) => {
-          const existingIds = new Set(prev.map((file) => file.id));
-          if (existingIds.has(result.file!.id)) return prev;
-          return [result.file!, ...prev];
-        });
-        setSelectedUrl(result.file.url);
-      }
-      setUploadStatus("success");
-      setPendingFileId(null);
-      hasCurrentUploadAttemptRef.current = false;
-      return;
-    }
-
-    if (result.fileStatus === "FAILED") {
-      setUploadStatus("error");
-      setUploadError("Upload processing failed. Please try again.");
-      setPendingFileId(null);
-      setUploadFromTrigger(false);
-      hasCurrentUploadAttemptRef.current = false;
-      return;
-    }
-
-    setPollTrigger((current) => current + 1);
-  }, [
-    statusQuery.data,
-    statusQuery.isSuccess,
-    uploadStatus,
-    uploadFromTrigger,
-    onChange,
-  ]);
-
-  useEffect(() => {
-    if (statusQuery.isError && uploadStatus === "polling") {
-      setUploadStatus("error");
-      setUploadError("Upload processing failed. Please try again.");
-      setPendingFileId(null);
-      setUploadFromTrigger(false);
-      hasCurrentUploadAttemptRef.current = false;
-    }
-  }, [statusQuery.isError, uploadStatus]);
+  }, [onChange, pendingFileId, pollTrigger, uploadFromTrigger, uploadStatus]);
 
   useEffect(() => {
     if (uploadStatus !== "success") return;
@@ -227,7 +166,6 @@ export function FilePicker({
 
   const resetUploadState = useCallback(() => {
     hasCurrentUploadAttemptRef.current = false;
-    resetUploadMutationRef.current();
     setUploadStatus("idle");
     setUploadError(null);
     setSizeError(null);
@@ -251,25 +189,6 @@ export function FilePicker({
       return;
     }
     hidePolarisModal(dialogRef);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.stopPropagation();
-        handleClose();
-      }
-    };
-    document.addEventListener("keydown", handler, true);
-    return () => document.removeEventListener("keydown", handler, true);
-  }, [handleClose, open]);
-
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [open]);
 
   const handleOpen = useCallback(() => {
@@ -300,13 +219,6 @@ export function FilePicker({
     }
   }, [cursor, loadStoreFiles]);
 
-  const handleUploadClick = useCallback(() => {
-    if (disabled) return;
-    setSizeError(null);
-    setUploadError(null);
-    fileInputRef.current?.click();
-  }, [disabled]);
-
   const handleTriggerUpload = useCallback(
     (event: { stopPropagation: () => void }) => {
       event.stopPropagation();
@@ -319,12 +231,9 @@ export function FilePicker({
     [disabled, isBlocked]
   );
 
-  const handleFileInputChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
+  const uploadFile = useCallback(
+    async (file: File | undefined) => {
       if (disabled) return;
-      const file = event.target.files?.[0];
-      if (fileInputRef.current) fileInputRef.current.value = "";
-
       if (!file) {
         setUploadFromTrigger(false);
         return;
@@ -351,7 +260,28 @@ export function FilePicker({
 
       const form = new FormData();
       form.append("file", file);
-      void uploadStoreFile(form);
+      try {
+        const result = await uploadStoreFile(form);
+        if (!hasCurrentUploadAttemptRef.current) return;
+        if (result.ok && result.fileId) {
+          setPendingFileId(result.fileId);
+          pollCountRef.current = 0;
+          setPollTrigger(0);
+          setUploadStatus("polling");
+          return;
+        }
+        setUploadStatus("error");
+        setUploadError(result.error ?? "Upload failed. Please try again.");
+        setUploadFromTrigger(false);
+        hasCurrentUploadAttemptRef.current = false;
+      } catch (error) {
+        setUploadStatus("error");
+        setUploadError(
+          error instanceof Error ? error.message : "Upload failed. Please try again.",
+        );
+        setUploadFromTrigger(false);
+        hasCurrentUploadAttemptRef.current = false;
+      }
     },
     [
       acceptedTypes,
@@ -359,9 +289,22 @@ export function FilePicker({
       invalidTypeErrorMessage,
       maxUploadBytes,
       maxUploadErrorMessage,
-      uploadStoreFile,
     ]
   );
+
+  const handleFileInputChange = useCallback(
+    (input: HTMLInputElement) => {
+      const file = input.files?.[0];
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      void uploadFile(file);
+    },
+    [uploadFile],
+  );
+
+  const handleDropZoneInput = useCallback((event: Event) => {
+    const input = event.currentTarget as HTMLElement & { files?: FileList };
+    void uploadFile(input.files?.[0]);
+  }, [uploadFile]);
 
   const filteredFiles = search
     ? files.filter((file) =>
@@ -428,7 +371,7 @@ export function FilePicker({
         disabled={disabled}
         accept={acceptedTypes}
         style={{ display: "none" }}
-        onChange={handleFileInputChange}
+        onChange={(event) => handleFileInputChange(event.currentTarget)}
       />
 
       <FilePickerDialog
@@ -450,8 +393,9 @@ export function FilePicker({
         progressCircleStatus={progressCircleStatus}
         progressLabel={progressLabel}
         progressTone={progressTone}
+        acceptedTypes={acceptedTypes}
         handleClose={handleClose}
-        handleUploadClick={handleUploadClick}
+        handleDropZoneInput={handleDropZoneInput}
         handleLoadMore={handleLoadMore}
         handleSelect={handleSelect}
       />

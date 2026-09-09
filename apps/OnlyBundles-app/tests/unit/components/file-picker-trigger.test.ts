@@ -2,14 +2,6 @@ import React from "react";
 
 import { FilePickerTrigger } from "../../../app/components/shared/file-picker/FilePickerTrigger";
 
-jest.mock("@shopify/polaris", () => ({
-  BlockStack: "BlockStack",
-  Button: "Button",
-  InlineStack: "InlineStack",
-  Spinner: "Spinner",
-  Text: "Text",
-}));
-
 function makeProps(overrides: Record<string, unknown> = {}) {
   return {
     value: null,
@@ -29,14 +21,6 @@ function makeProps(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function getEmptyTriggerChildren(props: ReturnType<typeof makeProps>) {
-  const trigger = FilePickerTrigger(props as any);
-  const content = React.Children.toArray(
-    trigger.props.children
-  )[0] as React.ReactElement;
-  return React.Children.toArray(content.props.children) as React.ReactElement[];
-}
-
 function findElementByType(
   node: React.ReactNode,
   type: string
@@ -50,11 +34,24 @@ function findElementByType(
   return null;
 }
 
+function findElementByComponentName(
+  node: React.ReactNode,
+  name: string,
+): React.ReactElement | null {
+  for (const child of React.Children.toArray(node)) {
+    if (!React.isValidElement(child)) continue;
+    if (typeof child.type === "function" && child.type.name === name) return child;
+    const nested = findElementByComponentName(child.props.children, name);
+    if (nested) return nested;
+  }
+  return null;
+}
+
 describe("FilePickerTrigger", () => {
   it("opens the asset picker when the upload button uses picker mode", () => {
     const props = makeProps({ uploadButtonAction: "openPicker" });
-    const children = getEmptyTriggerChildren(props);
-    const uploadButton = children.at(-1)!;
+    const trigger = FilePickerTrigger(props as any);
+    const uploadButton = findElementByType(trigger, "s-button")!;
 
     uploadButton.props.onClick({ stopPropagation: jest.fn() });
 
@@ -64,10 +61,10 @@ describe("FilePickerTrigger", () => {
 
   it("uses the mobile device icon for mobile banner pickers", () => {
     const props = makeProps({ triggerIcon: "mobile" });
-    const children = getEmptyTriggerChildren(props);
-    const icon = children[0];
+    const trigger = FilePickerTrigger(props as any);
+    const icon = findElementByComponentName(trigger, "MobileIcon");
 
-    expect((icon.type as Function).name).toBe("MobileIcon");
+    expect(icon).not.toBeNull();
   });
 
   it("keeps a loading GIF drop zone clickable without a nested upload button", () => {
@@ -77,7 +74,7 @@ describe("FilePickerTrigger", () => {
     });
     const trigger = FilePickerTrigger(props as any);
 
-    expect(trigger.props.role).toBe("button");
+    expect(trigger.type).toBe("s-clickable");
     expect(findElementByType(trigger, "s-button")).toBeNull();
     expect(JSON.stringify(trigger)).toContain("Click to upload a loading GIF");
   });
@@ -106,11 +103,10 @@ describe("FilePickerTrigger", () => {
   it("prevents empty trigger interaction while disabled", () => {
     const props = makeProps({ disabled: true });
     const trigger = FilePickerTrigger(props as any);
+    const clickable = findElementByType(trigger, "s-clickable");
     const uploadButton = findElementByType(trigger, "s-button");
 
-    expect(trigger.props.tabIndex).toBe(-1);
-    expect(trigger.props["aria-disabled"]).toBe(true);
-    expect(trigger.props.onClick).toBeUndefined();
+    expect(clickable?.props.disabled).toBe(true);
     expect(uploadButton?.props.disabled).toBe(true);
   });
 

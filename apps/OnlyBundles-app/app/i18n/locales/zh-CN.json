@@ -1489,6 +1489,8 @@
     "uploadFailed": "上传失败",
     "searchFiles": "搜索文件",
     "searchFiles2": "搜索文件…",
+    "noFilesMatchSearch": "没有与搜索条件匹配的文件。",
+    "noImageFilesFound": "未在您的商店中找到图片文件。",
     "uploadProcessing": "上传处理",
     "loadingFiles": "正在加载文件",
     "uploading": "上传中",

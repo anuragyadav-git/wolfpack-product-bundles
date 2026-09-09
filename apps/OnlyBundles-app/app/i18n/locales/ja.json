@@ -1489,6 +1489,8 @@
     "uploadFailed": "アップロードに失敗しました",
     "searchFiles": "ファイルを検索",
     "searchFiles2": "Search files…",
+    "noFilesMatchSearch": "検索条件に一致するファイルはありません。",
+    "noImageFilesFound": "ストアに画像ファイルが見つかりませんでした。",
     "uploadProcessing": "アップロード処理中",
     "loadingFiles": "ファイルを読み込み中",
     "uploading": "アップロード中",

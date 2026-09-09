@@ -1489,6 +1489,8 @@
     "uploadFailed": "Upload fehlgeschlagen",
     "searchFiles": "Dateien suchen",
     "searchFiles2": "Dateien durchsuchen…",
+    "noFilesMatchSearch": "Keine Dateien entsprechen Ihrer Suche.",
+    "noImageFilesFound": "In Ihrem Shop wurden keine Bilddateien gefunden.",
     "uploadProcessing": "Upload-Verarbeitung",
     "loadingFiles": "Lade Dateien",
     "uploading": "Hochladen",
