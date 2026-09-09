@@ -5,7 +5,7 @@ title: Analytics Attribution Fix and Orders Backfill
 type: test-spec
 status: active
 summary: Verifies Shopify-native checkout and revenue reconciliation for bundle orders missed by the Web Pixel.
-last_audited: 2026-09-04
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -39,6 +39,7 @@ Analytics dashboard was showing $0 revenue despite paid orders. Root causes:
 3. **Safety net** — Shopify Orders GraphQL backfill so revenue attribution can be reconciled from the source of truth even if the pixel fails.
 4. **Historical identity** — reconciliation must use Shopify's preserved line-item custom attributes and the signed Wolfpack runtime token before consulting current bundle configuration. Product matching alone cannot identify an order after its bundle is deleted.
 5. **Historical date** — reconciled rows must retain Shopify's order `createdAt`; using the backfill execution time puts revenue in the wrong reporting period.
+6. **Canonical order identity** — checkout ingestion accepts Shopify's Order GID only; numeric and missing IDs fail closed instead of creating a second identity format.
 
 ## Test Cases
 
@@ -77,6 +78,14 @@ Service that queries Shopify Orders GraphQL and populates `OrderAttribution` for
 | 11 | Historical checkout date is retained | Shopify order was created on July 30 and backfill runs on September 4 | Row `createdAt` is July 30 | Keeps the order in its actual reporting window |
 | 12 | Existing null attribution is repaired | A prior pixel/backfill row exists for the order with `bundleId=null`, and the signed token identifies the bundle | Existing row is updated with the historical bundle ID | Makes the fix effective for already-ingested orders |
 
+### checkout attribution ingress
+
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Canonical order ID | `gid://shopify/Order/123` | Attribution stores the exact GID | Same identity as Admin GraphQL backfill |
+| 2 | Numeric order ID | `123` | `400` response and no row | Retired compatibility input |
+| 3 | Missing order ID | no `orderId` | `400` response and no row | `checkout_completed` owns order identity |
+
 ## Acceptance Criteria
 
 - [x] All bundle-matcher tests pass
@@ -90,6 +99,7 @@ Service that queries Shopify Orders GraphQL and populates `OrderAttribution` for
 - [x] Signed runtime identity takes precedence over mutable current bundle configuration
 - [x] Reconciled rows retain the Shopify order creation timestamp
 - [x] Existing null attribution rows can be repaired idempotently
+- [x] Checkout attribution accepts only a canonical Shopify Order GID
 
 ## Out of Scope
 

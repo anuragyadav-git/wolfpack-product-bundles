@@ -3,11 +3,6 @@ import { matchLineItemsToBundles } from "../../../app/lib/analytics/bundle-match
 
 jest.mock("../../../app/lib/analytics/bundle-matcher.server", () => ({
   matchLineItemsToBundles: jest.fn(),
-  normalizeToOrderGid: (orderId: string) => (
-    orderId.startsWith("gid://shopify/Order/")
-      ? orderId
-      : `gid://shopify/Order/${orderId}`
-  ),
 }));
 
 jest.mock("../../../app/db.server", () => ({
@@ -40,7 +35,7 @@ describe("api.attribution", () => {
   it("persists sanitized custom UTM attributes on attribution rows", async () => {
     const response = await action({
       request: makeRequest({
-        orderId: "123",
+        orderId: "gid://shopify/Order/123",
         shopId: "test.myshopify.com",
         totalPrice: "10.00",
         currencyCode: "USD",
@@ -70,7 +65,7 @@ describe("api.attribution", () => {
 
     const response = await action({
       request: makeRequest({
-        orderId: "456",
+        orderId: "gid://shopify/Order/456",
         shopId: "test.myshopify.com",
         totalPrice: "25.00",
         currencyCode: "USD",
@@ -111,7 +106,7 @@ describe("api.attribution", () => {
 
     await action({
       request: makeRequest({
-        orderId: "789",
+        orderId: "gid://shopify/Order/789",
         shopId: "test.myshopify.com",
         lineItems: [{
           productId: "gid://shopify/Product/1",
@@ -146,7 +141,7 @@ describe("api.attribution", () => {
 
     await action({
       request: makeRequest({
-        orderId: "790",
+        orderId: "gid://shopify/Order/790",
         shopId: "test.myshopify.com",
         lineItems: [{
           productId: "gid://shopify/Product/1",
@@ -183,7 +178,7 @@ describe("api.attribution", () => {
 
     await action({
       request: makeRequest({
-        orderId: "791",
+        orderId: "gid://shopify/Order/791",
         shopId: "test.myshopify.com",
         totalPrice: "50.00",
         currencyCode: "USD",
@@ -218,5 +213,24 @@ describe("api.attribution", () => {
         bundleRevenue: 2_000,
       })],
     });
+  });
+
+  it.each([
+    ["numeric", "123"],
+    ["missing", undefined],
+  ])("rejects a %s Shopify order ID", async (_label, orderId) => {
+    const response = await action({
+      request: makeRequest({
+        orderId,
+        shopId: "test.myshopify.com",
+      }),
+      params: {},
+      context: {},
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Invalid Shopify order ID" });
+    expect(getDb().orderAttribution.create).not.toHaveBeenCalled();
+    expect(getDb().orderAttribution.createMany).not.toHaveBeenCalled();
   });
 });

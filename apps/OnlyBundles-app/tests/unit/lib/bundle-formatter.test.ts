@@ -117,6 +117,20 @@ describe("formatBundleForWidget", () => {
     expect(result.steps).toHaveLength(0);
   });
 
+  it("serializes signed app-proxy products only from StepProduct relations", () => {
+    const result = formatBundleForWidget(makeBundle({
+      steps: [makeStep({
+        products: [{ productId: "gid://shopify/Product/legacy", title: "Stale JSON" }],
+        StepProduct: [makeStepProduct()],
+      })],
+    }) as any);
+
+    expect(result.steps[0].products).toEqual([
+      expect.objectContaining({ id: "gid://shopify/Product/999", title: "My Product" }),
+    ]);
+    expect(JSON.stringify(result.steps[0])).not.toContain("Stale JSON");
+  });
+
   it("omits the legacy fullPageLayout field from widget payloads", () => {
     const bundle = makeBundle({ fullPageLayout: "footer_bottom" });
     const result = formatBundleForWidget(bundle as any);
@@ -361,7 +375,7 @@ describe("formatBundleForWidget", () => {
     expect(result.steps[0].stepImage).toBe("https://cdn.example.test/step-direct.png");
   });
 
-  it("keeps category-backed products under categories for storefront runtime", () => {
+  it("does not recover product-page membership from category JSON", () => {
     const step = makeStep({
       StepProduct: [],
       StepCategory: [
@@ -393,15 +407,10 @@ describe("formatBundleForWidget", () => {
     }) as any);
 
     expect(result.steps[0].products).toEqual([]);
-    expect((result.steps[0].categories as any[])[0].products).toEqual([
-      expect.objectContaining({
-        selectionId: "gid://shopify/Product/9427287703811",
-        title: "123Luxury Armor Matte Case",
-      }),
-    ]);
+    expect((result.steps[0].categories as any[])[0].products).toEqual([]);
   });
 
-  it("promotes category products into full-page step products when StepProduct is empty", () => {
+  it("does not recover full-page membership from category JSON", () => {
     const highVariantProduct = Array.from({ length: 11 }, (_, index) => ({
       id: `gid://shopify/ProductVariant/${48191691456771 + index}`,
       price: "123.00",
@@ -430,26 +439,8 @@ describe("formatBundleForWidget", () => {
     });
 
     const result = formatBundleForWidget(makeBundle({ steps: [step] }) as any);
-    const product = result.steps[0].products[0];
-
-    expect(result.steps[0].products).toHaveLength(1);
-    expect(product).toMatchObject({
-      id: "gid://shopify/Product/9427287703811",
-      title: "123Luxury Armor Matte Case",
-      featuredImage: { url: "https://cdn.shopify.com/category-product.jpg" },
-      price: 12300,
-      available: true,
-    });
-    expect(product.variants).toHaveLength(11);
-    expect(product.variants[0]).toMatchObject({
-      id: "48191691456771",
-      gid: "gid://shopify/ProductVariant/48191691456771",
-      title: "Dark Blue / For iphone 6 6S Plus #1",
-      price: 12300,
-      compareAtPrice: 24600,
-      available: true,
-      image: { url: "https://cdn.shopify.com/variant.jpg" },
-    });
+    expect(result.steps[0].products).toEqual([]);
+    expect((result.steps[0].categories as any[])[0].products).toEqual([]);
   });
 
   it("preserves hydrated category fields for storefront runtime", () => {
@@ -461,6 +452,10 @@ describe("formatBundleForWidget", () => {
       variants: [{ id: "gid://shopify/ProductVariant/48191691456771", price: "123.00" }],
     };
     const step = makeStep({
+      StepProduct: [{
+        ...categoryProduct,
+        productId: categoryProduct.id,
+      }],
       StepCategory: [
         {
           id: "category98476",

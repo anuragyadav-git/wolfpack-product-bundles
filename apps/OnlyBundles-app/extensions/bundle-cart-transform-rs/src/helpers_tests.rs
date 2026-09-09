@@ -2,26 +2,23 @@ use super::*;
 
 #[test]
 fn normalize_operator_short_forms() {
-    assert_eq!(normalize_operator("gte"), Operator::Gte);
-    assert_eq!(normalize_operator("gt"), Operator::Gt);
-    assert_eq!(normalize_operator("lte"), Operator::Lte);
-    assert_eq!(normalize_operator("lt"), Operator::Lt);
-    assert_eq!(normalize_operator("eq"), Operator::Eq);
+    assert_eq!(normalize_operator("gte"), Some(Operator::Gte));
+    assert_eq!(normalize_operator("gt"), Some(Operator::Gt));
+    assert_eq!(normalize_operator("lte"), Some(Operator::Lte));
+    assert_eq!(normalize_operator("lt"), Some(Operator::Lt));
+    assert_eq!(normalize_operator("eq"), Some(Operator::Eq));
 }
 
 #[test]
-fn normalize_operator_long_forms() {
-    assert_eq!(
-        normalize_operator("greater_than_or_equal_to"),
-        Operator::Gte
-    );
-    assert_eq!(normalize_operator("less_than_or_equal_to"), Operator::Lte);
-    assert_eq!(normalize_operator("equal_to"), Operator::Eq);
+fn normalize_operator_rejects_long_forms() {
+    assert_eq!(normalize_operator("greater_than_or_equal_to"), None);
+    assert_eq!(normalize_operator("less_than_or_equal_to"), None);
+    assert_eq!(normalize_operator("equal_to"), None);
 }
 
 #[test]
-fn normalize_operator_unknown_defaults_to_gte() {
-    assert_eq!(normalize_operator("unknown"), Operator::Gte);
+fn normalize_operator_rejects_unknown_values() {
+    assert_eq!(normalize_operator("unknown"), None);
 }
 
 #[test]

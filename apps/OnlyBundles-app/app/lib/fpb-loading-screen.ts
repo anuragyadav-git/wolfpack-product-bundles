@@ -3,7 +3,7 @@ export type FpbLoadingScreenSettings = {
   backgroundColor: string;
 };
 
-export const DEFAULT_FPB_LOADING_SCREEN: FpbLoadingScreenSettings = Object.freeze({
+const DEFAULT_FPB_LOADING_SCREEN: FpbLoadingScreenSettings = Object.freeze({
   gifUrl: null,
   backgroundColor: "#ffffff",
 });

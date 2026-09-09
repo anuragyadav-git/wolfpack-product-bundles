@@ -15,7 +15,7 @@ import db from "../db.server";
 import { AppLogger } from "../lib/logger";
 import { BundleStatus, BundleType } from "../constants/bundle";
 
-export interface BundleStats {
+interface BundleStats {
   totalBundles: number;
   activeBundles: number;
   draftBundles: number;
@@ -28,7 +28,7 @@ export interface BundleStats {
   };
 }
 
-export interface BundlePerformanceMetrics {
+interface BundlePerformanceMetrics {
   bundleId: string;
   bundleName: string;
   bundleType: string;
@@ -44,7 +44,7 @@ export interface BundlePerformanceMetrics {
   // revenue: number;
 }
 
-export interface ShopAnalyticsSummary {
+interface ShopAnalyticsSummary {
   stats: BundleStats;
   topBundles: BundlePerformanceMetrics[];
   recentActivity: {

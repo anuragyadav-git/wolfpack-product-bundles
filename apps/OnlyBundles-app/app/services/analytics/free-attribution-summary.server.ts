@@ -2,7 +2,7 @@ import db from "../../db.server";
 import {
   buildBundleSalesTrend,
   computeBundleCommerceSummary,
-} from "../../lib/analytics";
+} from "../../lib/analytics/bundle-commerce-metrics";
 
 export async function loadFreeAttributionSummary(shopId: string) {
   const now = new Date();

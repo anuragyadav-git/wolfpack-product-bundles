@@ -1,4 +1,4 @@
-import { matchLineItemGroupsToBundles, matchLineItemsToBundles, normalizeToOrderGid, orderIdMatchForms, type LineItemInput } from "../../../../app/lib/analytics/bundle-matcher.server";
+import { matchLineItemGroupsToBundles, matchLineItemsToBundles, type LineItemInput } from "../../../../app/lib/analytics/bundle-matcher.server";
 
 const mockBundleFindMany = jest.fn();
 const mockStepProductFindMany = jest.fn();
@@ -169,31 +169,5 @@ describe("matchLineItemsToBundles", () => {
     ]);
     expect(mockBundleFindMany).toHaveBeenCalledTimes(1);
     expect(mockStepProductFindMany).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("normalizeToOrderGid", () => {
-  it("passes through GID unchanged", () => {
-    expect(normalizeToOrderGid("gid://shopify/Order/1001")).toBe("gid://shopify/Order/1001");
-  });
-
-  it("wraps numeric id in GID prefix", () => {
-    expect(normalizeToOrderGid("1001")).toBe("gid://shopify/Order/1001");
-  });
-});
-
-describe("orderIdMatchForms", () => {
-  it("returns both GID and numeric form given a GID input", () => {
-    expect(orderIdMatchForms("gid://shopify/Order/1001")).toEqual([
-      "gid://shopify/Order/1001",
-      "1001",
-    ]);
-  });
-
-  it("returns both numeric and GID form given a numeric input", () => {
-    expect(orderIdMatchForms("1001")).toEqual([
-      "1001",
-      "gid://shopify/Order/1001",
-    ]);
   });
 });

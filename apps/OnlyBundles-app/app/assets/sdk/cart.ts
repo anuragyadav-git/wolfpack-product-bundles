@@ -143,7 +143,7 @@ export function buildCartItems(state: any) {
   };
 }
 
-export function buildProductPageCartFormData(items: any[], runtimeToken: any) {
+function buildProductPageCartFormData(items: any[], runtimeToken: any) {
   var formData = new FormData();
   items.forEach(function (item: any, index: number) {
     formData.append('items[' + index + '][id]', String(item.id));

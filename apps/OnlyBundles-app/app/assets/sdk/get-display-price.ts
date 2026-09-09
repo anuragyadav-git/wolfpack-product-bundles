@@ -27,17 +27,8 @@ export function getDisplayPrice(state: any) {
   var savings = original - discounted;
   var savingsPercent = original > 0 ? Math.min(100, (savings / original) * 100) : 0;
 
-  var formatted;
-  if (CurrencyManager) {
-    try {
-      var currencyInfo = CurrencyManager.getCurrencyInfo();
-      formatted = CurrencyManager.convertAndFormat(discounted, currencyInfo);
-    } catch (_: any) {
-      formatted = '$' + (discounted / 100).toFixed(2);
-    }
-  } else {
-    formatted = '$' + (discounted / 100).toFixed(2);
-  }
+  var currencyInfo = CurrencyManager.getCurrencyInfo();
+  var formatted = CurrencyManager.convertAndFormat(discounted, currencyInfo);
 
   return {
     original: original,

@@ -38,6 +38,25 @@ describe("selectEligiblePpbBundleEmbed", () => {
     expect(selectEligiblePpbBundleEmbed([bundle()], { productId: "999", productHandle: "sample", collectionIds: ["456"], locale: "en" })?.bundle.id).toBe("bundle-b");
   });
 
+  it("does not recover product membership from category JSON", () => {
+    const categoryOnly = bundle({
+      steps: [{
+        enabled: true,
+        isFreeGift: false,
+        StepProduct: [],
+        collections: [],
+        StepCategory: [{ products: [{ id: "gid://shopify/Product/123" }] }],
+      }],
+    });
+
+    expect(selectEligiblePpbBundleEmbed([categoryOnly], {
+      productId: "123",
+      productHandle: "sample",
+      collectionIds: [],
+      locale: "en",
+    })).toBeNull();
+  });
+
   it("matches specific product ID, GID, or handle and specific collection ID", () => {
     const productTarget = bundle({ bundleUpsellConfig: { upsellConfiguration: { isEnabled: true, title: "Title", displayConfiguration: { showOnAllBundleProducts: false, selectedProducts: [{ productId: "gid://shopify/Product/123", handle: "sample" }] } } } });
     expect(selectEligiblePpbBundleEmbed([productTarget], { productId: "999", productHandle: "sample", collectionIds: [], locale: "en" })).not.toBeNull();

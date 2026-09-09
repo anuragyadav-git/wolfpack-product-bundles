@@ -285,9 +285,6 @@ _parseBundleConfigPayload(rawValue: string) {
     const datasetBundleId = this.container.dataset.bundleId;
     const configValue = this._parseBundleConfigPayload(this.container.dataset.bundleConfig);
     const runtimeWindow = getWindow();
-    if (runtimeWindow && !(runtimeWindow as any).__WOLFPACK_STOREFRONT_PROXY_ROOT__) {
-      (runtimeWindow as any).__WOLFPACK_STOREFRONT_PROXY_ROOT__ = '/apps/product-bundles';
-    }
     const locationSearch = runtimeWindow?.location?.search || '';
     const previewToken = new URLSearchParams(locationSearch).get('wpb_preview');
 

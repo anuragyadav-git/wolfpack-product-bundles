@@ -65,6 +65,24 @@ describe('specific-link offer storefront eligibility', () => {
     );
   });
 
+  it('fails closed when only the retired bundleId alias is present', async () => {
+    const fetchImpl = jest.fn();
+    await expect(resolveSpecificLinkOfferStorefrontEligibility({
+      bundle: {
+        bundleId: 'legacy-bundle',
+        offerDelivery: {
+          decisionRequired: true,
+          serverDecisionRequired: true,
+          specificLinkRequired: false,
+        },
+      },
+      locationSearch: '',
+      countryCode: 'CA',
+      fetchImpl,
+    })).resolves.toBe(false);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it('resolves a country-only decision locally from Shopify Liquid context', async () => {
     const fetchImpl = jest.fn();
     const bundle = {

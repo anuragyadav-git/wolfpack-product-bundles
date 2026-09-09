@@ -1,7 +1,7 @@
 import type { ResolveShopSubscriptionInput } from "./subscription-entitlement-service.server";
 import type { PlanCode } from "../../lib/subscriptions/entitlements";
 
-export interface ReconciliationShop {
+interface ReconciliationShop {
   shopDomain: string;
   shopifyShopGid: string | null;
 }

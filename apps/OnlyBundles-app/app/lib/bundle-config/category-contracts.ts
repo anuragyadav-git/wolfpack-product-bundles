@@ -3,15 +3,15 @@ import {
   type VariantSelectorMode,
 } from "./variant-selector-config";
 
-export type CategoryBundleType = "full_page" | "product_page";
+type CategoryBundleType = "full_page" | "product_page";
 
-export interface CategoryConditionContract {
+interface CategoryConditionContract {
   type: string;
   condition: string;
   value: string;
 }
 
-export interface CategoryProductContract {
+interface CategoryProductContract {
   id: string;
   productId?: string;
   graphqlId?: string;
@@ -24,14 +24,14 @@ export interface CategoryProductContract {
   [key: string]: unknown;
 }
 
-export interface CategoryCollectionContract {
+interface CategoryCollectionContract {
   id: string;
   handle?: string;
   title?: string;
   [key: string]: unknown;
 }
 
-export interface CategoryContractInput {
+interface CategoryContractInput {
   bundleType: CategoryBundleType;
   id: string;
   name: string;

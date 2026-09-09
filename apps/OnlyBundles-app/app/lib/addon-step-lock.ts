@@ -1,4 +1,4 @@
-export interface AddonStepLockInput {
+interface AddonStepLockInput {
   isFreeGift: boolean;
   addonUnlockAfterCompletion: boolean;
   minQuantity?: number;

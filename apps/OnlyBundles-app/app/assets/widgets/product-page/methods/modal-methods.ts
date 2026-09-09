@@ -44,7 +44,7 @@ export function shouldDisableProductPageVariantOption(variant: any, trackInvento
     && variant?.currentlyNotInStock !== true;
 }
 
-export function shouldDisplayVariantsAsIndividualForModalCategory(
+function shouldDisplayVariantsAsIndividualForModalCategory(
   step: any,
   stepIndex: string|number,
   activeCategoryIndexes: any = {},
@@ -535,30 +535,6 @@ renderModalProductsLoading(_stepIndex?: any) {
     loading.append(spinner);
     productGrid.replaceChildren(loading);
   }
-},
-
-// Preload next step's products in the background
-preloadNextStep() {
-  const nextStepIndex = this.currentStepIndex + 1;
-
-  // Check if there is a next step
-  if (nextStepIndex >= this.selectedBundle.steps.length) {
-    return;
-  }
-
-  // Check if next step products are already loaded
-  if (this.stepProductData[nextStepIndex]?.length > 0) {
-    return;
-  }
-
-
-  // Load in background (don't await)
-  this.loadStepProducts(nextStepIndex)
-    .then(() => {
-    })
-    .catch((error: any)  => {
-      // Don't show error to user - preloading is optimization only
-    });
 },
 
 attachProductEventHandlers(productGrid: any, stepIndex: string|number) {

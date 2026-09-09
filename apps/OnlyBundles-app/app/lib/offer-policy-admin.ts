@@ -24,7 +24,7 @@ export type OfferOperationsAdminState = {
   recurrenceRunCount: number | null;
 };
 
-export type OfferOperationsPolicyState = {
+type OfferOperationsPolicyState = {
   priority: number;
   stopLowerPriority: boolean;
   scheduleMode: OfferScheduleMode;
@@ -40,7 +40,7 @@ export type OfferOperationsPolicyState = {
   recurrenceRunCount: number | null;
 };
 
-export type RawOfferOperations = {
+type RawOfferOperations = {
   priority: FormDataEntryValue | null;
   stopLowerPriority: FormDataEntryValue | null;
   scheduleMode: FormDataEntryValue | null;
@@ -55,7 +55,7 @@ export type RawOfferOperations = {
   recurrenceRunCount: FormDataEntryValue | null;
 };
 
-export type OfferOperationsData = {
+type OfferOperationsData = {
   priority: number;
   stopLowerPriority: boolean;
   scheduleMode: OfferScheduleMode;

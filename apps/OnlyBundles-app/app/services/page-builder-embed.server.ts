@@ -27,7 +27,7 @@ const bundleInclude = {
   offerPolicy: true,
 };
 
-export type PageBuilderEmbedResolution = {
+type PageBuilderEmbedResolution = {
   bundle: Record<string, any>;
   loadingScreen: FpbLoadingScreenSettings | null;
 };

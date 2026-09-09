@@ -35,7 +35,7 @@ export interface ResolveShopSubscriptionInput {
   forceRefresh?: boolean;
 }
 
-export interface SubscriptionEntitlementServiceDependencies {
+interface SubscriptionEntitlementServiceDependencies {
   repository: SubscriptionStateRepository;
   managedProvider: ManagedSubscriptionProvider;
   now?: () => Date;

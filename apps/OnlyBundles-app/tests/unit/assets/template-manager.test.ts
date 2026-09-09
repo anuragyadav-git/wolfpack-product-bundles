@@ -44,9 +44,97 @@ describe('TemplateManager.calculateConditionData', () => {
 
   it('amount GT at boundary requires 0.01 more (1 cent)', () => {
     const data = TemplateManager.calculateConditionData('amount', 500, 'gt', 500, 0, currencyInfo);
-    expect(data.amountNeeded).toBe('0.01');
+    expect(data.amountNeeded).toBe('$0.01');
     expect(data.alreadyQualified).toBe(false);
     expect(data.conditionText).toContain('$0.01 more');
+  });
+
+  it('does not convert an already-presented amount threshold a second time', () => {
+    const cadCurrencyInfo = {
+      calculation: { code: 'USD' },
+      display: { code: 'CAD', symbol: '$', rate: 1.35 },
+      isMultiCurrency: true,
+    };
+
+    const data = TemplateManager.calculateConditionData(
+      'amount',
+      1350,
+      'gte',
+      1000,
+      0,
+      cadCurrencyInfo,
+    );
+    const formattedGap = new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'CAD',
+    }).format(3.5);
+
+    expect(data.amountNeeded).toBe(formattedGap);
+    expect(data.conditionText).toBe(`${formattedGap} more`);
+  });
+});
+
+describe('TemplateManager.calculateDiscountData', () => {
+  it('does not convert an already-presented fixed discount a second time', () => {
+    const cadCurrencyInfo = {
+      calculation: { code: 'USD' },
+      display: { code: 'CAD', symbol: '$', rate: 1.35 },
+      isMultiCurrency: true,
+    };
+    const formatCad = (cents: number) => new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'CAD',
+    }).format(cents / 100);
+
+    expect(TemplateManager.calculateDiscountData('fixed_amount_off', 1350, cadCurrencyInfo))
+      .toMatchObject({ discountText: `${formatCad(1350)} off`, discountValue: formatCad(1350), discountValueUnit: '' });
+    expect(TemplateManager.calculateDiscountData('fixed_bundle_price', 2700, cadCurrencyInfo))
+      .toMatchObject({ discountText: formatCad(2700), discountValue: formatCad(2700) });
+  });
+
+  it('formats fixed money through Intl using the presentment locale and currency', () => {
+    const eurCurrencyInfo = {
+      calculation: { code: 'EUR' },
+      display: { code: 'EUR', symbol: '€', rate: 1 },
+      isMultiCurrency: false,
+      locale: 'de-DE',
+    };
+    const formatted = new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(13.5);
+
+    expect(TemplateManager.calculateDiscountData('fixed_amount_off', 1350, eurCurrencyInfo))
+      .toMatchObject({ discountText: `${formatted} off`, discountValue: formatted, discountValueUnit: '' });
+    expect(TemplateManager.calculateDiscountData('fixed_bundle_price', 1350, eurCurrencyInfo))
+      .toMatchObject({ discountText: formatted, discountValue: formatted, discountValueUnit: '' });
+  });
+});
+
+describe('TemplateManager presentment amount conditions', () => {
+  it('formats the remaining threshold through Intl instead of joining a symbol and decimal', () => {
+    const currencyInfo = {
+      calculation: { code: 'EUR' },
+      display: { code: 'EUR', symbol: '€', rate: 1 },
+      isMultiCurrency: false,
+      locale: 'de-DE',
+    };
+    const formattedGap = new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(3.5);
+
+    const data = TemplateManager.calculateConditionData(
+      'amount',
+      1350,
+      'gte',
+      1000,
+      0,
+      currencyInfo,
+    );
+
+    expect(data.amountNeeded).toBe(formattedGap);
+    expect(data.conditionText).toBe(`${formattedGap} more`);
   });
 });
 
@@ -111,8 +199,8 @@ describe('TemplateManager evidence-matched variables', () => {
     );
 
     expect(variables.discountConditionDiff).toBe('2');
-    expect(variables.discountValue).toBe('5.00');
-    expect(variables.discountValueUnit).toBe('$');
+    expect(variables.discountValue).toBe('$5.00');
+    expect(variables.discountValueUnit).toBe('');
     expect(TemplateManager.replaceVariables(
       'Success! Your {{discountValueUnit}}{{discountValue}} discount has been applied to your cart.',
       variables,
@@ -151,8 +239,8 @@ describe('TemplateManager evidence-matched variables', () => {
       currencyInfo,
     );
 
-    expect(variables.discountValue).toBe('5.00');
-    expect(variables.discountValueUnit).toBe('$');
+    expect(variables.discountValue).toBe('$5.00');
+    expect(variables.discountValueUnit).toBe('');
     expect(TemplateManager.replaceVariables(
       'Add {{discountConditionDiff}} product(s) to save {{discountValueUnit}}{{discountValue}}!',
       variables,

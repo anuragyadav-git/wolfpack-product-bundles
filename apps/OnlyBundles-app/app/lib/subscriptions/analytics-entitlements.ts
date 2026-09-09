@@ -3,7 +3,7 @@ import {
   type PlanEntitlements,
 } from "./entitlements";
 
-export type AnalyticsAccessMode = "SUMMARY" | "ADVANCED";
+type AnalyticsAccessMode = "SUMMARY" | "ADVANCED";
 
 export function getAnalyticsAccessMode(
   entitlements: PlanEntitlements,

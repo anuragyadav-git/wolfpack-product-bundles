@@ -8,8 +8,8 @@
 
 import { AppLogger } from "./logger";
 
-const GET_BUNDLE_PRODUCT = `
-  query GetBundleProduct($id: ID!) {
+const GET_BUNDLE_CONFIGURE_DATA_WITH_PRODUCT = `
+  query GetBundleConfigureDataWithProduct($id: ID!) {
     product(id: $id) {
       id
       title
@@ -31,6 +31,31 @@ const GET_BUNDLE_PRODUCT = `
         }
       }
     }
+    shop {
+      currencyCode
+      ianaTimezone
+    }
+    shopLocales(published: true) {
+      locale
+      name
+      primary
+      published
+    }
+  }
+`;
+
+const GET_BUNDLE_CONFIGURE_DATA = `
+  query GetBundleConfigureData {
+    shop {
+      currencyCode
+      ianaTimezone
+    }
+    shopLocales(published: true) {
+      locale
+      name
+      primary
+      published
+    }
   }
 `;
 
@@ -43,48 +68,50 @@ const GET_SHOP_CONFIGURATION = `
   }
 `;
 
-const GET_SHOP_LOCALES = `
-  query GetShopLocales {
-    shopLocales(published: true) {
-      locale
-      name
-      primary
-      published
-    }
-  }
-`;
-
 type ShopifyGraphqlResult<T> = {
   data?: T;
-  errors?: { message?: string }[];
+  errors?: { message?: string; path?: (string | number)[] }[];
 };
 
-async function fetchBundleProduct(
-  admin: any,
-  shopifyProductId: string,
-  bundleId: string,
-): Promise<any> {
-  try {
-    const response = await admin.graphql(GET_BUNDLE_PRODUCT, {
-      variables: { id: shopifyProductId },
-    });
-    const result = (await response.json()) as ShopifyGraphqlResult<{
-      product?: any;
-    }>;
-    if (result.errors?.length) {
-      throw new Error(
-        result.errors.map((error) => error.message ?? "Unknown Shopify error").join("; "),
-      );
-    }
-    return result.data?.product ?? null;
-  } catch (error) {
-    AppLogger.warn("Failed to fetch bundle product", {
-      component: "bundle-config",
-      bundleId,
-      operation: "fetch-product",
-    }, error);
-    return null;
+type ShopConfigurationData = {
+  shop?: { currencyCode?: string; ianaTimezone?: string };
+};
+
+type ShopLocaleData = {
+  locale: string;
+  name: string;
+  primary: boolean;
+  published: boolean;
+};
+
+type BundleConfigureData = ShopConfigurationData & {
+  product?: any;
+  shopLocales?: ShopLocaleData[] | null;
+};
+
+function parseShopConfiguration(data?: ShopConfigurationData): {
+  shopCurrencyCode: string;
+  shopIanaTimezone: string;
+} {
+  const shopCurrencyCode = data?.shop?.currencyCode;
+  const shopIanaTimezone = data?.shop?.ianaTimezone;
+  if (!shopCurrencyCode) {
+    throw new Error("Shop currency is missing from Shopify Admin response");
   }
+  if (!shopIanaTimezone) {
+    throw new Error("Shop timezone is missing from Shopify Admin response");
+  }
+  return { shopCurrencyCode, shopIanaTimezone };
+}
+
+function fieldError(
+  result: ShopifyGraphqlResult<unknown>,
+  field: "product" | "shopLocales",
+): Error | null {
+  const messages = (result.errors ?? [])
+    .filter((error) => error.path?.[0] === field)
+    .map((error) => error.message ?? "Unknown Shopify error");
+  return messages.length > 0 ? new Error(messages.join("; ")) : null;
 }
 
 export async function fetchShopConfiguration(admin: any): Promise<{
@@ -95,45 +122,7 @@ export async function fetchShopConfiguration(admin: any): Promise<{
   const result = (await response.json()) as ShopifyGraphqlResult<{
     shop?: { currencyCode?: string; ianaTimezone?: string };
   }>;
-  const shopCurrencyCode = result.data?.shop?.currencyCode;
-  const shopIanaTimezone = result.data?.shop?.ianaTimezone;
-  if (!shopCurrencyCode) {
-    throw new Error("Shop currency is missing from Shopify Admin response");
-  }
-  if (!shopIanaTimezone) {
-    throw new Error("Shop timezone is missing from Shopify Admin response");
-  }
-  return { shopCurrencyCode, shopIanaTimezone };
-}
-
-async function fetchShopLocales(
-  admin: any,
-): Promise<{ locale: string; name: string; primary: boolean }[]> {
-  try {
-    const response = await admin.graphql(GET_SHOP_LOCALES);
-    const result = (await response.json()) as ShopifyGraphqlResult<{
-      shopLocales?: {
-        locale: string;
-        name: string;
-        primary: boolean;
-        published: boolean;
-      }[];
-    }>;
-    if (result.errors?.length) {
-      throw new Error(
-        result.errors.map((error) => error.message ?? "Unknown Shopify error").join("; "),
-      );
-    }
-    return (result.data?.shopLocales ?? [])
-      .filter((locale) => locale.published)
-      .map(({ locale, name, primary }) => ({ locale, name, primary }));
-  } catch (error) {
-    AppLogger.warn("Failed to fetch published shop locales", {
-      component: "bundle-config",
-      operation: "fetch-shop-locales",
-    }, error);
-    return [];
-  }
+  return parseShopConfiguration(result.data);
 }
 
 export async function fetchBundleConfigureShopifyData(
@@ -141,16 +130,39 @@ export async function fetchBundleConfigureShopifyData(
   shopifyProductId: string | null,
   bundleId: string,
 ) {
-  const [bundleProduct, shopConfiguration, shopLocales] = await Promise.all([
-    shopifyProductId
-      ? fetchBundleProduct(admin, shopifyProductId, bundleId)
-      : Promise.resolve(null),
-    fetchShopConfiguration(admin),
-    fetchShopLocales(admin),
-  ]);
+  const response = shopifyProductId
+    ? await admin.graphql(GET_BUNDLE_CONFIGURE_DATA_WITH_PRODUCT, {
+        variables: { id: shopifyProductId },
+      })
+    : await admin.graphql(GET_BUNDLE_CONFIGURE_DATA);
+  const result = (await response.json()) as ShopifyGraphqlResult<BundleConfigureData>;
+  const productError = fieldError(result, "product");
+  const localeError = fieldError(result, "shopLocales");
+
+  if (productError) {
+    AppLogger.warn("Failed to fetch bundle product", {
+      component: "bundle-config",
+      bundleId,
+      operation: "fetch-product",
+    }, productError);
+  }
+
+  if (localeError) {
+    AppLogger.warn("Failed to fetch published shop locales", {
+      component: "bundle-config",
+      operation: "fetch-shop-locales",
+    }, localeError);
+  }
+
+  const shopConfiguration = parseShopConfiguration(result.data);
+  const shopLocales = localeError
+    ? []
+    : (result.data?.shopLocales ?? [])
+        .filter((locale) => locale.published)
+        .map(({ locale, name, primary }) => ({ locale, name, primary }));
 
   return {
-    bundleProduct,
+    bundleProduct: productError ? null : result.data?.product ?? null,
     ...shopConfiguration,
     shopLocales,
   };

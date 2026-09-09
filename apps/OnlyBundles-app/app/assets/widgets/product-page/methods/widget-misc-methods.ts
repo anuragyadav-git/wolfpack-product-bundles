@@ -224,9 +224,6 @@ async navigateModal(direction: number) {
         await this.loadStepProducts(newStepIndex);
         this.renderModalProducts(this.currentStepIndex);
         this.updateModalFooterMessaging();
-
-        // PRELOAD NEXT STEP
-        this.preloadNextStep();
       } else {
         const currentStep = this.selectedBundle?.steps?.[this.currentStepIndex];
         const message = formatProductPageStepValidationToast(currentStep, this._resolveText?.bind(this))

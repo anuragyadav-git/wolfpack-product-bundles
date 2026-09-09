@@ -80,49 +80,23 @@ export default defineConfig({
           if (chunkInfo.name && (
             chunkInfo.name.includes('api.create-bundle-discount') ||
             chunkInfo.name.includes('api.get-function-id') ||
-            chunkInfo.name.includes('api.check-bundles') ||
             chunkInfo.name.includes('auth._')
           )) {
             return 'assets/minimal-routes-[hash].js';
           }
           return 'assets/[name]-[hash].js';
         },
-        // Issue: admin-lcp-phase2-universal-wins-1 — manual chunking.
-        // Before: every admin route re-shipped recharts, polaris, react.
-        // After: long-lived vendor bundles get their own files, cached
-        // across navigations + across deploys (until the bundle's deps change).
+        // Long-lived vendor bundles get their own files and remain cached
+        // across navigations and deploys until their dependencies change.
         manualChunks: (id: string) => {
           if (!id.includes('node_modules')) return undefined;
           if (
             id.includes('node_modules/react/') ||
             id.includes('node_modules/react-dom/') ||
             id.includes('node_modules/scheduler/') ||
-            // Issue: admin-lcp-phase5-recharts-lazy-1 — keep React's
-            // useSyncExternalStore shim with React, NOT with charts. It's
-            // shared by react-redux (recharts' dep) and react-i18next, and
-            // Vite's default split was pulling vendor-charts onto every
-            // i18next-using route.
             id.includes('node_modules/use-sync-external-store/')
           ) {
             return 'vendor-react';
-          }
-          if (id.includes('node_modules/recharts/') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-vendor/')) {
-            return 'vendor-charts';
-          }
-          if (
-            id.includes('node_modules/@reduxjs/toolkit/') ||
-            id.includes('node_modules/react-redux/') ||
-            id.includes('node_modules/redux/') ||
-            id.includes('node_modules/reselect/') ||
-            id.includes('node_modules/immer/')
-          ) {
-            return 'vendor-state';
-          }
-          if (
-            id.includes('node_modules/@shopify/polaris/') ||
-            id.includes('node_modules/@shopify/polaris-icons/')
-          ) {
-            return 'vendor-polaris-react';
           }
           if (id.includes('node_modules/@shopify/app-bridge-react/')) {
             return 'vendor-app-bridge-react';
@@ -142,7 +116,6 @@ export default defineConfig({
           const knownEmptyRoutes = [
             'api.create-bundle-discount',
             'api.get-function-id',
-            'api.check-bundles',
             'auth._'
           ];
           if (knownEmptyRoutes.some(route => warning.message?.includes(route))) {

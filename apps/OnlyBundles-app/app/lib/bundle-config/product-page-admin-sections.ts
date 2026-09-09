@@ -1,16 +1,16 @@
-export interface ProductPageSetupItem {
+interface ProductPageSetupItem {
   id: string;
   label: string;
   iconType: string;
 }
 
-export interface ProductPageThemeTemplateOption {
+interface ProductPageThemeTemplateOption {
   handle?: string | null;
   fullKey?: string | null;
   isBundleContainer?: boolean | null;
 }
 
-export interface ProductPageThemeEditorDeepLinkInput {
+interface ProductPageThemeEditorDeepLinkInput {
   shop: string;
   apiKey: string;
   blockHandle: string;
@@ -39,7 +39,7 @@ export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
   { id: "select_template",    label: "Select Template",    iconType: "paint-brush-flat" },
 ];
 
-export interface SellingPlanGroupSummary {
+interface SellingPlanGroupSummary {
   id: string;
   name: string;
 }

@@ -9,7 +9,7 @@ export const bundleSubscriptionStorefrontMethods: Record<string, any> & ThisType
   getSubscriptionProductCardPrice(price: any) {
     return getSubscriptionProductCardPrice(this, price);
   },
-  calculateBundleTotalForPurchaseOption(selectedProducts: any, stepProductData: any, steps: any = null) {
+  calculateBundleTotalForPurchaseOption(selectedProducts: any, stepProductData: any, steps: any[]) {
     return calculateBundleTotalForPurchaseOption(
       this,
       selectedProducts,
@@ -61,7 +61,7 @@ export function calculateBundleTotalForPurchaseOption(
   controller: any,
   selectedProducts: any,
   stepProductData: any,
-  steps: any = null,
+  steps: any[],
 ) {
   const result = PricingCalculator.calculateBundleTotal(
     selectedProducts,

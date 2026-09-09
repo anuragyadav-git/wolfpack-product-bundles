@@ -465,10 +465,9 @@ describe("FPB checkout cart-line properties", () => {
       expect(JSON.parse(item.properties._bundle_display_properties)).toEqual({
         bundleName: "Daily Essentials",
         items: "1 x First product, 1 x Second product",
-        retailPrice: "$1448.00",
+        retailPrice: "$1,448.00",
         offerAnalytics: {
           bundleId: "bundle-1",
-          offerTierId: "rule-1",
         },
       });
     });

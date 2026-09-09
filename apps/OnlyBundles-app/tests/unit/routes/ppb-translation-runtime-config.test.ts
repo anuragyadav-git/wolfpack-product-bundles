@@ -43,6 +43,7 @@ describe("PPB translation runtime configuration", () => {
       discountRules: [{
         id: "rule-1",
         conditionType: "quantity",
+        conditionOperator: "lt",
         conditionValue: 2,
         discountValue: 10,
         tierBadge: {
@@ -78,6 +79,7 @@ describe("PPB translation runtime configuration", () => {
       shape: "pill",
       visibility: "always",
     });
+    expect(config.pricing.rules[0].conditionOperator).toBe("lt");
   });
 
   it("keeps translated fields when rebuilding a saved bundle for Sync Bundle", () => {
@@ -91,7 +93,13 @@ describe("PPB translation runtime configuration", () => {
       pricing: {
         enabled: true,
         method: "percentage_off",
-        rules: [],
+        rules: [{
+          id: "rule-1",
+          conditionType: "quantity",
+          conditionOperator: "eq",
+          conditionValue: 2,
+          discountValue: 10,
+        }],
         messages: { ruleMessages: {} },
         ruleMessagesByLocale: {
           fr: { "addons-step-1": { successMessage: "Débloqué" } },
@@ -108,5 +116,35 @@ describe("PPB translation runtime configuration", () => {
     expect(config.pricing.messages.ruleMessagesByLocale).toEqual({
       fr: { "addons-step-1": { successMessage: "Débloqué" } },
     });
+    expect(config.pricing.rules[0].conditionOperator).toBe("eq");
+  });
+
+  it("does not recover Sync Bundle product membership from legacy step JSON", () => {
+    const config = buildSyncBundleConfiguration({
+      id: "bundle-1",
+      name: "Bundle",
+      status: "ACTIVE",
+      bundleType: "product_page",
+      steps: [{
+        ...step,
+        StepProduct: [],
+        products: [{
+          id: "gid://shopify/Product/999999",
+          title: "Stale JSON product",
+        }],
+        StepCategory: [{
+          id: "category-stale",
+          products: [{
+            id: "gid://shopify/Product/999998",
+            title: "Stale category product",
+          }],
+        }],
+      }],
+      pricing: null,
+    }, "gid://shopify/Product/1") as any;
+
+    expect(config.steps[0].products).toEqual([]);
+    expect(config.steps[0].StepProduct).toEqual([]);
+    expect(config.steps[0].StepCategory[0].products).toEqual([]);
   });
 });

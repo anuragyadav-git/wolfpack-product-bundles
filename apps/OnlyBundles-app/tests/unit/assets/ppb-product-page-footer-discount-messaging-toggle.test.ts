@@ -51,6 +51,7 @@ describe('PPB product-page discount messaging rendering', () => {
         footer: createFakeElement(),
       },
       selectedBundle: {
+        steps: [{ isFreeGift: false }],
         messaging: {
           progressText: 'Add {conditionText} more to get {discountText}',
           displayOptions: {

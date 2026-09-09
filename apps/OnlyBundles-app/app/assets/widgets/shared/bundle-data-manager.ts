@@ -2,7 +2,6 @@
  * Bundle Widget - Bundle Data Manager
  *
  * Handles validation, filtering, and selection of bundle data.
- * Provides utilities for extracting step and product data.
  *
  * @version 4.0.0
  */
@@ -228,46 +227,6 @@ export class BundleDataManager {
       bundle.containerProductId &&
       bundle.containerProductId.toString() === productId?.toString()
     );
-  }
-
-  static _resolveCompareAtPrice(productData: any) {
-    const rawCompareAtPrice = productData?.compareAtPrice ?? productData?.compare_at_price;
-    if (rawCompareAtPrice == null) return null;
-    if (
-      typeof rawCompareAtPrice === 'object' &&
-      rawCompareAtPrice !== null &&
-      typeof rawCompareAtPrice.amount !== 'undefined'
-    ) {
-      return rawCompareAtPrice.amount;
-    }
-    return rawCompareAtPrice;
-  }
-
-  static extractStepData(steps: any[]) {
-    return steps.map((step: any)  => ({
-      id: step.id,
-      name: step.name || 'Unnamed Step',
-      required: step.required || false,
-      allowMultiple: step.allowMultiple || false,
-      products: step.StepProduct || [],
-      conditions: step.StepCondition || []
-    }));
-  }
-
-  static extractProductData(stepProducts: any[]) {
-    return stepProducts.map((sp: any)  => ({
-      id: sp.product?.id || sp.productId,
-      shopifyProductId: sp.product?.shopifyProductId || sp.shopifyProductId,
-      title: sp.product?.title || 'Untitled Product',
-      // AVIF is preferred for new widget payloads; old /bundle-product-placeholder.png kept as a compatibility fallback by
-      // component-level onerror handling.
-      imageUrl: sp.product?.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE,
-      price: sp.product?.price || 0,
-      compareAtPrice: BundleDataManager._resolveCompareAtPrice(sp.product),
-      variants: sp.product?.variants || [],
-      variantId: sp.variantId || null,
-      quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,
-    }));
   }
 
   static selectBundle(bundlesData: any, config: any) {

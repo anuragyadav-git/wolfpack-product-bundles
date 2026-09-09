@@ -4,8 +4,8 @@ id: widget-architecture
 title: Widget Architecture
 type: architecture
 status: authoritative
-summary: FPB and PPB bootstrap, hydration, extension-asset, and widget runtime architecture.
-last_audited: 2026-09-04
+summary: FPB and PPB bootstrap, signed settings, Shopify-hosted CSS, market pricing, and fail-closed hydration architecture.
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -20,7 +20,14 @@ source_paths:
   - app/storefront/ppb-bundle-embed.ts
   - app/storefront/page-builder-embed.ts
   - app/assets/bundle-modal-component.ts
+  - app/assets/widgets/product-page/methods/modal-methods.ts
+  - app/assets/widgets/product-page/methods/modal-state-methods.ts
+  - app/assets/widgets/product-page/methods/config-lifecycle-methods.ts
+  - app/assets/widgets/product-page/methods/selection-methods.ts
+  - app/assets/widgets/product-page/methods/widget-misc-methods.ts
   - app/assets/widgets/shared
+  - app/assets/widgets/shared/currency-manager.ts
+  - app/assets/widgets/shared/pricing-calculator.ts
   - app/assets/widgets/shared/specific-link-offer-eligibility.ts
   - app/assets/widgets/shared/localized-bundle-config.ts
   - app/assets/sdk/config-loader.ts
@@ -40,12 +47,16 @@ source_paths:
   - app/assets/widgets/full-page-css/base/bootstrap-reservation.css
   - app/assets/bundle-widget-product-page.ts
   - app/assets/widgets/product-page/methods/sticky-add-to-cart-methods.ts
+  - app/assets/widgets/product-page/methods/default-product-methods.ts
+  - app/assets/widgets/product-page/methods/product-data-methods.ts
   - app/assets/widgets/product-page-css/base/sticky-add-to-cart.css
   - app/assets/widgets/product-page/ppb-modal-card-presentation.ts
   - app/assets/widgets/product-page/methods/modal-methods.ts
   - app/assets/widgets/product-page/methods/modal-state-methods.ts
   - app/routes/api/api.storefront-products.tsx
   - app/routes/api/api.storefront-collections.tsx
+  - app/routes/api/api.controls-settings.tsx
+  - app/routes/api/api.language-settings.tsx
   - app/routes/api/api.fpb-upsells[.]json.tsx
   - app/routes/api/api.ppb-embed[.]json.tsx
   - app/routes/api/api.page-builder-embed[.]json.tsx
@@ -256,8 +267,9 @@ Customize panes without duplicating the preview model. Component color controls
 have no Expert-mode gate. `inheritedColorFieldKeys` records which fields resolve
 from the first Storefront API Shop Brand primary or secondary pair; editing a
 field removes it from that list and reset restores it. Existing saved payloads
-without the list remain explicit. `buildSettingsDesignRuntime` and the public
-Design CSS endpoint both use the same pure resolver, so Admin and storefront
+without the list remain explicit. `buildSettingsDesignRuntime` and the
+Shopify-synchronized `$app.ppb_storefront_css` value use the same pure resolver,
+so Admin and storefront
 precedence is explicit component value, Shop Brand semantic pair, then canonical
 template default.
 
@@ -353,7 +365,9 @@ never read or synthesized.
 - Parent-product PPB rendering continues to use the `bundle-product-page` app
   block. Greenfield Bundle Embed rendering is separately owned by the global
   `bundle-app-embed` runtime: it resolves an eligible PPB, lazily loads PPB
-  assets, and mounts before the primary visible Add to Cart control. The
+  assets, exposes that extension instance's Shopify-hosted
+  `$app.ppb_storefront_runtime` and Liquid currency context, and mounts before
+  the primary visible Add to Cart control. The
   `bundle-product-page-embed` product-template block is a setting-free custom
   placement anchor and takes precedence when visible.
 - Page builders use the separate provider-neutral `bundle-page-builder-embed`
@@ -443,6 +457,18 @@ attributes. The production and SIT TOMLs retain the same `apps` prefix and their
 required literal environment-specific `subpath` values because Shopify reads
 those deployment manifests directly.
 
+A PPB product-page preview may use the signed app proxy only after that hosted
+runtime has supplied the proxy root. If the root is absent, the browser runtime
+must fail closed without issuing a bundle request; it must not inject the
+production `/apps/product-bundles` root. This prevents a partially synchronized
+SIT preview from silently crossing into the production app. The production
+constant remains only the non-browser default for server-side URL construction.
+
+The signed Controls response uses the same resolver when it emits FPB
+collection quick-add targets. It must never embed the production proxy root in
+the response, because the SIT app is installed at `/apps/product-bundles-sit`
+and a production-root target would silently hand the shopper to the wrong app.
+
 ## FPB Load Strategy
 
 > **Do not modify the load order** — see `CLAUDE.md` → "Do Not Touch" section.
@@ -467,6 +493,13 @@ If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle
 - Single retry after 3s for `503`/`504` responses (Render cold-start tolerance)
 
 ## PPB Load Strategy
+
+PPB product hydration is demand-driven. Opening, navigating, or auto-advancing
+the picker calls the canonical `loadStepProducts()` owner only for the active
+destination step. The retired `preloadNextStep()` layer speculatively requested
+the following step without owning Shopify caching, request deduplication, or a
+platform contract, and could fetch product data the shopper never viewed.
+Foreground loading and its fail-closed error surface remain the sole authority.
 
 ### Native product-form actions
 
@@ -509,13 +542,23 @@ of whether an expired scheduled offer is visible at all.
 The PPB app block serializes only a complete schema-v3
 `$app.bundle_ui_config` into `data-bundle-config`. Compact v2 pointers are
 retired for this surface and are not fetched through the app proxy.
+`bundle_ui_config` has one identity field, `id`, and requires exact
+`bundleType: "product_page"`; a missing type is invalid rather than a PPB
+default. Its derived pricing rules use only `gte`, `gt`, `lte`, `lt`, and `eq`.
+Long-form step-condition operators remain a separate contract.
 
 Runtime behavior in `app/assets/widgets/product-page/methods/config-lifecycle-methods.js`:
 
 1. Accept only a complete schema-v3 Product Page snapshot with signed v2
    authorization.
-2. Read store controls, locale data, Storefront API version/token, and generated
-   Design CSS from Shopify-hosted shop metafields emitted by Liquid.
+2. Read store controls, locale data, and the Storefront API version/token from
+   the Shopify-hosted shop `$app.ppb_storefront_runtime` metafield emitted by
+   Liquid. The direct parent-product block emits this context in its JSON
+   payload; automatic and direct page-builder PPB surfaces receive the same
+   owning snapshot from the app-embed marker before the widget runtime starts.
+   Read exact Design CSS from `$app.ppb_storefront_css`. The signed
+   `/api/controls-settings` and `/api/language-settings` app-proxy routes remain
+   the live settings source for FPB surfaces; they are not a fallback for PPB.
 3. Hydrate product and variant state directly from Shopify Storefront API;
    category and collection membership is already materialized at sync time.
 4. If the snapshot is missing/invalid:
@@ -551,6 +594,24 @@ eligibility endpoint before exposing the static bundle data.
 There is no Wolfpack fallback for this surface. Storefront API failure fails
 closed rather than rendering stale catalog or price data. See
 [[Architecture/Storefront Outage Resilience]].
+
+PPB direct default-product configuration contributes only the canonical Shopify
+product ID, variant ID, and merchant-authored required quantity at runtime. The
+widget adds those product IDs to step-zero Storefront hydration and reconstructs
+the compulsory lines from the matching live variant. Saved picker title, image,
+price, availability, and inventory fields are never commerce or rendering
+fallbacks. A missing runtime, missing product, missing configured variant, or
+partial response clears the direct-default render data and leaves step zero in
+the existing hydration-failure state, which blocks add to cart.
+
+Storefront product DTOs preserve `MoneyV2.currencyCode` with decimal amounts.
+The browser converts those amounts to integer presentment minor units and does
+not apply another currency conversion. Merchant-authored absolute pricing
+values are converted once using Shopify's presentment rate; display uses
+`Intl.NumberFormat` for the preserved currency code. Shopify Liquid supplies
+the base and customer currency context for direct, automatic, and page-builder
+surfaces. Missing base currency or a missing non-base presentment rate fails
+closed; the runtime never assumes USD or silently applies a rate of one.
 
 ### Limited-release Product Page SDK
 
@@ -653,6 +714,18 @@ Do not solve the limit by minifying readable source into one-line CSS; remove
 redundant or conflicting rules and split assets only along real ownership
 boundaries.
 
+The same document may not bootstrap more than one Only Bundles app embed. Each
+app-embed entry containing the ownership guard resolves its adjacent Shopify
+marker, but proceeds only when that marker is the sole
+`[data-wpb-app-embed]` owner in the document. Once this runtime version is
+released in both PROD and SIT, two active embeds make both current entries stop
+before they publish shared storefront globals, register section listeners,
+fetch settings, or hydrate a bundle surface. During a staged rollout, an older
+deployed entry cannot be controlled retroactively, so the dormant environment
+must remain disabled. The diagnostic reports all observed proxy roots; it never
+chooses an environment from document or script load order. Theme-level
+activation remains the source of truth for which environment owns the page.
+
 The app embed must map canonical uppercase FPB preset IDs to explicit
 `DOMStringMap` properties: `presetStandard`, `presetClassic`, `presetCompact`,
 and `presetHorizontal`. Do not derive a dataset property as
@@ -701,9 +774,10 @@ All legitimate runtime stylesheets are owned by `replaceManagedStyle`. A caller
 supplies a stable key and already validated CSS; the helper creates, replaces,
 or removes the single matching `<style>` element. Settings Controls CSS is
 processed by the existing CSS pipeline when saved and again when projected
-into the public runtime response. Generated Design CSS and bundle-level CSS
-retain their existing payload contracts but use the same managed-style
-lifecycle. Static presentation belongs in the raw widget CSS sources, while
+into the public runtime response. Bundle-level CSS retains its existing payload
+contract and managed-style lifecycle. PPB Design CSS is rendered exactly from
+Shopify-hosted `$app.ppb_storefront_css` by Liquid; it is not fetched from an
+app-owned stylesheet endpoint. Static presentation belongs in the raw widget CSS sources, while
 validated colors, counts, and percentages may cross the DOM boundary only as
 CSS custom properties.
 
@@ -807,3 +881,10 @@ Do not diagnose that state as a widget boot or Classic template bug until the as
 - Verify `window.__BUNDLE_WIDGET_VERSION__`; a missing value means the widget JS did not execute.
 - Open or fetch the exact blocked asset URL. If it returns Shopify `404: Page not found` with `content-type: text/html`, the live proof is blocked by the dev-extension asset state, not by storefront source.
 - Compare against any older already-open tab before trusting it. A stale tab can keep a previous dev asset hash and `window.__BUNDLE_WIDGET_VERSION__` while fresh tabs point at a newer missing hash.
+
+After restarting the Shopify CLI dev session, a cache-bypassed reload can retain
+the obsolete theme-extension preview handle even when the visible product URL is
+unchanged. Reopen the storefront through the Admin **Preview Bundle** action or
+the active CLI preview link to obtain the current preview binding, then clear
+Cache Storage and hard-reload. Confirm that the `dev-<handle>` changed and its
+assets return `200` before using the page as runtime or visual evidence.

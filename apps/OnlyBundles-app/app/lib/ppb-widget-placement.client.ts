@@ -1,12 +1,12 @@
 import type { ShopifyThemeExtensionInfo } from "./theme-extension-status";
 
-export interface PpbWidgetPlacementGate {
+interface PpbWidgetPlacementGate {
   ready: boolean;
   installationLink: string | null;
   message: string | null;
 }
 
-export type PpbWidgetPlacementAction =
+type PpbWidgetPlacementAction =
   | { type: "preview" }
   | { type: "setup"; installationLink: string; message: string }
   | { type: "blocked"; message: string };

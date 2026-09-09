@@ -7,7 +7,7 @@ type CountdownConfig = {
   endsAt?: string;
 };
 
-export type CountdownSnapshot = {
+type CountdownSnapshot = {
   state: "active" | "expired";
   days: number;
   hours: number;

@@ -14,7 +14,7 @@
  * Issue: docs/issues-prod/admin-lcp-measurement-1.md.
  */
 
-export interface ServerTimingEntry {
+interface ServerTimingEntry {
   name: string;
   durationMs: number;
   description?: string;

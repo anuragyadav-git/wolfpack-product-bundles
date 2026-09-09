@@ -87,12 +87,9 @@ _sendEngagementBeacon(eventName: any) {
 
 async loadLanguageSettings() {
   try {
-    const shop = window.Shopify?.shop || this.container.dataset.shop;
-    if (!shop) return;
-
     const locale = window.Shopify?.locale || 'en';
     const endpoint = buildStorefrontApiPath(
-      `language-settings/${encodeURIComponent(shop)}?bundleType=full_page&locale=${encodeURIComponent(locale)}`,
+      `language-settings?bundleType=full_page&locale=${encodeURIComponent(locale)}`,
     );
     const response = await fetch(endpoint, { credentials: 'same-origin' });
     if (!response.ok) return;
@@ -112,11 +109,8 @@ async loadLanguageSettings() {
 
 async loadControlsSettings() {
   try {
-    const shop = window.Shopify?.shop || this.container.dataset.shop;
-    if (!shop) return;
-
     const endpoint = buildStorefrontApiPath(
-      `controls-settings/${encodeURIComponent(shop)}?bundleType=full_page`,
+      'controls-settings?bundleType=full_page',
     );
     const response = await fetch(endpoint, { credentials: 'same-origin' });
     if (!response.ok) return;

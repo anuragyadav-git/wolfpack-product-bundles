@@ -520,6 +520,11 @@ FPB Configure Page
 │   │   ├── Progress Bar: Simple Bar / Step-Based Bar + Multi Language modal
 │   │   └── Discount Messaging: per-rule Discount Text, one Success Message, Variables modal
 │   │
+│   ├── Images & GIFs
+│   │   ├── Promo banner background image
+│   │   ├── Per-step tab icon and banner image
+│   │   └── Floating promo badge enablement and text
+│   │
 │   ├── Sync Bundle
 │   │   └── [Button] "Sync Now" → ensure parent + metafields; returns canonical proxy URL
 │   ├── Bundle Widget
@@ -603,10 +608,11 @@ activation result fails closed and closes the reserved preview tab.
 ```
 PPB Configure Page
 ├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
-├── Sidebar Nav (6 sections — clone hierarchy)
+├── Sidebar Nav (7 sections — shared configure hierarchy)
 │   ├── [📝] Step Setup              → step_setup section
 │   ├── Discount & Pricing           → discount_pricing section
 │   ├── [👁] Bundle Visibility       → bundle_visibility section  [Pending badge when widget disabled]
+│   ├── Images & GIFs                 → images_gifs section
 │   ├── [✏] Bundle Settings         → bundle_settings section
 │   ├── Subscriptions                → subscriptions section
 │   └── [📦] Select Template        → select_template section
@@ -678,6 +684,10 @@ PPB Configure Page
 │       ├── Product or collection resource picker for the active target
 │       ├── Add browsed product to bundle
 │       └── Place Block → product-template selector → `bundle-product-page-embed` Theme Editor deep link
+│
+├── Images & GIFs
+│   ├── Per-step banner image shown above the step products
+│   └── Per-bundle loading GIF with the existing default-spinner preview
 │
 ├── Bundle Settings
 │   ├── PPB compare-at prices are product-driven; no per-bundle visibility control
@@ -913,7 +923,6 @@ Checkout order summary → Bundle & Save
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/apps/product-bundles/api/bundle/:id.json`                    | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape                                                                      |
 | `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy decision for app-owned pre-cart schedule, specific-link, and Shopify ISO-country visibility; requires an opaque bearer token only for link-restricted offers and never returns its stored SHA-256 digest |
-| `/apps/product-bundles/api/bundles.json`                       | All active bundles for shop                                                                                                                                                                                     |
 | `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns priority-ordered eligible DTOs with private ETag caching |
 | `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns the highest-priority eligible formatted PPB with private ETag caching |
 | `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup with Shopify ISO-country filtering: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
@@ -923,8 +932,8 @@ Checkout order summary → Bundle & Save
 | `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime`, including the canonical country rule, for independent Cart Transform / Discount Function verification |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations                                                                                                   |
 | `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
-| `/apps/product-bundles/api/design-settings/:shop`              | CSS vars for storefront widgets                                                                                                                                                                                 |
-| `/apps/product-bundles/api/language-settings/:shop`            | Settings -> Language JSON for storefront widget text and cart labels                                                                                                                                            |
+| `/apps/product-bundles/api/controls-settings`                  | Shopify app-proxy-authenticated Controls JSON; derives shop identity from the verified app-proxy session                                                                                                        |
+| `/apps/product-bundles/api/language-settings`                  | Shopify app-proxy-authenticated Language JSON; derives shop identity from the verified app-proxy session                                                                                                        |
 | `/app/billing/return`                                          | Verify Shopify App Pricing state through the Partner API after a hosted-plan redirect                                                                                                                           |
 | `/api/activate-cart-transform`                                 | Deploy cart transform function                                                                                                                                                                                  |
 | `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
@@ -934,6 +943,7 @@ Checkout order summary → Bundle & Save
 | `/api/attribution`                                             | Web Pixel checkout attribution; consumes Shopify checkout line/component properties and persists normalized offer dimensions only for the matching bundle                                                      |
 | `/api/widget-error`                                            | Widget runtime error logging                                                                                                                                                                                    |
 | `/api/inngest`                                                 | Inngest background job handler                                                                                                                                                                                  |
+| `/webhooks`                                                    | Shopify-library-authenticated webhook ingress; applies active-topic and product-delete relevance gates, then awaits Inngest enqueue                                                                              |
 
 ---
 

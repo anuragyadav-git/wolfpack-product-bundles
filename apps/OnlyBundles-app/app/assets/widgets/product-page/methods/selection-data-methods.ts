@@ -180,11 +180,7 @@ getAddonProductSelectionKeys(step: any) {
     if (!selectionId) return;
     keys.add(selectionId);
   };
-  const products: any[] = [
-    ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
-    ...(Array.isArray(step?.products) ? step.products : []),
-    ...(Array.isArray(step?.productsData1?.products) ? step.productsData1.products : []),
-  ];
+  const products: any[] = Array.isArray(step?.products) ? step.products : [];
 
   products.forEach(product => {
     addKey(product);

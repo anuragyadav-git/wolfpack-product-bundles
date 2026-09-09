@@ -95,6 +95,10 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
               { variantId: "102" },
             ],
           },
+          {
+            productId: "gid://shopify/Product/2",
+            variants: [{ variantGraphqlId: "gid://shopify/ProductVariant/201" }],
+          },
         ],
         StepCategory: [
           {
@@ -111,7 +115,12 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
     pricing: {
       enabled: true,
       method: "percentage_off",
-      rules: [{ conditionType: "quantity", conditionValue: 2, discountValue: 15 }],
+      rules: [{
+        id: "rule-1",
+        conditionType: "quantity",
+        conditionValue: 2,
+        discountValue: 15,
+      }],
     },
     personalizationData: null,
     ...overrides,
@@ -185,8 +194,8 @@ describe("cart transform runtime token service", () => {
     ]);
   });
 
-  it("validates selected components from persisted category products", () => {
-    const selection = validateRuntimeTokenSelection(makeBundle({
+  it("rejects selected components found only in persisted category products", () => {
+    expect(() => validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
           StepProduct: [],
@@ -205,15 +214,11 @@ describe("cart transform runtime token service", () => {
     }), {
       components: [{ variantId: "301", quantity: 1 }],
       addons: [],
-    });
-
-    expect(selection.components).toEqual([
-      { variantId: "gid://shopify/ProductVariant/301", quantity: 1 },
-    ]);
+    })).toThrow(/no cached selectable variants/i);
   });
 
-  it("validates selected components from persisted category products with variant gid fields", () => {
-    const selection = validateRuntimeTokenSelection(makeBundle({
+  it("rejects category-only variants even when they contain variant gid fields", () => {
+    expect(() => validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
           StepProduct: [],
@@ -232,15 +237,11 @@ describe("cart transform runtime token service", () => {
     }), {
       components: [{ variantId: "gid://shopify/ProductVariant/401", quantity: 1 }],
       addons: [],
-    });
-
-    expect(selection.components).toEqual([
-      { variantId: "gid://shopify/ProductVariant/401", quantity: 1 },
-    ]);
+    })).toThrow(/no cached selectable variants/i);
   });
 
-  it("validates hydrated category variants by matching the configured product when cached variants are empty", () => {
-    const selection = validateRuntimeTokenSelection(makeBundle({
+  it("rejects hydrated variants for products found only in category JSON", () => {
+    expect(() => validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
           StepProduct: [],
@@ -265,18 +266,19 @@ describe("cart transform runtime token service", () => {
         },
       ],
       addons: [],
-    });
-
-    expect(selection.components).toEqual([
-      { variantId: "gid://shopify/ProductVariant/501", quantity: 1 },
-    ]);
+    })).toThrow(/no cached selectable variants/i);
   });
 
   it("rejects hydrated variants that claim an unconfigured product", () => {
     expect(() => validateRuntimeTokenSelection(makeBundle({
       steps: [
         {
-          StepProduct: [],
+          StepProduct: [
+            {
+              productId: "gid://shopify/Product/5",
+              variants: [],
+            },
+          ],
           StepCategory: [
             {
               products: [
@@ -306,6 +308,22 @@ describe("cart transform runtime token service", () => {
       components: [{ variantId: "gid://shopify/ProductVariant/999", quantity: 1 }],
       addons: [],
     })).toThrow(/not part of bundle/i);
+  });
+
+  it("rejects variants present only in the legacy step JSON products field", () => {
+    expect(() => validateRuntimeTokenSelection(makeBundle({
+      steps: [{
+        StepProduct: [],
+        StepCategory: [],
+        products: [{
+          productId: "gid://shopify/Product/9",
+          variants: [{ id: "gid://shopify/ProductVariant/901" }],
+        }],
+      }],
+    }), {
+      components: [{ variantId: "gid://shopify/ProductVariant/901", quantity: 1 }],
+      addons: [],
+    })).toThrow(/no cached selectable variants/i);
   });
 
   it("builds a signed payload from a validated DB bundle", () => {
@@ -475,13 +493,18 @@ describe("cart transform runtime token service", () => {
     expect((payload.priceAdjustment as any).value).toBe(expectedValue);
   });
 
-  it("omits validation-only product IDs from the signed runtime token payload", () => {
+  it("omits validation-only canonical product IDs from the signed runtime token payload", () => {
     const payload = buildRuntimeTokenPayload({
       shop: "test-shop.myshopify.com",
       bundle: makeBundle({
         steps: [
           {
-            StepProduct: [],
+            StepProduct: [
+              {
+                productId: "gid://shopify/Product/5",
+                variants: [],
+              },
+            ],
             StepCategory: [
               {
                 products: [

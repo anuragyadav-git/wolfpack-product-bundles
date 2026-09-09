@@ -54,7 +54,6 @@ function makeBundleConfig(bundleType: BundleType, overrides: Record<string, unkn
     status: "active",
     bundleType,
     shopifyProductId: "gid://shopify/Product/999",
-    shopifyPageHandle: bundleType === BundleType.FULL_PAGE ? "build-your-bundle" : null,
     steps: [
       {
         id: "step-1",
@@ -71,6 +70,9 @@ function makeBundleConfig(bundleType: BundleType, overrides: Record<string, unkn
       method: "percentage_off",
       rules: [
         {
+          id: "rule-1",
+          conditionType: "quantity",
+          conditionValue: 1,
           discountValue: 10,
         },
       ],
@@ -111,6 +113,106 @@ describe("updateBundleProductMetafields", () => {
         ],
       ]),
     );
+  });
+
+  it.each([undefined, "unknown"])(
+    "rejects non-canonical bundle type %s before Shopify access",
+    async (bundleType) => {
+      const admin = makeAdmin();
+      const config = makeBundleConfig(BundleType.PRODUCT_PAGE, { bundleType });
+
+      await expect(
+        updateBundleProductMetafields(
+          admin,
+          "gid://shopify/Product/999",
+          config,
+        ),
+      ).rejects.toThrow("bundle_ui_config requires an exact bundleType");
+
+      expect(mockGetFirstVariantId).not.toHaveBeenCalled();
+      expect(admin.graphql).not.toHaveBeenCalled();
+    },
+  );
+
+  it("publishes one canonical bundle identifier", async () => {
+    const admin = makeAdmin();
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      makeBundleConfig(BundleType.PRODUCT_PAGE),
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const uiConfig = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+    expect(uiConfig.id).toBe("bundle-1");
+    expect(uiConfig).not.toHaveProperty("bundleId");
+  });
+
+  it("rejects a storefront snapshot without its canonical id", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.PRODUCT_PAGE, { id: "" });
+
+    await expect(updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      config,
+    )).rejects.toThrow("canonical id");
+  });
+
+  it("ignores legacy step JSON products during storefront serialization", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.FULL_PAGE, {
+      steps: [
+        {
+          id: "step-legacy-json",
+          name: "Legacy JSON only",
+          position: 0,
+          minQuantity: 1,
+          maxQuantity: 1,
+          StepProduct: [],
+          products: [
+            {
+              id: "gid://shopify/Product/999999",
+              title: "Stale JSON product",
+              variants: [
+                {
+                  id: "gid://shopify/ProductVariant/999999",
+                  price: "42.00",
+                },
+              ],
+            },
+          ],
+          collections: [],
+        },
+      ],
+    });
+
+    await updateBundleProductMetafields(
+      admin,
+      "gid://shopify/Product/999",
+      config,
+    );
+
+    const metafields = getMetafieldsSetPayload(admin);
+    const uiConfig = JSON.parse(
+      metafields.find((field: any) => field.key === "bundle_ui_config").value,
+    );
+    const componentReferences = JSON.parse(
+      metafields.find((field: any) => field.key === "component_reference").value,
+    );
+    const componentQuantities = JSON.parse(
+      metafields.find((field: any) => field.key === "component_quantities").value,
+    );
+    const componentPricing = JSON.parse(
+      metafields.find((field: any) => field.key === "component_pricing").value,
+    );
+
+    expect(uiConfig.steps[0].products).toEqual([]);
+    expect(componentReferences).toEqual([]);
+    expect(componentQuantities).toEqual([]);
+    expect(componentPricing).toEqual([]);
   });
 
   it("keeps optional step semantics while writing Shopify-valid component quantities", async () => {
@@ -344,7 +446,13 @@ describe("updateBundleProductMetafields", () => {
           position: 0,
           minQuantity: 1,
           maxQuantity: 1,
-          StepProduct: [],
+          StepProduct: [{
+            productId: "gid://shopify/Product/9427287703811",
+            title: "123Luxury Armor Matte Case",
+            variants: [
+              { id: "gid://shopify/ProductVariant/48191691456771", price: "123.00" },
+            ],
+          }],
           StepCategory: [
             {
               id: "category98476",
@@ -495,7 +603,7 @@ describe("updateBundleProductMetafields", () => {
     );
   });
 
-  it("includes StepCategory cached variants in parent component metadata", async () => {
+  it("ignores StepCategory cached variants without canonical StepProduct membership", async () => {
     const admin = makeAdmin();
     const config = makeBundleConfig(BundleType.FULL_PAGE, {
       steps: [
@@ -537,7 +645,7 @@ describe("updateBundleProductMetafields", () => {
     const metafields = getMetafieldsSetPayload(admin);
     const componentReferences = JSON.parse(metafields.find((field: any) => field.key === "component_reference").value);
 
-    expect(componentReferences).toEqual(expect.arrayContaining([
+    expect(componentReferences).not.toEqual(expect.arrayContaining([
       "gid://shopify/ProductVariant/48191691424003",
       "gid://shopify/ProductVariant/48191691456771",
     ]));
@@ -797,13 +905,14 @@ describe("updateBundleProductMetafields", () => {
         method: "buy_x_get_y",
         rules: [
           {
+            id: "rule-bxy",
             conditionType: "quantity",
             conditionValue: 2,
             discountValue: 100,
             customerBuys: 2,
             customerGets: 1,
-            discountType: "percentage",
-            applyDiscountTo: "lowest_priced",
+            bxyDiscountType: "percentage",
+            bxyApplyMode: "lowest_priced",
           },
         ],
         messages: {

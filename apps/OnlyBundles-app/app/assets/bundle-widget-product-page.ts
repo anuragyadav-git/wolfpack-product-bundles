@@ -16,13 +16,10 @@
  * WHEN THIS FILE IS LOADED
  * ============================================================================
  * This file loads when:
- * - Container has data-bundle-type="product_page", OR
- * - Container has no data-bundle-type attribute (DEFAULT for backward compatibility)
+ * - Container has data-bundle-type="product_page"
  *
  * Example container:
  * <div id="bundle-builder-app" data-bundle-type="product_page"></div>
- * OR
- * <div id="bundle-builder-app"></div>  <!-- Defaults to product_page -->
  *
  * ============================================================================
  * UI LAYOUT: VERTICAL STEP BOXES
@@ -47,14 +44,6 @@
  * - Vertical layout management
  * - Step navigation logic
  * - Event handlers for product page flow
- *
- * ============================================================================
- * BACKWARD COMPATIBILITY
- * ============================================================================
- * This is the DEFAULT widget loaded when:
- * - Existing merchants have no data-bundle-type attribute
- * - Ensures existing bundles continue working without changes
- * - No data migration or merchant action required
  *
  * @version 1.0.0
  * @author Only Bundles Team
@@ -220,7 +209,6 @@ export class BundleWidgetProductPage {
       await new Promise(resolve => requestAnimationFrame(resolve));
 
       // Load design settings CSS
-      await this.loadDesignSettingsCSS();
       await this.loadLanguageSettings();
       await this.loadControlsSettings();
 
@@ -319,31 +307,6 @@ export class BundleWidgetProductPage {
     }
   }
 
-  /**
-   * Load Settings design CSS
-   * Injects custom CSS from Settings -> Design into the page
-   */
-  async loadDesignSettingsCSS() {
-    try {
-      // Get shop domain from bundle data or window
-      const shopDomain = window.Shopify?.shop || this.container.dataset.shop;
-
-      if (!shopDomain) {
-        return;
-      }
-
-      // CSS is loaded by the small loader (bundle-widget.js) for better performance
-      // No need to load it here - just verify it's present
-      const existingLink = document.querySelector('link[href*="design-settings"]');
-      if (existingLink) {
-      } else {
-      }
-
-    } catch (error: any) {
-      // Don't throw - widget should work even if design CSS fails to load
-    }
-  }
-
   async loadLanguageSettings() {
     return this.config.languageSettings || null;
   }
@@ -366,7 +329,7 @@ export function initializeProductPageWidget(root = document) {
   const containers = root.querySelectorAll<HTMLElement>('#bundle-builder-app');
   containers.forEach(container => {
     if (!container.dataset.initialized) {
-      const bundleType = container.dataset.bundleType || 'product_page';
+      const bundleType = container.dataset.bundleType;
       if (bundleType === 'product_page') {
         new BundleWidgetProductPage(container);
       }

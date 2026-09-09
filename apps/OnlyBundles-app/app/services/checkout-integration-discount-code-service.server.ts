@@ -7,7 +7,7 @@ import { AppLogger } from "../lib/logger";
 
 type AdminApiContext = Awaited<ReturnType<typeof authenticate.admin>>["admin"];
 
-export interface CheckoutIntegrationDiscountCodeResult {
+interface CheckoutIntegrationDiscountCodeResult {
   success: boolean;
   providerId: DiscountCodeCheckoutIntegrationProviderId;
   discountId?: string;

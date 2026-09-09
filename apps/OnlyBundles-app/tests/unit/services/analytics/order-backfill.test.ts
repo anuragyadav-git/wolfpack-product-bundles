@@ -20,10 +20,6 @@ jest.mock("../../../../app/db.server", () => ({
 
 jest.mock("../../../../app/lib/analytics/bundle-matcher.server", () => ({
   matchLineItemGroupsToBundles: (...args: unknown[]) => mockMatchLineItemGroupsToBundles(...args),
-  orderIdMatchForms: (id: string) =>
-    id.includes("/")
-      ? [id, id.split("/").pop() ?? id]
-      : [id, `gid://shopify/Order/${id}`],
 }));
 
 jest.mock("../../../../app/lib/logger", () => ({
@@ -150,26 +146,6 @@ describe("backfillOrderAttribution", () => {
     expect(result.created).toBe(0);
     expect(result.skipped).toBe(1);
     expect(mockOrderAttributionCreateMany).not.toHaveBeenCalled();
-  });
-
-  it("Case 2b: skips orders written by pixel under legacy numeric orderId format", async () => {
-    // Backfill always uses GID (gid://shopify/Order/1001), but historical pixel
-    // rows may hold the raw sandbox id ("1001"). Dedup must catch both.
-    mockAdminGraphql.mockResolvedValue(makeGraphqlResponse([makeOrderNode()]));
-    mockOrderAttributionFindMany.mockResolvedValue([
-      { orderId: "1001" }, // legacy pixel row
-    ]);
-
-    const result = await backfillOrderAttribution(admin, SHOP, SINCE, UNTIL);
-
-    expect(result.created).toBe(0);
-    expect(result.skipped).toBe(1);
-    expect(mockOrderAttributionCreateMany).not.toHaveBeenCalled();
-    // Dedup query includes both forms
-    expect(mockOrderAttributionFindMany).toHaveBeenCalledWith({
-      where: { shopId: SHOP, orderId: { in: ["gid://shopify/Order/1001", "1001"] } },
-      select: { orderId: true, bundleId: true },
-    });
   });
 
   it("Case 3: paginates through multiple pages", async () => {
@@ -345,7 +321,7 @@ describe("backfillOrderAttribution", () => {
     expect(mockOrderAttributionUpdateMany).toHaveBeenCalledWith({
       where: {
         shopId: SHOP,
-        orderId: { in: ["gid://shopify/Order/1001", "1001"] },
+        orderId: "gid://shopify/Order/1001",
         bundleId: "bundle-1",
       },
       data: expect.objectContaining({
@@ -422,7 +398,7 @@ describe("backfillOrderAttribution", () => {
     expect(mockOrderAttributionUpdateMany).toHaveBeenCalledWith({
       where: {
         shopId: SHOP,
-        orderId: { in: ["gid://shopify/Order/1001", "1001"] },
+        orderId: "gid://shopify/Order/1001",
         bundleId: null,
       },
       data: {

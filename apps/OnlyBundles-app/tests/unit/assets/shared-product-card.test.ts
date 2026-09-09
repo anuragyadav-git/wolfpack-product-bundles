@@ -26,6 +26,31 @@ describe('shared product card data helpers', () => {
       'https://cdn.example.test/third.jpg',
     ]);
   });
+
+  it('formats product and compare-at money with the presentment currency code', () => {
+    const document = new JSDOM('<!doctype html>').window.document;
+    const card = createSharedProductCardElement(
+      {
+        selectionId: 'variant-1',
+        title: 'Euro product',
+        price: 1299,
+        currencyCode: 'EUR',
+        compareAtPrice: 1599,
+        compareAtCurrencyCode: 'EUR',
+      },
+      0,
+      { display: { code: 'USD' } },
+      { document },
+    );
+    const formatter = new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'EUR',
+    });
+
+    expect(card.textContent).toContain(formatter.format(12.99));
+    expect(card.textContent).toContain(formatter.format(15.99));
+    expect(card.textContent).not.toContain('$');
+  });
 });
 
 describe('shared product card magnifier', () => {
@@ -34,7 +59,7 @@ describe('shared product card magnifier', () => {
     return createSharedProductCardElement(
       { selectionId: 'variant-1', title: 'Test product', price: 1000 },
       0,
-      { display: { format: '${{amount}}' } },
+      { display: { code: 'USD' } },
       {
         ...options,
         document: dom.window.document,

@@ -13,6 +13,6 @@ description = "t:description"
   export = "cart_lines_discounts_generate_run"
 
   [extensions.build]
-  command = "cargo build --target=wasm32-unknown-unknown --release"
+  command = "node ../../scripts/build-discount-function.mjs"
   path = "target/wasm32-unknown-unknown/release/bundle-discount-function.wasm"
   watch = [ "src/**/*.rs" ]

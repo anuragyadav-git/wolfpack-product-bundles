@@ -448,10 +448,5 @@ preloadAllSteps() {
   });
 },
 
-// Keep legacy alias so any call sites that still say preloadNextStep() keep working
-preloadNextStep() {
-  this.preloadAllSteps();
-},
-
 // Create a product card DOM element for full-page layout
 };

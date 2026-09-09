@@ -98,7 +98,7 @@ export function isShopBrandColors(value: unknown): value is ShopBrandColors {
   return Boolean(readPair(value.primary) && readPair(value.secondary));
 }
 
-export function getShopBrandColorRole(fieldKey: string): BrandColorRole | null {
+function getShopBrandColorRole(fieldKey: string): BrandColorRole | null {
   return COLOR_ROLE_BY_FIELD.get(fieldKey) ?? null;
 }
 

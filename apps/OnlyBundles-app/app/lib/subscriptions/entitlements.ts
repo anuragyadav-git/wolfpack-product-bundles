@@ -22,12 +22,12 @@ export type EntitlementFailureCode =
   | "LIMIT_REACHED"
   | "BILLING_UNVERIFIED";
 
-export type EntitlementRemediation =
+type EntitlementRemediation =
   | "UPGRADE"
   | "RETRY"
   | "EDIT_CONFIGURATION";
 
-export interface EntitlementFailure {
+interface EntitlementFailure {
   code: EntitlementFailureCode;
   entitlement: EntitlementKey;
   requiredPlan: "GROWTH";

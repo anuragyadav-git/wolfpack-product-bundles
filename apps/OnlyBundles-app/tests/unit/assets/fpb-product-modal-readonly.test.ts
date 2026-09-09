@@ -286,4 +286,19 @@ describe("FPB product modal read-only quick view", () => {
     expect(modal.selectedOptions).toEqual({});
     expect(modal.selectedVariant).toEqual({ id: "variant-2", title: "Default Title" });
   });
+
+  it("formats modal prices with the hydrated Shopify currency", async () => {
+    const { BundleModalVariantMethods } = await import("../../../app/assets/widgets/full-page/modal/variant-methods.js");
+    const modal: any = {
+      selectedVariant: { currencyCode: "EUR" },
+      currentProduct: { currencyCode: "USD" },
+      ...BundleModalVariantMethods,
+    };
+    const expected = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "EUR",
+    }).format(12.99);
+
+    expect(modal.formatPrice(1299)).toBe(expected);
+  });
 });

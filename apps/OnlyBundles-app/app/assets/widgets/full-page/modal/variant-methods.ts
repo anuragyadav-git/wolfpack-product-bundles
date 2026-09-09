@@ -1,5 +1,7 @@
 'use strict';
 
+import { CurrencyManager } from '../../shared/currency-manager.js';
+
 function isRgbColorValue(value: string) {
   const lowerValue = value.toLowerCase();
   const isRgba = lowerValue.startsWith('rgba(');
@@ -389,14 +391,9 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * @returns {string} Formatted price
    */
   formatPrice(price: number) {
-    // Use widget's currency formatting if available
-    if (this.widget && this.widget.formatPrice) {
-      return this.widget.formatPrice(price);
-    }
-
-    // Fallback formatting
-    const dollars = (price / 100).toFixed(2);
-    return `$${dollars}`;
+    const variant = this.selectedVariant || this.currentProduct;
+    const currencyCode = variant?.currencyCode || this.currentProduct?.currencyCode || '';
+    return CurrencyManager.formatMoney(price, currencyCode);
   },
 
   /**

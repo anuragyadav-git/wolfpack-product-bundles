@@ -4,8 +4,8 @@ id: wpb-admin-ui-frontend
 title: Admin UI Frontend Architecture
 type: architecture-diagram
 status: authoritative
-summary: Embedded Shopify Admin frontend composition, Shopify-native locale ownership, provider hierarchy, Remix data flow, and route-owned configure adapters.
-last_audited: 2026-09-02
+summary: Embedded Shopify Admin frontend composition, Shopify-native locale ownership, Remix data flow, and route-local React configure state.
+last_audited: 2026-09-08
 owners:
   - Engineering
 domains:
@@ -18,13 +18,12 @@ systems:
   - Polaris Web Components
   - Remix
   - React
-  - Redux Toolkit
   - i18next
 source_paths:
   - app/routes/app/app.tsx
   - app/i18n/
-  - app/store/ReduxProvider.tsx
-  - app/store/
+  - app/hooks/configure-route-state.ts
+  - app/hooks/useBundleConfigurationState.ts
   - app/routes/app/_shared/bundle-configure/CommonConfigureShell.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/useConfigureBundleFlow.ts
@@ -47,7 +46,7 @@ keywords:
   - usePpbConfigureFlow
   - SaveBar
   - shopify.config.locale
-  - ReduxProvider
+  - useReducer
   - Polaris Web Components
 ---
 
@@ -62,7 +61,6 @@ flowchart TB
         RootLoader[App loader: session, Shopify request locale, API key]
         NativeLocale[App Bridge shopify.config.locale]
         AppProvider[Shopify AppProvider and App Bridge]
-        Redux[ReduxProvider]
         I18n[I18nextProvider]
         Nav[s-app-nav]
         Outlet[Remix Outlet]
@@ -84,7 +82,7 @@ flowchart TB
         Sections[Polaris-first configuration sections]
         Overlays[Modals, pickers, and dialogs]
         SaveBar[App Bridge SaveBar]
-        Draft[Route draft state and Redux client-only UI state]
+        Draft[Route-local React draft and UI state]
     end
 
     subgraph ServerEffects[Save result]
@@ -97,8 +95,7 @@ flowchart TB
     Iframe --> RootLoader
     RootLoader --> AppProvider
     AppProvider --> NativeLocale
-    AppProvider --> Redux
-    Redux --> I18n
+    AppProvider --> I18n
     NativeLocale --> I18n
     I18n --> Nav
     I18n --> Outlet
@@ -129,9 +126,9 @@ flowchart TB
 ## Ownership boundaries
 
 - Shopify owns each Admin user's locale preference. The initial request `locale` parameter and client-side `shopify.config.locale` select the matching i18next and Polaris resources; the app does not persist or render a separate locale preference.
-- The app shell owns authentication bootstrap, App Bridge, lazy locale-resource loading, Redux, localization, and global navigation.
+- The app shell owns authentication bootstrap, App Bridge, lazy locale-resource loading, localization, and global navigation.
 - All embedded Admin routes, shared components, banners, modals, form labels, and accessibility labels consume the common Admin catalogs. Unsupported Shopify locales fall back to English; Simplified Chinese resolves from `zh`, `zh-Hans`, and `zh-CN`.
-- Remix loaders/actions remain the route data boundary; Redux stores only client-side Admin state and selected standalone client calls.
+- Remix loaders/actions remain the route data boundary; route-local React reducers and state own transient Admin state, while authenticated relative fetches own the small standalone store-file calls.
 - FPB and PPB keep separate route URLs, loaders, actions, save handlers, and storefront sync contracts.
 - `CommonConfigureShell` owns shared shell composition only. FPB and PPB flows inject their own header, sidebar, sections, overlays, draft logic, and save semantics.
 - Admin components use Polaris web components first; custom HTML is reserved for documented gaps such as the configure shell grid and specialized overlays.

@@ -4,12 +4,12 @@ import { AppLogger } from "../lib/logger";
 
 type AdminApiContext = Awaited<ReturnType<typeof authenticate.admin>>["admin"];
 
-export type AddOnDiscountSetupOutcome =
+type AddOnDiscountSetupOutcome =
   | "created"
   | "reactivated"
   | "already_active";
 
-export interface AddOnDiscountActivationResult {
+interface AddOnDiscountActivationResult {
   success: boolean;
   discountId?: string;
   functionId?: string;

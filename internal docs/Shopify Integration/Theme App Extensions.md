@@ -5,7 +5,7 @@ title: Theme App Extensions
 type: shopify-integration
 status: authoritative
 summary: Theme extension handles, activation status, and App Bridge status source for Wolfpack storefront resources.
-last_audited: 2026-08-24
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -15,8 +15,11 @@ systems:
   - theme-app-extension
 source_paths:
   - extensions/bundle-builder/shopify.extension.toml
+  - extensions/bundle-builder/blocks/bundle-app-embed.liquid
   - app/lib/theme-extension-status.ts
   - app/lib/app-embed-status-check.client.ts
+  - app/storefront/app-embed-marker.ts
+  - app/storefront/app-embed.ts
   - app/routes/app/app.dashboard/dashboard-app-embed-enable-flow.ts
   - app/routes/app/app.dashboard/AppEmbedEnableModal.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/useConfigureBundleController.ts
@@ -51,3 +54,61 @@ Dashboard and configure routes do not parse theme files and do not return an app
 
 Theme Editor links use Shopify's current-theme route:
 `https://{shop}/admin/themes/current/editor?context=apps&activateAppId={apiKey}%2F{blockHandle}`.
+
+## SIT and production isolation
+
+An app installation, an app dev preview, and a theme's extension activation are
+separate Shopify-owned states. Uninstalling the dormant SIT or production app is
+not the normal way to change the storefront environment: uninstall removes that
+app's blocks from themes and exercises install-lifecycle cleanup. Theme Editor
+activation is the correct control for app embeds and app blocks.
+
+Use separate test stores for SIT and production when possible. When the same
+store must retain both apps, isolate them by theme: the production theme must
+contain only production app embeds and app blocks, and an unpublished or
+development SIT theme must contain only SIT app embeds and app blocks. Preview
+the intended theme explicitly. `shopify.app.extensions()` reports the published
+theme, so an Admin status check does not prove that an unpublished SIT theme is
+configured correctly; verify that theme through its own preview.
+
+For sequential checks on the same theme, activate only one environment at a
+time and remove or disable the other environment's app blocks as well as its app
+embed. The two installations intentionally have different app-proxy roots
+(`/apps/product-bundles` and `/apps/product-bundles-sit`), but they render into
+the same storefront document and therefore cannot both own the single bundle
+surface deterministically.
+
+Each storefront runtime version containing the ownership guard boots only when
+the document contains exactly one `[data-wpb-app-embed]` marker. Multiple
+markers produce one diagnostic containing the observed proxy roots and stop
+that entry before it publishes the active flag, proxy root, country context,
+section-load listeners, or bundle hydration. After the guard is released in
+both environments, neither current entry can win through load order. Until
+then, and for all normal testing, the dormant embed must remain disabled. This
+guard is diagnostic containment for a misconfigured theme; it does not replace
+the Shopify-owned activation workflow or select an environment on the
+merchant's behalf.
+
+Shopify keeps an `app dev` preview on the selected store after the process
+stops. Use the Dev Console **Clean dev preview** action or `shopify app dev clean`
+with the SIT configuration before validating the released extension. Cleaning
+the preview restores the active released app version; it does not change which
+theme app embed or app blocks are active.
+
+Opening an Admin **Preview in store** action and hard-reloading is not sufficient
+when Shopify's remote dev preview itself is incomplete. On 2026-09-09, a fresh
+SIT product document contained one correctly isolated SIT marker and referenced
+the current `dev-<handle>`, but every theme-extension asset under that handle
+returned Shopify CDN 404 and Chrome surfaced `net::ERR_BLOCKED_BY_ORB`. The
+corresponding files existed in `.shopify/dev-bundle`, including the small
+bootstrap stylesheet, so widget code, asset size, browser cache, and duplicate
+PROD/SIT embeds were not the cause.
+
+Treat this signature as a stale remote preview session. Stop the active dev
+process, run `shopify app dev clean --config
+shopify.app.wolfpack-product-bundles-sit.toml`, restart with `npm run dev:sit`,
+and open the fresh preview emitted by Shopify CLI. Do not clean while the dev
+process is running. Do not disable the app embed as a CDN repair: the PPB app
+block independently resolves its JavaScript and CSS through the same extension
+version. Do not uninstall either environment; installation lifecycle cleanup is
+unrelated to dev-preview publication.

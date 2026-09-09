@@ -37,6 +37,25 @@ describe("selectEligibleFpbUpsells", () => {
     expect(selectEligibleFpbUpsells([bundle({ steps: [{ position: 1, enabled: true, isFreeGift: true, StepProduct: [{ productId: "123" }], collections: [] }] })], { productId: "123", collectionIds: [], locale: "en" })).toHaveLength(0);
   });
 
+  it("does not recover product membership from category JSON", () => {
+    const categoryOnly = bundle({
+      steps: [{
+        position: 1,
+        enabled: true,
+        isFreeGift: false,
+        StepProduct: [],
+        collections: [],
+        StepCategory: [{ products: [{ id: "gid://shopify/Product/123" }] }],
+      }],
+    });
+
+    expect(selectEligibleFpbUpsells([categoryOnly], {
+      productId: "123",
+      collectionIds: [],
+      locale: "en",
+    })).toEqual([]);
+  });
+
   it("fails closed for empty specific targets and matches selected targets", () => {
     const specific = bundle({ upsellWidgetDisplayOn: "specific_products", bundleUpsellConfig: { widgetConfiguration: { title: "Title", buttonText: "View", displayConfiguration: { selectedProducts: [{ productId: "123" }] } } } });
     expect(selectEligibleFpbUpsells([specific], { productId: "123", collectionIds: [], locale: "en" })).toHaveLength(1);

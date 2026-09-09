@@ -5,7 +5,7 @@ import {
   type PricingRule,
 } from "../types/pricing";
 
-export interface PricingDisplayStep {
+interface PricingDisplayStep {
   id: string;
   enabled?: boolean;
   conditionType?: string | null;
@@ -51,7 +51,7 @@ export interface NormalizedPricingDisplayOptions {
   };
 }
 
-export interface SerializedBoxSelection {
+interface SerializedBoxSelection {
   isEnabled: true;
   validateBoxSelectionQuantity: false;
   rules: Array<{
@@ -63,7 +63,7 @@ export interface SerializedBoxSelection {
   }>;
 }
 
-export interface NormalizedRuleMessageInput {
+interface NormalizedRuleMessageInput {
   rules?: PricingRule[] | null;
   messages?: any;
   method?: DiscountMethod | string;

@@ -133,7 +133,7 @@ async renderFullPageLayout() {
     productGridContainer.appendChild(productGrid);
     this.renderSidePanel(sidePanel);
     this.hideLoadingOverlay();
-    this.preloadNextStep();
+    this.preloadAllSteps();
     this._renderMobileSummaryTray();
   } catch (error: any) {
     this.hideLoadingOverlay();

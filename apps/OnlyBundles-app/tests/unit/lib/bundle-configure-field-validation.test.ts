@@ -41,6 +41,24 @@ describe("validateBundleConfigureFormData", () => {
     expect(validateBundleConfigureFormData(form(), "fpb")).toEqual([]);
   });
 
+  it("does not accept legacy step JSON products as configured resources", () => {
+    const issues = validateBundleConfigureFormData(form({
+      stepsData: JSON.stringify([{
+        id: "step-1",
+        name: "Choose products",
+        enabled: true,
+        products: [{ id: "gid://shopify/Product/999" }],
+        StepProduct: [],
+        StepCategory: [],
+        collections: [],
+      }]),
+    }), "fpb");
+
+    expect(issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: "steps.step-1.resources" }),
+    ]));
+  });
+
   it.each(["fpb", "ppb"] as const)(
     "validates enabled subscription configuration for %s",
     (kind) => {

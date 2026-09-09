@@ -11,7 +11,7 @@
  */
 
 import db from "../../db.server";
-import { matchLineItemGroupsToBundles, orderIdMatchForms } from "../../lib/analytics/bundle-matcher.server";
+import { matchLineItemGroupsToBundles } from "../../lib/analytics/bundle-matcher.server";
 import { AppLogger } from "../../lib/logger";
 import { collectBundleLineRevenue } from "../../lib/analytics/bundle-line-revenue";
 import {
@@ -19,7 +19,7 @@ import {
   verifyRuntimeCartToken,
 } from "../cart-transform-runtime-token.server";
 
-export interface BackfillResult {
+interface BackfillResult {
   created: number;
   repaired: number;
   skipped: number;
@@ -175,22 +175,17 @@ export async function backfillOrderAttribution(
       break;
     }
 
-    // Dedup pre-check: which of these orderIds already exist in DB? We check
-    // both GID and numeric forms because early pixel writes may have stored the
-    // raw sandbox id (numeric) while backfill always writes canonical GID.
+    // Shopify Admin returns canonical Order GIDs; attribution rows use the same
+    // exact identifier so both ingestion paths share one key.
     const orderIds = nodes.map((n) => n.id);
-    const lookupForms = orderIds.flatMap((value) => orderIdMatchForms(value));
     const existing = await db.orderAttribution.findMany({
-      where: { shopId, orderId: { in: lookupForms } },
+      where: { shopId, orderId: { in: orderIds } },
       select: { orderId: true, bundleId: true },
     });
 
-    const existingRowsForOrder = (orderId: string) => {
-      const forms = new Set(orderIdMatchForms(orderId));
-      return existing.filter((row: { orderId: string; bundleId: string | null }) => (
-        forms.has(row.orderId)
-      ));
-    };
+    const existingRowsForOrder = (orderId: string) => existing.filter(
+      (row: { orderId: string; bundleId: string | null }) => row.orderId === orderId,
+    );
 
     const explicitBundleIdsByOrder = nodes.map((node) => (
       verifiedRuntimeBundleIds(node, shopId)
@@ -277,7 +272,7 @@ export async function backfillOrderAttribution(
           await db.orderAttribution.updateMany({
             where: {
               shopId,
-              orderId: { in: orderIdMatchForms(node.id) },
+              orderId: node.id,
               bundleId,
             },
             data: {
@@ -300,7 +295,7 @@ export async function backfillOrderAttribution(
         await db.orderAttribution.updateMany({
           where: {
             shopId,
-            orderId: { in: orderIdMatchForms(node.id) },
+            orderId: node.id,
             bundleId: null,
           },
           data: {

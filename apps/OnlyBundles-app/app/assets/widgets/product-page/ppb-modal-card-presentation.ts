@@ -1,4 +1,4 @@
-export type PpbModalCardPresentationMode = 'add' | 'quantity' | 'maximum-reached';
+type PpbModalCardPresentationMode = 'add' | 'quantity' | 'maximum-reached';
 
 type PpbQuantityValidation = {
   isEnabled?: boolean;

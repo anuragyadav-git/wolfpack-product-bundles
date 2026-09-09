@@ -1,11 +1,11 @@
-export interface CascadeSummaryPillInput {
+interface CascadeSummaryPillInput {
   selectedQuantity: number;
   totalPriceText: string;
   finalPriceText: string;
   hasDiscount: boolean;
 }
 
-export interface CascadeSummaryPillContent {
+interface CascadeSummaryPillContent {
   selectedQuantity: number;
   finalPriceText: string;
   compareAtPriceText: string;

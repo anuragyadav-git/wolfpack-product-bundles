@@ -2,7 +2,7 @@ interface MoneyValue {
   amount?: string | number | null;
 }
 
-export interface BundleRevenueLine {
+interface BundleRevenueLine {
   bundleId?: string | null;
   properties?: unknown;
   customAttributes?: unknown;

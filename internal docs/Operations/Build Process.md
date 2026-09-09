@@ -4,8 +4,8 @@ id: build-process
 title: Build Process
 type: operations
 status: authoritative
-summary: Build, minification, lint, and pre-commit requirements for deployable application and storefront assets.
-last_audited: 2026-09-02
+summary: Global Shopify CLI, Function, asset, lint, and pre-commit requirements for deployable application and storefront builds.
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -15,7 +15,9 @@ systems:
 source_paths:
   - apps/OnlyBundles-app/scripts/build-storefront.mjs
   - apps/OnlyBundles-app/scripts/build-cart-transform-function.mjs
+  - apps/OnlyBundles-app/scripts/build-discount-function.mjs
   - apps/OnlyBundles-app/extensions/bundle-cart-transform-rs/Cargo.toml
+  - apps/OnlyBundles-app/extensions/bundle-discount-function/shopify.extension.toml
   - apps/OnlyBundles-app/scripts/minify-assets.js
   - apps/OnlyBundles-app/scripts/rebuild-graphify.mjs
   - apps/OnlyBundles-app/scripts/rebuild-graphify-core.cjs
@@ -30,11 +32,67 @@ tags:
   - build
   - storefront-assets
 keywords:
+  - global Shopify CLI
   - widget bundles
   - css minification
 ---
 
 # Build Process
+
+## Global Shopify CLI
+
+Use the globally installed `shopify` executable directly for Shopify-owned
+validation. Do not route Shopify CLI commands through `npx`, `pnpx`, or a local
+package dependency.
+
+```bash
+command -v shopify
+type -a shopify
+shopify version
+shopify app build --help
+```
+
+The executable path belongs to the active Node installation and can change when
+the Node version changes, so scripts and documentation must call `shopify` from
+`PATH` rather than hardcoding its absolute path. The initial 2026-09-09
+investigation used global CLI 4.7.1.
+
+There must be one active global CLI owner. On 2026-09-09, `type -a shopify`
+found npm/NVM CLI 4.7.1 and Homebrew CLI 3.87.0. Although the parent command
+reported 4.7.1, verbose output launched the Homebrew binary for a subprocess
+and sent API metadata identifying CLI 3.87.0. The mixed state also made
+`app config validate` appear in command discovery but fail as unavailable, and
+made app builds reject supported `events`, `metafields`, `order`, `shop`, and
+`sidekick` sections.
+
+The npm/NVM CLI was isolated first. It validated PROD and SIT with zero issues
+and completed the full SIT app build, including both Functions, Sidekick, theme,
+checkout, product-configuration, and pixel extensions. Only after that proof
+was Homebrew CLI 3.87.0 unlinked. The live SIT dev process and Cloudflare tunnel
+then resolved from the npm/NVM 4.7.1 installation, and a normal post-unlink SIT
+configuration validation passed.
+
+A later `app config validate` automatically upgraded the CLI. The command began
+from NVM-owned 4.7.1, installed 4.8.0 under `/opt/homebrew`, and left the older
+NVM path present. Both PROD and SIT configuration files validate with zero
+issues, but this is mixed global state again until 4.8.0 also completes a
+stopped-dev full app build and fresh dev-preview check. Re-run `command -v`,
+`type -a`, and `shopify version` after every automatic upgrade; do not assume a
+previously consolidated installation remains consolidated.
+
+Treat dev, auth, or schema results from any future mixed state as unreliable.
+Do not pin an absolute executable inside project scripts; remove or unlink a
+dormant installation only with explicit user approval after the retained CLI
+passes configuration validation and a full non-deploy app build. Then clear the
+shell command cache and verify `type -a shopify` and `shopify version` again.
+
+Run a full `shopify app build` only when `shopify app dev` is stopped. In the
+global CLI 4.7.1 workflow observed on 2026-09-09, starting a standalone build
+beside the active SIT dev process rewrote `.shopify/dev-bundle` rather than an
+independent deploy bundle. The Shopify Admin Dev Console immediately lost its
+**Connected** state even though the CLI, Remix, and Cloudflare processes stayed
+alive. Treat the shared bundle directory as single-writer state: stop dev,
+build, then restart `npm run dev:sit` and open that session's fresh preview.
 
 ## Widget Bundles
 
@@ -65,7 +123,7 @@ Keep split source modules semantically named by responsibility. Mechanical split
 
 ```bash
 npm run build:cart-transform
-npx shopify app function build --path apps/OnlyBundles-app/extensions/bundle-cart-transform-rs
+shopify app function build --path apps/OnlyBundles-app/extensions/bundle-cart-transform-rs
 wc -c apps/OnlyBundles-app/extensions/bundle-cart-transform-rs/target/wasm32-unknown-unknown/release/bundle_cart_transform_rs.wasm
 ```
 
@@ -74,8 +132,26 @@ uses a conservative acceptance threshold of 256,000 bytes so the check does
 not depend on decimal-versus-binary unit interpretation. Use the size left by
 `shopify app function build`, because Shopify CLI applies
 its compatible final optimizer after the Cargo build. The larger raw Cargo
-size printed by `npm run build:cart-transform` is not the upload artifact.
+size printed by either `npm run build:cart-transform` or
+`shopify app function build` is not the upload artifact. On 2026-09-09, the
+CLI printed `280301 bytes` and completed successfully; the configured output
+path contained the Shopify-optimized 250,491-byte WASM. Always verify that
+configured path with `wc -c` before diagnosing a size-limit failure.
 WASM output is not committed.
+
+The Discount Function build owner deliberately pins rustup's stable Cargo and
+Rustc together because Homebrew Rust can precede rustup in `PATH` while the WASM
+standard library is installed only under rustup:
+
+```bash
+node apps/OnlyBundles-app/scripts/build-discount-function.mjs
+```
+
+Keep the extension TOML command as a plain executable plus arguments. Do not put
+shell assignments, pipes, or command substitutions in `extensions.build.command`;
+Shopify CLI owns the command runner and must not be required to emulate an
+interactive shell. Resolve dynamic tool paths and environment variables inside
+the Node build owner, matching the Cart Transform build convention.
 
 Do not use panic snipping or replace Shopify CLI's optimizer. The supported
 size controls are the release profile, narrow GraphQL input, compact signed

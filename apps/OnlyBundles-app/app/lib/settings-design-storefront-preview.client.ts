@@ -13,7 +13,7 @@ export type SettingsPreviewBundle = {
   viewUrl: string;
 };
 
-export type SettingsPreviewPreparation = {
+type SettingsPreviewPreparation = {
   success?: boolean;
   ready?: boolean;
   previewToken?: string;

@@ -113,16 +113,6 @@ function makeCreateAdmin(options: { publicationErrors?: unknown[]; variantErrors
           },
         });
       }
-      if (query.includes("RemoveLegacyBundleParentTags")) {
-        return response({
-          data: {
-            tagsRemove: {
-              node: { id: "gid://shopify/Product/10" },
-              userErrors: [],
-            },
-          },
-        });
-      }
       throw new Error(`Unexpected GraphQL operation: ${query}`);
     }),
   } as any;
@@ -338,9 +328,6 @@ describe("ensureBundleParentProduct", () => {
       if (query.includes("AddOnlyBundlesParentTags")) {
         return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
       }
-      if (query.includes("RemoveLegacyBundleParentTags")) {
-        return response({ data: { tagsRemove: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
-      }
       if (query.includes("GetOnlineStorePublication")) {
         return response({
           data: {
@@ -390,15 +377,7 @@ describe("ensureBundleParentProduct", () => {
         },
       },
     );
-    expect(admin.graphql).toHaveBeenCalledWith(
-      expect.stringContaining("RemoveLegacyBundleParentTags"),
-      {
-        variables: {
-          id: "gid://shopify/Product/10",
-          tags: ["WP-Bundles", "wolfpack-bundle-parent"],
-        },
-      },
-    );
+    expect(admin.graphql.mock.calls.some(([query]: [string]) => query.includes("tagsRemove"))).toBe(false);
     expect(mockedDb.bundle.update).toHaveBeenCalledWith({
       where: { id: "bundle-1", shopId: "test-shop.myshopify.com" },
       data: { shopifyProductHandle: "merchant-handle" },
@@ -446,53 +425,6 @@ describe("ensureBundleParentProduct", () => {
     })).rejects.toMatchObject({
       operation: "add Only Bundles parent tags",
       userErrors: [{ field: ["tags"], message: "Tag rejected" }],
-    });
-  });
-
-  it("fails existing-parent sync when Shopify rejects legacy brand tag removal", async () => {
-    const existingBundle = {
-      ...bundle,
-      shopifyProductId: "gid://shopify/Product/10",
-      shopifyProductHandle: "merchant-handle",
-    };
-    const admin = makeCreateAdmin();
-    admin.graphql.mockImplementation(async (query: string) => {
-      if (query.includes("GetBundleParentProduct")) {
-        return response({
-          data: {
-            product: {
-              id: "gid://shopify/Product/10",
-              handle: "merchant-handle",
-              status: "ACTIVE",
-              variants: { nodes: [{ id: "gid://shopify/ProductVariant/20" }] },
-            },
-          },
-        });
-      }
-      if (query.includes("AddOnlyBundlesParentTags")) {
-        return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
-      }
-      if (query.includes("RemoveLegacyBundleParentTags")) {
-        return response({
-          data: {
-            tagsRemove: {
-              node: { id: "gid://shopify/Product/10" },
-              userErrors: [{ field: ["tags"], message: "Removal rejected" }],
-            },
-          },
-        });
-      }
-      throw new Error(`Unexpected GraphQL operation: ${query}`);
-    });
-
-    await expect(ensureBundleParentProduct({
-      admin,
-      shopDomain: "test-shop.myshopify.com",
-      appUrl: process.env.SHOPIFY_APP_URL,
-      bundle: existingBundle,
-    })).rejects.toMatchObject({
-      operation: "remove legacy bundle parent tags",
-      userErrors: [{ field: ["tags"], message: "Removal rejected" }],
     });
   });
 
@@ -575,9 +507,6 @@ describe("ensureBundleParentProduct", () => {
       }
       if (query.includes("AddOnlyBundlesParentTags")) {
         return response({ data: { tagsAdd: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
-      }
-      if (query.includes("RemoveLegacyBundleParentTags")) {
-        return response({ data: { tagsRemove: { node: { id: "gid://shopify/Product/10" }, userErrors: [] } } });
       }
       if (query.includes("GetOnlineStorePublication")) {
         return response({

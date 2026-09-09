@@ -9,7 +9,7 @@ import db from "../../db.server";
 
 const PUBLICATION_TRANSACTION_TIMEOUT_MS = 10_000;
 
-export interface BundlePublicationGateInput {
+interface BundlePublicationGateInput {
   candidate: BundleEntitlementCandidate;
   entitlements: PlanEntitlements | null;
   otherPublicBundleCount: number;
@@ -83,7 +83,7 @@ export function assertBundlePublicationAllowed(
   }
 }
 
-export interface UpdateBundleWithPublicationGateInput {
+interface UpdateBundleWithPublicationGateInput {
   database?: typeof db;
   shopDomain: string;
   bundleId: string;

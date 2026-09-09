@@ -56,7 +56,7 @@ export function extractBundleDetailsSourceProperties(cartItems: any[] = []) {
   return firstItem?.properties || {};
 }
 
-export function normalizeSellingPlanIdForCart(value = '') {
+function normalizeSellingPlanIdForCart(value = '') {
   const raw = String(value).trim();
   const match = raw.match(/^gid:\/\/shopify\/SellingPlan\/(\d+)$/);
   return match ? match[1] : raw;

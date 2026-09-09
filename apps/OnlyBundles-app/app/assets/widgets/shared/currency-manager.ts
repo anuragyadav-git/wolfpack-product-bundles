@@ -1,13 +1,11 @@
-/**
- * Bundle Widget - Currency Management System
- *
- * Handles multi-currency detection, conversion, and formatting.
- * Integrates with Shopify Markets for automatic currency handling.
- *
- * @version 4.0.0
- */
-
 'use strict';
+
+export type CurrencyInfo = {
+  calculation: { code: string };
+  display: { code: string; symbol: string; rate: number };
+  isMultiCurrency: boolean;
+  locale?: string;
+};
 
 export class CurrencyManager {
   static getShopify() {
@@ -15,143 +13,73 @@ export class CurrencyManager {
     return (globalThis as any).Shopify || null;
   }
 
-  static getShopMoneyFormat() {
-    if (typeof window !== 'undefined' && window.shopMoneyFormat) return window.shopMoneyFormat;
-    return (globalThis as any).shopMoneyFormat || '{{amount}}';
-  }
-
   static getShopBaseCurrency() {
-    const shopify = this.getShopify();
-    // Shop's base currency from Shopify object (official source)
-    return {
-      code: shopify?.shop?.currency || 'USD',
-      format: this.getShopMoneyFormat(),
-    };
+    const currencyContext = (globalThis as any).shopifyMultiCurrency;
+    const code = String(currencyContext?.shopBaseCurrency || '').trim().toUpperCase();
+    if (!/^[A-Z]{3}$/.test(code)) {
+      throw new Error('Missing Shopify base currency context');
+    }
+    return { code };
   }
 
   static detectCustomerCurrency() {
     const shopify = this.getShopify();
-
-    // Primary: Shopify Markets active currency (official method)
-    // Shopify Markets handles geolocation and user preferences automatically
-    if (shopify?.currency?.active) {
-      return {
-        code: shopify.currency.active,
-        format: shopify.currency.format || this.getShopMoneyFormat(),
-        rate: shopify.currency.rate || 1,
-      };
+    const hydratedCurrency = typeof window !== 'undefined'
+      ? (window as any).__WOLFPACK_PRESENTMENT_CURRENCY__
+      : (globalThis as any).__WOLFPACK_PRESENTMENT_CURRENCY__;
+    const currencyContext = (globalThis as any).shopifyMultiCurrency;
+    const code = String(hydratedCurrency || currencyContext?.customerCurrency || '')
+      .toUpperCase();
+    if (!/^[A-Z]{3}$/.test(code)) {
+      throw new Error('Missing Shopify presentment currency context');
     }
-
-    // Fallback: Shop base currency (include rate: 1 so downstream math doesn't produce NaN)
-    return { ...this.getShopBaseCurrency(), rate: 1 };
-  }
-
-  static convertCurrency(amount: number, fromCurrency: any, toCurrency: any, rate = 1) {
-    if (fromCurrency === toCurrency) return amount;
-    const shopify = this.getShopify();
-
-    // Use Shopify's conversion if available
-    if (shopify?.currency?.convert) {
-      try {
-        return shopify.currency.convert(amount, fromCurrency, toCurrency);
-      } catch (e: any) {
-        console.warn('[BUNDLE_WIDGET] Shopify.currency.convert failed, using rate fallback:', e);
-      }
+    const baseCurrency = this.getShopBaseCurrency().code;
+    if (code === baseCurrency) return { code, rate: 1 };
+    const rate = Number(shopify?.currency?.rate);
+    if (!Number.isFinite(rate) || rate <= 0) {
+      throw new Error('Missing Shopify presentment currency rate');
     }
-
-    return Math.round(amount * rate);
+    return { code, rate };
   }
 
-  static formatMoney(amount: number, format: string) {
-    const shopify = this.getShopify();
-    if (shopify?.formatMoney) {
-      return shopify.formatMoney(amount, format);
-    }
-
-    // Fallback formatting
-    const formatted = (amount / 100).toFixed(2);
-    return format ? format.replace('{{amount}}', formatted) : `$${formatted}`;
+  static formatMoney(amount: number, currencyCode: string, locale?: string) {
+    const numericAmount = Number(amount);
+    const code = String(currencyCode || this.detectCustomerCurrency().code).toUpperCase();
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: code,
+    }).format((Number.isFinite(numericAmount) ? numericAmount : 0) / 100);
   }
 
-  static getCurrencySymbol(currencyCode: string|number) {
-    const symbols: any = {
-      'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥',
-      'CAD': 'C$', 'AUD': 'A$', 'INR': '₹', 'CNY': '¥',
-      'CHF': 'CHF', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr',
-      'PLN': 'zł', 'CZK': 'Kč', 'HUF': 'Ft', 'RUB': '₽',
-      'BRL': 'R$', 'MXN': '$', 'ZAR': 'R', 'SGD': 'S$',
-      'HKD': 'HK$', 'NZD': 'NZ$', 'KRW': '₩', 'THB': '฿',
-      'PKR': 'Rs.', 'LKR': 'Rs.', 'NPR': 'Rs.',
-      'BDT': '৳', 'NGN': '₦', 'KES': 'KSh', 'GHS': 'GH₵',
-      'EGP': 'E£', 'IDR': 'Rp', 'MYR': 'RM', 'PHP': '₱',
-      'VND': '₫', 'TRY': '₺', 'ILS': '₪', 'TWD': 'NT$',
-      'SAR': 'SR', 'AED': 'AED', 'QAR': 'QR', 'KWD': 'KD',
-      'BHD': 'BD', 'OMR': 'OMR', 'JOD': 'JD', 'LBP': 'L£',
-      'MAD': 'DH', 'TND': 'DT', 'DZD': 'DA',
-      'ARS': 'AR$', 'CLP': 'CLP$', 'COP': 'COL$', 'PEN': 'S/.',
-      'UYU': '$U', 'VES': 'Bs', 'BOB': 'Bs.', 'PYG': '₲',
-      'UAH': '₴', 'BGN': 'лв', 'RON': 'lei', 'HRK': 'kn',
-      'RSD': 'дин', 'ISK': 'kr'
-    };
-    return symbols[currencyCode] || currencyCode;
-  }
-
-  /**
-   * Ensure the format string uses the proper symbol for the given currency.
-   * If Shopify's format contains the 3-letter currency code (e.g. "PKR {{amount}}"),
-   * replace it with the symbol from our map ("Rs. {{amount}}"). This preserves
-   * the merchant's decimal/thousand-separator placeholder choice
-   * (e.g. {{amount_with_comma_separator}}) while ensuring symbols always render.
-   */
-  static normalizeCurrencyFormat(format: string|null, code: string, symbol: string) {
-    if (!format) return `${symbol}{{amount}}`;
-    if (!code || !symbol || symbol === code) return format;
-    return format.replace(new RegExp(`\\b${code}\\b`, 'g'), symbol);
-  }
-
-  static getCurrencyInfo() {
-    const shopify = this.getShopify();
+  static getCurrencyInfo(locale?: string): CurrencyInfo {
+    const calculation = this.getShopBaseCurrency();
     const customerCurrency = this.detectCustomerCurrency();
-    const shopBaseCurrency = this.getShopBaseCurrency();
-    const displaySymbol = this.getCurrencySymbol(customerCurrency.code);
-    const displayFormat = this.normalizeCurrencyFormat(
-      shopify?.currency?.format,
-      customerCurrency.code,
-      displaySymbol
-    );
+    const symbol = new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: customerCurrency.code,
+      currencyDisplay: 'narrowSymbol',
+    }).formatToParts(0).find((part) => part.type === 'currency')?.value ?? customerCurrency.code;
 
     return {
-      // For calculations (always use shop's base currency)
-      calculation: {
-        code: shopBaseCurrency.code,
-        symbol: this.getCurrencySymbol(shopBaseCurrency.code),
-        format: shopBaseCurrency.format
-      },
-      // For display (use customer's viewing currency)
+      calculation,
       display: {
         code: customerCurrency.code,
-        symbol: displaySymbol,
-        format: displayFormat,
-        rate: customerCurrency.rate
+        symbol,
+        rate: customerCurrency.rate,
       },
-      // Multi-currency status
-      isMultiCurrency: customerCurrency.code !== shopBaseCurrency.code
+      isMultiCurrency: customerCurrency.code !== calculation.code,
+      locale,
     };
   }
 
-  /**
-   * Convert an amount from shop base currency to the customer's display currency,
-   * then format it. Use this everywhere a price is rendered to the customer.
-   *
-   * @param {number} amount  Price in shop base currency cents
-   * @param {object} currencyInfo  Result of getCurrencyInfo()
-   * @returns {string}  Formatted price string in the display currency
-   */
-  static convertAndFormat(amount: number, currencyInfo: any) {
-    const rate = currencyInfo.display.rate;
-    const converted = currencyInfo.isMultiCurrency && rate && isFinite(rate)
-      ? this.convertCurrency(amount, currencyInfo.calculation.code, currencyInfo.display.code, rate)
-      : amount;
-    return this.formatMoney(converted, currencyInfo.display.format);
+  static convertMerchantAmountToPresentment(amount: number, currencyInfo: CurrencyInfo) {
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount)) return 0;
+    if (!currencyInfo.isMultiCurrency) return Math.round(numericAmount);
+    return Math.round(numericAmount * currencyInfo.display.rate);
+  }
+
+  static convertAndFormat(amount: number, currencyInfo: CurrencyInfo, locale?: string) {
+    return this.formatMoney(amount, currencyInfo.display.code, locale ?? currencyInfo.locale);
   }
 }

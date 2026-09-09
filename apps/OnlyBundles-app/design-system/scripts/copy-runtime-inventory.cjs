@@ -141,8 +141,5 @@ function discoverRuntimeCopyFields(sourceText) {
 }
 
 module.exports = {
-  TEMPLATE_IDS,
-  conditionFieldId,
   discoverRuntimeCopyFields,
-  kebabCase,
 };

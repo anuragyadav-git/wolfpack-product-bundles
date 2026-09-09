@@ -10,7 +10,7 @@ describe("PPB Product Grid interaction parity", () => {
     const view = createSharedProductCardElement(
       { id: "variant-1", title: "Grid product", price: 1299 },
       2,
-      { display: { format: ["$", "{{amount}}"].join("") } },
+      { display: { code: "USD" } },
       {
         mode: "grid",
         selectedAction: "button",
@@ -34,7 +34,7 @@ describe("PPB Product Grid interaction parity", () => {
         price: 1299,
       },
       0,
-      { display: { format: ["$", "{{amount}}"].join("") } },
+      { display: { code: "USD" } },
       { mode: "grid", description: "", document },
     );
 

@@ -1,4 +1,4 @@
-export interface DefaultProductVariant {
+interface DefaultProductVariant {
   variantId: string;
   variantGraphqlId: string;
   inventoryQuantity?: number;

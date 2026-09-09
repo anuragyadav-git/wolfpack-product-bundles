@@ -5,7 +5,7 @@ title: Shopify Web Pixels
 type: shopify-integration
 status: authoritative
 summary: Documents the canonical Shopify Web Pixel event and settings contracts used by Wolfpack attribution.
-last_audited: 2026-09-04
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -29,6 +29,15 @@ keywords:
 ---
 
 # Shopify Web Pixels
+
+## Canonical Order Identity
+
+Shopify's `checkout_completed` event is the only live-ingestion source for the
+completed order ID, and Wolfpack accepts its canonical
+`gid://shopify/Order/<numeric-id>` value exactly as provided. The attribution
+route rejects missing or numeric-only order IDs instead of wrapping them or
+storing an `unknown` identity. Admin GraphQL reconciliation already returns the
+same Order GID, so both paths deduplicate on one format.
 
 ## Settings Payload Gotchas
 

@@ -6,13 +6,16 @@ import {
 import { ToastManager } from '../../shared/toast-manager.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import {
+  calculateBundleDiscountForPurchaseOption,
+  calculateBundleTotalForPurchaseOption,
+} from '../../shared/subscription-storefront-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
 import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
 import { setPpbBundleDetailsCartMetafield } from '../storefront-client.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 import { captureDiscountTierState } from '../../shared/discount-tier-feedback.js';
+import { hasProductPageHydrationFailure } from './product-data-methods.js';
 
 function getProductPageSelectedQuantityTotal(selectedProducts: any[] = []) {
   return selectedProducts.reduce((sum: number, stepSelections: any) => {
@@ -46,6 +49,8 @@ function resolveRuntimeTokenProductId(product: any = {}) {
 export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
   async addToCart() {
     try {
+      if (hasProductPageHydrationFailure(this._stepFetchFailed)) return;
+
       const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
         this.selectedProducts,
         this.stepProductData,

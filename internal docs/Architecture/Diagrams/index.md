@@ -4,8 +4,8 @@ id: wpb-architecture-diagram-catalog
 title: Critical Operations Architecture Diagram Catalog
 type: architecture-diagram-index
 status: authoritative
-last_audited: 2026-07-14
 summary: Index of Mermaid diagrams for Wolfpack checkout, metafield, storefront, backend, and embedded Admin architecture.
+last_audited: 2026-09-08
 owners:
   - Engineering
 domains:
@@ -20,14 +20,13 @@ systems:
   - Remix app
   - PostgreSQL
   - Shopify Functions
-diagram_format: mermaid
 source_paths:
   - ../System Overview.md
   - ../Cart Transform Function.md
   - ../Widget Architecture.md
   - ../Admin Configure Page.md
   - ../../Shopify Integration/Metafields.md
-related_diagrams:
+related_docs:
   - Cart Transform Runtime Architecture.md
   - Metafield Design and Consumption.md
   - Storefront Frontend Architecture.md
@@ -43,12 +42,6 @@ keywords:
   - system design
   - data flow
   - component map
-related_docs:
-  - ../System Overview.md
-  - ../Cart Transform Function.md
-  - ../Widget Architecture.md
-  - ../Admin Configure Page.md
-  - ../../Shopify Integration/Metafields.md
 ---
 
 # Critical Operations Architecture Diagram Catalog
@@ -61,7 +54,7 @@ Use this page as the canonical entry point for architecture diagrams. Each diagr
 | [[Metafield Design and Consumption]] | `wpb-metafield-design-consumption` | Which metafields exist, who owns them, who writes them, and who consumes them? | Remix services, Shopify owners, Liquid, Functions, order metadata |
 | [[Storefront Frontend Architecture]] | `wpb-storefront-frontend` | How do Liquid, metafield context, app-proxy hydration, widget modules, and cart operations fit together? | Theme extension, CDN assets, widgets, app proxy, Shopify cart |
 | [[Backend Architecture]] | `wpb-backend-architecture` | How are requests authenticated and routed through domain services, persistence, and Shopify APIs? | Remix, auth/session layer, services, Prisma, Shopify APIs |
-| [[Admin UI Frontend Architecture]] | `wpb-admin-ui-frontend` | How is the embedded Admin shell composed, and how do route-owned configure flows save data? | Shopify Admin iframe, App Bridge, Redux, Remix routes, Polaris |
+| [[Admin UI Frontend Architecture]] | `wpb-admin-ui-frontend` | How is the embedded Admin shell composed, and how do route-owned configure flows save data? | Shopify Admin iframe, App Bridge, route-local React state, Remix routes, Polaris |
 
 ## Indexing contract
 

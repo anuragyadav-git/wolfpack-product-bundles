@@ -5,7 +5,7 @@ title: Only Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Only Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-09-06
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -50,21 +50,21 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 
 - [[Audit Report]] — What was stale or incorrect in the original `docs/` folder
 - [[Architecture/System Overview]] — App stack, services, deployment
-- [[Architecture/Repository Layout]] — npm workspace boundaries, root command compatibility, Prisma discovery, and the static website deployment surface
+- [[Architecture/Repository Layout]] — npm workspace boundaries, root command compatibility, Prisma and Knip ownership, and the static website deployment surface
 - [[Architecture/Public Website]] — static public routes, interactive-demo boundary, canonical SDK guide, product-claim ownership, analytics, and legal release gate
 - [[Architecture/Only Bundles Brand and Compatibility Boundary]] — visible brand identity, preserved runtime identifiers, legacy URL boundary, and parent-tag transition
 - [[Architecture/Database Schema]] — Authoritative Prisma schema summary
-- [[Architecture/Cart Transform Function]] — Rust Shopify Function cart transform and checkout discount contract
+- [[Architecture/Cart Transform Function]] — Rust Cart Transform and Discount Function runtime, build, and checkout pricing contracts
 - [[Architecture/Widget Architecture]] — FPB + PPB widgets, limited-release hydrated SDK, app-embed-owned product-page upsells, load strategy, versioning
 - [[Architecture/Product Card Layout Contract]] — Hard rule for row-level card size behavior across all templates and interaction states
 - [[Architecture/Admin Configure Page]] — shared FPB/PPB Admin configure-page adapter boundary, section rhythm, route-owned save semantics
 - [[Architecture/Bundle Subscriptions]] — shared provider-neutral FPB/PPB selling-plan discovery, signed cart handoff, Function ownership, and live release gate
 - [[Architecture/Bundle Parent Product]] — shared neutral FPB/PPB Shopify parent contract, merchant metadata ownership, sync invariants, and host separation
-- [[Architecture/Bundle Field Ownership]] — canonical persistence/runtime ownership ledger, retired aliases, and the gated FPB Page-removal boundary
+- [[Architecture/Bundle Field Ownership]] — canonical persistence/runtime ownership ledger and removed aliases, Page fields, and JSON product fallbacks
 - [[Architecture/FPB Host Evaluation]] — accepted signed app-proxy FPB document host, preview-token contract, and Page retirement sequence
 - [[Architecture/Storefront Draft Preview Authorization]] — shared stateless FPB/PPB draft-preview token, app-proxy authorization, and no-store caching contract
 - [[Architecture/Storefront Outage Resilience]] — Shopify-hosted parent-product PPB snapshot, direct catalog/cart access, and static fail-closed purchase authorization
-- [[Architecture/State Management]] — Redux Toolkit slices, RTK Query endpoint boundaries, and AppStateService migration rules
+- [[Architecture/State Management]] — Remix server state, route-local React reducers, and App Bridge-authenticated client requests
 - [[Architecture/Diagrams/index|Architecture Diagram Catalog]] — indexed Mermaid diagrams for Cart Transform, metafield ownership/consumption, storefront runtime, backend layers, and embedded Admin UI
 - [[Shopify Integration/Polaris Web Components Reference]] — source-of-truth link and policy for using `s-*` Admin web components
 - [[Shopify Integration/Admin API]] — Rate limits, native Prisma session storage, expiring-token migration gates
@@ -80,17 +80,18 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 - [[Shopify Integration/Webhooks]] — Subscribed webhook topics, removed broad topics, and delivery-volume rationale
 - [[Features/Bundle Types]] — FPB vs PDP, layout modes, step config
 - [[Features/Page Builder Integrations Guide]] — merchant-friendly blog source and setup instructions for PageFly, GemPages, Shogun, direct PPB/FPB embeds, and custom-code fallback markers
-- [[Features/Pricing Pipeline]] — UI → DB → Metafield → Cart Transform units
+- [[Features/Pricing Pipeline]] — minor-unit arithmetic, MoneyV2 presentment currency, pricing operators, and checkout ownership
 - [[Features/Bundle Instance Tracking]] — EB `_wolfpackProductBundle:OfferId`, MERGE dedup, unique titles
 - [[Operations/Deployment]] — Render + Shopify deploy process
 - [[Operations/Deployment General Sync]] — post-deploy persisted-bundle and custom-data replay behind one true or false flag
 - [[Operations/Development]] — SIT Shopify dev command and direct configure sync flow
-- [[Operations/Build Process]] — Widget bundles, WASM, CSS size limits
+- [[Operations/Build Process]] — Global Shopify CLI, Function builds, widget bundles, WASM, and CSS size limits
+- [[Operations/Linting Strategy]] — language-aware local, pre-commit, CI, and warning-ratchet gates
 - [[Operations/App Events Taxonomy]] — Shopify App Events taxonomy, flow tracing, feature usage, error events, and `wpb:*` migration boundaries
 - [[Operations/Admin Performance]] — Shopify Web Vitals ownership, temporary Chrome diagnostics, Admin loader critical path
 - [[Operations/LCP and CLS Playbook]] — Home bootstrap strategy, CLS stabilization order, and Knip-guided dead-code cleanup
-- [[Operations/Knip Prune Guardrails]] — known Knip false positives, convention-loaded runtime assets, and required skip rules for future dead-code pruning
-- [[Operations/Knip Candidate Inventory]] — dated Knip candidate snapshot from 2026-07-13; rerun Knip before using it for a current prune decision
+- [[Operations/Knip Prune Guardrails]] — monorepo-aware Knip ownership, generated-asset boundaries, autofix hazards, and dead-code review gates
+- [[Operations/Knip Candidate Inventory]] — clean 2026-09-09 Knip baseline, genuine removals, and unused-dependency negative-control evidence
 - [[Operations/Storefront Parity Placement Board]] — Chrome DevTools MCP placement-board method for EB/WPB storefront responsiveness proof across narrow, column, mobile, and wide widget contexts
 - [[Operations/Local Dev Process and Runtime Logs]] — safe runtime process-tree tracing for local dev shells and where to capture logs when output is TTY-bound
 

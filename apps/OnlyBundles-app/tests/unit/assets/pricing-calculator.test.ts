@@ -4,8 +4,8 @@
  * Covers every code path in app/assets/widgets/shared/pricing-calculator.js
  *
  * The three public API functions under test:
- *  - normalizeCondition: short/long/alias operator mapping + fallbacks
- *  - checkCondition:     all 5 operators × boundary values, accepts short format
+ *  - normalizeCondition: canonical pricing operators only
+ *  - checkCondition:     all 5 operators × boundary values
  *  - calculateDiscount:  all 3 discount methods × both condition types, best-rule
  *                        selection, disabled/empty cases, edge cases
  *  - getNextDiscountRule: first unsatisfied rule returned, all satisfied → null
@@ -20,13 +20,13 @@ export {};
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
 
-// ─── Operator Constants (long-format, as returned by normalizeCondition) ─────
+// ─── Canonical pricing operators ─────────────────────────────────────────────
 
-const EQ  = 'equal_to';
-const GT  = 'greater_than';
-const LT  = 'less_than';
-const GTE = 'greater_than_or_equal_to';
-const LTE = 'less_than_or_equal_to';
+const EQ  = 'eq';
+const GT  = 'gt';
+const LT  = 'lt';
+const GTE = 'gte';
+const LTE = 'lte';
 
 // ─── Bundle Builders ──────────────────────────────────────────────────────────
 
@@ -67,58 +67,19 @@ function makeAmtRule(operator: string, value: number, method: string, discountVa
 // ─── normalizeCondition ───────────────────────────────────────────────────────
 
 describe('PricingCalculator.normalizeCondition', () => {
-  // Short-format aliases
-  it('maps gte → greater_than_or_equal_to', () => {
-    expect(PricingCalculator.normalizeCondition('gte')).toBe(GTE);
-  });
-  it('maps gt → greater_than', () => {
-    expect(PricingCalculator.normalizeCondition('gt')).toBe(GT);
-  });
-  it('maps lte → less_than_or_equal_to', () => {
-    expect(PricingCalculator.normalizeCondition('lte')).toBe(LTE);
-  });
-  it('maps lt → less_than', () => {
-    expect(PricingCalculator.normalizeCondition('lt')).toBe(LT);
-  });
-  it('maps eq → equal_to', () => {
-    expect(PricingCalculator.normalizeCondition('eq')).toBe(EQ);
+  it.each([EQ, GT, LT, GTE, LTE])('preserves canonical operator %s', (operator) => {
+    expect(PricingCalculator.normalizeCondition(operator)).toBe(operator);
   });
 
-  // Long-format passthrough
-  it('passes through equal_to unchanged', () => {
-    expect(PricingCalculator.normalizeCondition('equal_to')).toBe(EQ);
-  });
-  it('passes through greater_than unchanged', () => {
-    expect(PricingCalculator.normalizeCondition('greater_than')).toBe(GT);
-  });
-  it('passes through less_than unchanged', () => {
-    expect(PricingCalculator.normalizeCondition('less_than')).toBe(LT);
-  });
-  it('passes through greater_than_or_equal_to unchanged', () => {
-    expect(PricingCalculator.normalizeCondition('greater_than_or_equal_to')).toBe(GTE);
-  });
-  it('passes through less_than_or_equal_to unchanged', () => {
-    expect(PricingCalculator.normalizeCondition('less_than_or_equal_to')).toBe(LTE);
-  });
-
-  // Underscore aliases (without _or_)
-  it('maps greater_than_equal_to → greater_than_or_equal_to', () => {
-    expect(PricingCalculator.normalizeCondition('greater_than_equal_to')).toBe(GTE);
-  });
-  it('maps less_than_equal_to → less_than_or_equal_to', () => {
-    expect(PricingCalculator.normalizeCondition('less_than_equal_to')).toBe(LTE);
-  });
-
-  // Fallbacks
-  it('returns greater_than_or_equal_to for null', () => {
+  it('defaults an absent operator to gte', () => {
     expect(PricingCalculator.normalizeCondition(null)).toBe(GTE);
-  });
-  it('returns greater_than_or_equal_to for undefined', () => {
     expect(PricingCalculator.normalizeCondition(undefined)).toBe(GTE);
   });
-  it('returns unknown string as-is (no map match → falls back to the string itself)', () => {
-    expect(PricingCalculator.normalizeCondition('foo')).toBe('foo');
-  });
+
+  it.each(['equal_to', 'greater_than', 'greater_than_or_equal_to', 'foo'])(
+    'rejects unsupported operator %s',
+    (operator) => expect(PricingCalculator.normalizeCondition(operator)).toBeNull(),
+  );
 });
 
 // ─── checkCondition ───────────────────────────────────────────────────────────
@@ -212,9 +173,8 @@ describe('PricingCalculator.checkCondition', () => {
     });
   });
 
-  // Unknown operator fallback
-  it('unknown operator falls back to >= (backward compatibility)', () => {
-    expect(PricingCalculator.checkCondition(5, 'unknown', 5)).toBe(true);
+  it('unknown operator fails closed', () => {
+    expect(PricingCalculator.checkCondition(5, 'unknown', 5)).toBe(false);
     expect(PricingCalculator.checkCondition(4, 'unknown', 5)).toBe(false);
   });
 
@@ -336,11 +296,11 @@ describe('PricingCalculator.calculateDiscount — percentage_off', () => {
     expect(result.discountAmount).toBe(400);
   });
 
-  it('accepts long-format operator greater_than_or_equal_to in condition', () => {
+  it('rejects long-format operator greater_than_or_equal_to in condition', () => {
     const bundle = makeBundle(true, [makeQtyRule('greater_than_or_equal_to', 2, 'percentage_off', 20)]);
     const result = PricingCalculator.calculateDiscount(bundle, 2000, 2);
-    expect(result.hasDiscount).toBe(true);
-    expect(result.discountAmount).toBe(400);
+    expect(result.hasDiscount).toBe(false);
+    expect(result.discountAmount).toBe(0);
   });
 });
 
@@ -742,19 +702,36 @@ describe('PricingCalculator.calculateBundleTotal — free gift step exclusion', 
     expect(totalQuantity).toBe(1);
   });
 
-  it('without steps (backward compat): free gift price is included as before', () => {
-    const { totalPrice, totalQuantity } = PricingCalculator.calculateBundleTotal(
-      selectedProducts, stepProductData
+  it('counts chargeable add-ons while excluding true free gifts', () => {
+    const chargeable = PricingCalculator.calculateBundleTotal(
+      selectedProducts,
+      stepProductData,
+      [{ isFreeGift: false }, { isFreeGift: true, addonDisplayFree: false }],
     );
-    expect(totalPrice).toBe(70000);
-    expect(totalQuantity).toBe(2);
+    const free = PricingCalculator.calculateBundleTotal(
+      selectedProducts,
+      stepProductData,
+      steps,
+    );
+
+    expect(chargeable).toMatchObject({
+      totalPrice: 70000,
+      totalQuantity: 2,
+      unitPrices: [50000, 20000],
+    });
+    expect(free).toMatchObject({
+      totalPrice: 50000,
+      totalQuantity: 1,
+      unitPrices: [50000],
+    });
   });
 
-  it('with steps=null: behaves identically to no steps argument', () => {
-    const { totalPrice } = PricingCalculator.calculateBundleTotal(
-      selectedProducts, stepProductData, null
-    );
-    expect(totalPrice).toBe(70000);
+  it.each([undefined, null])('fails closed when canonical steps are %s', (missingSteps) => {
+    expect(() => PricingCalculator.calculateBundleTotal(
+      selectedProducts,
+      stepProductData,
+      missingSteps,
+    )).toThrow('Bundle steps are required for pricing');
   });
 
   it('all free gift steps: totalPrice = 0, totalQuantity = 0', () => {

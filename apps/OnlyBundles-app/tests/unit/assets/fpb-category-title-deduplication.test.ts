@@ -48,7 +48,7 @@ describe("FPB category title rendering", () => {
       loadStepProducts: jest.fn(async () => undefined),
       createFullPageProductGrid: jest.fn(() => document.createElement("div")),
       hideLoadingOverlay: jest.fn(),
-      preloadNextStep: jest.fn(),
+      preloadAllSteps: jest.fn(),
       _renderMobileSummaryTray: jest.fn(),
     };
   }
@@ -98,7 +98,7 @@ describe("FPB category title rendering", () => {
       loadStepProducts: jest.fn(async () => undefined),
       createFullPageProductGrid: jest.fn(() => document.createElement("div")),
       hideLoadingOverlay: jest.fn(),
-      preloadNextStep: jest.fn(),
+      preloadAllSteps: jest.fn(),
       _renderMobileSummaryTray: jest.fn(),
       renderFullPageLayout: jest.fn(),
     };

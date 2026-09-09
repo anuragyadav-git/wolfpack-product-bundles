@@ -20,7 +20,7 @@ export async function resolveSpecificLinkOfferStorefrontEligibility({
   }
   if (bundle.offerDelivery.serverDecisionRequired !== true) return true;
 
-  const bundleId = String(bundle?.id ?? bundle?.bundleId ?? '').trim();
+  const bundleId = String(bundle?.id ?? '').trim();
   const token = new URLSearchParams(locationSearch).get(
     SPECIFIC_LINK_OFFER_QUERY_PARAM,
   );

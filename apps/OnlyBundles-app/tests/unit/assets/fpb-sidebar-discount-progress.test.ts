@@ -425,7 +425,7 @@ describe('FPB summary sidebar discount progress', () => {
 
     const total = panel.querySelector('.side-panel-total');
     expect(total?.querySelector('.side-panel-total-final')?.textContent).toBe('$5.00');
-    expect(total?.querySelector('.side-panel-total-original')?.textContent).toBe('$1448.00');
+    expect(total?.querySelector('.side-panel-total-original')?.textContent).toBe('$1,448.00');
   });
 });
 
@@ -519,7 +519,7 @@ describe('FPB configured summary header', () => {
 
     const bundleItems = fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
       context,
-      { display: { format: '${{amount}}' } },
+      { display: { code: 'USD' } },
       0,
     );
 
@@ -573,7 +573,7 @@ describe('FPB mobile bundle quantity options', () => {
 
       const bundleItems = fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
         context,
-        { display: { format: '${{amount}}' } },
+        { display: { code: 'USD' } },
         0,
       ) as FakeElement;
 
@@ -588,7 +588,7 @@ describe('FPB mobile bundle quantity options', () => {
 
     const bundleItems = fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
       context,
-      { display: { format: '${{amount}}' } },
+      { display: { code: 'USD' } },
       0,
     ) as FakeElement;
 
@@ -644,7 +644,7 @@ describe('FPB shared bundle quantity option state', () => {
     fullPageSidePanelMethods.renderSidePanel.call(desktopContext, desktopPanel);
     fullPageMobileSummaryMethods._renderCompactMobileSummaryBundleItems.call(
       mobileContext,
-      { display: { format: '${{amount}}' } },
+      { display: { code: 'USD' } },
       3,
     );
 

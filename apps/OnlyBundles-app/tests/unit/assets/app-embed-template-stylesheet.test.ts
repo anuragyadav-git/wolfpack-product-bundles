@@ -73,7 +73,9 @@ describe('FPB app-embed template stylesheet resolution', () => {
     try {
       global.document = {
         querySelector: jest.fn(() => null),
-        querySelectorAll: jest.fn(() => links),
+        querySelectorAll: jest.fn((selector: string) =>
+          selector === 'link[rel="stylesheet"]' ? links : []
+        ),
         createElement: jest.fn(() => ({ dataset: {} })),
         head: { append },
         body: { append: jest.fn() },

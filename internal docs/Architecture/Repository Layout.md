@@ -4,8 +4,8 @@ id: repository-layout
 title: Repository Layout
 type: architecture
 status: authoritative
-summary: Defines the npm workspace boundary between the Shopify application, static website, and repository-level documentation and delivery tooling.
-last_audited: 2026-09-03
+summary: Defines npm workspace, root tooling, and package-boundary ownership for the Shopify application and static website.
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -14,6 +14,8 @@ systems:
   - npm-workspaces
 source_paths:
   - package.json
+  - knip.jsonc
+  - prisma.config.ts
   - apps/OnlyBundles-app/
   - apps/OnlyBundles-website/
 related_docs:
@@ -43,6 +45,7 @@ Only Bundles is an npm-workspaces monorepo with one root lockfile and no separat
 ├── graphify-out/              # Generated repository knowledge graph
 ├── package.json               # Workspace declarations and compatibility command wrappers
 ├── package-lock.json          # Only npm lockfile
+├── knip.jsonc                 # Monorepo source, entrypoint, and extension ownership
 ├── prisma.config.ts           # Root Prisma schema discovery for Render and operator commands
 └── Dockerfile                 # Render image built from the repository root
 ```
@@ -57,7 +60,16 @@ The exact workspace declaration is:
 ]
 ```
 
-Root commands preserve the established Shopify operator interface. For example, `npm run build`, `npm test`, `npm run dev:sit`, `npm run deploy:prod`, and `npm run webhook-worker` delegate to `wolfpack-product-bundles`. Explicit `app:*` and `website:*` commands are available when the target should be stated directly.
+Root commands preserve the established Shopify operator interface. For example, `npm run build`, `npm test`, `npm run dev:sit`, and `npm run deploy:prod` delegate to `wolfpack-product-bundles`. Explicit `app:*` and `website:*` commands are available when the target should be stated directly. Webhooks enter through the Remix `/webhooks` action and have no standalone worker command.
+
+`npm run knip` analyzes root tooling, the Shopify app, and its package-backed
+extensions from the root. `npm run app:knip` and the app workspace's own
+`npm run knip` use the same root `knip.jsonc` while selecting the Shopify app
+and those extensions. The static website is a separate deployable with its own
+verification and is intentionally outside this remediation command. The Knip
+configuration models convention-loaded and file-system-loaded source
+entrypoints; generated Shopify CLI snapshots and generated theme-extension
+deploy assets are not source project files.
 
 `npx prisma generate` from the repository root resolves `apps/OnlyBundles-app/prisma/schema.prisma` through `prisma.config.ts`. Because Prisma config disables its implicit dotenv lookup, the root config uses Node 22's built-in env-file loader when `apps/OnlyBundles-app/.env` exists; process variables supplied by Render remain authoritative. App-local Prisma scripts use the same schema explicitly. Shopify TOML values, routes, webhooks, persistence contracts, and storefront assets are unchanged by the directory boundary.
 

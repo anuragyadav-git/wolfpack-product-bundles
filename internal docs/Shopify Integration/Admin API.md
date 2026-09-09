@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-09-04
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -16,7 +16,6 @@ systems:
 source_paths:
   - app/shopify.server.ts
   - prisma/schema.prisma
-  - app/lib/legacy-offline-token-cutover.server.ts
   - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
 related_docs:
   - internal docs/Architecture/Bundle Field Ownership.md
@@ -95,21 +94,22 @@ to Shopify's `login(request)` helper. The `/auth/$` OAuth route calls
 `authenticate.admin(request)` and returns `null` after successful completion;
 it must not add a second generic Remix redirect.
 
-Existing non-expiring rows require a one-time operator cutover. Select only offline rows with no expiry or refresh metadata, then call Shopify's native `migrateToExpiringToken` and store the returned session through `PrismaSessionStorage`. Run this temporary utility in SIT first. Production apply requires explicit approval because each successful exchange irreversibly revokes the previous non-expiring token; abort and report the first failed shop.
-
-Production rollout requirement:
-- New merchant launches naturally acquire expiring offline tokens.
-- Do not deploy the schema cutover until the explicit SIT and production migration gates have completed successfully.
+The temporary legacy-token cutover helper is no longer part of the deployable
+application. The configured database returned zero non-expiring offline rows on
+2026-09-08. Repeat that zero-count query in every release environment before
+shipping this strict state; a non-expiring row must be repaired through a fresh
+merchant app launch and Shopify's current authorization flow, not a permanent
+compatibility branch in session storage.
 
 Read-only Admin audits must classify credential state before interpreting a
 Shopify `401`. Enforcing PostgreSQL read-only transactions prevents an expiring
 session from persisting its rotated token; a subsequent query can therefore
 fail even though the refresh exchange itself succeeded. Refresh only rows with
 an unexpired refresh token in a separately authorized session-maintenance step,
-then rerun the audit read-only. Legacy rows rejected by token exchange and rows
-with unusable refresh tokens require a merchant to launch the embedded app so a
-fresh browser session token can be exchanged. Never weaken the audit by reading
-raw stored access tokens or treating an unaudited shop as ready.
+then rerun the audit read-only. Rows with unusable or absent refresh metadata
+require a merchant to launch the embedded app so a fresh browser session token
+can be exchanged. Never weaken the audit by reading raw stored access tokens or
+treating an unaudited shop as ready.
 
 Treat successful authentication and sufficient scopes as separate gates.
 `urlRedirects` requires online-store-navigation access; an older otherwise-valid

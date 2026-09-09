@@ -13,7 +13,7 @@ import {
 const RUNTIME_TOKEN_VERSION = 1;
 const RUNTIME_TOKEN_SECRET_CONTEXT = "wpb-runtime-token:";
 
-export type RuntimeTokenDiscount = {
+type RuntimeTokenDiscount = {
   type: "PERCENTAGE";
   value: number;
 };
@@ -140,16 +140,6 @@ function collectAllowedSelectionIds(bundle: any): { variantIds: Set<string>; pro
   for (const step of Array.isArray(bundle?.steps) ? bundle.steps : []) {
     for (const stepProduct of Array.isArray(step?.StepProduct) ? step.StepProduct : []) {
       addProduct(stepProduct);
-    }
-    for (const product of Array.isArray(step?.products) ? step.products : []) {
-      addProduct(product);
-    }
-    const categories = Array.isArray(step?.StepCategory) ? step.StepCategory : [];
-    for (const category of categories) {
-      const categoryProducts = Array.isArray(category?.products) ? category.products : [];
-      for (const product of categoryProducts) {
-        addProduct(product);
-      }
     }
   }
 

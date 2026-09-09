@@ -1,4 +1,4 @@
-export type NewBundleStep = {
+type NewBundleStep = {
   id: string;
   name: string;
   collections: unknown[];

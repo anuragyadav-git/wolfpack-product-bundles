@@ -6,7 +6,7 @@ export function normalizePpbSelectionKey(value: unknown) {
   return match ? match[1] : String(value).split('/').pop() || '';
 }
 
-export function findPpbProductBySelectionKey(products: any[], selectionKey: unknown) {
+function findPpbProductBySelectionKey(products: any[], selectionKey: unknown) {
   const normalized = normalizePpbSelectionKey(selectionKey);
   if (!normalized) return null;
   return (products || []).find((product: any) => (

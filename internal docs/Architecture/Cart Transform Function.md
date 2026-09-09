@@ -4,18 +4,22 @@ id: cart-transform-function
 title: Cart Transform Function
 type: architecture
 status: authoritative
-summary: Runtime-token-verified Shopify Cart Transform architecture and fail-closed bundle pricing contract.
-last_audited: 2026-09-01
+summary: Runtime-token-verified Shopify Cart Transform and Discount Function architecture, build ownership, and fail-closed pricing contract.
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
   - checkout
 systems:
   - bundle-cart-transform-rs
+  - bundle-discount-function
   - cart-transform-service
 source_paths:
   - extensions/bundle-cart-transform-rs/shopify.extension.toml
   - extensions/bundle-cart-transform-rs/src/merge.rs
+  - extensions/bundle-discount-function/shopify.extension.toml
+  - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.graphql
+  - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.rs
   - app/services/cart-transform-service.server.ts
   - app/services/cart-transform-runtime-token.server.ts
   - app/routes/api/api.cart-transform-runtime-token.tsx
@@ -113,7 +117,7 @@ The release build uses Rust size optimization and Shopify CLI's compatible
 WASM optimizer. Keep the authorization payload deserialization shared between
 v1 and v2 and deserialize only fields consumed by this Function; unknown signed
 payload fields are intentionally ignored. The resulting Shopify-optimized
-artifact is 250,641 bytes after country authorization, below the repository's
+artifact is 250,491 bytes after country authorization, below the repository's
 conservative 256,000-byte acceptance threshold. Country authorization uses one signed `countryRule` string
 (`include:CA,US`, `exclude:US`, or empty when disabled) instead of adding a
 nested Rust JSON deserializer. This is an internal signed-token ABI; the Admin
@@ -133,6 +137,19 @@ enabled. The same captured input succeeded after removing panic snipping,
 emitting one `linesMerge` in 1,128,695 instructions. Also do not replace
 Shopify CLI's final optimizer with a newer standalone Binaryen release; the
 Shopify Function compiler has rejected otherwise smaller incompatible modules.
+
+The Discount Function also builds to `wasm32-unknown-unknown`, but its Shopify
+extension command must resolve both Cargo and Rustc from rustup's stable
+toolchain. On macOS, Homebrew `cargo` and `rustc` can precede rustup in `PATH`;
+mixing Homebrew Cargo with rustup's installed WASM standard library fails with
+`can't find crate for core` even though `rustup target list --installed` shows
+the target. The extension therefore delegates to
+`scripts/build-discount-function.mjs`, which sets `RUSTC` from
+`rustup which --toolchain stable rustc` and invokes Cargo through `rustup run
+stable`. Keep shell expansion out of the extension TOML because Shopify CLI,
+not an interactive shell, owns that command runner. Do not simplify this back
+to bare `cargo build` unless the release environment proves it has one Rust
+owner.
 
 ---
 
@@ -183,7 +200,13 @@ prevented the current dev-preview extension assets from being published. Every
 Cart Transform query change must therefore pass the Shopify CLI app build; a
 successful Cargo build alone does not validate Shopify's query budget.
 
-Parent bundle metafields are still written for EXPAND/display paths: `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing`. Component-variant `$app:component_parents` is no longer the configured MERGE source.
+Parent bundle metafields are still written for EXPAND/display paths:
+`component_reference`, `component_quantities`, `price_adjustment`, and
+`component_pricing`. Component-variant `$app:component_parents` is not queried
+or trusted by either Function. The Discount Function emits bundle-pricing
+candidates only from a valid signed runtime token whose group and component
+quantities match the current cart; a missing secret, token, or signature fails
+closed.
 
 MERGE output also preserves the verified `_wolfpack_bundle_runtime` token and the
 base `_wolfpackProductBundle:OfferId` on every parent line. The Checkout UI extension

@@ -26,13 +26,6 @@ export async function getThemeExtensionStatusFromAppBridge(
   };
 }
 
-export function resolveConfiguredAppEmbedEnabled(
-  currentAppEmbedEnabled: boolean | null,
-  appBridgeStatus: Pick<AppBridgeThemeStatus, "appEmbedEnabled"> | null,
-): boolean {
-  return appBridgeStatus?.appEmbedEnabled ?? currentAppEmbedEnabled ?? true;
-}
-
 export async function verifyAppEmbedEnabledBeforePreview(
   currentAppEmbedEnabled: boolean,
   checkStatus: () => Promise<boolean>,

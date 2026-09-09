@@ -49,7 +49,6 @@ function makeFullPageBundleConfig(overrides: Record<string, unknown> = {}) {
     status: "active",
     bundleType: BundleType.FULL_PAGE,
     shopifyProductId: null,
-    shopifyPageHandle: "build-your-bundle",
     bundleVariantId: "gid://shopify/ProductVariant/111",
     steps: [
       {

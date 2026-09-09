@@ -71,7 +71,7 @@ describe("product page admin sections", () => {
     );
   });
 
-  it("extracts direct, category, default, and collection sources for subscription validation", () => {
+  it("extracts canonical StepProduct, default, and collection sources for subscription validation", () => {
     const sources = extractSellingPlanValidationSources({
       defaultProductsData: {
         products: [
@@ -100,10 +100,8 @@ describe("product page admin sections", () => {
     expect(sources.productIds).toEqual([
       "gid://shopify/Product/101",
       "gid://shopify/Product/102",
-      "gid://shopify/Product/201",
       "gid://shopify/Product/202",
       "gid://shopify/Product/203",
-      "gid://shopify/Product/204",
     ]);
     expect(sources.collectionIds).toEqual([
       "gid://shopify/Collection/301",
@@ -223,7 +221,6 @@ describe("product page admin sections", () => {
 
   it("lists only merchant theme product templates without generated fallback rows", () => {
     expect(getThemeTemplatesSource).toContain('return template.handle === "product" || template.handle.startsWith("product.")');
-    expect(getThemeTemplatesSource).not.toContain("ensureProductTemplate(product.handle)");
     expect(getThemeTemplatesSource).not.toMatch(/bundle-product-\$\{product\.handle\}/);
     expect(getThemeTemplatesSource).not.toContain("All Product Pages (General)");
   });

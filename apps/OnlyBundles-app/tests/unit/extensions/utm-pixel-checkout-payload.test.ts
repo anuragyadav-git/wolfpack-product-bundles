@@ -61,6 +61,8 @@ describe("Only Bundles attribution Web Pixel", () => {
 
       const request = fetchMock.mock.calls[0]?.[1] as RequestInit;
       const payload = JSON.parse(String(request.body));
+      expect(payload.orderId).toBe("gid://shopify/Order/123");
+      expect(payload.orderNumber).toBe("123");
       expect(payload.lineItems).toEqual([
         expect.objectContaining({
           variantId: "gid://shopify/ProductVariant/1",

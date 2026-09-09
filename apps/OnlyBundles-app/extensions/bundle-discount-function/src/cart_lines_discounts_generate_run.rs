@@ -227,15 +227,8 @@ fn extract_json_string_any(source: &str, keys: &[&str]) -> Option<String> {
     keys.iter().find_map(|key| extract_json_string(source, key))
 }
 
-fn price_adjustment_slice(source: &str) -> &str {
-    source
-        .find("\"price_adjustment\"")
-        .map(|position| &source[position..])
-        .unwrap_or(source)
-}
-
 fn calculate_parent_discount_percentage(
-    component_parents_json: &str,
+    price_adjustment_json: &str,
     paid_total: f64,
     original_total: f64,
     paid_quantity: i64,
@@ -246,7 +239,6 @@ fn calculate_parent_discount_percentage(
         return 0.0;
     }
 
-    let price_adjustment_json = price_adjustment_slice(component_parents_json);
     let method = extract_json_string(price_adjustment_json, "method")
         .unwrap_or_else(|| "percentage_off".to_string());
     let value = extract_json_number(price_adjustment_json, "value").unwrap_or(0.0);
@@ -769,50 +761,39 @@ fn build_checkout_integration_candidates(
         }
 
         let original_total = paid_total + free_gift_total;
-        let component_parents_json = if let Some(secret) = runtime_secret {
-            let token = line_indices.iter().find_map(|&idx| {
-                lines[idx]
-                    .runtime_token()
-                    .and_then(|attribute| attribute.value())
-                    .map(|value| value.as_str())
-                    .filter(|value| !value.trim().is_empty())
-            });
-            let Some(payload) =
-                token.and_then(|runtime_token| verify_runtime_token(runtime_token, secret))
-            else {
-                continue;
-            };
-            let Some(group_id) = line_indices.iter().find_map(|&idx| {
-                lines[idx]
-                    .wolfpack_product_bundle_offer_id()
-                    .and_then(|attribute| attribute.value())
-                    .and_then(|value| wolfpack_product_bundle_offer_group_id(value.as_str()))
-            }) else {
-                continue;
-            };
-            if !token_components_match(&payload, &group_id, &actual_components) {
-                continue;
-            }
-            if !country_is_eligible(&payload.country_rule, &current_country) {
-                continue;
-            }
-            serde_json::to_string(&payload.price_adjustment).unwrap_or_default()
-        } else {
-            let component_parents_json = line_indices.iter().find_map(|&idx| {
-                match lines[idx].merchandise() {
-                    schema::cart_lines_discounts_generate_run::input::cart::lines::Merchandise::ProductVariant(variant) => {
-                        variant.component_parents().map(|metafield| metafield.value().clone())
-                    }
-                    _ => None,
-                }
-            });
-            let Some(component_parents_json) = component_parents_json else {
-                continue;
-            };
-            component_parents_json
+        let Some(secret) = runtime_secret else {
+            continue;
         };
+        let token = line_indices.iter().find_map(|&idx| {
+            lines[idx]
+                .runtime_token()
+                .and_then(|attribute| attribute.value())
+                .map(|value| value.as_str())
+                .filter(|value| !value.trim().is_empty())
+        });
+        let Some(payload) =
+            token.and_then(|runtime_token| verify_runtime_token(runtime_token, secret))
+        else {
+            continue;
+        };
+        let Some(group_id) = line_indices.iter().find_map(|&idx| {
+            lines[idx]
+                .wolfpack_product_bundle_offer_id()
+                .and_then(|attribute| attribute.value())
+                .and_then(|value| wolfpack_product_bundle_offer_group_id(value.as_str()))
+        }) else {
+            continue;
+        };
+        if !token_components_match(&payload, &group_id, &actual_components) {
+            continue;
+        }
+        if !country_is_eligible(&payload.country_rule, &current_country) {
+            continue;
+        }
+        let price_adjustment_json =
+            serde_json::to_string(&payload.price_adjustment).unwrap_or_default();
         let percentage = calculate_parent_discount_percentage(
-            &component_parents_json,
+            &price_adjustment_json,
             paid_total,
             original_total,
             paid_quantity,

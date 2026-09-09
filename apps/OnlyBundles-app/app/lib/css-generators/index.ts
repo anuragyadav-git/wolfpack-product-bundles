@@ -14,17 +14,8 @@ import { generateFooterCSS } from "./footer-generator";
 import { generateModalCSS } from "./modal-generator";
 import { generateResponsiveCSS } from "./responsive-generator";
 
-// Re-export types
-export type { CSSDesignSettings, CSSGenerationContext } from "./types";
-export type { ShopBrandColors } from "../shop-brand-colors";
-
-// Re-export individual generators for testing/direct access
-export { generateCSSVariables, generateEBDcpBridgeCSS, generateFullPageVariables } from "./css-variables-generator";
-export { generateProductCardCSS } from "./product-card-generator";
-export { generateButtonCSS } from "./button-generator";
-export { generateFooterCSS } from "./footer-generator";
-export { generateModalCSS } from "./modal-generator";
-export { generateResponsiveCSS } from "./responsive-generator";
+// Re-export the settings contract consumed outside this owner.
+export type { CSSDesignSettings } from "./types";
 
 /**
  * Generate complete CSS from design settings

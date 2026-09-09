@@ -83,7 +83,6 @@ function issue(
 function hasStepResources(step: JsonRecord): boolean {
   if (
     list(step.StepProduct).length > 0 ||
-    list(step.products).length > 0 ||
     list(step.collections).length > 0
   ) {
     return true;

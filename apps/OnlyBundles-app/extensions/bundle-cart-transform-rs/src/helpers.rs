@@ -22,17 +22,16 @@ where
         .unwrap_or_default()
 }
 
-/// Normalize a condition operator string to a typed Operator.
-/// Handles both short aliases (gte/lte/gt/lt/eq) and long Shopify forms.
-/// Unknown operators default to Gte — matches the TypeScript default case.
-pub fn normalize_operator(operator: &str) -> Operator {
+/// Parse the canonical pricing-condition operator vocabulary.
+/// Unknown and non-canonical values fail closed.
+pub fn normalize_operator(operator: &str) -> Option<Operator> {
     match operator {
-        "gte" | "greater_than_or_equal_to" => Operator::Gte,
-        "gt" | "greater_than" => Operator::Gt,
-        "lte" | "less_than_or_equal_to" => Operator::Lte,
-        "lt" | "less_than" => Operator::Lt,
-        "eq" | "equal_to" => Operator::Eq,
-        _ => Operator::Gte,
+        "gte" => Some(Operator::Gte),
+        "gt" => Some(Operator::Gt),
+        "lte" => Some(Operator::Lte),
+        "lt" => Some(Operator::Lt),
+        "eq" => Some(Operator::Eq),
+        _ => None,
     }
 }
 

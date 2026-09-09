@@ -71,7 +71,7 @@ getSidebarTierCtaContent(nextRule: any) {
     ? option.subtext.trim()
     : (typeof option?.tierSubtext === 'string' ? option.tierSubtext.trim() : '');
   if (pricing.method === BUNDLE_WIDGET.DISCOUNT_METHODS.FIXED_BUNDLE_PRICE && rule) {
-    const discountValue = Number(rule.discountValue ?? rule.discount?.value ?? 0) || 0;
+    const discountValue = Number(rule.discountValue ?? 0) || 0;
     if (discountValue > 0) {
       subtext = `Bundle for ${CurrencyManager.convertAndFormat(discountValue, CurrencyManager.getCurrencyInfo())}`;
     }

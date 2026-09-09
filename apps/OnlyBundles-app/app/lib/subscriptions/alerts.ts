@@ -1,6 +1,6 @@
 import type { EntitlementFailureCode } from "./entitlements";
 
-export interface EntitlementAlertCopyKeys {
+interface EntitlementAlertCopyKeys {
   heading: string;
   message: string;
 }

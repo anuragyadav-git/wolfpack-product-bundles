@@ -130,8 +130,39 @@ function ensureStylesheet(href: string | undefined, marker: string) {
   document.head.append(link);
 }
 
-function exposeProductContext(embed: HTMLElement, context: EmbedContext) {
+function normalizeCurrencyCode(value: unknown) {
+  const code = String(value ?? "").trim().toUpperCase();
+  return /^[A-Z]{3}$/.test(code) ? code : null;
+}
+
+export function exposePpbStorefrontContext(embed: Pick<HTMLElement, "dataset">) {
   const runtime = window as Window & Record<string, any>;
+  const rawRuntime = embed.dataset.ppbStorefrontRuntime;
+  if (rawRuntime) {
+    try {
+      const parsed = JSON.parse(rawRuntime);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        runtime.__WOLFPACK_PPB_STOREFRONT_RUNTIME__ = parsed;
+      }
+    } catch {
+      // Missing or malformed Shopify-hosted state is intentionally left absent.
+    }
+  }
+
+  const shopBaseCurrency = normalizeCurrencyCode(embed.dataset.shopBaseCurrency);
+  const customerCurrency = normalizeCurrencyCode(embed.dataset.customerCurrency);
+  if (shopBaseCurrency && customerCurrency) {
+    runtime.shopCurrency = shopBaseCurrency;
+    runtime.shopifyMultiCurrency = {
+      shopBaseCurrency,
+      customerCurrency,
+    };
+  }
+}
+
+export function exposePpbProductContext(embed: HTMLElement, context: EmbedContext) {
+  const runtime = window as Window & Record<string, any>;
+  exposePpbStorefrontContext(embed);
   runtime.currentProductId = context.productId;
   runtime.currentProductGid = `gid://shopify/Product/${context.productId}`;
   runtime.currentProductHandle = context.productHandle;
@@ -200,7 +231,7 @@ function createHost(embedElement: HTMLElement, resolution: EmbedPayload, context
     isContainerProduct: "false",
   });
   host.append(container);
-  exposeProductContext(embedElement, context);
+  exposePpbProductContext(embedElement, context);
   return host;
 }
 
@@ -222,9 +253,6 @@ function mountWithRetry(embedElement: HTMLElement, current: EmbedState, root: Pa
       target.element.before(host);
     }
     ensureStylesheet(embedElement.dataset.productPageStyleUrl, "wpbPpbEmbedStyle");
-    if (embedElement.dataset.designSettingsStyleUrl) {
-      ensureStylesheet(embedElement.dataset.designSettingsStyleUrl, "wpbPpbDesignStyle");
-    }
     ensureProductPageRuntime(embedElement);
     return true;
   };

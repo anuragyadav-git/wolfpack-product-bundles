@@ -1,11 +1,10 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { buildStorefrontProxyPath } from "../../config/storefront-proxy-routes";
 import { BundleStatus, BundleType } from "../../constants/bundle";
 import { prisma } from "../../db.server";
 import { AppLogger } from "../../lib/logger";
 import { buildSettingsControlsResponse } from "../../lib/settings-controls-runtime";
-
-// auth: public - served to storefront widgets through the Shopify app proxy.
-// Data is non-sensitive merchant-authored storefront behavior settings.
+import { authenticate } from "../../shopify.server";
 
 function sanitizeBundleType(raw: string | null): BundleType.PRODUCT_PAGE | BundleType.FULL_PAGE {
   if (!raw) return BundleType.PRODUCT_PAGE;
@@ -13,13 +12,13 @@ function sanitizeBundleType(raw: string | null): BundleType.PRODUCT_PAGE | Bundl
   return stripped === BundleType.FULL_PAGE ? BundleType.FULL_PAGE : BundleType.PRODUCT_PAGE;
 }
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
-  const { shopDomain } = params;
-
-  if (!shopDomain) {
-    return json({ error: "Shop domain is required" }, { status: 400 });
+export async function loader({ request }: LoaderFunctionArgs) {
+  const { session } = await authenticate.public.appProxy(request);
+  if (!session) {
+    return json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const shopDomain = session.shop;
   const url = new URL(request.url);
   const bundleType = sanitizeBundleType(url.searchParams.get("bundleType"));
 
@@ -63,7 +62,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
         return [{
           bundleType: BundleType.FULL_PAGE,
           productHandle,
-          targetUrl: `/apps/product-bundles/wpb/${bundle.publicNumber}`,
+          targetUrl: buildStorefrontProxyPath(`wpb/${bundle.publicNumber}`),
         }];
       }
       return [{
@@ -74,23 +73,18 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
 
     return json({ schemaVersion, bundleType, settingsControls, activeControls, bundleLinks }, {
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-      },
+      headers: { "Cache-Control": "no-store, max-age=0" },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     AppLogger.error("Failed to load controls settings", {
       component: "api.controls-settings",
       shopDomain,
       bundleType,
       error: error instanceof Error ? error.message : String(error),
     });
-
     return json({ error: "Controls settings are temporarily unavailable" }, {
       status: 503,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-      },
+      headers: { "Cache-Control": "no-store, max-age=0" },
     });
   }
 }

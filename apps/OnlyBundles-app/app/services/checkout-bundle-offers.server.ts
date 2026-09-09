@@ -24,7 +24,7 @@ export type CheckoutOffer = {
   variants: CheckoutOfferVariant[];
 };
 
-export type CheckoutOfferRuntime = {
+type CheckoutOfferRuntime = {
   offers: CheckoutOffer[];
 };
 
@@ -115,10 +115,7 @@ function fpbOffers(bundle: any): CheckoutOffer[] {
 function ppbOffers(bundle: any): CheckoutOffer[] {
   return (Array.isArray(bundle?.steps) ? bundle.steps : []).flatMap((step: any) => {
     if (step?.isFreeGift !== true || step?.enabled === false) return [];
-    const products = [
-      ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
-      ...(Array.isArray(step?.products) ? step.products : []),
-    ];
+    const products = Array.isArray(step?.StepProduct) ? step.StepProduct : [];
     const variants = collectVariants(products);
     if (variants.length === 0) return [];
     const tiers = Array.isArray(step?.addonTiers) && step.addonTiers.length > 0
@@ -152,13 +149,9 @@ export function buildCheckoutOfferRuntime(bundle: any): CheckoutOfferRuntime {
 }
 
 function cachedComponentProducts(bundle: any) {
-  return (Array.isArray(bundle?.steps) ? bundle.steps : []).flatMap((step: any) => [
-    ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
-    ...(Array.isArray(step?.products) ? step.products : []),
-    ...(Array.isArray(step?.StepCategory) ? step.StepCategory : []).flatMap(
-      (category: any) => Array.isArray(category?.products) ? category.products : [],
-    ),
-  ]);
+  return (Array.isArray(bundle?.steps) ? bundle.steps : []).flatMap((step: any) =>
+    Array.isArray(step?.StepProduct) ? step.StepProduct : [],
+  );
 }
 
 export function calculateCheckoutOfferSelectionAmount(

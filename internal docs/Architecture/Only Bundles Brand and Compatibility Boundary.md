@@ -5,7 +5,7 @@ title: Only Bundles Brand and Compatibility Boundary
 type: architecture
 status: authoritative
 summary: Defines the Only Bundles visible identity and the legacy technical identifiers intentionally preserved for installed-shop compatibility.
-last_audited: 2026-08-30
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -53,7 +53,11 @@ These strings are implementation identifiers, not co-branding. No dual-read fall
 
 ## Parent-product transition
 
-New parents use `Only Bundles`, `only-bundles-parent`, and `smart-cart-hide-bundle-options`. Explicit Sync Product or Sync Bundle adds those tags to existing parents and removes only `WP-Bundles` and `wolfpack-bundle-parent`, preserving all merchant-authored tags.
+New parents use `Only Bundles`, `only-bundles-parent`, and
+`smart-cart-hide-bundle-options`. Explicit Sync Product or Sync Bundle adds
+those current tags to existing parents while preserving all merchant-authored
+tags. Retired brand tags were handled by a one-time cleanup after zero-state
+verification; recurring sync does not retain a legacy-tag removal branch.
 
 ## Legacy URL stage
 

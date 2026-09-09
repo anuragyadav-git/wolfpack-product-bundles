@@ -11,7 +11,7 @@ import { resolveStorefrontProxyRoot } from "../config/storefront-proxy-routes";
 
 export const PPB_STOREFRONT_TOKEN_TITLE = "Wolfpack PPB Storefront Runtime";
 export const PPB_JSON_LIMIT_BYTES = 128 * 1024;
-export const PPB_CSS_LIMIT_BYTES = 64 * 1024;
+const PPB_CSS_LIMIT_BYTES = 64 * 1024;
 
 type Admin = { graphql: (query: string, options?: any) => Promise<{ json: () => Promise<any> }> };
 
@@ -103,7 +103,7 @@ export function buildPpbStorefrontRuntime(input: {
   };
 }
 
-export function buildPpbDesignCss(settings: any) {
+function buildPpbDesignCss(settings: any) {
   const record = settings && typeof settings === "object" ? settings as Record<string, unknown> : {};
   const generalSettings = record.generalSettings && typeof record.generalSettings === "object"
     ? record.generalSettings as Record<string, unknown>

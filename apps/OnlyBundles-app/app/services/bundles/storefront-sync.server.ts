@@ -1,10 +1,10 @@
 import db from "../../db.server";
 import { BundleType } from "../../constants/bundle";
-import type { ShopifyAdmin } from "../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../shopify.server";
 import { CartTransformService } from "../cart-transform-service.server";
 import {
   updateBundleProductMetafields,
-} from "./metafield-sync.server";
+} from "./metafield-sync/operations/bundle-product.server";
 import { syncThemeColors } from "../theme-colors.server";
 import { buildFullPageBundleMetafieldConfig } from "../../routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server";
 import {

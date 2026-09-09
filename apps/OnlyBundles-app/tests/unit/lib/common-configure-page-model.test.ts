@@ -17,6 +17,7 @@ describe("common configure page model", () => {
         "step_setup",
         "discount_pricing",
         "bundle_visibility",
+        "images_gifs",
         "bundle_settings",
         "subscriptions",
         "select_template",
@@ -31,6 +32,7 @@ describe("common configure page model", () => {
       "step_setup",
       "discount_pricing",
       "bundle_visibility",
+      "images_gifs",
       "bundle_settings",
       "subscriptions",
       "select_template",
@@ -51,6 +53,14 @@ describe("common configure page model", () => {
         (item) => item.id === "bundle_settings",
       )?.iconType,
     ).toBe("settings");
+  });
+
+  it("uses the Polaris upload icon for the per-bundle media editor", () => {
+    expect(
+      buildConfigureSetupItems("product_page").find(
+        (item) => item.id === "images_gifs",
+      )?.iconType,
+    ).toBe("upload");
   });
 
   it("keeps Bundle Embed as a PPB-only visibility child", () => {

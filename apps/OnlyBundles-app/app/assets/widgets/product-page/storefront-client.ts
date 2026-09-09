@@ -83,7 +83,9 @@ function mapVariant(variant: any) {
     id: variant.id,
     title: variant.title,
     price: variant.price?.amount ?? "0",
+    currencyCode: variant.price?.currencyCode ?? null,
     compareAtPrice: variant.compareAtPrice?.amount ?? null,
+    compareAtCurrencyCode: variant.compareAtPrice?.currencyCode ?? null,
     available: variant.availableForSale === true,
     quantityAvailable: typeof variant.quantityAvailable === "number" ? variant.quantityAvailable : null,
     currentlyNotInStock: variant.currentlyNotInStock === true,
@@ -129,6 +131,35 @@ function mapProduct(product: any) {
   };
 }
 
+function isCompleteMoney(value: any) {
+  if (
+    typeof value?.amount !== "string"
+    || value.amount.trim() === ""
+    || !Number.isFinite(Number(value.amount))
+    || Number(value.amount) < 0
+  ) {
+    return false;
+  }
+  return typeof value.currencyCode === "string"
+    && /^[A-Z]{3}$/.test(value.currencyCode);
+}
+
+function assertCompleteProduct(product: any) {
+  if (!product?.id || !Array.isArray(product?.variants?.nodes) || product.variants.nodes.length === 0) {
+    throw new Error("Incomplete Shopify product hydration");
+  }
+  for (const variant of product.variants.nodes) {
+    if (
+      !variant?.id
+      || typeof variant.availableForSale !== "boolean"
+      || !isCompleteMoney(variant.price)
+      || (variant.compareAtPrice != null && !isCompleteMoney(variant.compareAtPrice))
+    ) {
+      throw new Error("Incomplete Shopify product hydration");
+    }
+  }
+}
+
 export async function fetchPpbStorefrontProducts({
   shop,
   apiVersion,
@@ -148,7 +179,13 @@ export async function fetchPpbStorefrontProducts({
       variables: { ids: ids.slice(index, index + PRODUCT_BATCH_SIZE), country: country || null },
       fetchImpl,
     });
-    for (const product of (data?.nodes ?? []).filter(Boolean)) {
+    const batchIds = ids.slice(index, index + PRODUCT_BATCH_SIZE);
+    const nodes = data?.nodes;
+    if (!Array.isArray(nodes) || nodes.filter(Boolean).length !== batchIds.length) {
+      throw new Error("Incomplete Shopify product hydration");
+    }
+    for (const product of nodes.filter(Boolean)) {
+      assertCompleteProduct(product);
       const mapped = mapProduct(product);
       let pageInfo = product.variants?.pageInfo;
       while (pageInfo?.hasNextPage && pageInfo.endCursor) {
@@ -160,6 +197,12 @@ export async function fetchPpbStorefrontProducts({
           fetchImpl,
         });
         const variants = variantData?.product?.variants;
+        if (!variants || !Array.isArray(variants.nodes)) {
+          throw new Error("Incomplete Shopify product hydration");
+        }
+        for (const variant of variants.nodes) {
+          assertCompleteProduct({ id: product.id, variants: { nodes: [variant] } });
+        }
         mapped.variants.push(...(variants?.nodes ?? []).map(mapVariant));
         pageInfo = variants?.pageInfo;
       }

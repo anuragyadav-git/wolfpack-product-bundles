@@ -9,6 +9,7 @@
 
 import { createQuantityControlElement } from './quantity-control.js';
 import { createMagnifierIcon } from '../svg-icons.js';
+import { CurrencyManager } from '../currency-manager.js';
 
 
 const DEFAULT_PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3C/svg%3E';
@@ -34,11 +35,15 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
   const displayPrice = Object.prototype.hasOwnProperty.call(options, 'displayPrice')
     ? options.displayPrice
     : product.price;
-  const price = formatPrice(displayPrice, currencyInfo);
+  const price = formatPrice(displayPrice, product.currencyCode, currencyInfo);
   const shouldRenderCompareAtPrice = product.compareAtPrice !== null
     && product.compareAtPrice !== undefined;
   const compareAtPrice = shouldRenderCompareAtPrice
-    ? formatPrice(product.compareAtPrice, currencyInfo)
+    ? formatPrice(
+      product.compareAtPrice,
+      product.compareAtCurrencyCode || product.currencyCode,
+      currencyInfo,
+    )
     : '';
   const hasPriceText = Boolean(price);
   const hasCompareAtText = Boolean(compareAtPrice);
@@ -378,12 +383,14 @@ function normalizeSafeImageUrl(value: any, runtimeDocument: Document) {
   }
 }
 
-function formatPrice(value: string|null, currencyInfo: any) {
+function formatPrice(value: string|null, currencyCode: unknown, currencyInfo: any) {
   if (value == null || value === '') return '';
 
-  const amount = Number(value || 0) / 100;
-  const format = currencyInfo?.display?.format || '${{amount}}';
-  return format.replace('{{amount}}', amount.toFixed(2));
+  return CurrencyManager.formatMoney(
+    Number(value),
+    String(currencyCode || currencyInfo?.display?.code || ''),
+    currencyInfo?.locale,
+  );
 }
 
 function resolveProductDescriptionText(value: string|null) {

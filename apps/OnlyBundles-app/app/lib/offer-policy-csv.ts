@@ -32,7 +32,7 @@ const MAX_CSV_BYTES = 1024 * 1024;
 const MAX_CSV_ROWS = 500;
 
 type CsvColumn = (typeof OFFER_POLICY_CSV_COLUMNS)[number];
-export type OfferPolicyCsvRow = Record<CsvColumn, string>;
+type OfferPolicyCsvRow = Record<CsvColumn, string>;
 
 type OfferPolicyState = {
   specificLinkRequired: boolean;
@@ -67,18 +67,18 @@ export type OfferPolicyCsvValidationBundle = OfferPolicyCsvBundle & {
   specificLinkConditionActive: boolean;
 };
 
-export type OfferPolicyCsvError = {
+type OfferPolicyCsvError = {
   row: number | null;
   field: CsvColumn | 'file';
   code: string;
 };
 
-export type ParsedOfferPolicyCsv = {
+type ParsedOfferPolicyCsv = {
   rows: OfferPolicyCsvRow[];
   fileErrors: OfferPolicyCsvError[];
 };
 
-export type ValidOfferPolicyCsvRow = {
+type ValidOfferPolicyCsvRow = {
   row: number;
   bundleId: string;
   bundleType: string;

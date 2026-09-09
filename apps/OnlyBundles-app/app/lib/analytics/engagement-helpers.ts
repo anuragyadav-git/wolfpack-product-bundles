@@ -21,7 +21,7 @@ export interface BundleEngagementRow {
   presetId?: string | null;
 }
 
-export interface FunnelSnapshot {
+interface FunnelSnapshot {
   // Each step is a unique-count (sessions for engaged/atc, orders for revenue).
   // `impressions` is optional and only populated when the storefront also forwards
   // wpb:bundle-ready beacons; for now it defaults to engagements (so the funnel
@@ -37,7 +37,7 @@ export interface FunnelSnapshot {
   dropOffAtcToCheckout: number;
 }
 
-export interface EngagementTrendPoint {
+interface EngagementTrendPoint {
   date: string; // YYYY-MM-DD
   engagements: number;
   uniqueBundles: number;
@@ -56,6 +56,8 @@ export interface BundleMatrixRow {
   engagementToOrderRate: number | null; // 0..100, null when no engagement
   overallConversionRate: number; // 0..100, orders divided by views
 }
+
+const SHOPIFY_ORDER_GID = /^gid:\/\/shopify\/Order\/\d+$/;
 
 // ─── computeBundleFunnel ───────────────────────────────────────────────────────
 
@@ -87,9 +89,13 @@ export function computeBundleFunnel(
   const checkedOutOrderIds = new Set<string>();
   const revenuePurchaseKeys = new Set<string>();
   let revenueCents = 0;
-  for (const [index, r] of attributionRows.entries()) {
-    if (r.bundleId !== null) {
-      const orderKey = r.orderId ?? `row-${index}`;
+  for (const r of attributionRows) {
+    if (
+      r.bundleId !== null &&
+      typeof r.orderId === "string" &&
+      SHOPIFY_ORDER_GID.test(r.orderId)
+    ) {
+      const orderKey = r.orderId;
       checkedOutOrderIds.add(orderKey);
       const purchaseKey = `${orderKey}\u0000${r.bundleId}`;
       if (!revenuePurchaseKeys.has(purchaseKey)) {
@@ -247,6 +253,3 @@ export function buildBundlePerformanceMatrix(
 
   return rows;
 }
-
-// Re-export helper for any callers wanting the existing trend type.
-export type { TrendPoint };

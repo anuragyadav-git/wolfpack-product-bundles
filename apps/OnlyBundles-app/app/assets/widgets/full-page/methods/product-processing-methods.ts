@@ -196,7 +196,7 @@ function mergeProductVariants(currentVariants: any[] = [], incomingVariants: any
   return Array.from(mergedById.values());
 }
 
-export function mergeFullPageProductsBySelectionId(products: any[] = []) {
+function mergeFullPageProductsBySelectionId(products: any[] = []) {
   const merged: any[] = [];
   const indexBySelectionId = new Map();
 
@@ -478,51 +478,36 @@ async loadStepProducts(stepIndex: string|number) {
         ? this.normalizePersonalizationAddonProduct(product)
         : product
     );
-    step.StepProduct = allProducts;
     step.products = allProducts;
     step.maxQuantity = allProducts.length;
   }
 
   // Process explicit products.
-  // When loaded from metafield cache (data-bundle-config), step.products already contains
-  // enriched data (images, variants, prices). Multi-image records are used directly;
-  // compact single-image records are hydrated so the product drawer receives the full gallery.
-  // When loaded from the API response, step.StepProduct carries the enriched data and
-  // step.products only has stubs, so skip the fetch to avoid a duplicate call.
-  const hasEnrichedStepProducts = !step?.isFreeGift && Array.isArray(step.StepProduct) && step.StepProduct.length > 0
-    && step.StepProduct.some((sp: any)  => sp.title && sp.imageUrl);
-
+  // The server formatter owns persistence translation and exposes only the
+  // canonical steps[].products contract to the widget. Multi-image records can
+  // render directly when inventory tracking is off; compact records are
+  // hydrated so the product drawer receives the complete Shopify gallery.
   const stepProductsAlreadyEnriched = !step?.isFreeGift && Array.isArray(step.products) && step.products.length > 0
     && step.products.some((p: any)  => (Array.isArray(p.images) && p.images.length > 0) || p.featuredImage);
-  const shouldRefreshRuntimeInventory = hasEnrichedStepProducts
+  const shouldRefreshRuntimeInventory = stepProductsAlreadyEnriched
     && fullPageProductProcessingMethods.isInventoryTrackingOnAddToCartEnabled.call(this);
-  const refreshedProductKeys = new Set();
   const productIds = !step?.isFreeGift ? this.collectStepProductIds(step) : [];
-  if (!step?.isFreeGift && Array.isArray(step.StepProduct)) {
-    step.StepProduct.forEach((product: any)  => {
-      const id = normalizeProductLookupId(product);
-      if (id && !productIds.includes(id)) productIds.push(id);
-    });
-  }
 
   if (stepProductsAlreadyEnriched) {
     // Metafield cache path: products have full data, use them directly.
     // Prices in metafield are stored as cents (e.g. 82900 = ₹829.00).
     // processProductsForStep multiplies by 100 assuming decimal input, so
     // divide by 100 here to normalise before that multiplication.
-    const cachedProducts: any[] = [];
-    const incompleteProducts: any[] = [];
-    step.products.forEach((product: any)  => {
-      if (hasCompleteRuntimeProductData(product)) {
-        cachedProducts.push(product);
-      } else {
-        incompleteProducts.push(product);
-      }
-    });
+    const incompleteProducts = step.products.filter(
+      (product: any) => !hasCompleteRuntimeProductData(product),
+    );
 
     const fetchedProductsByKey = new Map();
-    if (incompleteProducts.length > 0) {
-      const missingProductIds = incompleteProducts
+    const productsToHydrate = shouldRefreshRuntimeInventory
+      ? step.products
+      : incompleteProducts;
+    if (productsToHydrate.length > 0) {
+      const missingProductIds = productsToHydrate
         .map(productGraphqlId)
         .filter(Boolean);
 
@@ -556,21 +541,17 @@ async loadStepProducts(stepIndex: string|number) {
     }
 
     step.products.forEach((product: any)  => {
-      if (cachedProducts.includes(product)) {
-        allProducts.push(normalizeCachedRuntimeProduct(product));
-        return;
-      }
-
       const key = productLookupKey(product);
       const fetchedProduct = key ? fetchedProductsByKey.get(key) : null;
       if (fetchedProduct) {
         allProducts.push(fetchedProduct);
-      } else {
-        allProducts.push(normalizeCachedRuntimeProduct(product));
+        return;
       }
+
+      allProducts.push(normalizeCachedRuntimeProduct(product));
     });
   } else if (!step?.isFreeGift) {
-    if ((!hasEnrichedStepProducts || shouldRefreshRuntimeInventory) && productIds.length > 0) {
+    if (productIds.length > 0) {
 
       // Get app URL from widget data attribute or window global
       const apiBaseUrl = this.resolveStorefrontApiBase();
@@ -593,12 +574,6 @@ async loadStepProducts(stepIndex: string|number) {
             allProducts = allProducts.concat(data.products);
             if (typeof this.rememberRuntimeProductInventory === 'function') {
               this.rememberRuntimeProductInventory(data.products);
-            }
-            if (shouldRefreshRuntimeInventory) {
-              data.products.forEach((product: any)  => {
-                const key = storefrontApiProductLookupKey(product);
-                if (key) refreshedProductKeys.add(key);
-              });
             }
           }
         }
@@ -625,77 +600,6 @@ async loadStepProducts(stepIndex: string|number) {
         if (hasRenderableCachedProductData(product)) allProducts.push(product);
       });
     });
-  }
-
-  if (!step?.isFreeGift && step.StepProduct && Array.isArray(step.StepProduct) && step.StepProduct.length > 0) {
-    // Check if StepProduct already has enriched data (for full-page bundles)
-    const hasEnrichedData = step.StepProduct.some((sp: any)  => sp.title && sp.imageUrl && sp.price);
-
-    if (hasEnrichedData) {
-
-      // Transform StepProduct to match expected product format
-      const enrichedProducts = step.StepProduct.map((sp: any)  => ({
-        id: sp.productId,
-        selectionId: normalizeProductLookupId(sp),
-        title: sp.title,
-        handle: sp.handle,
-        imageUrl: sp.imageUrl,
-        price: sp.price,
-        compareAtPrice: sp.compareAtPrice != null
-        ? parseFinitePrice(sp.compareAtPrice)
-        : (sp.compare_at_price != null
-          ? parseFinitePrice(sp.compare_at_price?.amount ?? sp.compare_at_price)
-          : null),
-        available: true,
-        variants: sp.variants || [{
-          id: sp.productId.replace('Product', 'ProductVariant'),
-          title: 'Default Title',
-          price: sp.price,
-          compareAtPrice: sp.compareAtPrice != null
-            ? parseFinitePrice(sp.compareAtPrice)
-            : (sp.compare_at_price != null
-              ? parseFinitePrice(sp.compare_at_price?.amount ?? sp.compare_at_price)
-              : null),
-          available: true,
-          image: sp.imageUrl ? { src: sp.imageUrl } : null
-        }]
-      })).filter((product: any)  => {
-        const key = productLookupKey(product);
-        return !key || !refreshedProductKeys.has(key);
-      });
-
-      allProducts = allProducts.concat(enrichedProducts);
-    } else {
-      // Fetch from storefront API if data is not enriched
-      const productGids = step.StepProduct.map((sp: any)  => sp.productId).filter(Boolean);
-
-      if (productGids.length > 0) {
-
-        const apiBaseUrl = this.resolveStorefrontApiBase();
-
-        // Derive customer's country for @inContext pricing (market-correct prices via Shopify Markets)
-        const country = window.Shopify?.country
-          || (window.Shopify?.locale?.includes('-') ? window.Shopify.locale.split('-')[1] : null)
-          || null;
-
-        try {
-          const countryParam = country ? `&country=${encodeURIComponent(country)}` : '';
-          const response = await fetch(`${apiBaseUrl}/api/storefront-products?ids=${encodeURIComponent(productGids.join(','))}${countryParam}`);
-
-          if (!response.ok) {
-          } else {
-            const data = await response.json();
-            if (data.products && data.products.length > 0) {
-              allProducts = allProducts.concat(data.products);
-              if (typeof this.rememberRuntimeProductInventory === 'function') {
-                this.rememberRuntimeProductInventory(data.products);
-              }
-            }
-          }
-        } catch (error: any) {
-        }
-      }
-    }
   }
 
   const collectionHandles = step?.isFreeGift ? [] : this.collectStepCollectionHandles(step);
@@ -988,7 +892,11 @@ processProductsForStep(products: any, step: any) {
       selectionId: variantId,
       title: v.title,
       price: toCents(v.price),
+      currencyCode: typeof v.currencyCode === 'string' ? v.currencyCode : null,
       compareAtPrice: normalizeCompareAtPriceToCents(v.compareAtPrice) ?? normalizeCompareAtPriceToCents(v.compare_at_price),
+      compareAtCurrencyCode: typeof v.compareAtCurrencyCode === 'string'
+        ? v.compareAtCurrencyCode
+        : null,
       available: v.available === true && (
         !fullPageProductProcessingMethods.isInventoryTrackingOnAddToCartEnabled.call(this)
         || !(quantityAvailable === 0 && currentlyNotInStock !== true)
@@ -1040,7 +948,13 @@ processProductsForStep(products: any, step: any) {
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
+            currencyCode: typeof variant.currencyCode === 'string'
+              ? variant.currencyCode
+              : null,
             compareAtPrice: normalizeCompareAtPriceToCents(variant.compareAtPrice) ?? normalizeCompareAtPriceToCents(variant.compare_at_price),
+            compareAtCurrencyCode: typeof variant.compareAtCurrencyCode === 'string'
+              ? variant.compareAtCurrencyCode
+              : null,
             variantId,
             selectionId: variantId,
             available: this.isVariantSelectableForInventory(variant),
@@ -1109,9 +1023,17 @@ processProductsForStep(products: any, step: any) {
         price: defaultVariantSource
           ? toCents(defaultVariantSource.price)
           : toCents(product.price),
+        currencyCode: typeof defaultVariantSource?.currencyCode === 'string'
+          ? defaultVariantSource.currencyCode
+          : (typeof product.currencyCode === 'string' ? product.currencyCode : null),
         compareAtPrice: defaultVariantSource
           ? normalizeCompareAtPriceToCents(defaultVariantSource.compareAtPrice) ?? normalizeCompareAtPriceToCents(defaultVariantSource.compare_at_price)
           : null,
+        compareAtCurrencyCode: typeof defaultVariantSource?.compareAtCurrencyCode === 'string'
+          ? defaultVariantSource.compareAtCurrencyCode
+          : (typeof product.compareAtCurrencyCode === 'string'
+              ? product.compareAtCurrencyCode
+              : null),
         variantId: selectionId,
         selectionId,
         available: defaultVariantSource ? this.isVariantSelectableForInventory(defaultVariantSource) : product.available === true,

@@ -6,6 +6,16 @@ const { ProductPageSelectionDataMethods } = require(
 );
 
 describe('PPB selection data methods', () => {
+  it('collects add-on keys only from canonical runtime products', () => {
+    const keys = ProductPageSelectionDataMethods.getAddonProductSelectionKeys({
+      products: [{ selectionId: 'canonical', variants: [{ selectionId: 'canonical-variant' }] }],
+      StepProduct: [{ selectionId: 'persistence-alias' }],
+      productsData1: { products: [{ selectionId: 'competitor-alias' }] },
+    });
+
+    expect([...keys]).toEqual(['canonical', 'canonical-variant']);
+  });
+
   it('deletes a zero-quantity selection and its category ownership before persisting', () => {
     const persistSessionSelections = jest.fn();
     const context = {

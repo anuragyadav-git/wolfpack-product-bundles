@@ -625,7 +625,7 @@ getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
       const tierText = tierTextByRuleId?.[ruleId] || {};
       const boxRule = boxRules.find((box: any)  => box.ruleId === ruleId);
       const discountMethod = pricing?.method || BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF;
-      const discountValue = Number(rule.discountValue ?? rule.discount?.value ?? 0) || 0;
+      const discountValue = Number(rule.discountValue ?? 0) || 0;
       const fallbackTitle = rule.conditionType === 'quantity' && threshold > 0
         ? `${threshold} Pack`
         : String(threshold);
