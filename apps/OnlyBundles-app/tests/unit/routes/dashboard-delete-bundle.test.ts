@@ -18,7 +18,7 @@ jest.mock("../../../app/services/metafield-cleanup.server", () => ({
   },
 }));
 
-jest.mock("../../../app/services/widget-installation.server", () => ({
+jest.mock("../../../app/services/widget-installation/widget-installation-core.server", () => ({
   WidgetInstallationService: {},
 }));
 
@@ -28,22 +28,6 @@ jest.mock("../../../app/services/bundles/bundle-parent-product.server", () => ({
 
 // eslint-disable-next-line import/first
 import { handleDeleteBundle } from "../../../app/routes/app/app.dashboard/handlers/handlers.server";
-
-function pageDeleteResponse(input: {
-  deletedPageId?: string | null;
-  userErrors?: Array<{ code?: string; message: string }>;
-  errors?: Array<{ message: string }>;
-}) {
-  return Promise.resolve(new Response(JSON.stringify({
-    ...(input.errors ? { errors: input.errors } : {}),
-    data: {
-      pageDelete: {
-        deletedPageId: input.deletedPageId ?? null,
-        userErrors: input.userErrors ?? [],
-      },
-    },
-  }), { headers: { "content-type": "application/json" } }));
-}
 
 function productDeleteResponse(input: {
   deletedProductId?: string | null;
@@ -70,25 +54,20 @@ function bundle(overrides: Record<string, unknown> = {}) {
     id: "bundle-1",
     bundleType: "full_page",
     shopifyProductId: null,
-    shopifyPageId: "gid://shopify/Page/1",
-    shopifyPreviewPageId: "gid://shopify/Page/2",
     ...overrides,
   };
 }
 
-describe("handleDeleteBundle Page cleanup", () => {
+describe("handleDeleteBundle resource cleanup", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDb.bundle.delete.mockResolvedValue({});
     mockUpdateShopMetafieldsAfterDeletion.mockResolvedValue(undefined);
   });
 
-  it("deletes public and preview Pages before deleting the FPB row", async () => {
+  it("deletes an FPB row without Shopify product cleanup", async () => {
     mockDb.bundle.findUnique.mockResolvedValue(bundle());
-    const admin = {
-      graphql: jest.fn((_query: string, options?: any) =>
-        pageDeleteResponse({ deletedPageId: options?.variables?.id })),
-    };
+    const admin = { graphql: jest.fn() };
 
     const response = await handleDeleteBundle(
       admin as any,
@@ -97,69 +76,14 @@ describe("handleDeleteBundle Page cleanup", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(admin.graphql).toHaveBeenCalledTimes(2);
-    expect(admin.graphql).toHaveBeenNthCalledWith(
-      1,
-      expect.stringContaining("pageDelete"),
-      { variables: { id: "gid://shopify/Page/1" } },
-    );
-    expect(admin.graphql).toHaveBeenNthCalledWith(
-      2,
-      expect.stringContaining("pageDelete"),
-      { variables: { id: "gid://shopify/Page/2" } },
-    );
-    expect(admin.graphql.mock.invocationCallOrder[1]).toBeLessThan(
-      mockDb.bundle.delete.mock.invocationCallOrder[0],
-    );
-  });
-
-  it("accepts an already-deleted Page and deletes duplicate GIDs once", async () => {
-    mockDb.bundle.findUnique.mockResolvedValue(bundle({
-      shopifyPreviewPageId: "gid://shopify/Page/1",
-    }));
-    const admin = {
-      graphql: jest.fn(() => pageDeleteResponse({
-        userErrors: [{ code: "NOT_FOUND", message: "Page not found" }],
-      })),
-    };
-
-    const response = await handleDeleteBundle(
-      admin as any,
-      { shop: "test-shop.myshopify.com" },
-      formData(),
-    );
-
-    expect(response.status).toBe(200);
-    expect(admin.graphql).toHaveBeenCalledTimes(1);
+    expect(admin.graphql).not.toHaveBeenCalled();
     expect(mockDb.bundle.delete).toHaveBeenCalledTimes(1);
-  });
-
-  it("retains the FPB row when Shopify Page deletion fails", async () => {
-    mockDb.bundle.findUnique.mockResolvedValue(bundle({ shopifyPreviewPageId: null }));
-    const admin = {
-      graphql: jest.fn(() => pageDeleteResponse({
-        userErrors: [{ code: "TAKEN", message: "Page cannot be deleted" }],
-      })),
-    };
-
-    const response = await handleDeleteBundle(
-      admin as any,
-      { shop: "test-shop.myshopify.com" },
-      formData(),
-    );
-    const body = await response.json();
-
-    expect(response.status).toBe(500);
-    expect(body).toEqual({ success: false, error: "Failed to delete bundle" });
-    expect(mockDb.bundle.delete).not.toHaveBeenCalled();
   });
 
   it("deletes a PPB parent product before deleting the bundle row", async () => {
     mockDb.bundle.findUnique.mockResolvedValue(bundle({
       bundleType: "product_page",
       shopifyProductId: "gid://shopify/Product/42",
-      shopifyPageId: null,
-      shopifyPreviewPageId: null,
     }));
     const admin = { graphql: jest.fn(() => productDeleteResponse({
       deletedProductId: "gid://shopify/Product/42",
@@ -186,8 +110,6 @@ describe("handleDeleteBundle Page cleanup", () => {
     mockDb.bundle.findUnique.mockResolvedValue(bundle({
       bundleType: "product_page",
       shopifyProductId: "gid://shopify/Product/42",
-      shopifyPageId: null,
-      shopifyPreviewPageId: null,
     }));
     const admin = { graphql: jest.fn(() => productDeleteResponse({
       userErrors: [{ message: "Product cannot be deleted" }],

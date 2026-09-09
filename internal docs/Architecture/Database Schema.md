@@ -4,8 +4,8 @@ id: database-schema
 title: Database Schema
 type: architecture
 status: authoritative
-summary: Documents the canonical Prisma models, enums, ownership boundaries, and migration rules for Wolfpack persistence.
-last_audited: 2026-09-05
+summary: Documents the canonical Prisma models, removed legacy residue, ownership boundaries, and forward-only migration rules.
+last_audited: 2026-09-09
 owners:
   - engineering
 domains:
@@ -52,6 +52,13 @@ Core model. Key fields beyond basics:
   `countdownTitle`, `countdownExpiryAction`, and
   `countdownExpiredMessage`. These fields do not own a deadline.
 
+The Shopify Page-era columns `shopifyPageId`, `shopifyPreviewPageId`,
+`shopifyPageHandle`, and `shopifyPreviewPageHandle` have no schema owner. The
+forward-only `20260906090000_remove_legacy_shopify_page_fields` migration drops
+them and the obsolete handle index. Bundle deletion and status changes no
+longer run Shopify Page cleanup branches; FPB public documents are signed
+app-proxy URLs.
+
 ### BundleStep
 
 Per-step configuration. Links to `Bundle`.
@@ -87,6 +94,10 @@ the manual Analytics backfill refreshes it from Admin GraphQL
 `LineItem.discountedTotalSet(withCodeDiscounts: true)` when a verified runtime
 bundle token identifies the line. Lines without authoritative bundle identity
 remain at zero rather than guessing allocation.
+
+`orderId` is always the canonical Shopify Order GID. Web Pixel ingestion rejects
+missing and numeric-only IDs, and Admin GraphQL backfill writes its returned GID
+directly. There is no numeric-to-GID compatibility read or `unknown` order key.
 
 ### Shop
 
@@ -162,6 +173,10 @@ that historical drift is reconciled separately.
 
 Shopify session storage (standard Remix adapter pattern).
 
+Legacy non-expiring offline rows are not a supported runtime source. Admin API
+callers use Shopify's authenticated session helpers and expiring offline token
+metadata; the removed one-time cutover helper is not a fallback path.
+
 ---
 
 ## Enums
@@ -192,4 +207,18 @@ Controls FPB widget layout rendering mode.
 
 - New settings fields should be added as **direct Prisma columns** with sensible defaults, never as JSON blob sub-fields
 - The "Sync Bundle" feature lets merchants re-sync to pick up new defaults — no backwards-compat shims needed
-- See `CLAUDE.md` → "No Backwards Compatibility Rule" for enforcement details
+- See `AGENTS.md` → "No Backwards Compatibility Rule" for enforcement details
+- Before releasing a destructive residue migration, repeat zero-count checks in
+  every target environment for legacy offline sessions, Page-field bundles,
+  numeric order IDs, PPB legacy embed rows, and steps with JSON products but no
+  `StepProduct`. The membership query must inspect both `BundleStep.products`
+  and every related `StepCategory.products`; checking only the step JSON misses
+  products selected through the current FPB and PPB category editors.
+- On 2026-09-08 the configured database had no legacy Page columns and returned
+  zero legacy offline sessions, numeric order IDs, and PPB legacy embed rows.
+  A signed PPB preview exposed category JSON products without a canonical
+  `StepProduct` row; the corrected global query found an additional FPB draft
+  with the same shape. Both Agent-store fixtures were repaired through their
+  normal Admin save flows after the save boundary was corrected. The full
+  step-and-category query then returned zero offenders for the configured
+  database. That result is not evidence for another release environment.
