@@ -144,14 +144,30 @@ export function FpbAddonTierRules({
         </div>
       ) : null}
       <div className={actionClassName}>
-        <s-button
-          variant="secondary"
-          onClick={() => onAdd(tierIndex)}
-        >
-          {translateAdmin(
+        <s-clickable
+          inlineSize="100%"
+          border="base"
+          borderRadius="small"
+          padding="small"
+          accessibilityLabel={translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addTierRule"
           )}
-        </s-button>
+          onClick={() => onAdd(tierIndex)}
+        >
+          <s-stack
+            direction="inline"
+            gap="small"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <s-icon type="plus" />
+            <s-text>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addTierRule"
+              )}
+            </s-text>
+          </s-stack>
+        </s-clickable>
       </div>
     </div>
   );

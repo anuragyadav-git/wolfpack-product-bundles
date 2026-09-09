@@ -2509,38 +2509,6 @@
   padding-top: 12px;
 }
 
-.addonsTierAddAction {
-  width: 100%;
-}
-
-.addonsTierFullWidthButton {
-  width: 100%;
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 12px;
-  border: 1px solid #8a8a8a;
-  border-radius: 6px;
-  background: #fff;
-  color: #202223;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 450;
-  line-height: 1.2;
-  cursor: pointer;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
-}
-
-.addonsTierFullWidthButton:hover {
-  background: #f7f7f7;
-}
-
-.addonsTierFullWidthButton:focus-visible {
-  outline: 2px solid #005bd3;
-  outline-offset: 2px;
-}
-
 .addonSelectedProductList {
   display: flex;
   flex-direction: column;

@@ -391,8 +391,14 @@ export function CommonConfigureSidebar({
                     )}
                 </span>
               </div>
-              <s-button
-                icon="edit"
+              <s-clickable
+                inlineSize="100%"
+                border="base"
+                borderRadius="small"
+                padding="small"
+                accessibilityLabel={translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.editProduct"
+                )}
                 onClick={() => {
                   const productId = getProductId(adapter);
                   if (!productId) {
@@ -402,10 +408,20 @@ export function CommonConfigureSidebar({
                   openProductInAdmin(productId);
                 }}
               >
-                {translateAdmin(
-                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.editProduct"
-                )}
-              </s-button>
+                <s-stack
+                  direction="inline"
+                  gap="small"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <s-icon type="edit" />
+                  <s-text>
+                    {translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.editProduct"
+                    )}
+                  </s-text>
+                </s-stack>
+              </s-clickable>
             </div>
             <div className={styles.parentProductStatus}>
               <span>

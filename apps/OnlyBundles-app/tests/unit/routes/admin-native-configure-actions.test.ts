@@ -97,7 +97,7 @@ describe("native configure actions", () => {
   function clickAction(label: string) {
     const action = Array.from(
       container.querySelectorAll<HTMLElement>(
-        "button, s-button, s-clickable-chip",
+        "button, s-button, s-clickable, s-clickable-chip",
       ),
     ).find(
       (element) =>
@@ -348,6 +348,12 @@ describe("native configure actions", () => {
 
     clickAction("commonconfiguresidebar.replaceProduct");
     clickAction("commonconfiguresidebar.syncProduct");
+    const editProductAction = Array.from(
+      container.querySelectorAll<HTMLElement>("s-clickable"),
+    ).find((element) =>
+      element.textContent?.includes("commonconfiguresidebar.editProduct"),
+    );
+    expect(editProductAction).toBeDefined();
     clickAction("commonconfiguresidebar.editProduct");
 
     expect(handleBundleProductSelect).toHaveBeenCalledTimes(1);

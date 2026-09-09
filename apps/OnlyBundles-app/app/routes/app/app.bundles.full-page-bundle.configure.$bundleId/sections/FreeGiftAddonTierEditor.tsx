@@ -341,24 +341,38 @@ export function FpbAddonTierEditor({
                 </div>
               );
             })}
-            <div className={styles.addonsTierAddAction}>
-              <s-button
-                variant="secondary"
-                onClick={() => {
-                  updateAddonTiers([
-                    ...addonTiers,
-                    {
-                      ...createDefaultAddonDraftTier(addonTiers.length),
-                    },
-                  ]);
-                  onActiveTierIndexChange(() => addonTiers.length);
-                }}
+            <s-clickable
+              inlineSize="100%"
+              border="base"
+              borderRadius="small"
+              padding="small"
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+              )}
+              onClick={() => {
+                updateAddonTiers([
+                  ...addonTiers,
+                  {
+                    ...createDefaultAddonDraftTier(addonTiers.length),
+                  },
+                ]);
+                onActiveTierIndexChange(() => addonTiers.length);
+              }}
+            >
+              <s-stack
+                direction="inline"
+                gap="small"
+                alignItems="center"
+                justifyContent="center"
               >
-                {translateAdmin(
-                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
-                )}
-              </s-button>
-            </div>
+                <s-icon type="plus" />
+                <s-text>
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                  )}
+                </s-text>
+              </s-stack>
+            </s-clickable>
           </>
         );
       })()}

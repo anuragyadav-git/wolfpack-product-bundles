@@ -409,9 +409,14 @@ export function PpbFreeGiftAddonsSection({
                                 />
                               </div>
                             ))}
-                            <s-button
-                              variant="secondary"
-                              icon="plus"
+                            <s-clickable
+                              inlineSize="100%"
+                              border="base"
+                              borderRadius="small"
+                              padding="small"
+                              accessibilityLabel={translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                              )}
                               onClick={() =>
                                 updateAddonTiers([
                                   ...addonTiers,
@@ -419,10 +424,20 @@ export function PpbFreeGiftAddonsSection({
                                 ])
                               }
                             >
-                              {translateAdmin(
-                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
-                              )}
-                            </s-button>
+                              <s-stack
+                                direction="inline"
+                                gap="small"
+                                alignItems="center"
+                                justifyContent="center"
+                              >
+                                <s-icon type="plus" />
+                                <s-text>
+                                  {translateAdmin(
+                                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                                  )}
+                                </s-text>
+                              </s-stack>
+                            </s-clickable>
                           </>
                         );
                       })()}

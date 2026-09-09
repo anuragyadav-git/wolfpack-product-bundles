@@ -172,10 +172,12 @@ sections; their headings, help actions, step controls, and field content remain
 independently owned. Category, Rules Configuration, and Step Config continue as
 separate cards below.
 
-Ordinary configure actions such as Add Step, Add Category, Add Rule, clone,
-delete, selected-resource removal, reset, and Edit Product use Polaris
-`s-button`; selected-resource counts use `s-clickable-chip`. Bundle-product
-Replace and Sync
+Compact configure commands such as Add Step, Add Category, Add Rule, clone,
+delete, selected-resource removal, and reset use Polaris `s-button`;
+selected-resource counts use `s-clickable-chip`. A row-sized action that must
+own the full available width, such as Edit Product or adding an add-on tier or
+tier rule, uses `s-clickable` with `inlineSize="100%"`. The clickable owns its
+handler directly and must not wrap an `s-button`. Bundle-product Replace and Sync
 live in an `s-menu`; Shopify owns its open state, focus, keyboard behavior, and
 dismissal, so neither configure route keeps a parallel menu-state flag. Custom
 HTML buttons remain limited to
