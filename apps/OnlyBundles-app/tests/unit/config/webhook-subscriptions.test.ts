@@ -41,6 +41,11 @@ function readWebhookSubscriptionUris(configPath: string) {
   );
 }
 
+function readLocalWebhookPath() {
+  const source = readConfig("shopify.web.toml");
+  return source.match(/^webhooks_path\s*=\s*"([^"]+)"\s*$/m)?.[1];
+}
+
 describe("Shopify webhook subscriptions", () => {
   it.each([
     ["SIT", "shopify.app.wolfpack-product-bundles-sit.toml"],
@@ -66,5 +71,9 @@ describe("Shopify webhook subscriptions", () => {
     ["production", "shopify.app.toml"],
   ])("%s config routes every webhook subscription through Remix", (_label, configPath) => {
     expect(readWebhookSubscriptionUris(configPath)).toEqual(["/webhooks"]);
+  });
+
+  it("routes Shopify CLI's local webhook probe through Remix", () => {
+    expect(readLocalWebhookPath()).toBe("/webhooks");
   });
 });

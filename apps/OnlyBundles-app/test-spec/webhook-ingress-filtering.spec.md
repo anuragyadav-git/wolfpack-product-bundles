@@ -5,7 +5,7 @@ title: Webhook Ingress Filtering Test Spec
 type: test-spec
 status: active
 summary: Verifies that Shopify-authenticated, supported, and bundle-relevant webhooks enter durable Inngest processing through Remix.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -17,6 +17,7 @@ source_paths:
   - app/routes/api/webhooks.tsx
   - app/services/webhooks/topics.ts
   - app/services/webhooks/product-delete-relevance.server.ts
+  - shopify.web.toml
 related_docs:
   - internal docs/Shopify Integration/Webhooks.md
 tags:
@@ -54,6 +55,7 @@ a Wolfpack bundle in the delivering shop.
 | 9 | Enqueue failure | Inngest rejects the event | Retryable HTTP 503 | Shopify retries delivery |
 | 10 | Duplicate delivery | Same webhook ID reaches processor twice | Handler executes once | Existing processor idempotency remains authoritative |
 | 11 | App configuration ownership | SIT and production webhook subscriptions | Every subscription URI is exactly `/webhooks` | Prevents a return to the retired external worker |
+| 12 | Local dev webhook target | Shopify CLI sends its sample uninstall webhook | `shopify.web.toml` routes it to `/webhooks` | Keeps the CLI probe on the authenticated Remix ingress |
 
 ## Acceptance Criteria
 
@@ -63,3 +65,4 @@ a Wolfpack bundle in the delivering shop.
 - [x] No standalone worker or direct-processing fallback remains
 - [x] Product deletion lookup is scoped by shop and product ID
 - [x] SIT and production webhook subscriptions resolve through Remix `/webhooks`
+- [x] Shopify CLI's local webhook probe resolves through Remix `/webhooks`

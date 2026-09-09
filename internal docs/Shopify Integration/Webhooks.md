@@ -5,7 +5,7 @@ title: Webhooks
 type: architecture-note
 status: active
 summary: Defines authenticated Remix webhook ingress, active Shopify subscriptions, Inngest handoff, and delivery-volume safeguards.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -17,6 +17,7 @@ systems:
 source_paths:
   - shopify.app.toml
   - shopify.app.wolfpack-product-bundles-sit.toml
+  - shopify.web.toml
   - app/routes/api/webhooks.tsx
   - app/services/webhooks/topics.ts
   - app/services/webhooks/product-delete-relevance.server.ts
@@ -38,6 +39,12 @@ Both Shopify app configurations deliver to `/webhooks`. The Remix action calls
 `authenticate.webhook(request)`, so Shopify's maintained app library owns HMAC
 verification, topic/shop extraction, and invalid-request handling. There is no
 standalone `node:http` worker or app-owned HMAC implementation.
+
+`shopify.web.toml` uses the same `/webhooks` path. In Shopify CLI 4.8.0 this
+field targets the sample `APP_UNINSTALLED` webhook that `shopify app dev` sends
+to the local web process after the remote app configuration changes; it is not
+a separate subscription route. Keeping it aligned ensures the CLI probe also
+exercises the authenticated Remix ingress.
 
 After authentication, ingress rejects inactive topics and applies the
 shop-scoped product-delete relevance gate. Relevant events are awaited into
