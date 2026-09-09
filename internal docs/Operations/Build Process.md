@@ -74,11 +74,14 @@ configuration validation passed.
 
 A later `app config validate` automatically upgraded the CLI. The command began
 from NVM-owned 4.7.1, installed 4.8.0 under `/opt/homebrew`, and left the older
-NVM path present. Both PROD and SIT configuration files validate with zero
-issues, but this is mixed global state again until 4.8.0 also completes a
-stopped-dev full app build and fresh dev-preview check. Re-run `command -v`,
-`type -a`, and `shopify version` after every automatic upgrade; do not assume a
-previously consolidated installation remains consolidated.
+NVM path present. On 2026-09-09, 4.8.0 validated both PROD and SIT configuration
+files with zero issues and completed Shopify CLI Function builds for the
+Discount Function and Cart Transform. Their optimized configured outputs were
+190,215 bytes and 250,491 bytes respectively. This is still mixed global state
+until 4.8.0 also completes a stopped-dev full app build and fresh dev-preview check.
+Re-run `command -v`, `type -a`, and `shopify version` after every automatic
+upgrade; do not assume a previously consolidated installation remains
+consolidated.
 
 Treat dev, auth, or schema results from any future mixed state as unreliable.
 Do not pin an absolute executable inside project scripts; remove or unlink a

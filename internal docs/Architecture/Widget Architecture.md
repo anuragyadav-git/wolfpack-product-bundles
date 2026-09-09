@@ -501,6 +501,15 @@ the following step without owning Shopify caching, request deduplication, or a
 platform contract, and could fetch product data the shopper never viewed.
 Foreground loading and its fail-closed error surface remain the sole authority.
 
+This is consistent with Shopify's storefront performance guidance to load app
+code only where it is needed, keep JavaScript work small, and reserve preload
+for critical assets that the current page requires. Shopify does not define a
+theme-app-extension contract for speculatively hydrating a future bundle step.
+The decision to remove `preloadNextStep()` is therefore an application-level
+inference from those documented principles, not a claim that Shopify exposes a
+step-preload API. See [Storefront performance](https://shopify.dev/docs/apps/build/performance/storefront)
+and [Use defer and async on non-critical scripts](https://shopify.dev/docs/storefronts/themes/best-practices/performance/defer-scripts).
+
 ### Native product-form actions
 
 When the PPB block's **Hide native buttons** setting is enabled, the block hides
