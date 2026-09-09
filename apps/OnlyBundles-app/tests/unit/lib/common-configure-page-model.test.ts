@@ -55,13 +55,16 @@ describe("common configure page model", () => {
     ).toBe("settings");
   });
 
-  it("uses the Polaris upload icon for the per-bundle media editor", () => {
-    expect(
-      buildConfigureSetupItems("product_page").find(
-        (item) => item.id === "images_gifs",
-      )?.iconType,
-    ).toBe("upload");
-  });
+  it.each(["full_page", "product_page"] as const)(
+    "uses the Polaris image icon for the %s per-bundle media editor",
+    (bundleType) => {
+      expect(
+        buildConfigureSetupItems(bundleType).find(
+          (item) => item.id === "images_gifs",
+        )?.iconType,
+      ).toBe("image");
+    },
+  );
 
   it("keeps Bundle Embed as a PPB-only visibility child", () => {
     expect(buildBundleVisibilityChildItems("full_page")).toEqual([

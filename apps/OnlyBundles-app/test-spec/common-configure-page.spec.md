@@ -5,7 +5,7 @@ title: Common Configure Page Test Spec
 type: test-spec
 status: active
 summary: Behavioral coverage for the shared FPB and PPB configure-page model and dispatch contracts.
-last_audited: 2026-08-14
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -23,6 +23,7 @@ tags:
 keywords:
   - bundle-settings
   - settings-icon
+  - image-icon
 ---
 
 # Test Spec: Common Configure Page
@@ -49,6 +50,7 @@ Verify the shared FPB/PPB configure page model and dispatch behavior without ass
 | 12 | PPB Bundle Settings slots | `bundleType: product_page` | Shared default-products, quantity, summary text plus PPB-only variant selector, discount display, banner, CSS, subscription, and embed/place-widget slots | Bundle Settings adapter contract |
 | 13 | PPB category variant update | categories plus `displayVariantsAsIndividualProducts=true` | All categories update that PPB category field and preserve other category data | Shared slot behavior |
 | 14 | Bundle Settings navigation icon | FPB and PPB setup models | Bundle Settings uses the Polaris `settings` icon type | Shared navigation contract |
+| 15 | Images & GIFs navigation icon | FPB and PPB setup models | Images & GIFs uses the Polaris `image` icon type | Shared navigation contract |
 
 ### ConfigureActionDispatch
 | # | Scenario | Input | Expected Output | Notes |
