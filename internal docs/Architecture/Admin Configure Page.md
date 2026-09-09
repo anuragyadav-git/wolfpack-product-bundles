@@ -328,8 +328,11 @@ configure-state hydration.
 `CommonConfigureShell` owns the named `bundle-configure` query container. FPB
 remains the canonical visual source while PPB supplies route-owned state and
 controls through adapters and slots. Narrow containers stack the editor into one
-column, keep fields shrinkable with `min-width: 0`, expose 44px action targets,
-and reserve bottom space for Shopify's contextual save bar.
+column, keep fields shrinkable with `min-width: 0`, and expose 44px action
+targets. On wide containers, the sticky left rail participates in the page's
+vertical scroll; it must not cap itself to the viewport or create a nested
+scrollbar when a navigation section expands. Shopify owns the contextual save
+bar at the top of the Admin surface on both desktop and mobile.
 
 `BundleReadinessOverlay` is secondary, contextual information, so its checklist
 uses an anchored Polaris `s-popover` instead of a blocking modal. Wide
