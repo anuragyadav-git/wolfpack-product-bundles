@@ -13,6 +13,30 @@ If existing project logic conflicts with Shopify's current recommended approach,
 3. **Do not touch unrelated code.** If a file or function is not part of the current task, do not modify it even if you think it could be improved.
 4. **Flag uncertainty explicitly.** If you are not confident about an approach or technical detail, say so before proceeding. Confidence without certainty causes damage.
 
+### Open/Closed and Cohesion Rule
+
+Do not use file length, line-count tests, or oversized-file allowlists as
+architecture gates. They measure formatting and encourage arbitrary extraction
+without proving that the design or behavior improved.
+
+Keep a module cohesive even when it is long. Split it only when the extracted
+unit has a distinct responsibility, data owner, lifecycle, platform boundary,
+or behavior that can be named and verified independently. A good split should
+reduce the dependencies needed to understand or change each owner; moving JSX
+or logic behind a large pass-through prop bag solely to shorten a file is not an
+improvement.
+
+Apply the Open/Closed Principle at real variation points: keep stable owners
+closed to unrelated edits and add a narrow typed component, adapter, strategy,
+or handler when a new Shopify surface, bundle type, pricing method, or workflow
+truly varies. Prefer direct imports and explicit feature props. Do not create a
+generic abstraction for code that only looks similar or is expected to have
+different bundle-type semantics.
+
+Tests must protect behavior, public contracts, validation, persistence, and
+integration wiring. Do not add tests that inspect source length, file names,
+internal class names, or the mere presence or absence of implementation text.
+
 ---
 
 ## Architecture and Gotcha Documentation
@@ -236,6 +260,50 @@ Let me know once it completes.
 
 The root npm scripts delegate deployment to `apps/OnlyBundles-app` — never call `shopify app deploy` directly.
 
+## 🧰 Global Shopify CLI Rule
+
+Use the installed global Shopify CLI directly for local Shopify validation:
+
+```bash
+command -v shopify
+type -a shopify
+shopify version
+shopify app build --help
+```
+
+Do not invoke Shopify CLI through `npx`, `pnpx`, or a project-local package.
+This development machine currently resolves `shopify` from the active Node
+installation under `~/.nvm/`; always use `command -v shopify` instead of
+hardcoding that versioned path. Confirm the required subcommand with its own
+`--help` output before relying on it. If a listed command is unexpectedly
+unavailable, check for multiple installations before diagnosing the command
+surface itself.
+
+Keep exactly one global Shopify CLI installation active. Before diagnosing a
+CLI-only failure, run `type -a shopify`; an npm/NVM installation and a Homebrew
+installation can coexist and make the parent command and its subprocesses
+report or execute different versions. Do not hardcode one absolute binary to
+work around this. Stop, record both paths and versions, and consolidate the
+installations with explicit user approval before trusting dev/build evidence.
+
+Re-run `command -v shopify`, `type -a shopify`, and `shopify version` after any
+CLI command that reports an automatic upgrade. The upgrade uses the npm prefix
+resolved by that process and can recreate a second global installation even
+after a previous consolidation. On 2026-09-09, the active NVM-owned CLI reported
+4.7.1 while `/opt/homebrew/bin/shopify` reported 4.8.0. Treat that verified
+two-installation state as mixed until the retained version passes both
+app-configuration validations, a stopped-dev full app build, and a fresh
+dev-preview check; only then remove the dormant copy with the user's approval.
+
+For Shopify Function builds, Shopify CLI remains the platform-level validation
+owner, while the extension's `extensions.build.command` owns compilation. Do
+not weaken or delete valid app configuration merely to make an older or
+inconsistent local CLI parser pass. Record that CLI validation as blocked,
+retain the exact failure, and still run the configured compiler command and
+Function behavior tests as separate local evidence.
+
+This rule does not authorize deployment. The Shopify Deploy Rule still applies.
+
 ## 🔄 Deployment General Sync Rule
 
 Deployment scripts run `npm run deployment:general-sync` after Shopify deploy.
@@ -293,6 +361,90 @@ npm run dev:sit
 ```
 
 Do not run dev against `apps/OnlyBundles-app/shopify.web.toml` / the production Shopify app configuration.
+
+Do not run `shopify app build` while `shopify app dev` is active. With the
+global Shopify CLI 4.7.1, the standalone build can reuse and rewrite the active
+`.shopify/dev-bundle` workspace instead of producing an independent deploy
+bundle. The Admin Dev Console can then lose its **Connected** state even though
+the CLI, Remix, and Cloudflare child processes remain alive, and the theme
+extension preview can continue resolving an unpublished CDN handle. Stop the
+dev process before a full app build; restart `npm run dev:sit` after the build
+and open the preview emitted by that new session.
+
+### Stale theme-extension preview handles
+
+Restarting `npm run dev:sit` can leave an already-open storefront tab attached to
+the previous Shopify theme-extension preview session. The visible product or
+app-proxy URL can remain identical while Shopify resolves `asset_url` references
+through an obsolete `/extensions/.../dev-<handle>/...` path.
+
+Recognize this state by all of the following evidence:
+
+- The embedded Admin dev console is connected to the new tunnel, but storefront
+  theme-extension JS/CSS requests still use the earlier `dev-<handle>`.
+- Those requests return `404` or `net::ERR_BLOCKED_BY_ORB`.
+- A deployed production extension asset may still load, so
+  `window.__BUNDLE_WIDGET_VERSION__` reports an older version and the widget can
+  remain on its loading surface.
+
+Do not diagnose widget logic from that stale page, and do not rely on a normal
+or cache-bypassed reload to replace the preview session. Open the bundle again
+with the Admin **Preview Bundle** / **Preview in store** action, or open the
+fresh storefront preview from the active Shopify CLI session (normally `p` in
+the terminal). Then:
+
+1. Clear Cache Storage and hard-reload with cache bypass.
+2. Confirm the theme-extension `dev-<handle>` changed and its JS/CSS responses
+   are `200`.
+3. Confirm `window.__BUNDLE_WIDGET_VERSION__` matches the local build.
+4. Confirm the bootstrap/loading marker clears before gathering storefront
+   behavior or visual evidence.
+
+A fresh Admin preview is a diagnostic, not a repair guarantee. Shopify can
+render a new product document that still references the same invalid remote
+`dev-<handle>`. If every asset under that handle returns Shopify's CDN 404
+(Chrome reports `net::ERR_BLOCKED_BY_ORB`) while the files exist in
+`.shopify/dev-bundle`, the active remote dev preview is stale or incomplete.
+Disabling the app embed does not repair it: a PPB app block loads its own assets
+from the same theme-extension version. Stop the dev process, clean the SIT
+preview with `shopify app dev clean --config
+shopify.app.wolfpack-product-bundles-sit.toml`, restart with `npm run dev:sit`,
+and open the CLI's fresh preview before repeating the cache-cleared checks. Do
+not run `app dev clean` against a live dev process, and do not uninstall either
+app to repair a preview handle.
+
+Also check for duplicate app-embed metadata before trusting app-proxy evidence.
+If both production and SIT app embeds are enabled on the same theme, the current
+dev PPB block can render while the deployed production embed still issues its
+own settings requests. Because both embeds publish shared storefront runtime
+state, script load order can also make the current PPB widget use the other
+environment's proxy root and remain hidden after bootstrap. Opening Preview
+Bundle creates a new document and can change that order, so an apparently fixed
+widget after that click is intermittent evidence—not proof that the earlier
+product URL was stale. Inspect every `[data-wpb-app-embed]` owner and its proxy
+root. Do not attribute a request from `/apps/product-bundles` to SIT when SIT
+owns `/apps/product-bundles-sit`.
+
+Do not uninstall the other app merely to switch test environments. Shopify owns
+app-embed and app-block activation as theme configuration, while uninstalling
+removes the app's theme resources and exercises a different lifecycle. Use this
+environment-isolation order:
+
+1. Prefer a separate Shopify dev/test store for each app environment.
+2. When one store must host both apps concurrently, dedicate separate themes to
+   them. A PROD theme contains only PROD app embeds and app blocks; an
+   unpublished/development SIT theme contains only SIT app embeds and app
+   blocks. Preview the selected theme explicitly.
+3. When testing both apps sequentially on the same theme, disable the dormant
+   app embed and remove or disable its app blocks before enabling the app under
+   test. Save the theme, open the environment's current preview action, clear
+   Cache Storage, and hard-reload with cache bypass.
+
+Stopping `shopify app dev` does not clean its dev preview. Before switching from
+a local SIT preview back to the released extension, use Shopify's **Clean dev
+preview** action or run `shopify app dev clean` with the SIT app configuration.
+This restores the app's released version; it is not a substitute for toggling
+the correct theme embed, and it is not the same as uninstalling the app.
 
 ---
 
@@ -660,5 +812,5 @@ Always `select_page` to the **iframe target** before `evaluate_script`. For thir
 
 ---
 
-**Last Updated:** 2026-07-29
+**Last Updated:** 2026-09-09
 **Author:** Aditya Awasthi
