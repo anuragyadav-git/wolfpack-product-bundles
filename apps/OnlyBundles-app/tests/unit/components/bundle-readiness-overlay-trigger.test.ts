@@ -280,6 +280,57 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(onItemClick).not.toHaveBeenCalled();
   });
 
+  it("consumes an outside action click when it light-dismisses the popover", () => {
+    const outsideAction = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(BundleReadinessOverlay, {
+            items: [
+              {
+                key: "product_active",
+                label: "Set Parent Product to Active",
+                description: "Publish the product",
+                points: 15,
+                done: false,
+              },
+            ],
+          }),
+          React.createElement(
+            "button",
+            {type: "button", onClick: outsideAction},
+            "Edit Product",
+          ),
+        ),
+      );
+    });
+
+    const popover = container.querySelector("s-popover");
+    const editProduct = Array.from(
+      container.querySelectorAll<HTMLButtonElement>("button"),
+    ).find((button) => button.textContent === "Edit Product");
+    expect(editProduct).toBeDefined();
+
+    flushSync(() => {
+      popover?.dispatchEvent(new Event("show", {bubbles: true}));
+      editProduct?.dispatchEvent(new MouseEvent("pointerdown", {bubbles: true}));
+      popover?.dispatchEvent(new Event("hide", {bubbles: true}));
+      editProduct?.dispatchEvent(new MouseEvent("pointerup", {bubbles: true}));
+      editProduct?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    });
+
+    expect(outsideAction).not.toHaveBeenCalled();
+
+    flushSync(() => {
+      editProduct?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    });
+
+    expect(outsideAction).toHaveBeenCalledTimes(1);
+  });
+
   it("does not activate a completed checklist item", () => {
     const onItemClick = jest.fn();
 
