@@ -5,21 +5,23 @@ import {
 import {
   DESIGN_PREVIEW_FIXTURE,
   DESIGN_PREVIEW_TEMPLATES,
-  DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
   buildDesignPreviewStorefrontCss,
-  calculateDesignPreviewFitScale,
-  getDesignPreviewCanvasSize,
-  getDesignPreviewFitPresentation,
   getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
   getDesignPreviewScene,
-  getDesignPreviewContextFidelity,
   getSupportedDesignPreviewAreas,
   getSupportedDesignPreviewScenarios,
   getDesignFieldsForPreviewContext,
   isDesignPreviewFieldApplicable,
 } from "../../../app/routes/app/app.settings/design-preview-model";
+import {
+  DESIGN_PREVIEW_VIEWPORTS,
+  calculateDesignPreviewFitScale,
+  getDesignPreviewCanvasSize,
+  getDesignPreviewContextFidelity,
+  getDesignPreviewFitPresentation,
+} from "../../../app/routes/app/app.settings/design-preview-layout";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 

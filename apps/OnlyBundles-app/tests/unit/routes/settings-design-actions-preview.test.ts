@@ -9,8 +9,8 @@ import {
   togglePreviewMobileSummary,
   triggerPreviewDiscountFeedback,
   updatePreviewProductQuantity,
-} from "../../../app/routes/app/app.settings/DesignLivePreview";
-import { calculateDesignPreviewFitScale } from "../../../app/routes/app/app.settings/design-preview-model";
+} from "../../../app/routes/app/app.settings/design-preview-state";
+import { calculateDesignPreviewFitScale } from "../../../app/routes/app/app.settings/design-preview-layout";
 import {
   isPolarisHexColorInput,
   isPolarisNumberInput,

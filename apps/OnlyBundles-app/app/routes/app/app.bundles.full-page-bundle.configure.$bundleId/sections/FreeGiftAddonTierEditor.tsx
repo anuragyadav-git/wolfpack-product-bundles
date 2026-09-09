@@ -11,8 +11,6 @@ import {
 import type { AddonTierDraft } from "../addon-draft.types";
 import { FpbAddonTierRules } from "./FpbAddonTierRules";
 
-export type { AddonTierDraft } from "../addon-draft.types";
-
 export function FpbAddonTierEditor({
   activeTierIndex,
   tiers,

@@ -32,7 +32,7 @@ jest.mock("../../../app/components/analytics/TopCampaigns", () => ({
 describe("BackfillWindowModal", () => {
   it("explains the selected-window reconciliation before submission", async () => {
     const { BackfillWindowModal } = await import(
-      "../../../app/routes/app/app.attribution/AttributionDashboard"
+      "../../../app/routes/app/app.attribution/AttributionDateRangeControls"
     );
 
     const view = renderToStaticMarkup(
@@ -53,7 +53,7 @@ describe("BackfillWindowModal", () => {
 
   it("shows an explicit custom date range", async () => {
     const { BackfillWindowModal } = await import(
-      "../../../app/routes/app/app.attribution/AttributionDashboard"
+      "../../../app/routes/app/app.attribution/AttributionDateRangeControls"
     );
 
     const view = renderToStaticMarkup(

@@ -20,7 +20,7 @@ import {
 import type {
   DesignPreviewArea,
   DesignPreviewScenario,
-} from "../../app/app.settings/design-preview-model";
+} from "../../app/app.settings/design-preview-contract";
 import {
   createStorefrontPreviewOverlayHost,
   getStorefrontPreviewRendererKey,

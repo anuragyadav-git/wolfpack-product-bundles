@@ -25,35 +25,6 @@ import type {
   DesignPreviewViewport,
 } from "./design-preview-contract";
 
-export type {
-  DesignPreviewArea,
-  DesignPreviewAvailableSize,
-  DesignPreviewCategories,
-  DesignPreviewContext,
-  DesignPreviewContextFidelity,
-  DesignPreviewContextKind,
-  DesignPreviewFamily,
-  DesignPreviewFieldTarget,
-  DesignPreviewFixture,
-  DesignPreviewFixtureProduct,
-  DesignPreviewNavigation,
-  DesignPreviewProductCardContract,
-  DesignPreviewScenario,
-  DesignPreviewScene,
-  DesignPreviewSummary,
-  DesignPreviewTemplateDescriptor,
-  DesignPreviewTheme,
-  DesignPreviewViewport,
-} from "./design-preview-contract";
-
-export {
-  DESIGN_PREVIEW_VIEWPORTS,
-  calculateDesignPreviewFitScale,
-  getDesignPreviewCanvasSize,
-  getDesignPreviewContextFidelity,
-  getDesignPreviewFitPresentation,
-} from "./design-preview-layout";
-
 type RuntimeTemplateConfig = {
   productCard?: {
     mode?: string;

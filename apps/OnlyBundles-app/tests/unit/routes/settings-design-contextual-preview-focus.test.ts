@@ -3,7 +3,7 @@ import {
   setDesignPreviewArea,
   setDesignPreviewScenario,
   setDesignPreviewTemplate,
-} from "../../../app/routes/app/app.settings/DesignLivePreview";
+} from "../../../app/routes/app/app.settings/design-preview-state";
 import { getStorefrontPreviewRendererKey } from "../../../app/routes/app/app.settings/storefront-preview-interactions";
 import {
   DESIGN_PREVIEW_TEMPLATES,

@@ -1,5 +1,5 @@
-import type { CSSDesignSettings } from "../lib/css-generators";
 import { generateCSSFromSettings } from "../lib/css-generators";
+import type { CSSDesignSettings } from "../lib/css-generators/types";
 import { sanitizeCss } from "../lib/css-sanitizer";
 import { BundleType } from "../constants/bundle";
 import { buildSettingsControlsResponse } from "../lib/settings-controls-runtime";

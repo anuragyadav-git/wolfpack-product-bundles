@@ -2,10 +2,12 @@ import type { BundleContractType, TemplateKey } from "../../../lib/bundle-config
 import {
   getSupportedDesignPreviewAreas,
   getSupportedDesignPreviewScenarios,
-  type DesignPreviewArea,
-  type DesignPreviewScenario,
-  type DesignPreviewViewport,
 } from "./design-preview-model";
+import type {
+  DesignPreviewArea,
+  DesignPreviewScenario,
+  DesignPreviewViewport,
+} from "./design-preview-contract";
 
 export const PREVIEW_PROTOCOL_VERSION = 2 as const;
 

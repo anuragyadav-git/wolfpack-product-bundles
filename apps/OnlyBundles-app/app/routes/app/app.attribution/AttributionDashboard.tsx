@@ -20,8 +20,6 @@ import {
   DateRangeSelector,
 } from "./AttributionDateRangeControls";
 
-export { BackfillWindowModal } from "./AttributionDateRangeControls";
-
 type AttributionDashboardViewData = Omit<
   AttributionDashboardData,
   "from" | "to" | "accessMode"

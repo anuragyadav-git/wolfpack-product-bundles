@@ -9,14 +9,18 @@ import type {
 } from "../../../lib/bundle-config/template-selection";
 import {
   DESIGN_PREVIEW_TEMPLATES,
-  DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewStorefrontCss,
+  getDefaultDesignPreviewArea,
+} from "./design-preview-model";
+import type {
+  DesignPreviewArea,
+  DesignPreviewScenario,
+} from "./design-preview-contract";
+import {
+  DESIGN_PREVIEW_VIEWPORTS,
   getDesignPreviewCanvasSize,
   getDesignPreviewFitPresentation,
-  getDefaultDesignPreviewArea,
-  type DesignPreviewArea,
-  type DesignPreviewScenario,
-} from "./design-preview-model";
+} from "./design-preview-layout";
 import styles from "./DesignSettingsView.module.css";
 import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
 import {
@@ -35,35 +39,6 @@ import {
   setDesignPreviewTemplate,
   setDesignPreviewViewport,
   type DesignPreviewState,
-} from "./design-preview-state";
-
-export { DESIGN_PREVIEW_TEMPLATES } from "./design-preview-model";
-export type { DesignPreviewViewport } from "./design-preview-model";
-export {
-  advancePreviewProgress,
-  clearPreviewDiscountFeedback,
-  createDesignPreviewState,
-  createPreviewInteractionState,
-  getDefaultTemplateKey,
-  getPreviewSelectionSummary,
-  isDesignPreviewAreaSupported,
-  isDesignPreviewScenarioSupported,
-  isTemplateValidForBundleType,
-  retreatPreviewProgress,
-  selectPreviewCategory,
-  setDesignPreviewArea,
-  setDesignPreviewBundleType,
-  setDesignPreviewScenario,
-  setDesignPreviewTemplate,
-  setDesignPreviewViewport,
-  setPreviewProductQuantity,
-  togglePreviewMobileSummary,
-  triggerPreviewDiscountFeedback,
-  updatePreviewProductQuantity,
-} from "./design-preview-state";
-export type {
-  DesignPreviewState,
-  PreviewInteractionState,
 } from "./design-preview-state";
 
 export function DesignLivePreview({

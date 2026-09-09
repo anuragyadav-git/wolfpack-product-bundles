@@ -10,7 +10,7 @@ import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server"
 import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
 import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
 import { buildOfferDecisionMarker } from "../../lib/offer-policy-decision";
-import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer";
 
 /**
  * Public API endpoint to fetch a single bundle by ID

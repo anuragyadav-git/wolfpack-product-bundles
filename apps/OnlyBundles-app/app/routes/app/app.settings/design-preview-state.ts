@@ -8,10 +8,12 @@ import {
   getDefaultDesignPreviewArea,
   getSupportedDesignPreviewAreas,
   getSupportedDesignPreviewScenarios,
-  type DesignPreviewArea,
-  type DesignPreviewScenario,
-  type DesignPreviewViewport,
 } from "./design-preview-model";
+import type {
+  DesignPreviewArea,
+  DesignPreviewScenario,
+  DesignPreviewViewport,
+} from "./design-preview-contract";
 
 export type DesignPreviewState = {
   bundleType: BundleContractType;

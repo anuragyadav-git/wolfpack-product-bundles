@@ -14,9 +14,6 @@ import { generateFooterCSS } from "./footer-generator";
 import { generateModalCSS } from "./modal-generator";
 import { generateResponsiveCSS } from "./responsive-generator";
 
-// Re-export the settings contract consumed outside this owner.
-export type { CSSDesignSettings } from "./types";
-
 /**
  * Generate complete CSS from design settings
  *
