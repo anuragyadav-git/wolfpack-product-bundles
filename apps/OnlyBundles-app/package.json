@@ -35,7 +35,6 @@
     "generate:prisma": "prisma generate --schema prisma/schema.prisma",
     "graphql-codegen": "graphql-codegen",
     "vite": "vite",
-    "webhook-worker": "tsx scripts/webhook-worker.ts",
     "bulk-sync": "tsx scripts/bulk-sync-bundles.ts",
     "deployment:general-sync": "tsx scripts/deployment-general-sync.ts",
     "cart-transform:repair": "tsx scripts/cart-transform-repair.ts",

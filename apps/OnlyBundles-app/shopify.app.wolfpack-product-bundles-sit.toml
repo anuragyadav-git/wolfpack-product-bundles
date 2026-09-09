@@ -18,7 +18,7 @@ api_version = "2026-07"
   "app/scopes_update",
   "products/delete"
 ]
-  uri = "https://wolfpack-staging-pubsub-worker.onrender.com/webhooks"
+  uri = "/webhooks"
   compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
 
 # No-op required while Shopify's remote schema incorrectly requires Events.

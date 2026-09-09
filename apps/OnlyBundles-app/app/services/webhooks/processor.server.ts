@@ -1,7 +1,7 @@
 /**
  * Webhook Processor Service
  *
- * Processes webhooks delivered via Google Cloud Pub/Sub.
+ * Processes authenticated Shopify webhooks delivered through Inngest.
  * Handles product changes and GDPR compliance.
  *
  * Architecture:
@@ -32,7 +32,7 @@ import { isActiveWebhookTopic } from "./topics";
 
 /**
  * Main webhook processor entry point
- * Processes Pub/Sub messages from Google Cloud
+ * Processes the normalized message emitted by Remix webhook ingress.
  */
 export class WebhookProcessor {
   private static async markWebhookEvent(

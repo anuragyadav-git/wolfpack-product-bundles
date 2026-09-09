@@ -5,8 +5,8 @@ import type { ShopifyWebhookEvents } from "./types";
  * Shared Inngest client.
  *
  * Used by:
- *  - Webhook worker  → inngest.send() to enqueue events
- *  - Remix app       → serve() to register functions at /api/inngest
+ *  - Remix /webhooks action → inngest.send() to enqueue events
+ *  - Remix /api/inngest route → serve() to register functions
  *
  * Dev mode: set INNGEST_DEV=1 to route events to the local Inngest Dev Server
  * (npx inngest-cli@latest dev) instead of Inngest Cloud. No signing key required.
