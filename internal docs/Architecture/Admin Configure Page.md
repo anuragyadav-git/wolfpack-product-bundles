@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -342,10 +342,15 @@ that control and expose a native `s-button` beside Preview Bundle. Both use
 programmatically on page load. Shopify owns placement, Escape and outside
 dismissal, keyboard activation, and trigger-focus restoration. The checklist
 owns its bounded internal scroll region and does not repeat the score gauge
-inside the open surface. The app listens to the popover's `show` and `hide`
-events once to synchronize route-owned open state; `afterhide` is a later phase
-of the same close and must not repeat cleanup. `LocalAppModal` and configure
-multi-language workflows remain modal because they are blocking tasks.
+inside the open surface. Each incomplete checklist `s-clickable` owns its
+action through its click handler while `commandFor` only asks Shopify to hide
+the popover. Never dispatch checklist actions from the popover's `command`
+event: light dismissal can participate in the same command lifecycle and must
+not open an unrelated Shopify intent. The app listens to the popover's `show`
+and `hide` events once to synchronize route-owned open state; `afterhide` is a
+later phase of the same close and must not repeat cleanup. `LocalAppModal` and
+configure multi-language workflows remain modal because they are blocking
+tasks.
 
 ## Admin Warning Presentation Contract
 

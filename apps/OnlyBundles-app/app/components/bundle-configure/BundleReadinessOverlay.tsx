@@ -94,25 +94,14 @@ export function BundleReadinessOverlay({
 
     const handleShow = () => syncExpandedState(true);
     const handleHide = () => syncExpandedState(false);
-    const handleCommand = (event: Event) => {
-      if (!onItemClick) return;
-      const source = (event as Event & { source?: Element }).source;
-      const key = source?.getAttribute("data-readiness-key");
-      if (!key) return;
-
-      syncExpandedState(false);
-      onItemClick(key);
-    };
     popover.addEventListener("show", handleShow);
     popover.addEventListener("hide", handleHide);
-    popover.addEventListener("command", handleCommand);
 
     return () => {
       popover.removeEventListener("show", handleShow);
       popover.removeEventListener("hide", handleHide);
-      popover.removeEventListener("command", handleCommand);
     };
-  }, [onItemClick, syncExpandedState]);
+  }, [syncExpandedState]);
 
   useEffect(() => {
     if (open === false && expandedRef.current) {
@@ -258,10 +247,14 @@ export function BundleReadinessOverlay({
                         : undefined
                     }
                     command={showActionChevron ? "--hide" : undefined}
-                    data-readiness-key={
-                      showActionChevron ? item.key : undefined
+                    onClick={
+                      showActionChevron
+                        ? () => {
+                            syncExpandedState(false);
+                            onItemClick?.(item.key);
+                          }
+                        : undefined
                     }
-                    data-readiness-incomplete={!item.done || undefined}
                     accessibilityLabel={t("common.readiness.itemAccessibility", {
                       label: item.label,
                     })}

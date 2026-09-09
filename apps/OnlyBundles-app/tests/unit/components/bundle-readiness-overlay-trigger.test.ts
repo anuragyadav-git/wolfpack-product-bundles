@@ -200,7 +200,7 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
   });
 
-  it("closes before activating an incomplete checklist item", () => {
+  it("closes before activating a deliberately clicked incomplete checklist item", () => {
     const onItemClick = jest.fn();
     const onOpenChange = jest.fn();
 
@@ -236,10 +236,8 @@ describe("BundleReadinessOverlay trigger", () => {
     );
     expect(action?.getAttribute("command")).toBe("--hide");
 
-    const commandEvent = new Event("command", {bubbles: true});
-    Object.defineProperty(commandEvent, "source", {value: action});
     flushSync(() => {
-      popover?.dispatchEvent(commandEvent);
+      action?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
     });
 
     expect(onItemClick).toHaveBeenCalledTimes(1);
@@ -248,6 +246,38 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(onOpenChange.mock.invocationCallOrder[1]).toBeLessThan(
       onItemClick.mock.invocationCallOrder[0],
     );
+  });
+
+  it("does not activate a checklist item when the popover is light-dismissed", () => {
+    const onItemClick = jest.fn();
+    const onOpenChange = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleReadinessOverlay, {
+          items: [
+            {
+              key: "product_active",
+              label: "Set Parent Product to Active",
+              description: "Publish the product",
+              points: 15,
+              done: false,
+            },
+          ],
+          onItemClick,
+          onOpenChange,
+        }),
+      );
+    });
+
+    const popover = container.querySelector("s-popover");
+    flushSync(() => {
+      popover?.dispatchEvent(new Event("show", {bubbles: true}));
+      popover?.dispatchEvent(new Event("hide", {bubbles: true}));
+    });
+
+    expect(onOpenChange.mock.calls).toEqual([[true], [false]]);
+    expect(onItemClick).not.toHaveBeenCalled();
   });
 
   it("does not activate a completed checklist item", () => {
