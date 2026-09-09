@@ -5,7 +5,7 @@ title: Build Process
 type: operations
 status: authoritative
 summary: Global Shopify CLI, Function, asset, lint, and pre-commit requirements for deployable application and storefront builds.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -74,11 +74,16 @@ configuration validation passed.
 
 A later `app config validate` automatically upgraded the CLI. The command began
 from NVM-owned 4.7.1, installed 4.8.0 under `/opt/homebrew`, and left the older
-NVM path present. On 2026-09-09, 4.8.0 validated both PROD and SIT configuration
-files with zero issues and completed Shopify CLI Function builds for the
-Discount Function and Cart Transform. Their optimized configured outputs were
-190,215 bytes and 250,491 bytes respectively. This is still mixed global state
-until 4.8.0 also completes a stopped-dev full app build and fresh dev-preview check.
+NVM path present. On 2026-09-10, the global command resolved to 4.8.0, validated
+both PROD and SIT configuration files with zero issues, and completed the full
+SIT app build. The Discount Function and Cart Transform compiled to optimized
+WASM outputs of 206,933 bytes and 280,301 bytes respectively; the theme,
+checkout, product-configuration, pixel, and Sidekick extensions also built.
+After the build, a cache-bypassed Agent-store PPB configure reload completed
+through the live SIT tunnel and the Shopify Dev Console remained connected with
+the Function and extension surfaces registered. The older NVM-owned 4.7.1
+package was then removed with explicit user approval. `type -a shopify` now
+resolves only `/opt/homebrew/bin/shopify`, which reports 4.8.0.
 Re-run `command -v`, `type -a`, and `shopify version` after every automatic
 upgrade; do not assume a previously consolidated installation remains
 consolidated.

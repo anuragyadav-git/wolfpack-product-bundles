@@ -289,11 +289,12 @@ installations with explicit user approval before trusting dev/build evidence.
 Re-run `command -v shopify`, `type -a shopify`, and `shopify version` after any
 CLI command that reports an automatic upgrade. The upgrade uses the npm prefix
 resolved by that process and can recreate a second global installation even
-after a previous consolidation. On 2026-09-09, the active NVM-owned CLI reported
-4.7.1 while `/opt/homebrew/bin/shopify` reported 4.8.0. Treat that verified
-two-installation state as mixed until the retained version passes both
-app-configuration validations, a stopped-dev full app build, and a fresh
-dev-preview check; only then remove the dormant copy with the user's approval.
+after a previous consolidation. On 2026-09-10, Homebrew CLI 4.8.0 passed both
+app-configuration validations, the full SIT app build, and a cache-bypassed
+Agent-store dev-preview check with the Dev Console connected. The older
+NVM-owned 4.7.1 package was then removed with the user's approval.
+`type -a shopify` now resolves only `/opt/homebrew/bin/shopify`, which reports
+4.8.0.
 
 For Shopify Function builds, Shopify CLI remains the platform-level validation
 owner, while the extension's `extensions.build.command` owns compilation. Do
@@ -484,16 +485,17 @@ Do not keep the bridge in committed runtime code after the measurement cycle. If
 
 ## 🔧 Widget Bundle Build Process
 
-**ALWAYS build after modifying these source files:**
+**ALWAYS build after modifying the source graph rooted at these entrypoints:**
 
 Widget sources → `npm run build:widgets`:
-- `apps/OnlyBundles-app/app/assets/bundle-widget-components.js`
-- `apps/OnlyBundles-app/app/assets/bundle-modal-component.js`
-- `apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js`
-- `apps/OnlyBundles-app/app/assets/bundle-widget-product-page.js`
+- `apps/OnlyBundles-app/app/storefront/full-page.ts`
+- `apps/OnlyBundles-app/app/storefront/product-page.ts`
+- `apps/OnlyBundles-app/app/storefront/app-embed.ts`
+- their imports under `apps/OnlyBundles-app/app/assets/`
 
 SDK sources → `npm run build:sdk`:
-- `apps/OnlyBundles-app/app/assets/sdk/` (state.js, events.js, config-loader.js, cart.js, validate-bundle.js, get-display-price.js, debug.js, wolfpack-bundles.js)
+- `apps/OnlyBundles-app/app/storefront/sdk.ts`
+- its imports under `apps/OnlyBundles-app/app/assets/sdk/`
 - Output: `apps/OnlyBundles-app/extensions/bundle-builder/assets/wolfpack-bundles-sdk.js`
 
 **Build commands:**
@@ -504,14 +506,16 @@ npm run build:widgets:product-page
 npm run build:sdk
 ```
 
-**Raw widget JS syntax check:** after editing raw storefront widget JS, run `node --check <file>` before commit.
+The raw storefront sources are TypeScript, so `npm run typecheck` validates
+them. After building, run `node --check` against the generated JavaScript that
+Shopify will serve:
 
 Examples:
 ```bash
-node --check apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js
-node --check apps/OnlyBundles-app/app/assets/bundle-widget-product-page.js
-node --check apps/OnlyBundles-app/app/assets/bundle-modal-component.js
-node --check apps/OnlyBundles-app/app/assets/bundle-widget-components.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-app-embed.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/wolfpack-bundles-sdk.js
 ```
 
 **Forgetting to build = changes won't appear in the storefront.**
@@ -569,22 +573,22 @@ Storefront asset strategy: theme/app-extension Liquid must load storefront JS/CS
 
 ## 🚨 Do Not Touch — Bundle Config Loading (FPB Widget)
 
-**NEVER modify the bundle config loading priority order in `bundle-widget-full-page.js`.**
+**NEVER modify the bundle config loading priority order in `loadBundleData()`.**
 
 Two-stage load strategy:
-1. **Stage 1 — Metafield cache (primary):** Liquid block writes config into `data-bundle-config` attribute. Widget reads on init — zero network, instant first paint.
-2. **Stage 2 — Proxy API fallback:** If metafield absent/empty/malformed, falls back to `GET /apps/product-bundles/api/bundle/{id}.json` with single retry after 3s for `503`/`504` (Render cold-starts).
+1. **Stage 1 — App-proxy document marker (primary):** The signed `/wpb/{publicNumber}` route writes the complete, source-marked config into `data-bundle-config`. Widget reads it on init without a second bundle request.
+2. **Stage 2 — Proxy API fallback:** If the marker is absent, empty, malformed, or does not match the current bundle, fall back to `GET /apps/product-bundles/api/bundle/{id}.json` with one retry after 3s for `503`/`504` (Render cold-starts).
 
 **Rules:**
-- ❌ Do NOT remove or reorder the `data-bundle-config` check — must run before proxy fetch
+- ❌ Do NOT remove or reorder the source-marked `data-bundle-config` check — it must run before the fallback fetch
 - ❌ Do NOT remove `503`/`504` retry logic — Render cold-starts are 3–10s
 - ❌ Do NOT add a third source between Stage 1 and Stage 2
 - ✅ If bundle config structure changes, update server writer AND widget parser together
 
 **Relevant files:**
-- Widget: `apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js` — `loadBundleConfig()` (~line 325)
-- Liquid: `apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-full-page.liquid` — `data-bundle-config`
-- Server: `apps/OnlyBundles-app/app/services/bundles/metafield-sync/bundle-config-metafield.server.ts`
+- Widget: `apps/OnlyBundles-app/app/assets/widgets/full-page/methods/analytics-config-methods.ts` — `loadBundleData()`
+- App-proxy document: `apps/OnlyBundles-app/app/routes/root/wpb.$bundleId.tsx` — source-marked `data-bundle-config`
+- Formatter: `apps/OnlyBundles-app/app/lib/bundle-formatter.server.ts`
 
 ---
 
