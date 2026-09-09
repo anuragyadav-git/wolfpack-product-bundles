@@ -59,18 +59,16 @@ export function PpbBundleSettingsControls({
   stickyAddToCart,
 }: PpbBundleSettingsControlsProps) {
   return (
-    <div data-tour-target="ppb-bundle-status">
-      <s-stack direction="block" gap="base">
-        <PpbDefaultProductsSettings {...defaultProducts} />
-        <PpbQuantitySettings {...quantity} />
-        <PpbStickyAddToCartSettings {...stickyAddToCart} />
-        <PpbCountdownSettings {...countdown} />
-        <PpbCategoryStepSettings {...categorySteps} />
-        <PpbCartDiscountDisplaySettings {...discountDisplay} />
-        <PpbBundleBannerSettings {...banner} />
-        <PpbBundleLevelCssSettings {...bundleLevelCss} />
-        <PpbBundleStatusCard {...status} />
-      </s-stack>
-    </div>
+    <s-stack direction="block" gap="base">
+      <PpbDefaultProductsSettings {...defaultProducts} />
+      <PpbQuantitySettings {...quantity} />
+      <PpbStickyAddToCartSettings {...stickyAddToCart} />
+      <PpbCountdownSettings {...countdown} />
+      <PpbCategoryStepSettings {...categorySteps} />
+      <PpbCartDiscountDisplaySettings {...discountDisplay} />
+      <PpbBundleBannerSettings {...banner} />
+      <PpbBundleLevelCssSettings {...bundleLevelCss} />
+      <PpbBundleStatusCard {...status} />
+    </s-stack>
   );
 }

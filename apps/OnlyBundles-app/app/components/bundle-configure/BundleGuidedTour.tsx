@@ -29,7 +29,7 @@ const TOOLTIP_WIDTH = 420;
 const TOOLTIP_HEIGHT = 220;
 const SPOTLIGHT_PAD = 8;
 const VIEWPORT_PAD = 12;
-const MAX_TARGET_LOOKUP_FRAMES = 30;
+const MAX_TARGET_LOOKUP_FRAMES = 600;
 const STABLE_FRAME_COUNT = 4;
 const DESKTOP_VIEWPORT_MIN_WIDTH = 768;
 
@@ -74,6 +74,7 @@ export function BundleGuidedTour({
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
   const rafRef = useRef<number | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const onStepChangeRef = useRef(onStepChange);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const highlightedTargetRef = useRef<{
     el: HTMLElement;
@@ -82,6 +83,10 @@ export function BundleGuidedTour({
   } | null>(null);
 
   const storageKey = getBundleGuidedTourStorageKey(shop);
+
+  useEffect(() => {
+    onStepChangeRef.current = onStepChange;
+  }, [onStepChange]);
 
   useEffect(() => {
     const syncViewport = () => {
@@ -269,7 +274,7 @@ export function BundleGuidedTour({
     cleanupHighlightedTarget();
 
     const step = steps[currentStep];
-    onStepChange?.(step, currentStep);
+    onStepChangeRef.current?.(step, currentStep);
 
     if (!step?.targetSection) {
       showFallbackPosition();
@@ -313,7 +318,6 @@ export function BundleGuidedTour({
     visible,
     currentStep,
     steps,
-    onStepChange,
     queryTarget,
     highlightTarget,
     waitForStableTarget,
@@ -445,15 +449,15 @@ export function BundleGuidedTour({
         tabIndex={-1}
       >
         <div className={styles.tourHeader}>
-          <button
+          <s-button
             type="button"
-            className={styles.dismissTourLink}
+            variant="secondary"
             onClick={handleDismiss}
           >
             {translateAdmin(
               "adminExtracted.components.bundleConfigure.bundleguidedtour.dismissGuidedTour"
             )}
-          </button>
+          </s-button>
         </div>
         <div className={styles.progressTrack}>
           <div
@@ -470,11 +474,11 @@ export function BundleGuidedTour({
         <div className={styles.title}>{translateAdminCopy(step.title)}</div>
         <div className={styles.body}>{translateAdminCopy(step.body)}</div>
         <div className={styles.actions}>
-          <button type="button" className={styles.nextBtn} onClick={handleNext}>
+          <s-button type="button" variant="primary" onClick={handleNext}>
             {isLast
               ? translateAdmin("adminDynamic.gotIt")
               : `${translateAdmin("adminDynamic.next")} →`}
-          </button>
+          </s-button>
         </div>
       </div>
     </>

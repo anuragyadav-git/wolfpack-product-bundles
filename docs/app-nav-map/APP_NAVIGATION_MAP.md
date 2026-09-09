@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-09
+**Last Updated:** 2026-09-10
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -581,6 +581,7 @@ Responsive configure behavior:
 - The readiness score renders eagerly. Wide screens use only the floating 64px square trigger; phones hide it and show a native `s-button` in the same action row as Preview Bundle. Both open the same anchored Polaris popover through `commandFor`.
 - The non-blocking readiness popover contains only the checklist and readiness status, owns a bounded internal scroll region, and relies on Shopify for placement, Escape and outside dismissal, keyboard activation, and trigger-focus restoration. It never opens automatically on page load or repeats the score gauge inside the popover.
 - The guided configure tour is desktop-only and is suppressed below 768px; mobile retains the readiness popover without the tour overlay.
+- Guided-tour Step 2 highlights the desktop readiness control. Step 4 switches to Bundle Settings and highlights only Bundle Status for FPB and PPB.
 - Configure multi-language workflows share one staged Polaris `s-modal`; Apply updates route-owned draft state and Cancel/Escape/backdrop-close discard edits.
 - FPB and PPB expose curated visual help beside non-obvious setup, pricing, visibility, storefront, urgency, and subscription controls. Each info action opens the shared Polaris popover without changing configure state or activating the SaveBar.
 

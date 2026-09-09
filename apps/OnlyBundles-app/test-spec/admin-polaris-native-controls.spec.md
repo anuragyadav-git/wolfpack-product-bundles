@@ -5,7 +5,7 @@ title: Admin Polaris Native Controls Test Spec
 type: test-spec
 status: active
 summary: Defines native Polaris ownership for reusable Admin controls, ordinary actions, file selection, and modal behavior.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -29,6 +29,7 @@ source_paths:
   - app/routes/app/app.dashboard/DashboardResourcesCard.tsx
   - app/routes/app/app._index.tsx
   - app/components/bundle-configure/TemplateReadyScreen.tsx
+  - app/components/bundle-configure/BundleGuidedTour.tsx
   - app/components/bundle-configure/BundleReadinessOverlay.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsCss.tsx
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleSettingsControls.bundleCss.tsx
@@ -104,6 +105,7 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 | 29 | Open and choose an Analytics date range | Merchant opens the range trigger, chooses a preset, or applies a valid custom range | Polaris popover owns dismissal/focus, Polaris clickable chips select presets, and the existing URL query transition is preserved | No document-level outside-click listener |
 | 30 | Filter the Dashboard bundle list | Merchant chooses a status or bundle type | Native Polaris selects expose every supported option and preserve the route-local filter state | Avoid transient empty choice-list hydration warnings |
 | 31 | Open Dashboard support chat | Merchant activates the support CTA | Existing chat callback runs once and the icon action exposes its localized accessible name | Satisfies the Polaris icon-button contract |
+| 32 | Advance or dismiss the guided tour | Merchant activates Next, Got it, or Dismiss guided tour | Existing step, completion, dismissal, persistence, and focus-restoration behavior runs exactly once | The retained spotlight overlay uses native Polaris buttons for ordinary actions |
 
 ## Acceptance Criteria
 
@@ -122,3 +124,4 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 - [x] Analytics date selection delegates overlay and preset interaction to native Polaris components.
 - [x] Dashboard filters use native Polaris selects without empty choice-list warnings.
 - [x] Dashboard support chat exposes its localized accessibility label.
+- [x] Guided-tour actions use native Polaris buttons without changing the retained spotlight workflow.

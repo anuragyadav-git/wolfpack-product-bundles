@@ -35,22 +35,6 @@
   margin-bottom: 12px;
 }
 
-.dismissTourLink {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color 0.15s;
-}
-
-.dismissTourLink:hover {
-  color: white;
-}
-
 .progressTrack {
   height: 4px;
   background: rgba(255, 255, 255, 0.25);
@@ -94,37 +78,6 @@
   justify-content: flex-end;
   align-items: center;
   gap: 12px;
-}
-
-.dismissBtn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 6px 0;
-  opacity: 0.85;
-  transition: opacity 0.15s;
-}
-
-.dismissBtn:hover {
-  opacity: 1;
-}
-
-.nextBtn {
-  background: white;
-  color: #1a1a1a;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.nextBtn:hover {
-  opacity: 0.88;
 }
 
 @media (max-width: 480px) {

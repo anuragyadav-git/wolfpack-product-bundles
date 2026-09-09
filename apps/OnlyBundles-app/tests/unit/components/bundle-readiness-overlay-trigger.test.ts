@@ -138,9 +138,7 @@ describe("BundleReadinessOverlay trigger", () => {
       );
     });
 
-    const trigger = container.querySelector(
-      '[data-tour-target="fpb-readiness-score"]',
-    );
+    const trigger = container.querySelector("[data-readiness-trigger-state]");
     expect(trigger?.getAttribute("data-readiness-trigger-state")).toBe(
       "expanded",
     );
@@ -163,7 +161,6 @@ describe("BundleReadinessOverlay trigger", () => {
     );
 
     expect(markup).toContain("Products selected");
-    expect(markup).toContain('data-tour-target="fpb-readiness-score"');
     expect(markup).toContain('id="bundle-readiness-popover"');
     expect(markup).not.toContain('aria-label="Readiness Score: 0"');
     expect(markup.match(/Readiness Score/g)).toHaveLength(1);

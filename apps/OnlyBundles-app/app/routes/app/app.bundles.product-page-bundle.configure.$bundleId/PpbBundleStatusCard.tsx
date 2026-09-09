@@ -10,13 +10,11 @@ export function PpbBundleStatusCard({
   status,
   onChange,
 }: PpbBundleStatusCardProps) {
-
   return (
-    <s-section>
-      <BundleStatusSection
-        status={status}
-        onChange={onChange}
-      />
-    </s-section>
+    <div data-tour-target="ppb-bundle-status">
+      <s-section>
+        <BundleStatusSection status={status} onChange={onChange} />
+      </s-section>
+    </div>
   );
 }

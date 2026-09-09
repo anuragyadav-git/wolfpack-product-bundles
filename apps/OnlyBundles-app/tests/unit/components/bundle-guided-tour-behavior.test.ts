@@ -1,10 +1,19 @@
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { act } from "react-dom/test-utils";
+import { flushSync } from "react-dom";
+import { JSDOM } from "jsdom";
+
 import {
+  BundleGuidedTour,
   getBundleGuidedTourStorageKey,
   isBundleGuidedTourDesktopViewport,
   isBundleGuidedTourDismissKey,
   pickVisibleTourTarget,
 } from "../../../app/components/bundle-configure/BundleGuidedTour";
 import {
+  FPB_TOUR_STEPS,
+  PPB_TOUR_STEPS,
   getGuidedTourTransition,
   type TourStep,
 } from "../../../app/components/bundle-configure/tourSteps";
@@ -55,5 +64,155 @@ describe("BundleGuidedTour behavior", () => {
       sectionId: "step_setup",
       readinessOpen: false,
     });
+  });
+
+  it("navigates the final FPB and PPB steps to bundle settings", () => {
+    expect(getGuidedTourTransition(FPB_TOUR_STEPS.at(-1)!)).toEqual({
+      sectionId: "bundle_settings",
+      readinessOpen: false,
+    });
+    expect(getGuidedTourTransition(PPB_TOUR_STEPS.at(-1)!)).toEqual({
+      sectionId: "bundle_settings",
+      readinessOpen: false,
+    });
+  });
+
+  it("advances through the tour and completes exactly once", async () => {
+    const dom = new JSDOM("<!doctype html><html><body></body></html>", {
+      pretendToBeVisual: true,
+      url: "https://app.example.test",
+    });
+    Object.assign(globalThis, {
+      window: dom.window,
+      document: dom.window.document,
+      Event: dom.window.Event,
+      MouseEvent: dom.window.MouseEvent,
+      HTMLElement: dom.window.HTMLElement,
+      localStorage: dom.window.localStorage,
+      requestAnimationFrame: () => 1,
+      cancelAnimationFrame: () => undefined,
+      IS_REACT_ACT_ENVIRONMENT: true,
+    });
+    Object.defineProperty(dom.window, "innerWidth", {
+      configurable: true,
+      value: 1280,
+    });
+    dom.window.requestAnimationFrame = () => 1;
+    dom.window.cancelAnimationFrame = () => undefined;
+
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    const onComplete = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleGuidedTour, {
+          steps: [
+            { title: "First", body: "First body", targetSection: "" },
+            { title: "Second", body: "Second body", targetSection: "" },
+          ],
+          shop: "alpha.myshopify.com",
+          onComplete,
+        })
+      );
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const findAction = (label: string) =>
+      Array.from(container.querySelectorAll<HTMLElement>("button, s-button"))
+        .find((element) => element.textContent?.trim() === label);
+
+    const next = findAction("Next →");
+    expect(next).toBeDefined();
+
+    act(() => {
+      next?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    const complete = findAction("Got it");
+    expect(complete).toBeDefined();
+
+    act(() => {
+      complete?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(
+      localStorage.getItem(
+        getBundleGuidedTourStorageKey("alpha.myshopify.com")
+      )
+    ).toBe("1");
+
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it("does not repeat a step transition when only the callback identity changes", async () => {
+    const dom = new JSDOM("<!doctype html><html><body></body></html>", {
+      pretendToBeVisual: true,
+      url: "https://app.example.test",
+    });
+    Object.assign(globalThis, {
+      window: dom.window,
+      document: dom.window.document,
+      Event: dom.window.Event,
+      MouseEvent: dom.window.MouseEvent,
+      HTMLElement: dom.window.HTMLElement,
+      localStorage: dom.window.localStorage,
+      requestAnimationFrame: () => 1,
+      cancelAnimationFrame: () => undefined,
+      IS_REACT_ACT_ENVIRONMENT: true,
+    });
+    Object.defineProperty(dom.window, "innerWidth", {
+      configurable: true,
+      value: 1280,
+    });
+    dom.window.requestAnimationFrame = () => 1;
+    dom.window.cancelAnimationFrame = () => undefined;
+
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    const firstOnStepChange = jest.fn();
+    const replacementOnStepChange = jest.fn();
+    const steps: TourStep[] = [
+      { title: "First", body: "First body", targetSection: "" },
+    ];
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleGuidedTour, {
+          steps,
+          shop: "alpha.myshopify.com",
+          onStepChange: firstOnStepChange,
+        })
+      );
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(firstOnStepChange).toHaveBeenCalledTimes(1);
+
+    flushSync(() => {
+      root.render(
+        React.createElement(BundleGuidedTour, {
+          steps,
+          shop: "alpha.myshopify.com",
+          onStepChange: replacementOnStepChange,
+        })
+      );
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(replacementOnStepChange).not.toHaveBeenCalled();
+
+    act(() => root.unmount());
+    container.remove();
   });
 });

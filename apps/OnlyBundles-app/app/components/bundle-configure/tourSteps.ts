@@ -34,8 +34,8 @@ export const FPB_TOUR_STEPS: TourStep[] = [
   {
     title: "Set active",
     body: "Set the parent product to Active after the required setup is saved.",
-    targetSection: "fpb-bundle-visibility",
-    sectionId: "bundle_visibility",
+    targetSection: "fpb-bundle-status",
+    sectionId: "bundle_settings",
   },
 ];
 

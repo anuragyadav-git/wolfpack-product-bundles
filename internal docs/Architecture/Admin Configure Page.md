@@ -411,6 +411,13 @@ before looking up its target, retries while a lazy target arrives, and falls
 back to a centered dialog when the target is unavailable. Completion,
 dismissal, and Escape persist the existing shop-keyed local-storage value,
 restore the previously focused control, and release the body scroll lock.
+The custom spotlight and positioned dialog remain the deliberate overlay
+exception, while their ordinary Dismiss, Next, and Got it actions use Polaris
+`s-button` controls. A step transition is notified once per actual step even
+when a parent callback receives a new identity during rerender. Step 2 targets
+the box-owning desktop readiness container, not either mobile header action.
+Step 4 navigates to Bundle Settings and targets only the bundle-status card in
+both FPB and PPB, never the broader settings panel.
 The dialog measures its rendered height before choosing an above-target,
 below-target, or viewport-contained position. It recomputes that position after
 viewport changes and uses a bounded internal scroll region for long copy on

@@ -155,9 +155,6 @@ describe("Admin workspace back actions", () => {
       's-button[commandfor="bundle-readiness-popover"]',
     );
     expect(readinessAction?.getAttribute("command")).toBe("--show");
-    expect(readinessAction?.getAttribute("data-tour-target")).toBe(
-      "fpb-readiness-score",
-    );
   });
 
   it("delegates the PPB back action to its route owner", () => {

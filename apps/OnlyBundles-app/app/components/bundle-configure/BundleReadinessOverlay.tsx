@@ -248,11 +248,11 @@ export function BundleReadinessOverlay({
         className={`${styles.container} ${
           showTriggerContext ? styles.containerIntro : styles.containerCollapsed
         }`}
+        data-tour-target="fpb-readiness-score"
       >
         <s-clickable
           ref={triggerRef}
           inlineSize="100%"
-          data-tour-target="fpb-readiness-score"
           data-readiness-trigger-state={
             showTriggerContext ? "expanded" : "collapsed"
           }

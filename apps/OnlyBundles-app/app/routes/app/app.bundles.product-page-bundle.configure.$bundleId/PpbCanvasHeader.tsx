@@ -118,7 +118,6 @@ export function PpbCanvasHeader({
               accessibilityLabel={`${readinessScore} Readiness Score`}
               commandFor="bundle-readiness-popover"
               command="--show"
-              data-tour-target="fpb-readiness-score"
             >
               {readinessScore} {translateAdmin("common.readiness.title")}
             </s-button>

@@ -21,7 +21,6 @@ export function FpbBundleCssSettings({
   setBundleLevelCssExpanded,
   setBundleStatus,
 }: FpbBundleCssSettingsProps) {
-
   return (
     <>
       {/* Bundle Level CSS — collapsible */}
@@ -67,13 +66,15 @@ export function FpbBundleCssSettings({
           )}
         </s-stack>
       </s-section>
-      <s-section>
-        <BundleStatusSection
-          status={bundleStatus}
-          onChange={setBundleStatus}
-          showHeading={false}
-        />
-      </s-section>
+      <div data-tour-target="fpb-bundle-status">
+        <s-section>
+          <BundleStatusSection
+            status={bundleStatus}
+            onChange={setBundleStatus}
+            showHeading={false}
+          />
+        </s-section>
+      </div>
     </>
   );
 }
