@@ -5,7 +5,7 @@ title: Shopify Native Module Decomposition Test Spec
 type: test-spec
 status: active
 summary: Defines behavior-preserving responsibility splits for cohesive Admin and bundle save modules.
-last_audited: 2026-09-08
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -25,7 +25,6 @@ source_paths:
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsQuantity.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsSummaryText.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsTemplate.tsx
-  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsTimeline.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleVisibilityPanel.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ImagesGifsPanel.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ImagesVisibilitySection.tsx

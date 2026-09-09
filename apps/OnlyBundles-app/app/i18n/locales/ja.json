@@ -1690,6 +1690,8 @@
     "clickToUploadImage": "クリックして画像またはアイコンをアップロード",
     "chooseGifFile": "GIF ファイルを選択します。",
     "chooseSupportedImageFile": "サポートされている画像ファイルを選択してください。",
+    "fileMustBeUnder20Mb": "ファイルは20MB未満にしてください。",
+    "fileMustBeSmallerThan50Kb": "50KB未満のファイルをアップロードしてください。",
     "integrationLogo": "{{name}}ロゴ",
     "guidedTourProgress": "ガイドツアー：全 {{total}} ステップ中 {{current}} ステップ目",
     "guidedTourStep": "全 {{total}} ステップ中 {{current}} ステップ目",

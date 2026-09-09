@@ -28,7 +28,7 @@ function makeFlow(overrides: Record<string, unknown> = {}) {
     bundleEmbedSubTitle: "Saved embed subtitle",
     bundleEmbedTitle: "Saved embed title",
     clearValidationError: noop,
-    FilePicker: ({
+    AssetUpload: ({
       value,
       disabled,
     }: {

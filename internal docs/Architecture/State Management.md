@@ -5,7 +5,7 @@ title: State Management
 type: architecture
 status: authoritative
 summary: Defines Remix server-state ownership and route-local React state boundaries for the embedded Admin app.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -41,8 +41,11 @@ keywords:
   configure reducer keeps the existing hook return shape while replacing the
   former shared Redux slice.
 - Remix fetchers own route-bound asynchronous submissions and revalidation.
-- Store-file reads and uploads use relative, App Bridge-authenticated `fetch`
-  requests through `app/lib/admin-store-files.client.ts`.
+- Shopify Files uploads and processing-status polls use relative, App
+  Bridge-authenticated `fetch` requests through
+  `app/lib/admin-store-files.client.ts`. There is no client-side Files library
+  listing or parallel picker state; Polaris `s-drop-zone` owns local file
+  selection.
 - Shopify App Bridge owns title-bar, save-bar, toast, and resource-picker
   interactions.
 - Storefront controllers own storefront state; it is not shared with Admin.

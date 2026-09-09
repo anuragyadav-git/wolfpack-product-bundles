@@ -77,9 +77,6 @@ describe("app.upload-store-file route", () => {
       expect(data.file).toEqual({
         id: "gid://shopify/MediaImage/1",
         url: "https://cdn.shopify.com/s/files/1/banner.png",
-        filename: "banner.png",
-        alt: "Banner Image",
-        createdAt: "2026-08-18T00:00:00Z",
       });
     });
 
@@ -190,6 +187,21 @@ describe("app.upload-store-file route", () => {
       expect(data.ok).toBe(true);
       expect(data.fileId).toBe("gid://shopify/MediaImage/1");
       expect(mockGraphql).toHaveBeenCalledTimes(2);
+      expect(mockGraphql).toHaveBeenNthCalledWith(
+        1,
+        expect.any(String),
+        expect.objectContaining({
+          variables: {
+            input: [
+              expect.objectContaining({
+                filename: "banner.png",
+                mimeType: "image/png",
+                resource: "IMAGE",
+              }),
+            ],
+          },
+        }),
+      );
       expect(global.fetch).toHaveBeenCalledWith(
         "https://shopify-staged-uploads.s3.amazonaws.com/",
         expect.objectContaining({ method: "POST" }),

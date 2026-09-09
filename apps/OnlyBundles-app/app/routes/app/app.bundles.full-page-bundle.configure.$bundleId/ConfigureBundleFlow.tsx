@@ -603,15 +603,17 @@ function ConfigureBundleFlow() {
             media={{
               activeAssetTabIndex: flow.activeAssetTabIndex,
               activeSection: flow.activeSection,
+              bundleBannerDesktopUrl: flow.bundleBannerDesktopUrl,
+              bundleBannerMobileUrl: flow.bundleBannerMobileUrl,
               floatingBadgeEnabled: flow.floatingBadgeEnabled,
               floatingBadgeText: flow.floatingBadgeText,
               fullPageBundleStyles: flow.fullPageBundleStyles,
               markAsDirty: flow.markAsDirty,
-              promoBannerBgImage: flow.promoBannerBgImage,
               setActiveAssetTabIndex: flow.setActiveAssetTabIndex,
+              setBundleBannerDesktopUrl: flow.setBundleBannerDesktopUrl,
+              setBundleBannerMobileUrl: flow.setBundleBannerMobileUrl,
               setFloatingBadgeEnabled: flow.setFloatingBadgeEnabled,
               setFloatingBadgeText: flow.setFloatingBadgeText,
-              setPromoBannerBgImage: flow.setPromoBannerBgImage,
               steps: flow.stepsState.steps,
               updateStepField: flow.stepsState.updateStepField,
             }}
@@ -733,13 +735,6 @@ function ConfigureBundleFlow() {
               markAsDirty: flow.markAsDirty,
               setTextOverrides: flow.setTextOverrides,
               textOverrides: flow.textOverrides,
-            }}
-            timeline={{
-              bundleBannerDesktopUrl: flow.bundleBannerDesktopUrl,
-              bundleBannerMobileUrl: flow.bundleBannerMobileUrl,
-              markAsDirty: flow.markAsDirty,
-              setBundleBannerDesktopUrl: flow.setBundleBannerDesktopUrl,
-              setBundleBannerMobileUrl: flow.setBundleBannerMobileUrl,
             }}
           />
         ) : null}

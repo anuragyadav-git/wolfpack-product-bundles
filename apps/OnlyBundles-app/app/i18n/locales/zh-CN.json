@@ -1690,6 +1690,8 @@
     "clickToUploadImage": "点击上传图片或图标",
     "chooseGifFile": "选择 GIF 文件。",
     "chooseSupportedImageFile": "选择支持的图像文件。",
+    "fileMustBeUnder20Mb": "文件必须小于 20 MB。",
+    "fileMustBeSmallerThan50Kb": "请上传小于 50 KB 的文件。",
     "integrationLogo": "{{name}} 标志",
     "guidedTourProgress": "导览第 {{current}} 步，共 {{total}} 步",
     "guidedTourStep": "第 {{current}} 步，共 {{total}} 步",

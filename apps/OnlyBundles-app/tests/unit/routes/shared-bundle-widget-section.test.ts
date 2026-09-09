@@ -15,7 +15,7 @@ function makeProps(overrides: Record<string, unknown> = {}) {
     displayMode: "block" as const,
     displayOn: "all" as const,
     enabled: true,
-    FilePicker: () => React.createElement("button", null, "Upload file"),
+    AssetUpload: () => React.createElement("button", null, "Upload file"),
     imageUrl: "",
     multiLanguageDisabled: false,
     onAddBrowsedProductChange: noop,

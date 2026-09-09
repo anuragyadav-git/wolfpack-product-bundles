@@ -13,8 +13,7 @@ domains:
 systems:
   - polaris-app-home
 source_paths:
-  - app/components/shared/file-picker/FilePickerTrigger.tsx
-  - app/components/shared/file-picker/FilePickerDialog.tsx
+  - app/components/shared/AssetUpload.tsx
   - app/components/bundle-configure/LocalAppModal.tsx
   - app/components/EnablePreviewModal.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupRuleModeContent.tsx
@@ -74,9 +73,9 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Open store file library | Empty picker trigger | Polaris clickable invokes the picker action | Native keyboard semantics |
-| 2 | Upload a file | File picker modal | Polaris drop zone receives accepted files | Existing upload state machine remains authoritative |
-| 3 | Select a store file | Store file card | Polaris clickable selects the URL | No custom button element |
+| 1 | Choose or drop an asset | Empty asset field | Polaris drop zone receives accepted files | Native selection and drag-and-drop semantics |
+| 2 | Upload an accepted file | Valid image within the field limit | Files API upload and status polling produce the READY CDN URL | No custom file-library modal |
+| 3 | Remove a saved asset | Existing CDN URL | Polaris Remove button clears the field exactly once | No nested interactive wrapper |
 | 4 | Confirm discard | Ordinary app modal | Polaris modal owns focus, Escape, and scrolling | No manual dialog trap |
 | 5 | Open settings help | Inventory help content | Polaris modal renders and closes | No custom backdrop dialog |
 | 6 | Explain disabled preview | Preview visibility is not configured | Polaris modal renders existing guidance and actions | No custom backdrop dialog |
@@ -110,7 +109,7 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 ## Acceptance Criteria
 
 - [x] Ordinary modals use `s-modal` and its action slots.
-- [x] File upload uses `s-drop-zone`; custom selection surfaces use `s-clickable` and `s-image`.
+- [x] Asset upload uses `s-drop-zone`; saved previews use `s-image`, and no custom file-library selection surface remains.
 - [x] Manual focus traps, Escape handlers, and body-scroll handling are absent from ordinary modal components.
 - [x] Existing file upload validation, polling, selection, and removal behavior remains covered.
 - [x] Visible Admin date inputs use `s-date-field`; hidden transport inputs remain native.

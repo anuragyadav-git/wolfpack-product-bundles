@@ -1,21 +1,11 @@
 import {
   getUploadStoreFileStatus,
-  listStoreFiles,
   uploadStoreFile,
 } from "../../../app/lib/admin-store-files.client";
 
 describe("Admin store-files client", () => {
   beforeEach(() => {
     global.fetch = jest.fn(async () => Response.json({ ok: true })) as jest.Mock;
-  });
-
-  it("lists files with encoded cursor and query parameters", async () => {
-    await listStoreFiles({ cursor: "gid://shopify/File/1", query: "hero banner" });
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "/app/store-files?cursor=gid%3A%2F%2Fshopify%2FFile%2F1&query=hero+banner",
-      { method: "GET" },
-    );
   });
 
   it("uploads the original multipart body", async () => {

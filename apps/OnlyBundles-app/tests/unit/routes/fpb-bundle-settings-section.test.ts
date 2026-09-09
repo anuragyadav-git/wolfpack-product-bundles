@@ -38,12 +38,6 @@ jest.mock(
   }),
 );
 jest.mock(
-  "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsTimeline",
-  () => ({
-    FpbTimelineSettings: () => React.createElement("span", null, "timeline"),
-  }),
-);
-jest.mock(
   "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsCss",
   () => ({
     FpbBundleCssSettings: () => React.createElement("span", null, "css"),
@@ -57,7 +51,6 @@ const featureProps = {
   quantity: {},
   summaryText: {},
   template: {},
-  timeline: {},
 } as any;
 
 describe("BundleSettingsSection", () => {
@@ -85,7 +78,6 @@ describe("BundleSettingsSection", () => {
     expect(view).toContain("summary-text");
     expect(view).toContain("bundle-cart");
     expect(view).toContain("template");
-    expect(view).toContain("timeline");
     expect(view).toContain("css");
   });
 });

@@ -1690,6 +1690,8 @@
     "clickToUploadImage": "Klicken, um ein Bild oder Icon hochzuladen",
     "chooseGifFile": "GIF-Datei auswählen.",
     "chooseSupportedImageFile": "Wählen Sie eine unterstützte Bilddatei.",
+    "fileMustBeUnder20Mb": "Die Datei muss kleiner als 20 MB sein.",
+    "fileMustBeSmallerThan50Kb": "Bitte laden Sie eine Datei hoch, die kleiner als 50 KB ist.",
     "integrationLogo": "{{name}} Logo",
     "guidedTourProgress": "Führungspunkt {{current}} von {{total}}",
     "guidedTourStep": "Schritt {{current}} von {{total}}",

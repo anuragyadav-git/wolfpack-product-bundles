@@ -1,5 +1,5 @@
 import { CommonBundleWidgetSection } from "../_shared/bundle-configure/CommonBundleWidgetSection";
-import { FilePicker } from "../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
 import { getVisibilityResourceId } from "./ConfigureBundleFlow.helpers";
 import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
@@ -80,7 +80,7 @@ export function PpbBundleWidgetSection({
         displayMode={upsellWidgetDisplayMode}
         displayOn={upsellWidgetDisplayOn}
         enabled={upsellWidgetEnabled}
-        FilePicker={FilePicker}
+        AssetUpload={AssetUpload}
         getResourceId={getVisibilityResourceId}
         imageUrl={upsellWidgetImageUrl}
         multiLanguageDisabled={

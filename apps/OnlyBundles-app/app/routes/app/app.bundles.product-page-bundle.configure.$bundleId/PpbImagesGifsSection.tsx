@@ -1,6 +1,6 @@
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
-import { FilePicker } from "../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
@@ -153,7 +153,7 @@ export function PpbImagesGifsSection({
                                 )}
                               </p>
                             </s-stack>
-                            <FilePicker
+                            <AssetUpload
                               label={translateAdmin(
                                 "adminAttributes.chooseBannerImage"
                               )}
@@ -262,8 +262,12 @@ export function PpbImagesGifsSection({
                   </s-stack>
                 </div>
                 <s-divider />
-                <FilePicker
+                <AssetUpload
                   label={translateAdmin("adminAttributes.chooseLoadingGIF")}
+                  accept="image/gif"
+                  invalidTypeErrorMessage={translateAdmin(
+                    "adminDynamic.chooseGifFile"
+                  )}
                   value={loadingGif}
                   onChange={(url) => {
                     setLoadingGif(url);

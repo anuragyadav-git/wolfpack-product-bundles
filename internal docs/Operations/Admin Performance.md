@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -95,7 +95,7 @@ Measured in the Shopify Admin chrome on `agent-5sfidg3m` / SIT using
 | `/app/bundles/cart-transform` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/attribution` | Measured: critical funnel heading | Render the title and critical funnel heading before deferred data. Keep pixel status and the dashboard behind one inline Polaris loading boundary, with dashboard JavaScript and CSS resolving atomically. |
 | `/app/settings` | Measured: landing text | Paint the landing cards without awaiting deferred workspace data. The complete Settings workspace, including Design, remains lazy-loaded through one post-click boundary. Do not add speculative preloads. |
-| `/app/store-files` / `/app/upload-store-file` | Source audit: images are picker/file content, not initial route hero content | No route preload |
+| `/app/upload-store-file` | Source audit: asset uploads are merchant-initiated and not initial route hero content | No route preload |
 | Configure routes | Measured: text paragraph in the initial configure canvas | Render the loaded configure canvas immediately, fetch product/currency/locales in one Admin GraphQL request, and split inactive sections and closed overlays from the initial production chunk. The App Embed lookup remains a live guard before Preview; it must not gate the editor. |
 
 Pages without first-viewport owned media should be treated as text/bootstrap-bound
@@ -330,8 +330,7 @@ Merchant workflow roots should use descriptive `s-query-container` names when
 their responsive behavior depends on embedded app width. Current shared roots
 include `dashboard-bundles`, `settings-landing`, `design-settings`,
 `pricing-page`, `billing-page`, `events-page`, `storefront-setup-card`,
-`integrations-page`, `analytics-page`, `file-picker`, and
-`bundle-configure`. Page shells remain shrinkable, use responsive inline
+`integrations-page`, `analytics-page`, and `bundle-configure`. Page shells remain shrinkable, use responsive inline
 padding, and keep horizontal scrolling inside labelled data regions rather than
 on the document.
 

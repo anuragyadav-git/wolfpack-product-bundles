@@ -1,7 +1,7 @@
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
-import { FilePicker } from "../../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../../components/shared/AssetUpload";
 
 export function FpbAddonReferenceStepCard({
   enabled,
@@ -169,18 +169,18 @@ export function FpbAddonReferenceStepCard({
         </DisabledConfigurationRegion>
         {showImagePicker && (
           <div className={styles.addonsIconPickerRow}>
-            <FilePicker
-              autoOpen
+            <AssetUpload
               disabled={!enabled}
               value={imageUrl}
               maxUploadBytes={50 * 1024}
-              maxUploadErrorMessage="Please upload a file smaller than 50KB"
+              maxUploadErrorMessage={translateAdmin(
+                "adminDynamic.fileMustBeSmallerThan50Kb"
+              )}
               onChange={(url: string | null) => {
                 onImageChange(url);
                 onImagePickerOpenChange(false);
               }}
-              onClose={() => onImagePickerOpenChange(false)}
-              label=""
+              label={translateAdmin("adminAttributes.uploadImage")}
             />
           </div>
         )}

@@ -10,8 +10,8 @@ jest.mock(
       React.createElement("span", null, "bundle-widget"),
   }),
 );
-jest.mock("../../../app/components/shared/FilePicker", () => ({
-  FilePicker: () => null,
+jest.mock("../../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: () => null,
 }));
 
 describe("BundleWidgetSection", () => {

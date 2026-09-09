@@ -1,18 +1,3 @@
-import type { StoreFile } from "../routes/app/app.store-files";
-
-interface StoreFilesResponse {
-  files: StoreFile[];
-  pageInfo: {
-    hasNextPage: boolean;
-    endCursor: string | null;
-  };
-}
-
-interface ListStoreFilesArgs {
-  cursor?: string | null;
-  query?: string | null;
-}
-
 interface UploadStoreFileResult {
   ok: boolean;
   fileId?: string;
@@ -21,7 +6,10 @@ interface UploadStoreFileResult {
 
 interface UploadStoreFileStatus {
   fileStatus?: string;
-  file?: StoreFile;
+  file?: {
+    id: string;
+    url: string;
+  };
   error?: string;
 }
 
@@ -44,20 +32,6 @@ async function readAdminResource<T>(response: Response): Promise<T> {
     throw new Error(message);
   }
   return data as T;
-}
-
-export async function listStoreFiles(
-  args: ListStoreFilesArgs = {},
-): Promise<StoreFilesResponse> {
-  const params = new URLSearchParams();
-  if (args.cursor) params.set("cursor", args.cursor);
-  if (args.query) params.set("query", args.query);
-  const query = params.toString();
-  const response = await fetch(
-    query ? `/app/store-files?${query}` : "/app/store-files",
-    { method: "GET" },
-  );
-  return readAdminResource<StoreFilesResponse>(response);
 }
 
 export async function uploadStoreFile(

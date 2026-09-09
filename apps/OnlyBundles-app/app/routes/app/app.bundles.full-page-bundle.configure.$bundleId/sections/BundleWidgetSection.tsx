@@ -3,13 +3,13 @@ import {
   type CommonBundleWidgetSectionProps,
 } from "../../_shared/bundle-configure/CommonBundleWidgetSection";
 import { getVisibilityResourceId } from "../visibility-helpers";
-import { FilePicker } from "../../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../../components/shared/AssetUpload";
 
 interface BundleWidgetSectionProps {
   activeSection: string;
   widget: Omit<
     CommonBundleWidgetSectionProps,
-    "FilePicker" | "getResourceId"
+    "AssetUpload" | "getResourceId"
   >;
 }
 
@@ -23,7 +23,7 @@ export function BundleWidgetSection({
     <div data-tour-target="fpb-bundle-widget">
       <CommonBundleWidgetSection
         {...widget}
-        FilePicker={FilePicker}
+        AssetUpload={AssetUpload}
         getResourceId={getVisibilityResourceId}
       />
     </div>

@@ -1,6 +1,6 @@
 import { DefaultStepTimelineIcon } from "../../_shared/bundle-configure/DefaultStepTimelineIcon";
 import { translateAdmin } from "~/i18n/config";
-import { FilePicker } from "../../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../../components/shared/AssetUpload";
 
 export function FpbStepConfigCard({
   styles,
@@ -87,14 +87,12 @@ export function FpbStepConfigCard({
           </div>
         </div>
         {pickerOpen && (
-          <FilePicker
-            autoOpen
-            onClose={onClosePicker}
+          <AssetUpload
             value={(step as any).stepImage ?? null}
             onChange={(url: string | null) => {
               onImageChange(url);
             }}
-            label=""
+            label={translateAdmin("adminAttributes.uploadImage")}
           />
         )}
       </div>

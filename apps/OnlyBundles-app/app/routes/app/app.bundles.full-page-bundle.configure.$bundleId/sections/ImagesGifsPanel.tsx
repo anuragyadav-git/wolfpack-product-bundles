@@ -1,6 +1,6 @@
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
-import { FilePicker } from "../../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../../components/shared/AssetUpload";
 
 interface FpbMediaStep {
   bannerImageUrl?: string | null;
@@ -12,15 +12,17 @@ interface FpbMediaStep {
 export interface FpbImagesGifsPanelProps {
   activeAssetTabIndex: number;
   activeSection: string;
+  bundleBannerDesktopUrl: string;
+  bundleBannerMobileUrl: string;
   floatingBadgeEnabled: boolean;
   floatingBadgeText: string;
   fullPageBundleStyles: Record<string, string>;
   markAsDirty: () => void;
-  promoBannerBgImage: string | null;
   setActiveAssetTabIndex: (index: number) => void;
+  setBundleBannerDesktopUrl: (url: string) => void;
+  setBundleBannerMobileUrl: (url: string) => void;
   setFloatingBadgeEnabled: (enabled: boolean) => void;
   setFloatingBadgeText: (text: string) => void;
-  setPromoBannerBgImage: (url: string | null) => void;
   steps: FpbMediaStep[];
   updateStepField: (stepId: string, field: string, value: unknown) => void;
 }
@@ -28,15 +30,17 @@ export interface FpbImagesGifsPanelProps {
 export function FpbImagesGifsPanel({
   activeAssetTabIndex,
   activeSection,
+  bundleBannerDesktopUrl,
+  bundleBannerMobileUrl,
   floatingBadgeEnabled,
   floatingBadgeText,
   fullPageBundleStyles,
   markAsDirty,
-  promoBannerBgImage,
   setActiveAssetTabIndex,
+  setBundleBannerDesktopUrl,
+  setBundleBannerMobileUrl,
   setFloatingBadgeEnabled,
   setFloatingBadgeText,
-  setPromoBannerBgImage,
   steps,
   updateStepField,
 }: FpbImagesGifsPanelProps) {
@@ -123,35 +127,41 @@ export function FpbImagesGifsPanel({
                       )}
                     </p>
                   </s-stack>
-                  <s-stack direction="block" gap="small-400">
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: "#6d7175",
-                      }}
-                    >
-                      {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.recommendedSize"
-                      )}
-                    </p>
-                    <p style={{ margin: 0, fontSize: 14 }}>
-                      {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.1600400Px41Ratio"
-                      )}
-                    </p>
-                  </s-stack>
                 </s-stack>
               </div>
               <s-divider />
-              <FilePicker
-                value={promoBannerBgImage}
-                onChange={(url) => {
-                  setPromoBannerBgImage(url);
-                  markAsDirty();
-                }}
-              />
+              <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                  <AssetUpload
+                    label={translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageDesktop"
+                    )}
+                    hint={`${translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+                    )} ${translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1900x230"
+                    )}`}
+                    value={bundleBannerDesktopUrl || null}
+                    onChange={(url) => {
+                      setBundleBannerDesktopUrl(url ?? "");
+                      markAsDirty();
+                    }}
+                  />
+                  <AssetUpload
+                    label={translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageMobile"
+                    )}
+                    hint={`${translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+                    )} ${translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1100x500"
+                    )}`}
+                    value={bundleBannerMobileUrl || null}
+                    onChange={(url) => {
+                      setBundleBannerMobileUrl(url ?? "");
+                      markAsDirty();
+                    }}
+                  />
+              </s-grid>
             </s-stack>
           </s-section>
           {steps.length > 0 && (
@@ -237,7 +247,7 @@ export function FpbImagesGifsPanel({
                               )}
                             </p>
                           </s-stack>
-                          <FilePicker
+                          <AssetUpload
                             label={translateAdmin(
                               "adminAttributes.chooseTabIcon"
                             )}
@@ -278,7 +288,7 @@ export function FpbImagesGifsPanel({
                               )}
                             </p>
                           </s-stack>
-                          <FilePicker
+                          <AssetUpload
                             label={translateAdmin(
                               "adminAttributes.chooseBannerImage"
                             )}

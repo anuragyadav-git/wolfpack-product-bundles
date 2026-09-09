@@ -22,10 +22,6 @@ import {
   FpbBundleTemplateSettings,
   type FpbBundleTemplateSettingsProps,
 } from "./BundleSettingsTemplate";
-import {
-  FpbTimelineSettings,
-  type FpbTimelineSettingsProps,
-} from "./BundleSettingsTimeline";
 
 interface BundleSettingsSectionProps {
   activeSection: string;
@@ -35,7 +31,6 @@ interface BundleSettingsSectionProps {
   quantity: FpbQuantitySettingsProps;
   summaryText: FpbSummaryTextSettingsProps;
   template: FpbBundleTemplateSettingsProps;
-  timeline: FpbTimelineSettingsProps;
 }
 
 export function BundleSettingsSection({
@@ -46,7 +41,6 @@ export function BundleSettingsSection({
   quantity,
   summaryText,
   template,
-  timeline,
 }: BundleSettingsSectionProps) {
 
   if (activeSection !== "bundle_settings") return null;
@@ -59,7 +53,6 @@ export function BundleSettingsSection({
         <FpbSummaryTextSettings {...summaryText} />
         <FpbBundleCartSettings {...bundleCart} />
         <FpbBundleTemplateSettings {...template} />
-        <FpbTimelineSettings {...timeline} />
         <FpbBundleCssSettings {...css} />
       </s-stack>
     </div>

@@ -3,7 +3,7 @@ import { DisabledConfigurationRegion } from "../_shared/bundle-configure/Disable
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
-import { FilePicker } from "../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import { showPolarisModal } from "../_shared/bundle-configure/modal-utils";
 import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
@@ -122,12 +122,13 @@ export function PpbFreeGiftAddonsSection({
                           )}
                         </div>
                         {showIconPickerForStep === `addon-${step.id}` && (
-                          <FilePicker
-                            autoOpen
+                          <AssetUpload
                             disabled={!step.isFreeGift}
                             value={step.addonIconUrl ?? null}
                             maxUploadBytes={50 * 1024}
-                            maxUploadErrorMessage="Please upload a file smaller than 50KB"
+                            maxUploadErrorMessage={translateAdmin(
+                              "adminDynamic.fileMustBeSmallerThan50Kb"
+                            )}
                             onChange={(url: string | null) => {
                               stepsState.updateStepField(
                                 step.id,
@@ -137,8 +138,7 @@ export function PpbFreeGiftAddonsSection({
                               setShowIconPickerForStep(null);
                               markAsDirty();
                             }}
-                            onClose={() => setShowIconPickerForStep(null)}
-                            label=""
+                            label={translateAdmin("adminAttributes.uploadImage")}
                           />
                         )}
                         <s-button

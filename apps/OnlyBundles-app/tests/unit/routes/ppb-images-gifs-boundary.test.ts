@@ -6,10 +6,10 @@ import {
   type PpbImagesGifsSectionProps,
 } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbImagesGifsSection";
 
-const mockFilePicker = jest.fn<unknown, [Record<string, unknown>]>(() => null);
+const mockAssetUpload = jest.fn<unknown, [Record<string, unknown>]>(() => null);
 
-jest.mock("../../../app/components/shared/FilePicker", () => ({
-  FilePicker: (props: Record<string, unknown>) => mockFilePicker(props),
+jest.mock("../../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: (props: Record<string, unknown>) => mockAssetUpload(props),
 }));
 
 describe("PPB Images and GIFs boundary", () => {
@@ -38,15 +38,19 @@ describe("PPB Images and GIFs boundary", () => {
 
     renderToStaticMarkup(React.createElement(PpbImagesGifsSection, props));
 
-    const bannerPicker = mockFilePicker.mock.calls.find(
+    const bannerUpload = mockAssetUpload.mock.calls.find(
       ([pickerProps]) => pickerProps.value === "https://cdn.example.test/banner.png",
     )?.[0] as { onChange: (url: string | null) => void };
-    const loadingPicker = mockFilePicker.mock.calls.find(
+    const loadingUpload = mockAssetUpload.mock.calls.find(
       ([pickerProps]) => pickerProps.value === "https://cdn.example.test/loading.gif",
-    )?.[0] as { onChange: (url: string | null) => void };
+    )?.[0] as {
+      accept?: string;
+      invalidTypeErrorMessage?: string;
+      onChange: (url: string | null) => void;
+    };
 
-    bannerPicker.onChange("https://cdn.example.test/new-banner.png");
-    loadingPicker.onChange("https://cdn.example.test/new-loading.gif");
+    bannerUpload.onChange("https://cdn.example.test/new-banner.png");
+    loadingUpload.onChange("https://cdn.example.test/new-loading.gif");
 
     expect(updateStepField).toHaveBeenCalledWith(
       "step-1",
@@ -57,5 +61,7 @@ describe("PPB Images and GIFs boundary", () => {
       "https://cdn.example.test/new-loading.gif",
     );
     expect(markAsDirty).toHaveBeenCalledTimes(2);
+    expect(loadingUpload.accept).toBe("image/gif");
+    expect(loadingUpload.invalidTypeErrorMessage).toBeTruthy();
   });
 });

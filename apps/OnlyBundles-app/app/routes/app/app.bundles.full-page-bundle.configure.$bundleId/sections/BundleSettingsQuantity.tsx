@@ -1,7 +1,7 @@
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { areFpbProductSlotsAvailable } from "../../../../lib/fpb-product-slots-availability";
 import { translateAdmin } from "~/i18n/config";
-import { FilePicker } from "../../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../../components/shared/AssetUpload";
 import { QuestionHelpTooltip } from "../SmallComponents";
 
 export interface FpbQuantitySettingsProps {
@@ -256,9 +256,7 @@ export function FpbQuantitySettings({
               </div>
             </div>
             {productSlotsAvailable && showSlotIconPicker && (
-              <FilePicker
-                autoOpen
-                onClose={() => setShowSlotIconPicker(false)}
+              <AssetUpload
                 value={productSlotIconUrl || null}
                 onChange={(url: string | null) => {
                   setProductSlotIconUrl(url ?? "");
@@ -268,7 +266,6 @@ export function FpbQuantitySettings({
                 label={translateAdmin(
                   "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingsquantity.slotIcon"
                 )}
-                uploadLabel="No file chosen"
               />
             )}
             <p

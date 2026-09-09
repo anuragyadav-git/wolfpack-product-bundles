@@ -35,8 +35,8 @@ jest.mock(
   () => ({QuestionHelpTooltip: () => null}),
 );
 
-jest.mock("../../../app/components/shared/FilePicker", () => ({
-  FilePicker: () => null,
+jest.mock("../../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: () => null,
 }));
 
 jest.mock(

@@ -1,6 +1,6 @@
 import { DefaultStepTimelineIcon } from "../_shared/bundle-configure/DefaultStepTimelineIcon";
 import { translateAdmin } from "~/i18n/config";
-import { FilePicker } from "../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
@@ -113,16 +113,14 @@ export function PpbStepConfigCard({
         </div>
       </div>
       {showIconPickerForStep === step.id && (
-        <FilePicker
-          autoOpen
-          onClose={() => setShowIconPickerForStep(null)}
+        <AssetUpload
           value={stepImage}
           onChange={(url: string | null) => {
             stepsState.updateStepField(step.id, "stepImage", url);
             setShowIconPickerForStep(null);
             markAsDirty();
           }}
-          label=""
+          label={translateAdmin("adminAttributes.uploadImage")}
         />
       )}
     </div>

@@ -916,11 +916,6 @@
   min-width: 0;
 }
 
-.upsellBlockImageField {
-  --wpb-file-picker-trigger-height: 160px;
-  --wpb-file-picker-trigger-padding: 12px 8px;
-}
-
 .upsellBlockCopyFields {
   display: flex;
   flex-direction: column;

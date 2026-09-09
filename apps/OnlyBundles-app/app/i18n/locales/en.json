@@ -1690,6 +1690,8 @@
     "clickToUploadImage": "Click to upload an image or icon",
     "chooseGifFile": "Choose a GIF file.",
     "chooseSupportedImageFile": "Choose a supported image file.",
+    "fileMustBeUnder20Mb": "File must be under 20 MB.",
+    "fileMustBeSmallerThan50Kb": "Please upload a file smaller than 50 KB.",
     "integrationLogo": "{{name}} logo",
     "guidedTourProgress": "Guided tour step {{current}} of {{total}}",
     "guidedTourStep": "Step {{current}} of {{total}}",

@@ -17,7 +17,7 @@ source_paths:
   - app/hooks/useBundleConfigurationState.ts
   - app/hooks/configure-route-state.ts
   - app/hooks/useDashboardState.ts
-  - app/components/shared/FilePicker.tsx
+  - app/components/shared/AssetUpload.tsx
   - app/lib/admin-store-files.client.ts
 related_docs:
   - internal docs/Architecture/State Management.md
@@ -28,7 +28,7 @@ tags:
 keywords:
   - route-local reducer
   - App Bridge fetch
-  - FilePicker
+  - AssetUpload
 ---
 
 # Test Spec: Route Local State Remediation
@@ -37,7 +37,7 @@ keywords:
 
 ## Purpose
 
-Preserve Admin configure, dashboard, and store-file behavior while removing the route-local Redux store and RTK Query layer.
+Preserve Admin configure, dashboard, and Shopify Files upload behavior while removing the route-local Redux store and RTK Query layer.
 
 ## Test Cases
 
@@ -54,11 +54,9 @@ Preserve Admin configure, dashboard, and store-file behavior while removing the 
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | List files | Cursor and search query | Standard GET to authenticated `/app/store-files` | App Bridge intercepts `fetch` |
-| 2 | Upload file | Multipart `FormData` | Standard POST with original body | Do not set content type manually |
-| 3 | Poll upload | Shopify file GID | Encoded GET query | Same resource route |
-| 4 | Backend error | Non-2xx JSON or text response | Throw an error carrying backend detail | FilePicker maps it to existing failure UI |
-| 5 | Empty file results | Empty store library, with and without a search query | Render the matching localized empty-state message | No hardcoded English fallback copy |
+| 1 | Upload file | Multipart `FormData` | Standard POST with original body | Do not set content type manually |
+| 2 | Poll upload | Shopify file GID | Encoded GET query | Same resource route |
+| 3 | Backend error | Non-2xx JSON or text response | Throw an error carrying backend detail | AssetUpload maps it to existing failure UI |
 
 ### Dashboard State
 
@@ -71,7 +69,7 @@ Preserve Admin configure, dashboard, and store-file behavior while removing the 
 
 - [x] All listed behavior tests pass.
 - [x] Existing configure hook return shapes and dashboard flows remain compatible.
-- [x] Standard `fetch` owns App Bridge-authenticated store-file requests.
+- [x] Standard `fetch` owns App Bridge-authenticated Shopify Files upload and polling requests.
 - [x] No production code imports Redux, RTK Query, or `app/store`.
 - [x] The unused centralized Redux-era state type registry is removed.
 - [x] `@reduxjs/toolkit` and `react-redux` are removed from dependencies and Vite chunks.

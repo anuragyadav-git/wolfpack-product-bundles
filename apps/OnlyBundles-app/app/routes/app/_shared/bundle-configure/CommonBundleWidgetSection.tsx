@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 
+import type { AssetUploadProps } from "../../../../components/shared/AssetUpload";
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
@@ -24,7 +25,7 @@ export interface CommonBundleWidgetSectionProps {
   displayMode: WidgetDisplayMode;
   displayOn: WidgetDisplayOn;
   enabled: boolean;
-  FilePicker: ComponentType<any>;
+  AssetUpload: ComponentType<AssetUploadProps>;
   getResourceId?: (resource: WidgetResource) => string | null;
   imageUrl: string;
   multiLanguageDisabled: boolean;
@@ -65,7 +66,7 @@ export function CommonBundleWidgetSection(
     displayMode,
     displayOn,
     enabled,
-    FilePicker,
+    AssetUpload,
     getResourceId,
     imageUrl,
     multiLanguageDisabled,
@@ -202,11 +203,10 @@ export function CommonBundleWidgetSection(
 
               <div className={styles.widgetSettingsGrid}>
                 {displayMode === "block" && (
-                  <FilePicker
+                  <AssetUpload
                     label={translateAdmin("adminAttributes.uploadImage")}
                     value={imageUrl || null}
                     disabled={disabled}
-                    fitPreviewToTrigger
                     onChange={(url: string | null) =>
                       onImageUrlChange(url ?? "")
                     }

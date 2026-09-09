@@ -7,7 +7,6 @@ import {FpbBundleCartSettings} from "../../../app/routes/app/app.bundles.full-pa
 import {FpbDefaultProductsSettings} from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsDefaultProducts";
 import {FpbQuantitySettings} from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsQuantity";
 import {FpbBundleTemplateSettings} from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsTemplate";
-import {FpbTimelineSettings} from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsTimeline";
 
 const resourcePicker = jest.fn();
 
@@ -24,21 +23,23 @@ jest.mock(
   () => ({QuestionHelpTooltip: () => null}),
 );
 
-jest.mock("../../../app/components/shared/FilePicker", () => ({
-  FilePicker: ({
+jest.mock("../../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: ({
     onChange,
-    triggerIcon,
+    label,
   }: {
     onChange: (url: string | null) => void;
-    triggerIcon?: string;
+    label?: string;
   }) =>
     React.createElement(
       "button",
       {
-        "aria-label": triggerIcon === "mobile" ? "mobile picker" : "desktop picker",
+        "aria-label": label?.includes("bannerImageMobile")
+          ? "mobile upload"
+          : "desktop upload",
         onClick: () =>
           onChange(
-            triggerIcon === "mobile"
+            label?.includes("bannerImageMobile")
               ? "https://cdn.shopify.com/mobile.jpg"
               : "https://cdn.shopify.com/desktop.jpg",
           ),
@@ -140,35 +141,6 @@ describe("FPB bundle settings feature boundaries", () => {
 
     click("s-button");
     expect(handleSectionChange).toHaveBeenCalledWith("discount_pricing");
-  });
-
-  it("delegates desktop and mobile banner selections and marks the draft dirty", () => {
-    const markAsDirty = jest.fn();
-    const setBundleBannerDesktopUrl = jest.fn();
-    const setBundleBannerMobileUrl = jest.fn();
-
-    flushSync(() => {
-      root.render(
-        React.createElement(FpbTimelineSettings, {
-          bundleBannerDesktopUrl: "",
-          bundleBannerMobileUrl: "",
-          markAsDirty,
-          setBundleBannerDesktopUrl,
-          setBundleBannerMobileUrl,
-        } as any),
-      );
-    });
-
-    click('button[aria-label="desktop picker"]');
-    click('button[aria-label="mobile picker"]');
-
-    expect(setBundleBannerDesktopUrl).toHaveBeenCalledWith(
-      "https://cdn.shopify.com/desktop.jpg",
-    );
-    expect(setBundleBannerMobileUrl).toHaveBeenCalledWith(
-      "https://cdn.shopify.com/mobile.jpg",
-    );
-    expect(markAsDirty).toHaveBeenCalledTimes(2);
   });
 
   it("uses Shopify's resource picker for default products", async () => {

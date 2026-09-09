@@ -73,8 +73,8 @@ jest.mock("../../app/routes/app/shared/bundle-preview-action.server", () => ({
   handleRecordBundlePreview: jest.fn(),
 }));
 
-jest.mock("../../app/components/shared/FilePicker", () => ({
-  FilePicker: () => null,
+jest.mock("../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: () => null,
 }));
 
 jest.mock("../../app/components/bundle-configure/BundleGuidedTour", () => ({

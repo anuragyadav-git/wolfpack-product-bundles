@@ -268,7 +268,7 @@ Primary action:
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Edit area control exposes only persistent regions owned by the selected template: Bundle header, Navigation, Categories, Product cards, Product slots, and Cart / summary. Selecting an area returns the separate Preview state control to Default, scrolls the production region into view, and identifies it with a persistent outline and localized `Editing` label.
 - The separate Preview state control exposes only applicable transient states: Default, Product picker, Loading, Validation, and Upsell. Product picker is limited to PPB slot templates, Loading to FPB templates, and state dismissal/default restores the previously selected edit area.
-- Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
+- Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or upload a GIF through one native Polaris drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
 - Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
 - Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale and center within the Admin panel. The isolated same-origin frame composes a neutral store header and FPB page or PPB product-detail context around the production widget. Product picker, Loading, Validation, and Upsell invoke the production renderer's corresponding state.
 - The contextual inspector follows the selected edit area or non-default preview state. Editing a shared field preserves the current area instead of jumping to another region; the inspector heading names the active context.
@@ -522,8 +522,8 @@ FPB Configure Page
 │   │   └── Discount Messaging: per-rule Discount Text, one Success Message, Variables modal
 │   │
 │   ├── Images & GIFs
-│   │   ├── Promo banner background image
-│   │   ├── Per-step tab icon and banner image
+│   │   ├── Promo banner → desktop + mobile native drop zones side-by-side in one row → Shopify Files
+│   │   ├── Per-step tab icon and banner image → native drop zone → Shopify Files
 │   │   └── Floating promo badge enablement and text
 │   │
 │   ├── Sync Bundle
@@ -689,8 +689,8 @@ PPB Configure Page
 │       └── Place Block → product-template selector → `bundle-product-page-embed` Theme Editor deep link
 │
 ├── Images & GIFs
-│   ├── Per-step banner image shown above the step products
-│   └── Per-bundle loading GIF with the existing default-spinner preview
+│   ├── Per-step banner image shown above the step products → native drop zone → Shopify Files
+│   └── Per-bundle loading GIF with the existing default-spinner preview → native drop zone → Shopify Files
 │
 ├── Bundle Settings
 │   ├── PPB compare-at prices are product-driven; no per-bundle visibility control
@@ -707,7 +707,7 @@ PPB Configure Page
 │   │   ├── Pro Tip banner
 │   │   ├── FPB only: Product Slots toggle
 │   │   ├── FPB only: Product Slots helper text
-│   │   ├── FPB only: Slot Icon [Change Icon] opens bundle-level image picker; [Reset] clears icon
+│   │   ├── FPB only: Slot Icon [Change Icon] reveals a native asset drop zone; [Reset] clears icon
 │   │   ├── Settings -> Design: store-level FPB/PPB Slot Icon and Centered badge / Cover / Fit presentation control
 │   │   └── FPB only note: only applies when rules are quantity-based
 │   ├── PPB only: Low-stock alert
@@ -720,7 +720,6 @@ PPB Configure Page
 │   │   └── Action: Scroll to bundle offers / Add selected bundle
 │   ├── Cart line item discount display
 │   │   └── [Button] "Edit Defaults" → /app/settings
-│   ├── Bundle Banners (bundleBannerDesktopUrl + bundleBannerMobileUrl)
 │   ├── Custom CSS textarea (bundleLevelCss — sanitized via processCss)
 │   └── Bundle Status
 │

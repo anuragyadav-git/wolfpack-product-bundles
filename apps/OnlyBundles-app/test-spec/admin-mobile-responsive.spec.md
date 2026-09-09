@@ -5,7 +5,7 @@ title: Admin Mobile Responsive Behavior
 type: test-spec
 status: active
 summary: Behavior contracts for responsive Admin navigation, bundle tables, persistent support chat, overlays, and supporting merchant routes.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -14,7 +14,7 @@ systems:
   - remix-routes
 source_paths:
   - app/routes/app/
-  - app/components/shared/file-picker/
+  - app/components/shared/AssetUpload.tsx
 related_docs:
   - docs/app-nav-map/APP_NAVIGATION_MAP.md
 tags:
@@ -58,7 +58,7 @@ Keep merchant actions and navigation behavior intact while Admin surfaces adapt 
 | 1 | Accordion header is activated | Click or keyboard activation | Expanded state toggles without changing caller props | Events page |
 | 2 | Readiness item is selected | Incomplete actionable item | Overlay closes and original section callback receives the key | Configure editors |
 | 3 | Settings section changes on a phone | Existing language/control state | Active section changes without resetting dirty values | No layout assertions |
-| 4 | File picker dialog renders | Existing picker state and callbacks | Polaris modal exposes search, upload, cancel, and select actions | Shared image picker |
+| 4 | Asset field renders | Existing asset value and callbacks | Native drop zone accepts the file and preserves upload/remove behavior | No custom picker modal |
 | 5 | Configure disclosure section is selected | Section ID and existing selection callback | Original callback receives the section and the disclosure closes | FPB and PPB shared shell |
 | 6 | PPB live card is rendered through the shell supplement | Existing placement state and callback | Loading and disabled state are preserved and the original placement callback runs | A single model owns desktop and mobile behavior |
 | 7 | Wizard modal opens | Stable modal ID and open state | App Bridge modal API receives a show command | Language, filters, and custom fields |

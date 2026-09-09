@@ -13,6 +13,7 @@ domains:
 systems:
   - bundle-configure
 source_paths:
+  - app/components/shared/AssetUpload.tsx
   - app/components/AdminWarningGroup.tsx
   - app/components/bundle-configure/TemplatePreviewFeedbackModal.tsx
   - app/components/bundle-configure/BundleReadinessOverlay.tsx
@@ -129,7 +130,7 @@ Feature switches follow one shared disabled-configuration contract across FPB
 and PPB. The master switch remains interactive, while every dependent setting
 stays rendered with its saved value, is visually subdued, and sits inside an
 `aria-disabled` and native `inert` region. Native controls also receive their
-own `disabled` state, including shared `FilePicker` triggers. Turning a feature
+own `disabled` state, including shared `AssetUpload` drop zones. Turning a feature
 off must not clear its draft configuration; turning it back on restores the
 same values. Mutually exclusive mode branches and prerequisite acquisition
 flows may remain conditional because they do not represent disabled saved
@@ -147,10 +148,15 @@ Images & GIFs is an explicit shared configure navigation section because its
 route-owned editors persist storefront fields that have no other bundle-level
 owner. FPB owns its promo banner, per-step tab/banner images, and floating promo
 badge there. PPB owns its per-step banners and per-bundle loading animation.
+The FPB promo banner uses the canonical desktop and mobile bundle-banner URLs;
+its two native drop zones share one row at every configure width. Bundle
+Settings does not duplicate those media controls.
 The store-level FPB loading screen and shared slot icon remain owned by Settings
 Design; the configure section does not recreate those store-level controls.
 Media previews use Polaris `s-image`, and product/list media use `s-thumbnail`;
 the app does not maintain a custom responsive-picture wrapper for Admin media.
+Empty upload surfaces provide a Shopify upload icon as `s-drop-zone` content;
+they do not nest a second Polaris button inside the native drop zone.
 
 Step Setup uses the same section rhythm for both bundle types:
 
@@ -235,11 +241,15 @@ controls remain visible but disabled, and the Admin save payload forces
 `productSlotsEnabled=false` while the configuration is incompatible.
 
 Step Config uses the shared square step-image control beside the Step Title
-fields, with an explicit gap between those columns. Its Upload file and Replace
-actions mount `FilePicker` in auto-open mode. Auto-open pickers begin in the open
-state and use the shared Polaris modal utilities (`showOverlay()` plus native
-hide listeners); React custom-element `onHide` props and `show()` alone are not
-the supported lifecycle contract inside the embedded Admin iframe.
+fields, with an explicit gap between those columns. Upload and Replace reveal
+the shared `AssetUpload` surface, which delegates selection and drag-and-drop to
+one named Polaris `s-drop-zone`. The app does not maintain a file-library modal,
+search, pagination, faux drop target, or a separate clickable upload action.
+The selected file is posted through the App Bridge-authenticated
+`/app/upload-store-file` resource route, staged as Shopify image media, created
+through the Admin Files API, and polled until Shopify returns its READY CDN URL.
+Type and size validation, active-attempt disabling, explicit removal, and the
+owning configure draft update remain app responsibilities.
 
 SaveBar semantics remain route-owned. Shared configure UI should mark drafts dirty through the adapter but must not introduce autosave, wrap the canvas in a broad form, or make Enter keypresses submit the configure page.
 

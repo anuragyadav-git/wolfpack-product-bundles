@@ -16,8 +16,8 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({ saveBar: { show: jest.fn(), hide: jest.fn() } }),
 }));
 
-jest.mock("../../../app/components/shared/FilePicker", () => ({
-  FilePicker: ({ label }: { label: string }) => React.createElement("div", null, label),
+jest.mock("../../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: ({ label }: { label: string }) => React.createElement("div", null, label),
 }));
 
 describe("DesignSettingsView live preview", () => {

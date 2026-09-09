@@ -9,12 +9,26 @@ jest.mock("../../../app/i18n/config", () => ({
   translateAdmin: (key: string) => key,
 }));
 
-jest.mock("../../../app/components/shared/FilePicker", () => ({
-  FilePicker: ({onChange}: {onChange: (url: string | null) => void}) =>
+jest.mock("../../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: ({
+    label,
+    onChange,
+  }: {
+    label?: string;
+    onChange: (url: string | null) => void;
+  }) =>
     React.createElement(
       "button",
       {
-        onClick: () => onChange("https://cdn.shopify.com/promo.jpg"),
+        "aria-label": label?.includes("bannerImageMobile")
+          ? "mobile upload"
+          : "desktop upload",
+        onClick: () =>
+          onChange(
+            label?.includes("bannerImageMobile")
+              ? "https://cdn.shopify.com/mobile.jpg"
+              : "https://cdn.shopify.com/desktop.jpg",
+          ),
         type: "button",
       },
       "Choose media",
@@ -47,9 +61,10 @@ describe("FPB media feature boundary", () => {
     container.remove();
   });
 
-  it("updates the promo image and marks the route draft dirty", () => {
+  it("updates desktop and mobile promo banners and marks the route draft dirty", () => {
     const markAsDirty = jest.fn();
-    const setPromoBannerBgImage = jest.fn();
+    const setBundleBannerDesktopUrl = jest.fn();
+    const setBundleBannerMobileUrl = jest.fn();
 
     flushSync(() => {
       root.render(
@@ -60,27 +75,29 @@ describe("FPB media feature boundary", () => {
           floatingBadgeText: "",
           fullPageBundleStyles: {},
           markAsDirty,
-          promoBannerBgImage: null,
+          bundleBannerDesktopUrl: "",
+          bundleBannerMobileUrl: "",
           setActiveAssetTabIndex: jest.fn(),
+          setBundleBannerDesktopUrl,
+          setBundleBannerMobileUrl,
           setFloatingBadgeEnabled: jest.fn(),
           setFloatingBadgeText: jest.fn(),
-          setPromoBannerBgImage,
           steps: [],
           updateStepField: jest.fn(),
         } as any),
       );
     });
 
-    const picker = container.querySelector<HTMLElement>("button");
-    expect(picker).not.toBeNull();
-    flushSync(() => {
-      picker?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
-    });
+    click('button[aria-label="desktop upload"]');
+    click('button[aria-label="mobile upload"]');
 
-    expect(setPromoBannerBgImage).toHaveBeenCalledWith(
-      "https://cdn.shopify.com/promo.jpg",
+    expect(setBundleBannerDesktopUrl).toHaveBeenCalledWith(
+      "https://cdn.shopify.com/desktop.jpg",
     );
-    expect(markAsDirty).toHaveBeenCalledTimes(1);
+    expect(setBundleBannerMobileUrl).toHaveBeenCalledWith(
+      "https://cdn.shopify.com/mobile.jpg",
+    );
+    expect(markAsDirty).toHaveBeenCalledTimes(2);
   });
 
   it("renders no media controls outside the media section", () => {
@@ -93,11 +110,13 @@ describe("FPB media feature boundary", () => {
           floatingBadgeText: "",
           fullPageBundleStyles: {},
           markAsDirty: jest.fn(),
-          promoBannerBgImage: null,
+          bundleBannerDesktopUrl: "",
+          bundleBannerMobileUrl: "",
           setActiveAssetTabIndex: jest.fn(),
+          setBundleBannerDesktopUrl: jest.fn(),
+          setBundleBannerMobileUrl: jest.fn(),
           setFloatingBadgeEnabled: jest.fn(),
           setFloatingBadgeText: jest.fn(),
-          setPromoBannerBgImage: jest.fn(),
           steps: [],
           updateStepField: jest.fn(),
         } as any),
@@ -106,4 +125,12 @@ describe("FPB media feature boundary", () => {
 
     expect(container.querySelector("button")).toBeNull();
   });
+
+  function click(selector: string) {
+    const element = container.querySelector<HTMLElement>(selector);
+    expect(element).not.toBeNull();
+    flushSync(() => {
+      element?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+    });
+  }
 });
