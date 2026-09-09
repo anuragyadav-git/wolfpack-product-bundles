@@ -41,6 +41,16 @@ describe("pre-commit critical hook planner", () => {
     expect(plan.partialFiles).toEqual(["apps/OnlyBundles-app/app/lib/pricing-display-options.ts"]);
   });
 
+  it("maps app-owned Jest inputs into the app workspace", () => {
+    expect(core.toAppWorkspacePaths([
+      "apps/OnlyBundles-app/tests/unit/routes/example.test.ts",
+      "apps/OnlyBundles-app/app/routes/app/app.dashboard/route.tsx",
+    ])).toEqual([
+      "tests/unit/routes/example.test.ts",
+      "app/routes/app/app.dashboard/route.tsx",
+    ]);
+  });
+
   it("reports banned UI styling unit-test patterns", () => {
     const bannedSource = ["ex", "pect(source).toContain('class", "Name=\"hero\"');"].join("");
     const findings = core.findBannedTestPatterns({

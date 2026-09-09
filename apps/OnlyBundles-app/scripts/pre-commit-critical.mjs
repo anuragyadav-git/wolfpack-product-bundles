@@ -13,7 +13,9 @@ const {
   excludeExactRenameDestinations,
   findBannedTestPatterns,
   isGraphifyConfigurationFailure,
+  toAppWorkspacePaths,
 } = require("./pre-commit-critical-core.cjs");
+const APP_WORKSPACE = APP_PREFIX.slice(0, -1);
 
 const GENERATED_OUTPUTS = {
   "all": [
@@ -41,6 +43,7 @@ const CSS_OUTPUTS = [
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
+    cwd: options.cwd,
     encoding: "utf8",
     stdio: options.capture ? ["ignore", "pipe", "pipe"] : "inherit",
     maxBuffer: 64 * 1024 * 1024,
@@ -92,9 +95,9 @@ function commandLabel(command, args) {
   return [command, ...args].join(" ");
 }
 
-function mustRun(command, args) {
+function mustRun(command, args, options = {}) {
   console.log(`[pre-commit] ${commandLabel(command, args)}`);
-  const result = run(command, args);
+  const result = run(command, args, options);
   if (result.status !== 0) {
     abort(`Command failed: ${commandLabel(command, args)}`);
   }
@@ -180,11 +183,11 @@ function main() {
   }
 
   if (plan.testFiles.length > 0) {
-    mustRun("npx", ["jest", "--config", appPath("jest.config.js"), "--runTestsByPath", ...plan.testFiles, "--runInBand", "--coverage=false"]);
+    mustRun("npx", ["jest", "--config", "jest.config.js", "--runTestsByPath", ...toAppWorkspacePaths(plan.testFiles), "--runInBand", "--coverage=false"], { cwd: APP_WORKSPACE });
   }
 
   if (plan.relatedSourceFiles.length > 0) {
-    mustRun("npx", ["jest", "--config", appPath("jest.config.js"), "--findRelatedTests", ...plan.relatedSourceFiles, "--runInBand", "--coverage=false", "--passWithNoTests"]);
+    mustRun("npx", ["jest", "--config", "jest.config.js", "--findRelatedTests", ...toAppWorkspacePaths(plan.relatedSourceFiles), "--runInBand", "--coverage=false", "--passWithNoTests"], { cwd: APP_WORKSPACE });
   }
 
   if (plan.widgetBuildTargets.length > 0) {
