@@ -2945,8 +2945,7 @@
   }
 
   .readinessButton {
-    display: inline-block;
-    flex: 0 0 auto;
+    display: contents;
   }
 
   .visibilityPlacementCard {

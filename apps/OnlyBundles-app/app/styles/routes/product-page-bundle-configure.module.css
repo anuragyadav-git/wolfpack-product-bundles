@@ -211,12 +211,6 @@
   color: #8c9196;
 }
 
-.settingInlineSwitch {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-}
-
 .defaultProductsPickerGroup {
   display: flex;
   flex-direction: column;
@@ -2158,8 +2152,7 @@
   }
 
   .readinessButton {
-    display: inline-block;
-    flex: 0 0 auto;
+    display: contents;
   }
 
   .templateDialogContent {

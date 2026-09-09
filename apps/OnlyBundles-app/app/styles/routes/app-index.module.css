@@ -233,17 +233,6 @@
   background: #ffffff;
 }
 
-.footerLink {
-  font-size: 13px;
-  color: #5c6ac4;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.footerLink:hover {
-  text-decoration: underline;
-}
-
 .footerDot {
   width: 3px;
   height: 3px;

@@ -27,6 +27,16 @@ export function FpbStepSetupDetailsCard({
   onNameChange: (name: string) => void;
   onOpenTranslations: () => void;
 }) {
+  const translationsTooltipId = `fpb-step-${step.id}-translations-tooltip`;
+  const cloneTooltipId = `fpb-step-${step.id}-clone-tooltip`;
+  const deleteTooltipId = `fpb-step-${step.id}-delete-tooltip`;
+  const translationsLabel = translateAdmin(
+    "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+  );
+  const cloneLabel = translateAdmin("adminAttributes.cloneCurrentStep");
+  const deleteLabel =
+    stepCount <= 1 ? "At least one step is required" : "Delete current step";
+
   return (
     <div className={styles.stepSetupDetails}>
       <div className={styles.stepSetupHeader}>
@@ -46,49 +56,35 @@ export function FpbStepSetupDetailsCard({
           />
         </div>
         <div className={styles.stepSetupActions}>
-          <span
-            title={translateAdmin(
-              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+          <s-tooltip id={translationsTooltipId}>{translationsLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="language-translate"
+            accessibilityLabel={translationsLabel}
+            interestFor={translationsTooltipId}
+            disabled={translationsDisabled || undefined}
+            onClick={onOpenTranslations}
+          />
+          <s-tooltip id={cloneTooltipId}>{cloneLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="duplicate"
+            accessibilityLabel={cloneLabel}
+            interestFor={cloneTooltipId}
+            onClick={onClone}
+          />
+          <s-tooltip id={deleteTooltipId}>{deleteLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="delete"
+            tone="critical"
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.deleteCurrentStep"
             )}
-          >
-            <s-button
-              variant="tertiary"
-              icon="language-translate"
-              accessibilityLabel={translateAdmin(
-                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
-              )}
-              disabled={translationsDisabled || undefined}
-              onClick={onOpenTranslations}
-            />
-          </span>
-          <span title={translateAdmin("adminAttributes.cloneCurrentStep")}>
-            <s-button
-              variant="tertiary"
-              icon="duplicate"
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.cloneCurrentStep"
-              )}
-              onClick={onClone}
-            />
-          </span>
-          <span
-            title={
-              stepCount <= 1
-                ? "At least one step is required"
-                : "Delete current step"
-            }
-          >
-            <s-button
-              variant="tertiary"
-              icon="delete"
-              tone="critical"
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.deleteCurrentStep"
-              )}
-              disabled={stepCount <= 1 || undefined}
-              onClick={onDelete}
-            />
-          </span>
+            interestFor={deleteTooltipId}
+            disabled={stepCount <= 1 || undefined}
+            onClick={onDelete}
+          />
         </div>
       </div>
       <div

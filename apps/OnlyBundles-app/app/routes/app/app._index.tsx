@@ -179,17 +179,13 @@ export default function AppIndex() {
 
       {/* ── Footer strip ── */}
       <div className={styles.footerStrip}>
-        <span className={styles.footerLink}>
-          <s-button variant="tertiary" onClick={() => openSupportChat()}>
-            {translateAdmin("billing.actions.contactSupport")}
-          </s-button>
-        </span>
+        <s-button variant="tertiary" onClick={() => openSupportChat()}>
+          {translateAdmin("billing.actions.contactSupport")}
+        </s-button>
         <span className={styles.footerDot} />
-        <span className={styles.footerLink}>
-          <s-link href={TUTORIAL_LIBRARY_URL} target="_blank">
-            {translateAdmin("adminExtracted.appIndex.documentation")}
-          </s-link>
-        </span>
+        <s-link href={TUTORIAL_LIBRARY_URL} target="_blank">
+          {translateAdmin("adminExtracted.appIndex.documentation")}
+        </s-link>
       </div>
     </div>
   );

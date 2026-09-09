@@ -446,8 +446,7 @@
   }
 
   .filterGroup s-button,
-  .bundleActions s-button,
-  .paginationArrow s-button {
+  .bundleActions s-button {
     min-block-size: 44px;
   }
 
@@ -477,10 +476,6 @@
     width: 100%;
     justify-self: stretch;
     justify-content: space-between;
-  }
-
-  .paginationArrow {
-    min-width: 44px;
   }
 
   .perPageControls {
@@ -523,10 +518,6 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-}
-
-.paginationArrow {
-  min-width: 30px;
 }
 
 .paginationPageText {

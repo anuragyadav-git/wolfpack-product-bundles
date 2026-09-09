@@ -5,7 +5,7 @@ title: Bundle Readiness Overlay Test Spec
 type: test-spec
 status: active
 summary: Behavioral coverage for the Shopify-native floating bundle readiness popover and compact trigger.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -48,6 +48,7 @@ score control.
 | 8 | Responsive trigger ownership | Configure page crosses the mobile breakpoint | Desktop uses only the bottom-left gauge; mobile uses only the header readiness action | Guided tour resolves the visible trigger |
 | 9 | Guided-tour viewport gate | Configure page loads or resizes below 768px | Guided tour does not start or remain visible | Mobile readiness popover remains independent |
 | 10 | Immediate readiness delivery | Configure page renders before deferred dialogs and tours | Readiness trigger and popover are already available | Only genuinely non-critical overlays remain idle-deferred |
+| 11 | Header action independence | Merchant activates Readiness and Preview Bundle | Readiness opens the popover and Preview runs the preview handler | Both controls remain direct native actions without a wrapper-owned interaction |
 
 ## Acceptance Criteria
 

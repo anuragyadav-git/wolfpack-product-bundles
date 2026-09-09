@@ -40,7 +40,6 @@ export function PpbQuantitySettings({
   validationErrors,
   variantSelectorEnabled,
 }: PpbQuantitySettingsProps) {
-
   return (
     <s-section>
       <s-stack direction="block" gap="small">
@@ -51,20 +50,18 @@ export function PpbQuantitySettings({
             )}
             <QuestionHelpTooltip tooltipKey="quantityValidation" />
           </h3>
-          <span className={productPageBundleStyles.settingInlineSwitch}>
-            <s-switch
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.enableQuantityValidation"
-              )}
-              checked={quantityValidationEnabled || undefined}
-              onChange={(e) => {
-                setQuantityValidationEnabled(
-                  (e.target as HTMLInputElement).checked
-                );
-                markAsDirty();
-              }}
-            />
-          </span>
+          <s-switch
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.enableQuantityValidation"
+            )}
+            checked={quantityValidationEnabled || undefined}
+            onChange={(e) => {
+              setQuantityValidationEnabled(
+                (e.target as HTMLInputElement).checked
+              );
+              markAsDirty();
+            }}
+          />
         </div>
         <DisabledConfigurationRegion disabled={!quantityValidationEnabled}>
           <s-number-field
@@ -97,20 +94,16 @@ export function PpbQuantitySettings({
               )}
             </p>
           </div>
-          <span className={productPageBundleStyles.settingInlineSwitch}>
-            <s-switch
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.variantSelector"
-              )}
-              checked={variantSelectorEnabled || undefined}
-              onChange={(e) => {
-                setVariantSelectorEnabled(
-                  (e.target as HTMLInputElement).checked
-                );
-                markAsDirty();
-              }}
-            />
-          </span>
+          <s-switch
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.variantSelector"
+            )}
+            checked={variantSelectorEnabled || undefined}
+            onChange={(e) => {
+              setVariantSelectorEnabled((e.target as HTMLInputElement).checked);
+              markAsDirty();
+            }}
+          />
         </div>
         <div className={productPageBundleStyles.settingTitleRow}>
           <div>
@@ -124,18 +117,14 @@ export function PpbQuantitySettings({
               )}
             </p>
           </div>
-          <span className={productPageBundleStyles.settingInlineSwitch}>
-            <s-switch
-              accessibilityLabel={translateAdmin(
-                "tooltips.lowStockAlert.title"
-              )}
-              checked={lowStockAlertEnabled || undefined}
-              onChange={(e) => {
-                setLowStockAlertEnabled((e.target as HTMLInputElement).checked);
-                markAsDirty();
-              }}
-            />
-          </span>
+          <s-switch
+            accessibilityLabel={translateAdmin("tooltips.lowStockAlert.title")}
+            checked={lowStockAlertEnabled || undefined}
+            onChange={(e) => {
+              setLowStockAlertEnabled((e.target as HTMLInputElement).checked);
+              markAsDirty();
+            }}
+          />
         </div>
         <DisabledConfigurationRegion disabled={!lowStockAlertEnabled}>
           <s-stack direction="block" gap="small">

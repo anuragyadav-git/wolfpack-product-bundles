@@ -149,23 +149,21 @@ export function SettingsControlsWorkspace({
                   "adminExtracted.appSettings.settingsroute.configureYourBundleSettings"
                 )}
               </p>
-              <span className={styles.controlsLayoutSelectWrap}>
-                <s-select
-                  label={translateAdmin("adminAttributes.layoutSelector")}
-                  labelAccessibilityVisibility="exclusive"
-                  value={activeControlLayout}
-                  onChange={(event) => {
-                    const nextLayout = event.currentTarget.value;
-                    if (nextLayout) onLayoutChange(nextLayout);
-                  }}
-                >
-                  {CONTROL_LAYOUTS.map((layout) => (
-                    <s-option key={layout.id} value={layout.label}>
-                      {translateAdminCopy(layout.label)}
-                    </s-option>
-                  ))}
-                </s-select>
-              </span>
+              <s-select
+                label={translateAdmin("adminAttributes.layoutSelector")}
+                labelAccessibilityVisibility="exclusive"
+                value={activeControlLayout}
+                onChange={(event) => {
+                  const nextLayout = event.currentTarget.value;
+                  if (nextLayout) onLayoutChange(nextLayout);
+                }}
+              >
+                {CONTROL_LAYOUTS.map((layout) => (
+                  <s-option key={layout.id} value={layout.label}>
+                    {translateAdminCopy(layout.label)}
+                  </s-option>
+                ))}
+              </s-select>
               <div
                 className={styles.controlsNavList}
                 role="tablist"

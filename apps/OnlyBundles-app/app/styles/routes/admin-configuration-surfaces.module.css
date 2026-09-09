@@ -627,8 +627,7 @@
   font-weight: 750;
 }
 
-.languageLayoutButton::after,
-.controlsLayoutSelectWrap::after {
+.languageLayoutButton::after {
   content: "";
   position: absolute;
   right: 11px;
@@ -746,12 +745,6 @@
   font-size: 12px;
   font-weight: 500;
   line-height: 16px;
-}
-
-.controlsLayoutSelectWrap {
-  position: relative;
-  display: grid;
-  align-items: center;
 }
 
 .controlsLayoutSelect {

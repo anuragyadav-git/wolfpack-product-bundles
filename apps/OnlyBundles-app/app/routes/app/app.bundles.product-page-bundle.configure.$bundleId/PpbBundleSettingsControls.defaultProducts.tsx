@@ -83,24 +83,22 @@ export function PpbDefaultProductsSettings({
             {translateAdmin("tooltips.preselectedProducts.title")}
             <QuestionHelpTooltip tooltipKey="preselectedProducts" />
           </h3>
-          <span className={productPageBundleStyles.settingInlineSwitch}>
-            <s-switch
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.enablePreSelectedProduct"
-              )}
-              checked={defaultProductsEnabled || undefined}
-              onChange={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setDefaultProductsData((prev) => ({
-                  ...prev,
-                  isDefaultProductsEnabled: checked,
-                  defaultProductsTitle: prev.defaultProductsTitle ?? "",
-                  products: prev.products ?? [],
-                }));
-                markAsDirty();
-              }}
-            />
-          </span>
+          <s-switch
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.enablePreSelectedProduct"
+            )}
+            checked={defaultProductsEnabled || undefined}
+            onChange={(e) => {
+              const checked = (e.target as HTMLInputElement).checked;
+              setDefaultProductsData((prev) => ({
+                ...prev,
+                isDefaultProductsEnabled: checked,
+                defaultProductsTitle: prev.defaultProductsTitle ?? "",
+                products: prev.products ?? [],
+              }));
+              markAsDirty();
+            }}
+          />
         </div>
         <DisabledConfigurationRegion disabled={!defaultProductsEnabled}>
           <s-stack direction="block" gap="small">

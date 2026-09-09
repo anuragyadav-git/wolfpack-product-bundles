@@ -315,32 +315,26 @@ export function DashboardBundlesPanel<TBundle extends DashboardBundle>({
                     <div className={dashboardStyles.paginationBar}>
                       <span className={dashboardStyles.paginationSpacer} />
                       <div className={dashboardStyles.paginationControls}>
-                        <span className={dashboardStyles.paginationArrow}>
-                          <s-button
-                            variant="tertiary"
-                            disabled={effectivePage <= 1 || undefined}
-                            onClick={() => setCurrentPage((page) => page - 1)}
-                            accessibilityLabel={t("dashboard.pagination.prev")}
-                          >
-                            ‹
-                          </s-button>
-                        </span>
+                        <s-button
+                          variant="tertiary"
+                          icon="arrow-left"
+                          disabled={effectivePage <= 1 || undefined}
+                          onClick={() => setCurrentPage((page) => page - 1)}
+                          accessibilityLabel={t("dashboard.pagination.prev")}
+                        />
                         <span className={dashboardStyles.paginationPageText}>
                           {t("dashboard.pagination.page", {
                             current: effectivePage,
                             total: totalPages,
                           })}
                         </span>
-                        <span className={dashboardStyles.paginationArrow}>
-                          <s-button
-                            variant="tertiary"
-                            disabled={effectivePage >= totalPages || undefined}
-                            onClick={() => setCurrentPage((page) => page + 1)}
-                            accessibilityLabel={t("dashboard.pagination.next")}
-                          >
-                            ›
-                          </s-button>
-                        </span>
+                        <s-button
+                          variant="tertiary"
+                          icon="arrow-right"
+                          disabled={effectivePage >= totalPages || undefined}
+                          onClick={() => setCurrentPage((page) => page + 1)}
+                          accessibilityLabel={t("dashboard.pagination.next")}
+                        />
                       </div>
                       <div className={dashboardStyles.perPageControls}>
                         <span>{t("dashboard.pagination.perPageLabel")}</span>
