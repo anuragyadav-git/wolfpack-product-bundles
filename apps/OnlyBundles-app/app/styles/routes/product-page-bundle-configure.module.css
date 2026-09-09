@@ -2148,7 +2148,12 @@
 }
 
 @media (max-width: 767px) {
+  .canvasHeader {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .canvasActions {
+    inline-size: 100%;
     flex-wrap: nowrap;
   }
 
