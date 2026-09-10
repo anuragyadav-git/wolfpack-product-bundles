@@ -5,7 +5,7 @@ title: PPB Mobile Summary Footer Test Spec
 type: test-spec
 status: active
 summary: Defines behavior and browser acceptance coverage for the shared PPB mobile summary footer and product picker close control.
-last_audited: 2026-08-20
+last_audited: 2026-09-10
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -16,6 +16,7 @@ source_paths:
   - app/assets/widgets/product-page/templates/cascade-summary.ts
   - app/assets/widgets/product-page/templates/cascade-template.ts
   - app/assets/widgets/product-page-css/base/inpage-shared-footer.css
+  - app/assets/widgets/product-page-css/base/mobile-drawers.css
 related_docs:
   - test-spec/ppb-product-drawer-parity.spec.md
 tags:
@@ -51,9 +52,11 @@ Protect quantity and pricing behavior in the shared Product List and Product Gri
 | 1 | Mobile shared footer | Product List and Product Grid at `390x844` | Chevron, cart/count, divider, payable total, and optional compare-at total fit without wrapping | Clear cache and hard reload first |
 | 2 | Expanded selected drawer | Two selected products | One shell rule, one heading rule, no doubled borders, and no CTA overlap | Verify computed geometry |
 | 3 | Product picker close | `PDP_MODAL` open on mobile | Centered chevron close control is visible, keyboard focusable, and at least `44x44` | Desktop close remains unchanged |
+| 4 | Reopen after row removal | Remove a selected product through the expanded drawer, leaving or subsequently adding a selectable product | The collapsed 44px summary toggle remains hit-testable and reopens the selected-products drawer | The zero-height drawer must not clip its own toggle from pointer hit testing |
 
 ## Acceptance Criteria
 
+- [x] After a selected row is deleted and a product is selected again, the collapsed mobile summary toggle remains hit-testable and reopens the drawer.
 - [ ] All listed behavior tests pass.
 - [ ] Product List and Product Grid share the same mobile summary contract.
 - [ ] Desktop retains the localized label presentation.

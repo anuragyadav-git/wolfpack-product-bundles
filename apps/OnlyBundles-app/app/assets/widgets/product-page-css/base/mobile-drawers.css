@@ -51,9 +51,6 @@
 
   body[wpbmix-template-type="PDP_INPAGE"]
     #bundle-builder-app
-    .bw-ppb-cascade-selected-drawer,
-  body[wpbmix-template-type="PDP_INPAGE"]
-    #bundle-builder-app
     .bw-ppb-cascade-selected-list {
     overflow-x: clip;
     overscroll-behavior: contain;
