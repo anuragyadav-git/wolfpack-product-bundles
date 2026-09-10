@@ -369,6 +369,11 @@ describe("native configure actions", () => {
       element.textContent?.includes("commonconfiguresidebar.editProduct")
     );
     expect(editProductAction).toBeDefined();
+    expect(
+      editProductAction?.querySelector(
+        "button, a, s-button, s-clickable, s-clickable-chip, s-link"
+      )
+    ).toBeNull();
     clickAction("commonconfiguresidebar.editProduct");
     flushSync(() => {
       root.render(
