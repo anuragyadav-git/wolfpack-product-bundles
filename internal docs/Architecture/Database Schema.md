@@ -5,7 +5,7 @@ title: Database Schema
 type: architecture
 status: authoritative
 summary: Documents the canonical Prisma models, removed legacy residue, ownership boundaries, and forward-only migration rules.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -15,8 +15,9 @@ systems:
   - prisma
   - postgresql
 source_paths:
-  - prisma/schema.prisma
-  - prisma/migrations/
+  - apps/OnlyBundles-app/prisma/schema.prisma
+  - apps/OnlyBundles-app/prisma/migrations/
+  - prisma.config.ts
 related_docs:
   - internal docs/Architecture/System Overview.md
   - docs/competitor-analysis/22-bogos-bundlex-wolfpack-feasibility.md
@@ -31,7 +32,9 @@ keywords:
 
 # Database Schema
 
-Authoritative summary derived from `prisma/schema.prisma`. The `APPLICATION_ARCHITECTURE.md` in `docs/` is significantly outdated — this note supersedes it for schema questions.
+Authoritative summary derived from `apps/OnlyBundles-app/prisma/schema.prisma`.
+The `APPLICATION_ARCHITECTURE.md` in `docs/` is significantly outdated — this
+note supersedes it for schema questions.
 
 ---
 
@@ -40,8 +43,10 @@ Authoritative summary derived from `prisma/schema.prisma`. The `APPLICATION_ARCH
 ### Bundle
 
 Core model. Key fields beyond basics:
-- `status`: `BundleStatus` enum — `active`, `inactive`, `draft`, **`unlisted`** (not in old doc)
-- `fullPageLayout`: `FullPageLayout` enum — `CLASSIC`, `EDITORIAL`, `GRID`
+- `status`: `BundleStatus` enum — `draft`, `active`, `archived`, `unlisted`
+- `bundleDesignTemplate` and `bundleDesignPresetId`: nullable canonical design
+  identifiers for FPB and PPB templates; the schema has no separate
+  `FullPageLayout` field or enum
 - `promoBannerBgImage`: promotional banner image URL
 - Promo banner crop data is not part of the schema. The pruned `promoBannerBgImageCrop` column was removed; banners render with the configured image and standard cover/center behavior.
 - `tierConfig`: JSON — tiered pricing configuration
@@ -183,23 +188,23 @@ metadata; the removed one-time cutover helper is not a fallback path.
 
 ### BundleStatus
 ```
-active | inactive | draft | unlisted
+draft | active | archived | unlisted
 ```
-`unlisted` = bundle exists but is not shown in merchant list (used for archived/template bundles).
-
-### FullPageLayout
-```
-CLASSIC | EDITORIAL | GRID
-```
-Controls FPB widget layout rendering mode.
+`unlisted` keeps the bundle product out of Shopify discovery while preserving
+the bundle for configuration and preview. `archived` is a distinct terminal
+application status; it is not an `inactive` alias.
 
 ---
 
 ## Prisma Location
 
-- Schema: `prisma/schema.prisma`
-- Dev DB env: `prisma/.env` (not project root — contains SIT credentials)
-- Dev DB file: `prisma/dev.db` (SQLite, gitignored)
+- Schema: `apps/OnlyBundles-app/prisma/schema.prisma`
+- Database provider: PostgreSQL in every environment
+- Connection variables: `DATABASE_URL` and `DIRECT_URL`
+- Root Prisma commands resolve the app-owned schema through
+  `prisma.config.ts`. When `apps/OnlyBundles-app/.env` exists, that config loads
+  it with Node's environment-file loader; already-supplied process variables
+  remain authoritative.
 
 ---
 
