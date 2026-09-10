@@ -172,6 +172,7 @@ function makeStep(
     enabled: boolean;
     pageTitle: string;
     stepImage: string | null;
+    imageUrl: string | null;
     bannerImageUrl: string | null;
     multiLangData: Record<string, Record<string, string>>;
     StepProduct: any[];
@@ -349,7 +350,7 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(updateArgs.data).not.toHaveProperty("showCompareAtPrices");
   });
 
-  it("ignores retired PPB loading and banner media while preserving Step Config imagery", async () => {
+  it("ignores retired PPB media while preserving Step Config imagery", async () => {
     await handleSaveBundle(
       MOCK_ADMIN,
       MOCK_SESSION,
@@ -359,6 +360,7 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
         stepsData: JSON.stringify([
           makeStep({
             stepImage: "https://cdn.example.test/step-image.png",
+            imageUrl: "https://cdn.example.test/retired-tab-icon.png",
             bannerImageUrl: "https://cdn.example.test/retired-banner.png",
           }),
         ]),
@@ -370,6 +372,7 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     expect(updateArgs.data.steps.create[0]).not.toHaveProperty(
       "bannerImageUrl",
     );
+    expect(updateArgs.data.steps.create[0]).not.toHaveProperty("imageUrl");
     expect(updateArgs.data.steps.create[0].timelineIconUrl).toBe(
       "https://cdn.example.test/step-image.png",
     );

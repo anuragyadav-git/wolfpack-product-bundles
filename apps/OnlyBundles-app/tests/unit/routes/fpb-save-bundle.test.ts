@@ -176,6 +176,8 @@ function makeStepsData(
     maxQuantity: number | string | null;
     enabled: boolean;
     stepImage: string | null;
+    imageUrl: string | null;
+    bannerImageUrl: string | null;
     multiLangData: Record<string, Record<string, string>>;
     products: any[];
     StepProduct: any[];
@@ -474,6 +476,26 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
 
     const savedSteps = getDb().bundle.update.mock.calls[0][0].data.steps.create;
     expect(savedSteps.map((step: any) => step.enabled)).toEqual([true, false]);
+  });
+
+  it("persists only the canonical Step Config image", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify(makeStepsData({
+          stepImage: "https://cdn.shopify.com/step-icon.png",
+          imageUrl: "https://cdn.shopify.com/retired-tab-icon.png",
+          bannerImageUrl: "https://cdn.shopify.com/retired-step-banner.png",
+        })),
+      }),
+    );
+
+    const [savedStep] = getDb().bundle.update.mock.calls[0][0].data.steps.create;
+    expect(savedStep.timelineIconUrl).toBe("https://cdn.shopify.com/step-icon.png");
+    expect(savedStep).not.toHaveProperty("imageUrl");
+    expect(savedStep).not.toHaveProperty("bannerImageUrl");
   });
 
   it("allows exact step rules and bundle-total discount tiers without hidden quantity bounds", async () => {

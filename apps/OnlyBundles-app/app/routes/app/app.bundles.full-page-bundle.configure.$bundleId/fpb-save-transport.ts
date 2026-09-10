@@ -264,8 +264,6 @@ export function serializeFpbSaveSteps(
       addonUnlockAfterCompletion: true,
       isDefault: source.isDefault === true,
       defaultVariantId: source.defaultVariantId ?? null,
-      imageUrl: source.imageUrl ?? null,
-      bannerImageUrl: source.bannerImageUrl ?? null,
       StepProduct: compactProducts(source.StepProduct),
       StepCategory: compactCategories(source.StepCategory),
     };

@@ -83,9 +83,6 @@ async renderFullPageLayout() {
     if (categoryTabs) contentSection.appendChild(categoryTabs);
   }
 
-  const stepBanner = this.createStepBannerImage(this.currentStepIndex);
-  if (stepBanner) contentSection.appendChild(stepBanner);
-
   if (this.shouldRenderFullPageSearch()) {
     contentSection.appendChild(this.createSearchInput());
   }

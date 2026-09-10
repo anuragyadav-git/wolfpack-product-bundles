@@ -65,25 +65,28 @@ describe("FPB media feature boundary", () => {
     const markAsDirty = jest.fn();
     const setBundleBannerDesktopUrl = jest.fn();
     const setBundleBannerMobileUrl = jest.fn();
+    const updateStepField = jest.fn();
 
     flushSync(() => {
       root.render(
         React.createElement(FpbImagesGifsPanel, {
-          activeAssetTabIndex: 0,
           activeSection: "images_gifs",
           floatingBadgeEnabled: false,
           floatingBadgeText: "",
-          fullPageBundleStyles: {},
           markAsDirty,
           bundleBannerDesktopUrl: "",
           bundleBannerMobileUrl: "",
-          setActiveAssetTabIndex: jest.fn(),
           setBundleBannerDesktopUrl,
           setBundleBannerMobileUrl,
           setFloatingBadgeEnabled: jest.fn(),
           setFloatingBadgeText: jest.fn(),
-          steps: [],
-          updateStepField: jest.fn(),
+          steps: [{
+            id: "step-1",
+            name: "Step 1",
+            imageUrl: "https://cdn.shopify.com/retired-tab-icon.png",
+            bannerImageUrl: "https://cdn.shopify.com/retired-step-banner.png",
+          }],
+          updateStepField,
         } as any),
       );
     });
@@ -98,6 +101,9 @@ describe("FPB media feature boundary", () => {
       "https://cdn.shopify.com/mobile.jpg",
     );
     expect(markAsDirty).toHaveBeenCalledTimes(2);
+    expect(container.querySelectorAll("button")).toHaveLength(2);
+    expect(String(container.textContent).includes("FORMAT")).toBe(false);
+    expect(updateStepField).not.toHaveBeenCalled();
     expect(container.innerHTML).not.toContain("imagesgifspanel.mediaAssets");
     expect(container.innerHTML).not.toContain(
       "imagesgifspanel.addVisualMediaToEnhanceTheBundleExperienceForShoppers",
@@ -108,21 +114,16 @@ describe("FPB media feature boundary", () => {
     flushSync(() => {
       root.render(
         React.createElement(FpbImagesGifsPanel, {
-          activeAssetTabIndex: 0,
           activeSection: "bundle_visibility",
           floatingBadgeEnabled: false,
           floatingBadgeText: "",
-          fullPageBundleStyles: {},
           markAsDirty: jest.fn(),
           bundleBannerDesktopUrl: "",
           bundleBannerMobileUrl: "",
-          setActiveAssetTabIndex: jest.fn(),
           setBundleBannerDesktopUrl: jest.fn(),
           setBundleBannerMobileUrl: jest.fn(),
           setFloatingBadgeEnabled: jest.fn(),
           setFloatingBadgeText: jest.fn(),
-          steps: [],
-          updateStepField: jest.fn(),
         } as any),
       );
     });

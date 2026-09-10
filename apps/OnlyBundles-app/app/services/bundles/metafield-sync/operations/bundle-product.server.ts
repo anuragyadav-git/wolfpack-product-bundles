@@ -584,8 +584,6 @@ export async function updateBundleProductMetafields(
       addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
       isDefault: step.isDefault || false,
       defaultVariantId: step.defaultVariantId || null,
-      imageUrl: step.imageUrl ?? null,
-      bannerImageUrl: step.bannerImageUrl ?? null,
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
       primaryVariantOption: step.primaryVariantOption ?? null,
       filters: Array.isArray(step.filters) ? step.filters : null,

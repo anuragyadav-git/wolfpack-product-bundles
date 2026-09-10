@@ -510,8 +510,9 @@ FPB Configure Page
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
-│   │   └── [Button] "Add Step" → inline step builder
-│   │       └── Product/Collection picker per step → opens Product Picker
+│   │   ├── [Button] "Add Step" → inline step builder
+│   │   │   └── Product/Collection picker per step → opens Product Picker
+│   │   └── Step Config icon → native drop zone → Shopify Files
 │   │
 │   ├── Discount & Pricing
 │   │   ├── Discount type selector: Fixed Amount Off / Percentage Off / Fixed Bundle Price / Buy X, get Y
@@ -523,7 +524,6 @@ FPB Configure Page
 │   │
 │   ├── Images & GIFs
 │   │   ├── Promo banner → desktop + mobile native drop zones side-by-side in one row → Shopify Files
-│   │   ├── Per-step tab icon and banner image → native drop zone → Shopify Files
 │   │   └── Floating promo badge enablement and text
 │   │
 │   ├── Sync Bundle

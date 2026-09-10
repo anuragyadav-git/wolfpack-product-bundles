@@ -22,7 +22,6 @@ export function useConfigureVisibilityTemplateState(
   const { appEmbedEnabled, bundle, markAsDirty, stepsState, textOverrides } =
     dependencies;
   const [isInstallingWidget, setIsInstallingWidget] = useState(false);
-  const [activeAssetTabIndex, setActiveAssetTabIndex] = useState(0);
   const [searchBarEnabled, setSearchBarEnabled] = useState<boolean>(
     (bundle as any).searchBarEnabled ?? false
   );
@@ -302,7 +301,6 @@ export function useConfigureVisibilityTemplateState(
   }, [bundle.id]);
 
   return {
-    activeAssetTabIndex,
     addCategoryConditionRule,
     asVisibilityArray,
     autoSelectBrowsedProduct,
@@ -342,7 +340,6 @@ export function useConfigureVisibilityTemplateState(
     searchBarEnabled,
     selectTemplateModalRef,
     selectTemplateOpenButtonRef,
-    setActiveAssetTabIndex,
     setAutoSelectBrowsedProduct,
     setBundleBannerDesktopUrl,
     setBundleBannerMobileUrl,

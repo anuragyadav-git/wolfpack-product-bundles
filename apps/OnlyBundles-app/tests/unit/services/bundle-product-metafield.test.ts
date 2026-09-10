@@ -239,7 +239,7 @@ describe("updateBundleProductMetafields", () => {
     expect(uiConfig.steps[0].minQuantity).toBe(0);
   });
 
-  it("passes imageUrl through to step map when present", async () => {
+  it("does not publish the retired step imageUrl key", async () => {
     const admin = makeAdmin();
     const config = makeBundleConfig(BundleType.FULL_PAGE, {
       steps: [
@@ -261,7 +261,7 @@ describe("updateBundleProductMetafields", () => {
     const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
-    expect(parsed.steps[0].imageUrl).toBe("https://cdn.shopify.com/step-icon.png");
+    expect(parsed.steps[0]).not.toHaveProperty("imageUrl");
   });
 
   it("emits the FPB public number for storefront redirects", async () => {
@@ -280,7 +280,7 @@ describe("updateBundleProductMetafields", () => {
     expect(parsed.publicNumber).toBe(12);
   });
 
-  it("passes imageUrl as null when absent from step", async () => {
+  it("does not invent the retired step imageUrl key", async () => {
     const admin = makeAdmin();
 
     await updateBundleProductMetafields(admin, "gid://shopify/Product/999", makeBundleConfig(BundleType.FULL_PAGE));
@@ -288,7 +288,7 @@ describe("updateBundleProductMetafields", () => {
     const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
-    expect(parsed.steps[0].imageUrl).toBeNull();
+    expect(parsed.steps[0]).not.toHaveProperty("imageUrl");
   });
 
   it("maps stored Step Config image to public stepImage only", async () => {
@@ -347,7 +347,7 @@ describe("updateBundleProductMetafields", () => {
     );
   });
 
-  it("passes bannerImageUrl through to step map when present", async () => {
+  it("does not publish the retired step bannerImageUrl key", async () => {
     const admin = makeAdmin();
     const config = makeBundleConfig(BundleType.FULL_PAGE, {
       steps: [
@@ -369,10 +369,10 @@ describe("updateBundleProductMetafields", () => {
     const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
-    expect(parsed.steps[0].bannerImageUrl).toBe("https://cdn.shopify.com/step-banner.jpg");
+    expect(parsed.steps[0]).not.toHaveProperty("bannerImageUrl");
   });
 
-  it("passes bannerImageUrl as null when absent from step", async () => {
+  it("does not invent the retired step bannerImageUrl key", async () => {
     const admin = makeAdmin();
 
     await updateBundleProductMetafields(admin, "gid://shopify/Product/999", makeBundleConfig(BundleType.FULL_PAGE));
@@ -380,7 +380,7 @@ describe("updateBundleProductMetafields", () => {
     const metafields = getMetafieldsSetPayload(admin);
     const parsed = JSON.parse(metafields.find((f: any) => f.key === "bundle_ui_config").value);
 
-    expect(parsed.steps[0].bannerImageUrl).toBeNull();
+    expect(parsed.steps[0]).not.toHaveProperty("bannerImageUrl");
   });
 
   it("does not publish a Shopify Page handle for full-page bundles", async () => {

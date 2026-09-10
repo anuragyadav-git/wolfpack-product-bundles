@@ -129,7 +129,7 @@ async _sidebarAdvanceToNextStep() {
       existingTabs.remove();
     } else if (!existingTabs && newTabs) {
       const firstCatalogControl = contentSection.querySelector(
-        '.step-banner-image, .step-search-container, .fpb-category-section-rows, .fpb-step-category-title, .full-page-product-grid-container'
+        '.step-search-container, .fpb-category-section-rows, .fpb-step-category-title, .full-page-product-grid-container'
       );
       if (firstCatalogControl) contentSection.insertBefore(newTabs, firstCatalogControl);
     }

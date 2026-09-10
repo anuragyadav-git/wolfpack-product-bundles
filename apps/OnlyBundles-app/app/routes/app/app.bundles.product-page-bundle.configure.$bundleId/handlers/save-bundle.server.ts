@@ -505,7 +505,6 @@ export async function handleSaveBundle(
                 conditionOperator2: secondCondition?.operator || null,
                 conditionValue2: parseConditionValue(secondCondition?.value),
                 filters: Array.isArray(step.filters) ? step.filters : null,
-                imageUrl: step.imageUrl ?? null,
                 timelineIconUrl: step.stepImage ?? null,
                 // Create StepProduct records for selected products
                 StepProduct: {

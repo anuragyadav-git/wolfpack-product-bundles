@@ -537,9 +537,6 @@ export async function handleSaveBundle(
                   step.addonUnlockAfterCompletion !== false,
                 isDefault: step.isDefault === true,
                 defaultVariantId: step.defaultVariantId || null,
-                // Step image fields
-                imageUrl: step.imageUrl ?? null,
-                bannerImageUrl: step.bannerImageUrl ?? null,
                 timelineIconUrl: step.stepImage ?? null,
                 pageTitle: step.pageTitle ?? null,
                 // Category filter tabs configured by merchant

@@ -13,6 +13,8 @@ describe("serializeFpbSaveSteps", () => {
         displayVariantsAsIndividual: true,
         multiLangData: { en: { name: "Pick one" } },
         stepImage: "https://cdn.example.test/step.png",
+        imageUrl: "https://cdn.example.test/retired-tab-icon.png",
+        bannerImageUrl: "https://cdn.example.test/retired-step-banner.png",
         filters: [{ label: "Featured", value: "featured" }],
         products: [{ id: "gid://shopify/Product/legacy" }],
         collections: [{ id: "gid://shopify/Collection/stale", title: "Stale" }],
@@ -138,6 +140,9 @@ describe("serializeFpbSaveSteps", () => {
       ],
     });
     expect(result[0].StepCategory[0]).not.toHaveProperty("productsConnection");
+    expect(result[0].stepImage).toBe("https://cdn.example.test/step.png");
+    expect(result[0]).not.toHaveProperty("imageUrl");
+    expect(result[0]).not.toHaveProperty("bannerImageUrl");
   });
 
   it("does not invent zero quantity bounds when Admin state has no bounds", () => {

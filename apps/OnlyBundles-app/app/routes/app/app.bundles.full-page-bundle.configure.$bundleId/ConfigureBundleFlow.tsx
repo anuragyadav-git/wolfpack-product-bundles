@@ -601,21 +601,16 @@ function ConfigureBundleFlow() {
               onCountryCodesChange: flow.setCountryCodes,
             }}
             media={{
-              activeAssetTabIndex: flow.activeAssetTabIndex,
               activeSection: flow.activeSection,
               bundleBannerDesktopUrl: flow.bundleBannerDesktopUrl,
               bundleBannerMobileUrl: flow.bundleBannerMobileUrl,
               floatingBadgeEnabled: flow.floatingBadgeEnabled,
               floatingBadgeText: flow.floatingBadgeText,
-              fullPageBundleStyles: flow.fullPageBundleStyles,
               markAsDirty: flow.markAsDirty,
-              setActiveAssetTabIndex: flow.setActiveAssetTabIndex,
               setBundleBannerDesktopUrl: flow.setBundleBannerDesktopUrl,
               setBundleBannerMobileUrl: flow.setBundleBannerMobileUrl,
               setFloatingBadgeEnabled: flow.setFloatingBadgeEnabled,
               setFloatingBadgeText: flow.setFloatingBadgeText,
-              steps: flow.stepsState.steps,
-              updateStepField: flow.stepsState.updateStepField,
             }}
             offerOperations={{
               active: flow.activeSection === "bundle_visibility",

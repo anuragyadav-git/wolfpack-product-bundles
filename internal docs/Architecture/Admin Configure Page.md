@@ -143,12 +143,15 @@ the disabled region, and their preview, localized copy, targeting, selected
 resources, browsed-product behavior, and Theme Editor placement actions remain
 visible but inert while disabled.
 
-Images & GIFs is an FPB-only configure navigation section because those
-route-owned editors persist FPB storefront fields that have no other
-bundle-level owner. FPB owns its promo banner, per-step tab/banner images, and
-floating promo badge there. PPB has no separate Images & GIFs section: Step
-Config owns its canonical per-step `stepImage`, and Settings Design owns the
-store-level loading screen used by both bundle types.
+Images & GIFs is an FPB-only configure navigation section because its
+route-owned editors persist the bundle-level responsive promo banner and
+floating promo badge. The native desktop and mobile drop zones communicate
+their own accepted file types, so the section does not repeat a FORMAT summary.
+FPB does not maintain a second per-step media editor there: Step Setup → Step
+Config is the sole owner of canonical `stepImage`, and a separate step banner
+is not part of the supported storefront contract. PPB has no separate Images &
+GIFs section: Step Config owns its canonical per-step `stepImage`, and Settings
+Design owns the store-level loading screen used by both bundle types.
 The FPB promo banner uses the canonical desktop and mobile bundle-banner URLs;
 its two native drop zones share one row at every configure width. Bundle
 Settings does not duplicate those media controls.
