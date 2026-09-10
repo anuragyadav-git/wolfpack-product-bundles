@@ -113,10 +113,16 @@ block independently resolves its JavaScript and CSS through the same extension
 version. Do not uninstall either environment; installation lifecycle cleanup is
 unrelated to dev-preview publication.
 
-The Admin Dev Console provides an additional boundary signal. If
-`bundle-builder` is listed but its **Previews** value is `--`, no current Theme
-App Extension preview is bound to that session. **Preview Bundle** can still
-mint a fresh signed bundle URL, but that action does not publish or repair the
-missing extension preview. If the resulting document keeps the same invalid
-`dev-<handle>`, stop and repair the CLI preview session before evaluating PPB or
-FPB behavior.
+The Admin Dev Console **Previews** column is only a weak diagnostic signal for a
+Theme App Extension. It can continue to show `--` after a successful clean
+restart even while Shopify serves a new `dev-<handle>` and every extension asset
+returns `200`. Do not diagnose the preview from that column alone.
+
+Use a fresh **Preview Bundle** URL, clear Cache Storage, hard-reload with cache
+bypass, and inspect the document's actual extension requests. A changed
+`dev-<handle>` with successful JavaScript and CSS responses proves the current
+preview is usable. If those requests retain the old handle and return `404` or
+`net::ERR_BLOCKED_BY_ORB`, stop and repair the CLI preview session before
+evaluating PPB or FPB behavior. Chrome can also retain an unused Early Hints
+preload for an older handle; treat that warning as non-blocking when the assets
+used by the rendered widget come from the new handle and return `200`.
