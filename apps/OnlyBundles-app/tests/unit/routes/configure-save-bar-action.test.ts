@@ -110,6 +110,25 @@ describe("configure Save Bar actions", () => {
     expect(handleSave).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps the Save Bar open and gives Save its native loading state while submitting", () => {
+    const props = makeSaveFormProps({ fetcher: { state: "submitting" } });
+
+    flushSync(() => {
+      root.render(React.createElement(PpbSaveForm, props));
+    });
+
+    const saveButton = Array.from(document.body.querySelectorAll("button"))
+      .find((button) => button.textContent === "Save");
+    const discardButton = Array.from(document.body.querySelectorAll("button"))
+      .find((button) => button.textContent === "Discard");
+
+    expect(showSaveBar).toHaveBeenCalledWith("bundle-save-bar");
+    expect(hideSaveBar).not.toHaveBeenCalled();
+    expect(saveButton?.getAttribute("loading")).toBe("true");
+    expect(saveButton?.disabled).toBe(true);
+    expect(discardButton?.disabled).toBe(true);
+  });
+
   it("hides a previously shown Save Bar when the draft becomes clean", () => {
     const props = makeSaveFormProps();
 
@@ -124,5 +143,19 @@ describe("configure Save Bar actions", () => {
     });
 
     expect(hideSaveBar).toHaveBeenCalledWith("bundle-save-bar");
+  });
+
+  it("hides a shown Save Bar when the configure editor unmounts", () => {
+    const props = makeSaveFormProps();
+
+    flushSync(() => {
+      root.render(React.createElement(PpbSaveForm, props));
+    });
+    expect(showSaveBar).toHaveBeenCalledWith("bundle-save-bar");
+
+    flushSync(() => root.unmount());
+
+    expect(hideSaveBar).toHaveBeenCalledWith("bundle-save-bar");
+    root = createRoot(container);
   });
 });

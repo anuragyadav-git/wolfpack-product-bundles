@@ -35,7 +35,7 @@ describe("DesignSettingsView live preview", () => {
     expect(view).not.toContain("discardConfirmation");
     expect(view).not.toContain("discardconfirmation");
     expect(view).toContain('<button type="button" disabled="">Discard</button>');
-    expect(view).toContain('<button type="button" variant="primary" disabled="">Save</button>');
+    expect(view).toContain('<button type="button" variant="primary" disabled="" loading="true">Save</button>');
   });
 
   it("describes the page-local inspector disclosure in both states", () => {

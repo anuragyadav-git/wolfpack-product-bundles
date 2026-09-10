@@ -9,7 +9,10 @@ import {
   navigatePendingDashboardPreview,
   openPendingDashboardPreview,
 } from "../../../lib/dashboard-preview-window";
-import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
+import {
+  blockUnsavedAdminNavigation,
+  navigateWithSaveBarConfirmation,
+} from "../../../lib/admin-unsaved-navigation";
 import {
   buildFpbUpsellThemeEditorUrl,
   openThemeEditorInNewTab,
@@ -157,17 +160,19 @@ export function useConfigureActionController(
   const closeDisabledPreviewModal = useCallback(() => undefined, []);
 
   const handleBackClick = useCallback(() => {
-    if (
-      blockUnsavedAdminNavigation(
-        flow.isDirty && !flow.forceNavigation,
-        flow.triggerSaveBarIrritation
-      )
-    ) {
+    if (flow.forceNavigation) {
+      navigateBackOrFallback(flow.navigate, "/app/dashboard", {
+        replaceFallback: true,
+      });
       return;
     }
-    navigateBackOrFallback(flow.navigate, "/app/dashboard", {
-      replaceFallback: true,
-    });
+    void navigateWithSaveBarConfirmation(
+      () => flow.shopify.saveBar.leaveConfirmation(),
+      () =>
+        navigateBackOrFallback(flow.navigate, "/app/dashboard", {
+          replaceFallback: true,
+        }),
+    );
   }, [flow]);
   const enablePreviewGate = {
     modalProps: {
@@ -318,6 +323,14 @@ export function useConfigureActionController(
   );
   const openProductInAdmin = useCallback(
     (productId: string) => {
+      if (
+        blockUnsavedAdminNavigation(
+          flow.isDirty,
+          flow.triggerSaveBarIrritation,
+        )
+      ) {
+        return;
+      }
       const numericProductId = productId.startsWith("gid://")
         ? productId.split("/").pop() ?? productId
         : productId;

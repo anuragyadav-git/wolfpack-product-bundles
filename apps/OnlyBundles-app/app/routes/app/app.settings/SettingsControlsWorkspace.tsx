@@ -27,6 +27,7 @@ type SettingsControlsWorkspaceProps = {
   hasNestedControlGroups: boolean;
   isControlsNavigationOpen: boolean;
   isDirty: boolean;
+  isSaving: boolean;
   selectedControlFields: ControlField[];
   selectedControlGroupTitle: string;
   selectedControlGroupTitles: string[];
@@ -56,6 +57,7 @@ export function SettingsControlsWorkspace({
   hasNestedControlGroups,
   isControlsNavigationOpen,
   isDirty,
+  isSaving,
   selectedControlFields,
   selectedControlGroupTitle,
   selectedControlGroupTitles,
@@ -233,6 +235,7 @@ export function SettingsControlsWorkspace({
         </section>
         <SettingsContextualSaveBar
           isOpen={isDirty}
+          isSaving={isSaving}
           onDiscard={onDiscard}
           onSave={onSave}
         />

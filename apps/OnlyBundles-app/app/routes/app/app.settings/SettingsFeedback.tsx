@@ -32,6 +32,15 @@ export function SettingsContextualSaveBar({
     }
   }, [isOpen, shopify]);
 
+  useEffect(
+    () => () => {
+      if (!isSaveBarShown.current) return;
+      isSaveBarShown.current = false;
+      void shopify.saveBar.hide("settings-contextual-save-bar");
+    },
+    [shopify],
+  );
+
   return (
     <ui-save-bar id="settings-contextual-save-bar">
       <button type="button" disabled={isSaving} onClick={onDiscard}>
@@ -43,6 +52,7 @@ export function SettingsContextualSaveBar({
         type="button"
         variant="primary"
         disabled={isSaving}
+        loading={isSaving ? "true" : undefined}
         onClick={onSave}
       >
         {translateAdmin("dashboard.language.save")}

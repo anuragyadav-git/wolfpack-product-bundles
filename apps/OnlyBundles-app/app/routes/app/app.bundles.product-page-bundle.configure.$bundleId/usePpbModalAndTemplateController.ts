@@ -14,6 +14,7 @@ import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
 import type { usePpbPlacementHandlers } from "./usePpbPlacementHandlers";
 import type { usePpbPreviewReadinessHandlers } from "./usePpbPreviewReadinessHandlers";
 import type { usePpbSaveHandlers } from "./usePpbSaveHandlers";
+import { navigateWithSaveBarConfirmation } from "../../../lib/admin-unsaved-navigation";
 
 export function usePpbModalAndTemplateController({
   base,
@@ -111,9 +112,10 @@ export function usePpbModalAndTemplateController({
     templateState.setIsSelectTemplateModalOpen(true);
   }, [templateState]);
   const openDesignControlPanel = useCallback(() => {
-    void base.shopify.saveBar
-      .leaveConfirmation()
-      .then(() => base.navigate(PPB_DESIGN_CONTROL_PANEL_URL));
+    void navigateWithSaveBarConfirmation(
+      () => base.shopify.saveBar.leaveConfirmation(),
+      () => base.navigate(PPB_DESIGN_CONTROL_PANEL_URL),
+    );
   }, [base]);
   const handleTemplateNext = useCallback(() => {
     if (

@@ -19,6 +19,7 @@ import {
   loadAdminLocaleResources,
   resolveAdminLocaleFromRequest,
 } from "../../i18n/config";
+import { navigateWithSaveBarConfirmation } from "../../lib/admin-unsaved-navigation";
 
 type AdminLoadingApi = (isLoading?: boolean) => void;
 
@@ -81,7 +82,10 @@ function AdminNavigation() {
       navigate(href);
       return;
     }
-    void shopify.saveBar.leaveConfirmation().then(() => navigate(href));
+    void navigateWithSaveBarConfirmation(
+      () => shopify.saveBar!.leaveConfirmation!(),
+      () => navigate(href),
+    );
   };
 
   return (

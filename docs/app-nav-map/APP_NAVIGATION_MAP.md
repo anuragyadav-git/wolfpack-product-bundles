@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -275,11 +275,13 @@ Primary action:
 - Unsaved design values are converted through the normalized storefront Design runtime and posted to the frame through a versioned same-origin protocol. The frame uses deterministic local media and fixture data, blocks navigation and cart submission, and disables persistence, analytics, and bundle fetching.
 - Local Design controls and template previews remain available without a storefront-ready bundle. The separate Preview Bundle action is disabled while Design values are dirty or saving. Its Polaris modal lists only active/unlisted bundles with a valid FPB public number or PPB product handle, reserves a tab, posts the existing configure `/prepare-preview` action, and navigates to the signed FPB or tokenized PPB storefront URL.
 - Relevant Expert Colour Control groups expose `Show Colour Guide` links to the five app-owned AVIF guide paths generated from tracked public PNG sources by CI/CD.
-- Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist.
+- Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist; confirming Leave restores the last confirmed snapshot before the view changes.
 - Language uses Polaris web components for locale chips, layout/section navigation, fields, variable guidance, and the contextual save flow. English is mandatory; removing another locale removes it from Landing Page, Product Page, and shared language roots.
-- Language and Controls retain unsaved form state while switching configuration sections.
+- Language and Controls retain unsaved form state while the merchant stays; section changes await App Bridge leave confirmation and discard only after the merchant confirms Leave.
 - Settings has one landing owner; selecting a subpage lazy-loads the workspace and returning home is guarded by the contextual save bar.
 - Cart Messaging navigation from Controls to Language is also guarded by the contextual save bar.
+- Design, Language, and Controls keep the contextual bar visible while saving; Save uses App Bridge's native loading state and the bar clears only after the matching server-confirmed snapshot.
+- Configure and Settings save-bar owners hide their programmatic bar on unmount so route transitions and error boundaries cannot leak a stale busy bar into another Admin surface.
 
 ---
 
@@ -553,6 +555,8 @@ FPB Configure Page
 │
 ├── Save Bar (App Bridge): [Discard] [Save]
 │   └── Save validates required fields for enabled persisted features; invalid drafts stay dirty, open/focus the first affected section, and show inline critical feedback without submitting
+│   └── Save remains visible with its native loading spinner until the configure request completes
+│   └── Back and app navigation await App Bridge leave confirmation; Product editor intents are blocked while the draft is dirty so an Admin modal cannot cover and dismiss the save bar
 │
 └── Modals:
     ├── Actions Needed Modal (multiple warnings + one remediation action per warning)
@@ -864,10 +868,12 @@ Shopify Admin product or variant details
 
 ```
 Dirty Admin form
-  └── App nav, Settings back, configure Design Control Panel, or PPB section change
+  └── App nav, Settings back/section change, configure Back, or Design Control Panel
       └── App Bridge Save Bar leaveConfirmation()
           ├── Discard/leave → requested navigation continues
           └── Stay → current form and unsaved values remain
+  └── Configure section change or Product editor intent
+      └── Navigation/action is blocked and the existing save bar is surfaced
 ```
 
 ### Flow D: Billing Upgrade

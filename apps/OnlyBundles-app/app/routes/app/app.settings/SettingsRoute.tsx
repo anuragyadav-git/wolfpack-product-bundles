@@ -31,7 +31,7 @@ import { DesignSettingsView } from "./DesignSettingsView";
 import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
 import type { AdminTaskAlert } from "../../../lib/admin-alert-feedback";
 import type { AdditionalConfigurationsNavigation } from "../../../lib/additional-configurations-navigation";
-import { createDeferredSettingsNavigation } from "../../../lib/additional-configurations-behavior";
+import { navigateWithSaveBarConfirmation } from "../../../lib/admin-unsaved-navigation";
 import { SettingsControlsWorkspace } from "./SettingsControlsWorkspace";
 import { SettingsLanguageWorkspace } from "./SettingsLanguageWorkspace";
 
@@ -67,9 +67,6 @@ export function SettingsRoute({
   const navigation = useNavigation();
   const shopify = useAppBridge();
   const controlsNavigationRef = useRef<HTMLDetailsElement>(null);
-  const deferredControlsNavigationRef = useRef(
-    createDeferredSettingsNavigation()
-  );
   const pendingSavedControlValuesRef = useRef<Record<string, string> | null>(
     null
   );
@@ -77,9 +74,6 @@ export function SettingsRoute({
     languageMode: "SINGLE" | "MULTIPLE";
     localeFieldValues: Record<string, Record<string, string>>;
   } | null>(null);
-  const previousSavedControlValuesRef = useRef<Record<string, string> | null>(
-    null
-  );
   const [settingsHelpArticle, setSettingsHelpArticle] = useState<
     "inventory" | null
   >(null);
@@ -229,6 +223,12 @@ export function SettingsRoute({
   const isDesignSaving =
     navigation.state !== "idle" &&
     navigation.formData?.get("intent") === "saveSettingsDesign";
+  const isLanguageSaving =
+    navigation.state !== "idle" &&
+    navigation.formData?.get("intent") === "saveSettingsLanguage";
+  const isControlsSaving =
+    controlsFetcher.state !== "idle" &&
+    controlsFetcher.formData?.get("intent") === "saveSettingsControls";
   const isActiveSubpageDirty =
     (settingsView === "design" && isDesignDirty) ||
     (settingsView === "language" && isLanguageDirty) ||
@@ -239,33 +239,42 @@ export function SettingsRoute({
     }
   };
   const navigateWithinControls = (navigate: () => void) => {
-    deferredControlsNavigationRef.current.request(isControlsDirty, navigate);
-  };
-  const returnToSettingsLanding = () => {
-    if (settingsView === "controls") {
-      navigateWithinControls(onExit);
+    if (!isControlsDirty) {
+      navigate();
       return;
     }
-    void shopify.saveBar.leaveConfirmation().then(onExit);
+    void navigateWithSaveBarConfirmation(
+      () => shopify.saveBar.leaveConfirmation(),
+      () => {
+        discardActiveSettingsChanges();
+        navigate();
+      },
+    );
+  };
+  const returnToSettingsLanding = () => {
+    void navigateWithSaveBarConfirmation(
+      () => shopify.saveBar.leaveConfirmation(),
+      () => {
+        if (isActiveSubpageDirty) discardActiveSettingsChanges();
+        onExit();
+      },
+    );
   };
 
   const navigateToSettingsView = (
     nextView: "design" | "language" | "controls"
   ) => {
-    if (settingsView === "controls") {
-      navigateWithinControls(() => {
+    void navigateWithSaveBarConfirmation(
+      () => shopify.saveBar.leaveConfirmation(),
+      () => {
+        if (isActiveSubpageDirty) discardActiveSettingsChanges();
         setSettingsView(nextView);
         if (nextView === "language") setActiveLanguagePanel("cartCheckout");
-      });
-      return;
-    }
-    void shopify.saveBar.leaveConfirmation().then(() => {
-      setSettingsView(nextView);
-      if (nextView === "language") setActiveLanguagePanel("cartCheckout");
-    });
+      },
+    );
   };
 
-  const discardActiveSettingsChanges = () => {
+  function discardActiveSettingsChanges() {
     if (settingsView === "design") {
       setDesignFieldValues(savedDesignFieldValues);
       setInheritedColorFieldKeys(savedInheritedColorFieldKeys);
@@ -280,9 +289,8 @@ export function SettingsRoute({
     }
     if (settingsView === "controls") {
       setControlFieldValues(savedControlFieldValues);
-      deferredControlsNavigationRef.current.complete();
     }
-  };
+  }
 
   const saveActiveSettingsChanges = () => {
     if (settingsView === "design") {
@@ -315,8 +323,6 @@ export function SettingsRoute({
     if (settingsView === "controls") {
       const submittedControlValues = { ...controlFieldValues };
       pendingSavedControlValuesRef.current = submittedControlValues;
-      previousSavedControlValuesRef.current = savedControlFieldValues;
-      setSavedControlFieldValues(submittedControlValues);
       controlsFetcher.submit(
         {
           intent: "saveSettingsControls",
@@ -395,19 +401,11 @@ export function SettingsRoute({
     if (confirmedValues) {
       setSavedControlFieldValues(confirmedValues);
       pendingSavedControlValuesRef.current = null;
-      previousSavedControlValuesRef.current = null;
-      if (
-        JSON.stringify(controlFieldValues) === JSON.stringify(confirmedValues)
-      ) {
-        deferredControlsNavigationRef.current.complete();
-      }
     } else if (
       response.success === false &&
       pendingSavedControlValuesRef.current
     ) {
-      setSavedControlFieldValues(previousSavedControlValuesRef.current ?? {});
       pendingSavedControlValuesRef.current = null;
-      previousSavedControlValuesRef.current = null;
     }
     const error = showSettingsSaveFeedback(shopify, response);
     setTaskAlert(
@@ -487,6 +485,7 @@ export function SettingsRoute({
         fieldGroups={languageGroups}
         fieldValues={languageFieldValues}
         isDirty={isActiveSubpageDirty}
+        isSaving={isLanguageSaving}
         languageMode={languageMode}
         localeFieldValues={languageLocaleValues}
         selectedLocale={selectedLanguage}
@@ -515,6 +514,7 @@ export function SettingsRoute({
         hasNestedControlGroups={hasNestedControlGroups}
         isControlsNavigationOpen={isControlsNavigationOpen}
         isDirty={isActiveSubpageDirty}
+        isSaving={isControlsSaving}
         selectedControlFields={selectedControlFields}
         selectedControlGroupTitle={selectedControlGroupTitle}
         selectedControlGroupTitles={selectedControlGroupTitles}

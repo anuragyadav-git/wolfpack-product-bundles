@@ -201,6 +201,7 @@ describe("Admin workspace back actions", () => {
           hasNestedControlGroups: false,
           isControlsNavigationOpen: false,
           isDirty: false,
+          isSaving: false,
           selectedControlFields: [],
           selectedControlGroupTitle: "",
           selectedControlGroupTitles: [],

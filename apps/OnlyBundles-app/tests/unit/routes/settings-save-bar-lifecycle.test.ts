@@ -34,11 +34,12 @@ describe("SettingsContextualSaveBar lifecycle", () => {
     flushSync(() => root.unmount());
   });
 
-  function render(isOpen: boolean) {
+  function render(isOpen: boolean, isSaving = false) {
     flushSync(() => {
       root.render(
         React.createElement(SettingsContextualSaveBar, {
           isOpen,
+          isSaving,
           onDiscard: jest.fn(),
           onSave: jest.fn(),
         }),
@@ -68,5 +69,30 @@ describe("SettingsContextualSaveBar lifecycle", () => {
 
     expect(hide).toHaveBeenCalledTimes(1);
     expect(hide).toHaveBeenCalledWith("settings-contextual-save-bar");
+  });
+
+  it("stays open and gives Save its native loading state while saving", () => {
+    render(true, true);
+
+    const saveButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent === "Save");
+    const discardButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent === "Discard");
+
+    expect(show).toHaveBeenCalledWith("settings-contextual-save-bar");
+    expect(hide).not.toHaveBeenCalled();
+    expect(saveButton?.getAttribute("loading")).toBe("true");
+    expect(saveButton?.disabled).toBe(true);
+    expect(discardButton?.disabled).toBe(true);
+  });
+
+  it("hides a shown Save Bar when the Settings editor unmounts", () => {
+    render(true);
+    expect(show).toHaveBeenCalledWith("settings-contextual-save-bar");
+
+    flushSync(() => root.unmount());
+
+    expect(hide).toHaveBeenCalledWith("settings-contextual-save-bar");
+    root = createRoot(container);
   });
 });

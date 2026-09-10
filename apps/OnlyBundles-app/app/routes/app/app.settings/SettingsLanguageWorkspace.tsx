@@ -21,6 +21,7 @@ type SettingsLanguageWorkspaceProps = {
   fieldGroups: SettingsFieldGroup[];
   fieldValues: Record<string, string>;
   isDirty: boolean;
+  isSaving: boolean;
   languageMode: "SINGLE" | "MULTIPLE";
   localeFieldValues: LocaleValues;
   selectedLocale: string;
@@ -46,6 +47,7 @@ export function SettingsLanguageWorkspace({
   fieldGroups,
   fieldValues,
   isDirty,
+  isSaving,
   languageMode,
   localeFieldValues,
   selectedLocale,
@@ -125,6 +127,7 @@ export function SettingsLanguageWorkspace({
       />
       <SettingsContextualSaveBar
         isOpen={isDirty}
+        isSaving={isSaving}
         onDiscard={onDiscard}
         onSave={onSave}
       />

@@ -42,6 +42,7 @@ describe("Polaris wrapper ownership", () => {
       hasNestedControlGroups: false,
       isControlsNavigationOpen: false,
       isDirty: false,
+      isSaving: false,
       selectedControlFields: [],
       selectedControlGroupTitle: "",
       selectedControlGroupTitles: [],

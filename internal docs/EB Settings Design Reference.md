@@ -5,7 +5,7 @@ title: EB Settings Design Reference
 type: reference
 status: authoritative
 summary: Live EB Settings Design request, state, and storefront-mapping contract used to implement Wolfpack Design settings.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -104,9 +104,16 @@ receive one store-level state.
 Settings Design uses one programmatic App Bridge `ui-save-bar`; it does not
 combine the Save Bar API with automatic `data-save-bar` form tracking. Dirty
 state shows the bar, programmatic Discard immediately restores the confirmed
-snapshot, and both actions are disabled while the Design request is in flight. Back and
-cross-Settings navigation call `shopify.saveBar.leaveConfirmation()` before
-changing views. After both Design rows commit, a downstream PPB runtime-sync
+snapshot, and both actions are disabled while a Design, Language, or Controls
+request is in flight. The primary Save action retains the `loading` attribute
+until the matching request completes so App Bridge owns its native spinner.
+The route owner hides its programmatic bar when the editor unmounts so an error
+boundary or completed route transition cannot leave a stale busy bar in Admin.
+Controls does not optimistically mark a submitted draft as saved; the bar stays
+visible until the server confirms the submitted snapshot. Back, cross-Settings,
+and Controls section navigation call `shopify.saveBar.leaveConfirmation()`
+before changing views; confirming Leave restores the last confirmed snapshot,
+while staying preserves the draft. After both Design rows commit, a downstream PPB runtime-sync
 failure is a persisted partial success: the response returns the confirmed
 Design snapshot with `persisted: true` and `runtimeSynced: false`, so the Save
 Bar clears without misrepresenting the database state while the sync error

@@ -16,6 +16,7 @@ import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
+import { navigateWithSaveBarConfirmation } from "../../../lib/admin-unsaved-navigation";
 
 type ConfigureTemplatePricingDependencies = Pick<
   ReturnType<typeof useConfigureBundleController>,
@@ -157,9 +158,10 @@ export function useConfigureTemplatePricingController(
     templateSubmissionStartedRef,
   ]);
   const openDesignControlPanel = useCallback(() => {
-    void shopify.saveBar
-      .leaveConfirmation()
-      .then(() => navigate(FPB_DESIGN_CONTROL_PANEL_URL));
+    void navigateWithSaveBarConfirmation(
+      () => shopify.saveBar.leaveConfirmation(),
+      () => navigate(FPB_DESIGN_CONTROL_PANEL_URL),
+    );
   }, [navigate, shopify]);
 
   useEffect(() => {

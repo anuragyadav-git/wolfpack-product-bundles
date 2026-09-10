@@ -10,7 +10,10 @@ import {
   validatePpbWidgetPlacementFromAppBridge,
 } from "../../../lib/ppb-widget-placement.client";
 import { buildProductPageThemeEditorDeepLink } from "../../../lib/bundle-config/product-page-admin-sections";
-import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
+import {
+  blockUnsavedAdminNavigation,
+  navigateWithSaveBarConfirmation,
+} from "../../../lib/admin-unsaved-navigation";
 import {
   openPendingDashboardPreview,
   navigatePendingDashboardPreview,
@@ -314,6 +317,14 @@ export function usePpbPreviewReadinessHandlers({
   );
   const openProductInAdmin = useCallback(
     (productId: string) => {
+      if (
+        blockUnsavedAdminNavigation(
+          base.isDirty,
+          base.triggerSaveBarIrritation,
+        )
+      ) {
+        return;
+      }
       const numericProductId = productId.startsWith("gid://")
         ? (productId.split("/").pop() ?? productId)
         : productId;
@@ -358,15 +369,19 @@ export function usePpbPreviewReadinessHandlers({
     [base],
   );
   const handleBackClick = useCallback(() => {
-    if (
-      blockUnsavedAdminNavigation(
-        base.isDirty && !base.forceNavigation,
-        base.triggerSaveBarIrritation,
-      )
-    ) {
+    if (base.forceNavigation) {
+      navigateBackOrFallback(base.navigate, "/app/dashboard", {
+        replaceFallback: true,
+      });
       return;
     }
-    navigateBackOrFallback(base.navigate, "/app/dashboard", { replaceFallback: true });
+    void navigateWithSaveBarConfirmation(
+      () => base.shopify.saveBar.leaveConfirmation(),
+      () =>
+        navigateBackOrFallback(base.navigate, "/app/dashboard", {
+          replaceFallback: true,
+        }),
+    );
   }, [base]);
   const handleReadinessItemClick = useCallback(
     (key: string) => {

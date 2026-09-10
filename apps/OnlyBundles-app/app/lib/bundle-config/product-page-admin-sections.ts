@@ -1,3 +1,5 @@
+import { navigateWithSaveBarConfirmation } from "../admin-unsaved-navigation";
+
 interface ProductPageSetupItem {
   id: string;
   label: string;
@@ -25,9 +27,10 @@ export const PRODUCT_PAGE_EDIT_DEFAULTS_HREF = "/app/settings";
 export async function navigateToProductPageDefaults(
   leaveConfirmation: () => Promise<void> | void,
   navigate: (href: string) => void,
-): Promise<void> {
-  await leaveConfirmation();
-  navigate(PRODUCT_PAGE_EDIT_DEFAULTS_HREF);
+): Promise<boolean> {
+  return navigateWithSaveBarConfirmation(leaveConfirmation, () => {
+    navigate(PRODUCT_PAGE_EDIT_DEFAULTS_HREF);
+  });
 }
 
 export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
