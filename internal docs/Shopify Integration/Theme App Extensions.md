@@ -5,7 +5,7 @@ title: Theme App Extensions
 type: shopify-integration
 status: authoritative
 summary: Theme extension handles, activation status, and App Bridge status source for Wolfpack storefront resources.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -14,16 +14,16 @@ domains:
 systems:
   - theme-app-extension
 source_paths:
-  - extensions/bundle-builder/shopify.extension.toml
-  - extensions/bundle-builder/blocks/bundle-app-embed.liquid
-  - app/lib/theme-extension-status.ts
-  - app/lib/app-embed-status-check.client.ts
-  - app/storefront/app-embed-marker.ts
-  - app/storefront/app-embed.ts
-  - app/routes/app/app.dashboard/dashboard-app-embed-enable-flow.ts
-  - app/routes/app/app.dashboard/AppEmbedEnableModal.tsx
-  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/useConfigureBundleController.ts
-  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbBaseConfigureState.ts
+  - apps/OnlyBundles-app/extensions/bundle-builder/shopify.extension.toml
+  - apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-app-embed.liquid
+  - apps/OnlyBundles-app/app/lib/theme-extension-status.ts
+  - apps/OnlyBundles-app/app/lib/app-embed-status-check.client.ts
+  - apps/OnlyBundles-app/app/storefront/app-embed-marker.ts
+  - apps/OnlyBundles-app/app/storefront/app-embed.ts
+  - apps/OnlyBundles-app/app/routes/app/app.dashboard/dashboard-app-embed-enable-flow.ts
+  - apps/OnlyBundles-app/app/routes/app/app.dashboard/AppEmbedEnableModal.tsx
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/useConfigureBundleController.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbBaseConfigureState.ts
 related_docs:
   - docs/bfs-review-remediation-plan.md
 tags:
@@ -112,3 +112,11 @@ process is running. Do not disable the app embed as a CDN repair: the PPB app
 block independently resolves its JavaScript and CSS through the same extension
 version. Do not uninstall either environment; installation lifecycle cleanup is
 unrelated to dev-preview publication.
+
+The Admin Dev Console provides an additional boundary signal. If
+`bundle-builder` is listed but its **Previews** value is `--`, no current Theme
+App Extension preview is bound to that session. **Preview Bundle** can still
+mint a fresh signed bundle URL, but that action does not publish or repair the
+missing extension preview. If the resulting document keeps the same invalid
+`dev-<handle>`, stop and repair the CLI preview session before evaluating PPB or
+FPB behavior.
