@@ -362,11 +362,12 @@ not open an unrelated Shopify intent. The app listens to the popover's `show`
 and `hide` events once to synchronize route-owned open state; `afterhide` is a
 later phase of the same close and must not repeat cleanup. `LocalAppModal` and
 configure multi-language workflows remain modal because they are blocking
-tasks. Polaris light dismissal does not make the rest of the page modal: an
-outside pointer can otherwise dismiss the popover and activate the underlying
-Admin control in the same sequence. The readiness popover therefore consumes
-only that one resulting outside click. It clears the guard immediately so the
-merchant's next deliberate click uses the underlying control normally.
+tasks. Polaris popovers are intentionally non-modal: a deliberate click on an
+underlying Admin action can dismiss the popover and activate that action in the
+same sequence. The readiness component does not install document-level pointer
+or click interception. Its checklist actions are isolated by their own
+`onClick` handlers, so light dismissal cannot be mistaken for a checklist
+action or open an unrelated intent.
 
 ## Admin Warning Presentation Contract
 

@@ -49,7 +49,7 @@ score control.
 | 9 | Guided-tour viewport gate | Configure page loads or resizes below 768px | Guided tour does not start or remain visible | Mobile readiness popover remains independent |
 | 10 | Immediate readiness delivery | Configure page renders before deferred dialogs and tours | Readiness trigger and popover are already available | Only genuinely non-critical overlays remain idle-deferred |
 | 11 | Header action independence | Merchant activates Readiness and Preview Bundle | Readiness opens the popover and Preview runs the preview handler | Both controls remain direct native actions without a wrapper-owned interaction |
-| 12 | Outside dismissal over an action | Merchant clicks an underlying Admin action while the readiness popover is open | The pointer sequence only dismisses the popover and does not activate the underlying action | A later deliberate click can activate that action normally |
+| 12 | Outside interaction over an action | Merchant clicks an underlying Admin action while the readiness popover is open | Polaris dismisses the non-modal popover and the deliberately clicked action activates once | The app does not install a document-level click interceptor |
 
 ## Acceptance Criteria
 

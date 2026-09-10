@@ -277,7 +277,7 @@ describe("BundleReadinessOverlay trigger", () => {
     expect(onItemClick).not.toHaveBeenCalled();
   });
 
-  it("consumes an outside action click when it light-dismisses the popover", () => {
+  it("keeps an outside action operable while the non-modal popover light-dismisses", () => {
     const outsideAction = jest.fn();
 
     flushSync(() => {
@@ -316,12 +316,6 @@ describe("BundleReadinessOverlay trigger", () => {
       editProduct?.dispatchEvent(new MouseEvent("pointerdown", {bubbles: true}));
       popover?.dispatchEvent(new Event("hide", {bubbles: true}));
       editProduct?.dispatchEvent(new MouseEvent("pointerup", {bubbles: true}));
-      editProduct?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
-    });
-
-    expect(outsideAction).not.toHaveBeenCalled();
-
-    flushSync(() => {
       editProduct?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
     });
 

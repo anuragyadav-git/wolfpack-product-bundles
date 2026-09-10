@@ -47,14 +47,9 @@ export function BundleReadinessOverlay({
   const [expanded, setExpanded] = useState(false);
   const [showTriggerDetails, setShowTriggerDetails] = useState(true);
   const [animatedScore, setAnimatedScore] = useState(0);
-  const triggerRef = useRef<ElementRef<"s-clickable"> | null>(null);
   const popoverRef = useRef<ElementRef<"s-popover"> | null>(null);
   const expandedRef = useRef(false);
   const gaugeWasExpandedRef = useRef(false);
-  const suppressNextOutsideClickRef = useRef(false);
-  const outsideClickResetRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
 
   useEffect(() => {
     const timeout = scheduleReadinessTriggerCollapse(() => {
@@ -107,70 +102,6 @@ export function BundleReadinessOverlay({
       popover.removeEventListener("hide", handleHide);
     };
   }, [syncExpandedState]);
-
-  useEffect(() => {
-    const clearOutsideClickSuppression = () => {
-      suppressNextOutsideClickRef.current = false;
-      if (outsideClickResetRef.current) {
-        clearTimeout(outsideClickResetRef.current);
-        outsideClickResetRef.current = null;
-      }
-    };
-
-    const handlePointerDown = (event: PointerEvent) => {
-      clearOutsideClickSuppression();
-      if (!expandedRef.current) return;
-
-      const path = event.composedPath();
-      const popover = popoverRef.current;
-      const trigger = triggerRef.current;
-      if (
-        (popover && path.includes(popover)) ||
-        (trigger && path.includes(trigger))
-      ) {
-        return;
-      }
-
-      suppressNextOutsideClickRef.current = true;
-    };
-
-    const handlePointerUp = () => {
-      if (!suppressNextOutsideClickRef.current) return;
-      outsideClickResetRef.current = setTimeout(
-        clearOutsideClickSuppression,
-        0,
-      );
-    };
-
-    const handleClick = (event: MouseEvent) => {
-      if (!suppressNextOutsideClickRef.current) return;
-      clearOutsideClickSuppression();
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown, true);
-    document.addEventListener("pointerup", handlePointerUp, true);
-    document.addEventListener(
-      "pointercancel",
-      clearOutsideClickSuppression,
-      true,
-    );
-    document.addEventListener("click", handleClick, true);
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown, true);
-      document.removeEventListener("pointerup", handlePointerUp, true);
-      document.removeEventListener(
-        "pointercancel",
-        clearOutsideClickSuppression,
-        true,
-      );
-      document.removeEventListener("click", handleClick, true);
-      clearOutsideClickSuppression();
-    };
-  }, []);
 
   useEffect(() => {
     if (open === false && expandedRef.current) {
@@ -251,7 +182,6 @@ export function BundleReadinessOverlay({
         data-tour-target="fpb-readiness-score"
       >
         <s-clickable
-          ref={triggerRef}
           inlineSize="100%"
           data-readiness-trigger-state={
             showTriggerContext ? "expanded" : "collapsed"
