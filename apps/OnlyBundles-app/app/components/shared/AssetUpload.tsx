@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import type { ComponentRef } from "react";
+import type { ComponentProps, ComponentRef } from "react";
 
 import { translateAdmin } from "~/i18n/config";
 import {
@@ -32,6 +32,7 @@ export interface AssetUploadProps {
   maxUploadBytes?: number;
   maxUploadErrorMessage?: string;
   invalidTypeErrorMessage?: string;
+  dropZoneContentMinBlockSize?: ComponentProps<"s-grid">["minBlockSize"];
 }
 
 function isAcceptedFileType(fileType: string, accept: string) {
@@ -66,6 +67,7 @@ export function AssetUpload({
   invalidTypeErrorMessage = translateAdmin(
     "adminDynamic.chooseSupportedImageFile",
   ),
+  dropZoneContentMinBlockSize,
 }: AssetUploadProps) {
   const dropZoneRef = useRef<DropZoneElement | null>(null);
   const pollCountRef = useRef(0);
@@ -253,7 +255,17 @@ export function AssetUpload({
         error={validationError ?? undefined}
         onInput={handleInput}
       >
-        <s-icon type="upload" size="base" />
+        {dropZoneContentMinBlockSize ? (
+          <s-grid
+            minBlockSize={dropZoneContentMinBlockSize}
+            alignItems="center"
+            justifyItems="center"
+          >
+            <s-icon type="upload" size="base" />
+          </s-grid>
+        ) : (
+          <s-icon type="upload" size="base" />
+        )}
       </s-drop-zone>
 
       {hint ? <s-text color="subdued">{hint}</s-text> : null}

@@ -204,63 +204,74 @@ export function CommonBundleWidgetSection(
                 </s-button>
               </s-stack>
 
-              <div className={styles.widgetSettingsGrid}>
-                {displayMode === "block" && (
-                  <AssetUpload
-                    label={translateAdmin("adminAttributes.uploadImage")}
-                    value={imageUrl || null}
-                    disabled={disabled}
-                    onChange={(url: string | null) =>
-                      onImageUrlChange(url ?? "")
-                    }
-                  />
-                )}
-                <s-stack direction="block" gap="base">
+              <s-query-container>
+                <s-grid
+                  gridTemplateColumns={
+                    displayMode === "block"
+                      ? "@container (inline-size > 500px) 2fr 3fr, 1fr"
+                      : "1fr"
+                  }
+                  gap="base"
+                  alignItems="stretch"
+                >
                   {displayMode === "block" && (
-                    <>
-                      <s-text-field
-                        id="configure-widget-title"
-                        label={translateAdmin("adminAttributes.widgetTitle")}
-                        value={title}
-                        required
-                        disabled={disabled || undefined}
-                        error={validationErrors["widget.title"]}
-                        onInput={(event: Event) =>
-                          onTitleChange(
-                            (event.target as HTMLInputElement).value
-                          )
-                        }
-                      />
-                      <s-text-area
-                        label={translateAdmin(
-                          "adminAttributes.widgetDescription"
-                        )}
-                        value={description}
-                        rows={3}
-                        disabled={disabled || undefined}
-                        onInput={(event: Event) =>
-                          onDescriptionChange(
-                            (event.target as HTMLTextAreaElement).value
-                          )
-                        }
-                      />
-                    </>
+                    <AssetUpload
+                      label={translateAdmin("adminAttributes.uploadImage")}
+                      value={imageUrl || null}
+                      disabled={disabled}
+                      dropZoneContentMinBlockSize="152px"
+                      onChange={(url: string | null) =>
+                        onImageUrlChange(url ?? "")
+                      }
+                    />
                   )}
-                  <s-text-field
-                    id="configure-widget-buttonText"
-                    label={translateAdmin("adminAttributes.widgetButtonText")}
-                    value={buttonText}
-                    required
-                    disabled={disabled || undefined}
-                    error={validationErrors["widget.buttonText"]}
-                    onInput={(event: Event) =>
-                      onButtonTextChange(
-                        (event.target as HTMLInputElement).value
-                      )
-                    }
-                  />
-                </s-stack>
-              </div>
+                  <s-stack direction="block" gap="base">
+                    {displayMode === "block" && (
+                      <>
+                        <s-text-field
+                          id="configure-widget-title"
+                          label={translateAdmin("adminAttributes.widgetTitle")}
+                          value={title}
+                          required
+                          disabled={disabled || undefined}
+                          error={validationErrors["widget.title"]}
+                          onInput={(event: Event) =>
+                            onTitleChange(
+                              (event.target as HTMLInputElement).value
+                            )
+                          }
+                        />
+                        <s-text-area
+                          label={translateAdmin(
+                            "adminAttributes.widgetDescription"
+                          )}
+                          value={description}
+                          rows={3}
+                          disabled={disabled || undefined}
+                          onInput={(event: Event) =>
+                            onDescriptionChange(
+                              (event.target as HTMLTextAreaElement).value
+                            )
+                          }
+                        />
+                      </>
+                    )}
+                    <s-text-field
+                      id="configure-widget-buttonText"
+                      label={translateAdmin("adminAttributes.widgetButtonText")}
+                      value={buttonText}
+                      required
+                      disabled={disabled || undefined}
+                      error={validationErrors["widget.buttonText"]}
+                      onInput={(event: Event) =>
+                        onButtonTextChange(
+                          (event.target as HTMLInputElement).value
+                        )
+                      }
+                    />
+                  </s-stack>
+                </s-grid>
+              </s-query-container>
 
               <s-heading>
                 {translateAdmin(
