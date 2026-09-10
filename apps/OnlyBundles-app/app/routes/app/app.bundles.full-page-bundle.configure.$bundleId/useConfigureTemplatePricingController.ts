@@ -290,7 +290,7 @@ export function useConfigureTemplatePricingController(
     () =>
       normalizePricingDisplayOptions({
         rules: pricingState.discountRules,
-        messages: { displayOptions: pricingState.pricingDisplayOptions },
+        displayOptions: pricingState.pricingDisplayOptions,
         showProgressBar: pricingState.showDiscountProgressBar,
         steps: stepsState.steps.map((step: any) => {
           const [firstCondition, secondCondition] =

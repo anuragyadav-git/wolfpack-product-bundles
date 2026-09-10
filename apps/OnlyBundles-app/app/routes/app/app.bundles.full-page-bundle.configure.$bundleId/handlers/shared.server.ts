@@ -284,14 +284,13 @@ export function buildFpbBaseConfig(
   const firstRuleMsg = firstRuleId && discountData.ruleMessages?.[firstRuleId];
   const normalizedPricingDisplayOptions = normalizePricingDisplayOptions({
     rules: discountData.discountRules || [],
-    messages: { displayOptions: discountData.pricingDisplayOptions || null },
+    displayOptions: discountData.pricingDisplayOptions || null,
     showProgressBar: discountData.showDiscountProgressBar === true,
     method: discountData.discountType,
   });
   const canonicalPricingDisplayOptions = serializePricingDisplayOptions({
-    existingMessages: {},
     options: normalizedPricingDisplayOptions,
-  }).displayOptions;
+  });
 
   return {
     bundleId: updatedBundle.id,

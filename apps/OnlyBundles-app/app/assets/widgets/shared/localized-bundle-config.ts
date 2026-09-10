@@ -94,7 +94,7 @@ function localizePricing(pricing: any, locale: string): any {
   if (!pricing) return pricing;
 
   const messages = pricing.messages ?? {};
-  const displayOptions = pricing.displayOptions ?? messages.displayOptions ?? {};
+  const displayOptions = pricing.displayOptions ?? {};
   const quantityOptions = displayOptions.bundleQuantityOptions ?? {};
   const localizedMessages = {
     ...messages,

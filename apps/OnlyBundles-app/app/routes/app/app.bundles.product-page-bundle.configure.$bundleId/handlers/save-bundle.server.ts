@@ -238,7 +238,7 @@ export async function handleSaveBundle(
 
     const normalizedPricingDisplayOptions = normalizePricingDisplayOptions({
       rules: discountData.discountRules || [],
-      messages: { displayOptions: discountData.displayOptions || null },
+      displayOptions: discountData.displayOptions || null,
       showProgressBar:
         discountData.displayOptions?.progressBar?.enabled === true,
       method: discountData.discountType,

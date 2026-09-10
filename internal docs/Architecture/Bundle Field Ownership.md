@@ -16,6 +16,8 @@ systems:
 source_paths:
   - apps/OnlyBundles-app/prisma/schema.prisma
   - apps/OnlyBundles-app/app/lib/bundle-formatter.server.ts
+  - apps/OnlyBundles-app/app/lib/pricing-display-options.ts
+  - apps/OnlyBundles-app/app/assets/widgets/shared/localized-bundle-config.ts
   - apps/OnlyBundles-app/app/lib/bundle-config/category-persistence.ts
   - apps/OnlyBundles-app/app/lib/bundle-config/category-runtime.ts
   - apps/OnlyBundles-app/app/routes/api/api.bundle.$bundleId[.]json.tsx
@@ -148,6 +150,14 @@ alias or category-level `collectionsSelectedData` compatibility field.
 Pricing's
 derived operator vocabulary is exactly `gte`, `gt`, `lte`, `lt`, and `eq`;
 step-condition operators retain their separate long-form contract.
+
+Pricing display-option normalization, serialization, and locale projection all
+accept the direct `BundlePricing.displayOptions` value. They do not wrap it in
+or recover it from `messages.displayOptions`; pricing messages contain text and
+message toggles only. A read-only check on 2026-09-10 found zero configured
+database rows whose `BundlePricing.messages` JSON still contained a
+`displayOptions` key. Repeat that zero-count check in every release environment
+before releasing the strict storefront reader.
 
 Low-stock merchandising has exactly three direct Bundle owners:
 `lowStockAlertEnabled`, `lowStockAlertThreshold`, and

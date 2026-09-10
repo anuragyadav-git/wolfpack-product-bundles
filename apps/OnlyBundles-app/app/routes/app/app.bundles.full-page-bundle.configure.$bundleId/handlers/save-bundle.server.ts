@@ -276,14 +276,13 @@ export async function handleSaveBundle(
 
     const normalizedPricingDisplayOptions = normalizePricingDisplayOptions({
       rules: discountData.discountRules || [],
-      messages: { displayOptions: discountData.pricingDisplayOptions || null },
+      displayOptions: discountData.pricingDisplayOptions || null,
       showProgressBar: discountData.showDiscountProgressBar === true,
       method: discountData.discountType,
     });
     const canonicalPricingDisplayOptions = serializePricingDisplayOptions({
-      existingMessages: {},
       options: normalizedPricingDisplayOptions,
-    }).displayOptions;
+    });
     const directBoxSelection =
       discountData.discountEnabled === true &&
       discountData.discountType !== "buy_x_get_y"

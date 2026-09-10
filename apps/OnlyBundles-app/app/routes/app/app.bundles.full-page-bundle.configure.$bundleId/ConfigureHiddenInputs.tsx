@@ -92,12 +92,8 @@ export function ConfigureHiddenInputs({
           discountMessagingEnabled: pricing.discountMessagingEnabled,
           ruleMessages: normalizedRuleMessages,
           pricingDisplayOptions: serializePricingDisplayOptions({
-            existingMessages: {
-              showDiscountMessaging: pricing.discountMessagingEnabled,
-              ruleMessages: normalizedRuleMessages,
-            },
             options: normalizedPricingDisplayOptions,
-          }).displayOptions,
+          }),
           discountMessagingMultiLanguageEnabled,
           ruleMessagesByLocale: discountMessagingMultiLanguageEnabled
             ? ruleMessagesByLocale

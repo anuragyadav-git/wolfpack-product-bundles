@@ -205,11 +205,7 @@ export function useConfigureSaveController(flow: ConfigureSaveDependencies) {
       formData.append("bundleDescription", flow.formState.bundleDescription);
       formData.append("templateName", flow.formState.templateName);
       formData.append("bundleStatus", flow.formState.bundleStatus);
-      const pricingMessages = serializePricingDisplayOptions({
-        existingMessages: {
-          showDiscountMessaging: flow.pricingState.discountMessagingEnabled,
-          ruleMessages: flow.normalizedRuleMessages,
-        },
+      const pricingDisplayOptions = serializePricingDisplayOptions({
         options: flow.normalizedPricingDisplayOptions,
       });
       formData.append(
@@ -241,7 +237,7 @@ export function useConfigureSaveController(flow: ConfigureSaveDependencies) {
           successMessageByLocale: flow.discountMessagingMultiLanguageEnabled
             ? flow.successMessageByLocale
             : null,
-          pricingDisplayOptions: pricingMessages.displayOptions,
+          pricingDisplayOptions,
           discountMessagingMultiLanguageEnabled:
             flow.discountMessagingMultiLanguageEnabled,
           ruleMessagesByLocale: flow.discountMessagingMultiLanguageEnabled
