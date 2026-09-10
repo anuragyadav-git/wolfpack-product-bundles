@@ -5,7 +5,7 @@ title: Only Bundles Brand and Compatibility Boundary
 type: architecture
 status: authoritative
 summary: Defines the Only Bundles visible identity and the legacy technical identifiers intentionally preserved for installed-shop compatibility.
-last_audited: 2026-09-08
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -17,6 +17,8 @@ systems:
   - shopify-extensions
 source_paths:
   - app/lib/app-brand.ts
+  - app/components/ErrorPage.tsx
+  - app/root.tsx
   - public/branding/only-bundles/
   - shopify.app.toml
 related_docs:
@@ -37,6 +39,14 @@ keywords:
 The production application and publisher identity is **Only Bundles**. The canonical bundle-box mark is `public/branding/only-bundles/only-bundles-icon.png`; `APP_BRAND.markPath` and `APP_BRAND.wordmarkPath` both resolve to that asset. It uses deep green `#1F3D2E`, sage `#A7C29A`, cream `#F4EDE2`, with coral `#FE8A65` reserved for secondary accents. Production and SIT display names are `Only Bundles` and `Only Bundles SIT`.
 
 All merchant-visible Admin copy, Theme Editor labels, extension descriptions, analytics exports, loading/error states, and product-configuration ownership messages use the current brand.
+
+The shared Remix error boundary is a Shopify-native empty-state splash composed
+only from Polaris web components. `s-grid`, `s-box`, and `s-section` own the
+centred padded layout; `s-button-group` owns spacing and primary/secondary action
+semantics for dashboard recovery and Crisp support. Merchant-facing error pages
+never expose thrown messages or a technical-details disclosure. The root error
+document loads Polaris and Crisp directly because it cannot rely on the normal
+embedded-app route shell; it does not load a dedicated error-page stylesheet.
 
 ## Preserved identifiers
 

@@ -94,22 +94,6 @@ describe("admin root link warnings", () => {
     expect(mockCrispChat).toHaveBeenCalledTimes(1);
   });
 
-  it("registers the shared error-page stylesheet with Remix", async () => {
-    const { links } = await import("../../../app/root");
-
-    expect(links()).toContainEqual({
-      rel: "stylesheet",
-      href: "/test-stylesheet.css",
-    });
-  });
-
-  it("renders the error stylesheet directly in the root error document", async () => {
-    const { ErrorBoundary } = await import("../../../app/root");
-    const view = renderToStaticMarkup(React.createElement(ErrorBoundary));
-
-    expect(view).toContain('rel="stylesheet" href="/test-stylesheet.css"');
-  });
-
   it("does not render the font stylesheet onLoad handler as a string listener", async () => {
     const consoleError = jest
       .spyOn(console, "error")

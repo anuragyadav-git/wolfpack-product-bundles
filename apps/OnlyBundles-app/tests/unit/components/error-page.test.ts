@@ -54,7 +54,7 @@ describe("ErrorPage", () => {
     return container.textContent?.includes(value) ?? false;
   }
 
-  it("renders the Only Bundles identity and technical detail for a server error", () => {
+  it("renders the Only Bundles identity without exposing technical details", () => {
     renderErrorPage(new Error("Request failed"));
 
     const logo = container.querySelector(
@@ -64,8 +64,20 @@ describe("ErrorPage", () => {
       "/branding/only-bundles/only-bundles-icon.png",
     );
     expect(containsText("Unexpected Error")).toBe(true);
-    expect(containsText("Technical details")).toBe(true);
-    expect(containsText("Request failed")).toBe(true);
+    expect(containsText("Technical details")).toBe(false);
+    expect(containsText("Request failed")).toBe(false);
+  });
+
+  it("uses a Polaris-only splash composition for both recovery actions", () => {
+    renderErrorPage(new Error("Request failed"));
+
+    expect(container.querySelector("s-grid")).not.toBeNull();
+    expect(container.querySelector("s-section")).not.toBeNull();
+    expect(container.querySelector("s-button-group")).not.toBeNull();
+    expect(container.querySelectorAll("s-button")).toHaveLength(2);
+    expect(
+      container.querySelector("main, section, div, details, summary, pre"),
+    ).toBeNull();
   });
 
   it("renders status-specific guidance for a missing page", () => {
