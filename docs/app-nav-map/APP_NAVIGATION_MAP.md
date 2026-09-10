@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-10
+**Last Updated:** 2026-09-11
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -102,6 +102,7 @@ Dashboard
 │   └── [Finish setup / View details] → Storefront setup modal
 │       └── current theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
+│   ├── Visible Status and Type filters → native selects in one inline row
 │   └── DataTable of bundles (empty state if none exist)
 │       ├── Bundles per page dropdown → radio choices 10 / 20 / 50
 │       └── Per bundle row:
@@ -514,7 +515,7 @@ FPB Configure Page
 │   │   ├── List of configured steps
 │   │   ├── [Button] "Add Step" → inline step builder
 │   │   │   └── Product/Collection picker per step → opens Product Picker
-│   │   └── Step Config icon → native drop zone → Shopify Files
+│   │   └── Step Config icon tile → direct native drop zone → Shopify Files
 │   │
 │   ├── Discount & Pricing
 │   │   ├── Discount type selector: Fixed Amount Off / Percentage Off / Fixed Bundle Price / Buy X, get Y
@@ -527,6 +528,8 @@ FPB Configure Page
 │   ├── Images & GIFs
 │   │   ├── Promo banner → desktop + mobile native drop zones side-by-side in one row → Shopify Files
 │   │   └── Floating promo badge enablement and text
+│   ├── Free Gift & Add Ons
+│   │   └── Add-Ons with Bundles → independent visual info popover + external How to setup? guide
 │   │
 │   ├── Sync Bundle
 │   │   └── [Button] "Sync Now" → ensure parent + metafields; returns canonical proxy URL

@@ -6,7 +6,6 @@ import { JSDOM } from "jsdom";
 import { CommonConfigureSidebar } from "../../../app/routes/app/_shared/bundle-configure/CommonConfigureSidebar";
 import { BundleSubscriptionConfiguration } from "../../../app/routes/app/_shared/bundle-configure/BundleSubscriptionConfiguration";
 import { FpbStepCategoryFooter } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupCategoryFooter";
-import { FpbStepConfigCard } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupConfigCard";
 import { FpbStepRuleModeContent } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupRuleModeContent";
 import { FpbProgressBarOptions } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/DiscountProgressBarOptions";
 import { PpbRulesConfigurationCard } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbRulesConfigurationCard";
@@ -227,18 +226,6 @@ describe("configure Polaris semantics", () => {
         onAddCategory: jest.fn(),
         onDisplayVariantsChange: jest.fn(),
         step: {},
-        styles: {},
-      })
-    );
-    expectIconActionsNamed(
-      FpbStepConfigCard({
-        onClosePicker: jest.fn(),
-        onImageChange: jest.fn(),
-        onRemoveImage: jest.fn(),
-        onTitleChange: jest.fn(),
-        onTogglePicker: jest.fn(),
-        pickerOpen: false,
-        step: { id: "step-1" },
         styles: {},
       })
     );

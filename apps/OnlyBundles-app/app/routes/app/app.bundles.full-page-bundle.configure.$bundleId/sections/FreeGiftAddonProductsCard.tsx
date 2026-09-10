@@ -3,6 +3,7 @@ import { FpbAddonTierEditor } from "./FreeGiftAddonTierEditor";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
 import { ADDONS_HELP_ARTICLE_URL } from "../configure-constants";
+import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
 
 export function FpbAddonProductsCard({
   enabled,
@@ -42,27 +43,14 @@ export function FpbAddonProductsCard({
                 onEnabledChange((e.target as HTMLInputElement).checked)
               }
             />
-            <s-button
-              variant="tertiary"
-              tone="neutral"
-              icon="info"
-              accessibilityLabel={translateAdmin(
-                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
-              )}
-              onClick={() =>
-                window.open(
-                  ADDONS_HELP_ARTICLE_URL,
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
-            >
+            <ConfigureHelpPopover tooltipKey="freeGiftAddons" />
+          </div>
+          <div className={styles.addonsHeaderActions}>
+            <s-link href={ADDONS_HELP_ARTICLE_URL} target="_blank">
               {translateAdmin(
                 "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.howToSetup"
               )}
-            </s-button>
-          </div>
-          <div className={styles.addonsHeaderActions}>
+            </s-link>
             <s-button
               variant="secondary"
               icon="language-translate"

@@ -448,8 +448,6 @@ function ConfigureBundleFlow() {
           }}
           config={{
             markAsDirty: flow.markAsDirty,
-            pickerStepId: flow.showIconPickerForStep,
-            setPickerStepId: flow.setShowIconPickerForStep,
             updateStepField: flow.stepsState.updateStepField,
           }}
         />

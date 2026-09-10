@@ -211,8 +211,6 @@ describe("native configure actions", () => {
           ruleMode,
           config: {
             markAsDirty: jest.fn(),
-            pickerStepId: null,
-            setPickerStepId: jest.fn(),
             updateStepField: jest.fn(),
           },
         })

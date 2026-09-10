@@ -84,6 +84,28 @@ describe("AssetUpload", () => {
     expect(container.querySelector("s-clickable")).toBeNull();
   });
 
+  it("renders compact media content inside the native drop zone without a duplicate preview", () => {
+    renderUpload({
+      value: "https://cdn.shopify.com/step.png",
+      showValuePreview: false,
+      labelAccessibilityVisibility: "exclusive",
+      dropZoneContent: React.createElement("s-image", {
+        src: "https://cdn.shopify.com/step.png",
+        alt: "Step icon",
+      }),
+    });
+
+    const dropZones = container.querySelectorAll("s-drop-zone");
+    expect(dropZones).toHaveLength(1);
+    expect(dropZones[0].getAttribute("labelaccessibilityvisibility")).toBe(
+      "exclusive",
+    );
+    expect(dropZones[0].querySelector("s-image")?.getAttribute("src")).toBe(
+      "https://cdn.shopify.com/step.png",
+    );
+    expect(container.querySelector('s-button[icon="delete"]')).toBeNull();
+  });
+
   it("uploads an accepted file and emits its READY Shopify CDN URL", async () => {
     mockUploadStoreFile.mockResolvedValue({
       ok: true,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import type { ComponentProps, ComponentRef } from "react";
+import type { ComponentProps, ComponentRef, ReactNode } from "react";
 
 import { translateAdmin } from "~/i18n/config";
 import {
@@ -33,6 +33,9 @@ export interface AssetUploadProps {
   maxUploadErrorMessage?: string;
   invalidTypeErrorMessage?: string;
   dropZoneContentMinBlockSize?: ComponentProps<"s-grid">["minBlockSize"];
+  dropZoneContent?: ReactNode;
+  showValuePreview?: boolean;
+  labelAccessibilityVisibility?: ComponentProps<"s-drop-zone">["labelAccessibilityVisibility"];
 }
 
 function isAcceptedFileType(fileType: string, accept: string) {
@@ -68,6 +71,9 @@ export function AssetUpload({
     "adminDynamic.chooseSupportedImageFile",
   ),
   dropZoneContentMinBlockSize,
+  dropZoneContent,
+  showValuePreview = true,
+  labelAccessibilityVisibility,
 }: AssetUploadProps) {
   const dropZoneRef = useRef<DropZoneElement | null>(null);
   const pollCountRef = useRef(0);
@@ -216,7 +222,7 @@ export function AssetUpload({
 
   return (
     <s-stack direction="block" gap="small">
-      {value ? (
+      {value && showValuePreview ? (
         <s-stack direction="inline" gap="small" alignItems="center">
           <s-box inlineSize="64px" blockSize="64px">
             <s-image
@@ -251,6 +257,7 @@ export function AssetUpload({
         accept={accept}
         label={label}
         accessibilityLabel={label}
+        labelAccessibilityVisibility={labelAccessibilityVisibility}
         disabled={disabled || isBlocked || undefined}
         error={validationError ?? undefined}
         onInput={handleInput}
@@ -261,10 +268,10 @@ export function AssetUpload({
             alignItems="center"
             justifyItems="center"
           >
-            <s-icon type="upload" size="base" />
+            {dropZoneContent ?? <s-icon type="upload" size="base" />}
           </s-grid>
         ) : (
-          <s-icon type="upload" size="base" />
+          dropZoneContent ?? <s-icon type="upload" size="base" />
         )}
       </s-drop-zone>
 

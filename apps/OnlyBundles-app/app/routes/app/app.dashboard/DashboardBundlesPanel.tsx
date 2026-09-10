@@ -186,12 +186,15 @@ export function DashboardBundlesPanel<TBundle extends DashboardBundle>({
         <s-section padding="none">
           <div className={dashboardStyles.bundlesPanel}>
             <div className={dashboardStyles.bundlesToolbar}>
-              <div className={dashboardStyles.filterGroup}>
+              <s-grid
+                gridTemplateColumns="repeat(2, minmax(0, 1fr))"
+                gap="small"
+                minInlineSize="260px"
+              >
                 <s-select
                   ref={statusSelectRef}
                   name="status-filter-list"
-                  label={t("dashboard.filters.byStatus")}
-                  labelAccessibilityVisibility="exclusive"
+                  label={t("dashboard.table.status")}
                   value={statusFilter}
                 >
                   {(["all", "active", "draft", "unlisted"] as const).map(
@@ -208,8 +211,7 @@ export function DashboardBundlesPanel<TBundle extends DashboardBundle>({
                 <s-select
                   ref={typeSelectRef}
                   name="type-filter-list"
-                  label={t("dashboard.filters.byType")}
-                  labelAccessibilityVisibility="exclusive"
+                  label={t("dashboard.table.type")}
                   value={typeFilter}
                 >
                   {(["all", "product_page", "full_page"] as const).map(
@@ -222,7 +224,7 @@ export function DashboardBundlesPanel<TBundle extends DashboardBundle>({
                     )
                   )}
                 </s-select>
-              </div>
+              </s-grid>
               <div className={dashboardStyles.searchField}>
                 <s-text-field
                   ref={searchRef}
@@ -295,7 +297,9 @@ export function DashboardBundlesPanel<TBundle extends DashboardBundle>({
                               onClone={onClone}
                               onDelete={onDelete}
                               onPreview={onPreview}
-                              activeActionMenuBundleId={activeActionMenuBundleId}
+                              activeActionMenuBundleId={
+                                activeActionMenuBundleId
+                              }
                               onActionMenuRequest={onActionMenuRequest}
                               isPreviewing={previewingBundleId === row.id}
                             />

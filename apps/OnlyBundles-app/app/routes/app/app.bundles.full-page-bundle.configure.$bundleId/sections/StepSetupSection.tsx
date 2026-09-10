@@ -44,10 +44,6 @@ export function StepSetupSection({
   ruleMode: ComponentProps<typeof FpbStepRulesCard>["ruleMode"];
   config: {
     markAsDirty: () => void;
-    pickerStepId: string | null;
-    setPickerStepId: (
-      value: string | null | ((previous: string | null) => string | null)
-    ) => void;
     updateStepField: (stepId: string, field: string, value: unknown) => void;
   };
 }) {
@@ -214,27 +210,18 @@ export function StepSetupSection({
                 <FpbStepConfigCard
                   styles={styles}
                   step={step}
-                  pickerOpen={config.pickerStepId === step.id}
-                  onClosePicker={() => config.setPickerStepId(null)}
                   onImageChange={(url) => {
                     config.updateStepField(step.id, "stepImage", url);
-                    config.setPickerStepId(null);
                     config.markAsDirty();
                   }}
                   onRemoveImage={() => {
                     config.updateStepField(step.id, "stepImage", null);
-                    config.setPickerStepId(null);
                     config.markAsDirty();
                   }}
                   onTitleChange={(title) => {
                     config.updateStepField(step.id, "pageTitle", title);
                     config.markAsDirty();
                   }}
-                  onTogglePicker={() =>
-                    config.setPickerStepId((previous) =>
-                      previous === step.id ? null : step.id
-                    )
-                  }
                 />
               </div>
             </div>

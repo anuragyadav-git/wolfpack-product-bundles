@@ -36,18 +36,26 @@ describe("Dashboard native filter controls", () => {
         onClone: jest.fn(),
         onDelete: jest.fn(),
         onPreview: jest.fn(),
-      }),
+      })
     );
 
     expect(view).toContain('<s-select name="status-filter-list"');
+    expect(view).toContain('label="dashboard.table.status"');
     expect(view).toContain('<s-option value="active">');
     expect(view).toContain('<s-option value="draft">');
     expect(view).toContain('<s-option value="unlisted">');
     expect(view).toContain('<s-select name="type-filter-list"');
+    expect(view).toContain('label="dashboard.table.type"');
     expect(view).toContain('<s-option value="product_page">');
     expect(view).toContain('<s-option value="full_page">');
     expect(view).toContain(
-      '<s-select name="bundles-per-page-list" label="dashboard.pagination.perPageLabel" labelAccessibilityVisibility="exclusive" value="20"><s-option value="20">',
+      '<s-select name="bundles-per-page-list" label="dashboard.pagination.perPageLabel" labelAccessibilityVisibility="exclusive" value="20"><s-option value="20">'
+    );
+    expect(view).not.toContain(
+      'name="status-filter-list" label="dashboard.filters.byStatus" labelAccessibilityVisibility="exclusive"'
+    );
+    expect(view).not.toContain(
+      'name="type-filter-list" label="dashboard.filters.byType" labelAccessibilityVisibility="exclusive"'
     );
   });
 });
