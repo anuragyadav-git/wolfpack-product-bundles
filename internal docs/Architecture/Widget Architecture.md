@@ -504,7 +504,7 @@ If metafield cache is absent/malformed → `GET /apps/product-bundles/api/bundle
 
 - Single retry after 3s for `503`/`504` responses (Render cold-start tolerance)
 
-## PPB Load Strategy
+## Product Hydration Strategy
 
 PPB product hydration is demand-driven. Opening, navigating, or auto-advancing
 the picker calls the canonical `loadStepProducts()` owner only for the active
@@ -521,6 +521,17 @@ The decision to remove `preloadNextStep()` is therefore an application-level
 inference from those documented principles, not a claim that Shopify exposes a
 step-preload API. See [Storefront performance](https://shopify.dev/docs/apps/build/performance/storefront)
 and [Use defer and async on non-critical scripts](https://shopify.dev/docs/storefronts/themes/best-practices/performance/defer-scripts).
+
+FPB follows the same demand-driven boundary. Its initial render hydrates only
+the active step, and step navigation hydrates only the destination step before
+rendering that catalog. The retired `preloadAllSteps()` layer requested every
+unseen step after each successful foreground load, competing with the active
+storefront for product requests and silently discarding background failures.
+Shopify's [theme performance guidance](https://shopify.dev/docs/storefronts/themes/best-practices/performance)
+reserves preload for a small number of critical resources, while its
+[app performance guidance](https://shopify.dev/docs/apps/build/performance/general-best-practices)
+recommends loading non-critical resources on interaction. Those principles do
+not justify that application-owned future-step request layer.
 
 ### Native product-form actions
 

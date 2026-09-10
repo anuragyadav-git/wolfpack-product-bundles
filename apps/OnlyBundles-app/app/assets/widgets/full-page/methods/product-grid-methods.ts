@@ -428,25 +428,5 @@ createProductGridLoadingState() {
   return '';
 },
 
-// Preload ALL remaining steps' products in the background (parallel).
-// Called after step 0 renders so subsequent step transitions feel instant.
-// loadStepProducts() is a no-op when data is already cached, so this is safe to call
-// at any step without re-fetching.
-preloadAllSteps() {
-  const steps = this.selectedBundle?.steps;
-  if (!steps) return;
-
-  steps.forEach((_: any, index: string|number) => {
-    // Skip the step already on screen — it's been loaded synchronously
-    if (index === this.currentStepIndex) return;
-    // Skip steps already cached
-    if (this.stepProductData[index]?.length > 0) return;
-
-    this.loadStepProducts(index).catch(() => {
-      // Silent — background prefetch; errors here don't affect the user
-    });
-  });
-},
-
 // Create a product card DOM element for full-page layout
 };
