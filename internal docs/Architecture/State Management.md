@@ -14,12 +14,12 @@ systems:
   - react
   - remix
 source_paths:
-  - app/hooks/configure-route-state.ts
-  - app/hooks/useBundleConfigurationState.ts
-  - app/hooks/useDashboardState.ts
-  - app/lib/admin-store-files.client.ts
-  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx
-  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx
+  - apps/OnlyBundles-app/app/hooks/configure-route-state.ts
+  - apps/OnlyBundles-app/app/hooks/useBundleConfigurationState.ts
+  - apps/OnlyBundles-app/app/hooks/useDashboardState.ts
+  - apps/OnlyBundles-app/app/lib/admin-store-files.client.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx
 related_docs:
   - internal docs/Operations/Admin Performance.md
   - internal docs/Architecture/Admin Configure Page.md

@@ -15,13 +15,13 @@ systems:
   - webhook-processor
   - inngest
 source_paths:
-  - shopify.app.toml
-  - shopify.app.wolfpack-product-bundles-sit.toml
-  - shopify.web.toml
-  - app/routes/api/webhooks.tsx
-  - app/services/webhooks/topics.ts
-  - app/services/webhooks/product-delete-relevance.server.ts
-  - app/services/webhooks/processor.server.ts
+  - apps/OnlyBundles-app/shopify.app.toml
+  - apps/OnlyBundles-app/shopify.app.wolfpack-product-bundles-sit.toml
+  - apps/OnlyBundles-app/shopify.web.toml
+  - apps/OnlyBundles-app/app/routes/api/webhooks.tsx
+  - apps/OnlyBundles-app/app/services/webhooks/topics.ts
+  - apps/OnlyBundles-app/app/services/webhooks/product-delete-relevance.server.ts
+  - apps/OnlyBundles-app/app/services/webhooks/processor.server.ts
 related_docs:
   - internal docs/Shopify Integration/Admin API.md
 tags:

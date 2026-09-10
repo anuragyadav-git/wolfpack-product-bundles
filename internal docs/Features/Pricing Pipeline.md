@@ -5,7 +5,7 @@ title: Pricing Pipeline
 type: feature
 status: authoritative
 summary: Defines canonical minor-unit pricing, presentment-currency handling, discount operators, and checkout ownership.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -14,16 +14,16 @@ systems:
   - storefront-api
   - cart-transform
 source_paths:
-  - app/assets/widgets/shared/currency-manager.ts
-  - app/assets/widgets/shared/components/product-card.ts
-  - app/assets/widgets/shared/pricing-calculator.ts
-  - app/assets/widgets/shared/template-manager.ts
-  - app/assets/widgets/full-page/methods/validation-addons-methods.ts
-  - app/assets/widgets/full-page/modal/variant-methods.ts
-  - extensions/bundle-builder/blocks/bundle-app-embed.liquid
-  - extensions/bundle-builder/blocks/bundle-product-page.liquid
-  - app/services/bundles/metafield-sync/utils/price-adjustment.ts
-  - extensions/bundle-cart-transform-rs/src/run.rs
+  - apps/OnlyBundles-app/app/assets/widgets/shared/currency-manager.ts
+  - apps/OnlyBundles-app/app/assets/widgets/shared/components/product-card.ts
+  - apps/OnlyBundles-app/app/assets/widgets/shared/pricing-calculator.ts
+  - apps/OnlyBundles-app/app/assets/widgets/shared/template-manager.ts
+  - apps/OnlyBundles-app/app/assets/widgets/full-page/methods/validation-addons-methods.ts
+  - apps/OnlyBundles-app/app/assets/widgets/full-page/modal/variant-methods.ts
+  - apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-app-embed.liquid
+  - apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-product-page.liquid
+  - apps/OnlyBundles-app/app/services/bundles/metafield-sync/utils/price-adjustment.ts
+  - apps/OnlyBundles-app/extensions/bundle-cart-transform-rs/src/run.rs
 related_docs:
   - internal docs/Architecture/Cart Transform Function.md
   - internal docs/Architecture/Widget Architecture.md

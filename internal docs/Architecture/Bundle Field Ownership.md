@@ -5,7 +5,7 @@ title: Bundle Field Ownership
 type: architecture
 status: authoritative
 summary: Canonical ownership ledger for persisted bundle fields, public runtime fields, Shopify custom data, and retired aliases.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -14,17 +14,17 @@ systems:
   - bundle-persistence
   - storefront-runtime
 source_paths:
-  - prisma/schema.prisma
-  - app/lib/bundle-formatter.server.ts
-  - app/lib/bundle-config/category-persistence.ts
-  - app/lib/bundle-config/category-runtime.ts
-  - app/routes/api/api.bundle.$bundleId[.]json.tsx
-  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
-  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server.ts
-  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
-  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts
-  - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
-  - app/assets/widgets/product-page/methods/layout-shell-methods.ts
+  - apps/OnlyBundles-app/prisma/schema.prisma
+  - apps/OnlyBundles-app/app/lib/bundle-formatter.server.ts
+  - apps/OnlyBundles-app/app/lib/bundle-config/category-persistence.ts
+  - apps/OnlyBundles-app/app/lib/bundle-config/category-runtime.ts
+  - apps/OnlyBundles-app/app/routes/api/api.bundle.$bundleId[.]json.tsx
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts
+  - apps/OnlyBundles-app/app/services/bundles/metafield-sync/operations/bundle-product.server.ts
+  - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/layout-shell-methods.ts
 related_docs:
   - Shopify Integration/Metafields.md
   - Operations/Deployment General Sync.md
