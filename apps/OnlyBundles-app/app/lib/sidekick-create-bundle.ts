@@ -13,7 +13,9 @@ type SidekickBundleDraftValidation = {
 type SidekickToolRegistry = {
   register: (
     name: string,
-    handler: (input: unknown) => unknown | Promise<unknown>,
+    handler: (
+      input: Record<string, unknown>,
+    ) => Record<string, unknown> | Promise<Record<string, unknown>>,
   ) => () => void;
 };
 

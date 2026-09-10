@@ -61,6 +61,8 @@ The resource route is read-only. It accepts only `search_bundles` and `get_bundl
 
 The data extension calls only the configured application domain. Shopify attaches the sandbox Authorization header automatically, so the app does not issue or persist a separate Sidekick credential.
 
+The 2026-09-06 simplification audit confirmed that request validation has one owner per boundary: the server service validates data-tool requests, while the client helper validates the separate product-import intent and staging-tool payload through one shared draft validator. No duplicated validator or dead extension entrypoint remains. Browser access uses Shopify's typed App Bridge global after checking that the intent response is available, and server status parsing narrows directly to the supported `BundleStatus` values without unsafe casts.
+
 ## Creation flow and confirmation boundary
 
 ```text

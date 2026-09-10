@@ -35,22 +35,10 @@ import {
 import { BundleTypeSelectionCard } from "./BundleTypeSelectionCard";
 
 type SidekickAppBridge = {
-  tools: {
-    register: (
-      name: string,
-      handler: (input: unknown) => unknown | Promise<unknown>,
-    ) => () => void;
-  };
+  tools: typeof shopify.tools;
   intents: {
-    request: {
-      value: unknown;
-      subscribe: (callback: (request: unknown) => void) => () => void;
-    };
-    response: {
-      ok: (output: { id: string }) => Promise<void>;
-      error: (message: string) => Promise<void>;
-      closed: () => Promise<void>;
-    };
+    request: typeof shopify.intents.request;
+    response: NonNullable<typeof shopify.intents.response>;
   };
 };
 
@@ -199,15 +187,20 @@ export default function CreateBundleEntry() {
   const [bundleName, setBundleName] = useState("");
   const [isSidekickIntent, setIsSidekickIntent] = useState(false);
 
-  const getSidekick = useCallback(
-    () =>
-      resolveSidekickAppBridge<SidekickAppBridge>(
-        typeof window === "undefined"
-          ? undefined
-          : (window as unknown as { shopify?: SidekickAppBridge }),
-      ),
-    [],
-  );
+  const getSidekick = useCallback((): SidekickAppBridge | null => {
+    if (typeof shopify === "undefined" || !shopify.intents.response) {
+      return null;
+    }
+    return resolveSidekickAppBridge({
+      shopify: {
+        tools: shopify.tools,
+        intents: {
+          request: shopify.intents.request,
+          response: shopify.intents.response,
+        },
+      },
+    });
+  }, []);
 
   const applySidekickDraft = useCallback((draft: SidekickBundleDraft) => {
     setIsSidekickIntent(true);

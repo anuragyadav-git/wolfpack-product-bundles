@@ -35,6 +35,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function isBundleStatus(value: unknown): value is BundleStatus {
+  return (
+    value === BundleStatus.ACTIVE ||
+    value === BundleStatus.DRAFT ||
+    value === BundleStatus.UNLISTED ||
+    value === BundleStatus.ARCHIVED
+  );
+}
+
 function serializeBundle(bundle: SelectedBundle) {
   return {
     id: bundle.id,
@@ -82,10 +91,10 @@ function parseSearchInput(value: unknown) {
 
   let status: BundleStatus | undefined;
   if (value.status !== undefined) {
-    if (!Object.values(BundleStatus).includes(value.status as BundleStatus)) {
+    if (!isBundleStatus(value.status)) {
       throw new SidekickBundleRequestError(400, "invalid_status");
     }
-    status = value.status as BundleStatus;
+    status = value.status;
   }
 
   const limit = value.limit ?? DEFAULT_LIMIT;
