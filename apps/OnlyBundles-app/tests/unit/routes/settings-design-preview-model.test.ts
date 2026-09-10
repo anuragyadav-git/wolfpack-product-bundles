@@ -140,7 +140,7 @@ describe("Settings Design preview model", () => {
         categories: "tabs",
         summary: "list-selected-drawer",
         areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
-        scenarios: ["default", "validation"],
+        scenarios: ["default", "loading", "validation"],
       },
       {
         key: "product-grid",
@@ -150,7 +150,7 @@ describe("Settings Design preview model", () => {
         categories: "tabs",
         summary: "pdp-footer",
         areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
-        scenarios: ["default", "validation"],
+        scenarios: ["default", "loading", "validation"],
       },
       {
         key: "horizontal-slots",
@@ -160,7 +160,7 @@ describe("Settings Design preview model", () => {
         categories: "none",
         summary: "modal-footer",
         areas: ["bundle-header", "product-slots", "cart-summary"],
-        scenarios: ["default", "product-picker", "validation"],
+        scenarios: ["default", "product-picker", "loading", "validation"],
       },
       {
         key: "vertical-slots",
@@ -170,7 +170,7 @@ describe("Settings Design preview model", () => {
         categories: "none",
         summary: "modal-footer",
         areas: ["bundle-header", "product-slots", "cart-summary"],
-        scenarios: ["default", "product-picker", "validation"],
+        scenarios: ["default", "product-picker", "loading", "validation"],
       },
     ]);
   });
@@ -208,7 +208,7 @@ describe("Settings Design preview model", () => {
     )?.target).toEqual({ kind: "area", value: "cart-summary" });
     expect(getDesignPreviewFieldTarget(
       "generalSettings.loadingBgColor",
-      "standard",
+      "product-grid",
     )?.target).toEqual({ kind: "scenario", value: "loading" });
     expect(getDesignPreviewFieldTarget(
       "expert.generalSettings.conditionToastBgColor",
@@ -237,9 +237,9 @@ describe("Settings Design preview model", () => {
     expect(getDesignFieldsForPreviewContext(fields, "standard", { kind: "area", value: "product-card" }).map((field) => field.label))
       .toEqual(expect.arrayContaining(["Primary Color", "Image Fit"]));
     expect(getDesignFieldsForPreviewContext(fields, "standard", { kind: "scenario", value: "loading" }).map((field) => field.label))
-      .toEqual(["FPB Loading GIF", "Loading Screen Background Color"]);
+      .toEqual(["Loading GIF", "Loading Screen Background Color"]);
     expect(getDesignFieldsForPreviewContext(fields, "product-list", { kind: "scenario", value: "loading" }).map((field) => field.label))
-      .toEqual([]);
+      .toEqual(["Loading GIF", "Loading Screen Background Color"]);
   });
 
   it("builds family-specific themes from normalized storefront runtime values", () => {

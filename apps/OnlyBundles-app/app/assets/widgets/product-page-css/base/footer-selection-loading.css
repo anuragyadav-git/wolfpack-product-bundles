@@ -211,7 +211,7 @@
   height: 100%;
   min-height: var(--bundle-ppb-loading-overlay-min-height, 180px);
   min-width: var(--bundle-ppb-loading-overlay-min-width, 180px);
-  background: transparent;
+  background: var(--wpb-loading-screen-bg, transparent);
   display: flex;
   align-items: center;
   justify-content: center;

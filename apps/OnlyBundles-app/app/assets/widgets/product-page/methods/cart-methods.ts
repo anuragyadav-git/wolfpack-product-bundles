@@ -111,7 +111,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
 
       this.elements.addToCartButton.disabled = true;
       this.elements.addToCartButton.textContent = this._resolveText('addingToCart', 'Adding to Cart...');
-      this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
+      this.showLoadingOverlay(this.config?.loadingScreen?.gifUrl || null);
 
       const runtimeToken = this.config?.isEmbedSource && this.selectedBundle?.runtimeAuthorization?.version !== 2
         ? await this.requestEmbedCartTransformRuntimeToken(cartItems, {

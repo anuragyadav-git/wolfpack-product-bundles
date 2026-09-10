@@ -322,10 +322,19 @@ function applyPreviewContext(
   widgetRoot: HTMLElement | null,
   upsellAnchor: HTMLElement | null,
   focusLabel: HTMLElement | null,
+  loadingScreen: StorefrontPreviewInitializePayload["loadingScreen"],
 ) {
   if (!controller || !widgetRoot) return;
+  controller.config = {
+    ...(controller.config ?? {}),
+    loadingScreen,
+  };
   clearAreaFocus(focusLabel);
-  setStorefrontPreviewLoadingPersistent(controller, scenario === "loading");
+  setStorefrontPreviewLoadingPersistent(
+    controller,
+    scenario === "loading",
+    loadingScreen.gifUrl,
+  );
   document.getElementById("bundle-toast")?.remove();
   const modal = document.getElementById("bundle-builder-modal");
   if (modal) modal.style.removeProperty("display");
@@ -413,7 +422,7 @@ export default function SettingsDesignPreviewFrame() {
       setState((current) => {
         if (command.type === "INITIALIZE") return command.payload;
         if (!current) return current;
-        if (command.type === "UPDATE_DESIGN") return { ...current, designCss: command.payload.designCss };
+        if (command.type === "UPDATE_DESIGN") return { ...current, ...command.payload };
         if (command.type === "SET_TEMPLATE") return { ...current, ...command.payload };
         if (command.type === "SET_VIEWPORT") return { ...current, viewport: command.payload.viewport };
         if (command.type === "SET_AREA") return { ...current, ...command.payload };
@@ -468,6 +477,7 @@ export default function SettingsDesignPreviewFrame() {
           widgetRoot,
           upsellRef.current,
           focusLabelRef.current,
+          latestState.loadingScreen,
         );
         postFrameEvent({
           version: PREVIEW_PROTOCOL_VERSION,
@@ -518,13 +528,14 @@ export default function SettingsDesignPreviewFrame() {
       widgetRef.current,
       upsellRef.current,
       focusLabelRef.current,
+      activeState.loadingScreen,
     );
     postFrameEvent({
       version: PREVIEW_PROTOCOL_VERSION,
       type: "INTERACTION_CHANGED",
       payload: { selectedQuantity: selectedQuantity(controllerRef.current) },
     });
-  }, [state?.area, state?.areaLabel, state?.scenario, state?.viewport]);
+  }, [state?.area, state?.areaLabel, state?.loadingScreen, state?.scenario, state?.viewport]);
 
   useEffect(() => {
     if (state?.scenario !== "product-picker") return;

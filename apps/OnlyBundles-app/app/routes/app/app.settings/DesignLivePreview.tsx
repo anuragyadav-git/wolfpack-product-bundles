@@ -40,6 +40,7 @@ import {
   setDesignPreviewViewport,
   type DesignPreviewState,
 } from "./design-preview-state";
+import { resolveBundleLoadingScreenSettings } from "../../../lib/bundle-loading-screen";
 
 export function DesignLivePreview({
   fieldValues,
@@ -100,6 +101,15 @@ export function DesignLivePreview({
       }),
     [activeTemplate.key, fieldValues, inheritedColorFieldKeys, shopBrandColors]
   );
+  const loadingScreen = useMemo(
+    () => resolveBundleLoadingScreenSettings({
+      loadingScreen: {
+        gifUrl: fieldValues["generalSettings.loadingGifUrl"],
+        backgroundColor: fieldValues["generalSettings.loadingBgColor"],
+      },
+    }),
+    [fieldValues],
+  );
   const previewViewport = DESIGN_PREVIEW_VIEWPORTS[previewState.viewport];
   const previewCanvasSize = getDesignPreviewCanvasSize(previewState.viewport);
   const initializePayloadRef = useRef({
@@ -112,6 +122,7 @@ export function DesignLivePreview({
     }),
     scenario: previewState.scenario,
     designCss,
+    loadingScreen,
     locale: i18n?.resolvedLanguage ?? i18n?.language ?? "en",
     currency: "USD",
   });
@@ -125,6 +136,7 @@ export function DesignLivePreview({
     }),
     scenario: previewState.scenario,
     designCss,
+    loadingScreen,
     locale: i18n?.resolvedLanguage ?? i18n?.language ?? "en",
     currency: "USD",
   };
@@ -192,13 +204,13 @@ export function DesignLivePreview({
     const command: StorefrontPreviewCommand = {
       version: PREVIEW_PROTOCOL_VERSION,
       type: "UPDATE_DESIGN",
-      payload: { designCss },
+      payload: { designCss, loadingScreen },
     };
     previewFrameRef.current?.contentWindow?.postMessage(
       command,
       window.location.origin
     );
-  }, [designCss, isFrameReady]);
+  }, [designCss, isFrameReady, loadingScreen]);
 
   useEffect(() => {
     if (!isFrameReady) return;

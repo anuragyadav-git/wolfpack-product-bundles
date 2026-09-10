@@ -1,9 +1,9 @@
-export type FpbLoadingScreenSettings = {
+export type BundleLoadingScreenSettings = {
   gifUrl: string | null;
   backgroundColor: string;
 };
 
-const DEFAULT_FPB_LOADING_SCREEN: FpbLoadingScreenSettings = Object.freeze({
+const DEFAULT_BUNDLE_LOADING_SCREEN: BundleLoadingScreenSettings = Object.freeze({
   gifUrl: null,
   backgroundColor: "#ffffff",
 });
@@ -33,7 +33,9 @@ function escapeHtmlAttribute(value: string): string {
     .replace(/>/g, "&gt;");
 }
 
-export function resolveFpbLoadingScreenSettings(generalSettings: unknown): FpbLoadingScreenSettings {
+export function resolveBundleLoadingScreenSettings(
+  generalSettings: unknown,
+): BundleLoadingScreenSettings {
   const loadingScreen = isRecord(generalSettings) && isRecord(generalSettings.loadingScreen)
     ? generalSettings.loadingScreen
     : {};
@@ -43,12 +45,12 @@ export function resolveFpbLoadingScreenSettings(generalSettings: unknown): FpbLo
   const backgroundColor = typeof loadingScreen.backgroundColor === "string"
     && isCssColor(loadingScreen.backgroundColor)
     ? loadingScreen.backgroundColor
-    : DEFAULT_FPB_LOADING_SCREEN.backgroundColor;
+    : DEFAULT_BUNDLE_LOADING_SCREEN.backgroundColor;
 
   return { gifUrl, backgroundColor };
 }
 
-export function renderFpbLoadingScreen(settings: FpbLoadingScreenSettings): string {
+export function renderFpbLoadingScreen(settings: BundleLoadingScreenSettings): string {
   const backgroundColor = escapeHtmlAttribute(settings.backgroundColor);
   const media = settings.gifUrl
     ? `<img data-wpb-loading-gif src="${escapeHtmlAttribute(settings.gifUrl)}" alt="">`

@@ -39,7 +39,6 @@ export function usePpbTemplateUiState({ bundle }: { bundle: any }) {
   const templateSubmissionStartedRef = useRef(false);
   const lastTemplateResponseRef = useRef<unknown>(null);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
-  const [activeAssetTabIndex, setActiveAssetTabIndex] = useState(0);
   const [readinessOpen, setReadinessOpen] = useState(false);
   const [hasPreview, setHasPreview] = useState(false);
   const [isPreparingPlacementTemplates, setIsPreparingPlacementTemplates] =
@@ -81,8 +80,6 @@ export function usePpbTemplateUiState({ bundle }: { bundle: any }) {
     templateSubmissionStartedRef,
     isSyncModalOpen,
     setIsSyncModalOpen,
-    activeAssetTabIndex,
-    setActiveAssetTabIndex,
     readinessOpen,
     setReadinessOpen,
     hasPreview,

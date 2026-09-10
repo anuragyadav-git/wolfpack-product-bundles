@@ -11,13 +11,17 @@ function createTarget() {
 }
 
 const originalDocument = global.document;
+const originalWindow = global.window;
 
 beforeEach(() => {
-  global.document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+  const domWindow = new JSDOM('<!doctype html><html><body></body></html>').window;
+  global.document = domWindow.document;
+  global.window = domWindow as unknown as Window & typeof globalThis;
 });
 
 afterEach(() => {
   global.document = originalDocument;
+  global.window = originalWindow;
 });
 
 function createBaseContext(overrides: Record<string, unknown> = {}) {
@@ -50,6 +54,30 @@ function createBaseContext(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PPB card control setting parsing', () => {
+  it('reads the shared loading screen from the Shopify-hosted runtime', () => {
+    const context = {
+      ...ProductPageConfigLifecycleMethods,
+      container: { dataset: {} },
+      config: {},
+    } as any;
+    const runtimeWindow = global.window as Window & typeof globalThis & {
+      __WOLFPACK_PPB_STOREFRONT_RUNTIME__?: unknown;
+    };
+    runtimeWindow.__WOLFPACK_PPB_STOREFRONT_RUNTIME__ = {
+      loadingScreen: {
+        gifUrl: 'https://cdn.shopify.com/loading.gif',
+        backgroundColor: '#123456',
+      },
+    };
+
+    context.parseConfiguration();
+
+    expect(context.config.loadingScreen).toEqual({
+      gifUrl: 'https://cdn.shopify.com/loading.gif',
+      backgroundColor: '#123456',
+    });
+  });
+
   it('reads canonical controls for quantity-input visibility and defaults to dataset when absent', () => {
     const context = {
       ...ProductPageConfigLifecycleMethods,

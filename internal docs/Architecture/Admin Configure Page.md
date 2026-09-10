@@ -80,8 +80,7 @@ their status, media, countdown, default-product, cart-display, quantity, custom
 CSS, category-step, or sticky-cart state and callbacks. PPB Bundle Widget and
 Bundle Embed likewise receive explicit copy, targeting, localization,
 validation, and placement contracts; neither placement surface reads the
-aggregate configure context. PPB Images & GIFs owns only its asset-tab, step
-banner, and loading-animation inputs. PPB Free Gifts and Add-ons stays one
+aggregate configure context. PPB Free Gifts and Add-ons stays one
 cohesive active-step feature but receives only its add-on, localization,
 message, picker, and modal inputs. The PPB subscriptions adapter is one such leaf
 boundary: route composition passes the shared subscription component only its
@@ -144,15 +143,17 @@ the disabled region, and their preview, localized copy, targeting, selected
 resources, browsed-product behavior, and Theme Editor placement actions remain
 visible but inert while disabled.
 
-Images & GIFs is an explicit shared configure navigation section because its
-route-owned editors persist storefront fields that have no other bundle-level
-owner. FPB owns its promo banner, per-step tab/banner images, and floating promo
-badge there. PPB owns its per-step banners and per-bundle loading animation.
+Images & GIFs is an FPB-only configure navigation section because those
+route-owned editors persist FPB storefront fields that have no other
+bundle-level owner. FPB owns its promo banner, per-step tab/banner images, and
+floating promo badge there. PPB has no separate Images & GIFs section: Step
+Config owns its canonical per-step `stepImage`, and Settings Design owns the
+store-level loading screen used by both bundle types.
 The FPB promo banner uses the canonical desktop and mobile bundle-banner URLs;
 its two native drop zones share one row at every configure width. Bundle
 Settings does not duplicate those media controls.
-The store-level FPB loading screen and shared slot icon remain owned by Settings
-Design; the configure section does not recreate those store-level controls.
+The store-level FPB/PPB loading screen and shared slot icon remain owned by
+Settings Design; configure sections do not recreate those store-level controls.
 Media previews use Polaris `s-image`, and product/list media use `s-thumbnail`;
 the app does not maintain a custom responsive-picture wrapper for Admin media.
 Empty upload surfaces provide a Shopify upload icon as `s-drop-zone` content;

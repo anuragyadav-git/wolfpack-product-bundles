@@ -162,7 +162,7 @@ _renderDirectDefaultProducts() {
 
 // Returns a full-width banner image element for a step, or null if not configured
 _createStepBannerImage(step: any) {
-  const imageUrl = step?.stepImage || step?.bannerImageUrl || null;
+  const imageUrl = step?.stepImage || null;
   if (!imageUrl) return null;
   const wrapper = document.createElement('div');
   wrapper.className = 'step-banner-image';

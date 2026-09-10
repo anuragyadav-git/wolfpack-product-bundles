@@ -26,10 +26,10 @@ export function usePpbFetcherEffects({
 }: {
   base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
     | "allowQuantityChanges" | "appEmbedEnabled" | "cartRedirectToCheckout"
-    | "clearOperationAlert" | "fetcher" | "lastProcessedFetcherDataRef" | "loadingGif"
+    | "clearOperationAlert" | "fetcher" | "lastProcessedFetcherDataRef"
     | "markAsSaved" | "markSpecificLinkOfferSaved" | "openPageSelectionModal"
     | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
-    | "originalLoadingGifRef" | "originalSdkModeRef" | "originalShowProductPricesRef"
+    | "originalSdkModeRef" | "originalShowProductPricesRef"
     | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
     | "originalTextOverridesRef" | "revalidator" | "sdkMode" | "setAvailablePages"
     | "setIsLoadingPages" | "setOperationAlert" | "shopify" | "showProductPrices"
@@ -105,7 +105,6 @@ export function usePpbFetcherEffects({
       if (result.success) {
         saveHandlers.clearValidationErrors?.();
         if ("bundle" in result && result.bundle) {
-          base.originalLoadingGifRef.current = base.loadingGif;
           base.originalShowProductPricesRef.current = base.showProductPrices;
           base.originalCartRedirectToCheckoutRef.current =
             base.cartRedirectToCheckout;

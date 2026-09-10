@@ -223,12 +223,6 @@ export function usePpbBaseConfigureState() {
     setCurrentAppEmbedEnabled(appEmbedEnabled);
     return appEmbedEnabled;
   }, [shopify]);
-  const [loadingGif, setLoadingGif] = useState<string | null>(
-    bundle.loadingGif ?? null
-  );
-  const originalLoadingGifRef = useRef<string | null>(
-    bundle.loadingGif ?? null
-  );
   const [showProductPrices, setShowProductPrices] = useState<boolean>(
     (bundle as any).showProductPrices ?? true
   );
@@ -360,9 +354,6 @@ export function usePpbBaseConfigureState() {
     clearOperationAlert,
     parentProductStatusUi,
     refreshParentProductStatusFromShopify,
-    loadingGif,
-    setLoadingGif,
-    originalLoadingGifRef,
     showProductPrices,
     setShowProductPrices,
     originalShowProductPricesRef,

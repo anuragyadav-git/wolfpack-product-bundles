@@ -244,7 +244,7 @@ renderModalTabs() {
       }
 
       // Load products for this step if not already loaded
-      this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
+      this.showLoadingOverlay(this.config?.loadingScreen?.gifUrl || null);
       try {
         await this.loadStepProducts(index);
       } finally {
@@ -510,7 +510,7 @@ renderModalProductsLoading(_stepIndex?: any) {
   const productGrid = this.elements?.modal?.querySelector('.product-grid');
   if (!productGrid) return;
 
-  const gifUrl = this.selectedBundle?.loadingGif || this.config?.loadingGif || null;
+  const gifUrl = this.config?.loadingScreen?.gifUrl || null;
 
   if (gifUrl) {
     const loading = document.createElement('div');

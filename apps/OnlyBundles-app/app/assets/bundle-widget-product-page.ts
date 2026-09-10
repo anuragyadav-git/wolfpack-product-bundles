@@ -203,8 +203,8 @@ export class BundleWidgetProductPage {
       // bootstrap overlay paints, so loading and rendered states share a slot.
       if (!this.config.isEmbedSource) this._relocateContainerToProductForm();
 
-      // Show loading overlay immediately with fallback spinner while bundle config loads.
-      this.showLoadingOverlay(null, { bootstrap: true });
+      // Show the store-level loading screen while bundle config loads.
+      this.showLoadingOverlay(this.config?.loadingScreen?.gifUrl || null, { bootstrap: true });
       await new Promise(resolve => requestAnimationFrame(resolve));
       await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -233,10 +233,6 @@ export class BundleWidgetProductPage {
 
       // Select appropriate bundle
       this.selectBundle();
-
-      if (this.selectedBundle?.loadingGif) {
-        this.showLoadingOverlay(this.selectedBundle.loadingGif, { bootstrap: true });
-      }
 
       if (!this.selectedBundle) {
         this.hideLoadingOverlay();

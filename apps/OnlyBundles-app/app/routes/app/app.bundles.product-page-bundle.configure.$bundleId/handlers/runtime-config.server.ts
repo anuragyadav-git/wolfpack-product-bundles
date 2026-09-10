@@ -438,7 +438,6 @@ export function buildSyncBundleConfiguration(
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
     steps: buildSyncOptimizedSteps(bundle.steps || []),
     pricing: buildSyncPricingConfig(bundle.pricing),
-    loadingGif: bundle.loadingGif ?? null,
     floatingBadgeEnabled: bundle.floatingBadgeEnabled ?? false,
     floatingBadgeText: bundle.floatingBadgeText ?? "",
     textOverrides: bundle.textOverrides ?? null,

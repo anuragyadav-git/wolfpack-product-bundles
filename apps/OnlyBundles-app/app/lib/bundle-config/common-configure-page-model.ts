@@ -45,7 +45,9 @@ const SUBSCRIPTIONS_ITEM: ConfigureSetupItem = {
 export function buildConfigureSetupItems(
   bundleType: ConfigureBundleType,
 ): ConfigureSetupItem[] {
-  const items = [...COMMON_SETUP_ITEMS];
+  const items = COMMON_SETUP_ITEMS.filter(
+    (item) => bundleType === "full_page" || item.id !== "images_gifs",
+  );
   items.push(SUBSCRIPTIONS_ITEM);
   items.push(SELECT_TEMPLATE_ITEM);
   return items.map((item) => ({

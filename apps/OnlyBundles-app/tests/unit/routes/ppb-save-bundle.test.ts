@@ -172,6 +172,7 @@ function makeStep(
     enabled: boolean;
     pageTitle: string;
     stepImage: string | null;
+    bannerImageUrl: string | null;
     multiLangData: Record<string, Record<string, string>>;
     StepProduct: any[];
     StepCategory: any[];
@@ -346,6 +347,32 @@ describe("PPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
 
     const updateArgs = getDb().bundle.update.mock.calls[0][0];
     expect(updateArgs.data).not.toHaveProperty("showCompareAtPrices");
+  });
+
+  it("ignores retired PPB loading and banner media while preserving Step Config imagery", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        loadingGif: "https://cdn.example.test/retired-loading.gif",
+        stepsData: JSON.stringify([
+          makeStep({
+            stepImage: "https://cdn.example.test/step-image.png",
+            bannerImageUrl: "https://cdn.example.test/retired-banner.png",
+          }),
+        ]),
+      }),
+    );
+
+    const updateArgs = getDb().bundle.update.mock.calls[0][0];
+    expect(updateArgs.data).not.toHaveProperty("loadingGif");
+    expect(updateArgs.data.steps.create[0]).not.toHaveProperty(
+      "bannerImageUrl",
+    );
+    expect(updateArgs.data.steps.create[0].timelineIconUrl).toBe(
+      "https://cdn.example.test/step-image.png",
+    );
   });
 
   it("persists a normalized enabled subscription config and activates the initial-order role", async () => {

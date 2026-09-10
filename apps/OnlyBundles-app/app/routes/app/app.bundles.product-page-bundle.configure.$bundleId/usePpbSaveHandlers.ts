@@ -19,13 +19,13 @@ import type { usePpbCategoryHandlers } from "./usePpbCategoryHandlers";
 type BaseDependencies = Pick<ReturnType<typeof usePpbBaseConfigureState>,
   | "allowQuantityChanges" | "bundle" | "bundleProduct" | "cartRedirectToCheckout"
   | "checkAppEmbedStatusBeforePreview" | "conditionsState" | "discardSpecificLinkOfferChanges"
-  | "fetcher" | "formState" | "hookHandleDiscard" | "loadingGif" | "offerDeliveryState"
+  | "fetcher" | "formState" | "hookHandleDiscard" | "offerDeliveryState"
   | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
-  | "originalLoadingGifRef" | "originalSdkModeRef" | "originalShowProductPricesRef"
+  | "originalSdkModeRef" | "originalShowProductPricesRef"
   | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
   | "originalTextOverridesRef" | "pricingState" | "ruleMessages" | "sdkMode"
   | "selectedCollections" | "setActiveSection" | "setAllowQuantityChanges"
-  | "setCartRedirectToCheckout" | "setLoadingGif" | "setOperationAlert" | "setSdkMode"
+  | "setCartRedirectToCheckout" | "setOperationAlert" | "setSdkMode"
   | "setShowProductPrices" | "setSubscriptionConfigState" | "setTextOverrides"
   | "setTextOverridesByLocale" | "showProductPrices" | "stepsState" | "subscriptionConfig"
   | "textOverrides" | "textOverridesByLocale"
@@ -304,7 +304,6 @@ export function usePpbSaveHandlers({
         JSON.stringify(base.conditionsState.stepConditions),
       );
       formData.append("bundleProduct", JSON.stringify(base.bundleProduct));
-      formData.append("loadingGif", base.loadingGif ?? "");
       formData.append("showProductPrices", String(base.showProductPrices));
       formData.append(
         "cartRedirectToCheckout",
@@ -524,7 +523,6 @@ export function usePpbSaveHandlers({
 
   const handleDiscard = useCallback(() => {
     base.hookHandleDiscard();
-    base.setLoadingGif(base.originalLoadingGifRef.current);
     base.setShowProductPrices(base.originalShowProductPricesRef.current);
     base.setCartRedirectToCheckout(
       base.originalCartRedirectToCheckoutRef.current,

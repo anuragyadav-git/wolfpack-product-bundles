@@ -75,8 +75,8 @@ const FULL_PAGE_AREAS = ["navigation", "categories", "product-card", "product-sl
 const PRODUCT_PAGE_AREAS = ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"] as const;
 const SLOT_AREAS = ["bundle-header", "product-slots", "cart-summary"] as const;
 const FULL_PAGE_SCENARIOS = ["default", "loading", "validation", "upsell"] as const;
-const PRODUCT_PAGE_SCENARIOS = ["default", "validation"] as const;
-const SLOT_SCENARIOS = ["default", "product-picker", "validation"] as const;
+const PRODUCT_PAGE_SCENARIOS = ["default", "loading", "validation"] as const;
+const SLOT_SCENARIOS = ["default", "product-picker", "loading", "validation"] as const;
 
 export function getDesignPreviewContextKind(
   templateKey: TemplateKey,
@@ -291,8 +291,8 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "Image Fit": productTarget("product images"),
   "stylePresets.images.slotIconUrl": areaTarget("product-slots", ["empty slot icon"], { templates: ALL_TEMPLATES }),
   "stylePresets.images.slotIconFit": areaTarget("product-slots", ["empty slot icon presentation"], { templates: ALL_TEMPLATES }),
-  "generalSettings.loadingGifUrl": scenarioTarget("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
-  "generalSettings.loadingBgColor": scenarioTarget("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
+  "generalSettings.loadingGifUrl": scenarioTarget("loading", ["loading animation"], { templates: ALL_TEMPLATES }),
+  "generalSettings.loadingBgColor": scenarioTarget("loading", ["loading screen background"], { templates: ALL_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepCompletionColor": areaTarget("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationCheckColor": areaTarget("navigation", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepTextColor": areaTarget("navigation", ["step labels"], { templates: ALL_FPB_TEMPLATES }),

@@ -8,6 +8,7 @@ import { buildSettingsDesignRuntime } from "../lib/settings-design-runtime";
 import { isShopBrandColors } from "../lib/shop-brand-colors";
 import { prisma } from "../db.server";
 import { resolveStorefrontProxyRoot } from "../config/storefront-proxy-routes";
+import { resolveBundleLoadingScreenSettings } from "../lib/bundle-loading-screen";
 
 export const PPB_STOREFRONT_TOKEN_TITLE = "Wolfpack PPB Storefront Runtime";
 export const PPB_JSON_LIMIT_BYTES = 128 * 1024;
@@ -98,6 +99,7 @@ export function buildPpbStorefrontRuntime(input: {
     storefrontProxyRoot: resolveStorefrontProxyRoot({
       configuredRoot: input.storefrontProxyRoot,
     }),
+    loadingScreen: resolveBundleLoadingScreenSettings(input.generalSettings),
     controls,
     languages,
   };

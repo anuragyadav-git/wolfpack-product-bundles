@@ -68,6 +68,7 @@ describe("Settings Design contextual preview focus", () => {
     expect(getSupportedDesignPreviewScenarios("vertical-slots")).toEqual([
       "default",
       "product-picker",
+      "loading",
       "validation",
     ]);
   });
@@ -101,7 +102,11 @@ describe("Settings Design contextual preview focus", () => {
     expect(getDesignFieldsForPreviewContext(fields, "standard", {
       kind: "scenario",
       value: "loading",
-    }).map((field) => field.label)).toEqual(["FPB Loading GIF", "Loading Screen Background Color"]);
+    }).map((field) => field.label)).toEqual(["Loading GIF", "Loading Screen Background Color"]);
+    expect(getDesignFieldsForPreviewContext(fields, "product-grid", {
+      kind: "scenario",
+      value: "loading",
+    }).map((field) => field.label)).toEqual(["Loading GIF", "Loading Screen Background Color"]);
   });
 
   it("gives every template at least one editable area and Default state", () => {

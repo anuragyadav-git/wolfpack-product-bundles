@@ -92,8 +92,6 @@ export async function handleSaveBundle(
       );
     }
 
-    const loadingGifRaw = formData.get("loadingGif") as string;
-    const loadingGif = loadingGifRaw || null;
     const showProductPrices = formData.get("showProductPrices") !== "false";
     const cartRedirectToCheckout =
       formData.get("cartRedirectToCheckout") === "true";
@@ -438,7 +436,6 @@ export async function handleSaveBundle(
           existingBundle?.shopifyProductHandle ||
           null,
         templateName: templateName,
-        loadingGif: loadingGif,
         showProductPrices,
         cartRedirectToCheckout,
         allowQuantityChanges,
@@ -509,7 +506,6 @@ export async function handleSaveBundle(
                 conditionValue2: parseConditionValue(secondCondition?.value),
                 filters: Array.isArray(step.filters) ? step.filters : null,
                 imageUrl: step.imageUrl ?? null,
-                bannerImageUrl: step.bannerImageUrl ?? null,
                 timelineIconUrl: step.stepImage ?? null,
                 // Create StepProduct records for selected products
                 StepProduct: {

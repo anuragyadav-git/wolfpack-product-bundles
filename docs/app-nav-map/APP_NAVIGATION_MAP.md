@@ -267,8 +267,8 @@ Primary action:
 - The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the gutterless preview stage and its selectors sit beside one contextual inspector. On desktop, a vertically centered notch with a Polaris chevron straddles the preview/inspector boundary, remains centered in the visible sidebar edge while scrolling, and collapses the inspector so the width-driven storefront canvas grows without clearing unsaved settings or preview context. Canvas fitting is applied once per browser frame without React resize state or scale transitions. The canvas shows a centered Polaris spinner card and remains visually withheld until the isolated preview frame sends its trusted `READY` event. Mobile selection preserves the full 390 x 844 storefront viewport inside a decorative iPhone body whose chrome sits outside the iframe. At phone Admin widths the notch is hidden and a Preview / Customize segmented control remains the authoritative one-pane-at-a-time navigation.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Edit area control exposes only persistent regions owned by the selected template: Bundle header, Navigation, Categories, Product cards, Product slots, and Cart / summary. Selecting an area returns the separate Preview state control to Default, scrolls the production region into view, and identifies it with a persistent outline and localized `Editing` label.
-- The separate Preview state control exposes only applicable transient states: Default, Product picker, Loading, Validation, and Upsell. Product picker is limited to PPB slot templates, Loading to FPB templates, and state dismissal/default restores the previously selected edit area.
-- Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or upload a GIF through one native Polaris drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
+- The separate Preview state control exposes only applicable transient states: Default, Product picker, Loading, Validation, and Upsell. Product picker is limited to PPB slot templates, Loading is available to all FPB and PPB templates, and state dismissal/default restores the previously selected edit area.
+- Images & GIFs owns the store-level FPB/PPB loading screen: merchants can retain the default spinner or upload a GIF through one native Polaris drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. Per-bundle loading animation controls are not exposed.
 - Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
 - Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale and center within the Admin panel. The isolated same-origin frame composes a neutral store header and FPB page or PPB product-detail context around the production widget. Product picker, Loading, Validation, and Upsell invoke the production renderer's corresponding state.
 - The contextual inspector follows the selected edit area or non-default preview state. Editing a shared field preserves the current area instead of jumping to another region; the inspector heading names the active context.
@@ -611,11 +611,10 @@ activation result fails closed and closes the reserved preview tab.
 ```
 PPB Configure Page
 ├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
-├── Sidebar Nav (7 sections — shared configure hierarchy)
+├── Sidebar Nav (6 sections — PPB configure hierarchy)
 │   ├── [📝] Step Setup              → step_setup section
 │   ├── Discount & Pricing           → discount_pricing section
 │   ├── [👁] Bundle Visibility       → bundle_visibility section  [Pending badge when widget disabled]
-│   ├── Images & GIFs                 → images_gifs section
 │   ├── [✏] Bundle Settings         → bundle_settings section
 │   ├── Subscriptions                → subscriptions section
 │   └── [📦] Select Template        → select_template section
@@ -623,7 +622,7 @@ PPB Configure Page
 ├── Step Setup
 │   ├── Bundle product picker (Shopify resource picker)
 │   ├── Accordion step cards (DnD reorder)
-│   │   ├── Step name, min/max qty
+│   │   ├── Step name, min/max qty, and canonical Step Config image
 │   │   ├── Multi Language actions for step and category copy
 │   │   ├── Products / Collections pickers
 │   │   ├── Per-category grouped variant style: Dropdown / Pills / Color swatches / Image swatches
@@ -687,10 +686,6 @@ PPB Configure Page
 │       ├── Product or collection resource picker for the active target
 │       ├── Add browsed product to bundle
 │       └── Place Block → product-template selector → `bundle-product-page-embed` Theme Editor deep link
-│
-├── Images & GIFs
-│   ├── Per-step banner image shown above the step products → native drop zone → Shopify Files
-│   └── Per-bundle loading GIF with the existing default-spinner preview → native drop zone → Shopify Files
 │
 ├── Bundle Settings
 │   ├── PPB compare-at prices are product-driven; no per-bundle visibility control

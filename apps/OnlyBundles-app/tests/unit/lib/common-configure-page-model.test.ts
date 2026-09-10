@@ -32,7 +32,6 @@ describe("common configure page model", () => {
       "step_setup",
       "discount_pricing",
       "bundle_visibility",
-      "images_gifs",
       "bundle_settings",
       "subscriptions",
       "select_template",
@@ -55,16 +54,18 @@ describe("common configure page model", () => {
     ).toBe("settings");
   });
 
-  it.each(["full_page", "product_page"] as const)(
-    "uses the Polaris image icon for the %s per-bundle media editor",
-    (bundleType) => {
-      expect(
-        buildConfigureSetupItems(bundleType).find(
-          (item) => item.id === "images_gifs",
-        )?.iconType,
-      ).toBe("image");
-    },
-  );
+  it("keeps the Polaris image icon only for the FPB per-bundle media editor", () => {
+    expect(
+      buildConfigureSetupItems("full_page").find(
+        (item) => item.id === "images_gifs",
+      )?.iconType,
+    ).toBe("image");
+    expect(
+      buildConfigureSetupItems("product_page").find(
+        (item) => item.id === "images_gifs",
+      ),
+    ).toBeUndefined();
+  });
 
   it("keeps Bundle Embed as a PPB-only visibility child", () => {
     expect(buildBundleVisibilityChildItems("full_page")).toEqual([

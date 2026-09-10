@@ -66,7 +66,7 @@ describe("DesignSettingsView live preview", () => {
     );
 
     expect(view).toContain('<s-select label="Image Fit" name="Image Fit" value="Cover" disabled="true">');
-    expect(view).toContain("FPB Loading GIF");
+    expect(view).toContain("Loading GIF");
     expect(view).toContain("Loading Screen Background Color");
   });
 
@@ -200,7 +200,7 @@ describe("DesignSettingsView live preview", () => {
     );
 
     expect(view).toContain('aria-label="Live bundle preview"');
-    expect(view).not.toContain("FPB Loading GIF");
+    expect(view).not.toContain("Loading GIF");
     expect(view).not.toContain("Loading Screen Background Color");
     expect(view).toContain('<s-option value="loading">');
   });

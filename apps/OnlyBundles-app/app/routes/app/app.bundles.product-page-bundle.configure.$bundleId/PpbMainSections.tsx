@@ -28,11 +28,6 @@ const PpbBundleEmbedSection = lazy(() =>
     default: module.PpbBundleEmbedSection,
   }))
 );
-const PpbImagesGifsSection = lazy(() =>
-  import("./PpbImagesGifsSection").then((module) => ({
-    default: module.PpbImagesGifsSection,
-  }))
-);
 const PpbBundleSettingsSection = lazy(() =>
   import("./PpbBundleSettingsSection").then((module) => ({
     default: module.PpbBundleSettingsSection,
@@ -316,17 +311,6 @@ export function PpbMainSections({ flow }: { flow: PpbConfigureFlow }) {
             setBundleEmbedTitle={flow.setBundleEmbedTitle}
             shopLocales={flow.shopLocales}
             validationErrors={flow.validationErrors}
-          />
-        ) : null}
-        {flow.activeSection === "images_gifs" ? (
-          <PpbImagesGifsSection
-            activeAssetTabIndex={flow.activeAssetTabIndex}
-            activeSection={flow.activeSection}
-            loadingGif={flow.loadingGif}
-            markAsDirty={flow.markAsDirty}
-            setActiveAssetTabIndex={flow.setActiveAssetTabIndex}
-            setLoadingGif={flow.setLoadingGif}
-            stepsState={flow.stepsState}
           />
         ) : null}
         {deferredSection === "bundle_settings" ? (

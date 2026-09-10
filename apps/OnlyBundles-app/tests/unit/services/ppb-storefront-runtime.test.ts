@@ -69,6 +69,24 @@ describe("PPB Shopify-hosted storefront runtime", () => {
     expect(JSON.stringify(runtime)).not.toContain("serverUrl");
   });
 
+  it("projects the shared Settings Design loading screen", () => {
+    const runtime = buildPpbStorefrontRuntime({
+      storefrontAccessToken: "public-token",
+      storefrontProxyRoot: "/apps/product-bundles-sit",
+      generalSettings: {
+        loadingScreen: {
+          gifUrl: "https://cdn.shopify.com/loading.gif",
+          backgroundColor: "#123456",
+        },
+      },
+    });
+
+    expect(runtime.loadingScreen).toEqual({
+      gifUrl: "https://cdn.shopify.com/loading.gif",
+      backgroundColor: "#123456",
+    });
+  });
+
   it("projects the saved PPB out-of-stock button copy into each locale snapshot", () => {
     const settingsLanguage = buildSettingsLanguageRuntime({
       languageMode: "MULTIPLE",

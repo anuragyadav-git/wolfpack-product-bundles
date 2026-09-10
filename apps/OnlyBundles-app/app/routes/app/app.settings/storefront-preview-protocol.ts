@@ -8,6 +8,7 @@ import type {
   DesignPreviewScenario,
   DesignPreviewViewport,
 } from "./design-preview-contract";
+import type { BundleLoadingScreenSettings } from "../../../lib/bundle-loading-screen";
 
 export const PREVIEW_PROTOCOL_VERSION = 2 as const;
 
@@ -52,13 +53,14 @@ export type StorefrontPreviewInitializePayload = {
   areaLabel: string;
   scenario: DesignPreviewScenario;
   designCss: string;
+  loadingScreen: BundleLoadingScreenSettings;
   locale: string;
   currency: string;
 };
 
 export type StorefrontPreviewCommand =
   | { version: 2; type: "INITIALIZE"; payload: StorefrontPreviewInitializePayload }
-  | { version: 2; type: "UPDATE_DESIGN"; payload: { designCss: string } }
+  | { version: 2; type: "UPDATE_DESIGN"; payload: { designCss: string; loadingScreen: BundleLoadingScreenSettings } }
   | { version: 2; type: "SET_TEMPLATE"; payload: { bundleType: BundleContractType; templateKey: TemplateKey } }
   | { version: 2; type: "SET_VIEWPORT"; payload: { viewport: DesignPreviewViewport } }
   | { version: 2; type: "SET_AREA"; payload: { area: DesignPreviewArea; areaLabel: string } }
@@ -82,6 +84,12 @@ function hasProtocolEnvelope(value: unknown): value is Record<string, unknown> {
     && isRecord(value.payload);
 }
 
+function hasLoadingScreen(value: unknown): value is BundleLoadingScreenSettings {
+  return isRecord(value)
+    && (value.gifUrl === null || typeof value.gifUrl === "string")
+    && typeof value.backgroundColor === "string";
+}
+
 export function isStorefrontPreviewCommand(value: unknown): value is StorefrontPreviewCommand {
   if (!hasProtocolEnvelope(value)) return false;
   const payload = value.payload as Record<string, unknown>;
@@ -97,10 +105,13 @@ export function isStorefrontPreviewCommand(value: unknown): value is StorefrontP
       && SCENARIOS.has(payload.scenario as DesignPreviewScenario)
       && getSupportedDesignPreviewScenarios(payload.templateKey as TemplateKey).includes(payload.scenario as DesignPreviewScenario)
       && typeof payload.designCss === "string"
+      && hasLoadingScreen(payload.loadingScreen)
       && typeof payload.locale === "string"
       && typeof payload.currency === "string";
   }
-  if (value.type === "UPDATE_DESIGN") return typeof payload.designCss === "string";
+  if (value.type === "UPDATE_DESIGN") {
+    return typeof payload.designCss === "string" && hasLoadingScreen(payload.loadingScreen);
+  }
   if (value.type === "SET_TEMPLATE") {
     return BUNDLE_TYPES.has(payload.bundleType as BundleContractType)
       && TEMPLATE_KEYS.has(payload.templateKey as TemplateKey)

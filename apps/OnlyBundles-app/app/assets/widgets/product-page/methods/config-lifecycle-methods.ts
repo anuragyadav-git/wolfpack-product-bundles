@@ -235,6 +235,7 @@ parseConfiguration() {
     expandProductCardOnHover,
     controlsSettings,
     storefrontRuntime,
+    loadingScreen: storefrontRuntime?.loadingScreen ?? null,
     languageSettings,
     languageData: languageSettings?.activeLanguageData || null,
     ppbCustomTextSettings: languageSettings?.ppbCustomTextSettings || null,

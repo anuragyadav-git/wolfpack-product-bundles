@@ -33,7 +33,6 @@ export interface BundleData {
   bundleType: string;
   status: BundleStatus;
   templateName?: string;
-  loadingGif?: string | null;
   personalizationData?: unknown;
   steps: BundleStep[];
   pricing?: BundlePricing;
