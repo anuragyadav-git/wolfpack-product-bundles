@@ -5,7 +5,7 @@ title: Shopify Native Remediation Dead Code Test Spec
 type: test-spec
 status: active
 summary: Defines remediation for root routing, retired template and Page scaffolding, internal webhook guards, and the dead bundle diagnostic route.
-last_audited: 2026-09-08
+last_audited: 2026-09-06
 owners:
   - engineering
 domains:
@@ -13,10 +13,12 @@ domains:
 systems:
   - remix
   - prisma
+  - storefront-widgets
 source_paths:
   - app/routes/root/_index/route.tsx
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route.tsx
   - app/routes/app/app.dashboard/handlers/handlers.server.ts
+  - app/assets/widgets/shared/bundle-data-manager.ts
   - prisma/schema.prisma
 related_docs:
   - internal docs/Architecture/Bundle Field Ownership.md
@@ -72,6 +74,13 @@ Remove no-op and retired compatibility paths while retaining the current app-pro
 | 1 | Unreferenced bundle-report endpoint | Route and Vite route-chunk configuration | Endpoint and special chunk handling are absent | It read retired JSON membership, miscounted relations, and exposed server stack traces |
 | 2 | Unreferenced all-bundles endpoint | Route and navigation map | Endpoint and map entry are absent | FPB uses the tenant-scoped single-bundle fallback; PPB uses Shopify-hosted snapshots |
 
+### Storefront Bundle Selection
+
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Live bundle selection | Current bundle payload and storefront context | `selectBundle` returns the matching canonical bundle or `null` | Existing behavior suite remains the contract |
+| 2 | Unused selector utilities | Deployable widget source | Helpers with no runtime caller are absent | Do not ship a second unused bundle-query API inside the widget |
+
 ## Acceptance Criteria
 
 - [x] Root redirects directly to `/app` and preserves the original query string.
@@ -80,5 +89,6 @@ Remove no-op and retired compatibility paths while retaining the current app-pro
 - [x] The unused manual internal-secret guard and its stale tests are removed.
 - [x] The unreferenced bundle-report diagnostic route and its Vite exceptions are removed.
 - [x] The parallel all-bundles app-proxy endpoint and its navigation entry are removed.
+- [x] Uncalled `BundleDataManager` query and filtering helpers are removed while live selection behavior remains green.
 - [x] A forward-only migration drops the four Page columns and obsolete handle index.
 - [x] Focused tests, Prisma validation, typecheck, ESLint, and diff checks pass.

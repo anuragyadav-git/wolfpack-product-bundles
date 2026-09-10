@@ -11,39 +11,6 @@
 import { BUNDLE_WIDGET } from './constants.js';
 
 export class BundleDataManager {
-  static validateBundleData(bundles: any[]) {
-    if (!Array.isArray(bundles) || bundles.length === 0) {
-      throw new Error('No bundles available');
-    }
-
-    const required: any[] = ['id', 'name', 'status', 'bundleType', 'steps'];
-    bundles.forEach((bundle, index) => {
-      required.forEach(field => {
-        if (!bundle[field]) {
-          throw new Error(`Bundle ${index} missing required field: ${field}`);
-        }
-      });
-
-      // Validate bundle type
-      if (
-        bundle.bundleType !== BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE &&
-        bundle.bundleType !== BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE
-      ) {
-        throw new Error(
-          `Bundle ${bundle.id} has invalid bundleType: "${bundle.bundleType}". ` +
-          `Expected "${BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE}" or "${BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE}".`
-        );
-      }
-
-      // Validate steps
-      if (!Array.isArray(bundle.steps) || bundle.steps.length === 0) {
-        throw new Error(`Bundle ${bundle.id} has no steps`);
-      }
-    });
-
-    return bundles;
-  }
-
   static validateSingleBundle(bundle: any) {
     if (!bundle || typeof bundle !== 'object') {
       return false;
@@ -61,11 +28,6 @@ export class BundleDataManager {
     }
 
     return true;
-  }
-
-  static filterActiveBundles(bundles: any[]) {
-    // BundleStatus enum: draft | active | archived — 'published' is not a valid status
-    return bundles.filter((bundle: any)  => bundle.status === 'active');
   }
 
   static _normalizeId(value: any) {
@@ -204,29 +166,6 @@ export class BundleDataManager {
     const currentCollectionSet = this._buildCurrentCollectionIdentifierSet(config.currentProductCollections || []);
 
     return [...collectionTargetSet].some((value) => currentCollectionSet.has(value));
-  }
-
-  static getProductPageBundles(bundles: any[]) {
-    return bundles.filter((bundle: any)  =>
-      bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE
-    );
-  }
-
-  static getFullPageBundles(bundles: any[]) {
-    return bundles.filter((bundle: any)  =>
-      bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE
-    );
-  }
-
-  static getBundleById(bundles: any[], bundleId: any) {
-    return bundles.find((bundle: any)  => bundle.id === bundleId);
-  }
-
-  static getContainerBundle(bundles: any[], productId: any) {
-    return bundles.find((bundle: any)  =>
-      bundle.containerProductId &&
-      bundle.containerProductId.toString() === productId?.toString()
-    );
   }
 
   static selectBundle(bundlesData: any, config: any) {
