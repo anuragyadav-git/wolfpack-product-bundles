@@ -46,12 +46,24 @@ export function DashboardTopCards({
               </s-stack>
             </div>
             <div className={dashboardStyles.supportCta}>
-              <s-button
-                variant="primary"
+              <s-clickable
+                inlineSize="100%"
+                background="strong"
+                borderRadius="base"
+                padding="small"
+                accessibilityLabel={t("dashboard.support.cta")}
                 onClick={handleDirectChat}
               >
-                {t("dashboard.support.cta")}
-              </s-button>
+                <s-stack
+                  direction="inline"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <s-text type="strong" color="base">
+                    {t("dashboard.support.cta")}
+                  </s-text>
+                </s-stack>
+              </s-clickable>
             </div>
           </div>
         </div>
@@ -86,19 +98,27 @@ export function DashboardTopCards({
             </s-stack>
           </s-stack>
           <div className={dashboardStyles.supportIssuesCta}>
-            <s-button
-              icon="chat"
+            <s-clickable
+              inlineSize="100%"
+              border="base"
+              borderRadius="base"
+              padding="small"
               accessibilityLabel={t("dashboard.supportIssues.cta")}
               onClick={handleDirectChat}
             >
-              {t("dashboard.supportIssues.cta")}
-            </s-button>
-            <span
-              className={dashboardStyles.supportIssuesExternalIcon}
-              aria-hidden="true"
-            >
-              <s-icon type="external" color="subdued" />
-            </span>
+              <s-stack
+                direction="inline"
+                alignItems="center"
+                justifyContent="space-between"
+                gap="small"
+              >
+                <s-stack direction="inline" alignItems="center" gap="small">
+                  <s-icon type="chat" />
+                  <s-text>{t("dashboard.supportIssues.cta")}</s-text>
+                </s-stack>
+                <s-icon type="external" color="subdued" />
+              </s-stack>
+            </s-clickable>
           </div>
         </div>
       </div>

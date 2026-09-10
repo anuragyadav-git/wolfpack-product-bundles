@@ -232,7 +232,6 @@
   align-self: start;
 }
 
-.supportCta s-button[variant="primary"],
 .dashboardActions s-button[variant="primary"] {
   --s-button-background: linear-gradient(180deg, #4b4b4e 0%, #2f2f31 100%);
 }
@@ -265,15 +264,6 @@
   position: relative;
   width: 100%;
   margin-top: auto;
-}
-
-.supportIssuesExternalIcon {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  display: flex;
-  transform: translateY(-50%);
-  pointer-events: none;
 }
 
 .bundlesPanel {

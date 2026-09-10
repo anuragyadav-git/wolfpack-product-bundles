@@ -5,7 +5,7 @@ title: Admin Full Width Clickable Actions
 type: test-spec
 status: active
 summary: Verifies that full-width Admin activation rows use Polaris clickable while compact commands remain Polaris buttons.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -19,6 +19,7 @@ source_paths:
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/FpbAddonTierRules.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/FreeGiftAddonTierEditor.tsx
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbFreeGiftAddonsSection.tsx
+  - app/routes/app/app.dashboard/DashboardTopCards.tsx
 related_docs:
   - internal docs/Architecture/Admin Configure Page.md
 tags:
@@ -49,6 +50,7 @@ Keep row-sized Admin actions native and accessible without stretching a compact
 | 3 | Add an FPB add-on tier | Existing tier list | The full-width `s-clickable` appends one default tier and activates it | No CSS-stretched button |
 | 4 | Add a PPB add-on tier | Active gifting step | The full-width `s-clickable` updates only that step and marks the route dirty | Same interaction contract as before |
 | 5 | Select a bundle builder type | Product-page or full-page bundle card | The card-wide `s-clickable` invokes the selection owner exactly once | No nested button owns the same action |
+| 6 | Open support chat from either Dashboard support card | Chat with Parth or Talk to a support expert | Each full-width `s-clickable` invokes the existing direct-chat owner once | Neither action contains a nested button |
 
 ## Acceptance Criteria
 
@@ -58,6 +60,9 @@ Keep row-sized Admin actions native and accessible without stretching a compact
 - [x] Focused tests, typecheck, modified-file ESLint, build, Knip, diff check,
   Graphify, and desktop Agent-store Chrome QA pass.
 - [x] Agent-store Chrome QA passes at an actual 390×844 window.
+- [x] Both Dashboard support actions fill their available row and retain one
+  accessible activation owner in desktop and minimum-width real-window
+  Agent-store QA.
 
 ## Verification Notes
 
@@ -66,3 +71,7 @@ Keep row-sized Admin actions native and accessible without stretching a compact
 - Direct Chrome DevTools QA at an actual 390×844 window passed after a
   cache-bypassing hard reload. The shared Edit Product action remains one focus
   target and the FPB media editor has no horizontal overflow.
+- Dashboard support actions passed after a cache-bypassing reload at desktop
+  width and Chrome's minimum actual 500×844 window. Chrome clamped the requested
+  390-pixel window to 500 pixels, so no viewport emulation was used. Both actions
+  filled their card rows, and Talk to a support expert opened the Crisp dialog.
