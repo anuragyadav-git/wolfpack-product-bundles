@@ -10,10 +10,10 @@ import {
 } from "../../services/checkout-bundle-offers.server";
 import {
   generateCartTransformRuntimeTokenSecret,
-  normalizeProductVariantGid,
   signRuntimeCartToken,
   verifyRuntimeCartToken,
 } from "../../services/cart-transform-runtime-token.server";
+import { normalizeProductVariantGid } from "../../lib/shopify-product-gid";
 
 function shopDomainFromDestination(destination: unknown) {
   if (typeof destination !== "string") return null;

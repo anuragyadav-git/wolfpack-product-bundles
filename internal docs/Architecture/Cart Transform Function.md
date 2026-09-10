@@ -5,7 +5,7 @@ title: Cart Transform Function
 type: architecture
 status: authoritative
 summary: Runtime-token-verified Shopify Cart Transform and Discount Function architecture, build ownership, and fail-closed pricing contract.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -22,6 +22,7 @@ source_paths:
   - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.rs
   - app/services/cart-transform-service.server.ts
   - app/services/cart-transform-runtime-token.server.ts
+  - app/lib/shopify-product-gid.ts
   - app/routes/api/api.cart-transform-runtime-token.tsx
   - app/services/ppb-static-authorization.server.ts
 related_docs:
@@ -68,6 +69,11 @@ token, then applies bundle pricing through an automatic discount node with
 `recurringCycleLimit=1`.
 
 The v1 request body is mandatory, so every v1 caller must use `POST`.
+
+Shopify ProductVariant identifier normalization is owned by the dependency-neutral
+`app/lib/shopify-product-gid.ts` boundary. Cart Transform token validation and
+checkout-offer serialization import that owner directly; checkout offers do not
+depend on the token-signing service or its complete payload type.
 The Remix resource route also exports a `GET` loader that returns controlled
 `405 Method Not Allowed` JSON with `Allow: POST, OPTIONS`; without that loader,
 an accidental or stale GET exposes Remix's missing-loader stack instead of the

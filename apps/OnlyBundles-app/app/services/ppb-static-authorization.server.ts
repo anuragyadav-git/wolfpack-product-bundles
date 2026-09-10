@@ -4,7 +4,7 @@ import {
   buildPublicBundleSubscriptionConfig,
   type BundleSubscriptionConfigV1,
 } from "../lib/bundle-subscriptions";
-import { normalizeProductVariantGid } from "./cart-transform-runtime-token.server";
+import { normalizeProductVariantGid } from "../lib/shopify-product-gid";
 import {
   buildOfferCountryTargetingRule,
   encodeOfferCountryTargetingRule,

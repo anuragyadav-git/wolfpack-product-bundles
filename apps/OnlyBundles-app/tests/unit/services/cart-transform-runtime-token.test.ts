@@ -1,7 +1,6 @@
 import {
   buildRuntimeTokenPayload,
   generateCartTransformRuntimeTokenSecret,
-  normalizeProductVariantGid,
   signRuntimeCartToken,
   type RuntimeTokenPayload,
   validateRuntimeTokenSelection,
@@ -128,13 +127,6 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
 }
 
 describe("cart transform runtime token service", () => {
-  it("normalizes Shopify variant IDs into ProductVariant GIDs", () => {
-    expect(normalizeProductVariantGid("101")).toBe("gid://shopify/ProductVariant/101");
-    expect(normalizeProductVariantGid(202)).toBe("gid://shopify/ProductVariant/202");
-    expect(normalizeProductVariantGid("gid://shopify/ProductVariant/303")).toBe("gid://shopify/ProductVariant/303");
-    expect(normalizeProductVariantGid("gid://shopify/Product/404")).toBeNull();
-  });
-
   it("signs and verifies the exact base64url payload string", () => {
     const payload = {
       version: 1,
