@@ -24,6 +24,8 @@ source_paths:
   - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
   - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts
   - apps/OnlyBundles-app/app/services/bundles/metafield-sync/operations/bundle-product.server.ts
+  - apps/OnlyBundles-app/app/services/fpb-upsells.server.ts
+  - apps/OnlyBundles-app/app/services/ppb-bundle-embed.server.ts
   - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/layout-shell-methods.ts
 related_docs:
   - Shopify Integration/Metafields.md
@@ -130,8 +132,9 @@ price adjustment, bundle UI config, and component pricing. The retired
 
 `StepProduct` is the only persisted product-membership owner during
 serialization, configure validation, checkout-offer construction,
-runtime-token authorization, and subscription discovery. A missing relation is
-not recovered from the legacy `BundleStep.products` JSON field. Public runtime
+runtime-token authorization, subscription discovery, FPB upsell discovery,
+and PPB embed selection. A missing relation is not recovered from the legacy
+`BundleStep.products` JSON field. Public runtime
 DTOs then expose the normalized membership as `steps[].products`; the FPB
 widget does not read a `StepProduct` input or synthesize product JSON from it.
 Current FPB and PPB category selections are form input, not a second
@@ -139,7 +142,9 @@ persistence owner: both save boundaries materialize the final union of direct
 and category product selections into deduplicated `StepProduct` rows.
 `StepCategory.products` is retained only to preserve merchant-authored
 grouping. Strict readers never recover missing membership from either step or
-category JSON.
+category JSON. Those storefront selectors also read category collections only
+from `StepCategory[].collections`; they do not accept a `categories` relation
+alias or category-level `collectionsSelectedData` compatibility field.
 Pricing's
 derived operator vocabulary is exactly `gte`, `gt`, `lte`, `lt`, and `eq`;
 step-condition operators retain their separate long-form contract.

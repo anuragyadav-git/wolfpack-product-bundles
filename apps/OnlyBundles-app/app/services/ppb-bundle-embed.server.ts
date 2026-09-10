@@ -48,8 +48,8 @@ function enabledStepMatches(
   if (step.enabled === false || step.isFreeGift === true) return false;
   const productSources = [step.StepProduct];
   const collectionSources = [step.collections];
-  for (const category of resources(step.StepCategory ?? step.categories) as AnyRecord[]) {
-    collectionSources.push(category.collections ?? category.collectionsSelectedData);
+  for (const category of resources(step.StepCategory) as AnyRecord[]) {
+    collectionSources.push(category.collections);
   }
   return productSources.some((source) =>
     resources(source).some((item) => overlaps(resourceIdentifiers(item, "product"), productIds)),

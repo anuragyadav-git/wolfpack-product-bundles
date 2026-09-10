@@ -5,7 +5,7 @@ title: Compatibility Residue Removal Test Spec
 type: test-spec
 status: active
 summary: Defines canonical-only behavior after verified legacy data and mutation paths are retired.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -24,6 +24,8 @@ source_paths:
   - app/lib/bundle-config/category-runtime.ts
   - app/services/bundles/metafield-sync/utils/price-adjustment.ts
   - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
+  - app/services/fpb-upsells.server.ts
+  - app/services/ppb-bundle-embed.server.ts
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
@@ -75,6 +77,7 @@ Remove ongoing compatibility work after the configured database reports no legac
 | 13 | Category membership save | A current FPB or PPB step selects a product through one or more categories | Save writes one deduplicated canonical `StepProduct` row for the selected product while preserving category grouping data | Strict readers continue to ignore persistence JSON |
 | 14 | Admin component and analytics imports | Billing and Analytics routes consume their feature owners | Consumers import the exact component, helper, or type owner | Pure compatibility re-export barrels are removed |
 | 15 | Shopify Page residue migration | Existing schema contains the four retired Page columns and handle index | Forward migration drops the index and all four columns | Dashboard deletion performs no Shopify Page mutation |
+| 16 | Storefront upsell membership | Persisted FPB or PPB step contains only retired `categories` or category `collectionsSelectedData` aliases | Upsell and embed selection ignore the aliases while canonical `StepCategory[].collections` remains eligible | `StepCategory` is the sole category-relation owner |
 
 ## Acceptance Criteria
 
@@ -91,4 +94,5 @@ Remove ongoing compatibility work after the configured database reports no legac
 - [x] Analytics helpers do not invent order identities for malformed rows.
 - [x] Billing and Analytics consumers use direct owner imports; their pure re-export barrels are removed.
 - [x] The Prisma schema and dashboard deletion flow have no Shopify Page-field owner or cleanup branch.
+- [x] FPB upsell and PPB embed selectors ignore retired persisted category aliases.
 - [x] Focused tests, typecheck, ESLint, widget builds, and diff checks pass.

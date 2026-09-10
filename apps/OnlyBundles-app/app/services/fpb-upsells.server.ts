@@ -33,8 +33,8 @@ function stepContainsContext(step: AnyRecord, productId: string, collectionIds: 
   if (step.enabled === false || step.isFreeGift === true) return false;
   const productSources = [step.StepProduct];
   const collectionSources = [step.collections];
-  for (const category of resources(step.StepCategory ?? step.categories) as AnyRecord[]) {
-    collectionSources.push(category.collections ?? category.collectionsSelectedData);
+  for (const category of resources(step.StepCategory) as AnyRecord[]) {
+    collectionSources.push(category.collections);
   }
   if (productSources.some((source) => resources(source).some((item) => resourceId(item, "product") === productId))) return true;
   return collectionSources.some((source) => resources(source).some((item) => collectionIds.has(resourceId(item, "collection"))));
