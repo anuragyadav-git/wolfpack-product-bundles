@@ -24,6 +24,12 @@ describe("CurrencyManager", () => {
     expect(CurrencyManager.formatMoney(1234, "CAD", "en-CA")).toBe("$12.34");
   });
 
+  it("supports compact native symbols without changing the default formatter", () => {
+    expect(CurrencyManager.formatMoney(1234, "USD", "en-CA")).toBe("US$12.34");
+    expect(CurrencyManager.formatMoney(1234, "USD", "en-CA", "narrowSymbol"))
+      .toBe("$12.34");
+  });
+
   it("does not convert a Shopify-presented product amount again", () => {
     expect(CurrencyManager.convertAndFormat(1350, CurrencyManager.getCurrencyInfo(), "en-CA"))
       .toBe("$13.50");

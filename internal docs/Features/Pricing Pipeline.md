@@ -57,6 +57,10 @@ Display formatting, including product and compare-at prices rendered by the
 shared product card, uses `Intl.NumberFormat` with the preserved presentment
 currency code. Do not restore a manual symbol table, theme money-format parser,
 `Shopify.currency.convert` fallback, or a hardcoded display-currency fallback.
+The shared FPB and PPB product card requests `currencyDisplay: narrowSymbol`
+so compact card prices use native symbols such as `$`, `€`, `£`, `¥`, and `₹`.
+The default formatter remains unchanged for bundle summaries, pricing messages,
+cart totals, and checkout totals where explicit currency context can be required.
 The FPB product-details modal follows the same owner directly rather than
 calling an optional widget formatter. Amount-based add-on eligibility is also
 merchant-authored base-currency data: convert its threshold once before

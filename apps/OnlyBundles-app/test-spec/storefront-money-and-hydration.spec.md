@@ -5,7 +5,7 @@ title: Storefront Money and Hydration Test Spec
 type: test-spec
 status: active
 summary: Verifies Shopify MoneyV2 presentment currency, one-time authored-value conversion, canonical pricing operators, and fail-closed PPB hydration.
-last_audited: 2026-09-08
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -65,11 +65,13 @@ Use Shopify's market-contextual product money as authoritative while converting 
 | 17 | FPB product-details modal money | Hydrated variant cents and currency code without an injected widget formatter | Modal price uses `Intl.NumberFormat` with the hydrated currency | No hardcoded dollar fallback |
 | 18 | FPB add-on amount eligibility | Base-currency threshold, presentment subtotal, and Shopify presentment rate | Threshold converts once before qualification and the remaining amount is locale-aware money | Do not compare presentment product totals to unconverted authored values |
 | 19 | FPB product normalization | Storefront API product variants with price and compare-at currency codes | Grouped cards, individual cards, and modal variants retain both codes | Do not discard `MoneyV2.currencyCode` after transport mapping |
+| 20 | Compact shared product-card money | Dollar-family presentment currency with a locale that normally disambiguates the symbol | Every FPB and PPB shared product card uses the locale-aware narrow symbol, while non-card money keeps its existing explicit formatter | Use `Intl.NumberFormat`; no symbol table or string replacement |
 
 ## Acceptance Criteria
 
 - [x] Product DTOs preserve `currencyCode`.
 - [x] Money rendering, including shared product cards and pricing feedback, uses `Intl.NumberFormat`.
+- [x] Shared FPB and PPB product cards use compact native currency symbols without changing bundle summaries, pricing messages, cart totals, or checkout totals.
 - [x] SDK display pricing has no hardcoded currency fallback.
 - [x] PPB never falls back to embedded price or inventory snapshots, including direct default products.
 - [x] Pricing uses only the five canonical operator values.

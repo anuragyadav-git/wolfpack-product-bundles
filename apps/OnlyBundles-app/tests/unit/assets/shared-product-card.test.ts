@@ -51,6 +51,30 @@ describe('shared product card data helpers', () => {
     expect(card.textContent).toContain(formatter.format(15.99));
     expect(card.textContent).not.toContain('$');
   });
+
+  it.each(['USD', 'CAD', 'AUD', 'NZD', 'SGD'])(
+    'uses the compact native symbol for %s product-card prices',
+    (currencyCode) => {
+      const document = new JSDOM('<!doctype html>').window.document;
+      const card = createSharedProductCardElement(
+        {
+          selectionId: `variant-${currencyCode}`,
+          title: `${currencyCode} product`,
+          price: 1299,
+          currencyCode,
+          compareAtPrice: 1599,
+          compareAtCurrencyCode: currencyCode,
+        },
+        0,
+        { display: { code: currencyCode }, locale: 'en-GB' },
+        { document },
+      );
+
+      expect(card.textContent).toContain('$12.99');
+      expect(card.textContent).toContain('$15.99');
+      expect(card.textContent).not.toMatch(/(?:US|CA|A|NZ|SG)\$/);
+    },
+  );
 });
 
 describe('shared product card magnifier', () => {

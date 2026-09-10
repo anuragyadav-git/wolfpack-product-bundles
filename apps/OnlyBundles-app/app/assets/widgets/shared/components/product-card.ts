@@ -390,6 +390,7 @@ function formatPrice(value: string|null, currencyCode: unknown, currencyInfo: an
     Number(value),
     String(currencyCode || currencyInfo?.display?.code || ''),
     currencyInfo?.locale,
+    'narrowSymbol',
   );
 }
 

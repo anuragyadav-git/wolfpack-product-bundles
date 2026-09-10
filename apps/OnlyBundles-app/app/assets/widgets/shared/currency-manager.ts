@@ -42,12 +42,18 @@ export class CurrencyManager {
     return { code, rate };
   }
 
-  static formatMoney(amount: number, currencyCode: string, locale?: string) {
+  static formatMoney(
+    amount: number,
+    currencyCode: string,
+    locale?: string,
+    currencyDisplay: 'symbol' | 'narrowSymbol' = 'symbol',
+  ) {
     const numericAmount = Number(amount);
     const code = String(currencyCode || this.detectCustomerCurrency().code).toUpperCase();
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: code,
+      currencyDisplay,
     }).format((Number.isFinite(numericAmount) ? numericAmount : 0) / 100);
   }
 
