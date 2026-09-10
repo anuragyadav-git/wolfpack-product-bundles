@@ -52,7 +52,7 @@ modules that actually own each contract.
 
 ## Acceptance Criteria
 
-- [ ] Focused owner behavior tests pass.
-- [ ] Typecheck and modified-file ESLint pass.
-- [ ] Knip reports no unused or unresolved module boundary.
-- [ ] Graphify and `git diff --check` pass.
+- [x] Focused owner behavior tests pass.
+- [x] Typecheck and modified-file ESLint pass.
+- [x] Knip reports no unused or unresolved module boundary.
+- [x] Graphify and `git diff --check` pass.
