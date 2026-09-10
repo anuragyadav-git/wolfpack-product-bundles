@@ -14,6 +14,8 @@ systems:
   - storefront-api
   - cart-transform
 source_paths:
+  - apps/OnlyBundles-app/app/storefront/app-embed.ts
+  - apps/OnlyBundles-app/app/storefront/ppb-bundle-embed.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared/currency-manager.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared/components/product-card.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared/pricing-calculator.ts
@@ -64,6 +66,13 @@ The direct Product Page block and the owned app-embed marker expose Shopify
 Liquid's base and customer currency codes. A non-base market additionally
 requires Shopify's positive presentment rate. Missing base currency, customer
 currency, or rate fails closed instead of assuming USD or rate `1`.
+
+The app-embed entry point must publish the owned marker's currency context
+synchronously before it creates an FPB container or loads either bundle
+runtime. PPB product and page-builder paths reuse that same context handoff.
+Publishing it only from PPB initialization leaves direct FPB app-proxy pages
+without Shopify base-currency context and correctly triggers the fail-closed
+surface even though every extension asset and product request succeeded.
 
 Bundle totals require the canonical bundle `steps` array. A missing or malformed
 steps contract fails closed instead of falling back to a step-agnostic subtotal;

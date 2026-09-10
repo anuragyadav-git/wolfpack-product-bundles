@@ -8,6 +8,7 @@ import {
   reconcileFpbUpsellPlacement,
 } from './fpb-product-page-upsell.js';
 import {
+  exposeStorefrontContext,
   initializePpbBundleEmbed,
   reconcilePpbBundleEmbedPlacement,
 } from './ppb-bundle-embed.js';
@@ -32,6 +33,7 @@ if (embed?.dataset.storefrontProxyRoot) {
   setStorefrontProxyRoot(embed.dataset.storefrontProxyRoot);
 }
 if (embed) {
+  exposeStorefrontContext(embed);
   (window as Window & { currentCountryCode?: string }).currentCountryCode =
     embed.dataset.countryCode ?? '';
 }

@@ -2,7 +2,7 @@ import {
   getFpbStylesheetUrls,
   type FpbDesignPreset,
 } from "./fpb-template-assets.js";
-import { exposePpbStorefrontContext } from "./ppb-bundle-embed.js";
+import { exposeStorefrontContext } from "./ppb-bundle-embed.js";
 
 type PageBuilderEmbedMode =
   | "eligible-product"
@@ -260,7 +260,7 @@ function mountDirectEmbed(
 
   if (payload.bundleType === "product_page") {
     ensureStylesheet(appEmbed.dataset.productPageStyleUrl, "wpbPageBuilderPpbStyle");
-    exposePpbStorefrontContext(appEmbed);
+    exposeStorefrontContext(appEmbed);
     exposePpbTemplateAssets(appEmbed);
     loadProductPageRuntime(appEmbed);
     return;

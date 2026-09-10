@@ -135,7 +135,7 @@ function normalizeCurrencyCode(value: unknown) {
   return /^[A-Z]{3}$/.test(code) ? code : null;
 }
 
-export function exposePpbStorefrontContext(embed: Pick<HTMLElement, "dataset">) {
+export function exposeStorefrontContext(embed: Pick<HTMLElement, "dataset">) {
   const runtime = window as Window & Record<string, any>;
   const rawRuntime = embed.dataset.ppbStorefrontRuntime;
   if (rawRuntime) {
@@ -162,7 +162,7 @@ export function exposePpbStorefrontContext(embed: Pick<HTMLElement, "dataset">) 
 
 export function exposePpbProductContext(embed: HTMLElement, context: EmbedContext) {
   const runtime = window as Window & Record<string, any>;
-  exposePpbStorefrontContext(embed);
+  exposeStorefrontContext(embed);
   runtime.currentProductId = context.productId;
   runtime.currentProductGid = `gid://shopify/Product/${context.productId}`;
   runtime.currentProductHandle = context.productHandle;
