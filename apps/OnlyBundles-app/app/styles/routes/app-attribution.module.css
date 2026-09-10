@@ -194,7 +194,7 @@
   gap: 16px;
 }
 
-@container analytics-page (max-width: 720px) {
+@media (max-width: 720px) {
   .statsGrid {
     grid-template-columns: 1fr;
   }
@@ -530,7 +530,7 @@
   white-space: nowrap;
 }
 
-@container analytics-page (max-width: 720px) {
+@media (max-width: 720px) {
   .dashboardShell {
     padding-inline: 16px;
   }
@@ -565,7 +565,7 @@
   }
 }
 
-@container analytics-page (max-width: 520px) {
+@media (max-width: 520px) {
   .dashboardShell {
     padding-inline: 16px;
   }
@@ -580,7 +580,7 @@
 
 }
 
-@container analytics-page (max-width: 359px) {
+@media (max-width: 359px) {
   .analyticsActions {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -74,10 +74,7 @@ export default function AttributionRouteShell() {
         breadcrumbLabel="Dashboard"
         onBack={handleBack}
       />
-      <s-query-container
-        containerName="analytics-page"
-        {...({ className: styles.analyticsQueryContainer } as any)}
-      >
+      <div className={styles.analyticsPageGrid}>
         <div className={styles.criticalHeroShell}>
           <AdminPageBackTitle
             title={translateAdmin("nav.analytics")}
@@ -107,7 +104,7 @@ export default function AttributionRouteShell() {
             )}
           </Await>
         </Suspense>
-      </s-query-container>
+      </div>
     </>
   );
 }

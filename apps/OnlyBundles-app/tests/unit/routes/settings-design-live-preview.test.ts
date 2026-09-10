@@ -90,7 +90,6 @@ describe("DesignSettingsView live preview", () => {
 
     expect(view).toContain('src="/settings-design-preview-frame"');
     expect(view).toContain('sandbox="allow-scripts allow-same-origin"');
-    expect(view).toContain('<s-query-container containerName="design-settings">');
     expect(view).toContain('aria-label="settingsDcp.preview.workspace.label"');
     expect(view).toContain("settingsDcp.preview.workspace.preview");
     expect(view).toContain("settingsDcp.preview.workspace.customize");

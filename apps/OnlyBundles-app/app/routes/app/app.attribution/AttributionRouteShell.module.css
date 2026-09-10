@@ -55,12 +55,11 @@
     sans-serif;
 }
 
-.analyticsQueryContainer {
+.analyticsPageGrid {
   display: grid;
   width: 100%;
   min-width: 0;
   grid-template-columns: minmax(0, 1fr);
-  container-name: analytics-page;
 }
 
 .pixelStatusBoundary {
@@ -74,14 +73,14 @@
   line-height: 1.5;
 }
 
-@container analytics-page (max-width: 720px) {
+@media (max-width: 720px) {
   .criticalHeroCard {
     padding: 24px;
   }
 
 }
 
-@container analytics-page (max-width: 520px) {
+@media (max-width: 520px) {
   .dashboardShell {
     padding-inline: 16px;
   }

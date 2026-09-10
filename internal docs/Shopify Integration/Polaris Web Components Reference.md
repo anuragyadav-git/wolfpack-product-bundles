@@ -5,7 +5,7 @@ title: Polaris App Home Web Components Reference
 type: reference
 status: authoritative
 summary: Canonical source for Polaris web component usage in the Wolfpack admin UI, with the Shopify App Home web components documentation as the source of truth.
-last_audited: 2026-09-08
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -15,6 +15,11 @@ systems:
 source_paths:
   - internal docs/Shopify Integration/Polaris Web Components Reference.md
   - app/routes/app/app.attribution/AttributionDateRangeControls.tsx
+  - app/routes/app/app.attribution/AttributionDashboard.tsx
+  - app/routes/app/app.attribution/OfferAnalyticsCard.tsx
+  - app/routes/app/app.attribution/AttributionRouteShell.tsx
+  - app/routes/app/app.settings/SettingsLandingShell.tsx
+  - app/routes/app/_shared/bundle-configure/CommonConfigureShell.tsx
 related_docs:
   - internal docs/Architecture/Diagrams/Admin UI Frontend Architecture.md
   - internal docs/Architecture/Admin Configure Page.md
@@ -51,6 +56,52 @@ When implementing or auditing admin-facing UI in this repo, treat that documenta
   outside-click listeners for these overlays. Interactive filter or preset
   pills use `s-clickable-chip`; route state continues to own only the selected
   value and resulting navigation or mutation.
+
+## Layout and structure ownership
+
+Use the smallest documented Polaris layout primitive that owns the required
+behavior:
+
+| Component | Wolfpack ownership rule |
+|---|---|
+| `s-page` | Own the ordinary route page structure and width. Use `inlineSize="large"` for data-rich pages; retain a custom workspace shell only when the route has a demonstrated structure that `s-page` cannot express. |
+| `s-section` | Group semantically related content. Give it a heading when the group needs a navigable section boundary; do not nest sections more than two or three levels. |
+| `s-box` | Apply native padding, border, background, size, or accessibility properties to one container. It is not a substitute for a multi-item layout. |
+| `s-stack` | Arrange a simple one-dimensional block or inline group with native gap, alignment, wrapping, and distribution. |
+| `s-grid` and `s-grid-item` | Own rows, columns, matrices, and documented responsive tracks. Use `s-grid-item` only when a child needs explicit placement or spanning. |
+| `s-query-container` | Establish component-width responsive containment. Give the container a descriptive name when multiple containers can coexist, and put responsive Polaris prop values on descendants. Do not add a query container when page viewport media queries are sufficient. |
+| `s-divider` | Provide visual separation without inventing a semantic section. Use `s-section` instead when content forms a meaningful group. |
+
+Polaris layout components receive only properties documented by Shopify. Do not
+push a CSS-module `className` through an `as any` spread. When app-specific CSS
+is still required, a normal HTML wrapper owns that isolated gap and the nested
+Polaris component retains its native responsibility. In particular,
+`s-query-container` is the sole owner of its `containerName`; do not duplicate
+that name with a CSS `container-name` declaration on a wrapper. Shopify's
+responsive `@container` syntax belongs on supported Polaris component props;
+do not write app CSS `@container` rules against `s-query-container`. Use an
+ordinary viewport media query when custom CSS must respond to the embedded app
+width.
+
+The shared configure canvas is a documented complex-grid exception. On desktop,
+its sticky sidebar and supplemental placement content form one rail beside the
+main editor; on mobile, the supplemental content moves after the editor while
+the navigation stays before it. A single `s-grid` cannot preserve both grouping
+and responsive reading order without duplicating content, so
+`CommonConfigureShell` keeps its scoped HTML grid/flex wrappers inside one named
+`s-query-container`. Its fields, actions, feedback, and ordinary content groups
+continue to use Polaris components.
+
+Official layout references:
+
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/page`
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/section`
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/box`
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/stack`
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/grid`
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/grid-item`
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/query-container`
+- `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/divider`
 
 ## Alert decision rules
 

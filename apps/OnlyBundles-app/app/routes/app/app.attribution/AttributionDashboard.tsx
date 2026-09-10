@@ -449,10 +449,12 @@ function AttributionDashboardContent({
     <div className={styles.dashboardShell}>
       <div className={styles.dashboardStack}>
         {accessMode === "ADVANCED" && (
-          <OfferAnalyticsCard
-            model={offerAnalytics}
-            onSelectionChange={onOfferSelectionChange}
-          />
+          <s-query-container containerName="analytics-offers">
+            <OfferAnalyticsCard
+              model={offerAnalytics}
+              onSelectionChange={onOfferSelectionChange}
+            />
+          </s-query-container>
         )}
         {/* Date range selector + export and backfill actions */}
         {accessMode === "SUMMARY" && (
