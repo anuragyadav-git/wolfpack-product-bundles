@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -29,24 +29,21 @@ keywords:
 
 # Shopify Admin API
 
-## Rate Limits (corrected)
+## Rate limits
 
-> ⚠️ `docs/API_ENDPOINTS.md` states "40 requests/second" — **this is incorrect**.
+Shopify applies calculated query-cost limits to the GraphQL Admin API for each
+app-and-store combination. Restore rates depend on the merchant's plan: the
+current published rates are 100 points/second for Standard, 200 for Advanced,
+1,000 for Plus, and 2,000 for Commerce Components. Shopify can temporarily
+reduce limits to protect platform stability.
 
-### Actual Rate Limit: Leaky Bucket
+Do not encode one plan's bucket or restore rate as an application constant.
+Inspect the GraphQL response `extensions.cost.throttleStatus`, retry throttled
+work with bounded backoff, and use bulk operations for large asynchronous data
+sets. Deduplicate identifiers, batch compatible reads, request at most 250
+connection nodes per page, and follow cursors only for overflowing resources.
 
-- **Capacity**: 1,000 points
-- **Leak rate**: 50 points/second (restores 50 points/sec back to 1,000)
-- **Cost per query**: varies by operation complexity (1–1,000 points)
-  - Simple queries: ~1–10 points
-  - `inventoryAdjustQuantities` bulk mutation: higher cost
-  - Exact cost returned in `X-GraphQL-Cost-Include-Fields` response header
-
-### Practical Guidance
-- Burst up to 1,000 points, then throttle
-- Use `X-Shopify-Shop-Api-Call-Limit` header to monitor remaining
-- Deduplicate identifiers, batch compatible reads, request at most 250 connection nodes per page, and follow cursors only for overflowing resources
-- REST API: separate rate limit, roughly 2 req/sec per store on Basic plans
+Source: [Shopify API limits](https://shopify.dev/docs/api/usage/limits).
 
 ---
 
