@@ -1,5 +1,6 @@
 import React from "react";
 
+import { BundleTypeSelectionCard } from "../../../app/routes/app/app.bundles.create/BundleTypeSelectionCard";
 import { FpbAddonTierRules } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/FpbAddonTierRules";
 import { FpbAddonTierEditor } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/FreeGiftAddonTierEditor";
 import {
@@ -36,7 +37,43 @@ function findClickable(
   return null;
 }
 
+function findActionOwners(node: React.ReactNode): React.ReactElement[] {
+  if (!React.isValidElement(node)) return [];
+  const current = ["button", "s-button", "s-clickable"].includes(
+    String(node.type),
+  )
+    ? [node]
+    : [];
+  return [
+    ...current,
+    ...React.Children.toArray(node.props.children).flatMap((child) =>
+      findActionOwners(child),
+    ),
+  ];
+}
+
 describe("full-width Polaris clickable action ownership", () => {
+  it("delegates bundle-type card activation to one clickable owner", () => {
+    const onSelect = jest.fn();
+    const view = BundleTypeSelectionCard({
+      description: "Display this builder on an existing product page",
+      selected: false,
+      selectedLabel: "Selected",
+      selectLabel: "Select",
+      thumbnail: "product-page",
+      title: "Product page bundle builder",
+      onSelect,
+    });
+
+    expect(view.type).toBe("s-clickable");
+    const action = findClickable(view, "Product page bundle builder");
+    expect(action?.type).toBe("s-clickable");
+    expect(findActionOwners(view)).toHaveLength(1);
+    action!.props.onClick();
+
+    expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
   it("delegates Add Tier Rule to the FPB tier owner", () => {
     const onAdd = jest.fn();
     const view = FpbAddonTierRules({

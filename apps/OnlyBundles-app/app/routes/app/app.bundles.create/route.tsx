@@ -32,6 +32,7 @@ import {
   resolveSidekickAppBridge,
   type SidekickBundleDraft,
 } from "../../../lib/sidekick-create-bundle";
+import { BundleTypeSelectionCard } from "./BundleTypeSelectionCard";
 
 type SidekickAppBridge = {
   tools: {
@@ -365,87 +366,37 @@ export default function CreateBundleEntry() {
             {bundleTypeError && (
               <p className={styles.errorText}>{bundleTypeError}</p>
             )}
-            <div className={styles.bundleTypeGrid}>
-              <div
-                className={`${styles.bundleTypeCard} ${
-                  bundleType === BundleType.PRODUCT_PAGE
-                    ? styles.bundleTypeCardSelected
-                    : ""
-                }`}
-                onClick={() => handleSelectBundleType(BundleType.PRODUCT_PAGE)}
+            <s-query-container containerName="create-bundle-entry">
+              <s-grid
+                gap="base"
+                gridTemplateColumns="@container create-bundle-entry (inline-size > 600px) 1fr 1fr, 1fr"
               >
-                <div className={styles.bundleThumbnailWrap}>
-                  <span
-                    className={`${styles.bundleThumbnailImg} ${styles.productPageThumbnail}`}
-                    aria-hidden="true"
-                  />
-                </div>
-                <div className={styles.bundleCardBody}>
-                  <div className={styles.bundleCardText}>
-                    <strong>
-                      {t("createBundle.bundleType.productPage.title")}
-                    </strong>
-                    <p>
-                      {t("createBundle.bundleType.productPage.description")}
-                    </p>
-                  </div>
-                  <s-button
-                    variant={
-                      bundleType === BundleType.PRODUCT_PAGE
-                        ? "primary"
-                        : "secondary"
-                    }
-                    onClick={(e: Event) => {
-                      e.stopPropagation();
-                      handleSelectBundleType(BundleType.PRODUCT_PAGE);
-                    }}
-                  >
-                    {bundleType === BundleType.PRODUCT_PAGE
-                      ? t("createBundle.actions.selected")
-                      : t("createBundle.actions.select")}
-                  </s-button>
-                </div>
-              </div>
-
-              <div
-                className={`${styles.bundleTypeCard} ${
-                  bundleType === BundleType.FULL_PAGE
-                    ? styles.bundleTypeCardSelected
-                    : ""
-                }`}
-                onClick={() => handleSelectBundleType(BundleType.FULL_PAGE)}
-              >
-                <div className={styles.bundleThumbnailWrap}>
-                  <span
-                    className={`${styles.bundleThumbnailImg} ${styles.fullPageThumbnail}`}
-                    aria-hidden="true"
-                  />
-                </div>
-                <div className={styles.bundleCardBody}>
-                  <div className={styles.bundleCardText}>
-                    <strong>
-                      {t("createBundle.bundleType.fullPage.title")}
-                    </strong>
-                    <p>{t("createBundle.bundleType.fullPage.description")}</p>
-                  </div>
-                  <s-button
-                    variant={
-                      bundleType === BundleType.FULL_PAGE
-                        ? "primary"
-                        : "secondary"
-                    }
-                    onClick={(e: Event) => {
-                      e.stopPropagation();
-                      handleSelectBundleType(BundleType.FULL_PAGE);
-                    }}
-                  >
-                    {bundleType === BundleType.FULL_PAGE
-                      ? t("createBundle.actions.selected")
-                      : t("createBundle.actions.select")}
-                  </s-button>
-                </div>
-              </div>
-            </div>
+                <BundleTypeSelectionCard
+                  description={t(
+                    "createBundle.bundleType.productPage.description",
+                  )}
+                  selected={bundleType === BundleType.PRODUCT_PAGE}
+                  selectedLabel={t("createBundle.actions.selected")}
+                  selectLabel={t("createBundle.actions.select")}
+                  thumbnail="product-page"
+                  title={t("createBundle.bundleType.productPage.title")}
+                  onSelect={() =>
+                    handleSelectBundleType(BundleType.PRODUCT_PAGE)
+                  }
+                />
+                <BundleTypeSelectionCard
+                  description={t(
+                    "createBundle.bundleType.fullPage.description",
+                  )}
+                  selected={bundleType === BundleType.FULL_PAGE}
+                  selectedLabel={t("createBundle.actions.selected")}
+                  selectLabel={t("createBundle.actions.select")}
+                  thumbnail="full-page"
+                  title={t("createBundle.bundleType.fullPage.title")}
+                  onSelect={() => handleSelectBundleType(BundleType.FULL_PAGE)}
+                />
+              </s-grid>
+            </s-query-container>
           </div>
         </div>
 

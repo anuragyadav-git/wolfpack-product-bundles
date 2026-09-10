@@ -19,6 +19,7 @@ source_paths:
   - app/routes/app/app.attribution/OfferAnalyticsCard.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
   - app/routes/app/app.settings/SettingsLandingShell.tsx
+  - app/routes/app/app.bundles.create/BundleTypeSelectionCard.tsx
   - app/routes/app/_shared/bundle-configure/CommonConfigureShell.tsx
 related_docs:
   - internal docs/Architecture/Diagrams/Admin UI Frontend Architecture.md
@@ -49,6 +50,10 @@ When implementing or auditing admin-facing UI in this repo, treat that documenta
 ## Rules applied in Wolfpack Product Bundles
 
 - Prefer Polaris web components (`s-*`) for all Admin UI before custom HTML.
+- Give each interaction exactly one action owner. When an entire tile or row is
+  selectable, make the surface an `s-clickable` and keep its descendants
+  non-interactive. Do not nest an `s-button`, link, or second clickable inside
+  it. Use an `s-button` instead when only the compact command should activate.
 - Use component props from the official App Home reference as canonical for rendering behavior.
 - For status/feedback, treat `tone`, `color`, and `variant` values from the reference as authoritative and map them directly to components instead of inventing alternative visual tokens.
 - Use `commandFor` with `s-popover`, `s-menu`, and `s-modal` so Shopify owns
@@ -113,6 +118,15 @@ Official layout references:
 - Make informational banners dismissible. Prefer ordinary `s-box`, `s-paragraph`, spinner, or status content when the message is static guidance or a loading state.
 - Keep success and transient error toasts concise and merchant-safe. Success messages should remain three words or fewer.
 - Use success banners only when confirmation is delayed, must persist, or includes a next action.
+
+## Clickable tile rendering gotcha
+
+For image-backed clickable tiles, group the image and body under one Polaris
+layout child, such as an `s-stack`. Agent-store verification on 2026-09-10
+showed that supplying the image and body as direct sibling children caused the
+body content to disappear even though the clickable remained in the
+accessibility tree. The grouped structure rendered both content regions and
+retained one accessible action owner.
 
 Official UX guidance:
 
