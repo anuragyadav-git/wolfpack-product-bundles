@@ -49,29 +49,6 @@ export function FpbImagesGifsPanel({
     <>
       {activeSection === "images_gifs" && (
         <>
-          <div
-            style={{
-              padding: "var(--s-space-400)",
-              background: "var(--s-color-bg-surface-secondary, #f6f6f7)",
-              borderRadius: 8,
-            }}
-          >
-            <s-stack direction="inline" gap="small-100">
-              <s-icon type="upload" />
-              <s-stack direction="block">
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                  {translateAdmin(
-                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.mediaAssets"
-                  )}
-                </p>
-                <p style={{ margin: 0, fontSize: 12, color: "#6d7175" }}>
-                  {translateAdmin(
-                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.addVisualMediaToEnhanceTheBundleExperienceForShoppers"
-                  )}
-                </p>
-              </s-stack>
-            </s-stack>
-          </div>
           <s-section>
             <s-stack direction="block" gap="base">
               <s-stack direction="inline">

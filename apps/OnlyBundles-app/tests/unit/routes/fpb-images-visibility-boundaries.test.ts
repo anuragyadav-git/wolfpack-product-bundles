@@ -98,6 +98,10 @@ describe("FPB media feature boundary", () => {
       "https://cdn.shopify.com/mobile.jpg",
     );
     expect(markAsDirty).toHaveBeenCalledTimes(2);
+    expect(container.innerHTML).not.toContain("imagesgifspanel.mediaAssets");
+    expect(container.innerHTML).not.toContain(
+      "imagesgifspanel.addVisualMediaToEnhanceTheBundleExperienceForShoppers",
+    );
   });
 
   it("renders no media controls outside the media section", () => {

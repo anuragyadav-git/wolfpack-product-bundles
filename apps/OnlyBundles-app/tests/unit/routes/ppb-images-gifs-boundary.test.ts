@@ -36,7 +36,9 @@ describe("PPB Images and GIFs boundary", () => {
       } as unknown as PpbImagesGifsSectionProps["stepsState"],
     } satisfies PpbImagesGifsSectionProps;
 
-    renderToStaticMarkup(React.createElement(PpbImagesGifsSection, props));
+    const view = renderToStaticMarkup(
+      React.createElement(PpbImagesGifsSection, props),
+    );
 
     const bannerUpload = mockAssetUpload.mock.calls.find(
       ([pickerProps]) => pickerProps.value === "https://cdn.example.test/banner.png",
@@ -63,5 +65,9 @@ describe("PPB Images and GIFs boundary", () => {
     expect(markAsDirty).toHaveBeenCalledTimes(2);
     expect(loadingUpload.accept).toBe("image/gif");
     expect(loadingUpload.invalidTypeErrorMessage).toBeTruthy();
+    expect(view).not.toContain("Media Assets");
+    expect(view).not.toContain(
+      "Add visual media to enhance the bundle experience for shoppers.",
+    );
   });
 });

@@ -33,29 +33,6 @@ export function PpbImagesGifsSection({
   return (
     <div data-tour-target="ppb-design-settings">
           <s-stack direction="block" gap="base">
-            <div
-              style={{
-                padding: "var(--s-space-400)",
-                background: "#f6f6f7",
-                borderRadius: 8,
-              }}
-            >
-              <s-stack direction="inline" gap="small-100" alignItems="center">
-                <s-icon type="upload" />
-                <s-stack direction="block">
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-                    {translateAdmin(
-                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.mediaAssets"
-                    )}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 14, color: "#6d7175" }}>
-                    {translateAdmin(
-                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.addVisualMediaToEnhanceTheBundleExperienceForShoppers"
-                    )}
-                  </p>
-                </s-stack>
-              </s-stack>
-            </div>
             {stepsState.steps.length > 0 && (
               <s-section>
                 <s-stack direction="block" gap="base">
