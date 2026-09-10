@@ -1,8 +1,8 @@
 import { translateAdmin } from "~/i18n/config";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
-import type { AdminTaskAlert } from "../../../lib/admin-alert-feedback";
+import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import type {
   BundleContractType,
   TemplateKey,
@@ -59,6 +59,7 @@ export function DesignLivePreview({
     >
   ) => void;
 }) {
+  const shopify = useAppBridge();
   const { t, i18n } = useTranslation();
   const previewStageRef = useRef<HTMLDivElement>(null);
   const previewCanvasRef = useRef<HTMLDivElement>(null);
@@ -80,7 +81,6 @@ export function DesignLivePreview({
     };
   });
   const [isFrameReady, setIsFrameReady] = useState(false);
-  const [previewAlert, setPreviewAlert] = useState<AdminTaskAlert | null>(null);
   const availableTemplates = DESIGN_PREVIEW_TEMPLATES.filter(
     (template) => template.bundleType === previewState.bundleType
   );
@@ -158,23 +158,21 @@ export function DesignLivePreview({
       const message: unknown = event.data;
       if (!isStorefrontPreviewEvent(message)) return;
       if (message.type === "READY") {
-        setPreviewAlert(null);
         setIsFrameReady(true);
       } else if (message.type === "SCENARIO_CHANGED") {
         setPreviewState((current) =>
           setDesignPreviewScenario(current, message.payload.scenario)
         );
       } else if (message.type === "ERROR") {
-        setPreviewAlert({
-          id: "design-preview",
-          heading: t("common.alerts.previewUnavailable"),
-          message: t("settingsDcp.preview.storefront.errors.notReady"),
-        });
+        showAdminTransientErrorToast(
+          shopify,
+          t("settingsDcp.preview.storefront.errors.notReady"),
+        );
       }
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [t]);
+  }, [shopify, t]);
 
   useEffect(() => {
     if (!isFrameReady) return;
@@ -421,11 +419,6 @@ export function DesignLivePreview({
           </div>
         </div>
       </div>
-
-      <AdminTaskAlertBanner
-        alert={previewAlert}
-        onDismiss={() => setPreviewAlert(null)}
-      />
 
       <div
         ref={previewStageRef}

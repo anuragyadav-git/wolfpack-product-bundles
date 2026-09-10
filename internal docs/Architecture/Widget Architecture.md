@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, signed settings, Shopify-hosted CSS, market pricing, and fail-closed hydration architecture.
-last_audited: 2026-09-09
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -200,6 +200,18 @@ post-cart behavior, and external navigation are disabled; links, forms, and cart
 actions are also blocked at the frame boundary. Interactions otherwise use the
 production renderer. Product picker, Loading, Validation, and Upsell use their
 real modal, overlay, toast, and offer implementations.
+
+The frame must initialize the same explicit Shopify currency globals that its
+production controllers receive from Liquid: `shopCurrency`,
+`shopifyMultiCurrency.shopBaseCurrency`,
+`shopifyMultiCurrency.customerCurrency`,
+`__WOLFPACK_PRESENTMENT_CURRENCY__`, and `Shopify.currency`. The deterministic
+preview uses one requested currency with rate `1.0`; it must not rely on a
+storefront fallback. The controller subclass also retains and awaits the exact
+Promise started by the base constructor's virtual `init()` call. A derived
+class field cannot own that Promise because its initializer runs after
+`super()` and would erase the constructor-started value, exposing a partially
+initialized controller to later preview effects.
 
 The FPB Upsell preview uses a deterministic production-shaped block offer after
 the local product purchase form and delegates its markup to

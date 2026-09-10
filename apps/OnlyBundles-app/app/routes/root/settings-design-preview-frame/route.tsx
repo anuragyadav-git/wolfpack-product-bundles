@@ -89,9 +89,41 @@ const STYLESHEET_URLS: Record<StorefrontPreviewStylesheetId, string> = {
 };
 
 type PreviewController = Record<string, any>;
+type StorefrontPreviewWindow = {
+  Shopify?: {
+    shop?: string;
+    locale?: string;
+    country?: string;
+    designMode?: boolean;
+    currency?: { active: string; rate: string };
+    [key: string]: unknown;
+  };
+  shopCurrency?: string;
+  shopifyMultiCurrency?: {
+    shopBaseCurrency: string;
+    customerCurrency: string;
+  };
+  __WOLFPACK_PRESENTMENT_CURRENCY__?: string;
+};
 
 function postFrameEvent(event: StorefrontPreviewEvent) {
   window.parent.postMessage(event, window.location.origin);
+}
+
+export function configureStorefrontPreviewCurrencyContext(
+  previewWindow: StorefrontPreviewWindow,
+  currency: string,
+) {
+  previewWindow.Shopify = {
+    ...(previewWindow.Shopify ?? {}),
+    currency: { active: currency, rate: "1.0" },
+  };
+  previewWindow.shopCurrency = currency;
+  previewWindow.shopifyMultiCurrency = {
+    shopBaseCurrency: currency,
+    customerCurrency: currency,
+  };
+  previewWindow.__WOLFPACK_PRESENTMENT_CURRENCY__ = currency;
 }
 
 async function syncStylesheets(templateKey: TemplateKey) {
@@ -171,38 +203,36 @@ async function initializeController(controller: PreviewController, templateKey: 
   return controller;
 }
 
-async function createPreviewController(
+export async function createPreviewController(
   bundleType: StorefrontPreviewInitializePayload["bundleType"],
   widgetRoot: HTMLElement,
 ) {
   if (bundleType === "full_page") {
     const { BundleWidgetFullPage } = await import("../../../assets/bundle-widget-full-page");
+    let previewReady: Promise<PreviewController> | undefined;
     class SettingsPreviewFullPageWidget extends BundleWidgetFullPage {
-      __previewReady?: Promise<PreviewController>;
-
       override init() {
         const templateKey = this.container.getAttribute("data-preview-template") as TemplateKey;
-        this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
-        return this.__previewReady.then(() => undefined);
+        previewReady = initializeController(this as unknown as PreviewController, templateKey);
+        return previewReady.then(() => undefined);
       }
     }
     const controller = new SettingsPreviewFullPageWidget(widgetRoot);
-    await controller.__previewReady;
+    await previewReady;
     return controller as unknown as PreviewController;
   }
 
   const { BundleWidgetProductPage } = await import("../../../assets/bundle-widget-product-page");
+  let previewReady: Promise<PreviewController> | undefined;
   class SettingsPreviewProductPageWidget extends BundleWidgetProductPage {
-    __previewReady?: Promise<PreviewController>;
-
     override init() {
       const templateKey = this.container.getAttribute("data-preview-template") as TemplateKey;
-      this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
-      return this.__previewReady.then(() => undefined);
+      previewReady = initializeController(this as unknown as PreviewController, templateKey);
+      return previewReady.then(() => undefined);
     }
   }
   const controller = new SettingsPreviewProductPageWidget(widgetRoot);
-  await controller.__previewReady;
+  await previewReady;
   return controller as unknown as PreviewController;
 }
 
@@ -359,16 +389,17 @@ export default function SettingsDesignPreviewFrame() {
   }, []);
 
   useEffect(() => {
-    const previewWindow = window as any;
+    if (!state) return;
+    const previewWindow = window as unknown as StorefrontPreviewWindow;
+    configureStorefrontPreviewCurrencyContext(previewWindow, state.currency);
     previewWindow.Shopify = {
       ...(previewWindow.Shopify ?? {}),
       shop: "settings-design-preview.myshopify.com",
-      locale: state?.locale ?? "en",
+      locale: state.locale,
       country: "US",
-      currency: { active: state?.currency ?? "USD", rate: "1.0" },
       designMode: true,
     };
-  }, [state?.currency, state?.locale]);
+  }, [state]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
