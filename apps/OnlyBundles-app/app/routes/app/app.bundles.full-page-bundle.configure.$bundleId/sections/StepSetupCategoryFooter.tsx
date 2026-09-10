@@ -17,6 +17,9 @@ export function FpbStepCategoryFooter({
         <s-button
           variant="secondary"
           icon="plus"
+          accessibilityLabel={translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
+          )}
           onClick={onAddCategory}
         >
           {translateAdmin(

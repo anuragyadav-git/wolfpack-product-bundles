@@ -143,25 +143,25 @@ export function CommonBundleWidgetSection(
                     <s-choice-list
                       label={translateAdmin("adminAttributes.widgetType")}
                       labelAccessibilityVisibility="exclusive"
-                      name="sharedUpsellWidgetTypeBlock"
-                      values={displayMode === "block" ? ["block"] : []}
+                      name="sharedUpsellWidgetType"
+                      values={[displayMode]}
                       disabled={disabled || undefined}
-                      onChange={() => onDisplayModeChange("block")}
+                      onChange={(event) => {
+                        const nextMode = (
+                          event.currentTarget as HTMLElement & {
+                            values?: string[];
+                          }
+                        ).values?.[0];
+                        if (nextMode === "block" || nextMode === "button") {
+                          onDisplayModeChange(nextMode);
+                        }
+                      }}
                     >
                       <s-choice value="block">
                         {translateAdmin(
                           "adminExtracted.shared.bundleConfigure.commonbundlewidgetsection.offerUpsellBlock"
                         )}
                       </s-choice>
-                    </s-choice-list>
-                    <s-choice-list
-                      label={translateAdmin("adminAttributes.widgetType")}
-                      labelAccessibilityVisibility="exclusive"
-                      name="sharedUpsellWidgetTypeButton"
-                      values={displayMode === "button" ? ["button"] : []}
-                      disabled={disabled || undefined}
-                      onChange={() => onDisplayModeChange("button")}
-                    >
                       <s-choice value="button">
                         {translateAdmin(
                           "adminExtracted.shared.bundleConfigure.commonbundlewidgetsection.offerUpsellButton"
@@ -192,6 +192,9 @@ export function CommonBundleWidgetSection(
                 <s-button
                   variant="secondary"
                   icon={getConfigureActionIcon("translate")}
+                  accessibilityLabel={translateAdmin(
+                    "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                  )}
                   disabled={multiLanguageDisabled || undefined}
                   onClick={onOpenMultiLanguage}
                 >
@@ -353,6 +356,9 @@ export function CommonBundleWidgetSection(
             <s-button
               variant="secondary"
               icon={getConfigureActionIcon("place")}
+              accessibilityLabel={translateAdmin("adminDynamic.embedUpsell", {
+                placement: placementNoun,
+              })}
               disabled={disabled || undefined}
               onClick={onPlaceWidget}
             >
@@ -393,6 +399,7 @@ function ResourcePickerList({
       <s-button
         variant="secondary"
         icon={icon as any}
+        accessibilityLabel={buttonLabel}
         disabled={disabled || undefined}
         onClick={onOpen}
       >

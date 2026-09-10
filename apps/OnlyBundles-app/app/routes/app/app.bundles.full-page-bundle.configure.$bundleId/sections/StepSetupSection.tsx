@@ -107,7 +107,14 @@ export function StepSetupSection({
               <span className={styles.stepChipChevron}>›</span>
             </button>
           ))}
-          <s-button variant="primary" icon="plus" onClick={onAddStep}>
+          <s-button
+            variant="primary"
+            icon="plus"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
+            )}
+            onClick={onAddStep}
+          >
             {translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
             )}

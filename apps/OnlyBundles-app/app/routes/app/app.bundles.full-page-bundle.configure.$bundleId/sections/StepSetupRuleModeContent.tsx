@@ -23,9 +23,7 @@ export function FpbStepRuleModeContent({
       ruleId: string
     ) => void;
     removeStepConditionRule: (stepId: string, ruleId: string) => void;
-    setCategoryRulesOpen: Dispatch<
-      SetStateAction<Record<string, boolean>>
-    >;
+    setCategoryRulesOpen: Dispatch<SetStateAction<Record<string, boolean>>>;
     stepConditions: Record<
       string,
       Array<{
@@ -78,8 +76,7 @@ export function FpbStepRuleModeContent({
   const categoryRulesAvailable = deriveControlDependencies({
     categoryCount: stepCategories.length,
   }).categoryRulesVisible;
-  const hasStepRules =
-    (stepConditions[step.id] || []).length > 0;
+  const hasStepRules = (stepConditions[step.id] || []).length > 0;
   const hasCategoryRules = stepCategories.some(
     (category: any) => (category.conditions || []).length > 0
   );
@@ -119,26 +116,26 @@ export function FpbStepRuleModeContent({
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          gap: 20,
-          marginBottom: 12,
+      <s-choice-list
+        label={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+        )}
+        labelAccessibilityVisibility="exclusive"
+        name={`step-rule-mode-${step.id}`}
+        values={[activeRuleMode]}
+        onChange={(event) => {
+          const nextMode = (
+            event.currentTarget as HTMLElement & { values?: string[] }
+          ).values?.[0];
+          if (nextMode) handleRuleModeChange(nextMode);
         }}
       >
         {ruleModeOptions.map((opt) => (
-          <s-choice-list
-            key={opt.value}
-            label={`${opt.label} rule mode`}
-            labelAccessibilityVisibility="exclusive"
-            name={`step-rule-mode-${step.id}`}
-            values={activeRuleMode === opt.value ? [opt.value] : []}
-            onChange={() => handleRuleModeChange(opt.value)}
-          >
-            <s-choice value={opt.value}>{opt.label}</s-choice>
-          </s-choice-list>
+          <s-choice key={opt.value} value={opt.value}>
+            {opt.label}
+          </s-choice>
         ))}
-      </div>
+      </s-choice-list>
       {activeRuleMode === "category" ? (
         <div className={styles.categoryRulesList}>
           {stepCategories.map((cat: any, catIndex: number) => {
@@ -205,6 +202,9 @@ export function FpbStepRuleModeContent({
                                 variant="tertiary"
                                 tone="critical"
                                 icon="delete"
+                                accessibilityLabel={translateAdmin(
+                                  "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                                )}
                                 onClick={() =>
                                   removeCategoryConditionRule(
                                     step.id,
@@ -218,11 +218,7 @@ export function FpbStepRuleModeContent({
                                 )}
                               </s-button>
                             </div>
-                            <div
-                              className={
-                                styles.categoryRuleFields
-                              }
-                            >
+                            <div className={styles.categoryRuleFields}>
                               <s-select
                                 label={translateAdmin("dashboard.table.type")}
                                 labelAccessibilityVisibility="exclusive"
@@ -313,6 +309,9 @@ export function FpbStepRuleModeContent({
                       <s-button
                         variant="secondary"
                         icon="plus"
+                        accessibilityLabel={translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+                        )}
                         onClick={() =>
                           addCategoryConditionRule(step.id, catIndex)
                         }
@@ -357,6 +356,9 @@ export function FpbStepRuleModeContent({
                         variant="tertiary"
                         tone="critical"
                         icon="delete"
+                        accessibilityLabel={translateAdmin(
+                          "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                        )}
                         onClick={() =>
                           removeStepConditionRule(step.id, rule.id)
                         }
@@ -432,8 +434,7 @@ export function FpbStepRuleModeContent({
                         autocomplete="off"
                       />
                     </div>
-                    {(stepConditions[step.id] || []).length ===
-                      1 && (
+                    {(stepConditions[step.id] || []).length === 1 && (
                       <s-checkbox
                         label={translateAdmin(
                           "adminAttributes.autoNextWhenRuleIsMet"
@@ -464,6 +465,9 @@ export function FpbStepRuleModeContent({
             <s-button
               variant="secondary"
               icon="plus"
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+              )}
               disabled={
                 (stepConditions[step.id] || []).length >= 2 || undefined
               }

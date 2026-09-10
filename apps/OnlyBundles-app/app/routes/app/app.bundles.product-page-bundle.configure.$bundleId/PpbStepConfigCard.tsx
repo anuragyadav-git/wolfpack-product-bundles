@@ -82,6 +82,9 @@ export function PpbStepConfigCard({
         <div className={productPageBundleStyles.iconUploadButton}>
           <s-button
             icon="replace"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
+            )}
             onClick={() =>
               setShowIconPickerForStep((prev) =>
                 prev === step.id ? null : step.id

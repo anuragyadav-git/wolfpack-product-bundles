@@ -160,6 +160,7 @@ export function CommonBundleVisibilityOverview({
             <s-button
               variant="primary"
               icon="theme-edit"
+              accessibilityLabel={translateAdmin("common.actions.enableHere")}
               onClick={onEnableEmbed}
             >
               {translateAdmin("common.actions.enableHere")}
@@ -195,6 +196,9 @@ export function CommonBundleVisibilityOverview({
               <s-button
                 variant="secondary"
                 icon="duplicate"
+                accessibilityLabel={translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonbundlevisibilityoverview.copyLink"
+                )}
                 onClick={onCopyLink}
               >
                 {translateAdmin(
@@ -242,6 +246,7 @@ export function CommonBundleVisibilityOverview({
                   <s-button
                     variant={option.variant}
                     icon="arrow-right"
+                    accessibilityLabel={translateAdminCopy(option.actionLabel)}
                     onClick={option.onAction}
                   >
                     {translateAdminCopy(option.actionLabel)}

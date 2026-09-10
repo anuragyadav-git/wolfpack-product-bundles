@@ -17,7 +17,6 @@ export function PpbStepFlowCard({
   navigateToStep,
   stepsState,
 }: PpbStepFlowCardProps) {
-
   return (
     <div
       className={`${productPageBundleStyles.card} ${productPageBundleStyles.stepFlowCard}`}
@@ -79,6 +78,9 @@ export function PpbStepFlowCard({
         <s-button
           variant="primary"
           icon="plus"
+          accessibilityLabel={translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
+          )}
           onClick={handleAddNewStep}
         >
           {translateAdmin(

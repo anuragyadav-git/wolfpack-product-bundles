@@ -15,7 +15,7 @@ import {
 
 function findElements(
   node: React.ReactNode,
-  predicate: (element: React.ReactElement) => boolean,
+  predicate: (element: React.ReactElement) => boolean
 ): React.ReactElement[] {
   const matches: React.ReactElement[] = [];
   for (const child of React.Children.toArray(node)) {
@@ -40,8 +40,7 @@ describe("PPB rules boundaries", () => {
     const view = PpbStepRulesList(props);
     const addButton = findElements(
       view,
-      (element) =>
-        element.type === "s-button" && element.props.icon === "plus",
+      (element) => element.type === "s-button" && element.props.icon === "plus"
     )[0];
     addButton.props.onClick();
     expect(addConditionRule).toHaveBeenCalledWith("step-1");
@@ -65,7 +64,7 @@ describe("PPB rules boundaries", () => {
     const view = PpbCategoryRulesList(props);
     const disclosure = findElements(
       view,
-      (element) => element.type === "button",
+      (element) => element.type === "button"
     )[0];
     disclosure.props.onClick();
     const updater = setCategoryRulesOpen.mock.calls[0][0];
@@ -97,14 +96,12 @@ describe("PPB rules boundaries", () => {
     } as unknown as PpbRulesConfigurationCardProps;
 
     const view = PpbRulesConfigurationCard(props);
-    const choices = findElements(
+    const choiceLists = findElements(
       view,
-      (element) => element.type === "s-choice-list",
+      (element) => element.type === "s-choice-list"
     );
-    const stepMode = choices.find((choice) =>
-      String(choice.props.label).startsWith("Step rules"),
-    );
-    stepMode!.props.onChange();
+    expect(choiceLists).toHaveLength(1);
+    choiceLists[0].props.onChange({ currentTarget: { values: ["step"] } });
 
     expect(clearCategoryConditionRules).toHaveBeenCalledWith("step-1");
     expect(addConditionRule).toHaveBeenCalledWith("step-1");

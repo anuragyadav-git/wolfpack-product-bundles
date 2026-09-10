@@ -187,6 +187,15 @@ overlay; and controls projected into App Bridge title bars, save bars, or the
 maximum-size template modal. Those exceptions keep only their local interaction
 role and must not duplicate Shopify-owned dialog, focus, or form behavior.
 
+Mutually exclusive modes use one Shopify-owned `s-choice-list` per question,
+with every valid `s-choice` as a direct child and the current value supplied
+through the list's `values` property. FPB and PPB rule modes, widget
+presentation, progress presentation, and subscription purchase scope must not
+be split into independent one-item choice lists. Icon-bearing actions provide a
+localized `accessibilityLabel` even when their visible label is expected to
+render; this keeps their accessible name stable during Polaris custom-element
+registration and route transitions without adding a wrapper-owned click target.
+
 Step 1 is the required storefront entry step, so its enable switch remains on
 and cannot be changed. Later steps may be disabled without deleting their saved
 configuration. A disabled step keeps its enable switch interactive while its

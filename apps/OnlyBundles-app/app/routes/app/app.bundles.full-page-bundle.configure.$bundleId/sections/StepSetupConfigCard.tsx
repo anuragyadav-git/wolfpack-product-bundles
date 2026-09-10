@@ -65,6 +65,9 @@ export function FpbStepConfigCard({
           <div className={styles.iconUploadButton}>
             <s-button
               icon="replace"
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
+              )}
               onClick={onTogglePicker}
             >
               {translateAdmin(

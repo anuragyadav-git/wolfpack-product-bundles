@@ -10,14 +10,16 @@ import {
   type PpbBundleWidgetSectionProps,
 } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleWidgetSection";
 
-const mockWidgetSection = jest.fn<unknown, [Record<string, unknown>]>(() => null);
+const mockWidgetSection = jest.fn<unknown, [Record<string, unknown>]>(
+  () => null
+);
 
 jest.mock(
   "../../../app/routes/app/_shared/bundle-configure/CommonBundleWidgetSection",
   () => ({
     CommonBundleWidgetSection: (props: Record<string, unknown>) =>
       mockWidgetSection(props),
-  }),
+  })
 );
 
 const noop = jest.fn();
@@ -57,7 +59,7 @@ function widgetProps(): PpbBundleWidgetSectionProps {
 }
 
 function embedProps(
-  overrides: Partial<PpbBundleEmbedSectionProps> = {},
+  overrides: Partial<PpbBundleEmbedSectionProps> = {}
 ): PpbBundleEmbedSectionProps {
   return {
     activeSection: "bundle_embed",
@@ -93,7 +95,7 @@ function embedProps(
 
 function findElement(
   node: React.ReactNode,
-  predicate: (element: React.ReactElement) => boolean,
+  predicate: (element: React.ReactElement) => boolean
 ): React.ReactElement | null {
   for (const child of React.Children.toArray(node)) {
     if (!React.isValidElement(child)) continue;
@@ -109,7 +111,7 @@ describe("PPB widget and embed feature boundaries", () => {
 
   it("projects explicit widget values and owned callbacks", () => {
     renderToStaticMarkup(
-      React.createElement(PpbBundleWidgetSection, widgetProps()),
+      React.createElement(PpbBundleWidgetSection, widgetProps())
     );
 
     expect(mockWidgetSection).toHaveBeenCalledWith(
@@ -118,21 +120,22 @@ describe("PPB widget and embed feature boundaries", () => {
         enabled: false,
         title: "Bundle and save",
         imageUrl: "https://cdn.example.test/widget.png",
-      }),
+      })
     );
   });
 
   it("keeps embed settings inert while leaving placement available", () => {
     const view = renderToStaticMarkup(
-      React.createElement(PpbBundleEmbedSection, embedProps()),
+      React.createElement(PpbBundleEmbedSection, embedProps())
     );
 
     expect(view).toContain("Saved embed title");
     expect(view).toContain("Saved embed subtitle");
     expect(view).toContain("inert");
     expect(view).toMatch(/<s-button[^>]*>Place Block<\/s-button>/);
+    expect(view).toContain('accessibilityLabel="Place Block"');
     expect(view).not.toMatch(
-      /<s-button[^>]*disabled="true"[^>]*>Place Block<\/s-button>/,
+      /<s-button[^>]*disabled="true"[^>]*>Place Block<\/s-button>/
     );
   });
 
@@ -150,13 +153,13 @@ describe("PPB widget and embed feature boundaries", () => {
         setBundleEmbedSelectedProducts,
         setBundleEmbedSpecificCollectionPages,
         setBundleEmbedSpecificProductPages,
-      }),
+      })
     );
     const targeting = findElement(
       view,
       (element) =>
         element.type === "s-choice-list" &&
-        element.props.name === "ppbEmbedDisplayOn",
+        element.props.name === "ppbEmbedDisplayOn"
     );
 
     targeting!.props.onChange({ target: { values: ["specific_products"] } });

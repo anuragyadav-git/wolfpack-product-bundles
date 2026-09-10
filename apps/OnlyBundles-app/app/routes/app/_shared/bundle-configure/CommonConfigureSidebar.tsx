@@ -349,6 +349,9 @@ export function CommonConfigureSidebar({
                   <s-button
                     variant="tertiary"
                     icon="edit"
+                    accessibilityLabel={translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.replaceProduct"
+                    )}
                     onClick={() => void handleBundleProductSelect()}
                   >
                     {translateAdmin(
@@ -358,6 +361,9 @@ export function CommonConfigureSidebar({
                   <s-button
                     variant="tertiary"
                     icon="duplicate"
+                    accessibilityLabel={translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.syncProduct"
+                    )}
                     onClick={handleSyncProduct}
                   >
                     {translateAdmin(
@@ -516,6 +522,7 @@ export function CommonConfigureSupplement({
           <s-button
             variant="secondary"
             icon={getConfigureActionIcon("place")}
+            accessibilityLabel={translateAdminCopy(liveCard.actionLabel)}
             loading={liveCard.loading || undefined}
             disabled={liveCard.disabled || undefined}
             onClick={liveCard.onAction}

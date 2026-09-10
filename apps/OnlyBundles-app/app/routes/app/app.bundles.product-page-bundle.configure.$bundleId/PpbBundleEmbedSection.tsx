@@ -294,6 +294,9 @@ export function PpbBundleEmbedSection({
                 <s-button
                   variant="primary"
                   icon="theme-edit"
+                  accessibilityLabel={translateAdmin(
+                    "adminExtracted.appBundlesProductPageBundleConfigure.ppbbundleembedsection.placeBlock"
+                  )}
                   onClick={handlePlaceWidget}
                 >
                   {translateAdmin(

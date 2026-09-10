@@ -57,6 +57,9 @@ export function FpbProgressBarOptions({
           <s-button
             variant="secondary"
             icon="language-translate"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+            )}
             disabled={
               !pricingState.showDiscountProgressBar ||
               (pricingState.pricingDisplayOptions.progressBar.type ||
@@ -78,16 +81,20 @@ export function FpbProgressBarOptions({
             <s-stack direction="block" gap="small">
               <s-stack direction="inline" gap="small" alignItems="center">
                 <s-choice-list
-                  label={translateAdmin("adminAttributes.simpleProgressBar")}
+                  label={translateAdmin("adminAttributes.progressBarType")}
                   labelAccessibilityVisibility="exclusive"
-                  values={
-                    (pricingState.pricingDisplayOptions.progressBar.type ||
-                      "step_based") === "simple"
-                      ? ["simple"]
-                      : []
-                  }
-                  onChange={() => {
-                    pricingState.setProgressBarType("simple");
+                  name="fpbProgressBarType"
+                  values={[
+                    pricingState.pricingDisplayOptions.progressBar.type ||
+                      "step_based",
+                  ]}
+                  onChange={(event) => {
+                    const nextType = (
+                      event.currentTarget as HTMLElement & { values?: string[] }
+                    ).values?.[0];
+                    if (nextType === "simple" || nextType === "step_based") {
+                      pricingState.setProgressBarType(nextType);
+                    }
                   }}
                 >
                   <s-choice value="simple">
@@ -95,20 +102,6 @@ export function FpbProgressBarOptions({
                       "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.simpleBar"
                     )}
                   </s-choice>
-                </s-choice-list>
-                <s-choice-list
-                  label={translateAdmin("adminAttributes.stepBasedProgressBar")}
-                  labelAccessibilityVisibility="exclusive"
-                  values={
-                    (pricingState.pricingDisplayOptions.progressBar.type ||
-                      "step_based") === "step_based"
-                      ? ["step_based"]
-                      : []
-                  }
-                  onChange={() => {
-                    pricingState.setProgressBarType("step_based");
-                  }}
-                >
                   <s-choice value="step_based">
                     {translateAdmin(
                       "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountprogressbaroptions.stepBasedBar"
@@ -133,10 +126,7 @@ export function FpbProgressBarOptions({
                     </p>
                   ) : (
                     pricingState.discountRules.map((rule, index) => (
-                      <div
-                        key={rule.id}
-                        className={styles.discountRuleCard}
-                      >
+                      <div key={rule.id} className={styles.discountRuleCard}>
                         <s-stack direction="block" gap="small-100">
                           <p
                             style={{
@@ -159,16 +149,14 @@ export function FpbProgressBarOptions({
                               onInput={(e) => {
                                 const val = (e.target as HTMLInputElement)
                                   .value;
-                                setTierTextByRuleId(
-                                  (prev) => ({
-                                    ...prev,
-                                    [rule.id]: {
-                                      tierText: val,
-                                      tierSubtext:
-                                        prev[rule.id]?.tierSubtext ?? "",
-                                    },
-                                  })
-                                );
+                                setTierTextByRuleId((prev) => ({
+                                  ...prev,
+                                  [rule.id]: {
+                                    tierText: val,
+                                    tierSubtext:
+                                      prev[rule.id]?.tierSubtext ?? "",
+                                  },
+                                }));
                                 markAsDirty();
                               }}
                               autocomplete="off"
@@ -183,15 +171,13 @@ export function FpbProgressBarOptions({
                               onInput={(e) => {
                                 const val = (e.target as HTMLInputElement)
                                   .value;
-                                setTierTextByRuleId(
-                                  (prev) => ({
-                                    ...prev,
-                                    [rule.id]: {
-                                      tierText: prev[rule.id]?.tierText ?? "",
-                                      tierSubtext: val,
-                                    },
-                                  })
-                                );
+                                setTierTextByRuleId((prev) => ({
+                                  ...prev,
+                                  [rule.id]: {
+                                    tierText: prev[rule.id]?.tierText ?? "",
+                                    tierSubtext: val,
+                                  },
+                                }));
                                 markAsDirty();
                               }}
                               autocomplete="off"

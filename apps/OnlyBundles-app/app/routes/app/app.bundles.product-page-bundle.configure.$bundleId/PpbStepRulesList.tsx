@@ -39,6 +39,9 @@ export function PpbStepRulesList({
                   variant="tertiary"
                   tone="critical"
                   icon="delete"
+                  accessibilityLabel={translateAdmin(
+                    "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                  )}
                   onClick={() =>
                     conditionsState.removeConditionRule(step.id, rule.id)
                   }
@@ -141,6 +144,9 @@ export function PpbStepRulesList({
       <s-button
         variant="secondary"
         icon="plus"
+        accessibilityLabel={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+        )}
         disabled={rules.length >= 2 || undefined}
         onClick={() => conditionsState.addConditionRule(step.id)}
       >

@@ -143,6 +143,9 @@ function PpbCategoryRuleBody({
                   variant="tertiary"
                   tone="critical"
                   icon="delete"
+                  accessibilityLabel={translateAdmin(
+                    "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                  )}
                   onClick={() =>
                     removeCategoryConditionRule(step.id, catIndex, ruleId)
                   }
@@ -234,6 +237,9 @@ function PpbCategoryRuleBody({
       <s-button
         variant="secondary"
         icon="plus"
+        accessibilityLabel={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+        )}
         onClick={() => addCategoryConditionRule(step.id, catIndex)}
       >
         {translateAdmin(

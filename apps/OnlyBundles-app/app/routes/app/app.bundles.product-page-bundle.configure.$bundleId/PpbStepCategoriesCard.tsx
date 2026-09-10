@@ -70,6 +70,9 @@ export function PpbStepCategoriesCard({
       <s-button
         variant="secondary"
         icon="plus"
+        accessibilityLabel={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
+        )}
         onClick={() => {
           const displayVariantsForAllCategories =
             stepCategories.length > 0 &&

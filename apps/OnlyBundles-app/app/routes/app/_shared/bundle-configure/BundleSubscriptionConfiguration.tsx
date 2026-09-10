@@ -39,6 +39,9 @@ export function BundleSubscriptionConfiguration({
               variant="tertiary"
               tone="neutral"
               icon={getConfigureActionIcon("translate")}
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+              )}
               disabled={shopLocales.length === 0 || undefined}
               onClick={onOpenTranslations}
             >
@@ -85,10 +88,10 @@ export function BundleSubscriptionConfiguration({
               <s-text-field
                 label={translateAdmin("adminAttributes.oneTimePurchaseLabel")}
                 value={subscriptionConfig.oneTimePurchase.title}
-                disabled={!subscriptionConfig.oneTimePurchase.enabled || undefined}
-                error={
-                  validationErrors["subscriptions.oneTimePurchase.title"]
+                disabled={
+                  !subscriptionConfig.oneTimePurchase.enabled || undefined
                 }
+                error={validationErrors["subscriptions.oneTimePurchase.title"]}
                 onInput={(event) =>
                   setSubscriptionConfig((current) => ({
                     ...current,
@@ -104,7 +107,9 @@ export function BundleSubscriptionConfiguration({
                   "adminAttributes.oneTimePurchaseDescription"
                 )}
                 value={subscriptionConfig.oneTimePurchase.description}
-                disabled={!subscriptionConfig.oneTimePurchase.enabled || undefined}
+                disabled={
+                  !subscriptionConfig.oneTimePurchase.enabled || undefined
+                }
                 onInput={(event) =>
                   setSubscriptionConfig((current) => ({
                     ...current,
@@ -119,10 +124,12 @@ export function BundleSubscriptionConfiguration({
                 label={translateAdmin(
                   "adminAttributes.makeOneTimePurchaseSelectedByDefault"
                 )}
-                disabled={!subscriptionConfig.oneTimePurchase.enabled || undefined}
+                disabled={
+                  !subscriptionConfig.oneTimePurchase.enabled || undefined
+                }
                 checked={
-                  subscriptionConfig.defaultPurchaseOption.kind === "one_time" ||
-                  undefined
+                  subscriptionConfig.defaultPurchaseOption.kind ===
+                    "one_time" || undefined
                 }
                 error={validationErrors["subscriptions.defaultPurchaseOption"]}
                 onChange={(event) =>
@@ -224,9 +231,29 @@ export function BundleSubscriptionConfiguration({
               )}
             </s-paragraph>
           </s-stack>
-          <s-grid
-            gridTemplateColumns="repeat(3, minmax(0, 1fr))"
-            gap="base"
+          <s-choice-list
+            label={translateAdmin(
+              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.bundleDiscountAppliesOn"
+            )}
+            labelAccessibilityVisibility="exclusive"
+            name="bundleDiscountAppliesOn"
+            values={[subscriptionConfig.bundleDiscountAppliesOn]}
+            onChange={(event) => {
+              const selected = (
+                event.currentTarget as HTMLElement & { values?: string[] }
+              ).values?.[0];
+              if (
+                selected !== "subscription" &&
+                selected !== "one_time" &&
+                selected !== "both"
+              ) {
+                return;
+              }
+              setSubscriptionConfig((current) => ({
+                ...current,
+                bundleDiscountAppliesOn: selected,
+              }));
+            }}
           >
             {(
               [
@@ -244,30 +271,11 @@ export function BundleSubscriptionConfiguration({
                 ],
               ] as const
             ).map(([value, labelKey]) => (
-              <s-choice-list
-                key={value}
-                label={translateAdmin(labelKey)}
-                labelAccessibilityVisibility="exclusive"
-                values={
-                  subscriptionConfig.bundleDiscountAppliesOn === value
-                    ? [value]
-                    : []
-                }
-                onChange={(event) => {
-                  const selected = (
-                    (event.currentTarget as any).values as string[] | undefined
-                  )?.[0];
-                  if (!selected) return;
-                  setSubscriptionConfig((current) => ({
-                    ...current,
-                    bundleDiscountAppliesOn: value,
-                  }));
-                }}
-              >
-                <s-choice value={value}>{translateAdmin(labelKey)}</s-choice>
-              </s-choice-list>
+              <s-choice key={value} value={value}>
+                {translateAdmin(labelKey)}
+              </s-choice>
             ))}
-          </s-grid>
+          </s-choice-list>
           {subscriptionConfig.enabled &&
           Object.keys(validationErrors).some((path) =>
             path.startsWith("subscriptions.")

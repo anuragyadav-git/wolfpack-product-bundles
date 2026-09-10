@@ -34,7 +34,7 @@ export function PpbRulesConfigurationCard({
   step,
 }: PpbRulesConfigurationCardProps) {
   const stepCategories = getStepCategories(
-    step,
+    step
   ) as PpbCategoryRulesListProps["stepCategories"];
   const categoryRulesAvailable = deriveControlDependencies({
     categoryCount: stepCategories.length,
@@ -111,26 +111,26 @@ export function PpbRulesConfigurationCard({
           {translateAdmin("common.actions.learnMore")}
         </s-link>
       </s-box>
-      <div
-        style={{
-          display: "flex",
-          gap: 20,
-          marginBottom: 12,
+      <s-choice-list
+        label={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+        )}
+        labelAccessibilityVisibility="exclusive"
+        name={`step-rule-mode-${step.id}`}
+        values={[activeRuleMode]}
+        onChange={(event) => {
+          const nextMode = (
+            event.currentTarget as HTMLElement & { values?: string[] }
+          ).values?.[0];
+          if (nextMode) handleRuleModeChange(nextMode);
         }}
       >
         {ruleModeOptions.map((opt) => (
-          <s-choice-list
-            key={opt.value}
-            label={`${opt.label} rule mode`}
-            labelAccessibilityVisibility="exclusive"
-            name={`step-rule-mode-${step.id}`}
-            values={activeRuleMode === opt.value ? [opt.value] : []}
-            onChange={() => handleRuleModeChange(opt.value)}
-          >
-            <s-choice value={opt.value}>{opt.label}</s-choice>
-          </s-choice-list>
+          <s-choice key={opt.value} value={opt.value}>
+            {opt.label}
+          </s-choice>
         ))}
-      </div>
+      </s-choice-list>
       {activeRuleMode === "category" ? (
         <PpbCategoryRulesList
           adapter={categoryRulesAdapter}
