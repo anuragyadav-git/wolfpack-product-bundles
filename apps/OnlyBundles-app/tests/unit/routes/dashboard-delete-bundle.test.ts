@@ -65,7 +65,7 @@ describe("handleDeleteBundle resource cleanup", () => {
     mockUpdateShopMetafieldsAfterDeletion.mockResolvedValue(undefined);
   });
 
-  it("deletes an FPB row without Shopify product cleanup", async () => {
+  it("deletes a bundle row without Shopify cleanup when no parent product is stored", async () => {
     mockDb.bundle.findUnique.mockResolvedValue(bundle());
     const admin = { graphql: jest.fn() };
 
@@ -78,6 +78,30 @@ describe("handleDeleteBundle resource cleanup", () => {
     expect(response.status).toBe(200);
     expect(admin.graphql).not.toHaveBeenCalled();
     expect(mockDb.bundle.delete).toHaveBeenCalledTimes(1);
+  });
+
+  it("deletes an FPB parent product before deleting the bundle row", async () => {
+    mockDb.bundle.findUnique.mockResolvedValue(bundle({
+      shopifyProductId: "gid://shopify/Product/41",
+    }));
+    const admin = { graphql: jest.fn(() => productDeleteResponse({
+      deletedProductId: "gid://shopify/Product/41",
+    })) };
+
+    const response = await handleDeleteBundle(
+      admin as any,
+      { shop: "test-shop.myshopify.com" },
+      formData(),
+    );
+
+    expect(response.status).toBe(200);
+    expect(admin.graphql).toHaveBeenCalledWith(
+      expect.stringContaining("productDelete"),
+      { variables: { input: { id: "gid://shopify/Product/41" } } },
+    );
+    expect(admin.graphql.mock.invocationCallOrder[0]).toBeLessThan(
+      mockDb.bundle.delete.mock.invocationCallOrder[0],
+    );
   });
 
   it("deletes a PPB parent product before deleting the bundle row", async () => {
@@ -122,6 +146,40 @@ describe("handleDeleteBundle resource cleanup", () => {
     );
 
     expect(response.status).toBe(500);
+    expect(mockDb.bundle.delete).not.toHaveBeenCalled();
+  });
+
+  it("continues deleting when Shopify reports that the parent product is already gone", async () => {
+    mockDb.bundle.findUnique.mockResolvedValue(bundle({
+      shopifyProductId: "gid://shopify/Product/41",
+    }));
+    const admin = { graphql: jest.fn(() => productDeleteResponse({
+      userErrors: [{ message: "Product does not exist" }],
+    })) };
+
+    const response = await handleDeleteBundle(
+      admin as any,
+      { shop: "test-shop.myshopify.com" },
+      formData(),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockDb.bundle.delete).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns not found without cleanup when the bundle is outside the authenticated shop", async () => {
+    mockDb.bundle.findUnique.mockResolvedValue(null);
+    const admin = { graphql: jest.fn() };
+
+    const response = await handleDeleteBundle(
+      admin as any,
+      { shop: "test-shop.myshopify.com" },
+      formData("missing-bundle"),
+    );
+
+    expect(response.status).toBe(404);
+    expect(admin.graphql).not.toHaveBeenCalled();
+    expect(mockUpdateShopMetafieldsAfterDeletion).not.toHaveBeenCalled();
     expect(mockDb.bundle.delete).not.toHaveBeenCalled();
   });
 });

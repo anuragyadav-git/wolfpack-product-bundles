@@ -5,7 +5,7 @@ title: FPB App Proxy Host
 type: architecture-decision
 status: accepted
 summary: Full Page Bundles use the signed app proxy as their sole storefront document host.
-last_audited: 2026-09-08
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -140,8 +140,9 @@ directly; it does not select a Shopify Page.
 
 The forward-only `20260906090000_remove_legacy_shopify_page_fields` migration
 drops the obsolete Page IDs, handles, and handle index. Dashboard deletion now
-owns only the canonical bundle row and the PPB parent-product lifecycle; it has
-no Shopify Page cleanup branch. The configured database returned zero bundles
-with legacy Page fields before migration and had no Page columns on 2026-09-08.
+owns only the canonical bundle row and the shared FPB/PPB parent-product
+lifecycle; it has no Shopify Page cleanup branch. The configured database
+returned zero bundles with legacy Page fields before migration and had no Page
+columns on 2026-09-08.
 Every release environment must independently pass the same zero-count gate
 before this migration is applied.
