@@ -35,6 +35,7 @@ source_paths:
   - apps/OnlyBundles-app/app/storefront/sdk.ts
   - apps/OnlyBundles-app/app/storefront/app-embed-marker.ts
   - apps/OnlyBundles-app/app/lib/ppb-widget-placement.client.ts
+  - apps/OnlyBundles-app/app/lib/dashboard-preview-window.ts
   - apps/OnlyBundles-app/types/wolfpack-bundles.d.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared/discount-tier-feedback.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared-css/discount-tier-feedback.css
@@ -249,6 +250,11 @@ reserves a browser tab synchronously, and posts the existing authenticated
 configure `/prepare-preview` route. FPB navigates to the signed shareable URL;
 PPB appends the returned preview token to the parent product URL. Preparation
 failure closes the reserved tab and leaves the Polaris modal open with an error.
+The reserved `about:blank` tab must retain its opener connection while that
+asynchronous request completes so the initiating Admin document can still
+navigate it. Assign the validated storefront or Theme Editor destination first,
+then immediately clear `opener`; clearing it during reservation strands a blank
+tab and the later fallback open is susceptible to the browser's popup blocker.
 
 PPB preview placement is verified with Shopify's Admin App API
 `shopify.app.extensions()` result for the current app. The gate matches the
