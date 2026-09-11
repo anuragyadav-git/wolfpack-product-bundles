@@ -133,6 +133,10 @@ getStepCategoryTabEntries(step: any) {
         handles,
         productIds,
         displayVariantsAsIndividualProducts: category.displayVariantsAsIndividualProducts === true,
+        variantSelectorMode: category.variantSelectorMode || 'dropdown',
+        swatchTooltipEnabled:
+          category.variantSelectorMode === 'color_swatch'
+          && category.swatchTooltipEnabled === true,
       };
     })
     .filter(Boolean);

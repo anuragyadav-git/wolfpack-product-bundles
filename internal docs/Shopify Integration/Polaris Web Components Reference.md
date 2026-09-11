@@ -5,7 +5,7 @@ title: Polaris App Home Web Components Reference
 type: reference
 status: authoritative
 summary: Canonical source for Polaris web component usage and durable design decisions in the Wolfpack admin UI, with Shopify App Home web components as the source of truth.
-last_audited: 2026-09-11
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -22,6 +22,8 @@ source_paths:
   - app/routes/app/app.bundles.create/BundleTypeSelectionCard.tsx
   - app/routes/app/_shared/bundle-configure/CommonConfigureShell.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ImagesGifsPanel.tsx
+  - app/assets/widgets/shared/components/product-card.ts
+  - app/assets/widgets/full-page-css/shared/responsive-layout.css
 related_docs:
   - internal docs/Architecture/Diagrams/Admin UI Frontend Architecture.md
   - internal docs/Architecture/Admin Configure Page.md
@@ -98,6 +100,14 @@ Polaris `s-heading` as the single visible section label and set the control's
 `labelAccessibilityVisibility="exclusive"`. The control retains its
 programmatic label without repeating the same copy for merchants. FPB and PPB
 Bundle Status share this contract.
+
+Storefront product cards follow a task-first purchase hierarchy even though
+they are not Polaris surfaces. After media and product identity, render variant
+selectors before the price and then the Add or quantity action. Keep this order
+the same in the DOM and visual layout so keyboard and pointer users encounter
+the choices in the same sequence. Templates may change card direction,
+selector presentation, and compact action geometry, but must not place pricing
+or the primary action ahead of a configured variant selector.
 
 ## Layout and structure ownership
 

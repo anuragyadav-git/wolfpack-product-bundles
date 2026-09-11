@@ -2,7 +2,11 @@ import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { ToastManager } from '../../shared/toast-manager.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
-import { createSharedProductCardElement, getProductImageUrls } from '../../shared/components/product-card.js';
+import {
+  createSharedProductCardElement,
+  formatProductCardPrice,
+  getProductImageUrls,
+} from '../../shared/components/product-card.js';
 import { VariantSelectorComponent } from '../../shared/variant-selector.js';
 import {
   getInlineVariantSelectorPresentation,
@@ -75,7 +79,16 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
       : step?.displayVariantsAsIndividualProducts === true || step?.displayVariantsAsIndividual === true;
   const designPreset = this.getFullPageDesignPreset();
   const variantSelectorPresentation = getInlineVariantSelectorPresentation(designPreset);
-  const usesDropdownVariantSelector = variantSelectorPresentation.type === 'dropdown';
+  const configuredVariantSelectorMode = options.variantSelectorMode;
+  const usesConfiguredVariantSelector = [
+    'dropdown',
+    'pill',
+    'color_swatch',
+    'image_swatch',
+  ].includes(configuredVariantSelectorMode);
+  const usesDropdownVariantSelector = usesConfiguredVariantSelector
+    ? configuredVariantSelectorMode === 'dropdown'
+    : variantSelectorPresentation.type === 'dropdown';
   const shouldRenderVariantSelector = shouldRenderInlineVariantSelector({
     bundleVariantSelectorEnabled: this.selectedBundle?.variantSelectorEnabled !== false,
     product,
@@ -92,13 +105,23 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
     ? resolveText('chooseOptionsButton', 'Choose Options')
     : this.getProductCardAddButtonText(step);
   const variantSelectorElement = shouldRenderVariantSelector
-    ? usesDropdownVariantSelector
+    ? usesConfiguredVariantSelector
+      ? VariantSelectorComponent.createConfiguredElement(
+        product,
+        primaryOptionName,
+        {
+          variantSelectorMode: configuredVariantSelectorMode,
+          swatchTooltipEnabled: options.swatchTooltipEnabled === true,
+          placeholder: resolveText('chooseOptionsButton', 'Choose Options'),
+          mobileMode: variantSelectorPresentation.mobileMode,
+        },
+      )
+      : usesDropdownVariantSelector
       ? VariantSelectorComponent.createDropdownElement(product, primaryOptionName, {
         placeholder: getFpbProductCardMode(designPreset) === 'row'
           ? ''
           : resolveText('chooseOptionsButton', 'Choose Options'),
         mobileMode: variantSelectorPresentation.mobileMode,
-        hideUnavailable: true,
       })
       : VariantSelectorComponent.createElement(product, primaryOptionName)
     : null;
@@ -177,7 +200,6 @@ createProductCard(product: any, stepIndex: string|number, options: any = {}) {
         increaseDisabled,
         cardBadgeElement,
         stockBadgeElement,
-        variantSelectorPlacement: usesDropdownVariantSelector ? 'beforePrice' : undefined,
       }
     );
 
@@ -565,12 +587,17 @@ updateProductCardVariantDisplay(cardElement: any, product: any, step: any) {
     this,
     displayProduct.price || 0,
   );
-  const currentPriceText = CurrencyManager.convertAndFormat(
+  const currentPriceText = formatProductCardPrice(
     formattedCurrentPrice,
+    displayProduct.currencyCode,
     currencyInfo,
   );
   const compareAtText = displayProduct.compareAtPrice
-    ? CurrencyManager.convertAndFormat(displayProduct.compareAtPrice, currencyInfo)
+    ? formatProductCardPrice(
+      displayProduct.compareAtPrice,
+      displayProduct.compareAtCurrencyCode || displayProduct.currencyCode,
+      currencyInfo,
+    )
     : '';
 
   let priceRow = cardElement.querySelector('.product-price-row');

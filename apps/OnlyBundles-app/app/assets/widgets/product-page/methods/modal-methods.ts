@@ -138,6 +138,11 @@ export function applyProductPageVariantSelection({
     priceEl.textContent = formatPrice(product.price);
   }
 
+  const variantEl = productCard.querySelector?.('.product-variant-row');
+  if (variantEl) {
+    variantEl.textContent = nextVariantTitle;
+  }
+
   const compareEl = productCard.querySelector?.('.product-price-strike');
   if (compareEl) {
     if (Number.isFinite(product.compareAtPrice) && typeof formatPrice === 'function') {
@@ -602,7 +607,7 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
       || e.target.classList.contains('ppb-variant-selector-input')
     ) {
       e.stopPropagation();
-      const newVariantId = e.target.value;
+      const newVariantId = e.target.dataset.resolvedVariantId || e.target.value;
       const baseProductId = e.target.dataset.baseProductId;
 
       // Find the product and update its variant
@@ -628,7 +633,14 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
             ),
           });
 
-          // Re-render the active card context without mutating the bundle selection.
+          const isInpageProductGrid = newProductGrid.classList.contains('bw-ppb-grid-product-grid')
+            || newProductGrid.classList.contains('bw-ppb-cascade-product-list');
+          if (isInpageProductGrid && typeof this._renderInpageStepProducts === 'function') {
+            this._renderInpageStepProducts(stepIndex, newProductGrid);
+            return;
+          }
+
+          // Re-render the active modal card context without mutating the bundle selection.
           this.renderModalProducts(stepIndex);
           const replacementInputs = this.elements?.modal?.querySelectorAll?.(
             '.ppb-variant-selector-input',

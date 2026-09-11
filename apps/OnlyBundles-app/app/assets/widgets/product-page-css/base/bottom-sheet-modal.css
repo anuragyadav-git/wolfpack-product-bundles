@@ -194,8 +194,8 @@
   box-shadow:
     rgba(0, 0, 0, 0.12) 0 1px 3px,
     rgba(0, 0, 0, 0.24) 0 1px 2px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   padding: 10px;
   min-height: 0;
@@ -330,8 +330,10 @@
   .modal-body
   .product-card
   .product-content-wrapper {
-  align-self: start;
-  display: grid;
+  align-self: stretch;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   gap: 8px;
   min-height: 0;
   width: 100%;

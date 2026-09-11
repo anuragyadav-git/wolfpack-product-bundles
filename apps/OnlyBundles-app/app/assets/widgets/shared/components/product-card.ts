@@ -35,11 +35,11 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
   const displayPrice = Object.prototype.hasOwnProperty.call(options, 'displayPrice')
     ? options.displayPrice
     : product.price;
-  const price = formatPrice(displayPrice, product.currencyCode, currencyInfo);
+  const price = formatProductCardPrice(displayPrice, product.currencyCode, currencyInfo);
   const shouldRenderCompareAtPrice = product.compareAtPrice !== null
     && product.compareAtPrice !== undefined;
   const compareAtPrice = shouldRenderCompareAtPrice
-    ? formatPrice(
+    ? formatProductCardPrice(
       product.compareAtPrice,
       product.compareAtCurrencyCode || product.currencyCode,
       currencyInfo,
@@ -48,7 +48,6 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
   const hasPriceText = Boolean(price);
   const hasCompareAtText = Boolean(compareAtPrice);
   const shouldRenderPriceRow = hasPriceText || hasCompareAtText;
-  const variantSelectorBeforePrice = options.variantSelectorPlacement === 'beforePrice';
   const addButtonText = options.addButtonText || '+';
   const resolvedAddButtonLabel = options.addButtonAriaLabel || addButtonText;
   const resolvedSelectedLabel = options.selectedStateLabel || options.addedLabel || 'Added';
@@ -169,15 +168,22 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
 
   const priceAction = runtimeDocument.createElement('div');
   priceAction.className = 'product-card-price-action';
+  priceAction.dataset.variantSelectorPlacement = 'before-price';
   priceAction.setAttribute('role', 'group');
   priceAction.setAttribute('aria-label', `${quantityControlLabel} controls`);
   priceAction.setAttribute('aria-expanded', isSelected ? 'true' : 'false');
-  if (variantSelectorBeforePrice && options.variantSelectorElement?.nodeType) {
-    priceAction.append(options.variantSelectorElement);
+  const selectorRegion = runtimeDocument.createElement('div');
+  selectorRegion.className = 'bw-product-card__selector';
+  selectorRegion.dataset.bwProductSelector = 'true';
+  if (options.variantSelectorElement?.nodeType) {
+    selectorRegion.append(options.variantSelectorElement);
+    root.dataset.bwCardHasSelector = 'true';
   }
+  priceAction.append(selectorRegion);
   if (shouldRenderPriceRow) {
     const priceRow = runtimeDocument.createElement('div');
     priceRow.className = 'bw-product-card__price product-price-row';
+    priceRow.dataset.bwCardPrice = 'true';
     if (compareAtPrice) {
       const compare = runtimeDocument.createElement('span');
       compare.className = 'bw-product-card__compare-price product-price-strike';
@@ -192,11 +198,9 @@ export function createSharedProductCardElement(product: any = {}, currentQuantit
     }
     priceAction.append(priceRow);
   }
-  if (!variantSelectorBeforePrice && options.variantSelectorElement?.nodeType) {
-    priceAction.append(options.variantSelectorElement);
-  }
   const action = runtimeDocument.createElement('div');
   action.className = `bw-product-card__action product-card-action${isSelected ? ' is-expanded' : ''}`;
+  action.dataset.bwCardAction = 'true';
   action.append(isSelected && options.selectedAction === 'button'
     ? createAddButton(selectionKey, {
       ...options,
@@ -383,7 +387,7 @@ function normalizeSafeImageUrl(value: any, runtimeDocument: Document) {
   }
 }
 
-function formatPrice(value: string|null, currencyCode: unknown, currencyInfo: any) {
+export function formatProductCardPrice(value: string|null|number, currencyCode: unknown, currencyInfo: any) {
   if (value == null || value === '') return '';
 
   return CurrencyManager.formatMoney(

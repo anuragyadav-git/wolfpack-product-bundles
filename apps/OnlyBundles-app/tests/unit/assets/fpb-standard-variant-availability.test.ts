@@ -29,7 +29,7 @@ class FakeCard {
 }
 
 describe('FPB Standard variant availability', () => {
-  it('filters unavailable-only primary values from grouped selector choices', () => {
+  it('keeps unavailable-only primary values visible and disabled', () => {
     const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
     const view = VariantSelectorComponent.createElement({
       variantId: 'available-small',
@@ -48,8 +48,8 @@ describe('FPB Standard variant availability', () => {
       ],
     }, 'Size', runtimeDocument);
 
-    expect(view.querySelector('[data-primary-value="Small"]')).not.toBeNull();
-    expect(view.querySelector('[data-primary-value="Large"]')).toBeNull();
+    expect(view.querySelector('input[value="Small"]')?.hasAttribute('disabled')).toBe(false);
+    expect(view.querySelector('input[value="Large"]')?.hasAttribute('disabled')).toBe(true);
   });
 
   it('ignores unavailable-only primary variant selections', () => {

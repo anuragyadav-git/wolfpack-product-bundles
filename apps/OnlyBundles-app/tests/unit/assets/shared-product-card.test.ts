@@ -5,6 +5,14 @@ const {
   getProductImageUrls,
   createSharedProductCardElement,
 } = require('../../../app/assets/widgets/shared/components/product-card.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const {
+  fullPageProductCardFooterMethods,
+} = require('../../../app/assets/widgets/full-page/methods/product-card-footer-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const {
+  CurrencyManager,
+} = require('../../../app/assets/widgets/shared/currency-manager.js');
 
 export {};
 
@@ -75,6 +83,42 @@ describe('shared product card data helpers', () => {
       expect(card.textContent).not.toMatch(/(?:US|CA|A|NZ|SG)\$/);
     },
   );
+
+  it('keeps the compact native currency symbol after an FPB variant change', () => {
+    const document = new JSDOM('<!doctype html>').window.document;
+    const card = createSharedProductCardElement(
+      {
+        selectionId: 'variant-black',
+        title: 'T-Shirt',
+        price: 3000,
+        currencyCode: 'USD',
+      },
+      0,
+      { display: { code: 'USD' }, locale: 'en-CA' },
+      { document },
+    );
+    const currencySpy = jest.spyOn(CurrencyManager, 'getCurrencyInfo').mockReturnValue({
+      calculation: { code: 'USD', rate: 1 },
+      display: { code: 'USD', symbol: '$', rate: 1 },
+      isMultiCurrency: false,
+      locale: 'en-CA',
+    });
+
+    fullPageProductCardFooterMethods.updateProductCardVariantDisplay.call({
+      buildPaidAddonProductDisplayData: (product: any) => product,
+      selectedBundle: null,
+      selectedSellingPlanId: null,
+    }, card, {
+      selectionId: 'variant-navy',
+      title: 'T-Shirt',
+      price: 3000,
+      currencyCode: 'USD',
+    }, {});
+
+    expect(card.querySelector('.product-price')?.textContent).toBe('$30.00');
+    expect(card.querySelector('.product-price')?.textContent).not.toBe('US$30.00');
+    currencySpy.mockRestore();
+  });
 });
 
 describe('shared product card magnifier', () => {
@@ -106,5 +150,41 @@ describe('shared product card magnifier', () => {
     const card = createCard({ productDetailsEnabled: false });
     expect(card.querySelector('.bw-product-card__image-overlay')).toBeNull();
     expect(card.querySelector('.bw-product-card__magnifier')).toBeNull();
+  });
+});
+
+describe('shared product card reading order', () => {
+  it('places variant controls before price and Add controls', () => {
+    const dom = new JSDOM('<!doctype html><html><body></body></html>');
+    const selector = dom.window.document.createElement('select');
+    selector.setAttribute('aria-label', 'Color');
+    selector.append(new dom.window.Option('Black', 'black'));
+
+    const card = createSharedProductCardElement(
+      {
+        selectionId: 'variant-black',
+        title: 'T-Shirt',
+        price: 3000,
+        currencyCode: 'USD',
+      },
+      0,
+      { display: { code: 'USD' } },
+      {
+        document: dom.window.document,
+        variantSelectorElement: selector,
+        addButtonText: 'Add',
+      },
+    );
+
+    const selectorRegion = card.querySelector('[data-bw-product-selector="true"]');
+    const priceRegion = card.querySelector('[data-bw-card-price="true"]');
+    const actionRegion = card.querySelector('[data-bw-card-action="true"]');
+    const follows = dom.window.Node.DOCUMENT_POSITION_FOLLOWING;
+
+    expect(selectorRegion).not.toBeNull();
+    expect(priceRegion).not.toBeNull();
+    expect(actionRegion).not.toBeNull();
+    expect(selectorRegion!.compareDocumentPosition(priceRegion!) & follows).toBe(follows);
+    expect(priceRegion!.compareDocumentPosition(actionRegion!) & follows).toBe(follows);
   });
 });

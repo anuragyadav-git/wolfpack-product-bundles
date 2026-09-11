@@ -5,7 +5,7 @@ title: Pricing Pipeline
 type: feature
 status: authoritative
 summary: Defines canonical minor-unit pricing, presentment-currency handling, discount operators, and checkout ownership.
-last_audited: 2026-09-10
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -59,6 +59,9 @@ currency code. Do not restore a manual symbol table, theme money-format parser,
 `Shopify.currency.convert` fallback, or a hardcoded display-currency fallback.
 The shared FPB and PPB product card requests `currencyDisplay: narrowSymbol`
 so compact card prices use native symbols such as `$`, `€`, `£`, `¥`, and `₹`.
+Post-selection variant updates must call that same shared product-card formatter;
+they must not switch to the bundle-summary formatter, which may intentionally
+emit a disambiguated value such as `US$`.
 The default formatter remains unchanged for bundle summaries, pricing messages,
 cart totals, and checkout totals where explicit currency context can be required.
 The FPB product-details modal follows the same owner directly rather than
@@ -103,6 +106,17 @@ Supported discount methods are:
 - `fixed_amount_off`
 - `fixed_bundle_price`
 - `buy_x_get_y`
+
+Admin percentage inputs use Polaris `s-number-field` with a percent suffix,
+`min=0`, `max=100`, `step=1`, and numeric input mode. These properties guide
+entry but do not enforce typed values, so the shared FPB/PPB configure validator
+also requires an integer in the inclusive range `0..100` before either save
+handler can persist it. This applies to Percentage Off, percentage-mode Buy X
+Get Y rewards, and FPB add-on percentages. Invalid merchant input remains
+visible with an inline error for correction; it is never silently clamped to a
+different discount. Configure pages render that validation only on the owning
+Polaris field and do not insert a duplicate section-level summary above the
+active form, which keeps the surrounding section position stable.
 
 For `fixed_bundle_price`, `discountValue` is the only stored target-price field.
 Do not write or read a duplicate `fixedBundlePrice`; Cart Transform derives the

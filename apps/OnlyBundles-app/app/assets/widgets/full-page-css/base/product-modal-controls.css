@@ -1,13 +1,8 @@
-.bundle-modal-variant-btn.color-swatch:hover:not(.unavailable) {
-  transform: scale(1.1);
-}
-
 .bundle-modal-variant-btn.color-swatch.selected {
   border-color: var(--bundle-button-bg, var(--bundle-global-primary-button, #000));
   box-shadow:
     0 0 0 2px #fff,
     0 0 0 4px var(--bundle-button-bg, var(--bundle-global-primary-button, #000));
-  position: relative;
 }
 
 .bundle-modal-variant-btn.color-swatch.selected::after {

@@ -6,6 +6,40 @@ import {
 import { createChevronIcon, createCloseIcon } from './svg-icons.js';
 
 let standardMobileDrawerCleanup: (() => void) | null = null;
+const selectorInstanceCounts = new WeakMap<Document, number>();
+
+export function resolveCanonicalOptionValueSwatch(
+  product: any,
+  optionName: unknown,
+  value: unknown,
+) {
+  const option = (Array.isArray(product?.options) ? product.options : []).find(
+    (candidate: any) => (
+      candidate
+      && typeof candidate === 'object'
+      && String(candidate.name ?? '') === String(optionName ?? '')
+    ),
+  );
+  const optionValue = (Array.isArray(option?.optionValues) ? option.optionValues : []).find(
+    (candidate: any) => String(candidate?.name ?? '') === String(value ?? ''),
+  );
+  const color = optionValue?.swatch?.color ?? null;
+  const image = optionValue?.swatch?.image ?? null;
+  if (!color && !image) return null;
+
+  return {
+    color,
+    image,
+    label: String(optionValue?.name ?? value ?? ''),
+  };
+}
+
+function nextSelectorInstanceId(runtimeDocument: Document, productId: unknown) {
+  const count = (selectorInstanceCounts.get(runtimeDocument) || 0) + 1;
+  selectorInstanceCounts.set(runtimeDocument, count);
+  const stableProductId = String(productId ?? 'product').replace(/[^a-zA-Z0-9_-]+/g, '-');
+  return `fpb-variant-${stableProductId}-${count}`;
+}
 
 export function getStandardMobileDrawerContract({ isPpbOwned = false }: any = {}) {
   return {
@@ -21,9 +55,8 @@ export function getStandardMobileDrawerContract({ isPpbOwned = false }: any = {}
  * VariantSelectorComponent
  *
  * Renders an inline variant selector on FPB product cards.
- * Replaces the <select> dropdown with:
- *   - A button group for the merchant-configured primary option dimension (max 4 + overflow)
- *   - Pill button(s) for remaining dimensions (tap to open dropdown panel)
+ * Every Shopify option dimension is a labeled radio group whose values remain
+ * directly reachable in source order. Layout and wrapping belong to CSS.
  *
  * Usage:
  *   const selector = VariantSelectorComponent.createElement(product, primaryOptionName);
@@ -33,6 +66,191 @@ export function getStandardMobileDrawerContract({ isPpbOwned = false }: any = {}
  */
 
 class VariantSelectorComponent {
+
+  static createConfiguredElement(
+    product: any,
+    primaryOptionName: any,
+    configuration: any = {},
+    runtimeDocument: Document = document,
+  ) {
+    const mode = configuration.variantSelectorMode || 'dropdown';
+    if (mode === 'dropdown') {
+      return VariantSelectorComponent.createDropdownElement(product, primaryOptionName, {
+        ...configuration,
+        document: runtimeDocument,
+      });
+    }
+
+    const variants = product.variants || [];
+    const options = product.options || [];
+    if (variants.length <= 1 || options.length === 0) return null;
+
+    const optionIndexes = options.map((_: unknown, index: number) => index + 1);
+    const primaryIdx = VariantSelectorComponent._primaryIdx(options, primaryOptionName);
+    const swatchKind = mode === 'color_swatch'
+      ? 'color'
+      : mode === 'image_swatch'
+        ? 'image'
+        : null;
+    const mappedIndexes = swatchKind
+      ? optionIndexes.filter((optionIndex: number) => (
+        VariantSelectorComponent._uniqueValues(variants, optionIndex).some((value: unknown) => {
+          const swatch = resolveCanonicalOptionValueSwatch(
+            product,
+            VariantSelectorComponent._optionName(options[optionIndex - 1]),
+            value,
+          );
+          return swatchKind === 'color' ? Boolean(swatch?.color) : Boolean(swatch?.image);
+        })
+      ))
+      : [];
+    const visualIndex = mappedIndexes.includes(primaryIdx)
+      ? primaryIdx
+      : mappedIndexes[0] || primaryIdx;
+    const selectedVariant = variants.find((variant: any) => (
+      String(variant.id) === String(product.variantId)
+    )) || variants[0];
+    const instanceId = nextSelectorInstanceId(
+      runtimeDocument,
+      product.id || product.productId || product.variantId,
+    );
+    const root = runtimeDocument.createElement('div');
+    root.className = `vs-wrapper vs-wrapper--configured vs-wrapper--${mode}`;
+    root.dataset.vsProductId = String(product.id || product.variantId || '');
+
+    [visualIndex, ...optionIndexes.filter((index: number) => index !== visualIndex)]
+      .forEach((optionIndex: number) => {
+        const optionName = VariantSelectorComponent._optionName(options[optionIndex - 1]);
+        const values = VariantSelectorComponent._uniqueValues(variants, optionIndex);
+        if (values.length === 0) return;
+        if (optionIndex !== visualIndex) {
+          root.append(VariantSelectorComponent._createNativeOptionSelect({
+            instanceId,
+            optionIndex,
+            optionName,
+            selectedVariant,
+            values,
+            variants,
+            runtimeDocument,
+          }));
+          return;
+        }
+        root.append(VariantSelectorComponent._createVisualOptionGroup({
+          instanceId,
+          mode,
+          optionIndex,
+          optionName,
+          product,
+          selectedVariant,
+          swatchKind,
+          swatchTooltipEnabled: configuration.swatchTooltipEnabled === true,
+          values,
+          variants,
+          runtimeDocument,
+        }));
+      });
+
+    return root;
+  }
+
+  static _createVisualOptionGroup(options: any) {
+    const {
+      instanceId, mode, optionIndex, optionName, product, selectedVariant,
+      swatchKind, swatchTooltipEnabled, values, variants, runtimeDocument,
+    } = options;
+    const group = runtimeDocument.createElement('div');
+    group.className = 'vs-option-group';
+    group.setAttribute('role', 'radiogroup');
+    group.dataset.optionIndex = String(optionIndex);
+    const label = runtimeDocument.createElement('span');
+    label.id = `${instanceId}-label-${optionIndex}`;
+    label.className = 'vs-option-group-label';
+    label.textContent = optionName;
+    group.setAttribute('aria-label', optionName);
+    group.setAttribute('aria-labelledby', label.id);
+    const valuesElement = runtimeDocument.createElement('div');
+    valuesElement.className = 'vs-btn-group';
+    const groupName = `${instanceId}-option-${optionIndex}`;
+
+    values.forEach((value: unknown, valueIndex: number) => {
+      const selectable = VariantSelectorComponent._hasSelectableVariant(variants, optionIndex, value);
+      const swatch = swatchKind
+        ? resolveCanonicalOptionValueSwatch(product, optionName, value)
+        : null;
+      const hasRequestedSwatch = swatchKind === 'color'
+        ? Boolean(swatch?.color)
+        : swatchKind === 'image'
+          ? Boolean(swatch?.image)
+          : false;
+      const control = runtimeDocument.createElement('label');
+      control.className = `vs-radio-control${hasRequestedSwatch ? ' vs-radio-control--swatch' : ''}`;
+      control.dataset.unavailable = selectable ? 'false' : 'true';
+      const input = runtimeDocument.createElement('input');
+      input.type = 'radio';
+      input.id = `${groupName}-value-${valueIndex + 1}`;
+      input.name = groupName;
+      input.value = String(value);
+      input.className = 'vs-input';
+      input.dataset.optionIndex = String(optionIndex);
+      input.checked = String(selectedVariant?.[`option${optionIndex}`] ?? '') === String(value);
+      input.disabled = !selectable;
+      input.setAttribute('aria-label', selectable ? String(value) : `${String(value)} — unavailable`);
+      const visual = runtimeDocument.createElement('span');
+      visual.className = 'vs-btn';
+      if (hasRequestedSwatch && swatchKind === 'color') {
+        visual.dataset.swatchKind = 'color';
+        visual.style.setProperty('--vs-swatch-color', String(swatch?.color));
+      } else if (hasRequestedSwatch && swatchKind === 'image') {
+        visual.dataset.swatchKind = 'image';
+        const imageUrl = VariantSelectorComponent._swatchImageUrl(swatch?.image);
+        if (imageUrl) {
+          const image = runtimeDocument.createElement('img');
+          image.src = imageUrl;
+          image.alt = '';
+          visual.append(image);
+        }
+      }
+      if (!hasRequestedSwatch || mode === 'pill') {
+        const text = runtimeDocument.createElement('span');
+        text.className = 'vs-btn-label';
+        text.textContent = String(value);
+        visual.append(text);
+      }
+      if (swatchTooltipEnabled && hasRequestedSwatch) control.title = String(value);
+      control.append(input, visual);
+      valuesElement.append(control);
+    });
+
+    group.append(label, valuesElement);
+    return group;
+  }
+
+  static _createNativeOptionSelect(options: any) {
+    const {
+      instanceId, optionIndex, optionName, selectedVariant, values, variants, runtimeDocument,
+    } = options;
+    const group = runtimeDocument.createElement('div');
+    group.className = 'vs-option-group vs-option-group--select';
+    const label = runtimeDocument.createElement('label');
+    label.className = 'vs-option-group-label';
+    label.htmlFor = `${instanceId}-select-${optionIndex}`;
+    label.textContent = optionName;
+    const select = runtimeDocument.createElement('select');
+    select.id = label.htmlFor;
+    select.className = 'vs-native-select';
+    select.dataset.optionIndex = String(optionIndex);
+    select.setAttribute('aria-label', optionName);
+    values.forEach((value: unknown) => {
+      const option = runtimeDocument.createElement('option');
+      option.value = String(value);
+      option.textContent = String(value);
+      option.selected = String(selectedVariant?.[`option${optionIndex}`] ?? '') === String(value);
+      option.disabled = !VariantSelectorComponent._hasSelectableVariant(variants, optionIndex, value);
+      select.append(option);
+    });
+    group.append(label, select);
+    return group;
+  }
 
   /**
    * Render the variant selector HTML for a product card.
@@ -48,63 +266,71 @@ class VariantSelectorComponent {
     if (variants.length <= 1 || options.length === 0) return null;
 
     const primaryIdx = VariantSelectorComponent._primaryIdx(options, primaryOptionName);
-    const primaryValues = VariantSelectorComponent._uniqueSelectableValues(variants, primaryIdx);
-    if (primaryValues.length === 0) return null;
-
-    const selectedVariant = variants.find((v: any)  => v.id === product.variantId);
-    const selectedPrimaryVal = selectedVariant
-      ? (selectedVariant[`option${primaryIdx}`] || primaryValues[0])
-      : primaryValues[0];
-
-    const MAX_VISIBLE = 4;
-    const visible = primaryValues.slice(0, MAX_VISIBLE);
-    const overflowCount = primaryValues.length - MAX_VISIBLE;
+    const selectedVariant = variants.find((variant: any) => (
+      String(variant.id) === String(product.variantId)
+    )) || variants[0];
+    const orderedOptionIndexes = [
+      primaryIdx,
+      ...options.map((_: unknown, index: number) => index + 1).filter((index: number) => index !== primaryIdx),
+    ];
+    const instanceId = nextSelectorInstanceId(
+      runtimeDocument,
+      product.id || product.productId || product.variantId,
+    );
 
     const root = runtimeDocument.createElement('div');
     root.className = 'vs-wrapper';
     root.dataset.vsProductId = String(product.id || product.variantId || '');
-    const buttonGroup = runtimeDocument.createElement('div');
-    buttonGroup.className = 'vs-btn-group';
-    visible.forEach(val => {
-      const sel = val === selectedPrimaryVal;
-      const button = runtimeDocument.createElement('button');
-      button.type = 'button';
-      button.className = ['vs-btn', sel ? 'vs-btn--selected' : ''].filter(Boolean).join(' ');
-      button.dataset.primaryOptIdx = String(primaryIdx);
-      button.dataset.primaryValue = String(val);
-      button.textContent = String(val);
-      buttonGroup.append(button);
-    });
-    if (overflowCount > 0) {
-      const overflow = runtimeDocument.createElement('button');
-      overflow.type = 'button';
-      overflow.className = 'vs-btn vs-btn--overflow';
-      overflow.dataset.overflow = '1';
-      overflow.dataset.primaryOptIdx = String(primaryIdx);
-      overflow.dataset.allValues = JSON.stringify(primaryValues);
-      overflow.textContent = `+${overflowCount}`;
-      buttonGroup.append(overflow);
-    }
-    root.append(buttonGroup);
+    orderedOptionIndexes.forEach((optionIndex) => {
+      const values = VariantSelectorComponent._uniqueValues(variants, optionIndex);
+      if (values.length === 0) return;
+      const optionName = options[optionIndex - 1] || `Option ${optionIndex}`;
+      const group = runtimeDocument.createElement('div');
+      group.className = 'vs-option-group';
+      group.setAttribute('role', 'radiogroup');
+      const label = runtimeDocument.createElement('span');
+      label.id = `${instanceId}-label-${optionIndex}`;
+      label.className = 'vs-option-group-label';
+      label.textContent = String(optionName);
+      group.setAttribute('aria-label', String(optionName));
+      group.setAttribute('aria-labelledby', label.id);
+      group.dataset.optionIndex = String(optionIndex);
+      const valuesElement = runtimeDocument.createElement('div');
+      valuesElement.className = 'vs-btn-group';
+      const groupName = `${instanceId}-option-${optionIndex}`;
 
-    // Secondary dimension pills (options beyond primary)
-    if (options.length > 1 && selectedVariant) {
-      const secondary = runtimeDocument.createElement('div');
-      secondary.className = 'vs-secondary';
-      options.forEach((optName: any, i: number) => {
-        if (i === primaryIdx - 1) return;
-        const optIdx = i + 1;
-        const val = selectedVariant[`option${optIdx}`];
-        if (!val) return;
-        const pill = runtimeDocument.createElement('button');
-        pill.type = 'button';
-        pill.className = 'vs-secondary-pill';
-        pill.dataset.optIdx = String(optIdx);
-        VariantSelectorComponent._replaceSecondaryPillContent(pill, optName, val);
-        secondary.append(pill);
+      values.forEach((value: unknown, valueIndex: number) => {
+        const selectable = VariantSelectorComponent._hasSelectableVariant(
+          variants,
+          optionIndex,
+          value,
+        );
+        const control = runtimeDocument.createElement('label');
+        control.className = 'vs-radio-control';
+        control.dataset.unavailable = selectable ? 'false' : 'true';
+        const input = runtimeDocument.createElement('input');
+        input.type = 'radio';
+        input.id = `${groupName}-value-${valueIndex + 1}`;
+        input.name = groupName;
+        input.value = String(value);
+        input.className = 'vs-input';
+        input.dataset.optionIndex = String(optionIndex);
+        input.checked = String(selectedVariant?.[`option${optionIndex}`] ?? '') === String(value);
+        input.disabled = !selectable;
+        input.setAttribute(
+          'aria-label',
+          selectable ? String(value) : `${String(value)} — unavailable`,
+        );
+        const visual = runtimeDocument.createElement('span');
+        visual.className = 'vs-btn';
+        visual.textContent = String(value);
+        control.append(input, visual);
+        valuesElement.append(control);
       });
-      if (secondary.childElementCount > 0) root.append(secondary);
-    }
+
+      group.append(label, valuesElement);
+      root.append(group);
+    });
     return root;
   }
 
@@ -121,10 +347,9 @@ class VariantSelectorComponent {
     const selectedLabel = options.placeholder || selectedPrimaryValue;
     const productId = product.id || product.variantId;
     const mobileMode = options.mobileMode === 'inline' ? 'inline' : 'drawer';
+    const instanceId = nextSelectorInstanceId(runtimeDocument, productId);
 
-    const dropdownVariants = options.hideUnavailable === true
-      ? variants.filter(VariantSelectorComponent._isSelectableVariant)
-      : variants;
+    const dropdownVariants = variants;
     const root = runtimeDocument.createElement('div');
     root.className = 'vs-wrapper vs-wrapper--standard';
     Object.assign(root.dataset, {
@@ -137,6 +362,8 @@ class VariantSelectorComponent {
     selected.type = 'button';
     selected.className = 'vs-selected';
     selected.setAttribute('aria-expanded', 'false');
+    selected.setAttribute('aria-haspopup', 'listbox');
+    selected.setAttribute('aria-controls', `${instanceId}-options`);
     const selectedText = runtimeDocument.createElement('span');
     selectedText.className = 'vs-selected-label';
     selectedText.textContent = String(selectedLabel);
@@ -146,6 +373,7 @@ class VariantSelectorComponent {
     selectedIcon.append(createChevronIcon(runtimeDocument));
     selected.append(selectedText, selectedIcon);
     const list = runtimeDocument.createElement('ul');
+    list.id = `${instanceId}-options`;
     list.className = 'vs-options';
     list.hidden = true;
     dropdownVariants.forEach((variant: any) => {
@@ -154,21 +382,25 @@ class VariantSelectorComponent {
       const imageUrl = VariantSelectorComponent._variantImageUrl(variant);
       const isAvailable = variant.available !== false;
       const item = runtimeDocument.createElement('li');
-      item.className = 'vs-option';
-      item.dataset.variantId = String(variant.id ?? '');
-      item.dataset.primaryValue = String(value);
-      if (!isAvailable) item.setAttribute('aria-disabled', 'true');
+      const control = runtimeDocument.createElement('button');
+      control.type = 'button';
+      control.className = 'vs-option';
+      control.dataset.variantId = String(variant.id ?? '');
+      control.dataset.primaryValue = String(value);
+      control.disabled = !isAvailable;
+      if (!isAvailable) control.setAttribute('aria-disabled', 'true');
       if (imageUrl) {
         const image = runtimeDocument.createElement('img');
         image.className = 'vs-option-image';
         image.src = imageUrl;
         image.alt = '';
-        item.append(image);
+        control.append(image);
       }
       const label = runtimeDocument.createElement('span');
       label.className = 'vs-option-label';
       label.textContent = String(value);
-      item.append(label);
+      control.append(label);
+      item.append(control);
       list.append(item);
     });
     root.append(selected, list);
@@ -292,25 +524,21 @@ class VariantSelectorComponent {
    */
   static attachListeners(cardEl: any, product: any, onVariantChange: any) {
     cardEl.addEventListener('click', (e: any) => {
-      const btn = e.target.closest('.vs-btn, .vs-secondary-pill');
-      if (!btn || btn.disabled) return;
+      if (!e.target.closest('.vs-radio-control')) return;
       e.stopPropagation();
+    });
 
-      if (btn.classList.contains('vs-btn--overflow')) {
-        VariantSelectorComponent._openOverflowPanel(btn, cardEl, product, onVariantChange);
-        return;
-      }
-
-      if (btn.classList.contains('vs-secondary-pill')) {
-        VariantSelectorComponent._openSecondaryPanel(btn, cardEl, product, onVariantChange);
-        return;
-      }
-
-      if (btn.classList.contains('vs-btn')) {
-        const primaryOptIdx = parseInt(btn.dataset.primaryOptIdx, 10);
-        const val = btn.dataset.primaryValue;
-        VariantSelectorComponent._selectPrimary(cardEl, product, primaryOptIdx, val, onVariantChange);
-      }
+    cardEl.addEventListener('change', (e: any) => {
+      const input = e.target.closest('.vs-input, .vs-native-select');
+      if (!input || input.disabled) return;
+      e.stopPropagation();
+      VariantSelectorComponent._selectPrimary(
+        cardEl,
+        product,
+        Number.parseInt(input.dataset.optionIndex, 10),
+        input.value,
+        onVariantChange,
+      );
     });
 
     cardEl.addEventListener('click', (e: any) => {
@@ -322,7 +550,7 @@ class VariantSelectorComponent {
       }
 
       const option = e.target.closest('.vs-option');
-      if (!option || option.getAttribute('aria-disabled') === 'true') return;
+      if (!option || option.disabled || option.getAttribute('aria-disabled') === 'true') return;
       e.stopPropagation();
       VariantSelectorComponent._selectStandardOption(cardEl, product, option, onVariantChange);
     });
@@ -332,8 +560,21 @@ class VariantSelectorComponent {
 
   static _primaryIdx(options: any[], primaryOptionName: string) {
     if (!primaryOptionName) return 1;
-    const idx = options.findIndex((o: string)  => o.toLowerCase() === primaryOptionName.toLowerCase());
+    const idx = options.findIndex((option: unknown) => (
+      VariantSelectorComponent._optionName(option).toLowerCase() === primaryOptionName.toLowerCase()
+    ));
     return idx >= 0 ? idx + 1 : 1;
+  }
+
+  static _optionName(option: unknown) {
+    if (option && typeof option === 'object' && 'name' in option) {
+      return String((option as { name?: unknown }).name ?? '');
+    }
+    return String(option ?? '');
+  }
+
+  static _swatchImageUrl(image: any) {
+    return image?.previewImage?.url || image?.url || image?.src || '';
   }
 
   static _uniqueValues(variants: any[], optIdx: number) {
@@ -355,6 +596,13 @@ class VariantSelectorComponent {
 
   static _isSelectableVariant(variant: any) {
     return variant?.available !== false;
+  }
+
+  static _hasSelectableVariant(variants: any[], optionIndex: number, value: unknown) {
+    return variants.some((variant: any) => (
+      String(variant?.[`option${optionIndex}`] ?? '') === String(value)
+      && VariantSelectorComponent._isSelectableVariant(variant)
+    ));
   }
 
   static _esc(str: string|null|undefined) {
@@ -402,19 +650,16 @@ class VariantSelectorComponent {
     );
     if (!newVariant) return;
 
-    // Update button group visual state
+    // Keep every dimension synchronized with the resolved variant.
     const wrapper = cardEl.querySelector('.vs-wrapper');
     if (wrapper) {
-      wrapper.querySelectorAll('.vs-btn:not(.vs-btn--overflow)').forEach((b: any)  => {
-        b.classList.toggle('vs-btn--selected', b.dataset.primaryValue === val);
+      wrapper.querySelectorAll('.vs-input').forEach((input: any) => {
+        const optionIndex = Number.parseInt(input.dataset.optionIndex, 10);
+        input.checked = String(newVariant[`option${optionIndex}`] ?? '') === String(input.value);
       });
-      // Update secondary pills
-      wrapper.querySelectorAll('.vs-secondary-pill').forEach((pill: any)  => {
-        const optIdx = parseInt(pill.dataset.optIdx, 10);
-        const label = pill.querySelector('.vs-secondary-label');
-        const optName = label ? label.textContent.replace(':', '').trim() : `Option ${optIdx}`;
-        const newVal = newVariant[`option${optIdx}`] || '';
-        VariantSelectorComponent._replaceSecondaryPillContent(pill, optName, newVal);
+      wrapper.querySelectorAll('.vs-native-select').forEach((select: any) => {
+        const optionIndex = Number.parseInt(select.dataset.optionIndex, 10);
+        select.value = String(newVariant[`option${optionIndex}`] ?? '');
       });
     }
 
@@ -430,106 +675,6 @@ class VariantSelectorComponent {
     onVariantChange(newVariant.id, oldVariantId);
   }
 
-  static _openOverflowPanel(overflowBtn: any, cardEl: any, product: any, onVariantChange: any) {
-    VariantSelectorComponent._closePanel(cardEl);
-
-    const primaryOptIdx = parseInt(overflowBtn.dataset.primaryOptIdx, 10);
-    let allValues;
-    try { allValues = JSON.parse(overflowBtn.dataset.allValues); }
-    catch (_: any) { allValues = VariantSelectorComponent._uniqueSelectableValues(product.variants || [], primaryOptIdx); }
-
-    const currentVariant = (product.variants || []).find((v: any)  => v.id === product.variantId);
-    const currentPrimary = currentVariant ? currentVariant[`option${primaryOptIdx}`] : null;
-
-    const panel = VariantSelectorComponent._makePanel();
-
-    allValues.forEach((val: string|null)  => {
-      const sel = val === currentPrimary;
-      const tile = VariantSelectorComponent._makeTile(val, sel, false);
-      tile.addEventListener('click', (e: any) => {
-        e.stopPropagation();
-        VariantSelectorComponent._selectPrimary(cardEl, product, primaryOptIdx, val, onVariantChange);
-        VariantSelectorComponent._closePanel(cardEl);
-      });
-      panel.appendChild(tile);
-    });
-
-    const wrapper = cardEl.querySelector('.vs-wrapper');
-    if (wrapper) wrapper.appendChild(panel);
-    VariantSelectorComponent._bindOutsideClose(panel, cardEl);
-  }
-
-  static _openSecondaryPanel(pill: any, cardEl: any, product: any, onVariantChange: (arg0: any,arg1: any) => void) {
-    VariantSelectorComponent._closePanel(cardEl);
-
-    const optIdx = parseInt(pill.dataset.optIdx, 10);
-    const currentVariant = (product.variants || []).find((v: any)  => v.id === product.variantId);
-    const currentVal = currentVariant ? currentVariant[`option${optIdx}`] : null;
-
-    // Determine primary selection to preserve it when picking a secondary value
-    const wrapper = cardEl.querySelector('.vs-wrapper');
-    const primaryBtn = wrapper?.querySelector('.vs-btn--selected');
-    const primaryOptIdx = primaryBtn ? parseInt(primaryBtn.dataset.primaryOptIdx, 10) : 1;
-    const currentPrimary = currentVariant ? currentVariant[`option${primaryOptIdx}`] : null;
-    const values = VariantSelectorComponent._uniqueValues((product.variants || []).filter((v: any)  => {
-      const matchesPrimary = !currentPrimary || v[`option${primaryOptIdx}`] === currentPrimary;
-      return matchesPrimary && VariantSelectorComponent._isSelectableVariant(v);
-    }), optIdx);
-
-    const panel = VariantSelectorComponent._makePanel('vs-panel--secondary');
-
-    values.forEach(val => {
-      const candidate = (product.variants || []).find((v: any)  => {
-        const matchesPrimary = !currentPrimary || v[`option${primaryOptIdx}`] === currentPrimary;
-        return matchesPrimary && v[`option${optIdx}`] === val && VariantSelectorComponent._isSelectableVariant(v);
-      });
-      const sel = val === currentVal;
-      const tile = VariantSelectorComponent._makeTile(val, sel, !candidate);
-
-      tile.addEventListener('click', (e: any) => {
-        e.stopPropagation();
-        if (!candidate) return;
-        const oldVariantId = product.variantId;
-        product.variantId = candidate.id;
-        product.price = candidate.price;
-        product.compareAtPrice = VariantSelectorComponent._resolveCompareAtPrice(candidate);
-        product.imageUrl = VariantSelectorComponent._variantImageUrl(candidate) || product.imageUrl;
-        product.available = candidate.available === true;
-        product.quantityAvailable = typeof candidate.quantityAvailable === 'number' ? candidate.quantityAvailable : null;
-        product.currentlyNotInStock = candidate.currentlyNotInStock === true;
-        // Update the pill text
-        const optName = pill.querySelector('.vs-secondary-label')?.textContent?.replace(':', '').trim() || `Option ${optIdx}`;
-        VariantSelectorComponent._replaceSecondaryPillContent(pill, optName, val);
-        onVariantChange(candidate.id, oldVariantId);
-        VariantSelectorComponent._closePanel(cardEl);
-      });
-
-      panel.appendChild(tile);
-    });
-
-    if (wrapper) wrapper.appendChild(panel);
-    VariantSelectorComponent._bindOutsideClose(panel, cardEl);
-  }
-
-  static _makePanel(extraClass = '') {
-    const panel = document.createElement('div');
-    panel.className = ['vs-panel', extraClass].filter(Boolean).join(' ');
-    panel.dataset.vsPanel = '1';
-    return panel;
-  }
-
-  static _replaceSecondaryPillContent(pill: HTMLElement, optionName: unknown, value: unknown) {
-    const runtimeDocument = pill.ownerDocument;
-    const label = runtimeDocument.createElement('span');
-    label.className = 'vs-secondary-label';
-    label.textContent = `${String(optionName ?? '')}:`;
-    const selected = runtimeDocument.createElement('strong');
-    selected.textContent = String(value ?? '');
-    const chevron = runtimeDocument.createElement('span');
-    chevron.className = 'vs-chevron';
-    chevron.textContent = '▾';
-    pill.replaceChildren(label, runtimeDocument.createTextNode(' '), selected, runtimeDocument.createTextNode(' '), chevron);
-  }
 
   static handleStandardSelectorClick(selected: any, cardEl: any, product: any, onVariantChange: any) {
     const wrapper = selected.closest('.vs-wrapper--standard');
@@ -735,6 +880,9 @@ class VariantSelectorComponent {
     selected.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
     if (willOpen) {
       VariantSelectorComponent._bindStandardOutsideClose(panel, selected);
+      VariantSelectorComponent._bindStandardKeyboard(panel, selected);
+      const firstOption = panel.querySelector('.vs-option:not(:disabled)') as HTMLElement | null;
+      firstOption?.focus?.({ preventScroll: true });
     }
   }
 
@@ -763,6 +911,35 @@ class VariantSelectorComponent {
     if (panel) panel.hidden = true;
 
     onVariantChange(candidate.id, oldVariantId);
+    selected?.focus?.({ preventScroll: true });
+  }
+
+  static _bindStandardKeyboard(panel: HTMLElement, selected: HTMLElement) {
+    panel.onkeydown = (event: KeyboardEvent) => {
+      const controls = Array.from(
+        panel.querySelectorAll<HTMLElement>('.vs-option:not(:disabled)'),
+      );
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        panel.hidden = true;
+        selected.setAttribute('aria-expanded', 'false');
+        selected.focus({ preventScroll: true });
+        return;
+      }
+      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key) || controls.length === 0) {
+        return;
+      }
+      event.preventDefault();
+      const currentIndex = controls.indexOf(panel.ownerDocument.activeElement as HTMLElement);
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? controls.length - 1
+          : event.key === 'ArrowUp'
+            ? (currentIndex - 1 + controls.length) % controls.length
+            : (currentIndex + 1) % controls.length;
+      controls[nextIndex]?.focus({ preventScroll: true });
+    };
   }
 
   static _bindStandardOutsideClose(panel: any, selected: any) {
@@ -786,30 +963,6 @@ class VariantSelectorComponent {
       || null;
   }
 
-  static _makeTile(label: string|null, isSelected: boolean, isOos: boolean) {
-    const tile = document.createElement('button');
-    tile.type = 'button';
-    tile.className = ['vs-panel-tile', isSelected ? 'vs-panel-tile--selected' : '', isOos ? 'vs-panel-tile--oos' : ''].filter(Boolean).join(' ');
-    tile.textContent = label;
-    if (isOos) tile.disabled = true;
-    return tile;
-  }
-
-  static _closePanel(cardEl: any) {
-    cardEl.querySelector('[data-vs-panel]')?.remove();
-  }
-
-  static _bindOutsideClose(panel: HTMLDivElement, cardEl: any) {
-    setTimeout(() => {
-      const close = (e: any) => {
-        if (!panel.contains(e.target)) {
-          VariantSelectorComponent._closePanel(cardEl);
-          document.removeEventListener('click', close);
-        }
-      };
-      document.addEventListener('click', close);
-    }, 0);
-  }
 }
 
 export { VariantSelectorComponent };

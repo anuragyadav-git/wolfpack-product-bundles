@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, signed settings, Shopify-hosted CSS, market pricing, and fail-closed hydration architecture.
-last_audited: 2026-09-11
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -124,13 +124,25 @@ PPB Horizontal Slots (`PDP_MODAL/MODAL`) and Vertical Slots (`PDP_MODAL/SIMPLIFI
 
 The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
 
-All four PPB templates resolve grouped-variant presentation from the active
+All four PPB templates and all four FPB templates resolve grouped-variant presentation from the active
 category's canonical `variantSelectorMode`: Dropdown, Pills, Color swatches, or
-Image swatches. Non-dropdown modes are semantic radio groups with unavailable
-values disabled. Color and image swatches use Shopify Storefront API
+Image swatches. Each Shopify option dimension owns one visible label and one
+selector group in canonical option order. Dropdown groups use labeled native
+selects; groups presented as non-dropdown controls use uniquely named native
+radios. In a multi-dimensional Color swatches or Image swatches configuration,
+a dimension without the requested canonical Shopify swatch kind uses one
+labeled native select while mapped dimensions retain the configured swatch
+radios. Explicit Dropdown and Pills modes remain unchanged. Repeated card,
+modal, and picker instances receive instance-scoped IDs and group names.
+Unavailable values remain present and disabled rather than being filtered for
+fit. Color and image swatches use Shopify Storefront API
 `ProductOptionValue.swatch` data matched through each variant's
 `selectedOptions`. Missing Shopify swatches retain a neutral labeled
-presentation; the runtime does not infer colors or substitute variant images.
+presentation for a single swatch dimension; in multi-dimensional swatch mode an
+entirely unmapped dimension uses the compact native-select presentation. The
+runtime does not infer colors or substitute variant images.
+The FPB product-details modal uses the same canonical resolver, so color-like
+labels such as `Black` remain text controls unless Shopify supplies a swatch.
 Cached product snapshots that lack canonical option values and selected options
 are rehydrated before a swatch selector renders. Optional color tooltips are
 described to keyboard focus, clamp/flip at viewport edges on precise pointers,
@@ -142,6 +154,23 @@ trap queries native interactive controls as one combined selector so results
 stay in document order and variant radios remain keyboard reachable. A variant
 rerender restores focus to the replacement selected radio without scrolling,
 preserving arrow-key exploration and its focus tooltip.
+
+FPB persists those modes through the existing `StepCategory` fields and emits
+them in the storefront category contract. For a two-dimensional pill or swatch
+mode, the primary or canonically mapped dimension remains a visible native-radio
+group and every additional dimension becomes one labeled native select. FPB
+Dropdown mode retains complete-variant selection and its existing mobile policy.
+The shared product-card renderer always creates a selector region; when any card
+in the current grid renders a configured selector, sibling cards reserve that
+region alongside their independent media, identity, price, and action regions.
+The renderer owns one semantic and visual order for every selector mode:
+selector controls precede the variant price, which precedes the Add or quantity
+action. Template CSS may change card direction or action geometry, but cannot
+move pricing or the primary action ahead of the selector region.
+Every FPB control keeps unavailable variants or values present with disabled semantics.
+Presentation changes delegate exactly one update through the existing product
+card or product-details owner, which remains responsible for variant identity,
+price, image, inventory, quantity clamping, summary state, and Add eligibility.
 
 Horizontal/Vertical modal cards keep these grouped-variant selectors inline at
 every viewport. Product images and titles are informational and do not open a

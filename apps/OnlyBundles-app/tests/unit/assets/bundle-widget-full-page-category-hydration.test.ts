@@ -9,6 +9,7 @@ const {
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   fullPageProductGridMethods,
+  resolveVariantSelectorCategory,
 } = require('../../../app/assets/widgets/full-page/methods/product-grid-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
@@ -77,6 +78,8 @@ describe('Full Page widget category hydration behavior', () => {
           title: 'Manual',
           products: [{ selectionId: 'gid://shopify/Product/1' }],
           collections: [],
+          variantSelectorMode: 'color_swatch',
+          swatchTooltipEnabled: true,
         },
         {
           id: 'cat-collection',
@@ -94,6 +97,8 @@ describe('Full Page widget category hydration behavior', () => {
         handles: [],
         productIds: ['gid://shopify/Product/1'],
         displayVariantsAsIndividualProducts: false,
+        variantSelectorMode: 'color_swatch',
+        swatchTooltipEnabled: true,
       },
       {
         id: 'cat-collection',
@@ -101,6 +106,8 @@ describe('Full Page widget category hydration behavior', () => {
         handles: ['automated-collection'],
         productIds: [],
         displayVariantsAsIndividualProducts: false,
+        variantSelectorMode: 'dropdown',
+        swatchTooltipEnabled: false,
       },
     ]);
   });
@@ -124,8 +131,30 @@ describe('Full Page widget category hydration behavior', () => {
         handles: [],
         productIds: [],
         displayVariantsAsIndividualProducts: false,
+        variantSelectorMode: 'dropdown',
+        swatchTooltipEnabled: false,
       },
     ]);
+  });
+
+  it('uses an unnamed sole category as the product-card variant selector owner', () => {
+    const category = {
+      id: 'cat-default',
+      title: '',
+      variantSelectorMode: 'pill',
+      swatchTooltipEnabled: false,
+    };
+
+    expect(resolveVariantSelectorCategory({ categories: [category] }, null)).toBe(category);
+  });
+
+  it('does not guess a selector owner when multiple categories have no active tab', () => {
+    expect(resolveVariantSelectorCategory({
+      categories: [
+        { id: 'cat-one', variantSelectorMode: 'pill' },
+        { id: 'cat-two', variantSelectorMode: 'color_swatch' },
+      ],
+    }, null)).toBeNull();
   });
 
   it('uses the saved FPB step-level variant display flag for category tabs', () => {

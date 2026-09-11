@@ -45,6 +45,11 @@ export function getProductCarouselSwipeDirection({
   return horizontalDistance < 0 ? 1 : -1;
 }
 
+function hasMeaningfulDescription(element: HTMLElement) {
+  if (element.textContent?.trim()) return true;
+  return Boolean(element.querySelector('img, picture, video, iframe, svg, canvas'));
+}
+
 export class BundleProductModal {
   widget: any;
   modalElement: any;
@@ -422,7 +427,6 @@ export class BundleProductModal {
     const displayTitle = this.currentProduct.parentTitle || this.currentProduct.title;
     document.getElementById('modal-product-title')!.textContent = displayTitle;
 
-    // Keep the description row mounted so the modal layout remains stable.
     const descriptionEl = document.getElementById('modal-product-description')!;
     const descriptionHtml = typeof this.currentProduct.descriptionHtml === 'string'
       ? this.currentProduct.descriptionHtml.trim()
@@ -432,6 +436,7 @@ export class BundleProductModal {
     } else {
       descriptionEl.textContent = this.currentProduct.description || '';
     }
+    descriptionEl.hidden = !hasMeaningfulDescription(descriptionEl);
 
     // Load image
     this.loadImage();

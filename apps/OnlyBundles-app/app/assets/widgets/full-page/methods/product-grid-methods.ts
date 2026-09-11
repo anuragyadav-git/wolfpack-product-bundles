@@ -43,6 +43,13 @@ export function shouldCategoryTabActivateProducts(_context?: any) {
   return true;
 }
 
+export function resolveVariantSelectorCategory(step: any, activeCategory: any) {
+  if (activeCategory) return activeCategory;
+
+  const categories = Array.isArray(step?.categories) ? step.categories : [];
+  return categories.length === 1 ? categories[0] : null;
+}
+
 export const fullPageProductGridMethods: Record<string, any> & ThisType<any> = {
 scrollActiveCategoryTitleIntoView() {
   if (!shouldScrollActiveCategoryTitleIntoView(this.getFullPageDesignPreset?.())) return;
@@ -248,6 +255,7 @@ createFullPageProductGrid(stepIndex: string|number) {
 
 
   const activeCategory = this.getActiveStepCategoryEntry(step);
+  const variantSelectorCategory = resolveVariantSelectorCategory(step, activeCategory);
   const activeCollectionId = activeCategory ? activeCategory.id : this.activeCollectionId;
 
   // Filter by active category/collection if selected
@@ -305,6 +313,8 @@ createFullPageProductGrid(stepIndex: string|number) {
   expandedProducts.forEach((product: any)  => {
     const productCard = this.createProductCard(product, stepIndex, {
       displayVariantsAsIndividualProducts: shouldDisplayVariantsAsIndividual,
+      variantSelectorMode: variantSelectorCategory?.variantSelectorMode,
+      swatchTooltipEnabled: variantSelectorCategory?.swatchTooltipEnabled === true,
     });
     grid.appendChild(productCard);
   });

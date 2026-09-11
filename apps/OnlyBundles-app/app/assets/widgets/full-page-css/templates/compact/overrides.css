@@ -1116,3 +1116,60 @@
     transition: none;
   }
 }
+
+.layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-card-cta-mode="icon"]
+  .sidebar-content
+  .product-card:has(.vs-wrapper) {
+  height: auto;
+  grid-template-rows: auto auto;
+  overflow: visible;
+}
+
+.layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-card-cta-mode="icon"]
+  .sidebar-content
+  .product-card:has(.vs-wrapper)
+  .product-content-wrapper {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-card-cta-mode="icon"]
+  .sidebar-content
+  .product-card:has(.vs-wrapper)
+  .product-card-price-action {
+  grid-template-columns:
+    minmax(0, 1fr)
+    var(--compact-action-track);
+  grid-template-rows: auto var(--compact-action-visual-height);
+  grid-auto-rows: auto;
+  align-self: start;
+}
+
+.layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-card-cta-mode="icon"]
+  .sidebar-content
+  .product-card:has(.vs-wrapper)
+  .vs-wrapper {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  align-self: start;
+}
+
+.layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-card-cta-mode="icon"]
+  .sidebar-content
+  .product-card:has(.vs-wrapper)
+  .product-price-row {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.layout-sidebar[data-fpb-design-preset="COMPACT"][data-fpb-card-cta-mode="icon"]
+  .sidebar-content
+  .product-card:has(.vs-wrapper)
+  .product-card-action {
+  grid-column: 2;
+  grid-row: 2;
+}

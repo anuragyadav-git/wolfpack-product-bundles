@@ -230,7 +230,6 @@ renderVariantSelector(product: any, step: any) {
   return VariantSelectorComponent.createDropdownElement(product, primaryOptionName, {
     placeholder: this._resolveText?.('chooseOptionsButton', 'Choose Options') || 'Choose Options',
     mobileMode: 'drawer',
-    hideUnavailable: true,
   });
 },
 
