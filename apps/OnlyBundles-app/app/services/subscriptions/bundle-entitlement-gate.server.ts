@@ -7,7 +7,7 @@ import {
 import { Prisma } from "@prisma/client";
 import db from "../../db.server";
 
-const PUBLICATION_TRANSACTION_TIMEOUT_MS = 10_000;
+const PUBLICATION_TRANSACTION_TIMEOUT_MS = 30_000;
 
 interface BundlePublicationGateInput {
   candidate: BundleEntitlementCandidate;
@@ -114,6 +114,36 @@ export async function updateBundleWithPublicationGate<T = unknown>(
     return database.bundle.update({
       where: { id: input.bundleId, shopId: input.shopDomain },
       data: { ...input.data, publishedAt: input.now ?? new Date() },
+      ...(input.include ? { include: input.include } : {}),
+    } as any) as unknown as Promise<T>;
+  }
+
+  const existingBundle = await database.bundle.findUnique({
+    where: { id: input.bundleId, shopId: input.shopDomain },
+    select: { status: true, publishedAt: true },
+  });
+  const wasAlreadyPublic = existingBundle?.status === "active"
+    || existingBundle?.status === "unlisted";
+
+  if (wasAlreadyPublic) {
+    const otherPublicBundleCount = await database.bundle.count({
+      where: {
+        shopId: input.shopDomain,
+        id: { not: input.bundleId },
+        status: { in: ["active", "unlisted"] },
+      },
+    });
+    assertBundlePublicationAllowed({
+      candidate: input.candidate,
+      entitlements: input.entitlements,
+      otherPublicBundleCount,
+    });
+    return database.bundle.update({
+      where: { id: input.bundleId, shopId: input.shopDomain },
+      data: {
+        ...input.data,
+        publishedAt: existingBundle.publishedAt ?? input.now ?? new Date(),
+      },
       ...(input.include ? { include: input.include } : {}),
     } as any) as unknown as Promise<T>;
   }

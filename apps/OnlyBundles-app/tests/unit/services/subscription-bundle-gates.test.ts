@@ -127,7 +127,13 @@ describe("updateBundleWithPublicationGate", () => {
     };
     const database = {
       $transaction: jest.fn().mockImplementation((callback) => callback(tx)),
-      bundle: { update: jest.fn() },
+      bundle: {
+        findUnique: jest.fn().mockResolvedValue({
+          status: "draft",
+          publishedAt: null,
+        }),
+        update: jest.fn(),
+      },
     };
 
     await expect(updateBundleWithPublicationGate({
@@ -144,7 +150,7 @@ describe("updateBundleWithPublicationGate", () => {
 
     expect(database.$transaction).toHaveBeenCalledWith(
       expect.any(Function),
-      { timeout: 10_000 },
+      { timeout: 30_000 },
     );
     expect(tx.$queryRaw).toHaveBeenCalledTimes(1);
     expect(tx.bundle.count).toHaveBeenCalledWith({
@@ -168,10 +174,10 @@ describe("updateBundleWithPublicationGate", () => {
       .toBeLessThan(tx.bundle.update.mock.invocationCallOrder[0]);
   });
 
-  it("preserves the original publication timestamp when an already-public bundle is saved", async () => {
+  it("keeps already-public bundle writes outside the publication transaction", async () => {
     const originalPublishedAt = new Date("2026-08-20T08:00:00.000Z");
-    const tx = {
-      $queryRaw: jest.fn().mockResolvedValue([{ id: "shop-db-id" }]),
+    const database = {
+      $transaction: jest.fn(),
       bundle: {
         findUnique: jest.fn().mockResolvedValue({
           status: "active",
@@ -180,10 +186,6 @@ describe("updateBundleWithPublicationGate", () => {
         count: jest.fn().mockResolvedValue(0),
         update: jest.fn().mockResolvedValue({ id: "bundle-1", status: "active" }),
       },
-    };
-    const database = {
-      $transaction: jest.fn().mockImplementation((callback) => callback(tx)),
-      bundle: { update: jest.fn() },
     };
 
     await updateBundleWithPublicationGate({
@@ -196,7 +198,15 @@ describe("updateBundleWithPublicationGate", () => {
       now: new Date("2026-08-29T12:00:00.000Z"),
     });
 
-    expect(tx.bundle.update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(database.$transaction).not.toHaveBeenCalled();
+    expect(database.bundle.count).toHaveBeenCalledWith({
+      where: {
+        shopId: "shop.myshopify.com",
+        id: { not: "bundle-1" },
+        status: { in: ["active", "unlisted"] },
+      },
+    });
+    expect(database.bundle.update).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({ publishedAt: originalPublishedAt }),
     }));
   });
