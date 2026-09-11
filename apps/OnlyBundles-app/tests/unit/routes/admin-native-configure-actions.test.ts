@@ -299,14 +299,11 @@ describe("native configure actions", () => {
 
   it("clears a PPB step image through the route-owned draft callbacks", () => {
     const markAsDirty = jest.fn();
-    const setShowIconPickerForStep = jest.fn();
     const updateStepField = jest.fn();
     flushSync(() => {
       root.render(
         React.createElement(PpbStepConfigCard, {
           markAsDirty,
-          setShowIconPickerForStep,
-          showIconPickerForStep: null,
           step: { id: "step-1", stepImage: "https://cdn.shopify.com/step.png" },
           stepsState: { updateStepField },
         } as unknown as React.ComponentProps<typeof PpbStepConfigCard>)
@@ -315,7 +312,6 @@ describe("native configure actions", () => {
 
     clickAction("adminAttributes.removeStepIcon");
     expect(updateStepField).toHaveBeenCalledWith("step-1", "stepImage", null);
-    expect(setShowIconPickerForStep).toHaveBeenCalledWith(null);
     expect(markAsDirty).toHaveBeenCalledTimes(1);
   });
 

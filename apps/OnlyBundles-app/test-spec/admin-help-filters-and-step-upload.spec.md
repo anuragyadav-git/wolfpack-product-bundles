@@ -17,6 +17,7 @@ systems:
 source_paths:
   - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/FreeGiftAddonProductsCard.tsx
   - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupConfigCard.tsx
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbStepConfigCard.tsx
   - apps/OnlyBundles-app/app/routes/app/app.dashboard/DashboardBundlesPanel.tsx
   - apps/OnlyBundles-app/app/components/shared/AssetUpload.tsx
 related_docs:
@@ -48,7 +49,7 @@ Keep the affected Admin flows Shopify-native by separating informational and nav
 | 2 | Add-ons setup guide | Render Add-Ons with Bundles card | A separate external link points to the configured setup article | Opens in a new tab |
 | 3 | Dashboard filters | Render the bundles panel | Status and Type are visible labels and existing filter choices remain available | Side-by-side placement is verified in Chrome, not Jest |
 | 4 | Compact upload composition | Render AssetUpload with compact content | The supplied preview is inside the one native drop zone and the default separate preview is omitted | Preserves Shopify Files API behavior |
-| 5 | Step image upload | Render FPB Step Config | The icon tile is the native drop zone, Replace and the conditional large drop zone are absent, and removal remains a separate action | No nested interactive control |
+| 5 | Step image upload | Render FPB or PPB Step Config | The icon tile is the native drop zone, Replace and the conditional large drop zone are absent, and removal remains a separate action | No nested interactive control |
 
 ## Acceptance Criteria
 
@@ -56,5 +57,14 @@ Keep the affected Admin flows Shopify-native by separating informational and nav
 - [x] The configured Add-ons article opens separately from the information popover.
 - [x] Dashboard Status and Type labels are visible and both selects remain functional.
 - [x] The FPB Step Config card has one direct image drop zone and no Replace action.
+- [x] The PPB Step Config card has one direct image drop zone and no Replace action.
 - [x] Desktop 1280x800 and the Chrome host's minimum real 500x844 window show no overflow, overlap, or misplaced controls.
 - [ ] Exact 390x844 real-window QA; the direct Chrome host clamps both `innerWidth` and `outerWidth` to 500px and viewport emulation is prohibited.
+
+## PPB Step Config Verification
+
+- The Agent-store `Preview RCA PPB 2026-09-04` fixture rendered one compact
+  upload target beside Step Title after cache-bypassing reloads at 1280x800 and
+  the Chrome host's minimum real 500x844 window.
+- Neither viewport showed a Replace action, second drop zone, overlap, clipping,
+  or horizontal overflow. No viewport emulation was used.

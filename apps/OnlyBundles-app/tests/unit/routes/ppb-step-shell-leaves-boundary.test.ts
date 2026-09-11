@@ -1,4 +1,5 @@
 import React from "react";
+import { AssetUpload } from "../../../app/components/shared/AssetUpload";
 
 import {
   PpbStepFlowCard,
@@ -76,8 +77,6 @@ describe("PPB Step Setup shell leaves", () => {
     const updateStepField = jest.fn();
     const props = {
       markAsDirty: jest.fn(),
-      setShowIconPickerForStep: jest.fn(),
-      showIconPickerForStep: null,
       step,
       stepsState: { steps: [step], updateStepField },
     } as unknown as PpbStepConfigCardProps;
@@ -93,5 +92,29 @@ describe("PPB Step Setup shell leaves", () => {
       "pageTitle",
       "Bundle step",
     );
+  });
+
+  it("updates the step image through the native upload owner", () => {
+    const markAsDirty = jest.fn();
+    const updateStepField = jest.fn();
+    const props = {
+      markAsDirty,
+      step,
+      stepsState: { steps: [step], updateStepField },
+    } as unknown as PpbStepConfigCardProps;
+
+    const view = PpbStepConfigCard(props);
+    const upload = findElement(
+      view,
+      (element) => element.type === AssetUpload,
+    );
+    upload!.props.onChange("https://cdn.shopify.com/step.png");
+
+    expect(updateStepField).toHaveBeenCalledWith(
+      "step-1",
+      "stepImage",
+      "https://cdn.shopify.com/step.png",
+    );
+    expect(markAsDirty).toHaveBeenCalledTimes(1);
   });
 });

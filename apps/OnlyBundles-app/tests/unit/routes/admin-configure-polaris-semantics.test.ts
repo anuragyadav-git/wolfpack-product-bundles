@@ -24,7 +24,19 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("../../../app/components/shared/AssetUpload", () => ({
-  AssetUpload: () => null,
+  AssetUpload: ({
+    label,
+    labelAccessibilityVisibility,
+  }: {
+    label?: string;
+    labelAccessibilityVisibility?: string;
+  }) => {
+    const ReactModule: typeof React = jest.requireActual("react");
+    return ReactModule.createElement("s-drop-zone", {
+      label,
+      labelAccessibilityVisibility,
+    });
+  },
 }));
 
 jest.mock(
@@ -203,21 +215,23 @@ describe("configure Polaris semantics", () => {
     }
   });
 
-  it("gives the PPB step-image replacement action an accessible name", () => {
+  it("gives the PPB step-image drop zone an accessible name", () => {
     flushSync(() => {
       root.render(
         React.createElement(PpbStepConfigCard, {
           markAsDirty: jest.fn(),
-          setShowIconPickerForStep: jest.fn(),
-          showIconPickerForStep: null,
           step: { id: "step-1", stepImage: null },
           stepsState: { updateStepField: jest.fn() },
         } as unknown as React.ComponentProps<typeof PpbStepConfigCard>)
       );
     });
 
-    const replaceAction = container.querySelector('s-button[icon="replace"]');
-    expect(replaceAction?.getAttribute("accessibilitylabel")).toBeTruthy();
+    const dropZone = container.querySelector("s-drop-zone");
+    expect(dropZone?.getAttribute("label")).toBeTruthy();
+    expect(dropZone?.getAttribute("labelaccessibilityvisibility")).toBe(
+      "exclusive",
+    );
+    expect(container.querySelector('s-button[icon="replace"]')).toBeNull();
   });
 
   it("names the remaining FPB and PPB add and replace icon actions", () => {

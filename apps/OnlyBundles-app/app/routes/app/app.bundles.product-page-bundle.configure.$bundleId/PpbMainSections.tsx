@@ -118,8 +118,6 @@ export function PpbMainSections({ flow }: { flow: PpbConfigureFlow }) {
           }}
           config={{
             markAsDirty: flow.markAsDirty,
-            setShowIconPickerForStep: flow.setShowIconPickerForStep,
-            showIconPickerForStep: flow.showIconPickerForStep,
             stepsState: flow.stepsState,
           }}
         />

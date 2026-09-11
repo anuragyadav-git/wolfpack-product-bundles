@@ -165,8 +165,8 @@ Media previews use Polaris `s-image`, and product/list media use `s-thumbnail`;
 the app does not maintain a custom responsive-picture wrapper for Admin media.
 Empty upload surfaces provide a Shopify upload icon as `s-drop-zone` content;
 they do not nest a second Polaris button inside the native drop zone.
-In FPB Step Config, the compact icon tile is itself the one native drop zone;
-the route does not keep picker-open state or reveal a second large upload
+In FPB and PPB Step Config, the compact icon tile is itself the one native drop
+zone; neither surface keeps picker-open state or reveals a second large upload
 surface. A saved image remains replaceable through that same drop zone, and its
 remove action stays outside the drop zone so interactive controls are not nested.
 
@@ -264,10 +264,11 @@ controls remain visible but disabled, and the Admin save payload forces
 `productSlotsEnabled=false` while the configuration is incompatible.
 
 Step Config uses the shared square step-image control beside the Step Title
-fields, with an explicit gap between those columns. Upload and Replace reveal
-the shared `AssetUpload` surface, which delegates selection and drag-and-drop to
-one named Polaris `s-drop-zone`. The app does not maintain a file-library modal,
-search, pagination, faux drop target, or a separate clickable upload action.
+fields, with an explicit gap between those columns. The compact tile always
+renders the shared `AssetUpload` surface, which delegates selection and
+drag-and-drop to one named Polaris `s-drop-zone`. The app does not maintain a
+file-library modal, search, pagination, faux drop target, separate Replace
+button, or second expanded upload surface.
 The selected file is posted through the App Bridge-authenticated
 `/app/upload-store-file` resource route, staged as Shopify image media, created
 through the Admin Files API, and polled until Shopify returns its READY CDN URL.
