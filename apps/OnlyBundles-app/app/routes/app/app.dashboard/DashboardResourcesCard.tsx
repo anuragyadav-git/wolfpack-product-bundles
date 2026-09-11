@@ -30,23 +30,19 @@ export function DashboardResourcesCard({
             }}
             onClick={() => setActiveResource("bundle-inspirations")}
           >
-            <div className={dashboardStyles.resourceItemIcon}>
+            <s-stack direction="inline" alignItems="center" gap="base">
               <s-icon type="image" />
-            </div>
-            <span className={dashboardStyles.resourceItemLabel}>
-              {t("dashboard.resources.bundleInspiration")}
-            </span>
+              <s-text>{t("dashboard.resources.bundleInspiration")}</s-text>
+            </s-stack>
           </s-clickable>
           <s-clickable
             {...{ className: dashboardStyles.resourceItem }}
             onClick={handleDirectChat}
           >
-            <div className={dashboardStyles.resourceItemIcon}>
+            <s-stack direction="inline" alignItems="center" gap="base">
               <s-icon type="question-circle" />
-            </div>
-            <span className={dashboardStyles.resourceItemLabel}>
-              {t("dashboard.resources.support")}
-            </span>
+              <s-text>{t("dashboard.resources.support")}</s-text>
+            </s-stack>
           </s-clickable>
           <s-clickable
             {...{ className: dashboardStyles.resourceItem }}
@@ -54,12 +50,10 @@ export function DashboardResourcesCard({
             target="_blank"
             accessibilityLabel={t("dashboard.resources.sdkDocumentation")}
           >
-            <div className={dashboardStyles.resourceItemIcon}>
+            <s-stack direction="inline" alignItems="center" gap="base">
               <s-icon type="code" />
-            </div>
-            <span className={dashboardStyles.resourceItemLabel}>
-              {t("dashboard.resources.sdkDocumentation")}
-            </span>
+              <s-text>{t("dashboard.resources.sdkDocumentation")}</s-text>
+            </s-stack>
           </s-clickable>
         </div>
 

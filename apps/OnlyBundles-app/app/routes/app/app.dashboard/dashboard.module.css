@@ -572,19 +572,6 @@
   opacity: 0.65;
 }
 
-.resourceItemIcon {
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-  color: currentColor;
-}
-
-.resourceItemLabel {
-  flex: 1;
-  font-size: 14px;
-  line-height: 1.2;
-}
-
 .resourcesThumbnails {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
