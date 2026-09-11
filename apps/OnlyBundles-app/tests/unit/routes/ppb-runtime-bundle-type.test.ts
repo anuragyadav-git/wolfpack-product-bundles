@@ -16,9 +16,12 @@ describe("PPB sync bundle type", () => {
   it("preserves the canonical Product Page type", () => {
     const config = buildSyncBundleConfiguration(
       bundle(BundleType.PRODUCT_PAGE),
-      "gid://shopify/Product/1",
+      "gid://shopify/Product/1"
     );
 
+    expect(config.id).toBe("bundle-1");
+    expect(config).not.toHaveProperty("bundleId");
+    expect(config).not.toHaveProperty("updatedAt");
     expect(config.bundleType).toBe(BundleType.PRODUCT_PAGE);
   });
 
@@ -28,9 +31,9 @@ describe("PPB sync bundle type", () => {
       expect(() =>
         buildSyncBundleConfiguration(
           bundle(bundleType),
-          "gid://shopify/Product/1",
-        ),
+          "gid://shopify/Product/1"
+        )
       ).toThrow("PPB sync requires bundleType product_page");
-    },
+    }
   );
 });

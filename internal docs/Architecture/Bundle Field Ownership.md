@@ -5,7 +5,7 @@ title: Bundle Field Ownership
 type: architecture
 status: authoritative
 summary: Canonical ownership ledger for persisted bundle fields, public runtime fields, Shopify custom data, and retired aliases.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -127,6 +127,11 @@ Save and explicit Sync Bundle calls execute the current Shopify writer directly.
 Errors propagate to the caller. The database does not persist a second queue or
 attempt-state model. Deployment general sync replays this same writer; it does
 not own a parallel bundle serializer.
+
+The FPB and PPB live sync builders carry one bundle identity, `id`. They do not
+create a `bundleId` alias, a response timestamp, or sync-only transport fields.
+The superseded save-time configuration builders and Shopify Page redirect
+helper have no current owner and are removed.
 
 Variant custom data consists of component references, component quantities,
 price adjustment, bundle UI config, and component pricing. The retired

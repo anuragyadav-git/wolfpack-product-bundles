@@ -5,7 +5,7 @@ title: Compatibility Residue Removal Test Spec
 type: test-spec
 status: active
 summary: Defines canonical-only behavior after verified legacy data and mutation paths are retired.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -78,6 +78,7 @@ Remove ongoing compatibility work after the configured database reports no legac
 | 14 | Admin component and analytics imports | Billing and Analytics routes consume their feature owners | Consumers import the exact component, helper, or type owner | Pure compatibility re-export barrels are removed |
 | 15 | Shopify Page residue migration | Existing schema contains the four retired Page columns and handle index | Forward migration drops the index and all four columns | Dashboard deletion performs no Shopify Page mutation |
 | 16 | Storefront upsell membership | Persisted FPB or PPB step contains only retired `categories` or category `collectionsSelectedData` aliases | Upsell and embed selection ignore the aliases while canonical `StepCategory[].collections` remains eligible | `StepCategory` is the sole category-relation owner |
+| 17 | Storefront sync configuration identity | Current FPB or PPB persisted bundle | The live sync builder emits canonical `id` with no `bundleId` alias or generated response timestamp | Shopify writer derives `$app.bundle_ui_config` from this single identity |
 
 ## Acceptance Criteria
 
@@ -96,3 +97,6 @@ Remove ongoing compatibility work after the configured database reports no legac
 - [x] The Prisma schema and dashboard deletion flow have no Shopify Page-field owner or cleanup branch.
 - [x] FPB upsell and PPB embed selectors ignore retired persisted category aliases.
 - [x] Focused tests, typecheck, ESLint, widget builds, and diff checks pass.
+- [x] Live FPB and PPB storefront-sync builders emit only canonical `id` and
+  no response timestamp; dead Page redirect and superseded save-time builders
+  are removed.
