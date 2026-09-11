@@ -1,32 +1,28 @@
 import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepCategoryFooter({
-  styles,
   step,
   onAddCategory,
   onDisplayVariantsChange,
 }: {
-  styles: Record<string, string>;
   step: any;
   onAddCategory: () => void;
   onDisplayVariantsChange: (enabled: boolean) => void;
 }) {
   return (
     <>
-      <div className={styles.addSectionButton}>
-        <s-button
-          variant="secondary"
-          icon="plus"
-          accessibilityLabel={translateAdmin(
-            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
-          )}
-          onClick={onAddCategory}
-        >
-          {translateAdmin(
-            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
-          )}
-        </s-button>
-      </div>
+      <s-button
+        variant="secondary"
+        icon="plus"
+        accessibilityLabel={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
+        )}
+        onClick={onAddCategory}
+      >
+        {translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
+        )}
+      </s-button>
       <div style={{ margin: "12px 0" }}>
         <s-divider />
       </div>

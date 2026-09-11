@@ -63,7 +63,6 @@ export function FpbStepCategoryCard({
           />
         ))}
         <FpbStepCategoryFooter
-          styles={styles}
           step={step}
           onAddCategory={onAddCategory}
           onDisplayVariantsChange={onDisplayVariantsChange}

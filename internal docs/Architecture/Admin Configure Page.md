@@ -186,7 +186,9 @@ separate cards below.
 
 Compact configure commands such as Add Step, Add Category, Add Rule, clone,
 delete, selected-resource removal, and reset use Polaris `s-button`;
-selected-resource counts use `s-clickable-chip`. A row-sized action that must
+their layout parents must not add a second button-like border, background,
+hover state, or hit target. Selected-resource counts use `s-clickable-chip`. A
+row-sized action that must
 own the full available width, such as Edit Product or adding an add-on tier or
 tier rule, uses `s-clickable` with `inlineSize="100%"`. The clickable owns its
 handler directly and must not wrap an `s-button`. Bundle-product Replace and Sync

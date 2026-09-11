@@ -17,6 +17,7 @@ source_paths:
   - app/components/bundle-configure/LocalAppModal.tsx
   - app/components/EnablePreviewModal.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupRuleModeContent.tsx
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupCategoryFooter.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupSection.tsx
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbStepFlowCard.tsx
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbStepCategoriesCard.tsx
@@ -106,6 +107,7 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 | 31 | Open Dashboard support chat | Merchant activates the support CTA | Existing chat callback runs once and the icon action exposes its localized accessible name | Satisfies the Polaris icon-button contract |
 | 32 | Advance or dismiss the guided tour | Merchant activates Next, Got it, or Dismiss guided tour | Existing step, completion, dismissal, persistence, and focus-restoration behavior runs exactly once | The retained spotlight overlay uses native Polaris buttons for ordinary actions |
 | 33 | Expand Bundle Level CSS | FPB or PPB disclosure is open | One visible section label remains and the text-area label is available only to assistive technology | The padded native clickable owns the complete disclosure row |
+| 34 | Render FPB add actions | Merchant views Add Category or Add Rule | Each command is one native Polaris button and retains its route-owned callback | No faux-button parent or nested interactive owner |
 
 ## Acceptance Criteria
 
@@ -127,6 +129,18 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 - [x] Guided-tour actions use native Polaris buttons without changing the retained spotlight workflow.
 - [x] FPB and PPB Bundle Level CSS use one padded native disclosure row and do
   not repeat the field label visually.
+- [x] FPB Add Category and Add Rule actions use the same direct native-button
+  composition as their PPB counterparts.
+
+## FPB Add Action Verification
+
+- Agent-store desktop QA compared the hard-reloaded FPB and PPB Step Setup
+  cards. Add Category and Add Rule render as the same compact native Polaris
+  buttons, without the FPB-only full-width faux-button border.
+- Agent-store minimum-width QA passed at Chrome's actual 500x844 window after a
+  390x844 resize request. Both bundle types kept their add actions within the
+  card with no clipping, overlap, or horizontal overflow. No viewport emulation
+  was used, and the pages reported no new console errors.
 
 ## Bundle Level CSS Verification
 

@@ -305,22 +305,20 @@ export function FpbStepRuleModeContent({
                         }
                       />
                     )}
-                    <div className={styles.addSectionButton}>
-                      <s-button
-                        variant="secondary"
-                        icon="plus"
-                        accessibilityLabel={translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
-                        )}
-                        onClick={() =>
-                          addCategoryConditionRule(step.id, catIndex)
-                        }
-                      >
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
-                        )}
-                      </s-button>
-                    </div>
+                    <s-button
+                      variant="secondary"
+                      icon="plus"
+                      accessibilityLabel={translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+                      )}
+                      onClick={() =>
+                        addCategoryConditionRule(step.id, catIndex)
+                      }
+                    >
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+                      )}
+                    </s-button>
                   </div>
                 )}
               </div>
@@ -461,23 +459,19 @@ export function FpbStepRuleModeContent({
               )}
             </div>
           )}
-          <div className={styles.addSectionButton}>
-            <s-button
-              variant="secondary"
-              icon="plus"
-              accessibilityLabel={translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
-              )}
-              disabled={
-                (stepConditions[step.id] || []).length >= 2 || undefined
-              }
-              onClick={() => addStepConditionRule(step.id)}
-            >
-              {translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
-              )}
-            </s-button>
-          </div>
+          <s-button
+            variant="secondary"
+            icon="plus"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+            )}
+            disabled={(stepConditions[step.id] || []).length >= 2 || undefined}
+            onClick={() => addStepConditionRule(step.id)}
+          >
+            {translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+            )}
+          </s-button>
           {(stepConditions[step.id] || []).length >= 2 ? (
             <s-stack direction="inline" alignItems="center" gap="small">
               <s-icon type="alert-triangle" tone="caution" />

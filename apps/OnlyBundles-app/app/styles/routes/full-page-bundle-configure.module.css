@@ -2637,35 +2637,6 @@
   display: block;
 }
 
-.addSectionButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  min-height: 28px;
-  padding: 4px 12px;
-  border: 1px solid #c9cccf;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #202223;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-  margin-top: 8px;
-}
-
-.addSectionButton:hover {
-  background: #f6f6f7;
-  border-color: #8c9196;
-}
-
-.addSectionButton:active {
-  background: #edeeef;
-}
-
 /* ── Step Summary Side Card ───────────────────────────────────── */
 .sideCard {
   background: white;

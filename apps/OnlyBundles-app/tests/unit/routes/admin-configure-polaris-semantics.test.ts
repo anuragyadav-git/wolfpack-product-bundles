@@ -99,6 +99,24 @@ describe("configure Polaris semantics", () => {
     }
   }
 
+  it("delegates the FPB Add Category action to its route owner", () => {
+    const onAddCategory = jest.fn();
+    const view = FpbStepCategoryFooter({
+      onAddCategory,
+      onDisplayVariantsChange: jest.fn(),
+      step: {},
+    });
+    const addCategoryAction = findElements(
+      view,
+      (element) =>
+        element.type === "s-button" && element.props.icon === "plus"
+    );
+
+    expect(addCategoryAction).toHaveLength(1);
+    addCategoryAction[0].props.onClick();
+    expect(onAddCategory).toHaveBeenCalledTimes(1);
+  });
+
   it("uses one FPB choice list to switch the mutually exclusive rule mode", () => {
     const addStepConditionRule = jest.fn();
     const clearCategoryConditionRules = jest.fn();
@@ -240,7 +258,6 @@ describe("configure Polaris semantics", () => {
         onAddCategory: jest.fn(),
         onDisplayVariantsChange: jest.fn(),
         step: {},
-        styles: {},
       })
     );
     expectIconActionsNamed(
