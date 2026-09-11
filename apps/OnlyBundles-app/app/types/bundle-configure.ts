@@ -39,7 +39,6 @@ export interface BundleStep {
 export interface BundleStatusSectionProps {
   status: BundleStatus;
   onChange: (status: BundleStatus) => void;
-  showHeading?: boolean;
 }
 
 export interface ActionResponse {

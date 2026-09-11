@@ -93,6 +93,12 @@ or control affordance is not a header icon and does not need to follow this
 composition. The distinction is semantic: if the icon visually introduces the
 adjacent title, it is part of the header row.
 
+When a card heading and its only form control use the same label, keep the
+Polaris `s-heading` as the single visible section label and set the control's
+`labelAccessibilityVisibility="exclusive"`. The control retains its
+programmatic label without repeating the same copy for merchants. FPB and PPB
+Bundle Status share this contract.
+
 ## Layout and structure ownership
 
 Use the smallest documented Polaris layout primitive that owns the required

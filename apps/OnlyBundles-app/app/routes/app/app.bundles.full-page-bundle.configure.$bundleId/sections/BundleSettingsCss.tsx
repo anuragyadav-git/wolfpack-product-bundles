@@ -72,7 +72,6 @@ export function FpbBundleCssSettings({
           <BundleStatusSection
             status={bundleStatus}
             onChange={setBundleStatus}
-            showHeading={false}
           />
         </s-section>
       </div>
