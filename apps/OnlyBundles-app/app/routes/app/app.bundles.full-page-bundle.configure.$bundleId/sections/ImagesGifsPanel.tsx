@@ -34,23 +34,29 @@ export function FpbImagesGifsPanel({
           <s-section>
             <s-stack direction="block" gap="base">
               <s-grid
-                gridTemplateColumns="auto minmax(0, 1fr) auto"
+                gridTemplateColumns="minmax(0, 1fr) auto"
                 gap="base"
                 alignItems="start"
               >
-                <s-icon type="upload" />
-                <s-stack direction="block" gap="small-400">
-                  <s-text type="strong">
-                    {translateAdmin(
-                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.promoBanner"
-                    )}
-                  </s-text>
-                  <s-text color="subdued">
-                    {translateAdmin(
-                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.wideBannerDisplayedAtTheTopOfTheFullPageBundle"
-                    )}
-                  </s-text>
-                </s-stack>
+                <s-grid
+                  gridTemplateColumns="auto minmax(0, 1fr)"
+                  gap="base"
+                  alignItems="start"
+                >
+                  <s-icon type="upload" />
+                  <s-stack direction="block" gap="small-400">
+                    <s-text type="strong">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.promoBanner"
+                      )}
+                    </s-text>
+                    <s-text color="subdued">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.wideBannerDisplayedAtTheTopOfTheFullPageBundle"
+                      )}
+                    </s-text>
+                  </s-stack>
+                </s-grid>
                 <s-badge tone="info">
                   {translateAdmin(
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.pageHeader"
@@ -96,23 +102,29 @@ export function FpbImagesGifsPanel({
           <s-section>
             <s-stack direction="block" gap="base">
               <s-grid
-                gridTemplateColumns="auto minmax(0, 1fr) auto"
+                gridTemplateColumns="minmax(0, 1fr) auto"
                 gap="base"
                 alignItems="start"
               >
-                <s-icon type="note" />
-                <s-stack direction="block" gap="small-400">
-                  <s-text type="strong">
-                    {translateAdmin(
-                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.floatingPromoBadge"
-                    )}
-                  </s-text>
-                  <s-text color="subdued">
-                    {translateAdmin(
-                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks"
-                    )}
-                  </s-text>
-                </s-stack>
+                <s-grid
+                  gridTemplateColumns="auto minmax(0, 1fr)"
+                  gap="base"
+                  alignItems="start"
+                >
+                  <s-icon type="note" />
+                  <s-stack direction="block" gap="small-400">
+                    <s-text type="strong">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.floatingPromoBadge"
+                      )}
+                    </s-text>
+                    <s-text color="subdued">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks"
+                      )}
+                    </s-text>
+                  </s-stack>
+                </s-grid>
                 <s-badge tone="info">
                   {translateAdmin(
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.storefront"

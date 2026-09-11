@@ -4,8 +4,8 @@ id: polaris-app-home-web-components
 title: Polaris App Home Web Components Reference
 type: reference
 status: authoritative
-summary: Canonical source for Polaris web component usage in the Wolfpack admin UI, with the Shopify App Home web components documentation as the source of truth.
-last_audited: 2026-09-10
+summary: Canonical source for Polaris web component usage and durable design decisions in the Wolfpack admin UI, with Shopify App Home web components as the source of truth.
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -21,6 +21,7 @@ source_paths:
   - app/routes/app/app.settings/SettingsLandingShell.tsx
   - app/routes/app/app.bundles.create/BundleTypeSelectionCard.tsx
   - app/routes/app/_shared/bundle-configure/CommonConfigureShell.tsx
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ImagesGifsPanel.tsx
 related_docs:
   - internal docs/Architecture/Diagrams/Admin UI Frontend Architecture.md
   - internal docs/Architecture/Admin Configure Page.md
@@ -61,6 +62,36 @@ When implementing or auditing admin-facing UI in this repo, treat that documenta
   outside-click listeners for these overlays. Interactive filter or preset
   pills use `s-clickable-chip`; route state continues to own only the selected
   value and resulting navigation or mutation.
+
+## Admin UI design philosophy and durable decisions
+
+This file is the single authority for cross-Admin visual composition decisions.
+Record new durable Admin UI design principles here rather than scattering them
+across feature notes. Feature architecture documents may link to this reference
+and document feature-specific exceptions, but must not establish a conflicting
+global pattern.
+
+Admin surfaces should communicate hierarchy through consistent alignment before
+adding decoration. For any card or content-group header with an icon:
+
+- Keep the icon and title inline in the same row.
+- Put the description in the title's content column, immediately below the
+  title, so both begin at the same inline position.
+- Put a contextual badge or compact action in a trailing `auto` grid column on
+  that header row.
+- Compose the pattern with an outer two-column `s-grid` and a nested two-column
+  `s-grid` (`auto minmax(0, 1fr)`) containing the icon plus a block `s-stack` for
+  title and description. The explicit inner grid prevents the copy column from
+  wrapping below the icon at narrow widths. Do not make icon, copy, and trailing
+  context three independent columns of the outer grid.
+- Use an `s-heading` when the title establishes a semantic section boundary;
+  use strong `s-text` only for a subordinate card label beneath an existing
+  section boundary.
+
+An icon used as a centered illustration, empty-state graphic, status indicator,
+or control affordance is not a header icon and does not need to follow this
+composition. The distinction is semantic: if the icon visually introduces the
+adjacent title, it is part of the header row.
 
 ## Layout and structure ownership
 

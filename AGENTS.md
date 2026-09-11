@@ -190,6 +190,12 @@ When visual parity requires measured evidence, keep exact measurements in docs o
 
 Use Polaris web components (`s-*`) for **all** Admin-embedded app UI. Fall back to custom HTML only when no Polaris component exists.
 
+Before changing Admin UI composition, read
+`internal docs/Shopify Integration/Polaris Web Components Reference.md`. It is
+the single authority for durable cross-Admin design philosophy and composition
+decisions. Add any new reusable Admin UI design decision to that file instead
+of scattering it through feature-specific notes.
+
 **Components (polaris-app-home surface):**
 - Actions: `s-button`, `s-button-group`, `s-link`, `s-menu`
 - Forms: `s-checkbox`, `s-select`, `s-text-field`, `s-text-area`, `s-switch`, `s-number-field`, `s-search-field`, `s-drop-zone`
