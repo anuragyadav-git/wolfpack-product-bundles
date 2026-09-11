@@ -217,27 +217,7 @@ export function CommonStepCategoryAccordion({
       }}
       onDrop={(event: React.DragEvent) => handleCatDrop(event, step.id, catKey)}
     >
-      <div
-        className={styles.categoryAccordionHeader}
-        role="button"
-        aria-expanded={isOpen}
-        tabIndex={0}
-        onClick={() =>
-          setCategoryOpen((prev) => ({
-            ...prev,
-            [catKey]: !prev[catKey],
-          }))
-        }
-        onKeyDown={(event: React.KeyboardEvent) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            setCategoryOpen((prev) => ({
-              ...prev,
-              [catKey]: !prev[catKey],
-            }));
-          }
-        }}
-      >
+      <div className={styles.categoryAccordionHeader} data-expanded={isOpen}>
         <span
           className={styles.categoryDrag}
           aria-hidden="true"
@@ -251,9 +231,28 @@ export function CommonStepCategoryAccordion({
         >
           ::
         </span>
-        <span className={styles.categoryName}>
-          {cat.name || `Category ${catIndex + 1}`}
-        </span>
+        <s-clickable
+          inlineSize="100%"
+          aria-expanded={isOpen}
+          onClick={() =>
+            setCategoryOpen((prev) => ({
+              ...prev,
+              [catKey]: !prev[catKey],
+            }))
+          }
+        >
+          <s-stack
+            direction="inline"
+            alignItems="center"
+            justifyContent="space-between"
+            gap="small"
+          >
+            <span className={styles.categoryName}>
+              {cat.name || `Category ${catIndex + 1}`}
+            </span>
+            <s-icon type={isOpen ? "chevron-up" : "chevron-down"} />
+          </s-stack>
+        </s-clickable>
         <div
           className={styles.categoryActions}
           onClick={(event: React.MouseEvent) => event.stopPropagation()}
@@ -291,20 +290,6 @@ export function CommonStepCategoryAccordion({
             }}
           ></s-button>
         </div>
-        <button
-          type="button"
-          className={styles.categoryChevron}
-          aria-label={isOpen ? "Collapse category" : "Expand category"}
-          onClick={(event: React.MouseEvent) => {
-            event.stopPropagation();
-            setCategoryOpen((prev) => ({
-              ...prev,
-              [catKey]: !prev[catKey],
-            }));
-          }}
-        >
-          {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-        </button>
       </div>
       {isOpen && (
         <div className={styles.categoryAccordionBody}>
@@ -437,46 +422,5 @@ export function CommonStepCategoryAccordion({
         </div>
       )}
     </div>
-  );
-}
-
-
-function ChevronUpIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M3 9L7 5L11 9"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M3 5L7 9L11 5"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

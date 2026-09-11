@@ -14,6 +14,7 @@ import {
   CommonConfigureSupplement,
 } from "../../../app/routes/app/_shared/bundle-configure/CommonConfigureSidebar";
 import { CommonStepCategoryAccordion } from "../../../app/routes/app/_shared/bundle-configure/CommonStepCategoryAccordion";
+import { FpbAddonTierEditor } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/FreeGiftAddonTierEditor";
 import {
   SelectedCollectionsPanel,
   SelectedProductsPanel,
@@ -458,6 +459,102 @@ describe("native configure actions", () => {
       [categories[1]]
     );
     expect(markAsDirty).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps category expansion separate from clone and delete actions", () => {
+    const setCategoryOpen = jest.fn();
+    const styles = new Proxy<Record<string, string>>(
+      {},
+      { get: (_target, property) => String(property) }
+    );
+
+    flushSync(() => {
+      root.render(
+        React.createElement(CommonStepCategoryAccordion, {
+          adapter: {
+            categoryActiveTabs: {},
+            categoryOpen: {},
+            draggedCatKey: null,
+            dragOverCatKey: null,
+            handleCatDragEnd: jest.fn(),
+            handleCatDragStart: jest.fn(),
+            handleCatDrop: jest.fn(),
+            hidePolarisModal: jest.fn(),
+            markAsDirty: jest.fn(),
+            openStepCategoryMultiLanguageModal: jest.fn(),
+            setCategoryActiveTabs: jest.fn(),
+            setCategoryOpen,
+            setDragOverCatKey: jest.fn(),
+            shopify: {},
+            showPolarisModal: jest.fn(),
+            stepsState: { updateStepField: jest.fn() },
+            translationActionsDisabled: false,
+            styles,
+          },
+          cat: {
+            id: "category-1",
+            name: "Category 1",
+            products: [],
+            collections: [],
+          },
+          catIndex: 0,
+          step: { id: "step-1", StepCategory: [] },
+        })
+      );
+    });
+
+    const expandAction = Array.from(
+      container.querySelectorAll<HTMLElement>("s-clickable")
+    ).find((element) => element.textContent?.includes("Category 1"));
+    expect(expandAction).toBeDefined();
+    expect(expandAction?.querySelector("s-button, button")).toBeNull();
+    expect(
+      container.querySelector(
+        's-button[accessibilitylabel="adminAttributes.clone"]'
+      )
+        ?.closest("s-clickable")
+    ).toBeNull();
+
+    flushSync(() => {
+      expandAction?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(setCategoryOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps FPB add-on tier expansion separate from its delete action", () => {
+    const onActiveTierIndexChange = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(FpbAddonTierEditor, {
+          activeTierIndex: null,
+          tiers: [{ title: "Tier 1", conditions: [] }],
+          styles: new Proxy<Record<string, string>>(
+            {},
+            { get: (_target, property) => String(property) }
+          ),
+          onActiveTierIndexChange,
+          onAddProducts: jest.fn(),
+          onOpenSelectedProducts: jest.fn(),
+          onTiersChange: jest.fn(),
+        })
+      );
+    });
+
+    const expandAction = Array.from(
+      container.querySelectorAll<HTMLElement>("s-clickable")
+    ).find((element) => element.textContent?.includes("adminDynamic.tierNumber"));
+    const deleteAction = container.querySelector<HTMLElement>(
+      's-button[accessibilitylabel="Delete Tier 1"]'
+    );
+    expect(expandAction).toBeDefined();
+    expect(expandAction?.querySelector("s-button, button")).toBeNull();
+    expect(deleteAction?.closest("s-clickable")).toBeNull();
+
+    flushSync(() => {
+      expandAction?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(onActiveTierIndexChange).toHaveBeenCalledTimes(1);
   });
 
   it("preserves selected product and collection removal callbacks", () => {

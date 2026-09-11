@@ -108,6 +108,8 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 | 32 | Advance or dismiss the guided tour | Merchant activates Next, Got it, or Dismiss guided tour | Existing step, completion, dismissal, persistence, and focus-restoration behavior runs exactly once | The retained spotlight overlay uses native Polaris buttons for ordinary actions |
 | 33 | Expand Bundle Level CSS | FPB or PPB disclosure is open | One visible section label remains and the text-area label is available only to assistive technology | The padded native clickable owns the complete disclosure row |
 | 34 | Render FPB add actions | Merchant views Add Category or Add Rule | Each command is one native Polaris button and retains its route-owned callback | No faux-button parent or nested interactive owner |
+| 35 | Expand a shared category | Merchant activates the category label row | One Polaris clickable toggles the existing category state without containing clone or delete buttons | Compact category commands remain independent siblings |
+| 36 | Expand an FPB add-on tier | Merchant activates the tier label row | One Polaris clickable toggles the existing tier state without containing the delete button | The accordion header has no nested interactive owner |
 
 ## Acceptance Criteria
 
@@ -131,6 +133,8 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
   not repeat the field label visually.
 - [x] FPB Add Category and Add Rule actions use the same direct native-button
   composition as their PPB counterparts.
+- [x] Shared category and FPB add-on-tier accordion headers use independent
+  Polaris action owners with no nested buttons.
 
 ## FPB Add Action Verification
 

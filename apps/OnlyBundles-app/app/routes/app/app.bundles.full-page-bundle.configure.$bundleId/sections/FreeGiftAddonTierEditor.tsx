@@ -110,32 +110,42 @@ export function FpbAddonTierEditor({
                     className={`${styles.addonsTierHeader} ${
                       isActiveTier ? styles.addonsTierHeaderActive : ""
                     }`}
-                    role="button"
-                    tabIndex={0}
-                    aria-expanded={isActiveTier}
-                    onClick={() =>
-                      onActiveTierIndexChange((currentIndex) =>
-                        getNextAddonTierAccordionIndex(currentIndex, idx)
-                      )
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
+                  >
+                    <s-clickable
+                      inlineSize="100%"
+                      aria-expanded={isActiveTier}
+                      onClick={() =>
                         onActiveTierIndexChange((currentIndex) =>
                           getNextAddonTierAccordionIndex(currentIndex, idx)
-                        );
+                        )
                       }
-                    }}
-                  >
-                    <span
-                      className={styles.addonsTierDragPlaceholder}
-                      aria-hidden="true"
-                    />
-                    <h4 className={styles.addonsTierTitle}>
-                      {translateAdmin("adminDynamic.tierNumber", {
-                        number: idx + 1,
-                      })}
-                    </h4>
+                    >
+                      <s-stack
+                        direction="inline"
+                        gap="small"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <s-stack
+                          direction="inline"
+                          gap="small"
+                          alignItems="center"
+                        >
+                          <span
+                            className={styles.addonsTierDragPlaceholder}
+                            aria-hidden="true"
+                          />
+                          <s-text type="strong">
+                            {translateAdmin("adminDynamic.tierNumber", {
+                              number: idx + 1,
+                            })}
+                          </s-text>
+                        </s-stack>
+                        <s-icon
+                          type={isActiveTier ? "chevron-up" : "chevron-down"}
+                        />
+                      </s-stack>
+                    </s-clickable>
                     <div
                       className={styles.categoryActions}
                       onMouseDown={(event) => event.stopPropagation()}
@@ -154,19 +164,6 @@ export function FpbAddonTierEditor({
                         }}
                       />
                     </div>
-                    <s-button
-                      variant="tertiary"
-                      icon={isActiveTier ? "arrow-left" : "arrow-right"}
-                      accessibilityLabel={
-                        isActiveTier ? "Collapse tier" : "Expand tier"
-                      }
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onActiveTierIndexChange((currentIndex) =>
-                          getNextAddonTierAccordionIndex(currentIndex, idx)
-                        );
-                      }}
-                    />
                   </div>
                   {isActiveTier && (
                     <div className={styles.addonsTierBody}>

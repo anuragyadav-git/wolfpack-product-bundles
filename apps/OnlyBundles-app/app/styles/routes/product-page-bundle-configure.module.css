@@ -1607,27 +1607,6 @@
   composes: categoryDragOver from "./bundle-configure-shared.module.css";
 }
 
-.categoryChevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: #303030;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.12s, color 0.12s;
-}
-
-.categoryChevron:hover {
-  background: #f1f2f4;
-  color: #202223;
-}
-
 .catNameRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

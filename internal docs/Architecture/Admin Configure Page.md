@@ -211,6 +211,10 @@ navigation chips; drag handles and complex accordion headers; the guided-tour
 overlay; and controls projected into App Bridge title bars, save bars, or the
 maximum-size template modal. Those exceptions keep only their local interaction
 role and must not duplicate Shopify-owned dialog, focus, or form behavior.
+An accordion row with compact actions uses sibling interaction owners: one
+`s-clickable` owns only the label-and-chevron expansion target, while clone,
+delete, or other `s-button` commands remain outside it. A custom `role="button"`
+container must never contain Polaris buttons.
 
 FPB and PPB Bundle Level CSS share the same disclosure contract. One padded,
 full-width `s-clickable` header owns the complete label-and-chevron row,

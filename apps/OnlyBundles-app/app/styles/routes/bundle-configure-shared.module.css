@@ -615,26 +615,16 @@
 
 .categoryAccordionHeader {
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto 28px;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 8px 16px 8px 20px;
   min-height: 48px;
   background: #f7f7f7;
-  cursor: pointer;
   user-select: none;
 }
 
-.categoryAccordionHeader:hover {
-  background: #f3f3f3;
-}
-
-.categoryAccordionHeader:focus-visible {
-  outline: 2px solid #005bd3;
-  outline-offset: 2px;
-}
-
-.categoryAccordionHeader[aria-expanded="true"] {
+.categoryAccordionHeader[data-expanded="true"] {
   border-bottom: 1px solid #e5e7eb;
   background: #f7f7f7;
 }
