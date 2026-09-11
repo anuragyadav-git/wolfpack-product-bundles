@@ -80,66 +80,60 @@ export function PpbRulesConfigurationCard({
 
   return (
     <div className={productPageBundleStyles.card}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          marginBottom: 4,
-        }}
-      >
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+      <s-stack direction="block" gap="base">
+        <s-grid
+          gridTemplateColumns="minmax(0, 1fr) auto"
+          gap="base"
+          alignItems="center"
+        >
+          <s-stack direction="inline" gap="small" alignItems="center">
+            <s-heading>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+              )}
+            </s-heading>
+            <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
+          </s-stack>
+          <s-link href={TUTORIAL_LINKS.productPageRules} target="_blank">
+            {translateAdmin("common.actions.learnMore")}
+          </s-link>
+        </s-grid>
+        <s-text color="subdued">
           {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
+          )}
+        </s-text>
+        <div
+          role="radiogroup"
+          aria-label={translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
           )}
-        </h3>
-        <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
-      </div>
-      <p
-        style={{
-          margin: "0 0 8px",
-          fontSize: 14,
-          color: "#6d7175",
-        }}
-      >
-        {translateAdmin(
-          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
+        >
+          <s-stack direction="inline" gap="base">
+            {ruleModeOptions.map((opt) => (
+              <label key={opt.value}>
+                <input
+                  type="radio"
+                  name={`step-rule-mode-${step.id}`}
+                  value={opt.value}
+                  checked={activeRuleMode === opt.value}
+                  onChange={() => handleRuleModeChange(opt.value)}
+                />{" "}
+                {opt.label}
+              </label>
+            ))}
+          </s-stack>
+        </div>
+        {activeRuleMode === "category" ? (
+          <PpbCategoryRulesList
+            adapter={categoryRulesAdapter}
+            step={step}
+            stepCategories={stepCategories}
+          />
+        ) : (
+          <PpbStepRulesList conditionsState={conditionsState} step={step} />
         )}
-      </p>
-      <s-box paddingBlockEnd="base">
-        <s-link href={TUTORIAL_LINKS.productPageRules} target="_blank">
-          {translateAdmin("common.actions.learnMore")}
-        </s-link>
-      </s-box>
-      <s-choice-list
-        label={translateAdmin(
-          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
-        )}
-        labelAccessibilityVisibility="exclusive"
-        name={`step-rule-mode-${step.id}`}
-        values={[activeRuleMode]}
-        onChange={(event) => {
-          const nextMode = (
-            event.currentTarget as HTMLElement & { values?: string[] }
-          ).values?.[0];
-          if (nextMode) handleRuleModeChange(nextMode);
-        }}
-      >
-        {ruleModeOptions.map((opt) => (
-          <s-choice key={opt.value} value={opt.value}>
-            {opt.label}
-          </s-choice>
-        ))}
-      </s-choice-list>
-      {activeRuleMode === "category" ? (
-        <PpbCategoryRulesList
-          adapter={categoryRulesAdapter}
-          step={step}
-          stepCategories={stepCategories}
-        />
-      ) : (
-        <PpbStepRulesList conditionsState={conditionsState} step={step} />
-      )}
+      </s-stack>
     </div>
   );
 }

@@ -117,7 +117,7 @@ describe("configure Polaris semantics", () => {
     expect(onAddCategory).toHaveBeenCalledTimes(1);
   });
 
-  it("uses one FPB choice list to switch the mutually exclusive rule mode", () => {
+  it("uses one FPB radio group to switch the mutually exclusive rule mode", () => {
     const addStepConditionRule = jest.fn();
     const clearCategoryConditionRules = jest.fn();
 
@@ -139,23 +139,25 @@ describe("configure Polaris semantics", () => {
         updateStepConditionRule: jest.fn(),
       },
     });
-    const choiceLists = findElements(
+    const radioGroups = findElements(
       view,
-      (element) => element.type === "s-choice-list"
+      (element) => element.props.role === "radiogroup"
     );
 
-    expect(choiceLists).toHaveLength(1);
-    expect(
-      findElements(view, (element) => element.type === "s-choice")
-    ).toHaveLength(2);
+    expect(radioGroups).toHaveLength(1);
+    const radios = findElements(
+      view,
+      (element) => element.type === "input" && element.props.type === "radio"
+    );
+    expect(radios).toHaveLength(2);
     expectIconActionsNamed(view);
 
-    choiceLists[0].props.onChange({ currentTarget: { values: ["step"] } });
+    radios.find((radio) => radio.props.value === "step")?.props.onChange();
     expect(clearCategoryConditionRules).toHaveBeenCalledWith("step-1");
     expect(addStepConditionRule).toHaveBeenCalledWith("step-1");
   });
 
-  it("uses one PPB choice list to switch the mutually exclusive rule mode", () => {
+  it("uses one PPB radio group to switch the mutually exclusive rule mode", () => {
     const addCategoryConditionRule = jest.fn();
     const clearStepConditions = jest.fn();
 
@@ -176,17 +178,19 @@ describe("configure Polaris semantics", () => {
         ],
       },
     } as unknown as React.ComponentProps<typeof PpbRulesConfigurationCard>);
-    const choiceLists = findElements(
+    const radioGroups = findElements(
       view,
-      (element) => element.type === "s-choice-list"
+      (element) => element.props.role === "radiogroup"
     );
 
-    expect(choiceLists).toHaveLength(1);
-    expect(
-      findElements(view, (element) => element.type === "s-choice")
-    ).toHaveLength(3);
+    expect(radioGroups).toHaveLength(1);
+    const radios = findElements(
+      view,
+      (element) => element.type === "input" && element.props.type === "radio"
+    );
+    expect(radios).toHaveLength(3);
 
-    choiceLists[0].props.onChange({ currentTarget: { values: ["category"] } });
+    radios.find((radio) => radio.props.value === "category")?.props.onChange();
     expect(clearStepConditions).toHaveBeenCalledWith("step-1");
     expect(addCategoryConditionRule).toHaveBeenCalledWith("step-1", 0);
   });

@@ -16,38 +16,31 @@ export function FpbStepRulesCard({
   return (
     <>
       <div className={styles.card}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            marginBottom: 4,
-          }}
-        >
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+        <s-stack direction="block" gap="base">
+          <s-grid
+            gridTemplateColumns="minmax(0, 1fr) auto"
+            gap="base"
+            alignItems="center"
+          >
+            <s-stack direction="inline" gap="small" alignItems="center">
+              <s-heading>
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+                )}
+              </s-heading>
+              <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
+            </s-stack>
+            <s-link href={TUTORIAL_LINKS.fullPageRules} target="_blank">
+              {translateAdmin("common.actions.learnMore")}
+            </s-link>
+          </s-grid>
+          <s-text color="subdued">
             {translateAdmin(
-              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
             )}
-          </h3>
-          <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
-        </div>
-        <p
-          style={{
-            margin: "0 0 8px",
-            fontSize: 14,
-            color: "#6d7175",
-          }}
-        >
-          {translateAdmin(
-            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
-          )}
-        </p>
-        <s-box paddingBlockEnd="base">
-          <s-link href={TUTORIAL_LINKS.fullPageRules} target="_blank">
-            {translateAdmin("common.actions.learnMore")}
-          </s-link>
-        </s-box>
-        <FpbStepRuleModeContent {...ruleMode} step={step} />
+          </s-text>
+          <FpbStepRuleModeContent {...ruleMode} step={step} />
+        </s-stack>
       </div>
     </>
   );

@@ -212,14 +212,26 @@ including its whitespace. The heading is the only visible section label; the
 expanded `s-text-area` keeps its associated label exclusive to assistive
 technology. Neither bundle type adds a second click owner or custom hit area.
 
-Mutually exclusive modes use one Shopify-owned `s-choice-list` per question,
-with every valid `s-choice` as a direct child and the current value supplied
-through the list's `values` property. FPB and PPB rule modes, widget
-presentation, progress presentation, and subscription purchase scope must not
-be split into independent one-item choice lists. Icon-bearing actions provide a
-localized `accessibilityLabel` even when their visible label is expected to
-render; this keeps their accessible name stable during Polaris custom-element
-registration and route transitions without adding a wrapper-owned click target.
+Mutually exclusive modes normally use one Shopify-owned `s-choice-list` per
+question, with every valid `s-choice` as a direct child and the current value
+supplied through the list's `values` property. Widget presentation, progress
+presentation, and subscription purchase scope must not be split into
+independent one-item choice lists. Icon-bearing actions provide a localized
+`accessibilityLabel` even when their visible label is expected to render; this
+keeps their accessible name stable during Polaris custom-element registration
+and route transitions without adding a wrapper-owned click target.
+
+As verified on 2026-09-11, Shopify's latest Choice List documentation describes
+an `inline` variant, but the `polaris.js` runtime then served from Shopify's
+canonical CDN (`5ff803d5f82b5b8a4238acb189bfebec198906dc`) hard-codes the choice
+list as a vertical flex column, and `@shopify/polaris-types@1.0.7` omits the
+property from the public React element type. FPB and PPB rule modes therefore
+use one semantic native `radiogroup` inside Polaris `s-stack`, without custom
+radio styling or independent one-item groups. Replace this narrow exception
+with `s-choice-list variant="inline"` only after both the served runtime and
+published React type support it. The Learn More link occupies the top-right
+auto column of the same native grid row as the Rules Configuration heading and
+help tooltip; no custom positioning CSS or secondary click owner is used.
 
 Step 1 is the required storefront entry step, so its enable switch remains on
 and cannot be changed. Later steps may be disabled without deleting their saved

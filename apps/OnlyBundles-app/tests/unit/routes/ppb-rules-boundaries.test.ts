@@ -96,12 +96,19 @@ describe("PPB rules boundaries", () => {
     } as unknown as PpbRulesConfigurationCardProps;
 
     const view = PpbRulesConfigurationCard(props);
-    const choiceLists = findElements(
+    const radioGroups = findElements(
       view,
-      (element) => element.type === "s-choice-list"
+      (element) => element.props.role === "radiogroup"
     );
-    expect(choiceLists).toHaveLength(1);
-    choiceLists[0].props.onChange({ currentTarget: { values: ["step"] } });
+    expect(radioGroups).toHaveLength(1);
+    const stepRadio = findElements(
+      view,
+      (element) =>
+        element.type === "input" &&
+        element.props.type === "radio" &&
+        element.props.value === "step"
+    )[0];
+    stepRadio.props.onChange();
 
     expect(clearCategoryConditionRules).toHaveBeenCalledWith("step-1");
     expect(addConditionRule).toHaveBeenCalledWith("step-1");

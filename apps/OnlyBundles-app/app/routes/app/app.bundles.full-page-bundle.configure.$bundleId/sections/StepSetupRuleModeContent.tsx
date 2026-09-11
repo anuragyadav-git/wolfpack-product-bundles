@@ -116,26 +116,27 @@ export function FpbStepRuleModeContent({
 
   return (
     <>
-      <s-choice-list
-        label={translateAdmin(
+      <div
+        role="radiogroup"
+        aria-label={translateAdmin(
           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
         )}
-        labelAccessibilityVisibility="exclusive"
-        name={`step-rule-mode-${step.id}`}
-        values={[activeRuleMode]}
-        onChange={(event) => {
-          const nextMode = (
-            event.currentTarget as HTMLElement & { values?: string[] }
-          ).values?.[0];
-          if (nextMode) handleRuleModeChange(nextMode);
-        }}
       >
-        {ruleModeOptions.map((opt) => (
-          <s-choice key={opt.value} value={opt.value}>
-            {opt.label}
-          </s-choice>
-        ))}
-      </s-choice-list>
+        <s-stack direction="inline" gap="base">
+          {ruleModeOptions.map((opt) => (
+            <label key={opt.value}>
+              <input
+                type="radio"
+                name={`step-rule-mode-${step.id}`}
+                value={opt.value}
+                checked={activeRuleMode === opt.value}
+                onChange={() => handleRuleModeChange(opt.value)}
+              />{" "}
+              {opt.label}
+            </label>
+          ))}
+        </s-stack>
+      </div>
       {activeRuleMode === "category" ? (
         <div className={styles.categoryRulesList}>
           {stepCategories.map((cat: any, catIndex: number) => {
