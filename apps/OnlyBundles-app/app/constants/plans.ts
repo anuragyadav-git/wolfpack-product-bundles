@@ -40,8 +40,8 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
   growth: {
     id: "growth",
     name: "Growth Plan",
-    price: 19.99,
-    annualPrice: 199,
+    price: 9.99,
+    annualPrice: 99.9,
     trialDays: 14,
     currencyCode: "USD",
     bundleLimit: Number.MAX_SAFE_INTEGER,

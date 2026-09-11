@@ -59,10 +59,10 @@ test("pricing reflects verified Shopify plans and its audit date", async () => {
   const html = await readFile(outputPath("pricing"), "utf8");
   assert.match(html, />Free</i);
   assert.match(html, />Growth</i);
-  assert.match(html, /\$19\.99/);
-  assert.match(html, /\$199/);
+  assert.match(html, /\$9\.99/);
+  assert.match(html, /\$99\.90/);
   assert.match(html, /14-day/i);
-  assert.match(html, /verified[^<]*September 3, 2026/i);
+  assert.match(html, /verified[^<]*September 11, 2026/i);
 });
 
 test("privacy policy identifies the provider and actual application data flows", async () => {

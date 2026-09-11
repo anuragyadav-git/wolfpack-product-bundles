@@ -61,7 +61,7 @@ export function GrowthPlanCard({
                 </p>
                 <p className={brandStyles.finePrint}>
                   {t("billing.cards.annualPrice", {
-                    price: PLANS.growth.annualPrice,
+                    price: PLANS.growth.annualPrice?.toFixed(2),
                   })}
                 </p>
               </s-stack>

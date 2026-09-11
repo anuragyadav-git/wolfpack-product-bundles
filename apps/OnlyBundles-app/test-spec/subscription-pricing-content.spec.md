@@ -5,7 +5,7 @@ title: Subscription Pricing Content Test Spec
 type: test-spec
 status: active
 summary: Defines behavior-level pricing data consistency with centralized Free and Growth entitlements.
-last_audited: 2026-08-29
+last_audited: 2026-09-11
 owners:
   - product
   - engineering
@@ -45,14 +45,14 @@ Keep the in-app comparison, value propositions, FAQ, and quota messages aligned 
 | 3 | Advanced surfaces | Pricing data | Design/analytics differentiated | Approved gates only. |
 | 4 | Free limit message | 1 of 1 | Growth offers unlimited public bundles | No 20-bundle claim. |
 | 5 | Free usage rendering | 0 of 1 | Localized usage sentence | Translation keys never reach merchant UI. |
-| 6 | Growth prices in browser code | Shared plan constants | $19.99 monthly and $199 annual | No Node-only environment lookup. |
+| 6 | Growth prices in browser code | Shared plan constants | $9.99 monthly and $99.90 annual | Preserve the approved approximately 17% annual saving. |
 | 7 | Growth trial | One Growth plan | 14 trial days | Shopify tracks consumed trial days. |
 | 8 | Growth quota display | Internal unlimited sentinel | Merchant sees Unlimited | Never expose the sentinel number. |
 
 ## Acceptance Criteria
 
-- [ ] Pricing data contains no revenue threshold or finite Growth bundle cap.
-- [ ] FAQ explains that incompatible public bundles become Draft without deleting configuration.
-- [ ] The quota card renders localized usage copy.
-- [ ] Shared plan constants use the approved browser-safe prices.
-- [ ] Growth communicates the Shopify-managed 14-day trial.
+- [x] Pricing data contains no revenue threshold or finite Growth bundle cap.
+- [x] FAQ explains that incompatible public bundles become Draft without deleting configuration.
+- [x] The quota card renders localized usage copy.
+- [x] Shared plan constants use the approved browser-safe prices.
+- [x] Growth communicates the Shopify-managed 14-day trial.

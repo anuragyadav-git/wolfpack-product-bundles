@@ -5,7 +5,7 @@ title: Only Bundles
 type: repository-readme
 status: active
 summary: Development and architecture guide for the Only Bundles Shopify application and static website monorepo.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -37,7 +37,7 @@ mix-and-match experiences from products already in a merchant's catalog.
 
 ## Current public product
 
-The public listing, checked on August 31, 2026, describes:
+The public listing, last confirmed by the product owner on September 11, 2026, describes:
 
 - Full-page and product-page bundle experiences.
 - Steps, categories, quantity rules, and live summaries.
@@ -49,14 +49,14 @@ The public listing, checked on August 31, 2026, describes:
 Public listing pricing on the same date:
 
 - Free: one public bundle and up to two enabled steps or categories.
-- Growth: $19.99/month or $199/year, with a 14-day trial.
+- Growth: $9.99/month or $99.90/year, with a 14-day trial.
 - Growth includes unlimited public bundles and steps, all templates, advanced
   design and analytics, and priority support.
 
-The billing constants in `app/constants/plans.ts` and
-`app/constants/pricing-data.ts` predate the current listing. Confirm the active
-Partner Dashboard billing configuration before changing enforcement or
-subscription amounts in code.
+The shared billing constants and customer-facing website copy use the approved
+$9.99 monthly and $99.90 annual Growth prices. Shopify App Pricing remains the
+billing authority; confirm the active Partner Dashboard configuration before
+changing subscription amounts, enforcement, or entitlements.
 
 ## Compatibility identity
 

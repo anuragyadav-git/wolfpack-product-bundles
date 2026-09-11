@@ -5,7 +5,7 @@ title: Shopify App Pricing Setup Runbook
 type: runbook
 status: configured
 summary: Records the verified SIT and production Shopify App Pricing setup for Free and Growth.
-last_audited: 2026-08-30
+last_audited: 2026-09-11
 owners:
   - product
   - engineering
@@ -38,8 +38,8 @@ keywords:
 | Free plan display name | Free |
 | Free top features | One public bundle; two steps; FPB and PPB; all merchandising; brand colors and typography; 30-day summary |
 | Growth display name | Growth |
-| Growth monthly price | `$19.99 USD`; approved 2026-08-28 |
-| Growth annual price | `$199 USD`; approved 2026-08-28 |
+| Growth monthly price | `$9.99 USD`; approved 2026-09-11 |
+| Growth annual price | `$99.90 USD`; approved 2026-09-11 |
 | Growth trial | 14 days |
 | Growth top features | Unlimited public bundles and steps; all templates; advanced Design; advanced analytics; priority support |
 | Welcome link | Embedded `/app/billing/return`; verified in SIT and PROD |
@@ -53,7 +53,7 @@ SIT and PROD have the Free and Growth plans configured with handles `free` and
 `growth`, the approved feature copy, monthly/yearly billing, and the 14-day
 trial. SIT remains an unpublished internal development app.
 
-Create one Growth plan using Shopify's **monthly with yearly option** billing model. Set its monthly charge to `$19.99`, yearly charge to `$199`, and free trial duration to `14`. Shopify then owns the trial, billing-period changes, and proration. Do not create a local trial ledger or two separate Growth plans.
+Create one Growth plan using Shopify's **monthly with yearly option** billing model. Set its monthly charge to `$9.99`, yearly charge to `$99.90`, and free trial duration to `14`. Shopify then owns the trial, billing-period changes, and proration. Do not create a local trial ledger or two separate Growth plans.
 
 Shopify tracks consumed trial days across a 180-day period. This prevents reinstall-based trial reuse. Because monthly and annual are billing options on the same Growth plan, switching periods does not create a second app-owned trial.
 
