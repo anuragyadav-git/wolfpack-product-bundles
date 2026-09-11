@@ -15,6 +15,7 @@ export function FpbAddonTierEditor({
   activeTierIndex,
   tiers,
   styles,
+  validationErrors = {},
   onActiveTierIndexChange,
   onAddProducts,
   onOpenSelectedProducts,
@@ -23,6 +24,7 @@ export function FpbAddonTierEditor({
   activeTierIndex: number | null;
   tiers: AddonTierDraft[];
   styles: Record<string, string>;
+  validationErrors?: Record<string, string>;
   onActiveTierIndexChange: (
     updater: (currentIndex: number | null) => number | null
   ) => void;
@@ -99,6 +101,7 @@ export function FpbAddonTierEditor({
           <>
             {addonTiers.map((tier, idx) => {
               const isActiveTier = activeTierIndex === idx;
+              const tierId = String(tier.tierId ?? `tier-${idx + 1}`);
               return (
                 <div
                   key={idx}
@@ -293,9 +296,15 @@ export function FpbAddonTierEditor({
                             min={1}
                           />
                           <s-number-field
+                            id={`configure-addons-products-tiers-${tierId}-discount`}
                             label={translateAdmin(
                               "adminAttributes.discountOnAddOns"
                             )}
+                            error={
+                              validationErrors[
+                                `addons.products.tiers.${tierId}.discount`
+                              ]
+                            }
                             value={String(
                               tier.discountValue ?? tier.discount?.value ?? 0
                             )}
@@ -316,6 +325,8 @@ export function FpbAddonTierEditor({
                             }}
                             min={0}
                             max={100}
+                            step={1}
+                            inputMode="numeric"
                             suffix="%"
                           />
                         </div>

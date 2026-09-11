@@ -96,7 +96,6 @@ jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundl
 jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsSection", () => ({ BundleSettingsSection: () => null }));
 jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleWidgetSection", () => ({ BundleWidgetSection: () => null }));
 jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureRouteModals", () => ({ ConfigureRouteModals: () => React.createElement("div", null, "Configure overlays") }));
-jest.mock("../../../app/routes/app/_shared/bundle-configure/ConfigureValidationSummary", () => ({ ConfigureValidationSummary: () => null }));
 jest.mock("../../../app/routes/app/_shared/bundle-configure/BundleSubscriptionsSection", () => ({ BundleSubscriptionsSection: () => null }));
 
 jest.mock("../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbConfigureFlow", () => ({

@@ -69,6 +69,8 @@ describe("serializeFpbSaveSteps", () => {
             ],
             conditions: [{ type: "quantity", operator: ">=", value: "1" }],
             categoryBanner: "https://cdn.example.test/banner.jpg",
+            variantSelectorMode: "color_swatch",
+            swatchTooltipEnabled: true,
             multiLangData: { en: { title: "Category" } },
             productsConnection: { edges: [{ node: { id: "unused" } }] },
           },
@@ -128,6 +130,8 @@ describe("serializeFpbSaveSteps", () => {
     expect(result[0].StepCategory[0]).toMatchObject({
       id: "category-1",
       title: "Category",
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
       products: [{ id: "gid://shopify/Product/123" }],
       collections: [
         {

@@ -1110,9 +1110,6 @@
         "configurecontextualsavebar": {
           "discard": "Discard"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "Fix the following fields before saving:"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Tip: Discounts are based on all items in your cart. Don't forget to include the Pre Selected Product's quantity or amount when setting up discounts."
         },

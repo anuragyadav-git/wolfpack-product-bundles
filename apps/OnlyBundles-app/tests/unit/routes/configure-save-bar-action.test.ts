@@ -8,6 +8,7 @@ import {
   PpbSaveForm,
   type PpbSaveFormProps,
 } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbSaveForm";
+import { useLatestCallback } from "../../../app/routes/app/_shared/bundle-configure/ConfigureContextualSaveBar";
 
 const showSaveBar = jest.fn(() => Promise.resolve());
 const hideSaveBar = jest.fn(() => Promise.resolve());
@@ -108,6 +109,31 @@ describe("configure Save Bar actions", () => {
     });
 
     expect(handleSave).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a hosted Save action stable while invoking the latest callback", () => {
+    const firstSave = jest.fn();
+    const latestSave = jest.fn();
+    const hostedSaveAction: { current: (() => void) | null } = { current: null };
+
+    function SaveActionHarness({ onSave }: { onSave: () => void }) {
+      hostedSaveAction.current = useLatestCallback(onSave);
+      return null;
+    }
+
+    flushSync(() => {
+      root.render(React.createElement(SaveActionHarness, { onSave: firstSave }));
+    });
+    const retainedHostedAction = hostedSaveAction.current;
+
+    flushSync(() => {
+      root.render(React.createElement(SaveActionHarness, { onSave: latestSave }));
+    });
+
+    expect(hostedSaveAction.current).toBe(retainedHostedAction);
+    retainedHostedAction?.();
+    expect(firstSave).not.toHaveBeenCalled();
+    expect(latestSave).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the Save Bar open and gives Save its native loading state while submitting", () => {

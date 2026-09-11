@@ -89,7 +89,7 @@ export function FpbBxyDiscountRuleFields({
                 const nextValue =
                   Number((event.target as HTMLInputElement).value) || 0;
                 return (rule.bxyDiscountType ?? "percentage") === "percentage"
-                  ? Math.min(100, Math.max(0, nextValue))
+                  ? nextValue
                   : getBogoDiscountStoredValue(
                       Math.max(0, nextValue),
                       "fixed_amount"
@@ -113,6 +113,16 @@ export function FpbBxyDiscountRuleFields({
               ? 100
               : undefined
           }
+          step={
+            (rule.bxyDiscountType ?? "percentage") === "percentage"
+              ? 1
+              : undefined
+          }
+          inputMode={
+            (rule.bxyDiscountType ?? "percentage") === "percentage"
+              ? "numeric"
+              : "decimal"
+          }
         />
         <s-select
           label={translateAdmin("adminAttributes.discountType")}
@@ -128,7 +138,7 @@ export function FpbBxyDiscountRuleFields({
               bxyDiscountType,
               discountValue:
                 bxyDiscountType === "percentage"
-                  ? Math.min(100, Math.max(0, currentValue))
+                  ? currentValue
                   : getBogoDiscountStoredValue(
                       Math.max(0, currentValue),
                       "fixed_amount"

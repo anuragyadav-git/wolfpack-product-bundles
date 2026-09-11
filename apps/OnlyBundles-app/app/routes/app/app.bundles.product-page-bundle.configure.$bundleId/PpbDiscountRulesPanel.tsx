@@ -217,7 +217,7 @@ function PpbBuyXGetYRules({
                           Number((e.target as HTMLInputElement).value) || 0;
                         return (rule.bxyDiscountType ?? "percentage") ===
                           "percentage"
-                          ? Math.min(100, Math.max(0, nextValue))
+                          ? nextValue
                           : getBogoDiscountStoredValue(
                               Math.max(0, nextValue),
                               "fixed_amount"
@@ -241,6 +241,16 @@ function PpbBuyXGetYRules({
                       ? 100
                       : undefined
                   }
+                  step={
+                    (rule.bxyDiscountType ?? "percentage") === "percentage"
+                      ? 1
+                      : undefined
+                  }
+                  inputMode={
+                    (rule.bxyDiscountType ?? "percentage") === "percentage"
+                      ? "numeric"
+                      : "decimal"
+                  }
                 />
                 <s-select
                   label={translateAdmin("adminAttributes.discountType")}
@@ -256,7 +266,7 @@ function PpbBuyXGetYRules({
                       bxyDiscountType,
                       discountValue:
                         bxyDiscountType === "percentage"
-                          ? Math.min(100, Math.max(0, currentValue))
+                          ? currentValue
                           : getBogoDiscountStoredValue(
                               Math.max(0, currentValue),
                               "fixed_amount"
@@ -460,13 +470,8 @@ function PpbStandardDiscountRules({
                       DiscountMethod.PERCENTAGE_OFF
                         ? numValue
                         : amountToCents(Math.max(0, numValue));
-                    const safeValue =
-                      pricingState.discountType ===
-                      DiscountMethod.PERCENTAGE_OFF
-                        ? Math.min(100, Math.max(0, finalValue))
-                        : finalValue;
                     pricingState.updateDiscountRule(rule.id, {
-                      discountValue: safeValue,
+                      discountValue: finalValue,
                     });
                   }}
                   min={0}
@@ -479,6 +484,16 @@ function PpbStandardDiscountRules({
                     pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
                       ? "%"
                       : undefined
+                  }
+                  step={
+                    pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
+                      ? 1
+                      : undefined
+                  }
+                  inputMode={
+                    pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
+                      ? "numeric"
+                      : "decimal"
                   }
                   prefix={
                     pricingState.discountType !== DiscountMethod.PERCENTAGE_OFF

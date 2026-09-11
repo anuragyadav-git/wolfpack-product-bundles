@@ -1110,9 +1110,6 @@
         "configurecontextualsavebar": {
           "discard": "放弃..."
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "保存前修复以下字段："
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "提示：折扣基于购物车中的所有商品。设置折扣时，请记得计入预选商品的数量或金额。"
         },

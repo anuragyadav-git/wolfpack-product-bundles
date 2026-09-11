@@ -268,13 +268,8 @@ export function FpbDiscountRulesSection({
                                   DiscountMethod.PERCENTAGE_OFF
                                     ? numValue
                                     : amountToCents(Math.max(0, numValue));
-                                const safeValue =
-                                  pricingState.discountType ===
-                                  DiscountMethod.PERCENTAGE_OFF
-                                    ? Math.min(100, Math.max(0, finalValue))
-                                    : finalValue;
                                 pricingState.updateDiscountRule(rule.id, {
-                                  discountValue: safeValue,
+                                  discountValue: finalValue,
                                 });
                               }}
                               min={0}
@@ -289,6 +284,18 @@ export function FpbDiscountRulesSection({
                                 DiscountMethod.PERCENTAGE_OFF
                                   ? "%"
                                   : undefined
+                              }
+                              step={
+                                pricingState.discountType ===
+                                DiscountMethod.PERCENTAGE_OFF
+                                  ? 1
+                                  : undefined
+                              }
+                              inputMode={
+                                pricingState.discountType ===
+                                DiscountMethod.PERCENTAGE_OFF
+                                  ? "numeric"
+                                  : "decimal"
                               }
                               prefix={
                                 pricingState.discountType !==

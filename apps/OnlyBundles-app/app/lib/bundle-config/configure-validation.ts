@@ -60,6 +60,13 @@ function nonNegativeNumber(value: unknown): boolean {
   return Number.isFinite(parsed) && parsed >= 0;
 }
 
+function wholePercentage(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string" && value.trim() === "") return false;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 100;
+}
+
 function stableId(value: unknown, fallback: string): string {
   const normalized = text(value);
   return normalized || fallback;
@@ -240,13 +247,15 @@ function validateDiscounts(
         issues.push(issue(`${base}.customerGets`, "Enter a valid reward quantity.", "discount_pricing", { ruleId }));
       }
     }
-    const discountValue = Number(rule?.discountValue);
     const percentage = method === "percentage_off" ||
       (method === "buy_x_get_y" && rule?.bxyDiscountType !== "fixed_amount");
-    if (!Number.isFinite(discountValue) || discountValue <= 0 || (percentage && discountValue > 100)) {
+    const invalidDiscountValue = percentage
+      ? !wholePercentage(rule?.discountValue)
+      : !positiveNumber(rule?.discountValue);
+    if (invalidDiscountValue) {
       issues.push(issue(
         `${base}.discountValue`,
-        percentage ? "Enter a percentage from 1 to 100." : "Enter a value greater than zero.",
+        percentage ? "Enter a whole percentage from 0 to 100." : "Enter a value greater than zero.",
         "discount_pricing",
         { ruleId },
       ));
@@ -402,9 +411,8 @@ function validateFpbAddons(issues: ConfigureValidationIssue[], formData: FormDat
     if (!positiveNumber(eligibility)) {
       issues.push(issue(`${base}.eligibility`, "Enter an eligibility value greater than zero.", "free_gift_addons"));
     }
-    const discount = Number(tier?.discountValue ?? tier?.discount?.value);
-    if (!Number.isFinite(discount) || discount < 0 || discount > 100) {
-      issues.push(issue(`${base}.discount`, "Enter a percentage from 0 to 100.", "free_gift_addons"));
+    if (!wholePercentage(tier?.discountValue ?? tier?.discount?.value)) {
+      issues.push(issue(`${base}.discount`, "Enter a whole percentage from 0 to 100.", "free_gift_addons"));
     }
   });
 }
@@ -443,7 +451,7 @@ export function validateBundleConfigureFormData(
       if (list(category?.products).length === 0 && list(category?.collections).length === 0) {
         issues.push(issue(`${categoryBase}.resources`, "Add at least one product or collection.", "step_setup", { stepId, categoryId }));
       }
-      if (kind === "ppb") {
+      if (kind === "ppb" || kind === "fpb") {
         try {
           parseVariantSelectorConfiguration(category ?? {});
         } catch (error) {

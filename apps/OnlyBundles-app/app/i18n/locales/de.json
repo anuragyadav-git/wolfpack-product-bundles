@@ -1110,9 +1110,6 @@
         "configurecontextualsavebar": {
           "discard": "Verwerfen"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "Beheben Sie die folgenden Felder vor dem Speichern:"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Tipp: Rabatte basieren auf allen Artikeln in Ihrem Warenkorb. Don't vergisst es, bei der Einrichtung von Rabatten die vorgewählte Produktmenge's oder den Betrag einzubeziehen."
         },

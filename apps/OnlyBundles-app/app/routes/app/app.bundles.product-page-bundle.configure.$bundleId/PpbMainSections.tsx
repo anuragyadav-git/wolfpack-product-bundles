@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
 import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
 import { PpbStepSetupSection } from "./PpbStepSetupSection";
-import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
 import { getDeferredConfigureSection } from "../_shared/bundle-configure/deferred-configure-sections";
 import { getPpbStandaloneOperationAlert } from "./ppb-warning-presentation";
 import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
@@ -53,10 +52,6 @@ export function PpbMainSections({ flow }: { flow: PpbConfigureFlow }) {
       <AdminTaskAlertBanner
         alert={getPpbStandaloneOperationAlert(flow.operationAlert)}
         onDismiss={flow.clearOperationAlert}
-      />
-      <ConfigureValidationSummary
-        activeSection={flow.activeSection}
-        issues={flow.validationIssues}
       />
       {flow.activeSection === "step_setup" ? (
         <PpbStepSetupSection

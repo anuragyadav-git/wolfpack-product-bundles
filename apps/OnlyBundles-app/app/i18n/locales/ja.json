@@ -1110,9 +1110,6 @@
         "configurecontextualsavebar": {
           "discard": "破棄する"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "保存する前に次のフィールドを修正:"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "ヒント：割引はカート内のすべてのアイテムに基づいています。 Don't forget to include the Pre Selected Product's quantity or amount"
         },

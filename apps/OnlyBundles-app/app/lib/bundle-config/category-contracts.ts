@@ -60,6 +60,7 @@ export function buildCategoryContract(input: CategoryContractInput) {
   const autoNextStepOnConditionMet = input.autoNextStepOnConditionMet === true;
 
   if (input.bundleType === "full_page") {
+    const variantSelector = parseVariantSelectorConfiguration(input);
     return {
       id: input.id,
       title: input.title ?? input.name,
@@ -70,6 +71,7 @@ export function buildCategoryContract(input: CategoryContractInput) {
       products,
       collections,
       categoryBanner,
+      ...variantSelector,
       multiLangData,
     };
   }

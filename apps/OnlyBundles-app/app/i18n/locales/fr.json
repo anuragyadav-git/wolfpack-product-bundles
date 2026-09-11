@@ -1110,9 +1110,6 @@
         "configurecontextualsavebar": {
           "discard": "Abandonner"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "Corriger les champs suivants avant de sauvegarder :"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Astuce : Les remises sont basées sur tous les articles de votre panier. Don'N'oubliez pas d'inclure la quantité ou le montant du produit pré-sélectionné'lors de la configuration des réductions."
         },

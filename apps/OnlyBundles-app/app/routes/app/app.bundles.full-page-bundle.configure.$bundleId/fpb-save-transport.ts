@@ -204,10 +204,12 @@ function compactCategory(value: unknown): Record<string, unknown> | null {
     "sortOrder",
     "categoryBanner",
     "categoryImg",
+    "variantSelectorMode",
   ]);
   keepBoolean(compact, source, [
     "autoNextStepOnConditionMet",
     "displayVariantsAsIndividualProducts",
+    "swatchTooltipEnabled",
   ]);
 
   compact.products = compactProducts(source.products);

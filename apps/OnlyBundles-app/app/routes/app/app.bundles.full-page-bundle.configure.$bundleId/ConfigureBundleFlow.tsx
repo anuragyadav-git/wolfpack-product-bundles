@@ -12,7 +12,6 @@ import { ConfigureHiddenInputs } from "./ConfigureHiddenInputs";
 import { ConfigureSidebar } from "./ConfigureSidebar";
 import { useConfigureBundleFlow } from "./useConfigureBundleFlow";
 import { StepSetupSection } from "./sections/StepSetupSection";
-import { ConfigureValidationSummary } from "../_shared/bundle-configure/ConfigureValidationSummary";
 import { ConfigureContextualSaveBar } from "../_shared/bundle-configure/ConfigureContextualSaveBar";
 import { isMultiLanguageActionDisabled } from "../../../lib/bundle-config/common-configure-page-model";
 import type {
@@ -382,10 +381,6 @@ function ConfigureBundleFlow() {
         alert={flow.operationAlert}
         onDismiss={flow.clearOperationAlert}
       />
-      <ConfigureValidationSummary
-        activeSection={flow.activeSection}
-        issues={flow.validationIssues}
-      />
       {flow.activeSection === "step_setup" ? (
         <StepSetupSection
           activeSection={flow.activeSection}
@@ -494,6 +489,7 @@ function ConfigureBundleFlow() {
                 activeTierIndex: flow.activeAddonTierIndex,
                 tiers: addonTiers,
                 styles: flow.fullPageBundleStyles,
+                validationErrors: flow.validationErrors,
                 onActiveTierIndexChange: flow.setActiveAddonTierIndex,
                 onAddProducts: (tierIndex) => {
                   void flow.handleAddonSelectedProductAdd(tierIndex);

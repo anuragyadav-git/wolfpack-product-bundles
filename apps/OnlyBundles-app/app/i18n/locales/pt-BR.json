@@ -1110,9 +1110,6 @@
         "configurecontextualsavebar": {
           "discard": "Descartar"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "Corrija os seguintes campos antes de salvar:"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Dica: Os descontos são baseados em todos os itens do seu carrinho. Don't esquecer de incluir a quantidade ou quantidade de produtos selecionados's na configuração de descontos."
         },
