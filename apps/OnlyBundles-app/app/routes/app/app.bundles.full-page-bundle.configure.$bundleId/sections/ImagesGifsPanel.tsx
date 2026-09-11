@@ -33,28 +33,30 @@ export function FpbImagesGifsPanel({
         <>
           <s-section>
             <s-stack direction="block" gap="base">
-              <s-stack direction="inline">
-                <s-stack direction="inline" gap="small" inlineSize="100%">
-                  <s-icon type="upload" />
-                  <s-stack direction="block" gap="small-400">
-                    <s-text type="strong">
-                      {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.promoBanner"
-                      )}
-                    </s-text>
-                    <s-text color="subdued">
-                      {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.wideBannerDisplayedAtTheTopOfTheFullPageBundle"
-                      )}
-                    </s-text>
-                  </s-stack>
+              <s-grid
+                gridTemplateColumns="auto minmax(0, 1fr) auto"
+                gap="base"
+                alignItems="start"
+              >
+                <s-icon type="upload" />
+                <s-stack direction="block" gap="small-400">
+                  <s-text type="strong">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.promoBanner"
+                    )}
+                  </s-text>
+                  <s-text color="subdued">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.wideBannerDisplayedAtTheTopOfTheFullPageBundle"
+                    )}
+                  </s-text>
                 </s-stack>
                 <s-badge tone="info">
                   {translateAdmin(
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.pageHeader"
                   )}
                 </s-badge>
-              </s-stack>
+              </s-grid>
               <s-grid gridTemplateColumns="1fr 1fr" gap="base">
                 <AssetUpload
                   label={translateAdmin(
@@ -66,6 +68,7 @@ export function FpbImagesGifsPanel({
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1900x230"
                   )}`}
                   value={bundleBannerDesktopUrl || null}
+                  dropZoneContent={<s-icon type="desktop" size="base" />}
                   onChange={(url) => {
                     setBundleBannerDesktopUrl(url ?? "");
                     markAsDirty();
@@ -81,6 +84,7 @@ export function FpbImagesGifsPanel({
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1100x500"
                   )}`}
                   value={bundleBannerMobileUrl || null}
+                  dropZoneContent={<s-icon type="mobile" size="base" />}
                   onChange={(url) => {
                     setBundleBannerMobileUrl(url ?? "");
                     markAsDirty();
@@ -91,28 +95,30 @@ export function FpbImagesGifsPanel({
           </s-section>
           <s-section>
             <s-stack direction="block" gap="base">
-              <s-stack direction="inline">
-                <s-stack direction="inline" gap="small" inlineSize="100%">
-                  <s-icon type="note" />
-                  <s-stack direction="block" gap="small-400">
-                    <s-text type="strong">
-                      {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.floatingPromoBadge"
-                      )}
-                    </s-text>
-                    <s-text color="subdued">
-                      {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks"
-                      )}
-                    </s-text>
-                  </s-stack>
+              <s-grid
+                gridTemplateColumns="auto minmax(0, 1fr) auto"
+                gap="base"
+                alignItems="start"
+              >
+                <s-icon type="note" />
+                <s-stack direction="block" gap="small-400">
+                  <s-text type="strong">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.floatingPromoBadge"
+                    )}
+                  </s-text>
+                  <s-text color="subdued">
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks"
+                    )}
+                  </s-text>
                 </s-stack>
                 <s-badge tone="info">
                   {translateAdmin(
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.storefront"
                   )}
                 </s-badge>
-              </s-stack>
+              </s-grid>
               <s-checkbox
                 label={translateAdmin("adminAttributes.showFloatingPromoBadge")}
                 checked={floatingBadgeEnabled || undefined}

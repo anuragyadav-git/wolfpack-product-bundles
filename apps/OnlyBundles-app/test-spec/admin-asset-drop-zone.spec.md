@@ -5,7 +5,7 @@ title: Admin Asset Drop Zone
 type: test-spec
 status: active
 summary: Verifies that Admin asset fields use the native Polaris drop zone and upload directly to Shopify Files without a custom file-library picker.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -16,6 +16,8 @@ source_paths:
   - app/components/shared/AssetUpload.tsx
   - app/lib/admin-store-files.client.ts
   - app/routes/app/app.upload-store-file.tsx
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ImagesGifsPanel.tsx
+  - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleSettingsControls.banner.tsx
 related_docs:
   - internal docs/Architecture/Admin Configure Page.md
   - docs/app-nav-map/APP_NAVIGATION_MAP.md
@@ -70,8 +72,9 @@ Ensure every Admin asset field delegates file selection and drag-and-drop intera
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Edit FPB promo banners | Desktop and mobile image selections | Each native drop zone updates only its canonical bundle-banner URL and marks the route dirty | Both fields remain side-by-side in one row |
-| 2 | Edit PPB loading animation | GIF and non-GIF selections | GIF is accepted; other image types are rejected before upload | Matches the visible GIF-only contract |
+| 1 | Edit FPB promo banners | Desktop and mobile image selections | Each native drop zone updates only its canonical bundle-banner URL, marks the route dirty, and shows its matching device icon | Both fields remain side-by-side in one row |
+| 2 | Edit PPB bundle banners | Desktop and mobile image selections | Each native drop zone updates only its canonical bundle-banner URL, marks the route dirty, and shows its matching device icon | Uses the same responsive-media language as FPB |
+| 3 | Edit PPB loading animation | GIF and non-GIF selections | GIF is accepted; other image types are rejected before upload | Matches the visible GIF-only contract |
 
 ## Acceptance Criteria
 
@@ -80,3 +83,7 @@ Ensure every Admin asset field delegates file selection and drag-and-drop intera
 - [x] Existing values preview through Shopify-owned media components and retain explicit removal.
 - [x] Type, size, disabled, polling, success, timeout, and failure behavior remains covered.
 - [x] Focused tests, typecheck, modified-file ESLint, build, Knip, diff check, Graphify, and Agent-store desktop/mobile Chrome QA pass.
+- [x] FPB and PPB responsive banner drop zones use native `desktop` and
+  `mobile` icons instead of the generic upload icon.
+- [x] FPB media-card context badges remain at the top-right of their title and
+  description rows without clipping at supported Admin widths.

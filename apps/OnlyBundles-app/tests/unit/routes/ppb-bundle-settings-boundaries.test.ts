@@ -23,6 +23,21 @@ jest.mock("@remix-run/react", () => ({
 }));
 
 describe("PPB bundle settings leaf boundaries", () => {
+  it("gives responsive bundle banner uploads their matching device icons", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(PpbBundleBannerSettings, {
+        bundleBannerDesktopUrl: "",
+        bundleBannerMobileUrl: "",
+        markAsDirty: jest.fn(),
+        setBundleBannerDesktopUrl: jest.fn(),
+        setBundleBannerMobileUrl: jest.fn(),
+      }),
+    );
+
+    expect(view).toContain('<s-icon type="desktop"');
+    expect(view).toContain('<s-icon type="mobile"');
+  });
+
   it("renders status, CSS, category-step, and sticky-cart values from explicit props", () => {
     const view = renderToStaticMarkup(
       React.createElement(

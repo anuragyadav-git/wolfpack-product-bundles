@@ -11,9 +11,11 @@ jest.mock("../../../app/i18n/config", () => ({
 
 jest.mock("../../../app/components/shared/AssetUpload", () => ({
   AssetUpload: ({
+    dropZoneContent,
     label,
     onChange,
   }: {
+    dropZoneContent?: React.ReactNode;
     label?: string;
     onChange: (url: string | null) => void;
   }) =>
@@ -31,7 +33,7 @@ jest.mock("../../../app/components/shared/AssetUpload", () => ({
           ),
         type: "button",
       },
-      "Choose media",
+      dropZoneContent ?? "Choose media",
     ),
 }));
 
@@ -102,6 +104,8 @@ describe("FPB media feature boundary", () => {
     );
     expect(markAsDirty).toHaveBeenCalledTimes(2);
     expect(container.querySelectorAll("button")).toHaveLength(2);
+    expect(container.querySelector('s-icon[type="desktop"]')).not.toBeNull();
+    expect(container.querySelector('s-icon[type="mobile"]')).not.toBeNull();
     expect(String(container.textContent).includes("FORMAT")).toBe(false);
     expect(updateStepField).not.toHaveBeenCalled();
     expect(container.innerHTML).not.toContain("imagesgifspanel.mediaAssets");

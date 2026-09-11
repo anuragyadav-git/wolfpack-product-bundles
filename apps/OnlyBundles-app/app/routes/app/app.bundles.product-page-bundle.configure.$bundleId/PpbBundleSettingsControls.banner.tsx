@@ -21,47 +21,49 @@ export function PpbBundleBannerSettings({
   return (
     <s-section>
       <s-stack direction="block" gap="small">
-        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+        <s-text type="strong">
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bundleBanner"
           )}
-        </p>
-        <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
+        </s-text>
+        <s-text color="subdued">
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.uploadBannerImagesForDesktopAndMobileViewsThatWillBeDisplayedAtT"
           )}
-        </p>
+        </s-text>
         <s-grid gridTemplateColumns="1fr 1fr" gap="base">
-            <AssetUpload
-              label={translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageDesktop"
-              )}
-              hint={`${translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
-              )} ${translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1900x230"
-              )}`}
-              value={bundleBannerDesktopUrl || null}
-              onChange={(url) => {
-                setBundleBannerDesktopUrl(url ?? "");
-                markAsDirty();
-              }}
-            />
-            <AssetUpload
-              label={translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageMobile"
-              )}
-              hint={`${translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
-              )} ${translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1100x500"
-              )}`}
-              value={bundleBannerMobileUrl || null}
-              onChange={(url) => {
-                setBundleBannerMobileUrl(url ?? "");
-                markAsDirty();
-              }}
-            />
+          <AssetUpload
+            label={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageDesktop"
+            )}
+            hint={`${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+            )} ${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1900x230"
+            )}`}
+            value={bundleBannerDesktopUrl || null}
+            dropZoneContent={<s-icon type="desktop" size="base" />}
+            onChange={(url) => {
+              setBundleBannerDesktopUrl(url ?? "");
+              markAsDirty();
+            }}
+          />
+          <AssetUpload
+            label={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageMobile"
+            )}
+            hint={`${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+            )} ${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1100x500"
+            )}`}
+            value={bundleBannerMobileUrl || null}
+            dropZoneContent={<s-icon type="mobile" size="base" />}
+            onChange={(url) => {
+              setBundleBannerMobileUrl(url ?? "");
+              markAsDirty();
+            }}
+          />
         </s-grid>
       </s-stack>
     </s-section>

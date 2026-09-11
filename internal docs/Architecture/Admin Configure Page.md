@@ -159,12 +159,17 @@ Design owns the store-level loading screen used by both bundle types.
 The FPB promo banner uses the canonical desktop and mobile bundle-banner URLs;
 its two native drop zones share one row at every configure width. Bundle
 Settings does not duplicate those media controls.
+FPB Promo Banner and PPB Bundle Banner use the Polaris `desktop` and `mobile`
+icons inside their matching responsive drop zones. FPB media-card context badges
+occupy the top-right auto column of the same native grid row as the title and
+description; they do not wrap beneath the copy or use custom positioning CSS.
 The store-level FPB/PPB loading screen and shared slot icon remain owned by
 Settings Design; configure sections do not recreate those store-level controls.
 Media previews use Polaris `s-image`, and product/list media use `s-thumbnail`;
 the app does not maintain a custom responsive-picture wrapper for Admin media.
-Empty upload surfaces provide a Shopify upload icon as `s-drop-zone` content;
-they do not nest a second Polaris button inside the native drop zone.
+Generic empty upload surfaces provide a Shopify upload icon as `s-drop-zone`
+content; responsive banner pairs use their matching device icon. Neither form
+nests a second Polaris button inside the native drop zone.
 In FPB and PPB Step Config, the compact icon tile is itself the one native drop
 zone; neither surface keeps picker-open state or reveals a second large upload
 surface. A saved image remains replaceable through that same drop zone, and its
