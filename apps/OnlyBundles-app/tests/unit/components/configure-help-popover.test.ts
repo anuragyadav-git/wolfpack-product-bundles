@@ -23,7 +23,7 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-const PRESERVED_KEYS: HelpTooltipKey[] = [
+const LIVE_HELP_KEYS: HelpTooltipKey[] = [
   "stepFlow",
   "category",
   "rulesConfiguration",
@@ -31,8 +31,6 @@ const PRESERVED_KEYS: HelpTooltipKey[] = [
   "productSlots",
   "discountProgressBar",
   "discountMessaging",
-  "loadingAnimation",
-  "bundleVisibilityPending",
   "variantSelector",
   "showTextOnAddButton",
   "cartLineItemDiscountDisplay",
@@ -48,16 +46,11 @@ const CURATED_RICH_HELP_KEYS: HelpTooltipKey[] = [
   "discountMessaging",
   "variantSelector",
   "showTextOnAddButton",
-  "cartLineItemDiscountDisplay",
   "swatchTooltip",
   "tierBadge",
   "freeGiftAddons",
-  "specificLinkAccess",
-  "offerOperations",
-  "countryTargeting",
   "bundleWidget",
   "bundleEmbed",
-  "loadingAnimation",
   "preselectedProducts",
   "quantityValidation",
   "lowStockAlert",
@@ -65,6 +58,13 @@ const CURATED_RICH_HELP_KEYS: HelpTooltipKey[] = [
   "countdownTimer",
   "bundleSubscriptions",
   "floatingPromoBadge",
+];
+
+const TEXT_ONLY_HELP_KEYS: HelpTooltipKey[] = [
+  "cartLineItemDiscountDisplay",
+  "specificLinkAccess",
+  "offerOperations",
+  "countryTargeting",
 ];
 
 describe("ConfigureHelpPopover", () => {
@@ -102,16 +102,30 @@ describe("ConfigureHelpPopover", () => {
     expect(targets).toHaveLength(2);
     expect(new Set(targets).size).toBe(2);
   });
+
+  it("renders localized text without an image for text-only help", () => {
+    const view = renderToStaticMarkup(
+      React.createElement(ConfigureHelpPopover, {
+        tooltipKey: "cartLineItemDiscountDisplay",
+      }),
+    );
+
+    expect(view).toContain("<s-popover");
+    expect(view).not.toContain("<s-image");
+    expect(view).toContain("Cart Line Item Discount Display");
+  });
 });
 
 describe("configure help catalog", () => {
-  it("preserves every existing tooltip key", () => {
-    expect(Object.keys(HELP_TOOLTIPS)).toEqual(
-      expect.arrayContaining(PRESERVED_KEYS),
+  it("contains only help entries rendered by Configure surfaces", () => {
+    expect(Object.keys(HELP_TOOLTIPS).sort()).toEqual(
+      [...LIVE_HELP_KEYS, ...CURATED_RICH_HELP_KEYS, ...TEXT_ONLY_HELP_KEYS]
+        .filter((key, index, keys) => keys.indexOf(key) === index)
+        .sort(),
     );
   });
 
-  it("provides localized copy and durable image sources for curated rich help", () => {
+  it("provides localized copy, evidence, and durable sources for visual help", () => {
     for (const key of CURATED_RICH_HELP_KEYS) {
       const tooltip = HELP_TOOLTIPS[key];
       const imageSrc = tooltip.imageSrc as string;
@@ -121,6 +135,9 @@ describe("configure help catalog", () => {
 
       expect(tooltip).toBeDefined();
       expect(imageSrc).toMatch(/^\/tooltip-[a-z0-9-]+\.avif$/);
+      expect(tooltip.visualEvidence).toMatch(
+        /^(settings-design-production-renderer|agent-storefront)$/,
+      );
       expect(copy?.title).toBeTruthy();
       expect(copy?.description).toBeTruthy();
       expect(copy?.imageAlt).toBeTruthy();
@@ -133,6 +150,19 @@ describe("configure help catalog", () => {
         path.basename(imageSrc, ".avif") + ".png",
       );
       expect(fs.existsSync(pngPath)).toBe(true);
+    }
+  });
+
+  it("keeps theme-variable and non-visual settings text-only", () => {
+    for (const key of TEXT_ONLY_HELP_KEYS) {
+      const tooltip = HELP_TOOLTIPS[key];
+      const copy = en.tooltips[key as keyof typeof en.tooltips] as
+        | { title?: string; description?: string }
+        | undefined;
+
+      expect(tooltip).toEqual({});
+      expect(copy?.title).toBeTruthy();
+      expect(copy?.description).toBeTruthy();
     }
   });
 });
