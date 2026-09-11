@@ -13,6 +13,13 @@ import { resolveBundleLoadingScreenSettings } from "../lib/bundle-loading-screen
 export const PPB_STOREFRONT_TOKEN_TITLE = "Wolfpack PPB Storefront Runtime";
 export const PPB_JSON_LIMIT_BYTES = 128 * 1024;
 const PPB_CSS_LIMIT_BYTES = 64 * 1024;
+const PPB_STOREFRONT_REQUIRED_SCOPES = new Set([
+  "unauthenticated_read_checkouts",
+  "unauthenticated_read_metaobjects",
+  "unauthenticated_read_product_inventory",
+  "unauthenticated_read_product_listings",
+  "unauthenticated_write_checkouts",
+]);
 
 type Admin = { graphql: (query: string, options?: any) => Promise<{ json: () => Promise<any> }> };
 
@@ -28,15 +35,39 @@ export function assertPpbStorefrontSnapshotSize(name: string, value: unknown, li
 export async function ensurePpbStorefrontAccessToken(admin: Admin) {
   const listResponse = await admin.graphql(`
     query PpbStorefrontTokens {
-      shop { storefrontAccessTokens(first: 100) { nodes { id title accessToken } } }
+      currentAppInstallation { accessScopes { handle } }
+      shop {
+        storefrontAccessTokens(first: 100) {
+          nodes { id title accessToken accessScopes { handle } }
+        }
+      }
     }
   `);
   const listData = await listResponse.json();
   if (listData.errors?.length) {
     throw new Error(`Unable to list PPB Storefront tokens: ${listData.errors[0].message}`);
   }
+  const grantedScopes = new Set(
+    (listData.data?.currentAppInstallation?.accessScopes ?? [])
+      .map((scope: any) => scope?.handle)
+      .filter(Boolean),
+  );
+  const missingScope = [...PPB_STOREFRONT_REQUIRED_SCOPES].find(
+    (scope) => !grantedScopes.has(scope),
+  );
+  if (missingScope) {
+    throw new Error(`Shopify has not granted required PPB Storefront scope: ${missingScope}`);
+  }
   const nodes = listData.data?.shop?.storefrontAccessTokens?.nodes ?? [];
-  const existing = nodes.find((token: any) => token?.title === PPB_STOREFRONT_TOKEN_TITLE);
+  const existing = nodes.find((token: any) => {
+    if (token?.title !== PPB_STOREFRONT_TOKEN_TITLE) return false;
+    const scopes = new Set(
+      Array.isArray(token?.accessScopes)
+        ? token.accessScopes.map((scope: any) => scope?.handle).filter(Boolean)
+        : [],
+    );
+    return [...PPB_STOREFRONT_REQUIRED_SCOPES].every((scope) => scopes.has(scope));
+  });
   if (typeof existing?.accessToken === "string" && existing.accessToken) return existing.accessToken;
 
   const createResponse = await admin.graphql(`

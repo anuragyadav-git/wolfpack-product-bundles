@@ -24,13 +24,29 @@ function response(data: unknown) {
   return { json: async () => data };
 }
 
+const ppbStorefrontAccessScopes = [
+  { handle: "unauthenticated_read_checkouts" },
+  { handle: "unauthenticated_read_metaobjects" },
+  { handle: "unauthenticated_read_product_inventory" },
+  { handle: "unauthenticated_read_product_listings" },
+  { handle: "unauthenticated_write_checkouts" },
+];
+
 describe("PPB Shopify-hosted storefront runtime", () => {
   it("reuses the single titled public Storefront token", async () => {
     const admin = {
       graphql: jest.fn().mockResolvedValue(response({
-        data: { shop: { storefrontAccessTokens: { nodes: [
-          { id: "gid://shopify/StorefrontAccessToken/1", title: PPB_STOREFRONT_TOKEN_TITLE, accessToken: "public-token" },
-        ] } } },
+        data: {
+          currentAppInstallation: { accessScopes: ppbStorefrontAccessScopes },
+          shop: { storefrontAccessTokens: { nodes: [
+            {
+              id: "gid://shopify/StorefrontAccessToken/1",
+              title: PPB_STOREFRONT_TOKEN_TITLE,
+              accessToken: "public-token",
+              accessScopes: ppbStorefrontAccessScopes,
+            },
+          ] } },
+        },
       })),
     };
 
@@ -38,10 +54,56 @@ describe("PPB Shopify-hosted storefront runtime", () => {
     expect(admin.graphql).toHaveBeenCalledTimes(1);
   });
 
+  it("creates a new token when the titled token predates the metaobjects scope", async () => {
+    const admin = {
+      graphql: jest.fn()
+        .mockResolvedValueOnce(response({ data: {
+          currentAppInstallation: { accessScopes: ppbStorefrontAccessScopes },
+          shop: { storefrontAccessTokens: { nodes: [
+            {
+              id: "gid://shopify/StorefrontAccessToken/1",
+              title: PPB_STOREFRONT_TOKEN_TITLE,
+              accessToken: "stale-token",
+              accessScopes: ppbStorefrontAccessScopes.filter(
+                ({ handle }) => handle !== "unauthenticated_read_metaobjects",
+              ),
+            },
+          ] } },
+        } }))
+        .mockResolvedValueOnce(response({ data: { storefrontAccessTokenCreate: {
+          storefrontAccessToken: { accessToken: "created-token" }, userErrors: [],
+        } } })),
+    };
+
+    await expect(ensurePpbStorefrontAccessToken(admin as any)).resolves.toBe("created-token");
+    expect(admin.graphql).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not create a replacement token before Shopify grants every required scope", async () => {
+    const admin = {
+      graphql: jest.fn().mockResolvedValue(response({ data: {
+        currentAppInstallation: {
+          accessScopes: ppbStorefrontAccessScopes.filter(
+            ({ handle }) => handle !== "unauthenticated_read_metaobjects",
+          ),
+        },
+        shop: { storefrontAccessTokens: { nodes: [] } },
+      } })),
+    };
+
+    await expect(ensurePpbStorefrontAccessToken(admin as any)).rejects.toThrow(
+      "Shopify has not granted required PPB Storefront scope: unauthenticated_read_metaobjects",
+    );
+    expect(admin.graphql).toHaveBeenCalledTimes(1);
+  });
+
   it("creates a public Storefront token only when the titled token is absent", async () => {
     const admin = {
       graphql: jest.fn()
-        .mockResolvedValueOnce(response({ data: { shop: { storefrontAccessTokens: { nodes: [] } } } }))
+        .mockResolvedValueOnce(response({ data: {
+          currentAppInstallation: { accessScopes: ppbStorefrontAccessScopes },
+          shop: { storefrontAccessTokens: { nodes: [] } },
+        } }))
         .mockResolvedValueOnce(response({ data: { storefrontAccessTokenCreate: {
           storefrontAccessToken: { accessToken: "created-token" }, userErrors: [],
         } } })),
@@ -141,9 +203,17 @@ describe("PPB Shopify-hosted storefront runtime", () => {
     const admin = {
       graphql: jest.fn()
         .mockResolvedValueOnce(response({
-          data: { shop: { storefrontAccessTokens: { nodes: [
-            { id: "gid://shopify/StorefrontAccessToken/1", title: PPB_STOREFRONT_TOKEN_TITLE, accessToken: "public-token" },
-          ] } } },
+          data: {
+            currentAppInstallation: { accessScopes: ppbStorefrontAccessScopes },
+            shop: { storefrontAccessTokens: { nodes: [
+              {
+                id: "gid://shopify/StorefrontAccessToken/1",
+                title: PPB_STOREFRONT_TOKEN_TITLE,
+                accessToken: "public-token",
+                accessScopes: ppbStorefrontAccessScopes,
+              },
+            ] } },
+          },
         }))
         .mockResolvedValueOnce(response({ data: { shop: { id: "gid://shopify/Shop/1" } } }))
         .mockResolvedValueOnce(response({
