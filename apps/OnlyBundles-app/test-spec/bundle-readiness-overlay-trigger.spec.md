@@ -5,7 +5,7 @@ title: Bundle Readiness Overlay Trigger
 type: test-spec
 status: active
 summary: Verifies the readiness trigger lifecycle and ensures only a deliberate checklist click activates an item action.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - wolfpack
 domains:
@@ -48,7 +48,7 @@ Confirm that the shared readiness overlay initially exposes its complete score c
 
 ## Acceptance Criteria
 
-- [ ] Initial markup includes the score, full title, and description.
-- [ ] Minimal-state collapse is scheduled for exactly five seconds after mount.
-- [ ] Only a click on an incomplete checklist item invokes its action.
-- [ ] Native popover light dismissal never invokes a checklist action.
+- [x] Initial markup includes the score, full title, and description.
+- [x] Minimal-state collapse is scheduled for exactly five seconds after mount.
+- [x] Only a click on an incomplete checklist item invokes its action.
+- [x] Native popover light dismissal never invokes a checklist action.
