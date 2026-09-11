@@ -40,6 +40,12 @@ keywords:
 
 The FPB configure page is the canonical Admin configure design. FPB and PPB keep separate route URLs, loaders, actions, save handlers, and storefront sync contracts, but shared visual primitives live under `app/routes/app/_shared/bundle-configure/`.
 
+The shared desktop left rail is sticky within `editGrid`. The existing bottom
+safe area belongs to that grid rather than the outer `editCanvas`, ensuring the
+rail's sticky boundary does not move when Bundle Level CSS or another main-column
+disclosure expands near the end of the page. FPB and PPB use the same ownership;
+neither route adds disclosure-specific scroll compensation.
+
 The only bundle configuration routes are the type-specific FPB and PPB configure pages. Bundle creation, cloning, and editing navigate directly to the appropriate configure route. The retired `/app/bundles/create/configure/:bundleId` configuration wizard and its route-specific state, actions, preview helper, and modal controllers are not part of the supported architecture.
 
 Shared configure primitives accept adapter props for route-owned state and

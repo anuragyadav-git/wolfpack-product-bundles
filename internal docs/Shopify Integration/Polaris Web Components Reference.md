@@ -128,6 +128,13 @@ and responsive reading order without duplicating content, so
 `s-query-container`. Its fields, actions, feedback, and ordinary content groups
 continue to use Polaris components.
 
+For any sticky Admin rail, put the route's bottom safe area on the rail's actual
+sticky containing layout, not on an ancestor outside that containing block.
+Otherwise, expanding content near the end of the page changes the sticky bottom
+constraint and makes the rail appear to jump even though its top alignment did
+not change. Keep the safe area content-neutral and reuse the route's existing
+spacing rather than adding a disclosure-specific offset or scroll correction.
+
 Official layout references:
 
 - `https://shopify.dev/docs/api/app-home/latest/web-components/layout-and-structure/page`

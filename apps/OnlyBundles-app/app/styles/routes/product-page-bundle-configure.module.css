@@ -59,7 +59,6 @@
   min-width: 0;
   max-width: 950px;
   margin: 0 auto;
-  padding: 0 0 88px;
   box-sizing: border-box;
 }
 
@@ -112,6 +111,7 @@
   gap: 16px;
   inline-size: 100%;
   min-inline-size: 0;
+  padding-block-end: 88px;
 }
 
 .leftRail {
@@ -2048,7 +2048,7 @@
 @container bundle-configure (inline-size <= 980px) {
   .editCanvas {
     max-width: none;
-    padding: 0 12px 88px;
+    padding-inline: 12px;
   }
 
   .editGrid {
