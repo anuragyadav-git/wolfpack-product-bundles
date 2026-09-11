@@ -23,7 +23,7 @@ export function PpbBundleLevelCssSettings({
       <s-stack direction="block" gap="small">
         <s-clickable
           inlineSize="100%"
-          padding="none"
+          padding="small"
           aria-expanded={bundleLevelCssExpanded}
           onClick={() => setBundleLevelCssExpanded((prev) => !prev)}
         >
@@ -48,6 +48,7 @@ export function PpbBundleLevelCssSettings({
             label={translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingscss.bundleLevelCss"
             )}
+            labelAccessibilityVisibility="exclusive"
             value={bundleLevelCss}
             placeholder={translateAdmin(
               "adminAttributes.addCustomCSSForThisBundle"

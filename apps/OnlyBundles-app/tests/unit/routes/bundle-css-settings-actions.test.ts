@@ -94,4 +94,28 @@ describe("bundle CSS settings actions", () => {
     expect(setBundleLevelCssExpanded).toHaveBeenCalledTimes(1);
     expect(setBundleLevelCssExpanded.mock.calls[0][0](true)).toBe(false);
   });
+
+  it.each([
+    ["FPB", FpbBundleCssSettings, {bundleStatus: "draft", setBundleStatus: jest.fn()}],
+    ["PPB", PpbBundleLevelCssSettings, {}],
+  ])("keeps the expanded %s field label exclusive to assistive technology", (_name, Component, extraProps) => {
+    flushSync(() => {
+      root.render(
+        React.createElement(Component as React.ComponentType<any>, {
+          bundleLevelCss: "",
+          bundleLevelCssExpanded: true,
+          markAsDirty: jest.fn(),
+          setBundleLevelCss: jest.fn(),
+          setBundleLevelCssExpanded: jest.fn(),
+          ...extraProps,
+        }),
+      );
+    });
+
+    expect(
+      container
+        .querySelector("s-text-area")
+        ?.getAttribute("labelaccessibilityvisibility"),
+    ).toBe("exclusive");
+  });
 });

@@ -5,7 +5,7 @@ title: Admin Polaris Native Controls Test Spec
 type: test-spec
 status: active
 summary: Defines native Polaris ownership for reusable Admin controls, ordinary actions, file selection, and modal behavior.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -105,6 +105,7 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 | 30 | Filter the Dashboard bundle list | Merchant chooses a status or bundle type | Native Polaris selects expose every supported option and preserve the route-local filter state | Avoid transient empty choice-list hydration warnings |
 | 31 | Open Dashboard support chat | Merchant activates the support CTA | Existing chat callback runs once and the icon action exposes its localized accessible name | Satisfies the Polaris icon-button contract |
 | 32 | Advance or dismiss the guided tour | Merchant activates Next, Got it, or Dismiss guided tour | Existing step, completion, dismissal, persistence, and focus-restoration behavior runs exactly once | The retained spotlight overlay uses native Polaris buttons for ordinary actions |
+| 33 | Expand Bundle Level CSS | FPB or PPB disclosure is open | One visible section label remains and the text-area label is available only to assistive technology | The padded native clickable owns the complete disclosure row |
 
 ## Acceptance Criteria
 
@@ -124,3 +125,15 @@ Delegate ordinary Admin interaction, keyboard, focus, and modal behavior to Pola
 - [x] Dashboard filters use native Polaris selects without empty choice-list warnings.
 - [x] Dashboard support chat exposes its localized accessibility label.
 - [x] Guided-tour actions use native Polaris buttons without changing the retained spotlight workflow.
+- [x] FPB and PPB Bundle Level CSS use one padded native disclosure row and do
+  not repeat the field label visually.
+
+## Bundle Level CSS Verification
+
+- Agent-store desktop QA passed for PPB and FPB at 1280x800 after
+  cache-bypassing reloads. DevTools clicked each disclosure at its element
+  center, between the label and chevron, and both expanded and collapsed.
+- Agent-store minimum-width QA passed for both bundle types at the Chrome host's
+  actual 500x844 window. Each expanded card kept one visible label with no
+  clipped content, overlap, or horizontal overflow. No viewport emulation was
+  used.

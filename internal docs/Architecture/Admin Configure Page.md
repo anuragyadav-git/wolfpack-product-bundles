@@ -199,6 +199,12 @@ overlay; and controls projected into App Bridge title bars, save bars, or the
 maximum-size template modal. Those exceptions keep only their local interaction
 role and must not duplicate Shopify-owned dialog, focus, or form behavior.
 
+FPB and PPB Bundle Level CSS share the same disclosure contract. One padded,
+full-width `s-clickable` header owns the complete label-and-chevron row,
+including its whitespace. The heading is the only visible section label; the
+expanded `s-text-area` keeps its associated label exclusive to assistive
+technology. Neither bundle type adds a second click owner or custom hit area.
+
 Mutually exclusive modes use one Shopify-owned `s-choice-list` per question,
 with every valid `s-choice` as a direct child and the current value supplied
 through the list's `values` property. FPB and PPB rule modes, widget
