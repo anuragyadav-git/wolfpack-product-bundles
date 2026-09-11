@@ -4,8 +4,8 @@ id: public-website
 title: Public Website
 type: architecture
 status: active
-summary: Defines the static Only Bundles public site, production-renderer demo, limited-release SDK guide, legal content, and release gate.
-last_audited: 2026-09-07
+summary: Defines the static Only Bundles public site, production-renderer demo, merchant tutorial evidence, limited-release SDK guide, legal content, and release gate.
+last_audited: 2026-09-11
 owners:
   - product
   - engineering
@@ -89,11 +89,16 @@ During the custom-domain cutover, update both the website `SITE_ORIGIN` and this
 application URL owner so canonical metadata and in-app destinations change
 together.
 
-Tutorial screenshots are read-only captures of existing production Admin
-states. Capturing documentation must not save fixture changes. Public pages use
-the cropped app iframe rather than the outer Shopify Admin shell, include
-descriptive alternative text, and must not imply behavior that was not verified
-in the current app or authoritative internal feature notes.
+Tutorial screenshots are read-only captures of verified Admin and storefront
+states. Capturing documentation must not save incidental fixture changes. Public
+pages normally use the cropped app iframe rather than the outer Shopify Admin
+shell. A tutorial about Shopify-owned catalog configuration may show the
+relevant product-editor controls because those controls are the feature being
+taught, but the capture must exclude account details, unrelated navigation,
+private URLs, and unrelated store data. Every image includes descriptive
+alternative text and must not imply behavior that was not verified in the
+current app, Shopify's current documentation, or authoritative internal feature
+notes.
 
 ## Demo boundary
 

@@ -25,7 +25,7 @@ export type HelpTooltipKey =
   | "bundleSubscriptions"
   | "floatingPromoBadge";
 
-export type HelpTooltipVisualEvidence =
+type HelpTooltipVisualEvidence =
   | "settings-design-production-renderer"
   | "agent-storefront";
 
