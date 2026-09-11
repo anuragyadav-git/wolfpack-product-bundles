@@ -165,6 +165,10 @@ Design owns the store-level loading screen used by both bundle types.
 The FPB promo banner uses the canonical desktop and mobile bundle-banner URLs;
 its two native drop zones share one row at every configure width. Bundle
 Settings does not duplicate those media controls.
+The Floating Promo Badge header uses the shared `ConfigureHelpPopover`; its
+canonical image is captured from the real storefront badge renderer and CSS so
+the popover shows the fixed bottom-left pill, merchant text, and dismiss action
+instead of an independently styled approximation.
 FPB Promo Banner and PPB Bundle Banner use the Polaris `desktop` and `mobile`
 icons inside their matching responsive drop zones. FPB media-card context badges
 occupy the top-right auto column of the same native grid row as the title and

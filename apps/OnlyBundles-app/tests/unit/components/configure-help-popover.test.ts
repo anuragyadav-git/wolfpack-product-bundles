@@ -64,6 +64,7 @@ const CURATED_RICH_HELP_KEYS: HelpTooltipKey[] = [
   "stickyAddToCart",
   "countdownTimer",
   "bundleSubscriptions",
+  "floatingPromoBadge",
 ];
 
 describe("ConfigureHelpPopover", () => {

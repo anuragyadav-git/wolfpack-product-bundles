@@ -448,6 +448,11 @@
       "title": "Assinaturas do Pacote",
       "description": "Permita que os compradores escolham entre planos de venda compatíveis do Shopify compartilhados pelos produtos do pacote.",
       "imageAlt": "Opções de compra de um pacote uma vez e de assinatura"
+    },
+    "floatingPromoBadge": {
+      "title": "Selo promocional flutuante",
+      "description": "Exiba um selo promocional dispensável no canto inferior esquerdo do pacote de página inteira. Ele usa o texto configurado e a cor do botão principal do pacote.",
+      "imageAlt": "Um selo promocional arredondado no canto inferior esquerdo da loja com texto do lojista e um botão para fechar"
     }
   },
   "specificLinkOffer": {

@@ -448,6 +448,11 @@
       "title": "Bundle Subscriptions",
       "description": "Let shoppers choose from compatible Shopify selling plans shared by the bundle products.",
       "imageAlt": "One-time and subscription purchase options for a bundle"
+    },
+    "floatingPromoBadge": {
+      "title": "Floating Promo Badge",
+      "description": "Show a dismissible promotion badge at the bottom-left of the full-page bundle. It uses your configured text and the bundle's primary button color.",
+      "imageAlt": "A rounded promotional badge at the bottom-left of a storefront with merchant text and a dismiss button"
     }
   },
   "specificLinkOffer": {

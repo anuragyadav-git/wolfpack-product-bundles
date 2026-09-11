@@ -24,7 +24,8 @@ export type HelpTooltipKey =
   | "lowStockAlert"
   | "stickyAddToCart"
   | "countdownTimer"
-  | "bundleSubscriptions";
+  | "bundleSubscriptions"
+  | "floatingPromoBadge";
 
 interface HelpTooltipDetails {
   imageSrc?: string;
@@ -79,4 +80,7 @@ export const HELP_TOOLTIPS: Record<HelpTooltipKey, HelpTooltipDetails> = {
   stickyAddToCart: { imageSrc: "/tooltip-sticky-add-to-cart.avif" },
   countdownTimer: { imageSrc: "/tooltip-countdown-timer.avif" },
   bundleSubscriptions: { imageSrc: "/tooltip-bundle-subscriptions.avif" },
+  floatingPromoBadge: {
+    imageSrc: "/tooltip-floating-promo-badge.avif",
+  },
 };

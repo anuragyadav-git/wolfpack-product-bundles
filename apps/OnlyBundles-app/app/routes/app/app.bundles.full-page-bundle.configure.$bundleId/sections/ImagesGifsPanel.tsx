@@ -1,6 +1,7 @@
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
 import { AssetUpload } from "../../../../components/shared/AssetUpload";
+import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
 
 export interface FpbImagesGifsPanelProps {
   activeSection: string;
@@ -113,11 +114,14 @@ export function FpbImagesGifsPanel({
                 >
                   <s-icon type="note" />
                   <s-stack direction="block" gap="small-400">
-                    <s-text type="strong">
-                      {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.floatingPromoBadge"
-                      )}
-                    </s-text>
+                    <s-stack direction="inline" gap="small" alignItems="center">
+                      <s-text type="strong">
+                        {translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.floatingPromoBadge"
+                        )}
+                      </s-text>
+                      <ConfigureHelpPopover tooltipKey="floatingPromoBadge" />
+                    </s-stack>
                     <s-text color="subdued">
                       {translateAdmin(
                         "adminExtracted.appBundlesFullPageBundleConfigure.sections.imagesgifspanel.fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks"

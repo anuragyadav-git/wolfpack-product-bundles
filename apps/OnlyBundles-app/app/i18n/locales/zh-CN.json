@@ -448,6 +448,11 @@
       "title": "订阅包",
       "description": "让购物者从兼容的购物车销售计划中选择由捆包产品共享的销售计划。",
       "imageAlt": "包的一次性和订阅购买选项"
+    },
+    "floatingPromoBadge": {
+      "title": "浮动促销徽章",
+      "description": "在全页捆绑包左下角显示可关闭的促销徽章。徽章使用您配置的文本和捆绑包主按钮颜色。",
+      "imageAlt": "店面左下角带有商家文本和关闭按钮的圆角促销徽章"
     }
   },
   "specificLinkOffer": {

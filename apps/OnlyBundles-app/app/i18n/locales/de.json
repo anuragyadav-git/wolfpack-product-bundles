@@ -448,6 +448,11 @@
       "title": "Paketabonnements",
       "description": "Lassen Sie die Käufer aus kompatiblen Shopify Verkaufsplänen wählen, die von den Bundle-Produkten geteilt werden.",
       "imageAlt": "Einmal- und Abonnement-Kaufoptionen für ein Bundle"
+    },
+    "floatingPromoBadge": {
+      "title": "Schwebendes Promo-Abzeichen",
+      "description": "Zeigt ein schließbares Promo-Abzeichen unten links im Ganzseiten-Bundle. Es verwendet den konfigurierten Text und die Farbe der primären Bundle-Schaltfläche.",
+      "imageAlt": "Ein abgerundetes Promo-Abzeichen unten links im Storefront mit Händlertext und einer Schließen-Schaltfläche"
     }
   },
   "specificLinkOffer": {

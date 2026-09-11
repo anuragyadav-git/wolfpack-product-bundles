@@ -448,6 +448,11 @@
       "title": "Suscripciones al paquete",
       "description": "Permite a los compradores elegir entre los planes de venta compatibles de Shopify compartidos por los productos del paquete.",
       "imageAlt": "Opciones de compra de una sola vez y de suscripción para un paquete"
+    },
+    "floatingPromoBadge": {
+      "title": "Insignia promocional flotante",
+      "description": "Muestra una insignia promocional descartable en la esquina inferior izquierda del paquete de página completa. Usa el texto configurado y el color del botón principal del paquete.",
+      "imageAlt": "Una insignia promocional redondeada en la esquina inferior izquierda de la tienda con texto del comerciante y un botón para cerrarla"
     }
   },
   "specificLinkOffer": {

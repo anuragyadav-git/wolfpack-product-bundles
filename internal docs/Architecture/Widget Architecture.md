@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, signed settings, Shopify-hosted CSS, market pricing, and fail-closed hydration architecture.
-last_audited: 2026-09-10
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -45,7 +45,10 @@ source_paths:
   - apps/OnlyBundles-app/app/assets/widgets/shared/managed-style.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared/theme-section-parser.ts
   - apps/OnlyBundles-app/app/assets/widgets/full-page/initialization-guard.ts
+  - apps/OnlyBundles-app/app/assets/widgets/full-page/methods/tier-floating-runtime-methods.ts
   - apps/OnlyBundles-app/app/assets/widgets/full-page-css/base/bootstrap-reservation.css
+  - apps/OnlyBundles-app/app/assets/widgets/full-page-css/base/floating-badge-sidebar-progress.css
+  - apps/OnlyBundles-app/app/assets/widgets/full-page-css/shared/mobile-summary-footer.css
   - apps/OnlyBundles-app/app/assets/bundle-widget-product-page.ts
   - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/sticky-add-to-cart-methods.ts
   - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/default-product-methods.ts
@@ -816,6 +819,14 @@ Shopify-hosted `$app.ppb_storefront_css` by Liquid; it is not fetched from an
 app-owned stylesheet endpoint. Static presentation belongs in the raw widget CSS sources, while
 validated colors, counts, and percentages may cross the DOM boundary only as
 CSS custom properties.
+
+The FPB floating promo badge remains fixed at its established bottom-left
+desktop position. In mobile summary mode, CSS derives the complete sticky dock
+block size from the dock's shared spacing, control, border, and safe-area tokens,
+then places the badge one standard gap above it. The existing
+`data-fpb-summary-mode="tray"` state activates that branch. Do not replace this
+with a fixed viewport offset or JavaScript geometry injection: both would drift
+from the mobile footer and can obscure its summary or checkout action.
 
 The FPB desktop summary and mobile tray rebuild their contents after selection
 changes. Simple and Step-Based discount-progress transitions must therefore

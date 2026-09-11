@@ -37,6 +37,21 @@ jest.mock("../../../app/components/shared/AssetUpload", () => ({
     ),
 }));
 
+jest.mock(
+  "../../../app/routes/app/_shared/bundle-configure/ConfigureHelpPopover",
+  () => ({
+    ConfigureHelpPopover: ({tooltipKey}: {tooltipKey: string}) =>
+      React.createElement(
+        "button",
+        {
+          "aria-label": `${tooltipKey} help`,
+          type: "button",
+        },
+        "Help",
+      ),
+  }),
+);
+
 describe("FPB media feature boundary", () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -103,7 +118,9 @@ describe("FPB media feature boundary", () => {
       "https://cdn.shopify.com/mobile.jpg",
     );
     expect(markAsDirty).toHaveBeenCalledTimes(2);
-    expect(container.querySelectorAll("button")).toHaveLength(2);
+    expect(
+      container.querySelectorAll('button[aria-label$=" upload"]'),
+    ).toHaveLength(2);
     expect(container.querySelector('s-icon[type="desktop"]')).not.toBeNull();
     expect(container.querySelector('s-icon[type="mobile"]')).not.toBeNull();
     expect(String(container.textContent).includes("FORMAT")).toBe(false);
@@ -133,6 +150,31 @@ describe("FPB media feature boundary", () => {
     });
 
     expect(container.querySelector("button")).toBeNull();
+  });
+
+  it("exposes floating promo badge help without changing route draft state", () => {
+    const markAsDirty = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(FpbImagesGifsPanel, {
+          activeSection: "images_gifs",
+          floatingBadgeEnabled: false,
+          floatingBadgeText: "",
+          markAsDirty,
+          bundleBannerDesktopUrl: "",
+          bundleBannerMobileUrl: "",
+          setBundleBannerDesktopUrl: jest.fn(),
+          setBundleBannerMobileUrl: jest.fn(),
+          setFloatingBadgeEnabled: jest.fn(),
+          setFloatingBadgeText: jest.fn(),
+        }),
+      );
+    });
+
+    click('button[aria-label="floatingPromoBadge help"]');
+
+    expect(markAsDirty).not.toHaveBeenCalled();
   });
 
   function click(selector: string) {

@@ -448,6 +448,11 @@
       "title": "Abonnements groupés",
       "description": "Laissez les acheteurs choisir parmi les plans de vente compatibles Shopify partagés par les produits bundle .",
       "imageAlt": "Options d'achat à usage unique et d'abonnement pour un ensemble"
+    },
+    "floatingPromoBadge": {
+      "title": "Badge promotionnel flottant",
+      "description": "Affiche un badge promotionnel pouvant être fermé en bas à gauche du bundle pleine page. Il utilise le texte configuré et la couleur du bouton principal du bundle.",
+      "imageAlt": "Un badge promotionnel arrondi en bas à gauche d'une boutique avec le texte du marchand et un bouton de fermeture"
     }
   },
   "specificLinkOffer": {

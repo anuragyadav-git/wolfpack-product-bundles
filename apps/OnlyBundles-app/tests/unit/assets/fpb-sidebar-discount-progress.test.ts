@@ -21,6 +21,7 @@ class FakeElement {
   textContent = '';
   innerHTML = '';
   children: FakeElement[] = [];
+  parentElement: FakeElement | null = null;
   dataset: Record<string, string> = {};
   style = { setProperty: jest.fn(), removeProperty: jest.fn() };
   attributes: Record<string, string> = {};
@@ -55,6 +56,7 @@ class FakeElement {
       child.children.forEach((fragmentChild) => this.appendChild(fragmentChild));
       return child;
     }
+    child.parentElement = this;
     this.children.push(child);
     return child;
   }
@@ -64,9 +66,18 @@ class FakeElement {
   }
 
   replaceChildren(...children: FakeElement[]) {
+    this.children.forEach((child) => {
+      child.parentElement = null;
+    });
     this.children = [];
     this.textContent = '';
     this.append(...children);
+  }
+
+  remove() {
+    if (!this.parentElement) return;
+    this.parentElement.children = this.parentElement.children.filter((child) => child !== this);
+    this.parentElement = null;
   }
 
   addEventListener(eventName: string, handler: () => unknown) {
@@ -764,5 +775,33 @@ describe('FPB sidebar add-on CTA copy', () => {
     const cta = panel.querySelector('.side-panel-btn-next');
     expect(cta?.textContent).toBe('Add To Cart');
     expect(cta?.className).not.toContain('side-panel-btn-has-tier-cta');
+  });
+});
+
+describe('FPB floating promo badge lifecycle', () => {
+  it('removes and session-dismisses the badge when the shopper activates close', async () => {
+    const body = document.createElement('body') as unknown as FakeElement;
+    (global as any).document.body = body;
+    (global as any).sessionStorage = {
+      getItem: jest.fn(() => null),
+      setItem: jest.fn(),
+    };
+    const context = {
+      selectedBundle: {
+        id: 'bundle-1',
+        floatingBadgeEnabled: true,
+        floatingBadgeText: 'Save 20% today only!',
+      },
+    };
+
+    fullPageTierFloatingRuntimeMethods._initFloatingBadge.call(context);
+
+    expect(body.children).toHaveLength(1);
+
+    const closeButton = collectButtons(body)[0];
+    await closeButton.click();
+
+    expect(sessionStorage.setItem).toHaveBeenCalledWith('fpb_badge_dismissed_bundle-1', '1');
+    expect(body.children).toHaveLength(0);
   });
 });
