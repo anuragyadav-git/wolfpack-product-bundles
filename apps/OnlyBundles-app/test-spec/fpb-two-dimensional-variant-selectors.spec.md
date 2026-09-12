@@ -47,20 +47,22 @@ Verify that FPB preserves the merchant's category selector mode and presents mul
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 3 | Two-dimensional pill selector | Color x Size product | Primary dimension uses pills; secondary dimension uses a labeled native select | Prevents stacked pill rows |
-| 4 | Two-dimensional color swatch | Shopify color swatches plus Size | Color stays visual; Size uses a labeled native select | Never infer a color from its name |
-| 5 | Two-dimensional image swatch | Shopify image swatches plus Size | Image stays visual; Size uses a labeled native select | Shopify swatch data is authoritative |
-| 6 | Coordinated selection | Change either compact control | Exact compatible variant becomes active and all controls synchronize | Existing price/image/inventory callback remains single-fire |
-| 7 | Product has no meaningful variants | One variant or no options | No selector is rendered | Card still owns an empty stable selector region |
-| 8 | Review integration hydrates beside a mixed selector fixture | Judge.me badge HTML for each product | Badge mounts in the card identity region | It must not become an unowned card-grid child |
-| 9 | Product-card reading order | Any configured selector mode | Selector controls precede price content and the Add or quantity control in the rendered card | Visual and keyboard order stay aligned |
-| 10 | Modal product description has no meaningful content | Empty text or sanitized empty markup | Description region is hidden; meaningful text remains visible | Prevents an empty description from separating modal identity and controls |
+| 3 | Two-dimensional pill selector with an explicit primary | Color x Size product with Color configured as primary | Color uses pills; Size uses a labeled native select | Merchant ownership is preserved |
+| 4 | Two-dimensional pill selector without an explicit primary | Size with seven values x Color with four values | The four-value Color dimension uses pills; Size uses a labeled native select | Minimizes card height without hiding values |
+| 5 | Two-dimensional color swatch | Shopify color swatches plus Size | Color stays visual; Size uses a labeled native select | Never infer a color from its name |
+| 6 | Two-dimensional image swatch | Shopify image swatches plus Size | Image stays visual; Size uses a labeled native select | Shopify swatch data is authoritative |
+| 7 | Coordinated selection | Change either compact control | Exact compatible variant becomes active and all controls synchronize | Existing price/image/inventory callback remains single-fire |
+| 8 | Product has no meaningful variants | One variant or no options | No selector is rendered | Card still owns an empty stable selector region |
+| 9 | Review integration hydrates beside a mixed selector fixture | Judge.me badge HTML for each product | Badge mounts in the card identity region | It must not become an unowned card-grid child |
+| 10 | Product-card reading order | Any configured selector mode | Selector controls precede price content and the Add or quantity control in the rendered card | Visual and keyboard order stay aligned |
+| 11 | Modal product description has no meaningful content | Empty text or sanitized empty markup | Description region is hidden; meaningful text remains visible | Prevents an empty description from separating modal identity and controls |
 
 ## Acceptance Criteria
 
 - [x] FPB runtime output contains the saved canonical category selector configuration.
 - [x] Invalid FPB selector configuration is rejected.
 - [x] Two-dimensional pill, color-swatch, and image-swatch modes use one visual dimension plus compact native selects for remaining dimensions.
+- [x] Without an explicit primary option, a pill selector makes the dimension with the fewest distinct values visual.
 - [x] Shopify swatch metadata is the only swatch source.
 - [x] Unavailable values remain disabled and named.
 - [x] Variant changes preserve the existing exact variant, price, image, availability, and inventory update flow.

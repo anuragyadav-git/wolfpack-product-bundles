@@ -87,6 +87,11 @@ class VariantSelectorComponent {
 
     const optionIndexes = options.map((_: unknown, index: number) => index + 1);
     const primaryIdx = VariantSelectorComponent._primaryIdx(options, primaryOptionName);
+    const hasExplicitPrimary = typeof primaryOptionName === 'string'
+      && options.some((option: unknown) => (
+        VariantSelectorComponent._optionName(option).toLowerCase()
+          === primaryOptionName.toLowerCase()
+      ));
     const swatchKind = mode === 'color_swatch'
       ? 'color'
       : mode === 'image_swatch'
@@ -104,9 +109,17 @@ class VariantSelectorComponent {
         })
       ))
       : [];
+    const compactPillIndex = mode === 'pill' && !hasExplicitPrimary
+      ? optionIndexes.reduce((bestIndex: number, candidateIndex: number) => (
+        VariantSelectorComponent._uniqueValues(variants, candidateIndex).length
+          < VariantSelectorComponent._uniqueValues(variants, bestIndex).length
+          ? candidateIndex
+          : bestIndex
+      ), primaryIdx)
+      : primaryIdx;
     const visualIndex = mappedIndexes.includes(primaryIdx)
       ? primaryIdx
-      : mappedIndexes[0] || primaryIdx;
+      : mappedIndexes[0] || compactPillIndex;
     const selectedVariant = variants.find((variant: any) => (
       String(variant.id) === String(product.variantId)
     )) || variants[0];

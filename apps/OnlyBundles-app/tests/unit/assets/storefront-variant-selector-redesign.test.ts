@@ -48,6 +48,35 @@ function createFpbProduct() {
 }
 
 describe('Direction A FPB variant selector behavior', () => {
+  it('uses the lowest-value option as the visual pill dimension when no primary is configured', () => {
+    const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+    const sizes = ['S', 'M', 'L', 'XL', '2XL', '3XL', '4XL'];
+    const colors = ['Black', 'Navy', 'White', 'Gray'];
+    const variants = sizes.flatMap((size) => colors.map((color) => ({
+      id: `variant-${size}-${color}`,
+      title: `${size} / ${color}`,
+      option1: size,
+      option2: color,
+      available: true,
+    })));
+    const selector = VariantSelectorComponent.createConfiguredElement(
+      {
+        id: 'shirt',
+        variantId: variants[0].id,
+        options: ['Size', 'Color'],
+        variants,
+      },
+      null,
+      { variantSelectorMode: 'pill' },
+      runtimeDocument,
+    );
+
+    expect(selector.querySelector('[role="radiogroup"]').getAttribute('aria-label')).toBe('Color');
+    expect(selector.querySelectorAll('input[type="radio"]')).toHaveLength(colors.length);
+    expect(selector.querySelector('select').getAttribute('aria-label')).toBe('Size');
+    expect(selector.querySelectorAll('select option')).toHaveLength(sizes.length);
+  });
+
   it('keeps one pill dimension visible and compacts the second dimension into a native select', () => {
     const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
     const selector = VariantSelectorComponent.createConfiguredElement(
