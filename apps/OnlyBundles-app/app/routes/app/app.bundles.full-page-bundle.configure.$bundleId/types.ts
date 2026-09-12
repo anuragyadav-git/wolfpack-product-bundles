@@ -56,6 +56,7 @@ export interface LoaderData {
   shopCurrencyCode: string;
   shopLocales: { locale: string; name: string; primary: boolean }[];
   offerDelivery: SpecificLinkOfferAdminState;
+  isFreePlan?: boolean;
 }
 
 export interface SaveBundleResponse extends ActionResponse {

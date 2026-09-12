@@ -17,6 +17,7 @@ import {
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
 import { navigateWithSaveBarConfirmation } from "../../../lib/admin-unsaved-navigation";
+import { isFreeTemplate } from "../../../lib/subscriptions/entitlements";
 
 type ConfigureTemplatePricingDependencies = Pick<
   ReturnType<typeof useConfigureBundleController>,
@@ -30,6 +31,8 @@ type ConfigureTemplatePricingDependencies = Pick<
   | "productStatus"
   | "ruleMessages"
   | "stepsState"
+  | "setEntitlementFailure"
+  | "isFreePlan"
 > &
   Pick<ReturnType<typeof useConfigureContentState>, "textOverridesByLocale"> &
   Pick<
@@ -97,6 +100,8 @@ export function useConfigureTemplatePricingController(
     setPendingDesignTemplate,
     setTemplateModalStep,
     setTemplateSaveError,
+    setEntitlementFailure,
+    isFreePlan,
     stepsState,
     templateSubmissionStartedRef,
     templateFetcher,
@@ -208,6 +213,22 @@ export function useConfigureTemplatePricingController(
       templateSubmissionStartedRef.current = false;
       return;
     }
+    const entitlementFailure = (response as any).entitlementFailure;
+    if (entitlementFailure || response.error === "ENTITLEMENT_REQUIRED") {
+      setTemplateSaveError(null);
+      setIsSelectTemplateModalOpen(false);
+      setEntitlementFailure(
+        entitlementFailure || {
+          code: "ENTITLEMENT_REQUIRED",
+          entitlement: "bundle.template.premium",
+          action: "SELECT",
+          requiredPlan: "GROWTH",
+        }
+      );
+      lastTemplateRequestRef.current = null;
+      templateSubmissionStartedRef.current = false;
+      return;
+    }
     setTemplateModalStep("templates");
     setTemplateSaveError(response.error || "Failed to save template settings.");
     lastTemplateRequestRef.current = null;
@@ -218,8 +239,10 @@ export function useConfigureTemplatePricingController(
     lastTemplateResponseRef,
     setBundleDesignPresetId,
     setBundleDesignTemplate,
+    setIsSelectTemplateModalOpen,
     setTemplateModalStep,
     setTemplateSaveError,
+    setEntitlementFailure,
     templateSubmissionStartedRef,
     templateFetcher.data,
     templateFetcher.formData,
@@ -228,6 +251,23 @@ export function useConfigureTemplatePricingController(
 
   const handleTemplateNext = useCallback(() => {
     if (!pendingDesignTemplate || !pendingDesignPresetId) {
+      return;
+    }
+    if (
+      isFreePlan &&
+      !isFreeTemplate({
+        bundleType: "FULL_PAGE",
+        designTemplate: pendingDesignTemplate,
+        designPresetId: pendingDesignPresetId,
+      })
+    ) {
+      setTemplateSaveError(null);
+      setIsSelectTemplateModalOpen(false);
+      setEntitlementFailure({
+        code: "ENTITLEMENT_REQUIRED",
+        entitlement: "bundle.template.premium",
+        requiredPlan: "GROWTH",
+      });
       return;
     }
     setTemplateSaveError(null);
@@ -243,10 +283,13 @@ export function useConfigureTemplatePricingController(
     fd.append("bundleDesignPresetId", pendingDesignPresetId ?? "");
     templateFetcher.submit(fd, { method: "POST" });
   }, [
+    isFreePlan,
     lastTemplateRequestRef,
     lastTemplateResponseRef,
     pendingDesignPresetId,
     pendingDesignTemplate,
+    setIsSelectTemplateModalOpen,
+    setEntitlementFailure,
     setTemplateSaveError,
     templateSubmissionStartedRef,
     templateFetcher,

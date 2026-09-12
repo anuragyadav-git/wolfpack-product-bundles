@@ -303,68 +303,58 @@ export function usePpbPreviewReadinessHandlers({
   );
   const handleSectionChange = useCallback(
     (section: string) => {
-      if (
-        blockUnsavedAdminNavigation(
-          base.isDirty,
-          base.triggerSaveBarIrritation,
-        )
-      ) {
-        return;
-      }
-      base.setActiveSection(section);
+      void navigateWithSaveBarConfirmation(
+        () => base.shopify.saveBar.leaveConfirmation(),
+        () => {
+          base.setActiveSection(section);
+        },
+      );
     },
     [base],
   );
   const openProductInAdmin = useCallback(
     (productId: string) => {
-      if (
-        blockUnsavedAdminNavigation(
-          base.isDirty,
-          base.triggerSaveBarIrritation,
-        )
-      ) {
-        return;
-      }
-      const numericProductId = productId.startsWith("gid://")
-        ? (productId.split("/").pop() ?? productId)
-        : productId;
-      const productGid = productId.startsWith("gid://")
-        ? productId
-        : `gid://shopify/Product/${productId}`;
-      const storeHandle = base.shop?.replace(".myshopify.com", "");
-      const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
-      const openFallback = () => {
-        window.open(adminProductUrl, "_blank", "noopener,noreferrer");
-        base.refreshParentProductStatusFromShopify();
-      };
-      const intentsApi = (base.shopify as any).intents;
-      if (typeof intentsApi?.invoke === "function") {
-        try {
-          const intentResult = intentsApi.invoke("edit:shopify/Product", {
-            type: "shopify/Product",
-            value: productGid,
-          });
-          base.refreshParentProductStatusFromShopify();
-          if (typeof intentResult?.catch === "function") {
-            void intentResult.catch((error: unknown) => {
-              AppLogger.warn(
-                "Falling back after Product editor intent failed",
-                { productId },
-                error as any,
-              );
+      void navigateWithSaveBarConfirmation(
+        () => base.shopify.saveBar.leaveConfirmation(),
+        () => {
+          const numericProductId = productId.startsWith("gid://")
+            ? (productId.split("/").pop() ?? productId)
+            : productId;
+          const productGid = productId.startsWith("gid://")
+            ? productId
+            : `gid://shopify/Product/${productId}`;
+          const storeHandle = base.shop?.replace(".myshopify.com", "");
+          const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
+          const openFallback = () => {
+            window.open(adminProductUrl, "_blank", "noopener,noreferrer");
+            base.refreshParentProductStatusFromShopify();
+          };
+          const intentsApi = (base.shopify as any).intents;
+          if (typeof intentsApi?.invoke === "function") {
+            try {
+              const intentResult = intentsApi.invoke("edit:shopify/Product", {
+                type: "shopify/Product",
+                value: productGid,
+              });
+              if (intentResult && typeof intentResult.then === "function") {
+                intentResult
+                  .then(() => {
+                    base.refreshParentProductStatusFromShopify();
+                  })
+                  .catch(() => {
+                    openFallback();
+                  });
+              } else {
+                base.refreshParentProductStatusFromShopify();
+              }
+            } catch {
               openFallback();
-            });
+            }
+          } else {
+            openFallback();
           }
-          return;
-        } catch (error: any) {
-          AppLogger.warn(
-            "Falling back after Product editor intent failed",
-            { productId },
-            error as any,
-          );
-        }
-      }
-      openFallback();
+        },
+      );
     },
     [base],
   );

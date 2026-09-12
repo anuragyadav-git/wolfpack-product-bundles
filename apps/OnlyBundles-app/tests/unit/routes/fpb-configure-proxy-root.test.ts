@@ -24,6 +24,14 @@ jest.mock("../../../app/lib/bundle-configure-loader.server", () => ({
   fetchBundleConfigureShopifyData: jest.fn(),
 }));
 
+jest.mock("../../../app/services/subscriptions/subscription-service.server", () => ({
+  resolveShopEntitlements: jest.fn().mockResolvedValue({
+    entitlements: {
+      planCode: "GROWTH",
+    },
+  }),
+}));
+
 jest.mock(
   "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/ConfigureBundleFlow",
   () => ({

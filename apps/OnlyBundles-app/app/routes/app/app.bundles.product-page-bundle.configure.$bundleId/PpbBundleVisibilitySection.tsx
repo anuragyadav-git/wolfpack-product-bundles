@@ -39,7 +39,9 @@ type PpbBundleVisibilityFlowProps = Pick<
   | "shop"
   | "specificLinkOfferBusy"
   | "themeEditorUrl"
->;
+> & {
+  validationErrors?: Record<string, string>;
+};
 
 export type PpbBundleVisibilitySectionProps =
   PpbBundleVisibilityFlowProps & {
@@ -76,6 +78,7 @@ export function PpbBundleVisibilitySection({
   shop,
   specificLinkOfferBusy,
   themeEditorUrl,
+  validationErrors,
 }: PpbBundleVisibilitySectionProps) {
   const shopify = useAppBridge();
   const link = buildBundleLinkModel({
@@ -146,6 +149,7 @@ export function PpbBundleVisibilitySection({
           onRecurrenceTerminationChange={setOfferRecurrenceTermination}
           onRecurrenceEndsOnChange={setOfferRecurrenceEndsOn}
           onRecurrenceRunCountChange={setOfferRecurrenceRunCount}
+          validationErrors={validationErrors}
         />
         <CountryTargetingSection
           active={activeSection === "bundle_visibility"}
@@ -153,6 +157,7 @@ export function PpbBundleVisibilitySection({
           onEnabledChange={setCountryTargetingEnabled}
           onModeChange={setCountryTargetingMode}
           onCountryCodesChange={setCountryCodes}
+          validationErrors={validationErrors}
         />
       </s-stack>
     </div>

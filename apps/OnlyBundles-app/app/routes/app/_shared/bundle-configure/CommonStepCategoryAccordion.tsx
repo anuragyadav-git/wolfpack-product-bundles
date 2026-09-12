@@ -407,7 +407,6 @@ export function CommonStepCategoryAccordion({
               styles={styles}
             />
           )}
-          {categoryControls}
           {validationErrors[`${categoryPath}.resources`] && (
             <s-text
               id={`configure-${categoryPath.replace(
@@ -419,6 +418,7 @@ export function CommonStepCategoryAccordion({
               {validationErrors[`${categoryPath}.resources`]}
             </s-text>
           )}
+          {categoryControls}
         </div>
       )}
     </div>

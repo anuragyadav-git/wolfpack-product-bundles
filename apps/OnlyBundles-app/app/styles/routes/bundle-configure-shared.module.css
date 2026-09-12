@@ -828,7 +828,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
-  align-items: end;
+  align-items: start;
 }
 
 /* Two-column row for Fixed Bundle Price rule fields (number of products + price). */
@@ -836,7 +836,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  align-items: end;
+  align-items: start;
 }
 
 @media (max-width: 700px) {
@@ -874,6 +874,7 @@
 .discountRuleHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   margin-bottom: 10px;
 }

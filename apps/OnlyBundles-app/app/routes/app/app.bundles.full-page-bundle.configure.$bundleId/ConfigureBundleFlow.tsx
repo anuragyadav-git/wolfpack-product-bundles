@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { AdminSectionLoadingState } from "../../../components/AdminSectionLoadingState";
 import { AdminTaskAlertBanner } from "../../../components/AdminTaskAlertBanner";
 import { BundleReadinessOverlay } from "../../../components/bundle-configure/BundleReadinessOverlay";
+import { EntitlementUpgradeModal } from "../../../components/billing/EntitlementUpgradeModal";
 import fullPageBundleStyles from "../../../styles/routes/full-page-bundle-configure.module.css";
 import { CommonConfigureShell } from "../_shared/bundle-configure/CommonConfigureShell";
 import { getDeferredConfigureSection } from "../_shared/bundle-configure/deferred-configure-sections";
@@ -233,6 +234,14 @@ function ConfigureBundleFlow() {
             onOpenChange={flow.setReadinessOpen}
             onItemClick={flow.handleReadinessItemClick}
           />
+          <EntitlementUpgradeModal
+            open={Boolean(flow.entitlementFailure)}
+            failure={flow.entitlementFailure}
+            isSavingDraft={flow.fetcher.state !== "idle"}
+            onClose={flow.handleDismissEntitlementModal || flow.clearEntitlementFailure}
+            onSaveAsDraft={flow.handleSaveAsDraft}
+            onViewPlans={() => flow.navigate("/app/billing/plans")}
+          />
           {showOverlays ? (
             <Suspense fallback={null}>
               <ConfigureRouteModals
@@ -369,6 +378,7 @@ function ConfigureBundleFlow() {
                   templateModalStep: flow.templateModalStep,
                   templateSaveError: flow.templateSaveError,
                   themeEditorUrl: flow.themeEditorUrl,
+                  isFreePlan: flow.isFreePlan,
                 },
               }}
               />
@@ -479,12 +489,14 @@ function ConfigureBundleFlow() {
                 flow.updateAddonDraft({ personalizeStepText }),
               onStepTitleChange: (personalizePageSubtext) =>
                 flow.updateAddonDraft({ personalizePageSubtext }),
+              validationErrors: flow.validationErrors,
             }}
             products={{
               enabled: flow.addonDraft.addonProductsEnabled === true,
               title: flow.addonDraft.addonProductsTitle ?? "",
               translationsAvailable: flow.shopLocales.length > 0,
               styles: flow.fullPageBundleStyles,
+              validationErrors: flow.validationErrors,
               tierEditor: {
                 activeTierIndex: flow.activeAddonTierIndex,
                 tiers: addonTiers,
@@ -578,6 +590,7 @@ function ConfigureBundleFlow() {
                 markAsDirty: flow.markAsDirty,
                 normalizedRuleMessages: flow.normalizedRuleMessages,
                 styles: flow.fullPageBundleStyles,
+                validationErrors: flow.validationErrors,
                 onShowVariables: () =>
                   flow.setIsDiscountVariablesModalOpen(true),
               },
@@ -593,6 +606,7 @@ function ConfigureBundleFlow() {
               onEnabledChange: flow.setCountryTargetingEnabled,
               onModeChange: flow.setCountryTargetingMode,
               onCountryCodesChange: flow.setCountryCodes,
+              validationErrors: flow.validationErrors,
             }}
             media={{
               activeSection: flow.activeSection,
@@ -621,6 +635,7 @@ function ConfigureBundleFlow() {
               onRecurrenceTerminationChange: flow.setOfferRecurrenceTermination,
               onRecurrenceEndsOnChange: flow.setOfferRecurrenceEndsOn,
               onRecurrenceRunCountChange: flow.setOfferRecurrenceRunCount,
+              validationErrors: flow.validationErrors,
             }}
             specificLinkOffer={{
               active: flow.activeSection === "bundle_visibility",

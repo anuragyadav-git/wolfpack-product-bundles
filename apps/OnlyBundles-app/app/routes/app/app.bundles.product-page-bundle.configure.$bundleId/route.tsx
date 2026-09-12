@@ -35,6 +35,7 @@ import {
   handleGenerateSpecificLinkOffer,
   handleRevokeSpecificLinkOffer,
 } from "../shared/specific-link-offer-action.server";
+import { resolveShopEntitlements } from "../../../services/subscriptions/subscription-service.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -107,11 +108,16 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // File: extensions/bundle-builder/blocks/bundle-product-page.liquid
   const blockHandle = "bundle-product-page";
 
-  const shopifyData = await fetchBundleConfigureShopifyData(
-    admin,
-    bundle.shopifyProductId,
-    bundleId
-  );
+  const [shopifyData, entitlementContext] = await Promise.all([
+    fetchBundleConfigureShopifyData(
+      admin,
+      bundle.shopifyProductId,
+      bundleId
+    ),
+    resolveShopEntitlements({ shopDomain: session.shop }),
+  ]);
+
+  const isFreePlan = entitlementContext?.entitlements?.planCode !== "GROWTH";
 
   const { offerPolicy, ...safeBundle } = bundle;
   return json({
@@ -121,6 +127,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       shopifyData.shopIanaTimezone
     ),
     bundleProduct: shopifyData.bundleProduct,
+    isFreePlan,
     shop: session.shop,
     configureMode,
     showFirstLoadTour,

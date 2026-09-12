@@ -9,6 +9,7 @@ import {
   mergePpbBundleEmbedTranslations,
   mergePpbBundleWidgetTranslations,
 } from "../../../lib/ppb-bundle-embed";
+import { BundleStatus } from "../../../constants/bundle";
 import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
 import type { usePpbVisibilityState } from "./usePpbVisibilityState";
 import type { usePpbDisplayOptionsState } from "./usePpbDisplayOptionsState";
@@ -18,12 +19,12 @@ import type { usePpbCategoryHandlers } from "./usePpbCategoryHandlers";
 
 type BaseDependencies = Pick<ReturnType<typeof usePpbBaseConfigureState>,
   | "allowQuantityChanges" | "bundle" | "bundleProduct" | "cartRedirectToCheckout"
-  | "checkAppEmbedStatusBeforePreview" | "conditionsState" | "discardSpecificLinkOfferChanges"
-  | "fetcher" | "formState" | "hookHandleDiscard" | "offerDeliveryState"
+  | "checkAppEmbedStatusBeforePreview" | "clearEntitlementFailure" | "conditionsState" | "discardSpecificLinkOfferChanges"
+  | "entitlementFailure" | "fetcher" | "formState" | "hookHandleDiscard" | "offerDeliveryState"
   | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
   | "originalSdkModeRef" | "originalShowProductPricesRef"
   | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
-  | "originalTextOverridesRef" | "pricingState" | "ruleMessages" | "sdkMode"
+  | "originalTextOverridesRef" | "originalValuesRef" | "pricingState" | "ruleMessages" | "sdkMode"
   | "selectedCollections" | "setActiveSection" | "setAllowQuantityChanges"
   | "setCartRedirectToCheckout" | "setOperationAlert" | "setSdkMode"
   | "setShowProductPrices" | "setSubscriptionConfigState" | "setTextOverrides"
@@ -190,7 +191,7 @@ export function usePpbSaveHandlers({
     visibility.upsellWidgetTitle,
   ]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (statusOverride?: any) => {
     try {
       if (visibility.bundleEmbedEnabled) {
         const appEmbedEnabled =
@@ -231,7 +232,7 @@ export function usePpbSaveHandlers({
       formData.append("bundleName", base.formState.bundleName);
       formData.append("bundleDescription", base.formState.bundleDescription);
       formData.append("templateName", base.formState.templateName);
-      formData.append("bundleStatus", base.formState.bundleStatus);
+      formData.append("bundleStatus", statusOverride ?? base.formState.bundleStatus);
       const stepsWithCollections = base.stepsState.steps.map((step: any) => ({
         ...step,
         collections:
@@ -628,10 +629,47 @@ export function usePpbSaveHandlers({
     validation.clearValidationErrors();
   }, [base, settings, validation, visibility]);
 
+  const handleSaveAsDraft = useCallback(async () => {
+    base.formState.setBundleStatus(BundleStatus.DRAFT);
+    base.clearEntitlementFailure?.();
+    await handleSave("draft");
+  }, [base, handleSave]);
+
+  const handleDismissEntitlementModal = useCallback(() => {
+    const failure = base.entitlementFailure;
+    if (failure) {
+      if (
+        failure.entitlement === "bundle.public.limit" ||
+        (!failure.entitlement && failure.code === "LIMIT_REACHED")
+      ) {
+        const originalStatus = base.originalValuesRef.current?.status;
+        const revertedStatus =
+          originalStatus &&
+          originalStatus !== BundleStatus.ACTIVE &&
+          originalStatus !== BundleStatus.UNLISTED
+            ? originalStatus
+            : BundleStatus.DRAFT;
+        base.formState.setBundleStatus(revertedStatus);
+      } else if (failure.entitlement === "bundle.steps.limit") {
+        if (base.originalValuesRef.current?.steps) {
+          try {
+            const originalSteps = JSON.parse(base.originalValuesRef.current.steps);
+            base.stepsState.setSteps(originalSteps);
+          } catch {
+            // ignore JSON parse error
+          }
+        }
+      }
+    }
+    base.clearEntitlementFailure?.();
+  }, [base]);
+
   return {
     buildDefaultProductsData,
     buildBundleUpsellConfig,
     handleSave,
+    handleSaveAsDraft,
+    handleDismissEntitlementModal,
     handleDiscard,
     ...validation,
   };

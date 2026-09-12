@@ -5,6 +5,7 @@ import {
   DISCOUNT_TEMPLATE_VARIABLES,
 } from "./ConfigureBundleFlow.helpers";
 import { hidePolarisModal } from "../_shared/bundle-configure/modal-utils";
+import { EntitlementUpgradeModal } from "../../../components/billing/EntitlementUpgradeModal";
 import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
 export type PpbUtilityModalsProps = Pick<
@@ -15,6 +16,10 @@ export type PpbUtilityModalsProps = Pick<
   | "setIsSyncModalOpen"
   | "syncModalRef"
   | "templateVariablesModalRef"
+  | "entitlementFailure"
+  | "clearEntitlementFailure"
+  | "handleSaveAsDraft"
+  | "handleDismissEntitlementModal"
 >;
 
 export function PpbUtilityModals({
@@ -24,6 +29,10 @@ export function PpbUtilityModals({
   setIsSyncModalOpen,
   syncModalRef,
   templateVariablesModalRef,
+  entitlementFailure,
+  clearEntitlementFailure,
+  handleDismissEntitlementModal,
+  handleSaveAsDraft,
 }: PpbUtilityModalsProps) {
 
   return (
@@ -134,6 +143,13 @@ export function PpbUtilityModals({
           )}
         </div>
       </s-modal>
+      <EntitlementUpgradeModal
+        open={Boolean(entitlementFailure)}
+        failure={entitlementFailure}
+        isSavingDraft={fetcher.state !== "idle"}
+        onClose={handleDismissEntitlementModal || clearEntitlementFailure}
+        onSaveAsDraft={handleSaveAsDraft}
+      />
     </>
   );
 }

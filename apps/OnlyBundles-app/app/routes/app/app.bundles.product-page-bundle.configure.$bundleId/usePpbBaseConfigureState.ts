@@ -50,6 +50,7 @@ export function usePpbBaseConfigureState() {
     blockHandle,
     shopLocales = [],
     shopCurrencyCode,
+    isFreePlan = true,
   } = loaderData;
   const themeEditorUrl = buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed");
   const navigate = useNavigate();
@@ -77,8 +78,8 @@ export function usePpbBaseConfigureState() {
   const isSaveInFlight = fetcher.state !== "idle";
   const saveBarRef = useRef<UISaveBarElement | null>(null);
   const triggerSaveBarIrritation = useCallback(() => {
-    void saveBarRef.current?.show?.();
-  }, []);
+    void shopify.saveBar.leaveConfirmation();
+  }, [shopify]);
   const blockConfigurationChangeWhileSaving = useCallback(
     (event: SyntheticEvent) => {
       handleAdminSaveLockedEvent(
@@ -143,6 +144,9 @@ export function usePpbBaseConfigureState() {
     operationAlert,
     setOperationAlert,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
   } = configState;
   const setSubscriptionConfig = useCallback(
     (
@@ -352,6 +356,9 @@ export function usePpbBaseConfigureState() {
     operationAlert,
     setOperationAlert,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
     parentProductStatusUi,
     refreshParentProductStatusFromShopify,
     showProductPrices,
@@ -372,6 +379,7 @@ export function usePpbBaseConfigureState() {
     textOverridesByLocale,
     setTextOverridesByLocale,
     originalTextOverridesByLocaleRef,
+    isFreePlan,
     ...specificLinkOffer,
   };
 }

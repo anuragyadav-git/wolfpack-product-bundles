@@ -42,8 +42,17 @@ export function ConfigureContextualSaveBar({
     }
   }, [isOpen, shopify]);
 
+  useEffect(() => {
+    if (isSaving) {
+      shopify.loading?.(true);
+    } else {
+      shopify.loading?.(false);
+    }
+  }, [isSaving, shopify]);
+
   useEffect(
     () => () => {
+      shopify.loading?.(false);
       if (!isSaveBarShown.current) return;
       isSaveBarShown.current = false;
       void shopify.saveBar.hide("bundle-save-bar");

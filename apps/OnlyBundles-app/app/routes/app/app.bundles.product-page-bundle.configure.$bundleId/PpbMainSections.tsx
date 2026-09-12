@@ -97,6 +97,7 @@ export function PpbMainSections({ flow }: { flow: PpbConfigureFlow }) {
             },
             markAsDirty: flow.markAsDirty,
             stepsState: flow.stepsState,
+            validationErrors: flow.validationErrors,
           }}
           rules={{
             addCategoryConditionRule: flow.addCategoryConditionRule,
@@ -135,6 +136,7 @@ export function PpbMainSections({ flow }: { flow: PpbConfigureFlow }) {
             }}
             display={{
               displayOptionsInactive: flow.displayOptionsInactive,
+              validationErrors: flow.validationErrors,
               quantity: {
                 bundleQuantityOptionsEligible:
                   flow.bundleQuantityOptionsEligible,
@@ -220,6 +222,7 @@ export function PpbMainSections({ flow }: { flow: PpbConfigureFlow }) {
             shop={flow.shop}
             specificLinkOfferBusy={flow.specificLinkOfferBusy}
             themeEditorUrl={flow.themeEditorUrl}
+            validationErrors={flow.validationErrors}
           />
         ) : null}
         {deferredSection === "bundle_widget" ? (
@@ -427,6 +430,7 @@ export function PpbMainSections({ flow }: { flow: PpbConfigureFlow }) {
             showIconPickerForStep={flow.showIconPickerForStep}
             stepsState={flow.stepsState}
             templateVariablesModalRef={flow.templateVariablesModalRef}
+            validationErrors={flow.validationErrors}
           />
         ) : null}
       </Suspense>

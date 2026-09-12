@@ -13,6 +13,7 @@
 
 import { useCallback, useRef, useMemo, useEffect, useReducer } from "react";
 import { showAdminTransientErrorToast, type AdminTaskAlert } from "../lib/admin-alert-feedback";
+import type { EntitlementFailureData } from "../components/billing/EntitlementUpgradeModal";
 import { useBundleForm } from "./useBundleForm";
 import { useBundleSteps } from "./useBundleSteps";
 import { useBundleConditions } from "./useBundleConditions";
@@ -345,6 +346,16 @@ export function useBundleConfigurationState({
   const clearOperationAlert = useCallback(() => {
     dispatch({ type: "setOperationAlert", value: null });
   }, [dispatch]);
+  const entitlementFailure = configureRouteState.entitlementFailure;
+  const setEntitlementFailure = useCallback(
+    (value: EntitlementFailureData | null) => {
+      dispatch({ type: "setEntitlementFailure", value });
+    },
+    [dispatch],
+  );
+  const clearEntitlementFailure = useCallback(() => {
+    dispatch({ type: "setEntitlementFailure", value: null });
+  }, [dispatch]);
 
   // ===== ORIGINAL VALUES REF (for discard) =====
   const originalValuesRef = useRef({
@@ -561,6 +572,9 @@ export function useBundleConfigurationState({
     operationAlert,
     setOperationAlert,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
 
     // Original values ref
     originalValuesRef,

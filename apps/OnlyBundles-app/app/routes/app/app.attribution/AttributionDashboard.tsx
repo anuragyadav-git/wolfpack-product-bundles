@@ -85,14 +85,23 @@ export function CustomUtmTrackingCard({
       : shopify.saveBar.hide("analytics-custom-utm-save-bar"));
   }, [isDirty, shopify]);
 
+  const isSaving = fetcher.state !== "idle";
+
+  useEffect(() => {
+    if (isSaving) {
+      shopify.loading?.(true);
+    } else {
+      shopify.loading?.(false);
+    }
+  }, [isSaving, shopify]);
+
   useEffect(
     () => () => {
+      shopify.loading?.(false);
       void shopify.saveBar.hide("analytics-custom-utm-save-bar");
     },
     [shopify]
   );
-
-  const isSaving = fetcher.state !== "idle";
   const feedback = fetcher.data?.error ?? fetcher.data?.message;
   const previewLabel =
     inputAnalysis.accepted.length > 0
@@ -232,13 +241,15 @@ export function CustomUtmTrackingCard({
       </div>
       <ui-save-bar id="analytics-custom-utm-save-bar">
         <button
+          type="button"
           variant="primary"
           onClick={() => handleSaveSubmit()}
           disabled={isSaving}
+          loading={isSaving ? "true" : undefined}
         >
           {translateAdmin("dashboard.language.save")}
         </button>
-        <button onClick={handleDiscard} disabled={isSaving}>
+        <button type="button" onClick={handleDiscard} disabled={isSaving}>
           {translateAdmin(
             "adminExtracted.shared.bundleConfigure.configurecontextualsavebar.discard"
           )}

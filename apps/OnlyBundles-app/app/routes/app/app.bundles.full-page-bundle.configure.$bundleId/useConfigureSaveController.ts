@@ -15,6 +15,7 @@ import type { useConfigureTemplatePricingController } from "./useConfigureTempla
 import type { useConfigureModalController } from "./useConfigureModalController";
 import { serializeFpbSaveSteps } from "./fpb-save-transport";
 import { useConfigureValidation } from "../_shared/bundle-configure/useConfigureValidation";
+import { BundleStatus } from "../../../constants/bundle";
 import { i18n } from "../../../i18n/config";
 import {
   isPersistentAdminOperationError,
@@ -47,8 +48,10 @@ type ConfigureSaveDependencies = Pick<
   | "bundleLevelCss"
   | "bundleProduct"
   | "cartRedirectToCheckout"
+  | "clearEntitlementFailure"
   | "clearOperationAlert"
   | "conditionsState"
+  | "entitlementFailure"
   | "countdownEnabled"
   | "countdownExpiredMessage"
   | "countdownExpiryAction"
@@ -140,6 +143,7 @@ type ConfigureSaveDependencies = Pick<
   | "setLowStockAlertEnabled"
   | "setLowStockAlertMessage"
   | "setLowStockAlertThreshold"
+  | "setEntitlementFailure"
   | "setOperationAlert"
   | "setPromoBannerBgImage"
   | "setRuleMessagesByLocale"
@@ -197,14 +201,14 @@ export function useConfigureSaveController(flow: ConfigureSaveDependencies) {
   const closeDiscardModal = useCallback(() => {
     flow.setShowDiscardModal(false);
   }, [flow]);
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (statusOverride?: any) => {
     try {
       const formData = new FormData();
       formData.append("intent", "saveBundle");
       formData.append("bundleName", flow.formState.bundleName);
       formData.append("bundleDescription", flow.formState.bundleDescription);
       formData.append("templateName", flow.formState.templateName);
-      formData.append("bundleStatus", flow.formState.bundleStatus);
+      formData.append("bundleStatus", statusOverride ?? flow.formState.bundleStatus);
       const pricingDisplayOptions = serializePricingDisplayOptions({
         options: flow.normalizedPricingDisplayOptions,
       });
@@ -566,6 +570,7 @@ export function useConfigureSaveController(flow: ConfigureSaveDependencies) {
           }
         } else {
           flow.clearOperationAlert();
+          flow.clearEntitlementFailure?.();
           flow.shopify.toast.show(i18n.t("common.success.operationComplete"), {
             isError: false,
           });
@@ -576,14 +581,14 @@ export function useConfigureSaveController(flow: ConfigureSaveDependencies) {
           flow.finishPreviewBundleLoading?.();
           return;
         }
-        if (isPersistentAdminOperationError(requestIntent)) {
-          const alertCopy = getEntitlementAlertCopyKeys(
-            (result as any).entitlementFailure?.code
-          );
+        const entitlementFailure = (result as any).entitlementFailure;
+        if (entitlementFailure) {
+          flow.setEntitlementFailure(entitlementFailure);
+        } else if (isPersistentAdminOperationError(requestIntent)) {
           flow.setOperationAlert({
             id: "bundle-save",
-            heading: i18n.t(alertCopy.heading),
-            message: i18n.t(alertCopy.message),
+            heading: i18n.t("common.alerts.bundleNotSaved"),
+            message: i18n.t("common.alerts.operationFailed"),
           });
         } else {
           showAdminTransientErrorToast(
@@ -655,12 +660,49 @@ export function useConfigureSaveController(flow: ConfigureSaveDependencies) {
     handleDiscard();
   }, [closeDiscardModal, handleDiscard]);
 
+  const handleSaveAsDraft = useCallback(async () => {
+    flow.formState.setBundleStatus(BundleStatus.DRAFT);
+    flow.clearEntitlementFailure?.();
+    await handleSave("draft");
+  }, [flow, handleSave]);
+
+  const handleDismissEntitlementModal = useCallback(() => {
+    const failure = flow.entitlementFailure;
+    if (failure) {
+      if (
+        failure.entitlement === "bundle.public.limit" ||
+        (!failure.entitlement && failure.code === "LIMIT_REACHED")
+      ) {
+        const originalStatus = flow.originalValuesRef.current?.status;
+        const revertedStatus =
+          originalStatus &&
+          originalStatus !== BundleStatus.ACTIVE &&
+          originalStatus !== BundleStatus.UNLISTED
+            ? originalStatus
+            : BundleStatus.DRAFT;
+        flow.formState.setBundleStatus(revertedStatus);
+      } else if (failure.entitlement === "bundle.steps.limit") {
+        if (flow.originalValuesRef.current?.steps) {
+          try {
+            const originalSteps = JSON.parse(flow.originalValuesRef.current.steps);
+            flow.stepsState.setSteps(originalSteps);
+          } catch {
+            // ignore JSON parse error
+          }
+        }
+      }
+    }
+    flow.clearEntitlementFailure?.();
+  }, [flow]);
+
   return {
     buildDefaultProductsData,
     closeDiscardModal,
     handleConfirmDiscard,
     handleDiscard,
     handleSave,
+    handleSaveAsDraft,
+    handleDismissEntitlementModal,
     serializePricingDisplayOptions,
     ...validation,
   };

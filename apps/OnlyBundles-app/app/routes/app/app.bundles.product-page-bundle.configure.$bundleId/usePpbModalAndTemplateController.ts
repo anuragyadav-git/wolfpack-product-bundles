@@ -15,6 +15,7 @@ import type { usePpbPlacementHandlers } from "./usePpbPlacementHandlers";
 import type { usePpbPreviewReadinessHandlers } from "./usePpbPreviewReadinessHandlers";
 import type { usePpbSaveHandlers } from "./usePpbSaveHandlers";
 import { navigateWithSaveBarConfirmation } from "../../../lib/admin-unsaved-navigation";
+import { isFreeTemplate } from "../../../lib/subscriptions/entitlements";
 
 export function usePpbModalAndTemplateController({
   base,
@@ -25,8 +26,10 @@ export function usePpbModalAndTemplateController({
   saveHandlers,
 }: {
   base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
-    "isCollectionsModalOpen" | "isProductsModalOpen" | "navigate" | "shopify"
-  >;
+    "isCollectionsModalOpen" | "isProductsModalOpen" | "navigate" | "shopify" | "setEntitlementFailure"
+  > & {
+    isFreePlan?: boolean;
+  };
   display: Pick<ReturnType<typeof usePpbDisplayOptionsState>,
     "discountVariablesModalRef" | "isDiscountVariablesModalOpen" | "setIsDiscountVariablesModalOpen"
   >;
@@ -124,6 +127,23 @@ export function usePpbModalAndTemplateController({
     ) {
       return;
     }
+    if (
+      base.isFreePlan &&
+      !isFreeTemplate({
+        bundleType: "PRODUCT_PAGE",
+        designTemplate: templateState.pendingDesignTemplate,
+        designPresetId: templateState.pendingDesignPresetId,
+      })
+    ) {
+      templateState.setTemplateSaveError(null);
+      templateState.setIsSelectTemplateModalOpen(false);
+      base.setEntitlementFailure({
+        code: "ENTITLEMENT_REQUIRED",
+        entitlement: "bundle.template.premium",
+        requiredPlan: "GROWTH",
+      });
+      return;
+    }
     templateState.setTemplateSaveError(null);
     templateState.lastTemplateRequestRef.current = {
       template: templateState.pendingDesignTemplate,
@@ -142,7 +162,7 @@ export function usePpbModalAndTemplateController({
       templateState.pendingDesignPresetId ?? ""
     );
     templateState.templateFetcher.submit(fd, { method: "POST" });
-  }, [templateState]);
+  }, [base, templateState]);
   const handleTemplatePreview = useCallback((
     onPreviewOpened?: (previewUrl: string) => void,
   ) => {

@@ -6,9 +6,10 @@ import { SettingsContextualSaveBar } from "../../../app/routes/app/app.settings/
 
 const show = jest.fn(() => Promise.resolve());
 const hide = jest.fn(() => Promise.resolve());
+const loading = jest.fn();
 
 jest.mock("@shopify/app-bridge-react", () => ({
-  useAppBridge: () => ({ saveBar: { show, hide } }),
+  useAppBridge: () => ({ loading, saveBar: { show, hide } }),
 }));
 
 describe("SettingsContextualSaveBar lifecycle", () => {
@@ -18,6 +19,7 @@ describe("SettingsContextualSaveBar lifecycle", () => {
   beforeEach(() => {
     show.mockClear();
     hide.mockClear();
+    loading.mockClear();
     const dom = new JSDOM("<!doctype html><html><body></body></html>");
     Object.assign(globalThis, {
       window: dom.window,
@@ -84,6 +86,7 @@ describe("SettingsContextualSaveBar lifecycle", () => {
     expect(saveButton?.getAttribute("loading")).toBe("true");
     expect(saveButton?.disabled).toBe(true);
     expect(discardButton?.disabled).toBe(true);
+    expect(loading).toHaveBeenCalledWith(true);
   });
 
   it("hides a shown Save Bar when the Settings editor unmounts", () => {

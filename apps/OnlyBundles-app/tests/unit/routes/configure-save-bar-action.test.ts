@@ -12,9 +12,11 @@ import { useLatestCallback } from "../../../app/routes/app/_shared/bundle-config
 
 const showSaveBar = jest.fn(() => Promise.resolve());
 const hideSaveBar = jest.fn(() => Promise.resolve());
+const loading = jest.fn();
 
 jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({
+    loading,
     saveBar: {
       show: showSaveBar,
       hide: hideSaveBar,
@@ -87,6 +89,7 @@ describe("configure Save Bar actions", () => {
     flushSync(() => root.unmount());
     showSaveBar.mockClear();
     hideSaveBar.mockClear();
+    loading.mockClear();
   });
 
   it("shows the programmatic Save Bar and calls handleSave", () => {
@@ -153,6 +156,7 @@ describe("configure Save Bar actions", () => {
     expect(saveButton?.getAttribute("loading")).toBe("true");
     expect(saveButton?.disabled).toBe(true);
     expect(discardButton?.disabled).toBe(true);
+    expect(loading).toHaveBeenCalledWith(true);
   });
 
   it("hides a previously shown Save Bar when the draft becomes clean", () => {

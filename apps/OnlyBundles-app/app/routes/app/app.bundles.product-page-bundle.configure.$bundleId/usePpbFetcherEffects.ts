@@ -26,13 +26,13 @@ export function usePpbFetcherEffects({
 }: {
   base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
     | "allowQuantityChanges" | "appEmbedEnabled" | "cartRedirectToCheckout"
-    | "clearOperationAlert" | "fetcher" | "lastProcessedFetcherDataRef"
+    | "clearOperationAlert" | "clearEntitlementFailure" | "fetcher" | "lastProcessedFetcherDataRef"
     | "markAsSaved" | "markSpecificLinkOfferSaved" | "openPageSelectionModal"
     | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
     | "originalSdkModeRef" | "originalShowProductPricesRef"
     | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
     | "originalTextOverridesRef" | "revalidator" | "sdkMode" | "setAvailablePages"
-    | "setIsLoadingPages" | "setOperationAlert" | "shopify" | "showProductPrices"
+    | "setIsLoadingPages" | "setOperationAlert" | "setEntitlementFailure" | "shopify" | "showProductPrices"
     | "subscriptionConfig" | "textOverrides" | "textOverridesByLocale"
   >;
   visibility: Pick<ReturnType<typeof usePpbVisibilityState>,
@@ -71,7 +71,7 @@ export function usePpbFetcherEffects({
     | "lastTemplateRequestRef" | "lastTemplateResponseRef" | "pendingPlacementModalRef"
     | "setBundleDesignPresetId" | "setBundleDesignTemplate"
     | "setIsPreparingPlacementTemplates" | "setTemplateModalStep" | "setTemplateSaveError"
-    | "templateFetcher" | "templateSubmissionStartedRef"
+    | "templateFetcher" | "templateSubmissionStartedRef" | "setIsSelectTemplateModalOpen"
   >;
   sharedHandlers: Pick<ReturnType<typeof useSharedBundleHandlers>,
     "enhanceTemplateListWithUserSelection"
@@ -201,10 +201,12 @@ export function usePpbFetcherEffects({
           // Handled by individual callbacks.
         } else if ("synced" in result && result.synced) {
           base.clearOperationAlert();
+          base.clearEntitlementFailure?.();
           base.shopify.toast.show(i18n.t("common.success.bundleSynced"), { isError: false });
           base.revalidator.revalidate();
         } else {
           base.clearOperationAlert();
+          base.clearEntitlementFailure?.();
           base.shopify.toast.show(i18n.t("common.success.operationComplete"), { isError: false });
         }
       } else {
@@ -214,14 +216,14 @@ export function usePpbFetcherEffects({
         }
         const errorMessage =
           ("error" in result ? result.error : null) ?? "";
-        if (isPersistentAdminOperationError(requestIntent)) {
-          const alertCopy = getEntitlementAlertCopyKeys(
-            (result as any).entitlementFailure?.code,
-          );
+        const entitlementFailure = (result as any).entitlementFailure;
+        if (entitlementFailure) {
+          base.setEntitlementFailure(entitlementFailure);
+        } else if (isPersistentAdminOperationError(requestIntent)) {
           base.setOperationAlert({
             id: "bundle-save",
-            heading: i18n.t(alertCopy.heading),
-            message: i18n.t(alertCopy.message),
+            heading: i18n.t("common.alerts.bundleNotSaved"),
+            message: i18n.t("common.alerts.operationFailed"),
           });
         } else {
           showAdminTransientErrorToast(
@@ -285,6 +287,22 @@ export function usePpbFetcherEffects({
         );
       }
       templateState.setTemplateSaveError(null);
+      lastTemplateRequestRef.current = null;
+      templateSubmissionStartedRef.current = false;
+      return;
+    }
+    const entitlementFailure = (response as any).entitlementFailure;
+    if (entitlementFailure || response.error === "ENTITLEMENT_REQUIRED") {
+      templateState.setTemplateSaveError(null);
+      templateState.setIsSelectTemplateModalOpen(false);
+      base.setEntitlementFailure(
+        entitlementFailure || {
+          code: "ENTITLEMENT_REQUIRED",
+          entitlement: "bundle.template.premium",
+          action: "SELECT",
+          requiredPlan: "GROWTH",
+        }
+      );
       lastTemplateRequestRef.current = null;
       templateSubmissionStartedRef.current = false;
       return;

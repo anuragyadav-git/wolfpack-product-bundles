@@ -29,7 +29,9 @@ export type PpbDiscountMessagingOptionsProps = Pick<
   | "shopLocales"
   | "successMessageByLocale"
   | "updateRuleMessage"
->;
+> & {
+  validationErrors?: Record<string, string>;
+};
 
 export function PpbDiscountMessagingOptions({
   activeDiscountLocale,
@@ -48,6 +50,7 @@ export function PpbDiscountMessagingOptions({
   shopLocales,
   successMessageByLocale,
   updateRuleMessage,
+  validationErrors,
 }: PpbDiscountMessagingOptionsProps) {
 
   return (
@@ -146,6 +149,7 @@ export function PpbDiscountMessagingOptions({
               setSuccessMessageByLocale={setSuccessMessageByLocale}
               successMessageByLocale={successMessageByLocale}
               updateRuleMessage={updateRuleMessage}
+              validationErrors={validationErrors}
             />
           </s-stack>
         </div>

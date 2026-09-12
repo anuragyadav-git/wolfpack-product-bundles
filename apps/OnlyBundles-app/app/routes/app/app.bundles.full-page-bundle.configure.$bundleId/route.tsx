@@ -28,6 +28,7 @@ import {
   handleRevokeSpecificLinkOffer,
 } from "../shared/specific-link-offer-action.server";
 import { resolveStorefrontProxyRoot } from "../../../config/storefront-proxy-routes";
+import { resolveShopEntitlements } from "../../../services/subscriptions/subscription-service.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -100,7 +101,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     configuredRoot: process.env.STOREFRONT_PROXY_ROOT,
   });
 
-  const [shopifyData, availableBundles] = await Promise.all([
+  const [shopifyData, availableBundles, entitlementContext] = await Promise.all([
     fetchBundleConfigureShopifyData(admin, bundle.shopifyProductId, bundleId),
     db.bundle.findMany({
       where: {
@@ -111,7 +112,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
+    resolveShopEntitlements({ shopDomain: session.shop }),
   ]);
+
+  const isFreePlan = entitlementContext?.entitlements?.planCode !== "GROWTH";
 
   const { offerPolicy, ...safeBundle } = bundle;
   return json({
@@ -122,6 +126,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     ),
     bundleProduct: shopifyData.bundleProduct,
     availableBundles,
+    isFreePlan,
     shop: session.shop,
     configureMode,
     showFirstLoadTour,

@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-11
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -271,6 +271,7 @@ Primary action:
 - The separate Preview state control exposes only applicable transient states: Default, Product picker, Loading, Validation, and Upsell. Product picker is limited to PPB slot templates, Loading is available to all FPB and PPB templates, and state dismissal/default restores the previously selected edit area.
 - Images & GIFs owns the store-level FPB/PPB loading screen: merchants can retain the default spinner or upload a GIF through one native Polaris drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. Per-bundle loading animation controls are not exposed.
 - Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
+- Tier Badge owns the global discount tier badge styling controls (Shape, Visibility, Text Color, and Background Color) applied across discounted tiers on the storefront.
 - Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale and center within the Admin panel. The isolated same-origin frame composes a neutral store header and FPB page or PPB product-detail context around the production widget. Product picker, Loading, Validation, and Upsell invoke the production renderer's corresponding state.
 - The contextual inspector follows the selected edit area or non-default preview state. Editing a shared field preserves the current area instead of jumping to another region; the inspector heading names the active context.
 - Unsaved design values are converted through the normalized storefront Design runtime and posted to the frame through a versioned same-origin protocol. The frame uses deterministic local media and fixture data, blocks navigation and cart submission, and disables persistence, analytics, and bundle fetching.
@@ -520,7 +521,7 @@ FPB Configure Page
 │   ├── Discount & Pricing
 │   │   ├── Discount type selector: Fixed Amount Off / Percentage Off / Fixed Bundle Price / Buy X, get Y
 │   │   ├── Rule cards; Buy X, get Y uses Customer buys/gets, Discount value/type, and Apply Discount to
-│   │   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
+│   │   ├── Per-rule Tier Badge: enable toggle, badge text input, and [Show variables] modal (styling managed in Settings -> Design)
 │   │   ├── Bundle Quantity Options: Box Label/Subtext per eligible rule + Multi Language modal
 │   │   ├── Progress Bar: Simple Bar / Step-Based Bar + Multi Language modal
 │   │   └── Discount Messaging: per-rule Discount Text, one Success Message, Variables modal
@@ -564,6 +565,7 @@ FPB Configure Page
 └── Modals:
     ├── Actions Needed Modal (multiple warnings + one remediation action per warning)
     ├── Bundle Status Modal (Draft / Active / Unlisted)
+    ├── Entitlement Upgrade Modal (triggers on save when plan limit is reached; provides "View plans" and "Save as draft")
     ├── Product Picker Modal (Shopify resource picker)
     ├── Variables Modal (Discount Messaging variable reference)
     ├── Bundle Quantity Options Multi Language Modal (Box Label / Box Subtext)
@@ -643,7 +645,7 @@ PPB Configure Page
 │   ├── Buy X, get Y rule builder (shown when selected)
 │   │   └── Per-rule: Customer buys, Customer gets, Discount value/type, Apply Discount to
 │   ├── Standard and Fixed Bundle Price rule builders (shown for other types)
-│   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
+│   ├── Per-rule Tier Badge: enable toggle, badge text input, and [Show variables] modal (styling managed in Settings -> Design)
 │   ├── Bundle Quantity Options sub-section
 │   │   ├── Per-rule: Box Label + Box Subtext inputs + Make this rule default action
 │   │   └── Multi Language modal: Select Language, Box Label, Box Subtext

@@ -32,6 +32,7 @@ export function useConfigureBundleController() {
     storefrontProxyRoot,
     shopLocales = [],
     shopCurrencyCode,
+    isFreePlan = true,
   } = loaderData;
   const themeEditorUrl = buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed");
   const navigate = useNavigate();
@@ -49,8 +50,8 @@ export function useConfigureBundleController() {
   const isSaveInFlight = fetcher.state !== "idle";
   const saveBarRef = useRef<UISaveBarElement | null>(null);
   const triggerSaveBarIrritation = useCallback(() => {
-    void saveBarRef.current?.show?.();
-  }, []);
+    void shopify.saveBar.leaveConfirmation();
+  }, [shopify]);
   const blockConfigurationChangeWhileSaving = useCallback(
     (event: SyntheticEvent) => {
       handleAdminSaveLockedEvent(
@@ -108,6 +109,9 @@ export function useConfigureBundleController() {
     operationAlert,
     setOperationAlert,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
     originalValuesRef,
   } = configState;
   const parentProductStatusUi = getParentProductStatusUi(
@@ -251,6 +255,10 @@ export function useConfigureBundleController() {
     triggerAppEmbedBannerFeedback,
     triggerSaveBarIrritation,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
+    isFreePlan,
     ...specificLinkOffer,
   };
 }

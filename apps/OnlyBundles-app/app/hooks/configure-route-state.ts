@@ -1,5 +1,6 @@
 import type { AdminTaskAlert } from "../lib/admin-alert-feedback";
 import type { BundleProductData } from "../types/bundle-configure";
+import type { EntitlementFailureData } from "../components/billing/EntitlementUpgradeModal";
 
 type ConfigureModalKey =
   | "pageSelection"
@@ -26,6 +27,7 @@ interface ConfigureRouteState {
   showAutoPlacementBanner: boolean;
   dismissedBanners: string[];
   operationAlert: AdminTaskAlert | null;
+  entitlementFailure: EntitlementFailureData | null;
 }
 
 type LoadedConfigureState = Partial<Pick<
@@ -62,7 +64,8 @@ type ConfigureRouteAction =
   | { type: "setForceNavigation"; value: boolean }
   | { type: "setShowAutoPlacementBanner"; value: boolean }
   | { type: "setDismissedBanners"; value: string[] }
-  | { type: "setOperationAlert"; value: AdminTaskAlert | null };
+  | { type: "setOperationAlert"; value: AdminTaskAlert | null }
+  | { type: "setEntitlementFailure"; value: EntitlementFailureData | null };
 
 export function createInitialConfigureRouteState(): ConfigureRouteState {
   return {
@@ -89,6 +92,7 @@ export function createInitialConfigureRouteState(): ConfigureRouteState {
     showAutoPlacementBanner: false,
     dismissedBanners: [],
     operationAlert: null,
+    entitlementFailure: null,
   };
 }
 
@@ -160,5 +164,7 @@ export function reduceConfigureRouteState(
       return { ...state, dismissedBanners: action.value };
     case "setOperationAlert":
       return { ...state, operationAlert: action.value };
+    case "setEntitlementFailure":
+      return { ...state, entitlementFailure: action.value };
   }
 }

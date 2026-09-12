@@ -101,8 +101,8 @@ describe("CustomUtmTrackingCard", () => {
       }),
     );
 
-    expect(view).toContain('<button variant="primary" disabled="">Save</button>');
-    expect(view).toContain('<button disabled="">Discard</button>');
+    expect(view).toContain('<button type="button" variant="primary" disabled="" loading="true">Save</button>');
+    expect(view).toContain('<button type="button" disabled="">Discard</button>');
   });
 
   it("removes a saved custom attribute from the submitted parameter list", async () => {

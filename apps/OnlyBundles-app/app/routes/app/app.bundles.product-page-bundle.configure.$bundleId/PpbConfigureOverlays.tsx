@@ -43,6 +43,7 @@ export function PpbConfigureOverlays({ flow }: { flow: PpbConfigureFlow }) {
         templateModalStep={flow.templateModalStep}
         templateSaveError={flow.templateSaveError}
         themeEditorUrl={flow.themeEditorUrl}
+        isFreePlan={flow.isFreePlan}
       />
       <PpbUtilityModals
         discountVariablesModalRef={flow.discountVariablesModalRef}
@@ -51,6 +52,10 @@ export function PpbConfigureOverlays({ flow }: { flow: PpbConfigureFlow }) {
         setIsSyncModalOpen={flow.setIsSyncModalOpen}
         syncModalRef={flow.syncModalRef}
         templateVariablesModalRef={flow.templateVariablesModalRef}
+        entitlementFailure={flow.entitlementFailure}
+        clearEntitlementFailure={flow.clearEntitlementFailure}
+        handleDismissEntitlementModal={flow.handleDismissEntitlementModal}
+        handleSaveAsDraft={flow.handleSaveAsDraft}
       />
       <PpbDiscountLanguageModals
         activeBundleQuantityLocale={flow.activeBundleQuantityLocale}

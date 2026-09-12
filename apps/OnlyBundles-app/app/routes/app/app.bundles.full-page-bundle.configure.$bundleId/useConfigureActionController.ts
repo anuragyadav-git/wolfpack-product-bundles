@@ -311,77 +311,60 @@ export function useConfigureActionController(
   }, [finishPreviewBundleLoading, flow]);
   const handleSectionChange = useCallback(
     (section: string) => {
-      if (section === flow.activeSection) return;
-      if (
-        blockUnsavedAdminNavigation(flow.isDirty, flow.triggerSaveBarIrritation)
-      ) {
-        return;
-      }
-      flow.setActiveSection(section);
+      void navigateWithSaveBarConfirmation(
+        () => flow.shopify.saveBar.leaveConfirmation(),
+        () => {
+          flow.setActiveSection(section);
+        },
+      );
     },
-    [flow]
+    [flow],
   );
   const openProductInAdmin = useCallback(
     (productId: string) => {
-      if (
-        blockUnsavedAdminNavigation(
-          flow.isDirty,
-          flow.triggerSaveBarIrritation,
-        )
-      ) {
-        return;
-      }
-      const numericProductId = productId.startsWith("gid://")
-        ? productId.split("/").pop() ?? productId
-        : productId;
-      const productGid = productId.startsWith("gid://")
-        ? productId
-        : `gid://shopify/Product/${productId}`;
-      const storeHandle = flow.shop?.replace(".myshopify.com", "");
-      const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
-      const openFallback = () => {
-        try {
-          (flow.shopify as any).navigate(adminProductUrl);
-        } catch (error: any) {
-          AppLogger.warn(
-            "Falling back to a new tab for Admin product navigation",
-            { productId },
-            error as any
-          );
-          window.open(adminProductUrl, "_blank");
-        }
-        flow.refreshParentProductStatusFromShopify();
-      };
-      const intentsApi = (flow.shopify as any).intents;
-      if (typeof intentsApi?.invoke === "function") {
-        try {
-          const intentResult = intentsApi.invoke("edit:shopify/Product", {
-            type: "shopify/Product",
-            value: productGid,
-          });
-          flow.refreshParentProductStatusFromShopify();
-          if (typeof intentResult?.catch === "function") {
-            void intentResult.catch((error: unknown) => {
-              AppLogger.warn(
-                "Falling back after Product editor intent failed",
-                { productId },
-                error as any
-              );
+      void navigateWithSaveBarConfirmation(
+        () => flow.shopify.saveBar.leaveConfirmation(),
+        () => {
+          const numericProductId = productId.startsWith("gid://")
+            ? (productId.split("/").pop() ?? productId)
+            : productId;
+          const productGid = productId.startsWith("gid://")
+            ? productId
+            : `gid://shopify/Product/${productId}`;
+          const storeHandle = flow.shop?.replace(".myshopify.com", "");
+          const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
+          const openFallback = () => {
+            window.open(adminProductUrl, "_blank", "noopener,noreferrer");
+            flow.refreshParentProductStatusFromShopify();
+          };
+          const intentsApi = (flow.shopify as any).intents;
+          if (typeof intentsApi?.invoke === "function") {
+            try {
+              const intentResult = intentsApi.invoke("edit:shopify/Product", {
+                type: "shopify/Product",
+                value: productGid,
+              });
+              if (intentResult && typeof intentResult.then === "function") {
+                intentResult
+                  .then(() => {
+                    flow.refreshParentProductStatusFromShopify();
+                  })
+                  .catch(() => {
+                    openFallback();
+                  });
+              } else {
+                flow.refreshParentProductStatusFromShopify();
+              }
+            } catch {
               openFallback();
-            });
+            }
+          } else {
+            openFallback();
           }
-          return;
-        } catch (error: any) {
-          AppLogger.warn(
-            "Falling back after Product editor intent failed",
-            { productId },
-            error as any
-          );
-        }
-      }
-      openFallback();
+        },
+      );
     },
-    [flow]
+    [flow],
   );
   const handleReadinessItemClick = useCallback(
     (key: string) => {
