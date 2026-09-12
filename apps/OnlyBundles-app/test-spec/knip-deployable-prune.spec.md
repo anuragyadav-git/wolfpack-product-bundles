@@ -5,7 +5,7 @@ title: Knip Deployable Prune Test Spec
 type: test-spec
 status: active
 summary: Defines behavior-preserving Knip analysis and removal of declarations with no deployable, test, script, or platform consumer.
-last_audited: 2026-09-09
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -59,6 +59,7 @@ manifests determine whether removal is safe.
 | 10 | Generated Shopify artifacts | Knip constructs the app project graph | `.shopify/**` snapshots and generated `extensions/bundle-builder/assets/**` files are outside the source project | Generated copies do not become false unused-file or export reports |
 | 11 | Registered and build entrypoints | Analyze Remix route config, storefront build roots, Shopify extension target modules, repository hooks, and design-system manifest scripts | Each entrypoint is reachable from explicit Knip configuration | Convention and file-system ownership is modeled instead of documented as noise |
 | 12 | Genuine issue | Add an otherwise unreferenced package to a temporary fixture workspace | Knip reports the unused dependency and exits non-zero | Configuration must not suppress real dependency findings |
+| 13 | Locally owned declarations | A constant or interface is used only within its defining module | Keep the declaration local by removing only its export modifier | Runtime behavior and public entrypoints remain unchanged |
 
 ## Acceptance Criteria
 

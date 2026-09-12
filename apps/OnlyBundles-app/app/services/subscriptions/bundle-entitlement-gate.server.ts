@@ -10,7 +10,7 @@ import db from "../../db.server";
 
 const PUBLICATION_TRANSACTION_TIMEOUT_MS = 30_000;
 
-export interface TemplateSelectionGateInput {
+interface TemplateSelectionGateInput {
   bundleType: "FULL_PAGE" | "PRODUCT_PAGE" | "full_page" | "product_page";
   designTemplate?: string | null;
   designPresetId?: string | null;

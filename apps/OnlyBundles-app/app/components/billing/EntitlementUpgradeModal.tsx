@@ -16,7 +16,7 @@ export interface EntitlementFailureData {
   limit?: number;
 }
 
-export interface EntitlementUpgradeModalProps {
+interface EntitlementUpgradeModalProps {
   open: boolean;
   failure: EntitlementFailureData | null;
   isSavingDraft?: boolean;

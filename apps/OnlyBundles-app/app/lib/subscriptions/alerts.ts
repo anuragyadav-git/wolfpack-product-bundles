@@ -5,7 +5,7 @@ interface EntitlementAlertCopyKeys {
   message: string;
 }
 
-export interface EntitlementModalContentKeys {
+interface EntitlementModalContentKeys {
   heading: string;
   description: string;
   primaryAction: string;

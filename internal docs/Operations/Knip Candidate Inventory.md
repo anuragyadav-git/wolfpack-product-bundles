@@ -5,7 +5,7 @@ title: Knip Candidate Inventory
 type: operations
 status: active
 summary: Records the clean monorepo-aware Knip baseline and the genuine dead code removed to reach it.
-last_audited: 2026-09-09
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -93,6 +93,9 @@ Knip then identified genuine cleanup work:
 - removed the broken `graphql-codegen` scripts. `graphql.config.js` is an
   editor/language-tool project configuration, not a code-generation command,
   and no Codegen CLI or generated output contract existed.
+- kept pricing-badge constants and entitlement input/result interfaces local
+  after their only external consumers were removed during the Admin ownership
+  migrations; only the unnecessary export modifiers were deleted.
 
 ## Negative Control
 
