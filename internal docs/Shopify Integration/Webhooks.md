@@ -5,7 +5,7 @@ title: Webhooks
 type: architecture-note
 status: active
 summary: Defines authenticated Remix webhook ingress, active Shopify subscriptions, Inngest handoff, and delivery-volume safeguards.
-last_audited: 2026-09-10
+last_audited: 2026-09-13
 owners:
   - engineering
 domains:
@@ -164,9 +164,11 @@ to delete. The deliveries came from outside that per-shop subscription surface,
 most plausibly an app-version-managed contract that was active when Shopify
 emitted them.
 
-The Shopify CLI showed production version `wolfpack-product-bundles-280` from
-2026-07-31 as active and newer production versions as inactive. SIT version
-`wolfpack-bundles-sit-404` from 2026-08-17 was active. A future approved release
-must deploy the current TOML contract so Shopify's active app version and the
-repository agree; processor and ingress guards remain required even after that
-release.
+The original 2026-08-31 CLI audit found production version
+`wolfpack-product-bundles-280` active. A fresh read-only Shopify CLI inventory on
+2026-09-13 found production version `wolfpack-product-bundles-294` active, while
+SIT still had `wolfpack-bundles-sit-404` from 2026-08-17 active and SIT versions
+405 through 415 inactive. The remediation's `/webhooks` TOML contract is
+therefore not active in SIT yet. A future approved release must deploy the
+current TOML contract so Shopify's active app version and the repository agree;
+processor and ingress guards remain required even after that release.
