@@ -102,11 +102,6 @@ export function DashboardActionModals({
             {t("dashboard.renameModal.cancel")}
           </s-button>
           <s-stack direction="block" gap="base">
-            {renameError && (
-              <s-banner tone="critical" dismissible={false}>
-                {renameError}
-              </s-banner>
-            )}
             <s-text-field
               label={t("dashboard.renameModal.nameLabel")}
               value={bundleName}

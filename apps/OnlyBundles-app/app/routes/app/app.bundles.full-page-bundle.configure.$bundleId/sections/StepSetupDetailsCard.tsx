@@ -114,11 +114,6 @@ export function FpbStepSetupDetailsCard({
             }}
             autocomplete="off"
           />
-          {validationErrors[`steps.${step.id}.resources`] && (
-            <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
-              {validationErrors[`steps.${step.id}.resources`]}
-            </s-text>
-          )}
         </s-stack>
       </div>
     </div>

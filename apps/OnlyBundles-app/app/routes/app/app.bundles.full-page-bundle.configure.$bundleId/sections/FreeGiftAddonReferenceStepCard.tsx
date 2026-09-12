@@ -17,6 +17,7 @@ export function FpbAddonReferenceStepCard({
   onOpenTranslations,
   onStepNameChange,
   onStepTitleChange,
+  validationErrors,
 }: {
   enabled: boolean;
   imageUrl: string | null;
@@ -25,6 +26,7 @@ export function FpbAddonReferenceStepCard({
   stepTitle: string;
   styles: Record<string, string>;
   translationsAvailable: boolean;
+  validationErrors?: Record<string, string>;
   onEnabledChange: (enabled: boolean) => void;
   onImageChange: (url: string | null) => void;
   onImagePickerOpenChange: (open: boolean) => void;
@@ -143,8 +145,10 @@ export function FpbAddonReferenceStepCard({
             <div className={styles.addonsStepTextGroup}>
               <div className={styles.addonsStepNameGroup}>
                 <s-text-field
+                  id="configure-addons-gifting-stepName"
                   label={translateAdmin("adminAttributes.stepName")}
                   disabled={!enabled || undefined}
+                  error={validationErrors?.["addons.gifting.stepName"]}
                   value={stepName}
                   placeholder={translateAdmin("adminAttributes.addOn")}
                   onInput={(e) => {
@@ -155,8 +159,10 @@ export function FpbAddonReferenceStepCard({
               </div>
               <div className={styles.addonsStepTitleGroup}>
                 <s-text-field
+                  id="configure-addons-gifting-stepTitle"
                   label={translateAdmin("adminAttributes.stepTitle")}
                   disabled={!enabled || undefined}
+                  error={validationErrors?.["addons.gifting.stepTitle"]}
                   value={stepTitle}
                   onInput={(e) =>
                     onStepTitleChange((e.target as HTMLInputElement).value)

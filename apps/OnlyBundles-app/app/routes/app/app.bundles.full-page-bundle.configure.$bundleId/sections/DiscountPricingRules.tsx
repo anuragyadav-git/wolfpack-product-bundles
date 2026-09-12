@@ -95,6 +95,7 @@ export function FpbDiscountRulesSection({
                           margin: 0,
                           fontSize: 14,
                           fontWeight: 600,
+                          flex: 1,
                         }}
                       >
                         {translateAdmin("adminDynamic.ruleNumber", {
@@ -341,6 +342,11 @@ export function FpbDiscountRulesSection({
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.maximum4DiscountRulesReached"
                   )}
                 </p>
+              )}
+              {validationErrors?.["discount.rules"] && (
+                <s-text id="configure-discount-rules" tone="critical">
+                  {validationErrors["discount.rules"]}
+                </s-text>
               )}
             </s-stack>
           </DisabledConfigurationRegion>

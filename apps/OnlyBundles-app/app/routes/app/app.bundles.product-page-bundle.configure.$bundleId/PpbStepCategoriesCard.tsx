@@ -15,6 +15,7 @@ export type PpbStepCategoriesCardProps = Pick<
 > & {
   categoryAdapter: PpbCategoryAdapter;
   step: PpbCategoryAccordionProps["step"];
+  validationErrors?: Record<string, string>;
 };
 
 export function PpbStepCategoriesCard({
@@ -22,8 +23,10 @@ export function PpbStepCategoriesCard({
   markAsDirty,
   step,
   stepsState,
+  validationErrors,
 }: PpbStepCategoriesCardProps) {
   const stepCategories = getStepCategories(step);
+  const resourceError = validationErrors?.[`steps.${step.id}.resources`];
 
   return (
     <div className={productPageBundleStyles.card}>
@@ -102,6 +105,13 @@ export function PpbStepCategoriesCard({
           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
         )}
       </s-button>
+      {resourceError && (
+        <div style={{ marginTop: 12 }}>
+          <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
+            {resourceError}
+          </s-text>
+        </div>
+      )}
     </div>
   );
 }

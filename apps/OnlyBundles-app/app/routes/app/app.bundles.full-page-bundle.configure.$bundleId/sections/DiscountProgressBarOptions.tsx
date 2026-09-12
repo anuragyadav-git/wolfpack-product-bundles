@@ -142,6 +142,7 @@ export function FpbProgressBarOptions({
                           <s-grid
                             gridTemplateColumns="repeat(2, minmax(0, 1fr))"
                             gap="small"
+                            alignItems="start"
                           >
                             <s-text-field
                               label={translateAdmin("adminAttributes.tierText")}

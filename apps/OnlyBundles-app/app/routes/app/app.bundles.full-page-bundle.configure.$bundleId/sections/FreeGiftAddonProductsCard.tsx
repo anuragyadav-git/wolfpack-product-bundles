@@ -14,12 +14,14 @@ export function FpbAddonProductsCard({
   onEnabledChange,
   onOpenTranslations,
   onTitleChange,
+  validationErrors,
 }: {
   enabled: boolean;
   title: string;
   translationsAvailable: boolean;
   styles: Record<string, string>;
   tierEditor: ComponentProps<typeof FpbAddonTierEditor>;
+  validationErrors?: Record<string, string>;
   onEnabledChange: (enabled: boolean) => void;
   onOpenTranslations: () => void;
   onTitleChange: (title: string) => void;
@@ -72,9 +74,11 @@ export function FpbAddonProductsCard({
             </p>
             <div className={styles.addonsFormStack}>
               <s-text-field
+                id="configure-addons-products-title"
                 label={translateAdmin("adminAttributes.addOnSectionTitle")}
                 value={title}
                 disabled={!enabled || undefined}
+                error={validationErrors?.["addons.products.title"]}
                 onInput={(e) =>
                   onTitleChange((e.target as HTMLInputElement).value)
                 }

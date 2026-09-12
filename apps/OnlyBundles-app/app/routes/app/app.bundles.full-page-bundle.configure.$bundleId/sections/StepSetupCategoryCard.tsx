@@ -8,16 +8,19 @@ export function FpbStepCategoryCard({
   adapter,
   styles,
   step,
+  validationErrors,
   onAddCategory,
   onDisplayVariantsChange,
 }: {
   adapter: CommonStepCategoryAccordionAdapter;
   styles: Record<string, string>;
   step: any;
+  validationErrors?: Record<string, string>;
   onAddCategory: () => void;
   onDisplayVariantsChange: (enabled: boolean) => void;
 }) {
   const categories = (step.StepCategory as any[] | undefined) ?? [];
+  const resourceError = validationErrors?.[`steps.${step.id}.resources`];
 
   return (
     <>
@@ -67,6 +70,13 @@ export function FpbStepCategoryCard({
           onAddCategory={onAddCategory}
           onDisplayVariantsChange={onDisplayVariantsChange}
         />
+        {resourceError && (
+          <div style={{ marginTop: 12 }}>
+            <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
+              {resourceError}
+            </s-text>
+          </div>
+        )}
       </div>
     </>
   );

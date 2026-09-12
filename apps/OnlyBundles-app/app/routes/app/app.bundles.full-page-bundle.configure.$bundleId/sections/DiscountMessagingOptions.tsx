@@ -15,6 +15,7 @@ export function FpbDiscountMessagingOptions({
   markAsDirty,
   normalizedRuleMessages,
   styles,
+  validationErrors,
   onShowVariables,
 }: {
   pricingState: ReturnType<typeof useBundlePricing>;
@@ -47,6 +48,7 @@ export function FpbDiscountMessagingOptions({
     { discountText: string; successMessage: string }
   >;
   styles: Record<string, string>;
+  validationErrors?: Record<string, string>;
   onShowVariables: () => void;
 }) {
   const {
@@ -224,12 +226,18 @@ export function FpbDiscountMessagingOptions({
                             })}
                           </h5>
                           <s-text-field
+                            id={`configure-discount-messages-${rule.id}-discountText`}
                             label={translateAdmin(
                               "adminAttributes.discountText"
                             )}
                             value={
                               localeMessages?.discountText ||
                               defaultDiscountText
+                            }
+                            error={
+                              validationErrors?.[
+                                `discount.messages.${rule.id}.discountText`
+                              ]
                             }
                             onInput={(e) => {
                               const val = (e.target as HTMLInputElement).value;
@@ -262,9 +270,15 @@ export function FpbDiscountMessagingOptions({
                   <s-section>
                     <s-stack direction="block" gap="small">
                       <s-text-field
+                        id="configure-discount-messages-successMessage"
                         label={translateAdmin(
                           "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
                         )}
+                        error={
+                          validationErrors?.[
+                            "discount.messages.successMessage"
+                          ]
+                        }
                         value={(() => {
                           const defaultMsg =
                             getDefaultDiscountRuleSuccessMessage(

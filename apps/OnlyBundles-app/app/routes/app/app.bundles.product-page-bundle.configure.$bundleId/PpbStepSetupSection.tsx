@@ -18,9 +18,7 @@ import {
   PpbStepSetupDetailsCard,
   type PpbStepSetupDetailsCardProps,
 } from "./PpbStepSetupDetailsCard";
-import { getStepCategories } from "./PpbStepSetupShared";
 import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
-import { translateAdmin } from "~/i18n/config";
 import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 
 export type PpbStepSetupSectionProps = Pick<
@@ -74,34 +72,6 @@ export function PpbStepSetupSection({
                         : ""
                     }
                   >
-                    {step.StepProduct &&
-                      step.StepProduct.length > 0 &&
-                      getStepCategories(step).length === 0 && (
-                        <s-box paddingBlockEnd="small-200">
-                          <s-banner
-                            tone="warning"
-                            heading={translateAdmin(
-                              "common.warningGroup.heading"
-                            )}
-                            dismissible={false}
-                            hidden={false}
-                          >
-                            <p style={{ margin: 0, fontSize: 14 }}>
-                              <strong>
-                                {translateAdmin(
-                                  "adminExtracted.appBundlesProductPageBundleConfigure.ppbstepsetupsection.actionNeeded"
-                                )}
-                              </strong>{" "}
-                              {translateAdmin(
-                                "adminDynamic.legacyStepProducts",
-                                {
-                                  count: step.StepProduct.length,
-                                }
-                              )}
-                            </p>
-                          </s-banner>
-                        </s-box>
-                      )}
                     <PpbStepSetupDetailsCard
                       {...details}
                       isFirstStep={index === 0}

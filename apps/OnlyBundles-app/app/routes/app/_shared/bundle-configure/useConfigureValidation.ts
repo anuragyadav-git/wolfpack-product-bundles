@@ -6,13 +6,14 @@ import {
   type ConfigureValidationIssue,
 } from "../../../../lib/bundle-config/configure-validation";
 
-function sectionForPath(path: string): string {
+export function sectionForPath(path: string): string {
   if (path.startsWith("subscriptions.")) return "subscriptions";
   if (path.startsWith("discount.")) return "discount_pricing";
   if (path.startsWith("settings.")) return "bundle_settings";
   if (path.startsWith("widget.")) return "bundle_widget";
   if (path.startsWith("embed.")) return "bundle_embed";
   if (path.startsWith("addons.")) return "free_gift_addons";
+  if (path.startsWith("offerDelivery.")) return "offer_delivery";
   return "step_setup";
 }
 

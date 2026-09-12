@@ -14,6 +14,7 @@ interface CountryTargetingSectionProps {
   onEnabledChange: (enabled: boolean) => void;
   onModeChange: (mode: OfferCountryTargetingMode) => void;
   onCountryCodesChange: (countryCodes: string[]) => void;
+  validationErrors?: Record<string, string>;
 }
 
 export function CountryTargetingSection({
@@ -22,6 +23,7 @@ export function CountryTargetingSection({
   onEnabledChange,
   onModeChange,
   onCountryCodesChange,
+  validationErrors,
 }: CountryTargetingSectionProps) {
   const [query, setQuery] = useState("");
   const countryOptions = useMemo(
@@ -78,12 +80,19 @@ export function CountryTargetingSection({
           </s-option>
         </s-select>
         <s-search-field
+          id="configure-offerDelivery-countryCodes"
           label={i18n.t("countryTargeting.searchLabel")}
           placeholder={i18n.t("countryTargeting.searchPlaceholder")}
           value={query}
           disabled={!state.countryTargetingEnabled}
+          error={validationErrors?.["offerDelivery.countryCodes"]}
           onInput={(event) => setQuery(event.currentTarget.value)}
         />
+        {validationErrors?.["offerDelivery.countryCodes"] && (
+          <s-text id="configure-offerDelivery-countryCodes-error" tone="critical">
+            {validationErrors["offerDelivery.countryCodes"]}
+          </s-text>
+        )}
         {state.countryCodes.length > 0 ? (
           <s-stack direction="inline" gap="small">
             {state.countryCodes.map((countryCode) => {

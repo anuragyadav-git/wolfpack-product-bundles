@@ -371,7 +371,8 @@ export function FpbStepRuleModeContent({
                       <s-select
                         label={translateAdmin("dashboard.table.type")}
                         labelAccessibilityVisibility="exclusive"
-                        value={rule.type ?? ""}
+                        placeholder={translateAdmin("dashboard.table.type")}
+                        value={rule.type || undefined}
                         onChange={(e: Event) =>
                           updateStepConditionRule(
                             step.id,
@@ -381,9 +382,6 @@ export function FpbStepRuleModeContent({
                           )
                         }
                       >
-                        <s-option value="" disabled>
-                          {translateAdmin("dashboard.table.type")}
-                        </s-option>
                         {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
                           <s-option key={opt.value} value={opt.value}>
                             {opt.label}
@@ -395,7 +393,10 @@ export function FpbStepRuleModeContent({
                           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
                         )}
                         labelAccessibilityVisibility="exclusive"
-                        value={rule.operator ?? ""}
+                        placeholder={translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                        )}
+                        value={rule.operator || undefined}
                         onChange={(e: Event) =>
                           updateStepConditionRule(
                             step.id,
@@ -405,11 +406,6 @@ export function FpbStepRuleModeContent({
                           )
                         }
                       >
-                        <s-option value="" disabled>
-                          {translateAdmin(
-                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                          )}
-                        </s-option>
                         {[...STEP_CONDITION_OPERATOR_OPTIONS].map((opt) => (
                           <s-option key={opt.value} value={opt.value}>
                             {opt.label}

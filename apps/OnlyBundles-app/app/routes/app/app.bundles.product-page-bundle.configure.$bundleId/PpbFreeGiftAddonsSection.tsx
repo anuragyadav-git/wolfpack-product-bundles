@@ -21,7 +21,9 @@ export type PpbFreeGiftAddonsSectionProps = Pick<
   | "showIconPickerForStep"
   | "stepsState"
   | "templateVariablesModalRef"
->;
+> & {
+  validationErrors?: Record<string, string>;
+};
 
 export function PpbFreeGiftAddonsSection({
   activeSection,
@@ -35,6 +37,7 @@ export function PpbFreeGiftAddonsSection({
   showIconPickerForStep,
   stepsState,
   templateVariablesModalRef,
+  validationErrors,
 }: PpbFreeGiftAddonsSectionProps) {
   return (
     <>
@@ -176,10 +179,12 @@ export function PpbFreeGiftAddonsSection({
                           )}
                         </s-button>
                         <s-text-field
+                          id="configure-addons-gifting-stepName"
                           label={translateAdmin("adminAttributes.stepName")}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonLabel ?? step.freeGiftName ?? ""}
                           placeholder={translateAdmin("adminAttributes.addOn")}
+                          error={validationErrors?.["addons.gifting.stepName"]}
                           onInput={(e) => {
                             const value = (e.target as HTMLInputElement).value;
                             stepsState.updateStepField(
@@ -214,9 +219,11 @@ export function PpbFreeGiftAddonsSection({
                           autocomplete="off"
                         />
                         <s-text-field
+                          id="configure-addons-gifting-stepTitle"
                           label={translateAdmin("adminAttributes.stepTitle")}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonTitle ?? ""}
+                          error={validationErrors?.["addons.gifting.stepTitle"]}
                           onInput={(e) => {
                             stepsState.updateStepField(
                               step.id,
@@ -324,10 +331,12 @@ export function PpbFreeGiftAddonsSection({
                         </s-button>
                       </s-stack>
                       <s-text-field
+                        id="configure-addons-products-title"
                         label={translateAdmin(
                           "adminAttributes.addOnSectionTitle"
                         )}
                         value={step.freeGiftName ?? ""}
+                        error={validationErrors?.["addons.products.title"]}
                         onInput={(e) => {
                           stepsState.updateStepField(
                             step.id,

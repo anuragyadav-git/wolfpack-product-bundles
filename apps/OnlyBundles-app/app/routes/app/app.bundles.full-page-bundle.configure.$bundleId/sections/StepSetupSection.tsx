@@ -178,6 +178,7 @@ export function StepSetupSection({
                   adapter={categoryAdapter}
                   styles={styles}
                   step={step}
+                  validationErrors={details.validationErrors}
                   onAddCategory={() => {
                     const categories = (step.StepCategory as any[]) ?? [];
                     details.updateStepField(step.id, "StepCategory", [

@@ -172,8 +172,14 @@ export function FpbAddonTierEditor({
                     <div className={styles.addonsTierBody}>
                       <s-stack direction="block" gap="small">
                         <s-text-field
+                          id={`configure-addons-products-tiers-${tierId}-title`}
                           label={translateAdmin("adminAttributes.tierTitle")}
                           value={tier.title ?? `Tier ${idx + 1}`}
+                          error={
+                            validationErrors[
+                              `addons.products.tiers.${tierId}.title`
+                            ]
+                          }
                           onInput={(e) => {
                             const updated = addonTiers.map((t, i) =>
                               i === idx
@@ -209,6 +215,20 @@ export function FpbAddonTierEditor({
                               </s-button>
                             )}
                         </div>
+                        {validationErrors[
+                          `addons.products.tiers.${tierId}.products`
+                        ] && (
+                          <s-text
+                            id={`configure-addons-products-tiers-${tierId}-products`}
+                            tone="critical"
+                          >
+                            {
+                              validationErrors[
+                                `addons.products.tiers.${tierId}.products`
+                              ]
+                            }
+                          </s-text>
+                        )}
                         <s-checkbox
                           label={translateAdmin(
                             "adminAttributes.displayVariantsAsIndividualProducts"
@@ -330,6 +350,20 @@ export function FpbAddonTierEditor({
                             suffix="%"
                           />
                         </div>
+                        {validationErrors[
+                          `addons.products.tiers.${tierId}.eligibility`
+                        ] && (
+                          <s-text
+                            id={`configure-addons-products-tiers-${tierId}-eligibility`}
+                            tone="critical"
+                          >
+                            {
+                              validationErrors[
+                                `addons.products.tiers.${tierId}.eligibility`
+                              ]
+                            }
+                          </s-text>
+                        )}
                         <FpbAddonTierRules
                           actionClassName={styles.addonsTierRuleAction}
                           ruleCardClassName={styles.ruleCard}
@@ -381,6 +415,13 @@ export function FpbAddonTierEditor({
                 </s-text>
               </s-stack>
             </s-clickable>
+            {validationErrors["addons.products.tiers"] && (
+              <div style={{ marginTop: 8 }}>
+                <s-text id="configure-addons-products-tiers" tone="critical">
+                  {validationErrors["addons.products.tiers"]}
+                </s-text>
+              </div>
+            )}
           </>
         );
       })()}
