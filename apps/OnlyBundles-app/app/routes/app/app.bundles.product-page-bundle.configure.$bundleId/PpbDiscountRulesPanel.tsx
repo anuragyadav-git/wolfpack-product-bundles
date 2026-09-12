@@ -72,31 +72,27 @@ export function PpbDiscountRulesPanel({
         <DiscountPricingTipBanner />
         <DisabledConfigurationRegion disabled={!pricingState.discountEnabled}>
           <s-stack direction="block" gap="base">
-            <div>
-              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600 }}>
-                {translateAdmin(
-                  "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountrulespanel.discountType"
-                )}
-              </p>
-              <s-select
-                value={pricingState.discountType}
-                onChange={(e) => {
-                  const nextDiscountType = (e.target as HTMLSelectElement)
-                    .value as typeof pricingState.discountType;
-                  pricingState.replaceDiscountMethod(nextDiscountType);
-                  setRuleMessages({});
-                  setRuleMessagesByLocale({});
-                  setGlobalSuccessMessage("");
-                  setSuccessMessageByLocale({});
-                }}
-              >
-                {[...DISCOUNT_METHOD_OPTIONS].map((opt) => (
-                  <s-option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </s-option>
-                ))}
-              </s-select>
-            </div>
+            <s-select
+              label={translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountrulespanel.discountType"
+              )}
+              value={pricingState.discountType}
+              onChange={(e) => {
+                const nextDiscountType = (e.target as HTMLSelectElement)
+                  .value as typeof pricingState.discountType;
+                pricingState.replaceDiscountMethod(nextDiscountType);
+                setRuleMessages({});
+                setRuleMessagesByLocale({});
+                setGlobalSuccessMessage("");
+                setSuccessMessageByLocale({});
+              }}
+            >
+              {[...DISCOUNT_METHOD_OPTIONS].map((opt) => (
+                <s-option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </s-option>
+              ))}
+            </s-select>
             {pricingState.discountType === DiscountMethod.BUY_X_GET_Y ? (
               <PpbBuyXGetYRules
                 pricingState={pricingState}
@@ -107,6 +103,11 @@ export function PpbDiscountRulesPanel({
                 pricingState={pricingState}
                 validationErrors={validationErrors}
               />
+            )}
+            {validationErrors?.["discount.rules"] && (
+              <s-text id="configure-discount-rules" tone="critical">
+                {validationErrors["discount.rules"]}
+              </s-text>
             )}
           </s-stack>
         </DisabledConfigurationRegion>
@@ -131,7 +132,14 @@ function PpbBuyXGetYRules({
         <div key={rule.id} className={productPageBundleStyles.discountRuleCard}>
           <s-stack direction="block" gap="small">
             <div className={productPageBundleStyles.discountRuleHeader}>
-              <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+              <h4
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  flex: 1,
+                }}
+              >
                 {translateAdmin("adminDynamic.ruleNumber", {
                   number: index + 1,
                 })}
@@ -335,7 +343,14 @@ function PpbStandardDiscountRules({
         <div key={rule.id} className={productPageBundleStyles.discountRuleCard}>
           <s-stack direction="block" gap="small">
             <div className={productPageBundleStyles.discountRuleHeader}>
-              <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+              <h4
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  flex: 1,
+                }}
+              >
                 {translateAdmin("adminDynamic.ruleNumber", {
                   number: index + 1,
                 })}

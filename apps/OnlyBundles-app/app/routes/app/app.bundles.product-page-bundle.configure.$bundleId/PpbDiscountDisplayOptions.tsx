@@ -24,7 +24,9 @@ type PpbBundleQuantityOptionsProps = Pick<
   | "setQtyRuleLabels"
   | "setQtyRuleSubtexts"
   | "shopLocales"
->;
+> & {
+  validationErrors?: Record<string, string>;
+};
 
 type PpbProgressBarOptionsProps = Pick<
   PpbConfigureFlow,
@@ -38,13 +40,16 @@ type PpbProgressBarOptionsProps = Pick<
   | "setTierTextByRuleId"
   | "shopLocales"
   | "tierTextByRuleId"
->;
+> & {
+  validationErrors?: Record<string, string>;
+};
 
 export type PpbDiscountDisplayOptionsProps = {
   displayOptionsInactive: PpbConfigureFlow["displayOptionsInactive"];
   messaging: PpbDiscountMessagingOptionsProps;
   progress: PpbProgressBarOptionsProps;
   quantity: PpbBundleQuantityOptionsProps;
+  validationErrors?: Record<string, string>;
 };
 
 export function PpbDiscountDisplayOptions({
@@ -52,6 +57,7 @@ export function PpbDiscountDisplayOptions({
   messaging,
   progress,
   quantity,
+  validationErrors,
 }: PpbDiscountDisplayOptionsProps) {
 
   return (
@@ -70,16 +76,25 @@ export function PpbDiscountDisplayOptions({
               )}
             </p>
           </s-stack>
-          <PpbBundleQuantityOptions {...quantity} />
-          <PpbProgressBarOptions {...progress} />
-          <PpbDiscountMessagingOptions {...messaging} />
+          <PpbBundleQuantityOptions
+            {...quantity}
+            validationErrors={validationErrors}
+          />
+          <PpbProgressBarOptions
+            {...progress}
+            validationErrors={validationErrors}
+          />
+          <PpbDiscountMessagingOptions
+            {...messaging}
+            validationErrors={validationErrors}
+          />
         </s-stack>
       </DisabledConfigurationRegion>
     </s-section>
   );
 }
 
-function PpbBundleQuantityOptions({
+export function PpbBundleQuantityOptions({
   bundleQuantityOptionsEligible,
   markAsDirty,
   pricingState,
@@ -93,6 +108,7 @@ function PpbBundleQuantityOptions({
   setQtyRuleLabels,
   setQtyRuleSubtexts,
   shopLocales,
+  validationErrors,
 }: PpbBundleQuantityOptionsProps) {
 
   if (pricingState.discountType === DiscountMethod.BUY_X_GET_Y) {
@@ -185,37 +201,32 @@ function PpbBundleQuantityOptions({
                             number: index + 1,
                           })}
                         </h5>
-                        <s-press-button
-                          variant="tertiary"
-                          tone="neutral"
-                          pressed={rule.id === qtyOptionsDefaultRuleId}
-                          accessibilityLabel={translateAdmin(
-                            "adminAttributes.makeThisRuleDefault"
-                          )}
-                          onClick={() => {
-                            setQtyOptionsDefaultRuleId(rule.id);
+                        <s-switch
+                          label={translateAdmin("adminDynamic.makeRuleDefault")}
+                          checked={
+                            rule.id === qtyOptionsDefaultRuleId || undefined
+                          }
+                          onChange={(e: Event) => {
+                            const isChecked = (e.target as HTMLInputElement)
+                              .checked;
+                            setQtyOptionsDefaultRuleId(
+                              isChecked ? rule.id : null
+                            );
                             markAsDirty();
                           }}
-                        >
-                          <s-text
-                            tone={
-                              rule.id === qtyOptionsDefaultRuleId
-                                ? "success"
-                                : "neutral"
-                            }
-                          >
-                            {rule.id === qtyOptionsDefaultRuleId
-                              ? "\u2605"
-                              : "\u2606"}{" "}
-                            {translateAdmin("adminDynamic.makeRuleDefault")}
-                          </s-text>
-                        </s-press-button>
+                        />
                       </s-stack>
                       <s-stack direction="inline" gap="small">
                         <s-text-field
+                          id={`configure-discount-display-qtyOptions-${rule.id}-boxLabel`}
                           label={translateAdmin("adminAttributes.boxLabel")}
                           placeholder={`Box of ${rule.conditionValue ?? ""}`}
                           value={qtyRuleLabels[rule.id] ?? ""}
+                          error={
+                            validationErrors?.[
+                              `discount.display.qtyOptions.${rule.id}.boxLabel`
+                            ]
+                          }
                           onInput={(e) => {
                             setQtyRuleLabels((prev) => ({
                               ...prev,
@@ -226,11 +237,17 @@ function PpbBundleQuantityOptions({
                           autocomplete="off"
                         />
                         <s-text-field
+                          id={`configure-discount-display-qtyOptions-${rule.id}-boxSubtext`}
                           label={translateAdmin("adminAttributes.boxSubtext")}
                           placeholder={translateAdmin(
                             "adminAttributes.eG20Off"
                           )}
                           value={qtyRuleSubtexts[rule.id] ?? ""}
+                          error={
+                            validationErrors?.[
+                              `discount.display.qtyOptions.${rule.id}.boxSubtext`
+                            ]
+                          }
                           onInput={(e) => {
                             setQtyRuleSubtexts((prev) => ({
                               ...prev,
@@ -264,6 +281,7 @@ function PpbProgressBarOptions({
   setTierTextByRuleId,
   shopLocales,
   tierTextByRuleId,
+  validationErrors,
 }: PpbProgressBarOptionsProps) {
 
   return (
@@ -341,6 +359,7 @@ function PpbProgressBarOptions({
                 pricingState={pricingState}
                 setTierTextByRuleId={setTierTextByRuleId}
                 tierTextByRuleId={tierTextByRuleId}
+                validationErrors={validationErrors}
               />
             ) : null}
           </s-stack>
@@ -355,9 +374,14 @@ function PpbProgressTierTextFields({
   pricingState,
   setTierTextByRuleId,
   tierTextByRuleId,
+  validationErrors,
 }: Pick<
   PpbProgressBarOptionsProps,
-  "markAsDirty" | "pricingState" | "setTierTextByRuleId" | "tierTextByRuleId"
+  | "markAsDirty"
+  | "pricingState"
+  | "setTierTextByRuleId"
+  | "tierTextByRuleId"
+  | "validationErrors"
 >) {
 
   if (pricingState.discountRules.length === 0) {
@@ -378,10 +402,16 @@ function PpbProgressTierTextFields({
             <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
               {translateAdmin("adminDynamic.ruleNumber", { number: index + 1 })}
             </p>
-            <s-grid gridTemplateColumns="repeat(2, minmax(0, 1fr))" gap="small">
+            <s-grid gridTemplateColumns="repeat(2, minmax(0, 1fr))" gap="small" alignItems="start">
               <s-text-field
+                id={`configure-discount-display-progressBar-${rule.id}-tierText`}
                 label={translateAdmin("adminAttributes.tierText")}
                 value={tierTextByRuleId[rule.id]?.tierText ?? ""}
+                error={
+                  validationErrors?.[
+                    `discount.display.progressBar.${rule.id}.tierText`
+                  ]
+                }
                 onInput={(e) => {
                   const value = (e.target as HTMLInputElement).value;
                   setTierTextByRuleId((prev: typeof tierTextByRuleId) => ({
@@ -396,8 +426,14 @@ function PpbProgressTierTextFields({
                 autocomplete="off"
               />
               <s-text-field
+                id={`configure-discount-display-progressBar-${rule.id}-tierSubtext`}
                 label={translateAdmin("adminAttributes.tierSubtext")}
                 value={tierTextByRuleId[rule.id]?.tierSubtext ?? ""}
+                error={
+                  validationErrors?.[
+                    `discount.display.progressBar.${rule.id}.tierSubtext`
+                  ]
+                }
                 onInput={(e) => {
                   const value = (e.target as HTMLInputElement).value;
                   setTierTextByRuleId((prev: typeof tierTextByRuleId) => ({

@@ -131,25 +131,19 @@ export function FpbBundleQuantityOptions({
                                 number: index + 1,
                               })}
                             </h5>
-                            <s-button
-                              variant="tertiary"
-                              tone="neutral"
-                              accessibilityLabel={translateAdmin(
-                                "adminAttributes.makeThisRuleDefault"
+                            <s-switch
+                              label={translateAdmin(
+                                "adminDynamic.makeRuleDefault"
                               )}
-                              onClick={() =>
+                              checked={option.isDefault || undefined}
+                              onChange={(e: Event) => {
+                                const isChecked = (e.target as HTMLInputElement)
+                                  .checked;
                                 pricingState.setBundleQuantityDefaultRule(
-                                  option.ruleId
-                                )
-                              }
-                            >
-                              <s-text
-                                tone={option.isDefault ? "success" : "neutral"}
-                              >
-                                {option.isDefault ? "\u2605" : "\u2606"}{" "}
-                                {translateAdmin("adminDynamic.makeRuleDefault")}
-                              </s-text>
-                            </s-button>
+                                  isChecked ? option.ruleId : null
+                                );
+                              }}
+                            />
                           </s-stack>
                           {option.compatibility.status === "blocked" && (
                             <p
