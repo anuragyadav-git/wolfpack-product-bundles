@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-09-10
+last_audited: 2026-09-13
 owners:
   - engineering
 domains:
@@ -92,10 +92,13 @@ to Shopify's `login(request)` helper. The `/auth/$` OAuth route calls
 it must not add a second generic Remix redirect.
 
 The temporary legacy-token cutover helper is no longer part of the deployable
-application. The configured database returned zero non-expiring offline rows on
-2026-09-09. Repeat that zero-count query in every release environment before
-shipping this strict state; a non-expiring row must be repaired through a fresh
-merchant app launch and Shopify's current authorization flow, not a permanent
+application. The SIT database returned zero non-expiring offline rows on
+2026-09-12. The production database did not: 57 of its 162 offline sessions
+lacked `expires`, `refreshToken`, and `refreshTokenExpires`, and all 57 belonged
+to installed shops. Production must remain behind the strict-token release gate
+until every affected merchant has launched the expiring-token build or the
+documented Shopify offline-token exchange has completed and the zero-count
+query passes. A non-expiring row must never be accepted through a permanent
 compatibility branch in session storage.
 
 Read-only Admin audits must classify credential state before interpreting a
