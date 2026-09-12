@@ -5,7 +5,7 @@ title: Database Schema
 type: architecture
 status: authoritative
 summary: Documents the canonical Prisma models, removed legacy residue, ownership boundaries, and forward-only migration rules.
-last_audited: 2026-09-10
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -228,3 +228,15 @@ application status; it is not an `inactive` alias.
   normal Admin save flows after the save boundary was corrected. The full
   step-and-category query returned zero offenders for the configured database.
   That result is not evidence for another release environment.
+- On 2026-09-12 the release-environment session gate was run read-only against
+  both configured databases. SIT had one offline session and zero legacy
+  offline sessions. Production had 162 offline sessions, of which 57 lacked
+  `expires`, `refreshToken`, and `refreshTokenExpires`; all 57 belonged to
+  currently installed shops. Do not delete those rows or uninstall those apps.
+  Shopify's app-template migration cycles a perpetual token when that merchant
+  next opens the app after `expiringOfflineAccessTokens` is deployed. Stores
+  that do not reopen require Shopify's documented offline-token exchange. That
+  exchange is irreversible and must persist the returned access token, refresh
+  token, and expiry metadata before marking the store complete, so it remains
+  a separately approved production operation rather than a deploy-time
+  fallback. The production zero-count release gate therefore remains open.
