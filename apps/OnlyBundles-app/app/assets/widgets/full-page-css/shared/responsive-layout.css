@@ -577,6 +577,12 @@
   align-self: flex-start;
 }
 
+#bundle-builder-app.bundle-widget-full-page
+  .vs-wrapper--pill
+  .vs-btn {
+  padding-inline: clamp(0.35rem, 1cqi, 0.65rem);
+}
+
 #bundle-builder-app.bundle-widget-full-page .vs-wrapper--configured .vs-option-group {
   align-content: end;
   justify-self: stretch;
