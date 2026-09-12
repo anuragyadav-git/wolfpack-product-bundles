@@ -780,8 +780,9 @@
   )
   .full-page-product-grid:has(.vs-wrapper--configured)
   .product-card-price-action {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
 }
 
 #bundle-builder-app.bundle-widget-full-page
@@ -792,7 +793,24 @@
   )
   .full-page-product-grid:has(.vs-wrapper--configured)
   .product-card-action {
-  grid-row: 3;
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  margin-block: 0;
+}
+
+#bundle-builder-app.bundle-widget-full-page
+  .layout-sidebar[data-fpb-card-cta-mode="icon"]:is(
+    [data-fpb-design-preset="STANDARD"],
+    [data-fpb-design-preset="CLASSIC"],
+    [data-fpb-design-preset="COMPACT"]
+  )
+  .full-page-product-grid:has(.vs-wrapper--configured)
+  .product-price-row {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  margin-block: 0;
 }
 
 #bundle-builder-app.bundle-widget-full-page
