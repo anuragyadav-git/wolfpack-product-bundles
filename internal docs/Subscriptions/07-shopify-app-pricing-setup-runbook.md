@@ -5,7 +5,7 @@ title: Shopify App Pricing Setup Runbook
 type: runbook
 status: configured
 summary: Records the verified SIT and production Shopify App Pricing setup for Free and Growth.
-last_audited: 2026-09-11
+last_audited: 2026-09-12
 owners:
   - product
   - engineering
@@ -15,6 +15,7 @@ systems:
   - shopify-partner-dashboard
   - shopify-partner-api
 source_paths:
+  - app/routes/app/app.billing.tsx
   - app/routes/app/app.billing.return.tsx
   - app/services/subscriptions/shopify-app-pricing.server.ts
   - app/services/subscriptions/app-pricing-navigation.server.ts
@@ -53,6 +54,14 @@ SIT and PROD have the Free and Growth plans configured with handles `free` and
 `growth`, the approved feature copy, monthly/yearly billing, and the 14-day
 trial. SIT remains an unpublished internal development app.
 
+On 2026-09-12, the Agent development store approved the SIT Growth plan through
+Shopify App Pricing. Shopify displayed the approval as free to test and created
+an active no-charge Growth contract. The same pass found the SIT hosted plan
+still advertising `$19.99` monthly and `$199` yearly even though the app UI and
+pricing decision record already used the approved values. The Shopify-owned
+plan was corrected in App Pricing to `$9.99` monthly and `$99.90` yearly, and
+the pricing inventory was re-read after save to confirm both values.
+
 Create one Growth plan using Shopify's **monthly with yearly option** billing model. Set its monthly charge to `$9.99`, yearly charge to `$99.90`, and free trial duration to `14`. Shopify then owns the trial, billing-period changes, and proration. Do not create a local trial ledger or two separate Growth plans.
 
 Shopify tracks consumed trial days across a 180-day period. This prevents reinstall-based trial reuse. Because monthly and annual are billing options on the same Growth plan, switching periods does not create a second app-owned trial.
@@ -71,6 +80,12 @@ After verification, the return loader must use the `redirect` function returned
 by `authenticate.admin(request)`. A plain Remix redirect to `/app/billing`
 resolves against the app server origin after Shopify-hosted approval, loses the
 embedded Admin context, and falls through to `/auth/login`.
+
+The embedded Billing page must also route its Upgrade action with Remix client
+navigation. Giving an `s-button` a relative `href` caused its iframe to load the
+tunnel's `/app/billing/plans` document directly, outside the authenticated
+Shopify Admin navigation context, and fall through to `/auth/login`. Keep the
+Polaris button, but call the route-owned `navigate("/app/billing/plans")` handler.
 
 Partner organization `4162406`, Partner API version `2026-07`, and stable plan handles `free` and `growth` are application constants. Cache duration and the 24-hour paid outage grace use code-owned defaults. None require deployment-specific environment overrides. Subscription enforcement has no environment flag and begins when the released code runs.
 

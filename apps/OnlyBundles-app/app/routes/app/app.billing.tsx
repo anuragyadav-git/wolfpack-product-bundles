@@ -417,7 +417,7 @@ export default function BillingPage() {
                         <s-button
                           variant="primary"
                           icon="arrow-right"
-                          href="/app/billing/plans"
+                          onClick={() => navigate("/app/billing/plans")}
                         >
                           {t("common.actions.upgradeNow")}
                         </s-button>
