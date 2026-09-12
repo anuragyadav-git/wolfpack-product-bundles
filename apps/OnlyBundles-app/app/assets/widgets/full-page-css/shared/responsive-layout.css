@@ -558,9 +558,23 @@
   min-width: 0;
 }
 #bundle-builder-app.bundle-widget-full-page .vs-wrapper--configured:not(.vs-wrapper--standard) {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  grid-template-columns: minmax(0, 1fr);
   align-items: end;
   margin-bottom: 0;
+}
+
+#bundle-builder-app.bundle-widget-full-page
+  .vs-wrapper--pill
+  .vs-btn-group {
+  align-content: flex-start;
+}
+
+#bundle-builder-app.bundle-widget-full-page
+  .vs-wrapper--pill
+  .vs-radio-control {
+  flex: 1 1 3rem;
+  max-width: 6rem;
+  align-self: flex-start;
 }
 
 #bundle-builder-app.bundle-widget-full-page .vs-wrapper--configured .vs-option-group {
