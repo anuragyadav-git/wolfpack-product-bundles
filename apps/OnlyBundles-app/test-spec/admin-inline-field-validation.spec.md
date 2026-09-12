@@ -1,3 +1,34 @@
+---
+schema_version: 1
+id: admin-inline-field-validation
+title: Admin Inline Field Validation
+type: test-spec
+status: active
+summary: Defines single-owner Polaris field validation behavior across Admin configure, create, dashboard, and attribution forms.
+last_audited: 2026-09-12
+owners:
+  - engineering
+domains:
+  - admin
+systems:
+  - validation
+source_paths:
+  - app/routes/app/_shared/bundle-configure/
+  - app/routes/app/app.bundles.create/route.tsx
+  - app/routes/app/app.dashboard/DashboardActionModals.tsx
+  - app/routes/app/app.attribution/AttributionDateRangeControls.tsx
+  - app/routes/app/shared/CountryTargetingSection.tsx
+related_docs:
+  - internal docs/Shopify Integration/Polaris Web Components Reference.md
+tags:
+  - polaris
+  - validation
+  - tdd
+keywords:
+  - inline errors
+  - error ownership
+---
+
 # Test Spec: Admin Inline Field Validation
 **Spec ID:** admin-inline-field-validation  **Created:** 2026-09-12
 
@@ -15,9 +46,13 @@ Ensure all Admin UI field and field-group validations appear inline directly bel
 | 5 | Discount rules empty error placement | `validationErrors = { "discount.rules": "..." }` | Discount pricing card renders error with `id="configure-discount-rules"` | Ensures rules error has inline placement |
 | 6 | Free gift addons title & reference errors | `validationErrors = { "addons.products.title": "...", "addons.gifting.stepName": "..." }` | Input fields receive `error` and matching `id` | Verifies Polaris inline errors |
 | 7 | Offer delivery inline field errors | `validationErrors = { "offerDelivery.priority": "...", "offerDelivery.startsAt": "..." }` | Input fields receive `error` and matching `id` | Verifies Polaris inline errors |
-| 8 | Zero layout-shift multi-column alignment | Multi-column field row (`discountFieldsRow`, `discountFieldsRowPair`, `bxyRewardGrid`, `addonsDiscountGrid`, `PricingTierBadgeFields`, `ProgressBarOptions`) with validation error on one field | Row items align to `start` so sibling inputs and labels do not shift downward | Verified via Chrome DevTools element metrics |
+| 8 | Dashboard rename operation failure | Rename persistence fails after valid input | Critical operation banner renders and text field has no field error | Operation errors are not field validation |
+| 9 | Invalid attribution range | End date precedes start date | End date field alone owns the range error | No duplicate message on both dates |
+| 10 | Country selection is missing | Country targeting enabled with no country | Search field owns the error | No duplicate critical text block |
+| 11 | Create-bundle operation failure | Valid name submission fails server-side | Critical operation banner renders and name field has no field error | Merchant-safe operation feedback |
 
 ## Acceptance Criteria
 - [ ] All listed test cases pass
 - [ ] No regression errors in existing unit tests
 - [ ] Clean lint run on all modified files
+- [ ] No unit test asserts CSS, class names, or visual placement

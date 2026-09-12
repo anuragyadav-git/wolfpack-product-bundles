@@ -20,6 +20,10 @@ source_paths:
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
   - app/routes/app/app.settings/SettingsLandingShell.tsx
   - app/routes/app/app.bundles.create/BundleTypeSelectionCard.tsx
+  - app/routes/app/app.bundles.create/route.tsx
+  - app/routes/app/app.dashboard/DashboardActionModals.tsx
+  - app/routes/app/app.attribution/AttributionDateRangeControls.tsx
+  - app/routes/app/shared/CountryTargetingSection.tsx
   - app/routes/app/_shared/bundle-configure/CommonConfigureShell.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ImagesGifsPanel.tsx
   - app/assets/widgets/shared/components/product-card.ts
@@ -164,7 +168,15 @@ Official layout references:
 
 ## Alert decision rules
 
-- Put validation errors inline beside the field or control that can resolve them.
+- Give every field-validation message exactly one owner. Pass it through the
+  owning Polaris form component's `error` property so Polaris renders it below
+  the control, applies the invalid state, and announces it to assistive
+  technology. Do not repeat that message in a banner, toast, detached text
+  block, or page-level summary.
+- For a constraint involving multiple fields, attach the message to the one
+  field the merchant should change next. For a selection surface without a
+  Polaris field-level `error` property, render one critical message immediately
+  after the closest actionable control group and associate it by identifier.
 - Use a contextual `s-banner` for task or system failures that merchants must notice or act on. Supply a concise `heading`, a supported `tone`, merchant-safe body copy, and a recovery action when one is available.
 - Treat an error as transient only when it belongs to one discrete attempt, leaves no invalid or broken state behind, and a fresh retry starts cleanly. These retryable picker, launch, export, backfill, toggle, or similar operation failures can use a concise App Bridge error toast.
 - Treat save failures, unresolved validation, missing configuration, missing placement, and broken embedded surfaces as persistent. Keep them inline or in a contextual banner until dismissed or resolved.

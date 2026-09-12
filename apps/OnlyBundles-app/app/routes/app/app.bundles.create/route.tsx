@@ -243,9 +243,9 @@ export default function CreateBundleEntry() {
     return () => el.removeEventListener("input", handler);
   }, []);
 
-  const serverError =
+  const operationError =
     actionData && "error" in actionData
-      ? String(actionData.error)
+      ? t("common.alerts.operationFailed")
       : sidekickFetcher.data && "errorCode" in sidekickFetcher.data
         ? t("common.alerts.operationFailed")
         : null;
@@ -272,8 +272,8 @@ export default function CreateBundleEntry() {
   }, [getSidekick, sidekickFetcher.data, t]);
 
   useEffect(() => {
-    if (serverError) showPolarisModal(nameModalRef);
-  }, [serverError]);
+    if (operationError) showPolarisModal(nameModalRef);
+  }, [operationError]);
 
   const handleBackToDashboard = useCallback(() => {
     if (isSidekickIntent) {
@@ -356,9 +356,6 @@ export default function CreateBundleEntry() {
 
         <div className={styles.formContent}>
           <div className={styles.formSection}>
-            {bundleTypeError && (
-              <p className={styles.errorText}>{bundleTypeError}</p>
-            )}
             <s-query-container containerName="create-bundle-entry">
               <s-grid
                 gap="base"
@@ -390,6 +387,9 @@ export default function CreateBundleEntry() {
                 />
               </s-grid>
             </s-query-container>
+            {bundleTypeError ? (
+              <s-text tone="critical">{bundleTypeError}</s-text>
+            ) : null}
           </div>
         </div>
 
@@ -403,6 +403,13 @@ export default function CreateBundleEntry() {
           }
         >
           <Form method="post" className={styles.modalForm}>
+            {operationError ? (
+              <s-banner
+                tone="critical"
+                heading={operationError}
+                dismissible={false}
+              />
+            ) : null}
             <s-text-field
               ref={bundleNameRef}
               label={t("createBundle.fields.name")}
@@ -412,7 +419,7 @@ export default function CreateBundleEntry() {
               autocomplete="off"
               onInput={handleBundleNameInput}
               onChange={handleBundleNameInput}
-              error={bundleNameError ?? serverError ?? undefined}
+              error={bundleNameError ?? undefined}
             />
             {bundleType && (
               <input type="hidden" name="bundleType" value={bundleType} />

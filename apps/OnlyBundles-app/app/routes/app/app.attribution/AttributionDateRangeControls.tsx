@@ -8,6 +8,25 @@ import {
 
 const ATTRIBUTION_DATE_POPOVER_ID = "analytics-date-range-popover";
 
+export function getAttributionDateRangeFieldErrors({
+  from,
+  to,
+  today,
+  message,
+}: {
+  from: string;
+  to: string;
+  today: string;
+  message: string;
+}): { from: string | undefined; to: string | undefined } {
+  const invalid = Boolean(from && to) &&
+    !validateAttributionDateRange(from, to, today);
+  return {
+    from: undefined,
+    to: invalid ? message : undefined,
+  };
+}
+
 function formatDateLabel(date: Date): string {
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -60,10 +79,12 @@ export function DateRangeSelector({
     toDate,
     today
   );
-  const dateRangeError =
-    fromDate && toDate && !isDateRangeValid
-      ? translateAdmin("offerPolicy.errors.invalid_date_range")
-      : undefined;
+  const dateRangeErrors = getAttributionDateRangeFieldErrors({
+    from: fromDate,
+    to: toDate,
+    today,
+    message: translateAdmin("offerPolicy.errors.invalid_date_range"),
+  });
 
   useEffect(() => {
     setFromDate(from || "");
@@ -125,7 +146,7 @@ export function DateRangeSelector({
                 "adminExtracted.appAttribution.attributiondashboard.from"
               )}
               value={fromDate}
-              error={dateRangeError}
+              error={dateRangeErrors.from}
               onInput={(event) => setFromDate(event.currentTarget.value ?? "")}
             />
             <s-date-field
@@ -133,7 +154,7 @@ export function DateRangeSelector({
                 "adminExtracted.appAttribution.attributiondashboard.to"
               )}
               value={toDate}
-              error={dateRangeError}
+              error={dateRangeErrors.to}
               onInput={(event) => setToDate(event.currentTarget.value ?? "")}
             />
             </s-stack>

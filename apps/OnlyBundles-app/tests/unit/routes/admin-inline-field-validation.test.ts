@@ -3,6 +3,7 @@ import React from "react";
 import { DashboardActionModals } from "../../../app/routes/app/app.dashboard/DashboardActionModals";
 import { BundleSubscriptionConfiguration } from "../../../app/routes/app/_shared/bundle-configure/BundleSubscriptionConfiguration";
 import type { BundleSubscriptionConfigV1 } from "../../../app/lib/bundle-subscriptions";
+import { getAttributionDateRangeFieldErrors } from "../../../app/routes/app/app.attribution/AttributionDateRangeControls";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -42,6 +43,7 @@ describe("Admin inline field validation", () => {
       renameModalRef: { current: null },
       isRenaming: false,
       renameError,
+      renameOperationError: null,
       bundleName: "",
       onBundleNameChange: jest.fn(),
       onConfirmRename: jest.fn(),
@@ -60,6 +62,45 @@ describe("Admin inline field validation", () => {
 
     expect(nameField.props.error).toBe(renameError);
     expect(criticalBanners).toHaveLength(0);
+  });
+
+  it("keeps dashboard rename operation failures in a banner instead of assigning them to the field", () => {
+    const operationError = "The bundle could not be renamed.";
+    const view = DashboardActionModals({
+      appEmbedOpen: false,
+      appEmbedPhase: "ready" as never,
+      appEmbedModalRef: { current: null },
+      onOpenThemeEditor: jest.fn(),
+      onCloseAppEmbed: jest.fn(),
+      onSupport: jest.fn(),
+      renderDeleteModal: false,
+      deleteModalRef: { current: null },
+      isSubmitting: false,
+      onConfirmDelete: jest.fn(),
+      onCancelDelete: jest.fn(),
+      renderRenameModal: true,
+      renameModalRef: { current: null },
+      isRenaming: false,
+      renameError: null,
+      renameOperationError: operationError,
+      bundleName: "Bundle",
+      onBundleNameChange: jest.fn(),
+      onConfirmRename: jest.fn(),
+      onCloseRename: jest.fn(),
+    });
+
+    const [nameField] = findElements(
+      view,
+      (element) => element.type === "s-text-field",
+    );
+    const [criticalBanner] = findElements(
+      view,
+      (element) =>
+        element.type === "s-banner" && element.props.tone === "critical",
+    );
+
+    expect(nameField.props.error).toBeUndefined();
+    expect(criticalBanner.props.heading).toBe(operationError);
   });
 
   it("keeps subscription validation on the affected Polaris controls without a detached summary", () => {
@@ -404,5 +445,16 @@ describe("Admin inline field validation", () => {
     );
     expect(startsAtField).toBeDefined();
     expect(startsAtField.props.error).toBe(startsAtError);
+  });
+
+  it("assigns an invalid attribution range to one actionable date field", () => {
+    expect(
+      getAttributionDateRangeFieldErrors({
+        from: "2026-09-12",
+        to: "2026-09-11",
+        today: "2026-09-12",
+        message: "Choose a valid date range.",
+      }),
+    ).toEqual({ from: undefined, to: "Choose a valid date range." });
   });
 });

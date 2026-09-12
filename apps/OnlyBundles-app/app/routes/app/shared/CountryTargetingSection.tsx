@@ -88,11 +88,6 @@ export function CountryTargetingSection({
           error={validationErrors?.["offerDelivery.countryCodes"]}
           onInput={(event) => setQuery(event.currentTarget.value)}
         />
-        {validationErrors?.["offerDelivery.countryCodes"] && (
-          <s-text id="configure-offerDelivery-countryCodes-error" tone="critical">
-            {validationErrors["offerDelivery.countryCodes"]}
-          </s-text>
-        )}
         {state.countryCodes.length > 0 ? (
           <s-stack direction="inline" gap="small">
             {state.countryCodes.map((countryCode) => {

@@ -21,6 +21,7 @@ type DashboardActionModalsProps = {
   renameModalRef: ModalRef;
   isRenaming: boolean;
   renameError: string | null;
+  renameOperationError: string | null;
   bundleName: string;
   onBundleNameChange: (value: string) => void;
   onConfirmRename: () => void;
@@ -43,6 +44,7 @@ export function DashboardActionModals({
   renameModalRef,
   isRenaming,
   renameError,
+  renameOperationError,
   bundleName,
   onBundleNameChange,
   onConfirmRename,
@@ -102,6 +104,13 @@ export function DashboardActionModals({
             {t("dashboard.renameModal.cancel")}
           </s-button>
           <s-stack direction="block" gap="base">
+            {renameOperationError ? (
+              <s-banner
+                tone="critical"
+                heading={renameOperationError}
+                dismissible={false}
+              />
+            ) : null}
             <s-text-field
               label={t("dashboard.renameModal.nameLabel")}
               value={bundleName}

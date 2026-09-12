@@ -97,6 +97,9 @@ export function DashboardPage({ banners }: DashboardPageProps) {
   const [bundleToRename, setBundleToRename] = useState<any | null>(null);
   const [newBundleName, setNewBundleName] = useState<string>("");
   const [renameError, setRenameError] = useState<string | null>(null);
+  const [renameOperationError, setRenameOperationError] = useState<
+    string | null
+  >(null);
   const [renamedBundleNames, setRenamedBundleNames] = useState<
     Record<string, string>
   >({});
@@ -192,14 +195,12 @@ export function DashboardPage({ banners }: DashboardPageProps) {
         setBundleToRename(null);
         setNewBundleName("");
         setRenameError(null);
+        setRenameOperationError(null);
       }
     } else if (data.error) {
       if (intent === "renameBundle") {
-        setRenameError(
-          typeof data.error === "string"
-            ? data.error
-            : t("dashboard.renameModal.errorFailed")
-        );
+        setRenameError(null);
+        setRenameOperationError(t("dashboard.renameModal.errorFailed"));
         fetcherIntentRef.current = null;
         return;
       }
@@ -268,6 +269,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     setBundleToRename(bundle);
     setNewBundleName(bundle.name || "");
     setRenameError(null);
+    setRenameOperationError(null);
   }, []);
 
   const handleCloseRename = useCallback(() => {
@@ -275,20 +277,24 @@ export function DashboardPage({ banners }: DashboardPageProps) {
     setBundleToRename(null);
     setNewBundleName("");
     setRenameError(null);
+    setRenameOperationError(null);
   }, []);
 
   const handleConfirmRename = useCallback(() => {
     if (!bundleToRename) return;
     const trimmed = newBundleName.trim();
     if (!trimmed) {
+      setRenameOperationError(null);
       setRenameError(t("dashboard.renameModal.errorEmpty"));
       return;
     }
     if (trimmed.length > 255) {
+      setRenameOperationError(null);
       setRenameError(t("dashboard.renameModal.errorTooLong"));
       return;
     }
     setRenameError(null);
+    setRenameOperationError(null);
     fetcherIntentRef.current = "renameBundle";
     const formData = new FormData();
     formData.append("intent", "renameBundle");
@@ -304,6 +310,7 @@ export function DashboardPage({ banners }: DashboardPageProps) {
       setBundleToRename(null);
       setNewBundleName("");
       setRenameError(null);
+      setRenameOperationError(null);
     };
     modal.addEventListener("hide", handler);
     modal.addEventListener("afterhide", handler);
@@ -529,10 +536,12 @@ export function DashboardPage({ banners }: DashboardPageProps) {
           fetcherIntentRef.current === "renameBundle"
         }
         renameError={renameError}
+        renameOperationError={renameOperationError}
         bundleName={newBundleName}
         onBundleNameChange={(value) => {
           setNewBundleName(value);
           if (renameError) setRenameError(null);
+          if (renameOperationError) setRenameOperationError(null);
         }}
         onConfirmRename={handleConfirmRename}
         onCloseRename={handleCloseRename}
