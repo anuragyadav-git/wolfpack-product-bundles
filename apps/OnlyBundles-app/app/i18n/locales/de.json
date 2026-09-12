@@ -712,7 +712,22 @@
       "tryAgain": "Erneut versuchen",
       "contactSupport": "Support kontaktieren",
       "cancel": "Abbrechen",
-      "back": "Zur vorherigen Seite"
+      "back": "Zur vorherigen Seite",
+      "viewPlans": "Tarife anzeigen",
+      "saveAsDraft": "Als Entwurf speichern",
+      "keepEditing": "Weiter bearbeiten"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Limit für öffentliche Bundles erreicht",
+      "publicLimitDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth für unbegrenzte öffentliche Bundles oder speichere dieses Bundle als Entwurf, um deine Änderungen zu behalten.",
+      "premiumTemplateHeading": "Vorlage des Growth-Tarifs",
+      "premiumTemplateDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth, um mit dieser Vorlage zu veröffentlichen, oder speichere als Entwurf, um deine Änderungen zu behalten.",
+      "advancedDesignHeading": "Growth-Designfunktionen",
+      "advancedDesignDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth, um mit benutzerdefiniertem Styling zu veröffentlichen, oder speichere als Entwurf.",
+      "stepsLimitHeading": "Schrittlimit erreicht",
+      "stepsLimitDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth für unbegrenzte Schritte oder speichere als Entwurf.",
+      "growthRequiredHeading": "Growth-Tarif erforderlich",
+      "growthRequiredDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth, um mit dieser Funktion zu veröffentlichen, oder speichere dieses Bundle als Entwurf."
     },
     "error": {
       "heading": "Abonnementproblem",
@@ -1226,6 +1241,7 @@
           "syncBundle": "Sync-Paket"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Upgraden Sie auf den Growth-Plan für mehr Vorlagen, die Ihnen helfen, Ihre Conversions zu steigern.",
           "customizeYourBundle": "Passen Sie Ihr Paket an",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Wählen Sie ein Design aus, das Ihren Bedürfnissen und Ihrer Marke entspricht",
           "customizeColorsAmpLanguage": "Farben & Sprache anpassen",

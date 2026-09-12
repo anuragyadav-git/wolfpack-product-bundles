@@ -27,6 +27,7 @@ describe("recovered admin surfaces contract", () => {
       "Typography",
       "Corners",
       "Images & GIFs",
+      "Tier Badge",
     ]);
     expect(DESIGN_CONFIGURATION[0]?.fields.map((field) => field.label)).toContain("Primary Color");
     expect(DESIGN_CONFIGURATION.find((tab) => tab.title === "Images & GIFs")?.fields).toEqual(

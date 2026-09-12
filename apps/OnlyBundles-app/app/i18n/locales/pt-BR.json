@@ -712,7 +712,22 @@
       "tryAgain": "Tentar novamente",
       "contactSupport": "Falar com o suporte",
       "cancel": "Cancelar",
-      "back": "Voltar à página anterior"
+      "back": "Voltar à página anterior",
+      "viewPlans": "Ver planos",
+      "saveAsDraft": "Salvar como rascunho",
+      "keepEditing": "Continuar editando"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Limite de pacotes públicos atingido",
+      "publicLimitDescription": "O plano Free inclui apenas 1 pacote publicado publicamente e modelos padrão. Faça upgrade para o Growth para pacotes públicos ilimitados ou salve este pacote como rascunho para manter suas alterações.",
+      "premiumTemplateHeading": "Modelo do plano Growth",
+      "premiumTemplateDescription": "O plano Free inclui apenas 1 pacote publicado publicamente e modelos padrão. Faça upgrade para o Growth para publicar com este modelo ou salve como rascunho para manter suas alterações.",
+      "advancedDesignHeading": "Recursos de design do Growth",
+      "advancedDesignDescription": "O plano Free inclui apenas 1 pacote publicado publicamente e modelos padrão. Faça upgrade para o Growth para publicar com estilos personalizados ou salve como rascunho.",
+      "stepsLimitHeading": "Limite de etapas atingido",
+      "stepsLimitDescription": "O plano Free inclui apenas 1 pacote publicado publicamente e modelos padrão. Faça upgrade para o Growth para etapas ilimitadas ou salve como rascunho.",
+      "growthRequiredHeading": "Plano Growth necessário",
+      "growthRequiredDescription": "O plano Free inclui apenas 1 pacote publicado publicamente e modelos padrão. Faça upgrade para o Growth para publicar ou salve este pacote como rascunho."
     },
     "error": {
       "heading": "Problema na assinatura",
@@ -1226,6 +1241,7 @@
           "syncBundle": "Sincronizar Pacote"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Faça upgrade para o plano Growth para obter mais modelos que ajudarão a aumentar as conversões.",
           "customizeYourBundle": "Personalizar seu pacote",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Escolha um design que se adapte às suas necessidades e se adapte à sua marca",
           "customizeColorsAmpLanguage": "Personalizar Cores & Idioma",

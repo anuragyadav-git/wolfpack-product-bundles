@@ -228,6 +228,42 @@ export const DESIGN_CONFIGURATION: SettingsTab[] = [
       { label: "Checkout GIF", value: "Default spinner", kind: "loadingSpinner", description: "Displayed during checkout loading unless a merchant GIF is configured." },
     ],
   },
+  {
+    title: "Tier Badge",
+    description: "Shape, visibility, and color styling for discount tier badges.",
+    fields: [
+      {
+        key: "stylePresets.tierBadge.shape",
+        label: "Shape",
+        value: "Pill",
+        kind: "select",
+        options: ["Pill", "Folded", "Banner Rounded"],
+        description: "Badge shape displayed on discounted bundle tiers",
+      },
+      {
+        key: "stylePresets.tierBadge.visibility",
+        label: "Visibility",
+        value: "Always",
+        kind: "select",
+        options: ["Always", "Selected tier only"],
+        description: "Display badge on all tiers or only when the tier is selected",
+      },
+      {
+        key: "stylePresets.tierBadge.textColor",
+        label: "Text Color",
+        value: "#ffffff",
+        kind: "color",
+        description: "Text color for the tier badge",
+      },
+      {
+        key: "stylePresets.tierBadge.backgroundColor",
+        label: "Background Color",
+        value: "#1f2937",
+        kind: "color",
+        description: "Background color for the tier badge",
+      },
+    ],
+  },
 ];
 
 export const EXPERT_COLOR_CONTROLS: Record<string, SettingsField[]> = {

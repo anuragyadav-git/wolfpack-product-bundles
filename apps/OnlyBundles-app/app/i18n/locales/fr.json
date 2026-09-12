@@ -712,7 +712,22 @@
       "tryAgain": "Réessayer",
       "contactSupport": "Contacter l'assistance",
       "cancel": "Annuler",
-      "back": "Retour à la page précédente"
+      "back": "Retour à la page précédente",
+      "viewPlans": "Voir les forfaits",
+      "saveAsDraft": "Enregistrer comme brouillon",
+      "keepEditing": "Continuer à modifier"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Limite de lots publics atteinte",
+      "publicLimitDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour des lots publics illimités, ou enregistrez ce lot comme brouillon pour conserver vos modifications.",
+      "premiumTemplateHeading": "Modèle du forfait Growth",
+      "premiumTemplateDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour publier avec ce modèle, ou enregistrez comme brouillon pour conserver vos modifications.",
+      "advancedDesignHeading": "Fonctionnalités de design Growth",
+      "advancedDesignDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour publier avec des styles personnalisés, ou enregistrez comme brouillon.",
+      "stepsLimitHeading": "Limite d'étapes atteinte",
+      "stepsLimitDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour des étapes illimitées, ou enregistrez comme brouillon.",
+      "growthRequiredHeading": "Forfait Growth requis",
+      "growthRequiredDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour publier avec cette fonctionnalité, ou enregistrez ce lot comme brouillon."
     },
     "error": {
       "heading": "Problème d'abonnement",
@@ -1226,6 +1241,7 @@
           "syncBundle": "Pack de synchronisation"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Passez au forfait Growth pour obtenir plus de modèles qui vous aideront à augmenter vos conversions.",
           "customizeYourBundle": "Personnaliser votre bundle",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Choisissez un design qui correspond à vos besoins et à votre marque",
           "customizeColorsAmpLanguage": "Personnaliser les couleurs & langue",

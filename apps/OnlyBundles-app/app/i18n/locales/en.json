@@ -712,7 +712,22 @@
       "tryAgain": "Try Again",
       "contactSupport": "Contact Support",
       "cancel": "Cancel",
-      "back": "Back to previous page"
+      "back": "Back to previous page",
+      "viewPlans": "View plans",
+      "saveAsDraft": "Save as draft",
+      "keepEditing": "Keep editing"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Public bundle limit reached",
+      "publicLimitDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth for unlimited public bundles, or save this bundle as a draft to keep your changes.",
+      "premiumTemplateHeading": "Growth plan template",
+      "premiumTemplateDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth to publish with this template, or save as a draft to keep your changes.",
+      "advancedDesignHeading": "Growth plan design features",
+      "advancedDesignDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth to publish with custom styling, or save as a draft.",
+      "stepsLimitHeading": "Step limit reached",
+      "stepsLimitDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth for unlimited steps, or save as a draft.",
+      "growthRequiredHeading": "Growth plan required",
+      "growthRequiredDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth to publish with this feature, or save this bundle as a draft."
     },
     "error": {
       "heading": "Subscription Issue",
@@ -1226,6 +1241,7 @@
           "syncBundle": "Sync bundle"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Upgrade to the Growth plan for more templates that will help in increasing conversions.",
           "customizeYourBundle": "Customize your bundle",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Choose a design that suits your needs and fits your brand",
           "customizeColorsAmpLanguage": "Customize Colors & Language",

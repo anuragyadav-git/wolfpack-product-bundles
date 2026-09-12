@@ -712,7 +712,22 @@
       "tryAgain": "再試行",
       "contactSupport": "サポートに連絡",
       "cancel": "キャンセル",
-      "back": "前のページに戻る"
+      "back": "前のページに戻る",
+      "viewPlans": "プランを確認",
+      "saveAsDraft": "下書きとして保存",
+      "keepEditing": "編集を続ける"
+    },
+    "entitlements": {
+      "publicLimitHeading": "公開バンドル数の上限に達しました",
+      "publicLimitDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。無制限に公開するにはGrowthプランにアップグレードするか、下書きとして保存して変更を保持してください。",
+      "premiumTemplateHeading": "Growthプランテンプレート",
+      "premiumTemplateDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。このテンプレートで公開するにはGrowthプランにアップグレードするか、下書きとして保存して変更を保持してください。",
+      "advancedDesignHeading": "Growthプランのデザイン機能",
+      "advancedDesignDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。カスタムスタイルで公開するにはGrowthプランにアップグレードするか、下書きとして保存してください。",
+      "stepsLimitHeading": "ステップ数の上限に達しました",
+      "stepsLimitDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。無制限のステップを利用するにはGrowthプランにアップグレードするか、下書きとして保存してください。",
+      "growthRequiredHeading": "Growthプランが必要です",
+      "growthRequiredDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。この機能を利用して公開するにはGrowthプランにアップグレードするか、このバンドルを下書きとして保存してください。"
     },
     "error": {
       "heading": "サブスクリプションの問題",
@@ -1226,6 +1241,7 @@
           "syncBundle": "バンドルを同期"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "コンバージョン率の向上に役立つ他のテンプレートを利用するには、Growthプランにアップグレードしてください。",
           "customizeYourBundle": "バンドルをカスタマイズ",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "あなたのニーズに合ったデザインを選択してください",
           "customizeColorsAmpLanguage": "色 & 言語をカスタマイズ",

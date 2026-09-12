@@ -712,7 +712,22 @@
       "tryAgain": "再试一次",
       "contactSupport": "联系客服支持",
       "cancel": "取消",
-      "back": "返回上一页"
+      "back": "返回上一页",
+      "viewPlans": "查看方案",
+      "saveAsDraft": "保存为草稿",
+      "keepEditing": "继续编辑"
+    },
+    "entitlements": {
+      "publicLimitHeading": "已达到公开组合上限",
+      "publicLimitDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案可获得无限公开组合，或将此组合保存为草稿以保留您的更改。",
+      "premiumTemplateHeading": "Growth 方案专属模板",
+      "premiumTemplateDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案以使用此模板发布，或保存为草稿以保留您的更改。",
+      "advancedDesignHeading": "Growth 方案高级设计功能",
+      "advancedDesignDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案以使用自定义样式发布，或保存为草稿。",
+      "stepsLimitHeading": "已达到步骤上限",
+      "stepsLimitDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案可获得无限步骤，或保存为草稿。",
+      "growthRequiredHeading": "需要 Growth 方案",
+      "growthRequiredDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案以使用此功能发布，或将此组合保存为草稿。"
     },
     "error": {
       "heading": "订阅问题",
@@ -1226,6 +1241,7 @@
           "syncBundle": "同步包"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "升级到 Growth 计划以获取更多有助于提高转化率的模板。",
           "customizeYourBundle": "自定义您的包",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "选择适合您需要并符合您品牌的设计",
           "customizeColorsAmpLanguage": "自定义颜色 & 语言",

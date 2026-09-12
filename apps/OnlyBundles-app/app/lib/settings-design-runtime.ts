@@ -46,6 +46,12 @@ const DEFAULT_STYLE_PRESETS = {
     slotIconUrl: "",
     slotIconFit: "badge",
   },
+  tierBadge: {
+    shape: "Pill",
+    visibility: "Always",
+    textColor: "#ffffff",
+    backgroundColor: "#1f2937",
+  },
 };
 
 const BRAND_COLOR_TARGETS: Record<string, string[]> = {
@@ -481,6 +487,10 @@ export function buildSettingsDesignRuntime(
   const productImageFit = normalizeImageFit(getField(fieldValues, "Image Fit", DEFAULT_STYLE_PRESETS.images.productImageFit));
   const slotIconUrl = getField(fieldValues, "stylePresets.images.slotIconUrl", DEFAULT_STYLE_PRESETS.images.slotIconUrl);
   const slotIconFit = normalizeSlotIconFit(getField(fieldValues, "stylePresets.images.slotIconFit", DEFAULT_STYLE_PRESETS.images.slotIconFit));
+  const tierBadgeShape = getField(fieldValues, "stylePresets.tierBadge.shape", DEFAULT_STYLE_PRESETS.tierBadge.shape);
+  const tierBadgeVisibility = getField(fieldValues, "stylePresets.tierBadge.visibility", DEFAULT_STYLE_PRESETS.tierBadge.visibility);
+  const tierBadgeTextColor = getField(fieldValues, "stylePresets.tierBadge.textColor", DEFAULT_STYLE_PRESETS.tierBadge.textColor);
+  const tierBadgeBackgroundColor = getField(fieldValues, "stylePresets.tierBadge.backgroundColor", DEFAULT_STYLE_PRESETS.tierBadge.backgroundColor);
   const loadingGifUrl = getField(fieldValues, "generalSettings.loadingGifUrl", "");
   const loadingBackgroundColor = getField(fieldValues, "generalSettings.loadingBgColor", "#ffffff");
   const buttonRadius = radiusForStyle(buttonRadiusStyle, buttonRadiusBase);
@@ -510,6 +520,10 @@ export function buildSettingsDesignRuntime(
   IMAGE_FIT_TARGETS.forEach((path) => setPath(designPatch, path, productImageFit));
   setPath(designPatch, "stylePresets.images.slotIconUrl", slotIconUrl);
   setPath(designPatch, "stylePresets.images.slotIconFit", slotIconFit);
+  setPath(designPatch, "stylePresets.tierBadge.shape", tierBadgeShape);
+  setPath(designPatch, "stylePresets.tierBadge.visibility", tierBadgeVisibility);
+  setPath(designPatch, "stylePresets.tierBadge.textColor", tierBadgeTextColor);
+  setPath(designPatch, "stylePresets.tierBadge.backgroundColor", tierBadgeBackgroundColor);
   setPath(designPatch, "mixAndMatchConfig.emptyStateCard.slotIconUrl", slotIconUrl);
   setPath(designPatch, "mixAndMatchConfig.emptyStateCard.slotIconFit", slotIconFit);
   setPath(designPatch, "generalSettings.loadingGifUrl", loadingGifUrl);
@@ -556,6 +570,12 @@ export function buildSettingsDesignRuntime(
       productImageFit,
       slotIconUrl,
       slotIconFit,
+    },
+    tierBadge: {
+      shape: tierBadgeShape,
+      visibility: tierBadgeVisibility,
+      textColor: tierBadgeTextColor,
+      backgroundColor: tierBadgeBackgroundColor,
     },
   };
   designPatch.quickSettings = {

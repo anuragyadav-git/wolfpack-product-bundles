@@ -712,7 +712,22 @@
       "tryAgain": "Intentar de nuevo",
       "contactSupport": "Contactar con soporte",
       "cancel": "Cancelar",
-      "back": "Volver a la página anterior"
+      "back": "Volver a la página anterior",
+      "viewPlans": "Ver planes",
+      "saveAsDraft": "Guardar como borrador",
+      "keepEditing": "Seguir editando"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Límite de paquetes públicos alcanzado",
+      "publicLimitDescription": "El plan Free solo incluye 1 paquete publicado públicamente y plantillas estándar. Pasa a Growth para paquetes públicos ilimitados, o guarda este paquete como borrador para conservar tus cambios.",
+      "premiumTemplateHeading": "Plantilla del plan Growth",
+      "premiumTemplateDescription": "El plan Free solo incluye 1 paquete publicado públicamente y plantillas estándar. Pasa a Growth para publicar con esta plantilla, o guárdala como borrador para conservar tus cambios.",
+      "advancedDesignHeading": "Funciones de diseño del plan Growth",
+      "advancedDesignDescription": "El plan Free solo incluye 1 paquete publicado públicamente y plantillas estándar. Pasa a Growth para publicar con estilos personalizados, o guárdala como borrador.",
+      "stepsLimitHeading": "Límite de pasos alcanzado",
+      "stepsLimitDescription": "El plan Free solo incluye 1 paquete publicado públicamente y plantillas estándar. Pasa a Growth para pasos ilimitados, o guárdalo como borrador.",
+      "growthRequiredHeading": "Plan Growth requerido",
+      "growthRequiredDescription": "El plan Free solo incluye 1 paquete publicado públicamente y plantillas estándar. Pasa a Growth para publicar con esta función, o guarda este paquete como borrador."
     },
     "error": {
       "heading": "Problema de suscripción",
@@ -1226,6 +1241,7 @@
           "syncBundle": "Sincronizar paquete"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Actualiza al plan Growth para obtener más plantillas que te ayudarán a aumentar las conversiones.",
           "customizeYourBundle": "Personaliza tu paquete",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Elige un diseño que se adapte a tus necesidades y a tu marca",
           "customizeColorsAmpLanguage": "Personalizar Colores & Idioma",
