@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "最新动态",
+    "unavailable": "最新动态和反馈暂时不可用。",
+    "loading": "正在加载功能请求",
+    "retry": "重试",
+    "retryHelp": "请重试，或在新标签页中打开反馈门户。",
+    "openPortal": "打开反馈门户",
+    "feedbackIntro": "提出改进建议、为创意投票并关注进展。请求和投票由店铺的所有成员共享。"
+  },
   "nav": {
+    "featureRequests": "功能请求",
     "dashboard": "控制面板",
     "designControlPanel": "设计控制面板",
     "settings": "设置",

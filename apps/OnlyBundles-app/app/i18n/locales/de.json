@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "Neuigkeiten",
+    "unavailable": "Neuigkeiten und Feedback sind vorübergehend nicht verfügbar.",
+    "loading": "Funktionswünsche werden geladen",
+    "retry": "Erneut versuchen",
+    "retryHelp": "Versuchen Sie es erneut oder öffnen Sie das Feedbackportal in einem neuen Tab.",
+    "openPortal": "Feedbackportal öffnen",
+    "feedbackIntro": "Schlagen Sie Verbesserungen vor, stimmen Sie für Ideen ab und verfolgen Sie deren Fortschritt. Anfragen und Stimmen werden von allen Mitgliedern Ihres Shops geteilt."
+  },
   "nav": {
+    "featureRequests": "Funktionswünsche",
     "dashboard": "Dashboard",
     "designControlPanel": "Design-Kontrollzentrum",
     "settings": "Einstellungen",

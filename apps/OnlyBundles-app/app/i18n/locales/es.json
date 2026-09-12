@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "Novedades",
+    "unavailable": "Las novedades y los comentarios no están disponibles temporalmente.",
+    "loading": "Cargando solicitudes de funciones",
+    "retry": "Volver a intentar",
+    "retryHelp": "Vuelve a intentarlo o abre el portal de comentarios en una nueva pestaña.",
+    "openPortal": "Abrir portal de comentarios",
+    "feedbackIntro": "Sugiere mejoras, vota por ideas y sigue su progreso. Las solicitudes y los votos se comparten entre todos los miembros de tu tienda."
+  },
   "nav": {
+    "featureRequests": "Solicitudes de funciones",
     "dashboard": "Panel",
     "designControlPanel": "Panel de control de diseño",
     "settings": "Configuración",

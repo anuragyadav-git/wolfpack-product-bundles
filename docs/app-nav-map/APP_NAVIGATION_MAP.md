@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-11
+**Last Updated:** 2026-09-12
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -72,6 +72,7 @@ Wolfpack Bundles SIT
 ├── Integrations        → /app/integrations
 ├── Analytics           → /app/attribution
 ├── Offer operations    → /app/offer-operations
+├── Feature requests    → /app/feature-requests   (Canny board)
 └── Billing             → /app/billing          (Subscription & Billing)
 ```
 
@@ -85,6 +86,17 @@ Same-screen submissions and revalidation do not start it.
 
 ## 2. Page-by-Page Map
 
+### Feature requests — `/app/feature-requests`
+
+Authenticated route with native Polaris page shell, shared back navigation,
+loading indicator, retryable errors, and the official Canny board embed. Stores
+can browse/search, submit, vote, and comment using one Shopify-store identity.
+The GET resource `/app/canny/session` authenticates with Shopify, reads canonical
+Shop GID/name/email, and returns a short-lived Canny SSO JWT with `no-store`.
+`basePath: null` keeps Canny from rewriting embedded Admin URLs. Hosted public
+Canny URLs remain the targets for sharing/email; no retired `/app/events` route
+is restored. See `internal docs/Operations/Canny.md` for setup and release gates.
+
 ### 2.1 Dashboard — `/app/dashboard`
 
 **Route file:** `app/routes/app/app.dashboard/route.tsx`
@@ -96,6 +108,7 @@ Dashboard
 ├── Subheader: "Access your bundles, customer support & more."
 │
 ├── [Button] "Create Bundle"  → opens Create Bundle Modal
+├── [Bell] "What’s new" → Canny changelog popup, immediately right of Create Bundle
 ├── Language selector → persists one shop-wide embedded Admin UI language for all staff accounts on change
 ├── Metrics: active bundle count
 ├── Storefront setup card → action-first core readiness and active-bundle summary

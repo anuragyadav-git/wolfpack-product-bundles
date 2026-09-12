@@ -5,7 +5,7 @@ title: EB Implementation Reference
 type: reference
 status: authoritative
 summary: Records directly verified reference-app contracts used for Wolfpack bundle implementation and parity decisions.
-last_audited: 2026-08-27
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -27,6 +27,20 @@ keywords:
 ---
 
 # EB Implementation Reference
+
+## Dashboard changelog reference (Agent, 2026-09-12)
+
+Direct authenticated Chrome inspection found a **View changelog** bell directly
+to the right of **Create Bundle**. Clicking it opens a centered **What's new**
+modal with date/version, one release at a time, newer/previous controls, unread
+indicator, Close, View all updates, and Cool dismissal. No setup/help links are
+present in this popup. This differs from the approved Only Bundles integration,
+which uses Canny's official bottom/right popup rather than copying the custom
+modal. The reference establishes entry-point placement, not Canny SDK ownership.
+
+Easy Bundles was installed on Agent with user authorization. Shopify explicitly
+marked its onboarding subscription as a non-billed test charge. No paid live
+subscription was approved.
 
 **This is the grounded truth for all EB porting questions.**
 

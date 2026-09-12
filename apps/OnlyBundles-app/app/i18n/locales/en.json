@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "What’s new",
+    "unavailable": "Updates and feedback are temporarily unavailable.",
+    "loading": "Loading feature requests",
+    "retry": "Try again",
+    "retryHelp": "Try again, or open the feedback portal in a new tab.",
+    "openPortal": "Open feedback portal",
+    "feedbackIntro": "Suggest improvements, vote on ideas, and follow their progress. Requests and votes are shared by everyone on your store."
+  },
   "nav": {
+    "featureRequests": "Feature requests",
     "dashboard": "Dashboard",
     "designControlPanel": "Design Control Panel",
     "settings": "Settings",

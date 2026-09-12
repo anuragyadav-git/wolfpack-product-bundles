@@ -1,3 +1,20 @@
+---
+schema_version: 1
+id: repository-agent-instructions
+title: Repository Agent Instructions
+type: instructions
+status: authoritative
+summary: Engineering constraints, verification requirements, and authorized release workflows for Only Bundles.
+last_audited: 2026-09-12
+owners: [engineering]
+domains: [development, operations]
+systems: [only-bundles, shopify, canny]
+source_paths: [AGENTS.md]
+related_docs: [internal docs/Operations/Canny.md]
+tags: [agent-instructions]
+keywords: [development, changelog, publication]
+---
+
 # Shopify-Native First — Do Not Reinvent the Wheel
 
 Before planning or implementing anything, check whether Shopify already provides the capability through its canonical APIs, Functions, extensions, Admin components, platform configuration, or documented patterns. Use the Shopify-provided solution when it exists. Do not recreate Shopify behavior with custom models, secrets, endpoints, abstractions, fallback chains, or duplicated business logic merely because a custom implementation is possible.
@@ -40,6 +57,33 @@ internal class names, or the mere presence or absence of implementation text.
 ---
 
 ## Architecture and Gotcha Documentation
+
+### Canny Changelog Publication Authorization
+
+The user authorizes agents to draft and publish Only Bundles changelog entries
+through the logged-in Canny dashboard without asking for repeat publication
+approval. Canny login and MFA are always handled by the user: if login is
+required, stop that browser workflow and prompt the user to log in. Never
+retrieve credentials or attempt login on their behalf.
+
+- Evaluate every change for merchant impact. Publish meaningful new features,
+  improvements, fixes, and breaking changes that merchants need to know about.
+  Do not publish internal refactors, test-only changes, or unsupported claims.
+- Before writing, check existing drafts and published entries for duplicates.
+  Preserve unrelated drafts. Use Canny's New, Improved, or Fixed classification.
+- Drafts may be prepared during development. Publish only after the matching
+  production release is live and its merchant behavior has been verified.
+  A local/SIT test or merged commit alone is not release proof.
+- For action-required changes, state affected merchants, exact required steps,
+  any verified deadline, and the consequence of not acting. Reference the
+  existing bundle Sync prompt where applicable; do not invent deadlines.
+- Verify the published entry URL and its appearance through the Dashboard bell.
+  Keep Canny as the source of truth; do not add publishing APIs or a parallel
+  local release-note database.
+- Development/SIT fixtures and test entries belong only in Only Bundles QA.
+  Never put test feedback or simulated releases in the production workspace.
+- This authorization does not override manual Shopify deployment gates or
+  authorize paid plan upgrades. See `internal docs/Operations/Canny.md`.
 
 Do not create issue files or run the feature pipeline by default. They are overhead for normal repo work.
 

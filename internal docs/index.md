@@ -5,7 +5,7 @@ title: Only Bundles Internal Docs
 type: index
 status: authoritative
 summary: Index of durable Only Bundles architecture, integration, feature, and operations documentation.
-last_audited: 2026-09-09
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -47,6 +47,8 @@ Full evidence record: `docs/competitor-analysis/16-eb-full-data-flow-investigati
 ---
 
 ## Vault Structure
+
+- [[Operations/Canny]] — Dashboard changelog, store-level feature requests, QA/production configuration, and release publication authorization
 
 - [[Audit Report]] — What was stale or incorrect in the original `docs/` folder
 - [[Architecture/System Overview]] — App stack, services, deployment

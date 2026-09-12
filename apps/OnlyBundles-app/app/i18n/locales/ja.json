@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "新着情報",
+    "unavailable": "新着情報とフィードバックは一時的に利用できません。",
+    "loading": "機能リクエストを読み込み中",
+    "retry": "再試行",
+    "retryHelp": "再試行するか、新しいタブでフィードバックポータルを開いてください。",
+    "openPortal": "フィードバックポータルを開く",
+    "feedbackIntro": "改善を提案し、アイデアに投票して、進捗を確認できます。リクエストと投票はストアの全員で共有されます。"
+  },
   "nav": {
+    "featureRequests": "機能リクエスト",
     "dashboard": "ダッシュボード",
     "designControlPanel": "デザインコントロールパネル",
     "settings": "設定",
