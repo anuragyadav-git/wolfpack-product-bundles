@@ -1,0 +1,1294 @@
+{
+  "schema_version": 1,
+  "job": {
+    "id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+    "title": "Storefront variant selectors across product cards and modal",
+    "status": "qa-running",
+    "stage": "CHROME_QA_EXECUTION",
+    "revision": 4,
+    "created_at": "2026-09-11T12:25:40Z",
+    "updated_at": "2026-09-12T20:59:56Z",
+    "owner": "engineering",
+    "product": "Only Bundles storefront widgets",
+    "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "bc954fc5c022e81c75f0b6835e8e0d7cac7412b8",
+    "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
+    "resume_stage": null
+  },
+  "scope": {
+    "product_family": "FPB and PPB",
+    "template": "FPB Standard, Classic, Compact, Horizontal; PPB Grid, List, Horizontal Slots, Vertical Slots",
+    "component": "Variant selectors in product cards, FPB product-details modal, and PPB modal picker cards",
+    "implementation_mode": "design-director",
+    "design_goal": "Create template-fit variant selectors that remain legible, uncongested, and fully contained across cards and modal surfaces at desktop and mobile widths.",
+    "user_problem": "Current dropdown, pill, color-swatch, and image-swatch presentations do not reliably fit the differently shaped product cards and modal surfaces without clipping, overflow, or congestion.",
+    "primary_user_action": "Review available product variants and select one without losing access to the card image, title, price, inventory feedback, quantity controls, or primary action.",
+    "out_of_scope": [
+      "Changing Shopify variant, availability, pricing, or cart semantics",
+      "Inferring colors or images when Shopify ProductOptionValue.swatch data is missing",
+      "Redesigning product cards, bundle summaries, navigation, discounts, or checkout beyond selector accommodation",
+      "Changing merchant storefront theme CSS"
+    ],
+    "merchant_configurability": [
+      "FPB and PPB category variantSelectorMode: dropdown, pill, color_swatch, image_swatch",
+      "FPB and PPB color-swatch tooltip enablement",
+      "Existing FPB bundle variant-selector enablement and primary option selection",
+      "Existing design-system colors, radii, and typography tokens"
+    ],
+    "business_logic_constraints": [
+      "Shopify Storefront API ProductOptionValue.swatch remains the only color/image swatch source",
+      "Variant changes must continue updating active variant, image, price, availability, and inventory context through existing delegated handlers",
+      "Add and quantity actions remain the only selection/cart mutations",
+      "Unavailable variants remain disabled and labeled",
+      "Cards in a row remain equal height and cannot grow across selection, hover, or focus states",
+      "FPB product details and PPB picker preserve existing modal ownership, focus restoration, and scroll locking"
+    ]
+  },
+  "viewports": {
+    "reference": [],
+    "required": [
+      "desktop >=1280x800",
+      "mobile actual Chrome window 390x844"
+    ],
+    "edge_cases": [
+      "long option labels",
+      "many option values",
+      "multiple option dimensions",
+      "unavailable values",
+      "missing Shopify swatch media",
+      "selected and unselected cards",
+      "maximum quantity and quantity controls",
+      "long product titles and market-formatted prices"
+    ],
+    "browser_zoom": 100,
+    "device_pixel_ratio_policy": "record-actual",
+    "locale": "en",
+    "currency": "USD market context for baseline; formatting must remain currency-agnostic",
+    "color_scheme": "merchant configured light baseline",
+    "reduced_motion": false
+  },
+  "references": {
+    "current": [
+      {
+        "path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-standard-card__single-variant__1280x800__r1.png"
+      },
+      {
+        "path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-product-modal__single-variant__1280x800__r1.png"
+      },
+      {
+        "path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__ppb-grid-card__single-variant__1280x800__r1.png"
+      }
+    ],
+    "target": [],
+    "context": [],
+    "approved": [
+      {
+        "path": "direction-comparison.md",
+        "role": "user-approved Direction A design contract"
+      }
+    ],
+    "implementation": [],
+    "provenance": [
+      "Current screenshots are first-party Agent-store SIT evidence captured through direct Chrome DevTools.",
+      "The target is a user-approved textual direction because no target screenshot was supplied."
+    ],
+    "permissions_or_usage_notes": [
+      "Current PNGs are internal QA artifacts and must not be committed.",
+      "Direction A is approved for revision 1."
+    ]
+  },
+  "decisions": {
+    "locked": [
+      "No clipping, overflow, congestion, or regression to adjacent product-card and modal controls",
+      "Both desktop and actual 390x844 mobile Chrome windows require direct QA",
+      "All four FPB and all four PPB templates are in the non-regression matrix",
+      "Product-card and modal selector surfaces are both in scope",
+      "Shopify swatch data remains authoritative and missing swatches use the existing neutral labeled presentation",
+      "FPB and PPB use the same canonical category selector modes; two-dimensional cards expose one visual dimension and compact remaining dimensions as labeled native selects",
+      "Configured variant selectors precede price and Add or quantity controls in matching DOM and visual order; mobile option groups share one inline origin"
+    ],
+    "assumptions": [
+      "The existing StepCategory fields are the canonical persistence contract for both bundle families"
+    ],
+    "rejected": [],
+    "open": [],
+    "recommendation_delegation": {
+      "status": "granted",
+      "scope": [
+        "Selector-only visual density, spacing, intrinsic wrapping, and target geometry within approved Direction A",
+        "Template-specific selector presentation refinements that preserve the approved anatomy, behavior, accessibility, data semantics, and acceptance criteria"
+      ],
+      "exclusions": [
+        "business-behavior",
+        "accessibility",
+        "data-semantics",
+        "approval-scope"
+      ],
+      "approved_by": "user",
+      "approved_at": "2026-09-11T13:57:54Z",
+      "expires_at_stage": "FINAL_APPROVAL"
+    }
+  },
+  "states": {
+    "required": [
+      "VS-01 single variant",
+      "VS-02 dropdown default",
+      "VS-03 pill default",
+      "VS-04 mapped color swatch",
+      "VS-05 missing color swatch",
+      "VS-06 mapped image swatch",
+      "VS-07 missing image swatch",
+      "VS-08 selected",
+      "VS-09 pressed",
+      "VS-10 focus visible",
+      "VS-11 unavailable",
+      "VS-12 all unavailable",
+      "VS-13 long labels",
+      "VS-14 many values",
+      "VS-15 multiple dimensions",
+      "VS-16 adjacent controls",
+      "VS-17 FPB modal open",
+      "VS-18 PPB picker open",
+      "VS-19 FPB mobile drawer",
+      "VS-20 high zoom",
+      "VS-21 reduced motion",
+      "VS-22 hydration failure"
+    ],
+    "optional": [],
+    "not_applicable": [
+      "selector-owned loading",
+      "selector-owned error",
+      "empty product collection",
+      "summary progress",
+      "step progress",
+      "modal image carousel"
+    ],
+    "coverage_status": "complete"
+  },
+  "responsive": {
+    "contract_status": "complete",
+    "breakpoints": [
+      "FPB container 799/800/801",
+      "PPB viewport 767/768/769",
+      "PPB Grid viewport 479/480/481",
+      "primary 390x844",
+      "desktop 1280x800"
+    ],
+    "transformations": [
+      "intrinsic columns reduce with available container width",
+      "long values receive wider or full rows",
+      "modal columns collapse through existing owner",
+      "existing FPB drawer policy remains mutually exclusive with inline exposure",
+      "sticky action ownership remains unchanged"
+    ]
+  },
+  "accessibility": {
+    "requirements": [
+      "native labeled select or named radio group",
+      "44px targets",
+      "keyboard completion",
+      "visible unclipped focus",
+      "color-independent selected and unavailable state",
+      "persistent selected labels",
+      "unique instance-scoped IDs",
+      "modal and drawer focus restoration",
+      "200 percent zoom",
+      "reduced motion"
+    ],
+    "known_risks": [
+      "FPB overflow presentation and radio semantics",
+      "PPB tooltip edge positioning",
+      "focus loss during rerender",
+      "duplicate instance ID collisions",
+      "missing live multi-variant evidence"
+    ],
+    "validation_status": "complete"
+  },
+  "handoff": {
+    "status": "approved",
+    "package_path": "handoff/storefront-variant-selectors-r1.zip",
+    "implementation_owner": "Codex",
+    "implementation_branch": "feature/26.05-UI-changes",
+    "implementation_commit": ""
+  },
+  "prototype": {
+    "status": "not-applicable",
+    "reason": "An isolated prototype would duplicate the existing FPB and PPB renderers and cannot reproduce their template-specific card, modal, sticky-footer, or Shopify-hydrated constraints. The approved direction must be iterated in the canonical production owners with live Chrome evidence."
+  },
+  "qa": {
+    "chrome_mcp_required": true,
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "preflight_status": "passed-with-inline-evidence",
+    "preflight_result_path": "chrome-preflight-result.yaml",
+    "baseline_status": "complete",
+    "baseline_paths": [
+      "implementation-handoff.md"
+    ],
+    "summary_path": "qa/browser-artifact-summary.json",
+    "execution_status": "passed-fpb-and-ppb-selector-slices",
+    "required_viewports": [
+      "desktop-1280x800",
+      "mobile-390x844"
+    ],
+    "required_states": [
+      "FPB Standard mixed no-variant and two-dimensional selector row",
+      "FPB Classic mixed no-variant and two-dimensional selector row",
+      "FPB Compact mixed no-variant and two-dimensional selector row",
+      "FPB Horizontal mixed no-variant and two-dimensional selector row",
+      "FPB exact variant price and image update",
+      "PPB Product Grid mixed no-variant and two-dimensional selector row",
+      "PPB Product List mixed no-variant and two-dimensional selector row",
+      "PPB Horizontal Slots modal mixed no-variant and two-dimensional selector row",
+      "PPB Vertical Slots modal mixed no-variant and two-dimensional selector row",
+      "PPB sequential Size and Color exact variant update"
+    ],
+    "console_status": "passed",
+    "network_status": "passed",
+    "accessibility_status": "passed-for-exercised-controls",
+    "lighthouse_status": "not-started",
+    "performance_status": "not-started",
+    "visual_diff_status": "passed-inline-fpb-and-ppb-selector-slices",
+    "non_regression_status": "passed-fpb-and-ppb-mixed-card-matrix",
+    "retry_history": [
+      {
+        "attempt": 1,
+        "at": "2026-09-11T17:50:00Z",
+        "classification": "infrastructure",
+        "result": "blocked",
+        "evidence": "Fresh Agent-store preview page 130 returned HTTP 200, but all four required Shopify dev-extension CDN assets returned 404 responses blocked by ORB."
+      },
+      {
+        "attempt": 2,
+        "at": "2026-09-11T19:09:24Z",
+        "classification": "recovered",
+        "result": "passed",
+        "evidence": "Fresh signed Agent-store FPB previews serve widget 22.0.0 and the latest generated responsive stylesheet; product hydration, screenshots, geometry reads, resize, network inspection, and accessibility snapshots are available."
+      },
+      {
+        "attempt": 3,
+        "at": "2026-09-11T19:37:50Z",
+        "classification": "host-capability",
+        "result": "blocked-final-evidence",
+        "evidence": "All four FPB templates pass desktop and the smallest achievable real-window widths with equal cards and zero overflow, but Chrome clamps a 390x844 request to 524x844 and rejects PNG writes to the approved design-job directory."
+      },
+      {
+        "attempt": 4,
+        "at": "2026-09-11T20:43:08Z",
+        "classification": "recovered",
+        "result": "passed-fpb-ordering-slice",
+        "evidence": "User-resized real Chrome windows exposed 390px mobile previews. Standard, Classic, Compact, and Horizontal all kept Size and Color at one inline origin, placed selectors before price and action, retained equal card heights, and reported zero card or document overflow."
+      },
+      {
+        "attempt": 5,
+        "at": "2026-09-11T22:18:49Z",
+        "classification": "recovered-with-host-gate",
+        "result": "passed-ppb-selector-slice",
+        "evidence": "Served widget 22.1.0 passed live sequential Size then Color selection and all four PPB templates at desktop and the narrowest genuine 500x844 Chrome window. Cards, modal dialogs, and the document reported zero overflow; the exact 390px PPB capture remains constrained by the browser host."
+      }
+    ],
+    "artifacts_path": "qa",
+    "blockers": []
+  },
+  "approvals": {
+    "design": {
+      "status": "approved",
+      "approver": "user",
+      "at": "2026-09-11T13:23:17Z",
+      "revision": 1
+    },
+    "handoff": {
+      "status": "approved",
+      "approver": "user",
+      "at": "2026-09-11T13:57:54Z",
+      "revision": 1
+    },
+    "implementation": {
+      "status": "approved",
+      "approver": "user",
+      "at": "2026-09-11T13:57:54Z",
+      "revision": 1
+    },
+    "final": {
+      "status": "not-started",
+      "approver": "",
+      "at": "",
+      "revision": null
+    }
+  },
+  "artifacts": {
+    "immutable_after_approval": true,
+    "current": {
+      "acceptance-criteria.md": {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 4,
+        "sha256": "8695a3ea492034445299613ca74d317e1a667482fe72cb60e55f0b6ced6f3ba1",
+        "approved_by": "user",
+        "approved_at": "2026-09-12T20:59:56Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "accessibility-checklist.md": {
+        "path": "accessibility-checklist.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "34cacc0a3187387190338a0fba05a7de54e67d06606d84dc5cba9a5fb60c8411",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "approval-record.yaml": {
+        "path": "approval-record.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "d24d5c9afe61497f1d89d3a20aaaf93fe6aae5e81f4ff62361526944ae0fd05f",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "browser-test-plan.yaml": {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "fc7717ea4bd4226307d861652de792249c9fd36bc312cfd06415f52085fa0abb",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T16:59:03Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "browser-test-report.md": {
+        "path": "browser-test-report.md",
+        "status": "complete",
+        "revision": 4,
+        "sha256": "27b4f3a3368bd6120bc69db1cfa114b18a4e59b1bdc81bb0a5b4f6534e581530",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "chrome-preflight-result.yaml": {
+        "path": "chrome-preflight-result.yaml",
+        "status": "complete",
+        "revision": 4,
+        "sha256": "868d941b1d9f652dd7c9e98bc14f9e612ff5717294e6a5a649807bf03c70290d",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "qa/preflight.json": {
+        "path": "qa/preflight.json",
+        "status": "complete",
+        "revision": 4,
+        "sha256": "a2a612f1d9b212d91e6ee2346ad6342289cb7b19aa72ee8b91261818542ea95d",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "codex-task.md": {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "a468f73e461bb5c2569e4d5b8cb57d6b45b5a7d4d7cba9566eb022ef4e73ebbe",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T16:59:03Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "component-anatomy.md": {
+        "path": "component-anatomy.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "daf72a220e10f84e5eff2eb508d3a22c64330a3b877c816d1dea377af204b062",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "component-brief.md": {
+        "path": "component-brief.md",
+        "status": "complete",
+        "revision": 4,
+        "sha256": "02213c56a18df28a05a8277977b8eed4b6081ab78d50d58e49db64ee32d57d76",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "content-stress-cases.yaml": {
+        "path": "content-stress-cases.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "37fe0558f9d18799b45d67662e1d3c7a35c8e6373ca2d4bd5623a3f25c14ecae",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "design-tokens.json": {
+        "path": "design-tokens.json",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "3eabc6a92696353a0f70f8f91c56f0058821e80b2d835bba11a5d13ec7a61984",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "direction-comparison.md": {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 4,
+        "sha256": "77fae20bb12955e4316a9256bea6b215cb624110145471014b14afd11613c60c",
+        "approved_by": "user",
+        "approved_at": "2026-09-12T20:59:56Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "implementation-handoff.md": {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 4,
+        "sha256": "a8763f82f8e691856710d8dceac1c9b9c7712858707f15575b854ed83dd8370c",
+        "approved_by": "user",
+        "approved_at": "2026-09-12T20:59:56Z",
+        "evidence": [
+          "approval-record.yaml"
+        ]
+      },
+      "interaction-contract.md": {
+        "path": "interaction-contract.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "d406db165caa07bf59c11d15c79146e290fcae89f6e1cbef82853b653355374f",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "locked-decisions.yaml": {
+        "path": "locked-decisions.yaml",
+        "status": "complete",
+        "revision": 4,
+        "sha256": "a2b3ad3fd8fc310ee3ed81f1aa779b742990a457e37c25143dad97620f0fce02",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "remediation-list.md": {
+        "path": "remediation-list.md",
+        "status": "complete",
+        "revision": 4,
+        "sha256": "1c6598e1436485f6d0f13c12cfbaad0163e598172660e114d1e7bdcf2dfd3b40",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "responsive-contract.md": {
+        "path": "responsive-contract.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "76772b7b4e6eedfe87c16033076ea0a0a9b1ce262c47c21942adca55398ade8c",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "screenshot-inventory.yaml": {
+        "path": "screenshot-inventory.yaml",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "9205a46078145238ea1540ab7ab0eec45e6db16a32aa6e03a6422fb4faf4192b",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "state-matrix.md": {
+        "path": "state-matrix.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "de6ce20461de7b968f9ca4fd610f6ce1e78878108a8448020107ab5bd7cb6f06",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-audit.md": {
+        "path": "visual-audit.md",
+        "status": "complete",
+        "revision": 2,
+        "sha256": "54ca7842857272cd923a680c5f34d906f4636720260643db3692a492c1f16cf6",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      },
+      "visual-qa-report.md": {
+        "path": "visual-qa-report.md",
+        "status": "complete",
+        "revision": 4,
+        "sha256": "e6e5a4256532b73209bf7ef505bbd75bc12e6bb512dbb305d1cd7430c5c2ac96",
+        "approved_by": "",
+        "approved_at": "",
+        "evidence": []
+      }
+    },
+    "superseded": [
+      {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "08e1ca549d0d2c0e89397d669c45ce0dc0039b13e66e11a5f446a0d1e81c2ebf",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T13:58:30Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-11T16:59:03Z",
+        "superseded_by": "user",
+        "superseded_reason": "Revision 2 adds adaptive native-select fallback for non-swatch dimensions"
+      },
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "e39a50580d78e9ca9506ee1a591c6f07fefedc713916ba10b20b5094cfa02cd2",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T13:58:30Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-11T16:59:03Z",
+        "superseded_by": "user",
+        "superseded_reason": "Revision 2 adds exact Size by Color hybrid-selector assertions"
+      },
+      {
+        "path": "codex-task.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "3ea8b233f5e8461c46bac8a43dcad1c5f75ee2c14fa01884940db4ca5a326572",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T13:58:30Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-11T16:59:03Z",
+        "superseded_by": "user",
+        "superseded_reason": "Revision 2 defines compact hybrid selector implementation"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "4cfa98098598111daf38ae63f463ddc6599ea95c9df136e6a37913e9a80bc67e",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T13:58:30Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-11T16:59:03Z",
+        "superseded_by": "user",
+        "superseded_reason": "Revision 2 hands off adaptive PPB swatch presentation"
+      },
+      {
+        "path": "acceptance-criteria.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "1ea670c9180a96452acc047a16bc174b4b1fe5cfdd6807eef6beaaae6a190ebd",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T16:59:03Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-12T20:59:56Z",
+        "superseded_by": "user",
+        "superseded_reason": "User approved all Direction A revisions and authorized end-to-end implementation"
+      },
+      {
+        "path": "direction-comparison.md",
+        "status": "approved",
+        "revision": 1,
+        "sha256": "f6b0235bca9f70d516d4655620b08067f07ab59f46676a330a8ed7c280a6c010",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T13:24:04Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-12T20:59:56Z",
+        "superseded_by": "user",
+        "superseded_reason": "User approved all Direction A revisions and authorized end-to-end implementation"
+      },
+      {
+        "path": "implementation-handoff.md",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "fe40af91cebb22696e0667acd7c1e5f15b641a66bd98fb67ff8852d29a7d1b3c",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T16:59:03Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-12T20:59:56Z",
+        "superseded_by": "user",
+        "superseded_reason": "User approved all Direction A revisions and authorized end-to-end implementation"
+      }
+    ]
+  },
+  "history": [
+    {
+      "sequence": 1,
+      "at": "2026-09-11T12:25:40Z",
+      "from": null,
+      "to": "DISCOVERY",
+      "revision": 1,
+      "reason": "Design job created",
+      "evidence": []
+    },
+    {
+      "sequence": 2,
+      "at": "2026-09-11T12:33:04Z",
+      "from": "DISCOVERY",
+      "to": "SCOPE",
+      "revision": 1,
+      "reason": "Problem, primary user action, constraints, and initial repository ownership are recorded.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 3,
+      "at": "2026-09-11T13:04:06Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 1,
+      "reason": "Scope is explicit: FPB presentation-only within existing button/dropdown capability; PPB retains four merchant-selectable modes.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 4,
+      "at": "2026-09-11T13:18:43Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 1,
+      "reason": "Inventoried every current Agent-store capture with stable IDs, provenance, actual viewport dimensions, limitations, and counterpart mapping.",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 5,
+      "at": "2026-09-11T13:19:13Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 1,
+      "reason": "Validated the current evidence as sufficient for structural card and modal analysis while explicitly blocking selector geometry and final QA claims until multi-variant fixtures and a true 390px viewport are available.",
+      "evidence": [
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 6,
+      "at": "2026-09-11T13:20:57Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 1,
+      "reason": "Completed a confidence-labeled audit that separates observed card and modal structure from selector recommendations, and records data, responsive, accessibility, ownership, and evidence gaps.",
+      "evidence": [
+        "visual-audit.md",
+        "screenshot-inventory.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 7,
+      "at": "2026-09-11T13:21:47Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 1,
+      "reason": "Prepared three behavior-equivalent selector directions and recommended the adaptive intrinsic matrix as the only option that avoids clipping, horizontal overflow, runtime sizing, and hidden values.",
+      "evidence": [
+        "direction-comparison.md",
+        "visual-audit.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 8,
+      "at": "2026-09-11T13:24:04Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 1,
+      "reason": "The user explicitly approved Direction A, adaptive intrinsic matrix, and the decision, rationale, rejections, and evidence are recorded.",
+      "evidence": [
+        "direction-comparison.md",
+        "approval-record.yaml",
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 9,
+      "at": "2026-09-11T13:25:43Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 1,
+      "reason": "Mapped every visible and interactive selector, card, modal, feedback, scroll, sticky, and responsive region to its existing canonical owner and identified conflicting style ownership without adding a new renderer.",
+      "evidence": [
+        "component-anatomy.md",
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 10,
+      "at": "2026-09-11T13:27:05Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 1,
+      "reason": "Defined all applicable selector, adjacency, modal, accessibility, stress, and fail-closed states with explicit behavior assertions and marked unrelated catalog states not applicable.",
+      "evidence": [
+        "state-matrix.md",
+        "component-anatomy.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 11,
+      "at": "2026-09-11T13:28:38Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 1,
+      "reason": "Specified content-driven transformations, existing breakpoint boundaries, modal and drawer replacements, sticky safe areas, target sizes, overflow policy, high zoom, and exact viewport evidence requirements for every selector region.",
+      "evidence": [
+        "responsive-contract.md",
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 12,
+      "at": "2026-09-11T13:30:06Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 1,
+      "reason": "Defined native control semantics, keyboard and pointer paths, focus and announcement behavior, modal and drawer ownership, reduced motion, business invariants, and a complete evidence-pending accessibility checklist.",
+      "evidence": [
+        "interaction-contract.md",
+        "accessibility-checklist.md",
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 13,
+      "at": "2026-09-11T13:34:20Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 1,
+      "reason": "Classified repository-existing, merchant-owned, Shopify-owned, user-approved, and recommended selector tokens with explicit geometry and zero-layout-shift contracts, and populated required stress fixtures.",
+      "evidence": [
+        "design-tokens.json",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 14,
+      "at": "2026-09-11T13:34:48Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 1,
+      "reason": "Marked an isolated prototype not applicable because it would duplicate production renderers and cannot reproduce live template, modal, sticky-footer, and Shopify hydration constraints; iteration belongs in canonical owners.",
+      "evidence": [
+        "component-anatomy.md",
+        "responsive-contract.md",
+        "content-stress-cases.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 15,
+      "at": "2026-09-11T13:44:29Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 1,
+      "reason": "Completed the bounded implementation handoff, Codex task, independently testable acceptance criteria, and a direct Chrome desktop/mobile matrix for all eight storefront templates.",
+      "evidence": [
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 16,
+      "at": "2026-09-11T13:59:01Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 1,
+      "reason": "The user approved revision 1, authorized implementation, and delegated further selector-only visual refinements within Direction A; the validated handoff package is available.",
+      "evidence": [
+        "approval-record.yaml",
+        "handoff/storefront-variant-selectors-r1.zip"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 17,
+      "at": "2026-09-11T16:28:36Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 1,
+      "reason": "Direction A implementation is built and live browser verification has begun.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": [
+        "qa/preflight.json"
+      ]
+    },
+    {
+      "sequence": 18,
+      "at": "2026-09-11T16:28:36Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 1,
+      "reason": "Mandatory Chrome QA preflight cannot pass because the host enforces a viewport wider than 390px and screenshot file writes are denied.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 19,
+      "at": "2026-09-11T16:48:23Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 1,
+      "reason": "Chrome DevTools connectivity and default-profile authentication are available again; resume preflight to record the newly observed PPB two-dimensional selector issue.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 20,
+      "at": "2026-09-11T16:48:24Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "User-authorized bounded revision: reduce two-dimensional PPB selector height while preserving approved Direction A anatomy, behavior, accessibility, and each template structure.",
+      "evidence": [],
+      "affected_artifacts": [
+        "design-tokens.json",
+        "content-stress-cases.yaml",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml",
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "remediation-list.md"
+      ]
+    },
+    {
+      "sequence": 21,
+      "at": "2026-09-11T16:59:03Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Revision 2 adds adaptive native-select fallback for non-swatch dimensions",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "acceptance-criteria.md"
+      ]
+    },
+    {
+      "sequence": 22,
+      "at": "2026-09-11T16:59:03Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Revision 2 adds exact Size by Color hybrid-selector assertions",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 23,
+      "at": "2026-09-11T16:59:03Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Revision 2 defines compact hybrid selector implementation",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "codex-task.md"
+      ]
+    },
+    {
+      "sequence": 24,
+      "at": "2026-09-11T16:59:03Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 2,
+      "reason": "Revision 2 hands off adaptive PPB swatch presentation",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 25,
+      "at": "2026-09-11T16:59:21Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 2,
+      "reason": "Revision 2 reuses the approved Direction A anatomy; no separate prototype is required",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 26,
+      "at": "2026-09-11T16:59:21Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 2,
+      "reason": "Revision 2 tokens, stress fixture, acceptance criteria, and task packet are assembled",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 27,
+      "at": "2026-09-11T17:00:17Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 2,
+      "reason": "Revision 2 implementation packet is ready for validation",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 28,
+      "at": "2026-09-11T17:00:26Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 2,
+      "reason": "Revision 2 handoff validates and the user has already authorized end-to-end implementation",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 29,
+      "at": "2026-09-11T17:45:02Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "Direction A implementation is present in the authorized branch and focused selector, Storefront-runtime, typecheck, lint, build, and website checks are green; begin deterministic Agent-store browser preflight.",
+      "evidence": [
+        "handoff/storefront-variant-selectors-r1.zip"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 30,
+      "at": "2026-09-11T17:49:41Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "BLOCKED",
+      "revision": 2,
+      "reason": "Chrome QA preflight cannot pass because the current SIT development extension handle returns Shopify 404 pages for all required PPB CSS and JavaScript assets; the fixture cannot initialize after hard reload.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 31,
+      "at": "2026-09-11T17:57:15Z",
+      "from": "BLOCKED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 2,
+      "reason": "User supplied a material FPB scope revision while the PPB preflight was blocked; resume the normal stage so the approved design contract can be revised.",
+      "evidence": [
+        "qa/preflight.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 32,
+      "at": "2026-09-11T17:57:15Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "SCOPE",
+      "revision": 3,
+      "reason": "The user now requires Dropdown, Pills, Color swatches, and Image swatches across every FPB product-card template, plus stable per-region card geometry beside no-variant cards. This supersedes the PPB-only mode decision and changes the merchant-configurable FPB boundary.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": [
+        "component-brief.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "interaction-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md",
+        "acceptance-criteria.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 33,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "SCOPE",
+      "to": "REFERENCE_INTAKE",
+      "revision": 3,
+      "reason": "Revision 3 scope records the user-required FPB category modes and stable card regions.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 34,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "REFERENCE_INTAKE",
+      "to": "REFERENCE_VALIDATION",
+      "revision": 3,
+      "reason": "The user scenario and repository persistence/runtime evidence are sufficient first-party references for the revised contract.",
+      "evidence": [
+        "component-brief.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 35,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "REFERENCE_VALIDATION",
+      "to": "VISUAL_ANALYSIS",
+      "revision": 3,
+      "reason": "The height defect is traced to stacked two-dimensional controls sharing an undifferentiated price/action column.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 36,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "VISUAL_ANALYSIS",
+      "to": "DIRECTION_EXPLORATION",
+      "revision": 3,
+      "reason": "Direction A is revised to one visual dimension plus native selects and named card regions.",
+      "evidence": [
+        "direction-comparison.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 37,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "DIRECTION_EXPLORATION",
+      "to": "DIRECTION_APPROVAL",
+      "revision": 3,
+      "reason": "The user explicitly authorized the best end-to-end implementation and reaffirmed Direction A.",
+      "evidence": [
+        "locked-decisions.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 38,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "DIRECTION_APPROVAL",
+      "to": "COMPONENT_ANATOMY",
+      "revision": 3,
+      "reason": "The revised anatomy assigns media, identity, price, selector, and action ownership.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 39,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "COMPONENT_ANATOMY",
+      "to": "STATE_CONTRACT",
+      "revision": 3,
+      "reason": "Existing state matrix plus revised two-dimensional selector behavior covers the requested states.",
+      "evidence": [
+        "state-matrix.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 40,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "STATE_CONTRACT",
+      "to": "RESPONSIVE_CONTRACT",
+      "revision": 3,
+      "reason": "Existing responsive contract is retained with compact secondary selects and no selector-owned scrolling.",
+      "evidence": [
+        "responsive-contract.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 41,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "RESPONSIVE_CONTRACT",
+      "to": "INTERACTION_ACCESSIBILITY",
+      "revision": 3,
+      "reason": "Native selects and named radio groups preserve keyboard and accessible-name behavior.",
+      "evidence": [
+        "accessibility-checklist.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 42,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "INTERACTION_ACCESSIBILITY",
+      "to": "TOKENS_GEOMETRY",
+      "revision": 3,
+      "reason": "Existing design tokens remain authoritative; layout uses content-driven reserved regions.",
+      "evidence": [
+        "design-tokens.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 43,
+      "at": "2026-09-11T18:02:55Z",
+      "from": "TOKENS_GEOMETRY",
+      "to": "PROTOTYPE_OPTIONAL",
+      "revision": 3,
+      "reason": "Canonical runtime owners are the only representative environment; isolated prototype remains not applicable.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 44,
+      "at": "2026-09-11T18:02:56Z",
+      "from": "PROTOTYPE_OPTIONAL",
+      "to": "HANDOFF_ASSEMBLY",
+      "revision": 3,
+      "reason": "Revision 3 handoff now covers shared FPB modes and stable card anatomy.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 45,
+      "at": "2026-09-11T18:02:56Z",
+      "from": "HANDOFF_ASSEMBLY",
+      "to": "HANDOFF_VALIDATION",
+      "revision": 3,
+      "reason": "Revision 3 handoff matches the user-approved behavior and existing Shopify data contract.",
+      "evidence": [
+        "acceptance-criteria.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 46,
+      "at": "2026-09-11T18:03:09Z",
+      "from": "HANDOFF_VALIDATION",
+      "to": "IMPLEMENTATION_AWAITED",
+      "revision": 3,
+      "reason": "Behavior-first red tests now prove the missing FPB runtime and selector capability.",
+      "evidence": [
+        "implementation-handoff.md"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 47,
+      "at": "2026-09-11T18:35:50Z",
+      "from": "IMPLEMENTATION_AWAITED",
+      "to": "CHROME_QA_PREFLIGHT",
+      "revision": 3,
+      "reason": "Direct Agent-store preflight passed after verifying signed pill persistence, exact variant updates, stable desktop card coordinates, and zero overflow.",
+      "evidence": [
+        "chrome-preflight-result.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 48,
+      "at": "2026-09-11T19:09:37Z",
+      "from": "CHROME_QA_PREFLIGHT",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 3,
+      "reason": "Fresh Shopify development assets now serve widget 22.0.0 and the shared responsive track fix; direct Chrome geometry verification has begun.",
+      "evidence": [
+        "chrome-preflight-result.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 49,
+      "at": "2026-09-12T20:59:56Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 4,
+      "reason": "User approved all Direction A revisions and authorized end-to-end implementation",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "acceptance-criteria.md"
+      ]
+    },
+    {
+      "sequence": 50,
+      "at": "2026-09-12T20:59:56Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 4,
+      "reason": "User approved all Direction A revisions and authorized end-to-end implementation",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "direction-comparison.md"
+      ]
+    },
+    {
+      "sequence": 51,
+      "at": "2026-09-12T20:59:56Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "CHROME_QA_EXECUTION",
+      "revision": 4,
+      "reason": "User approved all Direction A revisions and authorized end-to-end implementation",
+      "evidence": [
+        "approval-record.yaml"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "implementation-handoff.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 2,
+  "status": "complete",
+  "cases": [
+    {
+      "id": "long-product-title",
+      "data": {
+        "title": "Sidekick QA Success 2026-09-06 with an intentionally long product identity",
+        "expectation": "Title wrapping or the existing clamp cannot collide with selector or price"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "short-product-title",
+      "data": {
+        "title": "Tee",
+        "expectation": "Selector does not reserve artificial title space"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "high-price",
+      "data": {
+        "amount": "12345.67",
+        "currencyCode": "USD",
+        "expectation": "Market-formatted price remains contained beside selector"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "discounted-price",
+      "data": {
+        "price": "79.95",
+        "compareAtPrice": "129.95",
+        "currencyCode": "USD",
+        "expectation": "Both prices remain readable and selector placement is stable"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "zero-discount",
+      "data": {
+        "discount": 0,
+        "expectation": "No empty discount geometry affects selector"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "long-variant-name",
+      "data": {
+        "optionName": "Finish and fit",
+        "value": "Limited Edition Midnight Blue with Extra Long Sleeve",
+        "expectation": "Full value wraps without clipping or reducing target size"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "multiple-variant-dimensions",
+      "data": {
+        "options": [
+          {
+            "name": "Color",
+            "values": [
+              "Black",
+              "Blue",
+              "Green",
+              "Red"
+            ]
+          },
+          {
+            "name": "Size",
+            "values": [
+              "S",
+              "M",
+              "L",
+              "XL",
+              "2XL",
+              "3XL",
+              "4XL"
+            ]
+          }
+        ],
+        "variantCount": 28,
+        "fixture": "Agent-store Black Crew Neck T-Shirt",
+        "expectation": "In image or color swatch mode, Size uses one native select when it has no canonical swatch while Color retains canonical swatches; both labels, values, Shopify order, and exact combination resolution remain intact without disproportionate card height"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "missing-image",
+      "data": {
+        "swatch": null,
+        "expectation": "Neutral labeled choice renders without a broken image or inferred product image"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "portrait-image",
+      "data": {
+        "ratio": "2:3",
+        "expectation": "Product media remains unchanged beside selector"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "landscape-image",
+      "data": {
+        "ratio": "3:2",
+        "expectation": "Product media remains unchanged beside selector"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "quantity-one",
+      "data": {
+        "quantity": 1,
+        "expectation": "Selector and quantity controls remain independent"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "quantity-ten-plus",
+      "data": {
+        "quantity": 12,
+        "expectation": "Two-digit quantity does not collide with selector or Add action"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "zero-selected-products",
+      "data": {
+        "selected": 0,
+        "expectation": "Existing CTA-disabled summary remains unobstructed"
+      },
+      "required_in_browser_qa": false
+    },
+    {
+      "id": "many-selected-products",
+      "data": {
+        "selected": 8,
+        "expectation": "Long summary/footer state remains independent from selectors"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "long-translated-copy",
+      "data": {
+        "optionName": "Material and surface treatment",
+        "selectedValue": "Recycled brushed cotton with water-resistant finish",
+        "expectation": "Labels and selected text wrap without losing accessible names"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "wide-currency-format",
+      "data": {
+        "amount": "12345.67",
+        "currencyCode": "CHF",
+        "expectation": "Intl-formatted price remains contained and selector logic stays currency-agnostic"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "validation-error",
+      "data": {
+        "condition": "selected option becomes unavailable",
+        "expectation": "Last valid selection and canonical feedback remain with no stale Add path"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "slow-loading-state",
+      "data": {
+        "condition": "Storefront product hydration is delayed and then succeeds",
+        "expectation": "No stale selector is interactive during loading and the final selector renders once"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "many-option-values",
+      "data": {
+        "optionName": "Size",
+        "values": [
+          "2XS",
+          "XS",
+          "S",
+          "M",
+          "L",
+          "XL",
+          "2XL",
+          "3XL",
+          "4XL",
+          "5XL",
+          "6XL",
+          "7XL"
+        ],
+        "expectation": "All twelve values render directly in normal flow with no +N disclosure or horizontal rail"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "mixed-availability",
+      "data": {
+        "available": [
+          "XS",
+          "M",
+          "XL"
+        ],
+        "unavailable": [
+          "S",
+          "L",
+          "2XL"
+        ],
+        "expectation": "Unavailable values remain visible and disabled without changing track geometry"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "canonical-color-swatches",
+      "data": {
+        "values": [
+          {
+            "name": "Black",
+            "swatch": {
+              "color": "#000000"
+            }
+          },
+          {
+            "name": "Sand",
+            "swatch": {
+              "color": "#d8c3a5"
+            }
+          },
+          {
+            "name": "Unmapped",
+            "swatch": null
+          }
+        ],
+        "expectation": "Shopify colors and neutral labeled fallback render together with persistent selected text"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "canonical-image-swatches",
+      "data": {
+        "values": [
+          {
+            "name": "Stripe",
+            "swatch": {
+              "image": "fixture-owned Shopify swatch image"
+            }
+          },
+          {
+            "name": "No media",
+            "swatch": null
+          }
+        ],
+        "expectation": "Canonical media keeps its aspect and missing media remains a labeled neutral control"
+      },
+      "required_in_browser_qa": true
+    },
+    {
+      "id": "duplicate-product-instances",
+      "data": {
+        "instances": [
+          "card-a",
+          "card-b",
+          "modal-card"
+        ],
+        "productId": "same product",
+        "expectation": "DOM IDs and radio names are unique per instance and selection stays scoped"
+      },
+      "required_in_browser_qa": true
+    }
+  ]
+}

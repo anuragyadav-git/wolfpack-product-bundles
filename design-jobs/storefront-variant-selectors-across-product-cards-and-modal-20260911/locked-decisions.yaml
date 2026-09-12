@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 4,
+  "status": "complete",
+  "locked": [
+    {
+      "id": "selector-layout-direction",
+      "question": "Which behavior-equivalent layout direction should own variant selectors across cards and modals?",
+      "options_considered": [
+        "Direction A \u2014 Adaptive intrinsic matrix",
+        "Direction B \u2014 Linear choice stack",
+        "Direction C \u2014 Compact option rail"
+      ],
+      "recommendation": "Direction A \u2014 Adaptive intrinsic matrix",
+      "selected_value": "Direction A \u2014 Adaptive intrinsic matrix",
+      "rationale": "The user explicitly approved Direction A. It keeps every value visible through responsive normal-flow wrapping without horizontal overflow, runtime sizing, or new interaction surfaces.",
+      "evidence_ids": [
+        "direction-comparison.md",
+        "VA-01",
+        "VA-05",
+        "VA-10",
+        "VA-12"
+      ],
+      "status": "approved",
+      "approved_by": "user",
+      "approved_at": "2026-09-11T13:23:17Z",
+      "revision_introduced": 1,
+      "affected_artifacts": [
+        "component-anatomy.md",
+        "state-matrix.md",
+        "responsive-contract.md",
+        "design-tokens.json",
+        "implementation-handoff.md"
+      ]
+    },
+    {
+      "id": "multi-dimensional-swatch-density",
+      "question": "How should PPB swatch modes represent a Size by Color product without making product cards disproportionately tall?",
+      "options_considered": [
+        "Render every dimension as the configured swatch mode",
+        "Use an adaptive native select for non-swatch dimensions and canonical Shopify swatches for mapped dimensions",
+        "Hide or horizontally scroll excess values"
+      ],
+      "recommendation": "Use an adaptive native select for non-swatch dimensions and canonical Shopify swatches for mapped dimensions",
+      "selected_value": "Use an adaptive native select for non-swatch dimensions and canonical Shopify swatches for mapped dimensions",
+      "rationale": "This preserves every variant choice and Shopify's canonical swatch data while keeping two-dimensional product cards compact. The user authorized the best end-to-end solution and approved Direction A throughout.",
+      "evidence_ids": [
+        "content-stress-cases.yaml",
+        "design-tokens.json",
+        "acceptance-criteria.md",
+        "implementation-handoff.md"
+      ],
+      "status": "approved",
+      "approved_by": "user",
+      "approved_at": "2026-09-11T14:45:00Z",
+      "revision_introduced": 2,
+      "affected_artifacts": [
+        "design-tokens.json",
+        "content-stress-cases.yaml",
+        "acceptance-criteria.md",
+        "implementation-handoff.md",
+        "codex-task.md",
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "id": "selector-before-price-and-action",
+      "question": "Where should variant selectors sit relative to product-card pricing and actions?",
+      "options_considered": [
+        "Selector before price and action in both DOM and visual order",
+        "Template-specific ordering",
+        "Price or action before selector"
+      ],
+      "recommendation": "Selector before price and action in both DOM and visual order",
+      "selected_value": "Selector before price and action in both DOM and visual order",
+      "rationale": "The user explicitly required pricing and CTA to remain below configured variant selectors. Matching semantic and visual order also makes the interaction sequence predictable. On mobile, every selector dimension shares the same inline origin.",
+      "evidence_ids": [
+        "browser-test-report.md",
+        "visual-qa-report.md",
+        "internal docs/Architecture/Product Card Layout Contract.md"
+      ],
+      "status": "approved",
+      "approved_by": "user",
+      "approved_at": "2026-09-12T00:00:00+05:30",
+      "revision_introduced": 3,
+      "affected_artifacts": [
+        "implementation-handoff.md",
+        "browser-test-plan.yaml",
+        "browser-test-report.md",
+        "visual-qa-report.md"
+      ]
+    }
+  ],
+  "assumptions": [
+    "FPB and PPB share the existing StepCategory selector-mode contract; no new persistence model is introduced.",
+    "Two-dimensional FPB cards keep one visual dimension and compact every additional dimension into a labeled native select.",
+    "Every FPB card reserves independent media, identity, price, selector, and action regions."
+  ],
+  "rejected": [
+    {
+      "value": "Direction B \u2014 Linear choice stack",
+      "reason": "It makes Compact and Grid cards unnecessarily tall."
+    },
+    {
+      "value": "Direction C \u2014 Compact option rail",
+      "reason": "It introduces internal horizontal overflow that conflicts with the request."
+    }
+  ],
+  "open": [],
+  "superseded": [],
+  "decision_shape": null
+}

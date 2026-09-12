@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 2,
+  "status": "complete",
+  "design": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-09-11T13:23:17Z",
+    "evidence": [
+      "direction-comparison.md",
+      "visual-audit.md",
+      "screenshot-inventory.yaml"
+    ],
+    "waivers": []
+  },
+  "handoff": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-09-11T13:57:54Z",
+    "evidence": [
+      "implementation-handoff.md",
+      "codex-task.md",
+      "acceptance-criteria.md",
+      "browser-test-plan.yaml"
+    ],
+    "waivers": []
+  },
+  "implementation": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-09-11T13:57:54Z",
+    "evidence": [
+      "implementation-handoff.md"
+    ],
+    "waivers": []
+  },
+  "final": {
+    "status": "not-started",
+    "approver": "",
+    "at": "",
+    "evidence": [],
+    "waivers": []
+  },
+  "superseded_approvals": []
+}
