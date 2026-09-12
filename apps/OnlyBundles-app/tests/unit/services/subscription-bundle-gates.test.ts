@@ -1,5 +1,6 @@
 import {
   assertBundlePublicationAllowed,
+  assertTemplateSelectionAllowed,
   updateBundleWithPublicationGate,
 } from "../../../app/services/subscriptions/bundle-entitlement-gate.server";
 import {
@@ -231,5 +232,152 @@ describe("updateBundleWithPublicationGate", () => {
 
     expect(database.$transaction).not.toHaveBeenCalled();
     expect(database.bundle.update).toHaveBeenCalled();
+  });
+});
+
+describe("assertTemplateSelectionAllowed", () => {
+  it("allows standard Free templates for PPB and FPB", () => {
+    expect(() =>
+      assertTemplateSelectionAllowed({
+        bundleType: "PRODUCT_PAGE",
+        designPresetId: "LIST",
+        designTemplate: "PDP_INPAGE",
+        entitlements: getPlanEntitlements("FREE", "NONE"),
+      })
+    ).not.toThrow();
+
+    expect(() =>
+      assertTemplateSelectionAllowed({
+        bundleType: "PRODUCT_PAGE",
+        designPresetId: null,
+        designTemplate: null,
+        entitlements: getPlanEntitlements("FREE", "NONE"),
+      })
+    ).not.toThrow();
+
+    expect(() =>
+      assertTemplateSelectionAllowed({
+        bundleType: "FULL_PAGE",
+        designPresetId: "STANDARD",
+        designTemplate: "FBP_SIDE_FOOTER",
+        entitlements: getPlanEntitlements("FREE", "NONE"),
+      })
+    ).not.toThrow();
+
+    expect(() =>
+      assertTemplateSelectionAllowed({
+        bundleType: "FULL_PAGE",
+        designPresetId: null,
+        designTemplate: null,
+        entitlements: getPlanEntitlements("FREE", "NONE"),
+      })
+    ).not.toThrow();
+
+    // Verify lowercase bundleType works properly
+    expect(() =>
+      assertTemplateSelectionAllowed({
+        bundleType: "full_page" as any,
+        designPresetId: "STANDARD",
+        designTemplate: "FBP_SIDE_FOOTER",
+        entitlements: getPlanEntitlements("FREE", "NONE"),
+      })
+    ).not.toThrow();
+
+    expect(() =>
+      assertTemplateSelectionAllowed({
+        bundleType: "product_page" as any,
+        designPresetId: "LIST",
+        designTemplate: "PDP_INPAGE",
+        entitlements: getPlanEntitlements("FREE", "NONE"),
+      })
+    ).not.toThrow();
+  });
+
+  it("blocks the 3 non-standard PPB templates on Free plan", () => {
+    const ppbGated = [
+      { designPresetId: "GRID", designTemplate: "PDP_INPAGE" },
+      { designPresetId: "HORIZONTAL_SLOTS", designTemplate: "PDP_MODAL" },
+      { designPresetId: "VERTICAL_SLOTS", designTemplate: "PDP_MODAL" },
+    ];
+
+    for (const tpl of ppbGated) {
+      expect(() =>
+        assertTemplateSelectionAllowed({
+          bundleType: "PRODUCT_PAGE",
+          designPresetId: tpl.designPresetId,
+          designTemplate: tpl.designTemplate,
+          entitlements: getPlanEntitlements("FREE", "NONE"),
+        })
+      ).toThrow(
+        expect.objectContaining({
+          code: "ENTITLEMENT_REQUIRED",
+          entitlement: "bundle.template.premium",
+        })
+      );
+    }
+  });
+
+  it("blocks the 3 non-standard FPB templates on Free plan", () => {
+    const fpbGated = [
+      { designPresetId: "CLASSIC", designTemplate: "FBP_SIDE_FOOTER" },
+      { designPresetId: "COMPACT", designTemplate: "FBP_SIDE_FOOTER" },
+      { designPresetId: "HORIZONTAL", designTemplate: "FBP_SIDE_FOOTER" },
+    ];
+
+    for (const tpl of fpbGated) {
+      expect(() =>
+        assertTemplateSelectionAllowed({
+          bundleType: "FULL_PAGE",
+          designPresetId: tpl.designPresetId,
+          designTemplate: tpl.designTemplate,
+          entitlements: getPlanEntitlements("FREE", "NONE"),
+        })
+      ).toThrow(
+        expect.objectContaining({
+          code: "ENTITLEMENT_REQUIRED",
+          entitlement: "bundle.template.premium",
+        })
+      );
+    }
+  });
+
+  it("allows all 8 templates on Growth plan", () => {
+    const allTemplates = [
+      { bundleType: "PRODUCT_PAGE" as const, designPresetId: "LIST", designTemplate: "PDP_INPAGE" },
+      { bundleType: "PRODUCT_PAGE" as const, designPresetId: "GRID", designTemplate: "PDP_INPAGE" },
+      { bundleType: "PRODUCT_PAGE" as const, designPresetId: "HORIZONTAL_SLOTS", designTemplate: "PDP_MODAL" },
+      { bundleType: "PRODUCT_PAGE" as const, designPresetId: "VERTICAL_SLOTS", designTemplate: "PDP_MODAL" },
+      { bundleType: "FULL_PAGE" as const, designPresetId: "STANDARD", designTemplate: "FBP_SIDE_FOOTER" },
+      { bundleType: "FULL_PAGE" as const, designPresetId: "CLASSIC", designTemplate: "FBP_SIDE_FOOTER" },
+      { bundleType: "FULL_PAGE" as const, designPresetId: "COMPACT", designTemplate: "FBP_SIDE_FOOTER" },
+      { bundleType: "FULL_PAGE" as const, designPresetId: "HORIZONTAL", designTemplate: "FBP_SIDE_FOOTER" },
+    ];
+
+    for (const tpl of allTemplates) {
+      expect(() =>
+        assertTemplateSelectionAllowed({
+          bundleType: tpl.bundleType,
+          designPresetId: tpl.designPresetId,
+          designTemplate: tpl.designTemplate,
+          entitlements: getPlanEntitlements("GROWTH", "MONTHLY"),
+        })
+      ).not.toThrow();
+    }
+  });
+
+  it("fails closed when entitlements are missing", () => {
+    expect(() =>
+      assertTemplateSelectionAllowed({
+        bundleType: "PRODUCT_PAGE",
+        designPresetId: "GRID",
+        designTemplate: "PDP_INPAGE",
+        entitlements: null,
+      })
+    ).toThrow(
+      expect.objectContaining({
+        code: "ENTITLEMENT_REQUIRED",
+        entitlement: "bundle.template.premium",
+      })
+    );
   });
 });

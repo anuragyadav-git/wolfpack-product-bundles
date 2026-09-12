@@ -32,6 +32,7 @@ export interface FpbTemplateDialogProps {
     templateModalStep: TemplateModalStep;
     templateSaveError: string | null;
     themeEditorUrl: string | null;
+    isFreePlan?: boolean;
   };
 }
 
@@ -55,6 +56,7 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
     templateSaveError,
     themeEditorUrl,
     closeSelectTemplateModal,
+    isFreePlan,
   } = template;
 
   return (
@@ -70,30 +72,41 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
           <div className={fullPageBundleStyles.templateDialogContent}>
             {templateModalStep === "templates" ? (
               <>
-                <div className={fullPageBundleStyles.templateDialogBody}>
-                  <div className={fullPageBundleStyles.templateDialogIntro}>
-                    <s-stack direction="block" gap="small">
-                      <s-heading>
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeYourBundle"
-                        )}
-                      </s-heading>
-                      <s-paragraph color="subdued">
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.chooseADesignThatSuitsYourNeedsAndFitsYourBrand"
-                        )}
-                      </s-paragraph>
-                    </s-stack>
-                    <s-button
-                      variant="secondary"
-                      icon="paint-brush-flat"
-                      onClick={() => setTemplateModalStep("colorsAndCorners")}
-                    >
+                <div className={fullPageBundleStyles.templateDialogIntro}>
+                  <s-stack direction="block" gap="small">
+                    <s-heading>
                       {translateAdmin(
-                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeColorsAmpLanguage"
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeYourBundle"
                       )}
-                    </s-button>
-                  </div>
+                    </s-heading>
+                    <s-paragraph color="subdued">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.chooseADesignThatSuitsYourNeedsAndFitsYourBrand"
+                      )}
+                    </s-paragraph>
+                  </s-stack>
+                  <s-button
+                    variant="secondary"
+                    icon="paint-brush-flat"
+                    onClick={() => setTemplateModalStep("colorsAndCorners")}
+                  >
+                    {translateAdmin(
+                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeColorsAmpLanguage"
+                    )}
+                  </s-button>
+                </div>
+                <div className={fullPageBundleStyles.templateDialogBody}>
+                  {isFreePlan ? (
+                    <s-box paddingBlockEnd="small-200">
+                      <s-banner tone="info">
+                        <s-text>
+                          {translateAdmin(
+                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.upgradeToGrowthForMoreTemplates"
+                          )}
+                        </s-text>
+                      </s-banner>
+                    </s-box>
+                  ) : null}
                   {templateSaveError ? (
                     <s-box paddingBlockEnd="small-200">
                       <s-banner
@@ -108,6 +121,9 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
                   ) : null}
                   <div className={fullPageBundleStyles.templateDialogGrid}>
                     {fullPageTemplateOptions.map((tpl) => {
+                      const isGated = Boolean(
+                        isFreePlan && tpl.presetId !== "STANDARD"
+                      );
                       const isSelected =
                         pendingDesignPresetId === tpl.presetId &&
                         pendingDesignTemplate === "FBP_SIDE_FOOTER";
@@ -115,6 +131,7 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
                         <button
                           key={tpl.presetId}
                           type="button"
+                          disabled={isGated || undefined}
                           className={`${
                             fullPageBundleStyles.templateOptionCard
                           } ${
@@ -124,6 +141,7 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
                           }`}
                           aria-pressed={isSelected}
                           onClick={() => {
+                            if (isGated) return;
                             setPendingDesignTemplate("FBP_SIDE_FOOTER");
                             setPendingDesignPresetId(tpl.presetId);
                           }}
@@ -153,17 +171,25 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
                             >
                               {tpl.label}
                             </span>
-                            <span
-                              className={`${
-                                fullPageBundleStyles.templateOptionAction
-                              } ${
-                                isSelected
-                                  ? fullPageBundleStyles.templateOptionActionSelected
-                                  : ""
-                              }`}
-                            >
-                              {isSelected ? "Selected" : "Select"}
-                            </span>
+                            {isGated ? (
+                              <s-badge tone="warning">
+                                {translateAdmin(
+                                  "adminExtracted.components.billing.featurecomparisontable.growth"
+                                )}
+                              </s-badge>
+                            ) : (
+                              <span
+                                className={`${
+                                  fullPageBundleStyles.templateOptionAction
+                                } ${
+                                  isSelected
+                                    ? fullPageBundleStyles.templateOptionActionSelected
+                                    : ""
+                                }`}
+                              >
+                                {isSelected ? "Selected" : "Select"}
+                              </span>
+                            )}
                           </span>
                         </button>
                       );
@@ -187,54 +213,54 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
               </>
             ) : templateModalStep === "colorsAndCorners" ? (
               <>
-                <div className={fullPageBundleStyles.templateDialogBody}>
-                  <div className={fullPageBundleStyles.templateDialogIntro}>
-                    <s-stack direction="block" gap="small">
-                      <s-heading>
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeYourBundle"
-                        )}
-                      </s-heading>
-                      <s-paragraph color="subdued">
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.fineTuneColorsAndCornersBeforePreviewingTheBundle"
-                        )}
-                      </s-paragraph>
-                    </s-stack>
-                    <div
-                      className={fullPageBundleStyles.templateDialogTabs}
-                      role="tablist"
-                      aria-label={translateAdmin(
-                        "adminAttributes.templateCustomization"
+                <div className={fullPageBundleStyles.templateDialogIntro}>
+                  <s-stack direction="block" gap="small">
+                    <s-heading>
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeYourBundle"
                       )}
+                    </s-heading>
+                    <s-paragraph color="subdued">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.fineTuneColorsAndCornersBeforePreviewingTheBundle"
+                      )}
+                    </s-paragraph>
+                  </s-stack>
+                  <div
+                    className={fullPageBundleStyles.templateDialogTabs}
+                    role="tablist"
+                    aria-label={translateAdmin(
+                      "adminAttributes.templateCustomization"
+                    )}
+                  >
+                    <button
+                      type="button"
+                      className={fullPageBundleStyles.templateDialogTab}
+                      onClick={() => setTemplateModalStep("templates")}
                     >
-                      <button
-                        type="button"
-                        className={fullPageBundleStyles.templateDialogTab}
-                        onClick={() => setTemplateModalStep("templates")}
-                      >
-                        {translateAdmin("billing.comparison.templates")}
-                      </button>
-                      <button
-                        type="button"
-                        className={`${fullPageBundleStyles.templateDialogTab} ${fullPageBundleStyles.templateDialogTabActive}`}
-                        aria-current="page"
-                      >
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.colorsAndCorners"
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        className={fullPageBundleStyles.templateDialogTab}
-                        onClick={() => setTemplateModalStep("textAndImages")}
-                      >
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.textAndImages"
-                        )}
-                      </button>
-                    </div>
+                      {translateAdmin("billing.comparison.templates")}
+                    </button>
+                    <button
+                      type="button"
+                      className={`${fullPageBundleStyles.templateDialogTab} ${fullPageBundleStyles.templateDialogTabActive}`}
+                      aria-current="page"
+                    >
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.colorsAndCorners"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className={fullPageBundleStyles.templateDialogTab}
+                      onClick={() => setTemplateModalStep("textAndImages")}
+                    >
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.textAndImages"
+                      )}
+                    </button>
                   </div>
+                </div>
+                <div className={fullPageBundleStyles.templateDialogBody}>
                   <div
                     className={fullPageBundleStyles.templateCustomizationGrid}
                   >
@@ -277,54 +303,54 @@ export function FpbTemplateDialog({ template }: FpbTemplateDialogProps) {
               </>
             ) : templateModalStep === "textAndImages" ? (
               <>
-                <div className={fullPageBundleStyles.templateDialogBody}>
-                  <div className={fullPageBundleStyles.templateDialogIntro}>
-                    <s-stack direction="block" gap="small">
-                      <s-heading>
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeYourBundle"
-                        )}
-                      </s-heading>
-                      <s-paragraph color="subdued">
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.reviewTemplateLanguageLabelsAndMediaBeforeFinishingCustomization"
-                        )}
-                      </s-paragraph>
-                    </s-stack>
-                    <div
-                      className={fullPageBundleStyles.templateDialogTabs}
-                      role="tablist"
-                      aria-label={translateAdmin(
-                        "adminAttributes.templateCustomization"
+                <div className={fullPageBundleStyles.templateDialogIntro}>
+                  <s-stack direction="block" gap="small">
+                    <s-heading>
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.customizeYourBundle"
                       )}
+                    </s-heading>
+                    <s-paragraph color="subdued">
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.reviewTemplateLanguageLabelsAndMediaBeforeFinishingCustomization"
+                      )}
+                    </s-paragraph>
+                  </s-stack>
+                  <div
+                    className={fullPageBundleStyles.templateDialogTabs}
+                    role="tablist"
+                    aria-label={translateAdmin(
+                      "adminAttributes.templateCustomization"
+                    )}
+                  >
+                    <button
+                      type="button"
+                      className={fullPageBundleStyles.templateDialogTab}
+                      onClick={() => setTemplateModalStep("templates")}
                     >
-                      <button
-                        type="button"
-                        className={fullPageBundleStyles.templateDialogTab}
-                        onClick={() => setTemplateModalStep("templates")}
-                      >
-                        {translateAdmin("billing.comparison.templates")}
-                      </button>
-                      <button
-                        type="button"
-                        className={fullPageBundleStyles.templateDialogTab}
-                        onClick={() => setTemplateModalStep("colorsAndCorners")}
-                      >
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.colorsAndCorners"
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        className={`${fullPageBundleStyles.templateDialogTab} ${fullPageBundleStyles.templateDialogTabActive}`}
-                        aria-current="page"
-                      >
-                        {translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.textAndImages"
-                        )}
-                      </button>
-                    </div>
+                      {translateAdmin("billing.comparison.templates")}
+                    </button>
+                    <button
+                      type="button"
+                      className={fullPageBundleStyles.templateDialogTab}
+                      onClick={() => setTemplateModalStep("colorsAndCorners")}
+                    >
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.colorsAndCorners"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className={`${fullPageBundleStyles.templateDialogTab} ${fullPageBundleStyles.templateDialogTabActive}`}
+                      aria-current="page"
+                    >
+                      {translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuretemplatedialog.textAndImages"
+                      )}
+                    </button>
                   </div>
+                </div>
+                <div className={fullPageBundleStyles.templateDialogBody}>
                   {templateSaveError ? (
                     <s-box paddingBlockEnd="small-200">
                       <s-banner

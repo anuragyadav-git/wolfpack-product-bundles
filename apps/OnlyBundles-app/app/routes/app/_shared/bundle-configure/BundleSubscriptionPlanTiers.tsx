@@ -65,6 +65,7 @@ export function BundleSubscriptionPlanTiers({
                   <s-grid
                     gridTemplateColumns="minmax(0, 1fr) minmax(7.5rem, 0.45fr)"
                     gap="base"
+                    alignItems="start"
                   >
                     <s-text-field
                       label={translateAdmin(

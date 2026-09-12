@@ -40,6 +40,14 @@ const components: Record<string, string[]> = {
     "billing.success.support",
     "billing.success.priority",
   ],
+  "app/components/billing/EntitlementUpgradeModal.tsx": [
+    "billing.upgradeModal.benefitsHeading",
+    "billing.upgradeModal.benefits.unlimitedPublicBundles",
+    "billing.upgradeModal.benefits.allTemplatesDesign",
+    "billing.upgradeModal.benefits.advancedAnalytics",
+    "billing.upgradeModal.benefits.prioritySupport",
+    "billing.upgradeModal.managedByShopify",
+  ],
 };
 
 describe("billing feedback copy extraction", () => {

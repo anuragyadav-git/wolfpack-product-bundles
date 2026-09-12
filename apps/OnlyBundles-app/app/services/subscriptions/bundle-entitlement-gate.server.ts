@@ -1,6 +1,7 @@
 import {
   EntitlementDeniedError,
   detectBundleRequirements,
+  isFreeTemplate,
   type BundleEntitlementCandidate,
   type PlanEntitlements,
 } from "../../lib/subscriptions/entitlements";
@@ -8,6 +9,27 @@ import { Prisma } from "@prisma/client";
 import db from "../../db.server";
 
 const PUBLICATION_TRANSACTION_TIMEOUT_MS = 30_000;
+
+export interface TemplateSelectionGateInput {
+  bundleType: "FULL_PAGE" | "PRODUCT_PAGE" | "full_page" | "product_page";
+  designTemplate?: string | null;
+  designPresetId?: string | null;
+  entitlements: PlanEntitlements | null;
+}
+
+export function assertTemplateSelectionAllowed(
+  input: TemplateSelectionGateInput,
+): void {
+  if (isFreeTemplate(input)) return;
+
+  if (!input.entitlements?.capabilities.premiumTemplates) {
+    throw new EntitlementDeniedError({
+      code: "ENTITLEMENT_REQUIRED",
+      entitlement: "bundle.template.premium",
+      remediation: "UPGRADE",
+    });
+  }
+}
 
 interface BundlePublicationGateInput {
   candidate: BundleEntitlementCandidate;

@@ -276,16 +276,6 @@ export function BundleSubscriptionConfiguration({
               </s-choice>
             ))}
           </s-choice-list>
-          {subscriptionConfig.enabled &&
-          Object.keys(validationErrors).some((path) =>
-            path.startsWith("subscriptions.")
-          ) ? (
-            <s-text tone="critical">
-              {translateAdmin(
-                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.fixTheSubscriptionFieldsBeforeSaving"
-              )}
-            </s-text>
-          ) : null}
         </s-stack>
       </s-section>
     </DisabledConfigurationRegion>

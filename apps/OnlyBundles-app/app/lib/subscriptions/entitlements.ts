@@ -109,18 +109,33 @@ export function getPlanEntitlements(
   };
 }
 
-function isFreeTemplate(candidate: BundleEntitlementCandidate): boolean {
+export function isFreeTemplate(candidate: {
+  bundleType?: "FULL_PAGE" | "PRODUCT_PAGE" | "full_page" | "product_page";
+  designTemplate?: string | null;
+  designPresetId?: string | null;
+}): boolean {
+  const type = candidate.bundleType?.trim().toUpperCase();
   const template = candidate.designTemplate?.trim().toUpperCase();
   const preset = candidate.designPresetId?.trim().toUpperCase();
 
   if (!template && !preset) return true;
-  if (candidate.bundleType === "FULL_PAGE") {
+
+  if (type === "FULL_PAGE") {
     return (!template || template === "FBP_SIDE_FOOTER")
       && (!preset || preset === "STANDARD");
   }
 
-  return (!template || template === "PDP_INPAGE")
+  if (type === "PRODUCT_PAGE") {
+    return (!template || template === "PDP_INPAGE")
+      && (!preset || preset === "LIST");
+  }
+
+  const isFreeFpb = (!template || template === "FBP_SIDE_FOOTER")
+    && (!preset || preset === "STANDARD");
+  const isFreePpb = (!template || template === "PDP_INPAGE")
     && (!preset || preset === "LIST");
+
+  return isFreeFpb || isFreePpb;
 }
 
 export function detectBundleRequirements(

@@ -34,6 +34,7 @@ jest.mock("../../../app/services/subscriptions/design-entitlement-state.server",
 }));
 
 jest.mock("../../../app/services/subscriptions/bundle-entitlement-gate.server", () => ({
+  assertTemplateSelectionAllowed: jest.fn(),
   updateBundleWithPublicationGate: jest.fn((input) => input.database.bundle.update({
     where: { id: input.bundleId, shopId: input.shopDomain },
     data: input.data,
