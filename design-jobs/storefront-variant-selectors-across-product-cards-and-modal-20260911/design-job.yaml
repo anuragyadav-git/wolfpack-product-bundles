@@ -3,11 +3,11 @@
   "job": {
     "id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
     "title": "Storefront variant selectors across product cards and modal",
-    "status": "qa-running",
-    "stage": "CHROME_QA_EXECUTION",
+    "status": "active",
+    "stage": "VISUAL_REMEDIATION",
     "revision": 4,
     "created_at": "2026-09-11T12:25:40Z",
-    "updated_at": "2026-09-12T20:59:56Z",
+    "updated_at": "2026-09-13T19:12:33Z",
     "owner": "engineering",
     "product": "Only Bundles storefront widgets",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -227,7 +227,7 @@
       "implementation-handoff.md"
     ],
     "summary_path": "qa/browser-artifact-summary.json",
-    "execution_status": "passed-fpb-and-ppb-selector-slices",
+    "execution_status": "passed-ppb-vertical-slots-1280x800-and-500x844-remediation",
     "required_viewports": [
       "desktop-1280x800",
       "mobile-390x844"
@@ -247,10 +247,10 @@
     "console_status": "passed",
     "network_status": "passed",
     "accessibility_status": "passed-for-exercised-controls",
-    "lighthouse_status": "not-started",
-    "performance_status": "not-started",
-    "visual_diff_status": "passed-inline-fpb-and-ppb-selector-slices",
-    "non_regression_status": "passed-fpb-and-ppb-mixed-card-matrix",
+    "lighthouse_status": "passed",
+    "performance_status": "passed",
+    "visual_diff_status": "passed-inline-ppb-vertical-slots-remediation",
+    "non_regression_status": "passed-ppb-vertical-slots-minimum-desktop-and-mobile-width",
     "retry_history": [
       {
         "attempt": 1,
@@ -286,6 +286,20 @@
         "classification": "recovered-with-host-gate",
         "result": "passed-ppb-selector-slice",
         "evidence": "Served widget 22.1.0 passed live sequential Size then Color selection and all four PPB templates at desktop and the narrowest genuine 500x844 Chrome window. Cards, modal dialogs, and the document reported zero overflow; the exact 390px PPB capture remains constrained by the browser host."
+      },
+      {
+        "attempt": 6,
+        "at": "2026-09-14T06:30:00Z",
+        "classification": "product-geometry",
+        "result": "failed",
+        "evidence": "A fresh signed Agent-store PPB Vertical Slots preview serving widget 22.1.1 at an exact 1280x800 real Chrome window showed both 428.28px product cards extending 15.28px below the 416px scroll-body boundary on initial open, visually clipping their Add to Cart actions at the fixed footer boundary."
+      },
+      {
+        "attempt": 7,
+        "at": "2026-09-14T07:10:00Z",
+        "classification": "recovered",
+        "result": "passed-ppb-vertical-slots-remediation",
+        "evidence": "After making the desktop picker header height responsive, a fresh signed preview serving widget 22.1.2 placed equal card bottoms 3.72px above the body boundary and both CTA bottoms 16.72px above it at 1280x800. The genuine 500x844 narrow-window rerun retained equal 473.47px cards, fully visible actions, zero overflow, and exact M then Navy variant resolution."
       }
     ],
     "artifacts_path": "qa",
@@ -352,19 +366,19 @@
       "browser-test-plan.yaml": {
         "path": "browser-test-plan.yaml",
         "status": "approved",
-        "revision": 2,
-        "sha256": "fc7717ea4bd4226307d861652de792249c9fd36bc312cfd06415f52085fa0abb",
+        "revision": 4,
+        "sha256": "b74c7d0b84f9b02988c3f6267fe281cfbaa195d60c8e4ceacc84001e304bf5b8",
         "approved_by": "user",
-        "approved_at": "2026-09-11T16:59:03Z",
+        "approved_at": "2026-09-13T19:08:27Z",
         "evidence": [
-          "approval-record.yaml"
+          "browser-case-result.json"
         ]
       },
       "browser-test-report.md": {
         "path": "browser-test-report.md",
         "status": "complete",
         "revision": 4,
-        "sha256": "27b4f3a3368bd6120bc69db1cfa114b18a4e59b1bdc81bb0a5b4f6534e581530",
+        "sha256": "1579b2ecbb2efdd7086415fbc53928d612a4aea98af8a2b15ac4e67446bb0810",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -478,7 +492,7 @@
         "path": "remediation-list.md",
         "status": "complete",
         "revision": 4,
-        "sha256": "1c6598e1436485f6d0f13c12cfbaad0163e598172660e114d1e7bdcf2dfd3b40",
+        "sha256": "5bb2a8f8adf65dcd70ee97878448354ab38abdeddbd08e55d9b52f8209858be1",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -523,7 +537,7 @@
         "path": "visual-qa-report.md",
         "status": "complete",
         "revision": 4,
-        "sha256": "e6e5a4256532b73209bf7ef505bbd75bc12e6bb512dbb305d1cd7430c5c2ac96",
+        "sha256": "13dfe342b4c2d2c3ec853b181570b13c0c75f0462f4b38a81bae7346adade485",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -627,6 +641,20 @@
         "superseded_at": "2026-09-12T20:59:56Z",
         "superseded_by": "user",
         "superseded_reason": "User approved all Direction A revisions and authorized end-to-end implementation"
+      },
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 2,
+        "sha256": "fc7717ea4bd4226307d861652de792249c9fd36bc312cfd06415f52085fa0abb",
+        "approved_by": "user",
+        "approved_at": "2026-09-11T16:59:03Z",
+        "evidence": [
+          "approval-record.yaml"
+        ],
+        "superseded_at": "2026-09-13T19:08:27Z",
+        "superseded_by": "user",
+        "superseded_reason": "User authorized all Direction A revisions and end-to-end implementation; QA status updated after the verified rerun."
       }
     ]
   },
@@ -1288,6 +1316,33 @@
       "event": "artifact-superseded",
       "affected_artifacts": [
         "implementation-handoff.md"
+      ]
+    },
+    {
+      "sequence": 52,
+      "at": "2026-09-13T18:56:57Z",
+      "from": "CHROME_QA_EXECUTION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 4,
+      "reason": "PPB Vertical Slots at 1280x800 clips product-card CTAs by 15.28px against the modal body/footer boundary.",
+      "evidence": [
+        "browser-case-result.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 53,
+      "at": "2026-09-13T19:08:27Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 4,
+      "reason": "User authorized all Direction A revisions and end-to-end implementation; QA status updated after the verified rerun.",
+      "evidence": [
+        "browser-case-result.json"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
       ]
     }
   ]

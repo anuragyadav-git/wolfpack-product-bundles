@@ -5,7 +5,7 @@ title: Widget Architecture
 type: architecture
 status: authoritative
 summary: FPB and PPB bootstrap, signed settings, Shopify-hosted CSS, market pricing, and fail-closed hydration architecture.
-last_audited: 2026-09-12
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -25,6 +25,7 @@ source_paths:
   - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/config-lifecycle-methods.ts
   - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/selection-methods.ts
   - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/widget-misc-methods.ts
+  - apps/OnlyBundles-app/app/assets/widgets/product-page-css/base/footer-selection-loading.css
   - apps/OnlyBundles-app/app/assets/widgets/shared
   - apps/OnlyBundles-app/app/assets/widgets/shared/currency-manager.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared/pricing-calculator.ts
@@ -122,7 +123,7 @@ Template behavior is resolved through plain config modules and method modules:
 
 PPB Horizontal Slots (`PDP_MODAL/MODAL`) and Vertical Slots (`PDP_MODAL/SIMPLIFIED`) share the single `#bundle-builder-modal` picker owned by `product-page/methods/dom-methods.ts`. Product List and Product Grid use their in-page surfaces and must not inherit modal-only layout behavior.
 
-The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
+The shared picker is an 85dvh bottom sheet with three regions: a non-scrolling header, the only vertically scrolling catalog body, and a non-scrolling footer in normal flex flow. On desktop the header is content-driven within a 128px-to-160px viewport-responsive range, leaving the catalog enough height at the supported 1280×800 minimum for complete card actions and focus rings before the footer boundary. Footer geometry must never overlap product actions or focus rings. The catalog renders five tracks at 1440px, four at 1280px, and two at 768px and below; fixed track counts keep sparse rows from stretching. Modal lifecycle and exact opener-focus restoration remain owned by `modal-state-methods.ts`, while the global keyboard listener contains Tab focus only when the picker is the topmost drawer layer.
 
 All four PPB templates and all four FPB templates resolve grouped-variant presentation from the active
 category's canonical `variantSelectorMode`: Dropdown, Pills, Color swatches, or

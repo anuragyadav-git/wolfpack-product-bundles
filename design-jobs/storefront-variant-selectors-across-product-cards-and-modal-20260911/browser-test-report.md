@@ -5,7 +5,7 @@ title: Storefront Variant Selectors Browser Test Report
 type: design-job-qa-report
 status: active
 summary: Records direct Chrome evidence for stable FPB and PPB product-card tracks and coordinated two-dimensional variant selection.
-last_audited: 2026-09-12
+last_audited: 2026-09-14
 owners:
   - Aditya Awasthi
 domains:
@@ -177,3 +177,34 @@ At the narrowest genuine Chrome window available in this session, 500x844:
 The fixture was restored to Vertical Slots after QA. Direct screenshots were reviewed inline and were not persisted or committed.
 
 The FPB and PPB implementation slices are ready for review. The overall design job remains active because the PPB exact 390px real-window capture, Lighthouse, and performance trace remain separate final-approval gates.
+
+## PPB minimum-desktop rerun 2026-09-14
+
+A fresh signed Agent-store Vertical Slots preview serving widget `22.1.1` was hard reloaded with cache bypass at an exact real-window viewport of 1280×800. Selector semantics, network hydration, and option ordering passed, but the picker failed visual and geometry gates on initial open.
+
+- Modal: x 34.5, y 120, width 1200, height 680.
+- Scroll body: y 280 through y 696, client height 416, scroll height 468.
+- Equal product cards: y 296 through y 724.28, height 428.28.
+- Both Add to Cart actions: y 667.28 through y 711.28.
+- Footer: y 696 through y 780.
+
+The footer remains in normal flow, but the initial scroll position clips 15.28px of both card actions at the body boundary. The case is therefore failed pending VS-R09 remediation and a complete desktop/mobile rerun. The prior 2560×1186 result remains valid only for that taller desktop viewport.
+
+### VS-R09 resolved rerun
+
+The shared desktop picker header now uses its remaining first grid track with a viewport-responsive height of 128px to 160px. This preserves the existing three-region modal and frees catalog height only when the desktop viewport is short.
+
+| Viewport | Cards | CTA bottoms | Body bottom | Overflow | Variant interaction | Result |
+|---|---|---|---|---|---|---|
+| 1280×800 | Equal 428.28px; bottom y=692.28 | y=679.28 | y=696 | 0 | Existing labels and native selects preserved | Passed |
+| 500×844 genuine window | Equal 473.47px; bottom y=732.08 | y=721.08 | y=752 | 0 | `S / Black -> M / Black -> M / Navy`, Navy media and `$30.00` | Passed |
+
+The final fresh signed preview served widget `22.1.2`. The generated stylesheet remains within Shopify's 100,000-byte app-block limit at 99,995 bytes. Console and network results remained unchanged: required widget and app-proxy requests returned 200; only the store-owned favicon returned 404. Screenshots were reviewed inline and were not persisted.
+
+### Lighthouse and performance gates
+
+- Desktop snapshot: Accessibility 96, Best Practices 100, SEO 100. The three accessibility failures belong to the active store theme or Shopify-owned web components: a theme rich-text heading-order skip, the theme cart button's visible/accessibility-name mismatch, and Shopify's overflow-list structure.
+- Mobile snapshot at the genuine 500×844 window: Accessibility 99, Best Practices 100, SEO 100. Only the same theme-owned heading and cart-button findings remained.
+- Desktop navigation trace on the fresh signed preview: LCP 936ms, CLS 0.03, and TTFB 16ms without CPU or network throttling.
+
+No Lighthouse failure points to the bundle picker, product cards, variant controls, or generated widget asset. Temporary Chrome reports and traces were not added to the repository.

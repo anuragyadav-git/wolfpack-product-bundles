@@ -393,8 +393,8 @@
 @media (min-width: 768px) {
   .bw-bs-header {
     display: grid;
-    grid-template-rows: 86px 47px 27px;
-    height: 160px;
+    grid-template-rows: 1fr 47px 27px;
+    height: clamp(128px, 16vh, 160px);
     padding: 0 20px;
   }
 

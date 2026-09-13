@@ -1,40 +1,69 @@
 {
   "schema_version": 1,
-  "case_id": "",
-  "viewport": "",
-  "state": "",
+  "case_id": "ppb-vertical-slots-desktop",
+  "viewport": "1280x800",
+  "state": "picker-open-two-dimensional-selector",
   "required": true,
   "gates": {
-    "functional": "not-run",
-    "visual": "not-run",
-    "geometry": "not-run",
-    "responsive": "not-run",
-    "console": "not-run",
-    "network": "not-run",
-    "accessibility": "not-run",
-    "performance": "not-run",
-    "non_regression": "not-run"
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed-with-host-width-gate",
+    "console": "passed-with-allowlist",
+    "network": "passed",
+    "accessibility": "passed-for-exercised-controls",
+    "performance": "passed",
+    "non_regression": "passed-for-remediated-surface"
   },
-  "performance_reason": "",
+  "performance_reason": "Desktop reload trace on the fresh signed preview recorded LCP 936ms and CLS 0.03 without CPU or network throttling.",
   "evidence": {
-    "snapshot": "",
+    "snapshot": "Direct Chrome accessibility snapshot reviewed inline on page 220.",
     "screenshots": {
       "before": "",
       "after": "",
       "element": {"actual": "", "baseline": "", "diff": "", "comparison_summary": ""},
       "viewport": {"actual": "", "baseline": "", "diff": "", "comparison_summary": ""}
     },
-    "console": "",
-    "network": "",
-    "accessibility": "",
-    "lighthouse": {"desktop": "", "mobile": ""},
-    "performance_trace": null
+    "console": "No widget exception or hydration error; store-owned /favicon.ico returned 404.",
+    "network": "Required widget assets and app-proxy hydration requests returned HTTP 200.",
+    "accessibility": "Size and Color are labeled native selects; Add to Cart actions remain named buttons and are fully visible at the tested desktop and narrow-window sizes.",
+    "lighthouse": {
+      "desktop": "Accessibility 96, Best Practices 100, SEO 100; failures were store-theme or Shopify-owned.",
+      "mobile": "Accessibility 99, Best Practices 100, SEO 100; failures were store-theme owned."
+    },
+    "performance_trace": "LCP 936ms; CLS 0.03; TTFB 16ms; unthrottled desktop navigation trace."
   },
-  "assertions": [],
+  "assertions": [
+    {
+      "name": "picker cards remain fully visible above the footer boundary",
+      "status": "passed",
+      "evidence": "At 1280x800 the scroll body ends at y=696, both cards end at y=692.28, and both actions end at y=679.28. At 500x844 the body ends at y=752, both cards end at y=732.08, and both actions end at y=721.08."
+    },
+    {
+      "name": "two-dimensional selectors remain above price and CTA",
+      "status": "passed",
+      "evidence": "Selector ends at y=646.28, price ends at y=667.28, and action follows at y=667.28 through y=711.28."
+    }
+  ],
   "observations": {
-    "console": {"violations": [], "allowlisted": []},
+    "console": {"violations": [], "allowlisted": ["GET /favicon.ico 404"]},
     "network": {"violations": [], "expected_analytics": []}
   },
   "waivers": [],
-  "retry_history": []
+  "retry_history": [
+    {
+      "attempt": 1,
+      "at": "2026-09-14T06:30:00Z",
+      "classification": "product-geometry",
+      "result": "failed",
+      "evidence": "Fresh signed preview, cache-bypassed reload, exact 1280x800 real Chrome window, widget 22.1.1."
+    },
+    {
+      "attempt": 2,
+      "at": "2026-09-14T07:10:00Z",
+      "classification": "recovered",
+      "result": "passed",
+      "evidence": "Fresh signed preview serving widget 22.1.2 at exact 1280x800, plus the genuine 500x844 rerun after the responsive header correction; screenshots reviewed inline and not persisted."
+    }
+  ]
 }

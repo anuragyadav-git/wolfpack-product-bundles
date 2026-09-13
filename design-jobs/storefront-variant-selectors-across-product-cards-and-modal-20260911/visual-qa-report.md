@@ -5,7 +5,7 @@ title: Storefront Variant Selectors Visual QA Report
 type: design-job-qa-report
 status: active
 summary: Records semantic visual review of FPB cards with adjacent no-variant and two-dimensional selector products.
-last_audited: 2026-09-12
+last_audited: 2026-09-14
 owners:
   - Aditya Awasthi
 domains:
@@ -59,3 +59,11 @@ Artifact status: complete
 ## Baseline and comparison status
 
 Direct semantic and measured geometry review passes for the executed FPB cases at desktop and a real 390px Chrome width. No persisted PNG diff is claimed because investigation screenshots were intentionally kept out of the repository. Broader PPB and modal coverage remains in the active design job.
+
+## Resolved minimum-desktop remediation
+
+| Region | Reference | Actual | Difference | Severity | Measured evidence | Canonical owner | Required fix |
+|---|---|---|---|---|---|---|---|
+| PPB Vertical Slots picker at 1280×800 | Product cards and Add to Cart actions are fully visible on initial open above the normal-flow footer | Equal 428.28px cards end at y=692.28 and both CTAs end at y=679.28 before the y=696 body/footer boundary | None after remediation | ACCEPTED | Cards retain a 3.72px boundary gap; CTAs retain 16.72px; zero overflow | Shared PPB bottom-sheet header/body/footer layout | None |
+
+The genuine 500×844 narrow-window rerun also passed: equal 473.47px cards, fully visible 44px actions, zero overflow, and stable `M / Navy` selection with the expected Navy image and `$30.00` amount. Exact 390px PPB evidence remains constrained by the host Chrome minimum width and is not claimed.
