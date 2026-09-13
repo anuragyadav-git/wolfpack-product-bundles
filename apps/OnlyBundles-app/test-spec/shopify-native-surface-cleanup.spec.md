@@ -5,7 +5,7 @@ title: Shopify Native Surface Cleanup Test Spec
 type: test-spec
 status: active
 summary: Defines Wolfpack-owned behavior retained while Shopify-native authentication, Storefront, app-extension, Save Bar, modal, and Web Vitals wrappers are removed.
-last_audited: 2026-09-09
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -71,7 +71,8 @@ Retain tests for Wolfpack validation, transformation, and fail-closed policy whi
 
 - [x] Official Prisma session storage is configured with expiring offline access tokens.
 - [x] The legacy offline-token compatibility helper is removed after the configured database reported zero legacy sessions.
-- [ ] SIT and production each report zero legacy offline sessions before their respective release.
+- [x] SIT reports zero legacy offline sessions before release.
+- [ ] Production reports zero legacy offline sessions before release; the 2026-09-12 audit found 57 installed-shop sessions without refresh metadata.
 - [x] Signed app-proxy routes use Shopify's native Storefront context and reject a missing installed-shop session.
 - [x] Manual Storefront-token creation, persistence, direct-host clients, and CORS fallbacks are removed.
 - [x] App-embed state is derived from native extension resources and the current-theme editor deep link.
