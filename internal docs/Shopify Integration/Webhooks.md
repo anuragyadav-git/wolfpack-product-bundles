@@ -5,7 +5,7 @@ title: Webhooks
 type: architecture-note
 status: active
 summary: Defines authenticated Remix webhook ingress, active Shopify subscriptions, Inngest handoff, and delivery-volume safeguards.
-last_audited: 2026-09-13
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -166,7 +166,7 @@ emitted them.
 
 The original 2026-08-31 CLI audit found production version
 `wolfpack-product-bundles-280` active. A fresh read-only Shopify CLI inventory on
-2026-09-13 found production version `wolfpack-product-bundles-294` active, while
+2026-09-14 found production version `wolfpack-product-bundles-294` active, while
 SIT still had `wolfpack-bundles-sit-404` from 2026-08-17 active and SIT versions
 405 through 415 inactive. The remediation's `/webhooks` TOML contract is
 therefore not active in SIT yet. A future approved release must deploy the
