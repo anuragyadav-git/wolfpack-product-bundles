@@ -5,7 +5,7 @@ title: Configure Polaris Choice and Action Semantics Test Spec
 type: test-spec
 status: active
 summary: Defines canonical mutually exclusive choice grouping and accessible action behavior for FPB and PPB configure surfaces.
-last_audited: 2026-09-11
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -36,7 +36,7 @@ keywords:
 
 ## Purpose
 
-Keep mutually exclusive configure choices in one accessible group and preserve accessible names and route-owned callbacks for icon actions. The currently served App Home runtime has no horizontal `s-choice-list` contract, so the rule-mode exception uses native radios inside `s-stack` without custom radio styling.
+Keep mutually exclusive configure choices in one accessible group and preserve accessible names and route-owned callbacks for icon and full-width actions. The current App Home `s-choice-list` contract has no inline layout and forces its internal fieldset into a column, so rule mode keeps one native radio group inside an inline `s-stack` as the smallest documented-platform gap exception. Unsupported attributes and shadow-DOM manipulation are prohibited.
 
 ## Test Cases
 
@@ -52,6 +52,8 @@ Keep mutually exclusive configure choices in one accessible group and preserve a
 | 6   | Use an icon-bearing configure action            | Replace, sync, add, or change-icon action is rendered | The action has a non-empty accessible name and invokes its existing callback once | Accessibility semantics only; no visual placement assertion    |
 | 7   | Open FPB rule guidance                          | Activate Learn More                                   | The canonical FPB tutorial opens in a new tab                                        | Existing destination remains unchanged                         |
 | 8   | Open PPB rule guidance                          | Activate Learn More                                   | The canonical PPB tutorial opens in a new tab                                        | Existing destination remains unchanged                         |
+| 9   | Expand an FPB category rule                     | Activate its category header                          | The route-owned open-state setter receives the toggled category state                | Full-width surface is an `s-clickable`                         |
+| 10  | Expand a PPB category rule                     | Activate its category header                          | The route-owned open-state setter receives the toggled category state                | Full-width surface is an `s-clickable`                         |
 
 ## Acceptance Criteria
 
@@ -60,5 +62,7 @@ Keep mutually exclusive configure choices in one accessible group and preserve a
 - [x] Rendered icon actions expose non-empty accessible names without wrapper-owned click behavior.
 - [x] Focused tests, typecheck, modified-file ESLint, browser console verification, and visual Chrome QA pass.
 - [x] FPB and PPB rule-mode choices render inline through one accessible radio group without custom radio styling.
+- [x] FPB and PPB rule-mode choices remain in one inline row at supported desktop widths, verified in Chrome rather than a unit test.
+- [x] FPB and PPB category rule headers use native full-width `s-clickable` actions and retain their existing open-state callbacks.
 - [x] FPB and PPB Learn More links remain at the top-right of the title row at desktop and supported narrow widths.
 - [x] No unit test asserts CSS, class names, or visual placement.

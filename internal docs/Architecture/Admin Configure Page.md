@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-09-11
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -260,14 +260,17 @@ live in an `s-menu`; Shopify owns its open state, focus, keyboard behavior, and
 dismissal, so neither configure route keeps a parallel menu-state flag. Custom
 HTML buttons remain limited to
 interaction shapes without a Polaris equivalent: step, category, and tab
-navigation chips; drag handles and complex accordion headers; the guided-tour
+navigation chips; drag handles; the inline FPB/PPB rule-mode radio group; the guided-tour
 overlay; and controls projected into App Bridge title bars, save bars, or the
 maximum-size template modal. Those exceptions keep only their local interaction
 role and must not duplicate Shopify-owned dialog, focus, or form behavior.
 An accordion row with compact actions uses sibling interaction owners: one
 `s-clickable` owns only the label-and-chevron expansion target, while clone,
 delete, or other `s-button` commands remain outside it. A custom `role="button"`
-container must never contain Polaris buttons.
+container must never contain Polaris buttons. Category-rule accordion headers
+in both configure flows are full-width `s-clickable` surfaces with a
+Shopify-owned chevron and divider; they do not retain a parallel HTML button or
+custom hover state.
 
 FPB and PPB Bundle Level CSS share the same disclosure contract. One padded,
 full-width `s-clickable` header owns the complete label-and-chevron row,
@@ -279,7 +282,11 @@ Mutually exclusive modes normally use one Shopify-owned `s-choice-list` per
 question, with every valid `s-choice` as a direct child and the current value
 supplied through the list's `values` property. Widget presentation, progress
 presentation, and subscription purchase scope must not be split into
-independent one-item choice lists. Icon-bearing actions provide a localized
+independent one-item choice lists. Rule-mode selection is the narrow exception:
+the current App Home choice-list API forces its shadow-DOM fieldset into a column
+and exposes no horizontal direction. FPB and PPB therefore share one semantic
+native radio group inside an inline `s-stack`; unsupported attributes and
+shadow-DOM manipulation are prohibited. Icon-bearing actions provide a localized
 `accessibilityLabel` even when their visible label is expected to render; this
 keeps their accessible name stable during Polaris custom-element registration
 and route transitions without adding a wrapper-owned click target.

@@ -150,9 +150,9 @@ export function FpbStepRuleModeContent({
                 key={cat.id ?? catIndex}
                 className={styles.categoryRuleAccordion}
               >
-                <button
-                  type="button"
-                  className={styles.categoryRuleHeader}
+                <s-clickable
+                  inlineSize="100%"
+                  padding="base"
                   aria-expanded={isRulesOpen}
                   onClick={() =>
                     setCategoryRulesOpen((prev: Record<string, boolean>) => ({
@@ -161,13 +161,23 @@ export function FpbStepRuleModeContent({
                     }))
                   }
                 >
-                  <span>
+                  <s-stack
+                    direction="inline"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap="small"
+                  >
+                    <s-text type="strong">
                     {translateAdmin("adminDynamic.categoryRules", {
                       category: categoryLabel,
                     })}
-                  </span>
-                  <span aria-hidden="true">{isRulesOpen ? "⌃" : "⌄"}</span>
-                </button>
+                    </s-text>
+                    <s-icon
+                      type={isRulesOpen ? "chevron-up" : "chevron-down"}
+                    />
+                  </s-stack>
+                </s-clickable>
+                {isRulesOpen ? <s-divider /> : null}
                 {isRulesOpen && (
                   <div className={styles.categoryRuleBody}>
                     <p className={styles.categoryRuleHelp}>

@@ -9,6 +9,7 @@ import { PpbStepFlowCard } from "../../../app/routes/app/app.bundles.product-pag
 import { PpbStepRulesList } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbStepRulesList";
 import { PpbStepConfigCard } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbStepConfigCard";
 import { StepSetupSection } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupSection";
+import { FpbStepRuleModeContent } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/StepSetupRuleModeContent";
 import {
   CommonConfigureSidebar,
   CommonConfigureSupplement,
@@ -274,6 +275,81 @@ describe("native configure actions", () => {
 
     clickAction("stepsetuprulemodecontent.addRule");
     expect(addCategoryConditionRule).toHaveBeenCalledWith("step-1", 0);
+  });
+
+  it("delegates the PPB category-rule header through a native clickable", () => {
+    const setCategoryRulesOpen = jest.fn();
+    const view = PpbCategoryRulesList({
+      adapter: {
+        addCategoryConditionRule: jest.fn(),
+        categoryRulesOpen: {},
+        removeCategoryConditionRule: jest.fn(),
+        setCategoryRulesOpen,
+        updateCategoryAutoNextRule: jest.fn(),
+        updateCategoryConditionRule: jest.fn(),
+      },
+      step: { id: "step-1" },
+      stepCategories: [
+        { id: "category-1", name: "Category 1", conditions: [] },
+      ],
+    });
+    const rootChildren = React.Children.toArray(
+      (view as React.ReactElement).props.children
+    );
+    const categoryAccordion = rootChildren[0] as React.ReactElement;
+    const header = React.Children.toArray(categoryAccordion.props.children).find(
+      (child) => React.isValidElement(child) && child.type === "s-clickable"
+    ) as React.ReactElement | undefined;
+
+    expect(header).toBeDefined();
+    header?.props.onClick();
+    const updater = setCategoryRulesOpen.mock.calls[0][0];
+    expect(updater({})).toEqual({ "step-1__category-1": false });
+  });
+
+  it("delegates the FPB category-rule header through a native clickable", () => {
+    const setCategoryRulesOpen = jest.fn();
+    const view = FpbStepRuleModeContent({
+      step: {
+        id: "step-1",
+        StepCategory: [
+          { id: "category-1", name: "Category 1", conditions: [{}] },
+        ],
+      },
+      rules: {
+        addCategoryConditionRule: jest.fn(),
+        addStepConditionRule: jest.fn(),
+        categoryRulesOpen: {},
+        clearCategoryConditionRules: jest.fn(),
+        clearStepConditions: jest.fn(),
+        removeCategoryConditionRule: jest.fn(),
+        removeStepConditionRule: jest.fn(),
+        setCategoryRulesOpen,
+        stepConditions: {},
+        styles: {},
+        updateCategoryAutoNextRule: jest.fn(),
+        updateCategoryConditionRule: jest.fn(),
+        updateStepConditionRule: jest.fn(),
+      },
+    });
+
+    const findClickable = (
+      node: React.ReactNode
+    ): React.ReactElement | undefined => {
+      for (const child of React.Children.toArray(node)) {
+        if (!React.isValidElement(child)) continue;
+        if (child.type === "s-clickable") return child;
+        const nested = findClickable(child.props.children);
+        if (nested) return nested;
+      }
+      return undefined;
+    };
+    const header = findClickable(view);
+
+    expect(header).toBeDefined();
+    header?.props.onClick();
+    const updater = setCategoryRulesOpen.mock.calls[0][0];
+    expect(updater({})).toEqual({ "step-1__category-1": false });
   });
 
   it("delegates Add Rule to the PPB step-rule owner", () => {

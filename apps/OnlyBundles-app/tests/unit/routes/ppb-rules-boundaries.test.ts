@@ -64,7 +64,7 @@ describe("PPB rules boundaries", () => {
     const view = PpbCategoryRulesList(props);
     const disclosure = findElements(
       view,
-      (element) => element.type === "button"
+      (element) => element.type === "s-clickable"
     )[0];
     disclosure.props.onClick();
     const updater = setCategoryRulesOpen.mock.calls[0][0];

@@ -743,10 +743,6 @@
   composes: categoryRuleAccordion from "./bundle-configure-shared.module.css";
 }
 
-.categoryRuleHeader {
-  composes: categoryRuleHeader from "./bundle-configure-shared.module.css";
-}
-
 .categoryRuleBody {
   composes: categoryRuleBody from "./bundle-configure-shared.module.css";
 }

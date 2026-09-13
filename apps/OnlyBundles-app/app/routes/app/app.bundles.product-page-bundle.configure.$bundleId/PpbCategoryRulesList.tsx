@@ -59,9 +59,9 @@ export function PpbCategoryRulesList({
             key={cat.id ?? catIndex}
             className={productPageBundleStyles.categoryRuleAccordion}
           >
-            <button
-              type="button"
-              className={productPageBundleStyles.categoryRuleHeader}
+            <s-clickable
+              inlineSize="100%"
+              padding="base"
               aria-expanded={isRulesOpen}
               onClick={() =>
                 setCategoryRulesOpen((prev) => ({
@@ -70,13 +70,23 @@ export function PpbCategoryRulesList({
                 }))
               }
             >
-              <span>
-                {translateAdmin("adminDynamic.categoryRules", {
-                  category: categoryLabel,
-                })}
-              </span>
-              <span aria-hidden="true">{isRulesOpen ? "⌃" : "⌄"}</span>
-            </button>
+              <s-stack
+                direction="inline"
+                alignItems="center"
+                justifyContent="space-between"
+                gap="small"
+              >
+                <s-text type="strong">
+                  {translateAdmin("adminDynamic.categoryRules", {
+                    category: categoryLabel,
+                  })}
+                </s-text>
+                <s-icon
+                  type={isRulesOpen ? "chevron-up" : "chevron-down"}
+                />
+              </s-stack>
+            </s-clickable>
+            {isRulesOpen ? <s-divider /> : null}
             {isRulesOpen && (
               <PpbCategoryRuleBody
                 adapter={adapter}
