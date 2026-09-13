@@ -5,9 +5,9 @@
     "title": "Storefront variant selectors across product cards and modal",
     "status": "active",
     "stage": "VISUAL_REMEDIATION",
-    "revision": 4,
+    "revision": 5,
     "created_at": "2026-09-11T12:25:40Z",
-    "updated_at": "2026-09-13T19:12:33Z",
+    "updated_at": "2026-09-13T19:32:58Z",
     "owner": "engineering",
     "product": "Only Bundles storefront widgets",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
@@ -366,12 +366,13 @@
       "browser-test-plan.yaml": {
         "path": "browser-test-plan.yaml",
         "status": "approved",
-        "revision": 4,
-        "sha256": "b74c7d0b84f9b02988c3f6267fe281cfbaa195d60c8e4ceacc84001e304bf5b8",
+        "revision": 5,
+        "sha256": "1b16070e0cb2b9b4095539695ba015a2d7c78a91274b0dea9991bd5f99ac1164",
         "approved_by": "user",
-        "approved_at": "2026-09-13T19:08:27Z",
+        "approved_at": "2026-09-13T19:32:58Z",
         "evidence": [
-          "browser-case-result.json"
+          "browser-test-report.md",
+          "visual-qa-report.md"
         ]
       },
       "browser-test-report.md": {
@@ -655,6 +656,20 @@
         "superseded_at": "2026-09-13T19:08:27Z",
         "superseded_by": "user",
         "superseded_reason": "User authorized all Direction A revisions and end-to-end implementation; QA status updated after the verified rerun."
+      },
+      {
+        "path": "browser-test-plan.yaml",
+        "status": "approved",
+        "revision": 4,
+        "sha256": "b74c7d0b84f9b02988c3f6267fe281cfbaa195d60c8e4ceacc84001e304bf5b8",
+        "approved_by": "user",
+        "approved_at": "2026-09-13T19:08:27Z",
+        "evidence": [
+          "browser-case-result.json"
+        ],
+        "superseded_at": "2026-09-13T19:32:58Z",
+        "superseded_by": "user",
+        "superseded_reason": "Reconciled previously recorded FPB and PPB desktop Chrome evidence while retaining exact-390 PPB mobile cases as not run."
       }
     ]
   },
@@ -1339,6 +1354,22 @@
       "reason": "User authorized all Direction A revisions and end-to-end implementation; QA status updated after the verified rerun.",
       "evidence": [
         "browser-case-result.json"
+      ],
+      "event": "artifact-superseded",
+      "affected_artifacts": [
+        "browser-test-plan.yaml"
+      ]
+    },
+    {
+      "sequence": 54,
+      "at": "2026-09-13T19:32:58Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 5,
+      "reason": "Reconciled previously recorded FPB and PPB desktop Chrome evidence while retaining exact-390 PPB mobile cases as not run.",
+      "evidence": [
+        "browser-test-report.md",
+        "visual-qa-report.md"
       ],
       "event": "artifact-superseded",
       "affected_artifacts": [

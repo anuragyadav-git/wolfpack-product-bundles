@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
-  "revision": 4,
+  "revision": 5,
   "status": "approved",
   "chrome_mcp_required": true,
   "environment": "development",
@@ -120,8 +120,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "fpb-standard-mobile",
@@ -164,8 +167,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "fpb-classic-desktop",
@@ -208,8 +214,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "fpb-classic-mobile",
@@ -252,8 +261,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "fpb-compact-desktop",
@@ -296,8 +308,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "fpb-compact-mobile",
@@ -340,8 +355,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "fpb-horizontal-desktop",
@@ -384,8 +402,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "fpb-horizontal-mobile",
@@ -428,8 +449,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
     },
     {
       "id": "ppb-grid-desktop",
@@ -472,8 +496,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#ppb-direction-a-completion-evidence",
+        "visual-qa-report.md#baseline-and-comparison-status"
+      ]
     },
     {
       "id": "ppb-grid-mobile",
@@ -560,8 +587,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#ppb-direction-a-completion-evidence",
+        "visual-qa-report.md#baseline-and-comparison-status"
+      ]
     },
     {
       "id": "ppb-list-mobile",
@@ -648,8 +678,11 @@
         "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
         "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
       ],
-      "status": "not-run",
-      "evidence_links": []
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#ppb-direction-a-completion-evidence",
+        "visual-qa-report.md#baseline-and-comparison-status"
+      ]
     },
     {
       "id": "ppb-horizontal-slots-mobile",
@@ -740,7 +773,7 @@
       "evidence_links": [
         "browser-case-result.json",
         "browser-test-report.md#ppb-minimum-desktop-rerun-2026-09-14",
-        "visual-qa-report.md#open-remediation"
+        "visual-qa-report.md#resolved-minimum-desktop-remediation"
       ]
     },
     {
