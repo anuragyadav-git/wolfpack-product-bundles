@@ -1,5 +1,3 @@
-import transformModulesCommonjs from '@babel/plugin-transform-modules-commonjs';
-
 const storefrontTypeScriptMapper = {
   '^(\\.{1,2}/.*)\\.js$': '$1',
   '^(.*app/assets/(?:widgets|sdk)/.*)\\.js$': '$1.ts',
@@ -66,7 +64,7 @@ export default {
           diagnostics: false,
         }],
         '^.+/extensions/sidekick-bundle-data/src/.+\\.js$': ['babel-jest', {
-          plugins: [transformModulesCommonjs],
+          plugins: ['@babel/plugin-transform-modules-commonjs'],
         }],
       },
       moduleNameMapper: {
