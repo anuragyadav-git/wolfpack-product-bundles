@@ -1,3 +1,4 @@
+import { withBundleCartLock } from "../../../../lib/bundle-cart-lock.js";
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
@@ -367,19 +368,22 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
         delete item._runtimeProductId;
       });
 
+      const response = await withBundleCartLock(async () => {
       await this.syncBundleDetailsCartMetafield(
         `${offerId}_${sessionKey}`,
         sourceProperties,
         runtimeToken,
+        items.length,
       );
 
       // Add to Shopify cart
-      const response = await fetch('/cart/add.js', {
+      return fetch('/cart/add.js', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ items })
+      });
       });
 
       if (!response.ok) {

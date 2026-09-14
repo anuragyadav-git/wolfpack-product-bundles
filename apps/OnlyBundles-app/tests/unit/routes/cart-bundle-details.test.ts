@@ -1,6 +1,5 @@
 import {
   action,
-  mergeBundleDetailsValue,
   normalizeCartId,
   sanitizeDisplayProperties,
 } from "../../../app/routes/api/api.cart-bundle-details";
@@ -29,16 +28,7 @@ describe("cart bundle details", () => {
     expect(normalizeCartId(null, "cart-token")).toBe("gid://shopify/Cart/cart-token");
     expect(sanitizeDisplayProperties({ Bundle: "Starter", _private: "no" }))
       .toEqual({ Bundle: "Starter" });
-    expect(mergeBundleDetailsValue(
-      '[{"key":"old","displayProperties":{"A":"B"},"runtimeToken":"old-token"}]',
-      "new",
-      { C: "D" },
-      "signed-runtime-token",
-    ))
-      .toEqual([
-        { key: "old", displayProperties: { A: "B" }, runtimeToken: "old-token" },
-        { key: "new", displayProperties: { C: "D" }, runtimeToken: "signed-runtime-token" },
-      ]);
+
   });
 
   it("rejects a missing installed-shop session", async () => {
@@ -51,11 +41,14 @@ describe("cart bundle details", () => {
   });
 
   it("merges and writes bundle details through the native Storefront client", async () => {
-    mockGraphql
-      .mockResolvedValueOnce({ json: async () => ({ data: { cart: { metafields: [] } } }) })
-      .mockResolvedValueOnce({ json: async () => ({
-        data: { cartMetafieldsSet: { userErrors: [] } },
-      }) });
+    let value: string | null = null;
+    mockGraphql.mockImplementation(async (_query, { variables }) => ({ json: async () => {
+      if (variables.metafields) {
+        value = variables.metafields[0].value;
+        return { data: { cartMetafieldsSet: { metafields: [{ key: 'bundle_details', value }], userErrors: [] } } };
+      }
+      return { data: { cart: { id: 'cart', metafields: [{ value }], lines: { nodes: [], pageInfo: { hasNextPage: false } } } } };
+    } }));
 
     const response = await action({
       request: new Request("https://app.example/api/cart-bundle-details", {
@@ -63,7 +56,7 @@ describe("cart bundle details", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartToken: "cart-token",
-          bundleDetailsKey: "bundle-1",
+          pendingLineCount: 1, bundleDetailsKey: "bundle-1",
           displayProperties: { Bundle: "Starter" },
           runtimeToken: "signed-runtime-token",
         }),
@@ -73,7 +66,7 @@ describe("cart bundle details", () => {
     } as any);
 
     expect(response.status).toBe(200);
-    expect(mockGraphql).toHaveBeenCalledTimes(2);
+    expect(mockGraphql).toHaveBeenCalledTimes(3);
     const mutationVariables = mockGraphql.mock.calls[1][1].variables;
     expect(JSON.parse(mutationVariables.metafields[0].value)).toEqual([{
       key: "bundle-1",
@@ -90,7 +83,7 @@ describe("cart bundle details", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cartToken: "cart-token",
-          bundleDetailsKey: "bundle-1",
+          pendingLineCount: 1, bundleDetailsKey: "bundle-1",
           displayProperties: { Bundle: "Starter" },
         }),
       }),

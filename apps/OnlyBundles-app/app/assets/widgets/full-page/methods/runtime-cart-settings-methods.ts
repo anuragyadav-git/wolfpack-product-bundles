@@ -272,7 +272,7 @@ resolveFullPageOfferId() {
   return offerId.startsWith('FBP-') ? offerId : `FBP-${offerId}`;
 },
 
-async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any) {
+async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any, pendingLineCount: number) {
     const displayProperties = this.buildBundleDetailsDisplayProperties(sourceProperties);
     if (!bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
       throw new Error('Missing bundle cart authorization');
@@ -292,6 +292,7 @@ async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: an
         bundleDetailsKey,
         displayProperties,
         runtimeToken,
+        pendingLineCount,
       })
     });
 
