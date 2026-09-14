@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-09-10
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -36,6 +36,7 @@ source_paths:
   - app/lib/bundle-configure-loader.server.ts
   - app/routes/app/app._index.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
+  - app/routes/auth/auth.login/route.tsx
   - app/routes/app/app.attribution/AttributionDashboard.tsx
   - app/components/analytics/BundleConversionFunnel.tsx
 related_docs:
@@ -353,16 +354,17 @@ components. `app/root.tsx` loads the unversioned `polaris.js` script immediately
 after the required unversioned App Bridge script. The shared `/app` route no
 longer loads the React Polaris provider, Polaris translation JSON, the 444KB
 legacy stylesheet, or a global Redux provider. The standalone auth login route
-retains its route-local React Polaris styling.
+uses the same globally registered Polaris web components around its standard
+Remix form, so it does not require a React Polaris provider, translation bundle,
+or stylesheet either.
 
 The 2026-07-30 production chunk graph kept legacy React Polaris in
-`vendor-polaris-react`, App Bridge React hooks in
-`vendor-app-bridge-react`, Redux in `vendor-state`, and charts in
-`vendor-charts`. That production manifest showed no shared shell CSS
-and no Admin route violations: non-state routes avoided `vendor-state`,
-non-Analytics routes avoided `vendor-charts`, and embedded Admin routes avoided
-the legacy Polaris chunk and stylesheet. Analytics continued to request its
-lazy dashboard JavaScript and CSS in the same import boundary.
+`vendor-polaris-react`, App Bridge React hooks in `vendor-app-bridge-react`,
+Redux in `vendor-state`, and charts in `vendor-charts`. The later Shopify-native
+cutover removed the React Polaris, Redux, and chart dependencies and their
+manual chunks. App Bridge React remains because authenticated Admin routes use
+Shopify's hooks. Analytics continues to request its lazy dashboard JavaScript
+and CSS in the same import boundary.
 
 The 2026-09-07 Shopify-native remediation removed Redux, RTK Query, Recharts,
 and their manual Vite chunks from the deployable Admin. Configure and Dashboard
