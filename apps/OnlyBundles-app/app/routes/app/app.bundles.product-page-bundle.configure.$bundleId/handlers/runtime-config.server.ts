@@ -218,6 +218,7 @@ export function buildSyncBundleConfiguration(
   const bundleDesignPresetId = bundle.bundleDesignPresetId ?? null;
   return {
     shopId: bundle.shopId,
+    offerPolicy: bundle.offerPolicy ?? null,
     id: bundle.id,
     name: bundle.name,
     description: bundle.description || "",

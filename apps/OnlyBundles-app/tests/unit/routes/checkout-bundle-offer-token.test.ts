@@ -8,11 +8,19 @@ import {
   type RuntimeTokenPayload,
 } from "../../../app/services/cart-transform-runtime-token.server";
 
+const mockPublishedPolicy = jest.fn().mockResolvedValue({ revision: 'rev-1', pricingMode: 'standard' });
+jest.mock('../../../app/services/bundle-authorization-policy.server', () => ({
+  readPublishedBundlePolicy: (...args: unknown[]) => mockPublishedPolicy(...args),
+  buildBundleAuthorizationPolicy: jest.fn(() => ({ revision: 'rev-1', pricingMode: 'standard' })),
+}));
+jest.mock('../../../app/utils/variant-lookup.server', () => ({ getBundleProductVariantId: jest.fn().mockResolvedValue('gid://shopify/ProductVariant/999') }));
+
 jest.mock("../../../app/db.server", () => ({
   bundle: { findFirst: jest.fn() },
 }));
 
 jest.mock("../../../app/shopify.server", () => ({
+  unauthenticated: { admin: jest.fn().mockResolvedValue({ admin: {} }) },
   authenticate: {
     public: { checkout: jest.fn() },
   },
@@ -54,6 +62,7 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
 function parentPayload(shop = "test-shop.myshopify.com"): RuntimeTokenPayload {
   return {
     version: 1,
+    revision: "rev-1",
     shop,
     bundleId: "bundle-1",
     bundleType: "full_page",
@@ -91,12 +100,21 @@ describe("checkout bundle offer token route", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPublishedPolicy.mockResolvedValue({ revision: "rev-1", pricingMode: "standard" });
     process.env.SHOPIFY_API_SECRET = "test_api_secret";
     mockCheckoutAuth.mockResolvedValue({
       sessionToken: { dest: "https://test-shop.myshopify.com" },
       cors: (response: Response) => response,
     });
     mockDb.bundle.findFirst.mockResolvedValue(makeBundle());
+  });
+
+  it('rejects checkout add-on issuance from a stale parent revision', async () => {
+    mockPublishedPolicy.mockResolvedValue({ revision: 'new-revision', pricingMode: 'standard' });
+    const response = await call({ parentToken: tokenFor(), offerKey: 'tier-1', selectedVariantId: 'gid://shopify/ProductVariant/201', quantity: 1 });
+    expect(response.status).toBe(400);
+    expect(await response.json()).not.toHaveProperty('token');
+    expect(mockPublishedPolicy).toHaveBeenCalled();
   });
 
   it("rejects GET with a controlled method contract", async () => {

@@ -1,3 +1,6 @@
+import { buildBundleAuthorizationPolicy } from '../../../app/services/bundle-authorization-policy.server';
+import { buildFullPageBundleMetafieldConfig } from '../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server';
+import { buildSyncBundleConfiguration } from '../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server';
 import { createHmac } from "node:crypto";
 import { action, loader } from "../../../app/routes/api/api.cart-transform-runtime-token";
 import prisma from "../../../app/db.server";
@@ -73,6 +76,7 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
     shopId: "test-shop.myshopify.com",
     bundleType: "product_page",
     name: "Mix Bundle",
+    status: "active",
     shopifyProductId: "gid://shopify/Product/PARENT",
     steps: [
       {
@@ -111,7 +115,12 @@ describe("cart transform runtime token route", () => {
     (unauthenticated.admin as jest.Mock).mockResolvedValue({
       admin: {
         graphql: jest.fn().mockImplementation(async (query: string) => ({
-          json: async () => query.includes("ResolveRuntimeSellingPlanVariants")
+          json: async () => query.includes('BundlePolicyRevisions') ? await (async () => {
+            const bundle = await mockDb.bundle.findFirst.mock.results.at(-1).value;
+            const config = bundle.bundleType === 'full_page' ? buildFullPageBundleMetafieldConfig(bundle) : buildSyncBundleConfiguration(bundle, bundle.shopifyProductId);
+            const policy = buildBundleAuthorizationPolicy({ bundle: config, shop: bundle.shopId, parentVariantId: 'gid://shopify/ProductVariant/PARENT' });
+            return { data: { shop: { id: 'gid://shopify/Shop/1', policy: { compareDigest: 'digest', value: JSON.stringify({ [bundle.id]: { revision: policy.revision, pricingMode: policy.pricingMode } }) } } } };
+          })() : query.includes('ResolveRuntimeSelectionProducts') ? { data: { nodes: [{ id: 'gid://shopify/ProductVariant/501', product: { id: 'gid://shopify/Product/5' } }] } } : query.includes("ResolveRuntimeSellingPlanVariants")
             ? {
                 data: {
                   nodes: [{
@@ -134,8 +143,51 @@ describe("cart transform runtime token route", () => {
     });
   });
 
+  it.each([null, { revision: 'stale', pricingMode: 'standard' }])('does not sign unpublished or stale configuration: %j', async (published) => {
+    (unauthenticated.admin as jest.Mock).mockResolvedValue({ admin: { graphql: jest.fn().mockResolvedValue({ json: async () => ({ data: { shop: { id: 'gid://shopify/Shop/1', policy: { compareDigest: 'digest', value: JSON.stringify({ 'bundle-1': published }) } } } }) }) } });
+    const response = await action({ request: makeSignedRequest({ bundleId: 'bundle-1', bundleType: 'product_page', offerGroupId: 'group-1', components: [{ variantId: 'gid://shopify/ProductVariant/101', quantity: 1 }] }) } as any);
+    expect(response.status).toBe(409);
+    expect(await response.json()).not.toHaveProperty('token');
+  });
+
   afterAll(() => {
     process.env.SHOPIFY_API_SECRET = originalSecret;
+  });
+
+  it.each([
+    ["full_page", { scheduleMode: "one_time", endsAt: "2026-09-14T10:00:00Z" }, 403],
+    ["product_page", { scheduleMode: "one_time", startsAt: "2026-09-14T11:00:00Z" }, 403],
+    ["full_page", { scheduleMode: "one_time", startsAt: "2026-09-14T10:00:00Z" }, 200],
+    ["product_page", { scheduleMode: "one_time", endsAt: "invalid" }, 403],
+    ["full_page", { scheduleMode: "recurring", recurrenceFrequency: "weekly", recurrenceTimezone: "UTC", recurrenceAnchorDate: "2026-09-14", recurrenceWindowStartMinute: 600, recurrenceWindowEndMinute: 660 }, 200],
+    ["full_page", { scheduleMode: "recurring", recurrenceFrequency: "weekly", recurrenceTimezone: "UTC", recurrenceAnchorDate: "2026-09-14", recurrenceWindowStartMinute: 540, recurrenceWindowEndMinute: 600 }, 403],
+  ])("enforces %s schedule before issuing authorization: %j", async (bundleType, offerPolicy, status) => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-09-14T10:00:00Z"));
+    try {
+      mockDb.bundle.findFirst.mockResolvedValue(makeBundle({ bundleType, offerPolicy }));
+      const response = await action({ request: makeSignedRequest({
+        bundleId: "bundle-1", bundleType, offerGroupId: "FBP-bundle-1_ABC",
+        components: [{ variantId: "101", quantity: 1 }],
+      }), params: {}, context: {} } as any) as Response;
+      expect(response.status).toBe(status);
+      if (status === 403) {
+        expect(unauthenticated.admin).not.toHaveBeenCalled();
+        expect(await response.json()).not.toHaveProperty("token");
+      }
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it.each(["draft", "archived", "paused", undefined])("does not sign an unavailable bundle with status %s", async (status) => {
+    mockDb.bundle.findFirst.mockResolvedValue(makeBundle({ status }));
+    const response = await action({ request: makeSignedRequest({
+      bundleId: "bundle-1", bundleType: "product_page", offerGroupId: "bundle-1_GROUP",
+      components: [{ variantId: "101", quantity: 1 }],
+    }), params: {}, context: {} } as any) as Response;
+    expect(response.status).toBe(403);
+    expect(unauthenticated.admin).not.toHaveBeenCalled();
+    expect(await response.json()).not.toHaveProperty("token");
   });
 
   it("rejects GET without exposing a Remix missing-loader error", async () => {

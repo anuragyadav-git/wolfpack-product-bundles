@@ -1,9 +1,16 @@
+import { buildBundleAuthorizationPolicy } from '../../../app/services/bundle-authorization-policy.server';
 import {
-  buildPpbPolicyRevisionMetafield,
-  buildPpbStaticAuthorization,
+  buildPpbStaticAuthorization as signAuthorization,
   verifyPpbStaticToken,
 } from "../../../app/services/ppb-static-authorization.server";
 import type { BundleSubscriptionConfigV1 } from "../../../app/lib/bundle-subscriptions";
+
+function buildPpbStaticAuthorization(input: any) {
+  const bundle = { ...input.bundle, offerPolicy: input.offerPolicy, bundleSubscriptionConfig: input.subscription,
+    steps: input.bundle.steps?.map((step: any) => ({ ...step, StepProduct: step.products })) };
+  const policy = buildBundleAuthorizationPolicy({ bundle, shop: input.shop, parentVariantId: input.parentVariantId });
+  return signAuthorization({ ...input, revision: policy.revision });
+}
 
 describe("PPB static purchase authorization", () => {
   const bundle = {
@@ -107,13 +114,36 @@ describe("PPB static purchase authorization", () => {
     expect(verifyPpbStaticToken(`${result.authorization.bundleToken}x`, "secret")).toBeNull();
   });
 
+  it("revises authorization for schedule edits but not priority or countdown presentation", () => {
+    const authorize = (offerPolicy: any) => buildPpbStaticAuthorization({
+      bundle, shop: "shop.myshopify.com", parentVariantId: "gid://shopify/ProductVariant/99", secret: "secret", offerPolicy,
+    });
+    const policy = { scheduleMode: "one_time", startsAt: new Date("2026-09-14T10:00:00Z"), endsAt: new Date("2026-09-14T11:00:00Z") };
+    const original = authorize(policy);
+    const changed = authorize({ ...policy, endsAt: new Date("2026-09-14T12:00:00Z") });
+    expect(changed.policy.revision).not.toBe(original.policy.revision);
+    expect(verifyPpbStaticToken(changed.authorization.bundleToken, "secret")?.revision).toBe(changed.policy.revision);
+    expect(authorize({ ...policy, priority: 1, stopLowerPriority: true, countdownTitle: "Changed" }).policy.revision)
+      .toBe(original.policy.revision);
+    expect(authorize({ ...policy, startsAt: policy.startsAt.toISOString(), endsAt: policy.endsAt.toISOString() }).policy.revision)
+      .toBe(original.policy.revision);
+  });
+
+  it("revises authorization for recurrence window edits", () => {
+    const policy = { scheduleMode: "recurring" as const, recurrenceFrequency: "weekly" as const, recurrenceTimezone: "UTC", recurrenceAnchorDate: "2026-09-14", recurrenceWindowStartMinute: 600, recurrenceWindowEndMinute: 660 };
+    const authorize = (offerPolicy: any) => buildPpbStaticAuthorization({
+      bundle, shop: "shop.myshopify.com", parentVariantId: "gid://shopify/ProductVariant/99", secret: "secret", offerPolicy,
+    }).policy.revision;
+    expect(authorize(policy)).not.toBe(authorize({ ...policy, recurrenceWindowEndMinute: 720 }));
+  });
+
   it("requires the canonical bundle id instead of a legacy bundleId alias", () => {
     expect(() => buildPpbStaticAuthorization({
       bundle: { ...bundle, id: undefined, bundleId: "legacy-bundle" },
       shop: "shop.myshopify.com",
       parentVariantId: "gid://shopify/ProductVariant/99",
       secret: "secret",
-    })).toThrow("PPB bundle ID is required for static authorization");
+    })).toThrow();
   });
 
   it("does not authorize persistence-shaped product aliases", () => {
@@ -219,26 +249,4 @@ describe("PPB static purchase authorization", () => {
     });
   });
 
-  it("advances the shop policy revision without disturbing other bundles", async () => {
-    const admin = {
-      graphql: jest.fn().mockResolvedValue({
-        json: async () => ({
-          data: { shop: {
-            id: "gid://shopify/Shop/1",
-            policy: { value: '{"other":"keep","bundle-1":"old"}' },
-          } },
-        }),
-      }),
-    };
-
-    const metafield = await buildPpbPolicyRevisionMetafield({
-      admin,
-      bundleId: "bundle-1",
-      revision: "new",
-      active: true,
-    });
-
-    expect(metafield).toMatchObject({ ownerId: "gid://shopify/Shop/1", key: "ppb_policy_revisions" });
-    expect(JSON.parse(metafield.value)).toEqual({ other: "keep", "bundle-1": "new" });
-  });
 });

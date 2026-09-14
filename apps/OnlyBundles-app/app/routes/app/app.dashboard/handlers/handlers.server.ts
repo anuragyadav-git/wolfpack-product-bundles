@@ -1,3 +1,5 @@
+import { removePublishedBundlePolicy } from "../../../../services/bundle-authorization-policy.server";
+import { removeScheduledBundleDiscounts } from "../../../../services/scheduled-bundle-discount.server";
 /**
  * Dashboard Action Handlers
  *
@@ -227,6 +229,9 @@ export async function handleDeleteBundle(
     if (!bundle) {
       return json({ success: false, error: ERROR_MESSAGES.BUNDLE_NOT_FOUND }, { status: 404 });
     }
+
+    await removePublishedBundlePolicy(admin, bundleId);
+    await removeScheduledBundleDiscounts(admin, session.shop, bundleId);
 
     // Clean up app references and the app-owned generated parent product.
     if (bundle.shopifyProductId) {

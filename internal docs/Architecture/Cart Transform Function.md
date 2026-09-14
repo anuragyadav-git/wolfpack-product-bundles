@@ -5,7 +5,7 @@ title: Cart Transform Function
 type: architecture
 status: authoritative
 summary: Runtime-token-verified Shopify Cart Transform and Discount Function architecture, build ownership, and fail-closed pricing contract.
-last_audited: 2026-09-14
+last_audited: 2026-09-15
 owners:
   - engineering
 domains:
@@ -54,7 +54,7 @@ Shopify-hosted bundle policy and bounded product/variant line policies before
 the outage occurs. Both use HMAC-SHA256 and the secret stored inside the
 CartTransform owner's `$app.runtime_configuration` JSON.
 
-For v2, Cart Transform and Discount Function also read the shop's
+For both v1 and v2, Cart Transform and Discount Function read the shop's
 `$app.ppb_policy_revisions` map. A stale snapshot, changed bundle,
 altered role or discount, mismatched product/variant, per-line excess, or an
 aggregate quantity split across duplicate lines fails closed. The client never
@@ -129,6 +129,228 @@ No target migration remains for the active extension.
 
 ---
 
+## Scheduled checkout boundary
+
+Scheduled offers use Shopify automatic app discounts. Save and deployment general
+sync reconcile app-owned owners from paginated Shopify metadata, verify native
+resource settings, and then publish the current policy with `metafieldsSet` and
+`compareDigest`. Shopify is the owner registry; there are no mirrored discount-ID
+columns, scheduler jobs, or custom checkout clocks. Deletion revokes the published
+policy before removing the native owners and bundle parent.
+
+`scheduled_initial` covers one-time bundle pricing, initial-only subscription
+pricing and add-ons (`recurringCycleLimit: 1`). `scheduled_recurring` covers base
+subscription pricing when configured to recur (`recurringCycleLimit: 0`). Both
+reuse the existing Discount Function calculation code. The standard automatic,
+subscription and code paths reject scheduled policy ownership, preventing a
+second application of the same saving. Shopify owns combinations and the shared
+25-active-automatic-discount capacity; native errors fail synchronization.
+
+Both FPB and PPB require the current `{revision, pricingMode}` record in
+`$app.ppb_policy_revisions`. Issuance compares canonical saved configuration with
+that publication. Checkout add-on issuance also checks the current parent
+revision. Newly hydrated variants must have a Shopify-resolved product
+relationship; a browser-supplied product ID is insufficient. Add-on authorization
+is restricted to configured add-on roles and signed maximum percentage ceilings.
+This ceiling is not a claim of exact checkout-time add-on tier-threshold enforcement.
+
+Scheduled MERGE and direct-parent EXPAND retain the original Shopify price and
+append `transformedPricing` inside the existing signed runtime token. The receipt
+binds shop, bundle, parent variant, current revision, offer group, quantity,
+unit-price basis and percentage. Identity stays in the signed outer authorization;
+`transformedPricing` contains only group, quantity, unit price and percentage. Serde `RawValue` preserves original token
+fields without rebuilding subscription or presentation data. The native Discount
+Function verifies both outer authorization and receipt before applying savings.
+
+Shopify owns one-time `startsAt`/`endsAt`. Recurring owners use Shopify's local
+date and `timeAfter` predicates through `$app.scheduled_offer` input variables.
+Bounded weekly/monthly arithmetic skips nonexistent month days. The server uses
+Temporal's IANA transitions for both copies of repeated hours and skipped windows.
+A wholly skipped window still counts as a configured calendar occurrence.
+Priority selects storefront offers; it does not arbitrate existing carts.
+Countdowns are presentation only and currently render one-time deadlines; an old
+one-time deadline is never reused for an always-on or recurring offer.
+
+The private component-breakdown, component-count and computed savings attributes
+have no repository runtime consumers and are removed. Checkout uses Shopify's
+native discount allocations. `_bundle_total_retail_cents` remains for the existing
+checkout-offer threshold consumer, derived from the native original price.
+Public `component_pricing` and `component_quantities` metafields remain published.
+The user confirmed there are no existing external dependencies on those private
+attributes. Future integration contracts are assessed below.
+
+Critical `price_adjustment` now carries `componentQuantities`; malformed, missing,
+nonpositive or mismatched quantities reject expansion. Cart Transform reads neither
+the redundant quantity metafield nor the unused display-pricing metafield. Query
+cost is **26**, down from 32. Large display data remains outside pricing authorization.
+This is a coordinated writer/Function cutover requiring bundle synchronization;
+there is no legacy Function fallback.
+
+## Third-party consumption assessment
+
+Repository assessment on 2026-09-14 found no runtime reads of the removed
+`_bundle_components`, `_bundle_component_count`, `_bundle_total_price_cents`,
+`_bundle_total_savings_cents` or `_bundle_discount_percent` fields. Existing
+checkout adapters pass checkout URLs, invoke provider callbacks, or refresh the
+native cart; they do not construct a provider payload from these attributes.
+The SDK cart writer also does not consume them. User confirmation covers existing
+external custom dependencies; this is not certification of every third-party app.
+
+| Integration need | Supported data owner | Boundary |
+| --- | --- | --- |
+| Cart composition and quantities | Storefront `ComponentizableCartLine.lineComponents`, merchandise and quantity | Contains actual transformed components, not arbitrary catalog metadata |
+| Order/ERP/fulfillment grouping | Admin `LineItem.lineItemGroup` plus each component line's variant and quantity | Group by Shopify group ID; use native order lines for fulfillment |
+| Final payable prices and applied discounts | Native cart/order cost and discount allocations | Allocations describe Discount Function savings; standard Cart Transform price changes are not themselves native discount allocations |
+| Configured bundle display/composition | Retained public `component_pricing`, `component_reference`, `component_quantities` | Use the resolved app namespace and permitted API access; current catalog configuration is not a historical order snapshot |
+| Historical bundle-only markdown reporting | A specifically agreed reporting contract | Do not substitute current catalog prices or pre-checkout private savings for final Shopify totals |
+
+The direct-parent EXPAND path intentionally expands to the same parent variant.
+It therefore does not expose the configured underlying component SKUs as native
+fulfillment lines. MERGE does. Removing a title/price breakdown does not create
+this existing distinction, and retaining that breakdown would not make it an
+inventory or fulfillment contract. An integration needing component fulfillment
+must validate actual order lines; changing EXPAND inventory semantics is a separate
+product decision, not part of this query-cost change.
+
+Rebuy documents Cart Transform bundle display, and Shopflo documents Shopify-backed
+discounts. Neither establishes that all of our scheduled/subscription combinations
+work through their checkout. GoKwik, Shopflo, Zecpay and Shiprocket/Fastrr handoffs
+still require provider QA for native automatic discounts, expiration and component
+order data. Standard integration codes deliberately cannot grant scheduled savings.
+Do not restore unused attributes speculatively or create provider-specific pricing
+copies; add an adapter only for a demonstrated consumer requirement.
+
+Sources: [native cart components](https://shopify.dev/docs/api/storefront/latest/objects/ComponentizableCartLine),
+[native order grouping](https://shopify.dev/docs/api/admin-graphql/latest/objects/LineItemGroup),
+[actual discount allocations](https://shopify.dev/docs/api/admin-graphql/latest/objects/DiscountAllocation),
+[Rebuy bundle behavior](https://help.rebuyengine.com/en/articles/10593786-faq-rebuy-s-bundle-builder-features-settings-and-troubleshooting),
+[Shopflo discount support](https://intercom.help/shopflo-a9de00772be8/en/articles/10115196-create-and-manage-discounts-on-shopflo).
+
+## Cart payload boundary
+
+`cart-bundle-details.ts` is shared by the app-proxy and direct PPB Storefront
+writers. It paginates native cart lines, recognizes parent and component offer
+attributes, retains active entries plus the pending bundle, and removes stale
+entries. The complete serialized JSON is limited to 10,000 UTF-8 bytes before
+writing. Incomplete reads, malformed data, mutation failures, changing pagination
+snapshots and mismatched readback fail without a cart-add retry.
+
+FPB, PPB and SDK additions hold the same native Web Lock through metafield sync
+and cart add. Browsers without Web Locks reject the operation. This coordinates
+tabs on one origin; it does not provide atomicity across independent devices or
+third-party cart writers. Shopify cart metafields have no compareDigest input.
+Readback detects observed overwrites but cannot eliminate a later independent write.
+
+The 10,000-byte metafield guard is not a whole-Function resource guarantee. Release
+QA must measure compiled WASM, full input/output and instructions with representative
+multi-bundle carts and large static line authorizations. Shopify's documented limits
+are 256,000 binary bytes, 128,000 input bytes, 20,000 output bytes and 11 million
+instructions for up to 200 cart lines. Hosted expiry, recurrence, country, subscription,
+add-on and combination checks remain required before production certification.
+
+### Tested selection limit and native resource evidence (2026-09-15)
+
+The supported boundary is **10 bundle cart lines across the entire cart**, including
+components, gifts and add-ons. Ordinary merchandise lines do not consume this
+allowance. Native bundle children count individually, without also counting their
+parent. This limits selected lines, not units per line or the number of choices
+available in a bundle catalog.
+
+FPB, PPB and SDK submit the pending line count to the shared cart preflight, which
+adds existing bundle lines across all pages and rejects overflow before metafield
+mutation or cart submission. Token issuance also rejects oversized selections.
+The Cart Transform independently rejects more than 10 bundle lines before expensive
+authorization; its native `blockOnFailure: true` setting blocks bypass submissions.
+Both Discount Functions stop before authorization when their signed bundle-line
+count exceeds 10. No new validation extension or custom checkout service is needed.
+
+Before enforcement, 40 static component lines passed but 100 exceeded instructions.
+Add-ons exposed a tighter boundary: 20 static add-on lines used 17.48 million
+instructions. The user approved a tested selection cap; 10 is the conservative
+common boundary supported by the following current binary measurements.
+
+Rust compile ownership follows Function behavior. Signature verification is shared;
+`signing.rs` is compiled by Cart Transform at runtime and by Discount tests only.
+Standard checkout-code candidates are a child module loaded only by the standard
+Discount binary. Shared add-on/subscription builders take a typed eligibility scope:
+the standard owner checks standard policy mode, while the scheduled owner also checks
+its exact shop, bundle and revision. No unused-code lint suppression is required.
+
+The isolated builds use the configured stable Rust compiler and the installed
+Shopify CLI 4.8.0 trampoline/Binaryen pipeline. Final WASM sizes: Cart Transform
+255,966 bytes, standard Discount 206,427 bytes, scheduled Discount 244,369 bytes.
+All fit 256,000 bytes; the Cart Transform has only 34 bytes of binary headroom and
+must be remeasured after changes.
+
+Production-length identifiers exposed a failure missed by the original short-ID
+fixture: 10 static scheduled add-ons consumed 13,191,830 instructions. The shared
+add-on builder now verifies each distinct signed bundle token once per invocation
+and each line authorization once, reusing those validated results for quantity
+aggregation and candidate construction. The scheduled parent-receipt pass skips
+add-on lines, whose authorization belongs to that builder. Invalid line signatures
+remain independently rejected; policy revision, country, scope and quantity checks
+remain mandatory. This is invocation-local reuse, with no persisted authorization
+cache or additional service.
+
+| Full-query fixture / Function | Input bytes | Output bytes | Instructions | Result |
+| --- | --- | --- | --- | --- |
+| 10 production-length static add-ons / scheduled Discount | 17736 | 1284 | 3,375,040 | Pass |
+| 10 add-ons, wide bundle policy, 9,918-byte published-policy map, 190 ordinary lines / scheduled Discount | 121178 | 1284 | 7,242,698 | Pass |
+| Same configuration, 240 ordinary lines / scheduled Discount | 141278 | 1284 | 7,939,784 | Pass under proportional 250-line limits |
+| 10 bundle groups, exact 10,000-byte cart metafield, 9,783-byte policy map, 190 ordinary lines / Transform | 110492 | 17274 | 10,229,431 | Pass, limited instruction/output headroom |
+
+The checked-in native suite is `tests/native/function-resources.test.mjs`, with
+synthetic, non-secret fixtures under `tests/fixtures/functions/`. Run it from the
+app directory against binaries produced by the configured Shopify compilation,
+trampoline and optimization pipeline:
+
+```bash
+SHOPIFY_FUNCTION_RUNNER=<installed-cli-function-runner> \
+SCHEDULED_DISCOUNT_WASM=<compiled-scheduled-discount.wasm> \
+CART_TRANSFORM_WASM=<compiled-cart-transform.wasm> \
+node --test tests/native/function-resources.test.mjs
+```
+
+All five cases pass, including an independently tampered line sharing a valid bundle
+token. The suite asserts actual binary, complete serialized input, output and
+instruction budgets; native runner `success: true` alone is insufficient. Shopify
+scales input/output/instruction limits proportionally above 200 cart lines. The
+UTF-8 unit boundary separately accepts exactly 10,000 bytes and rejects 10,001,
+including multibyte characters and JSON escapes.
+
+These measurements cover representative complete payloads, not arbitrary token
+sizes, quantities or ordinary-cart data. The 10-line cap and 10,000-byte metafield
+guard remain required, and the 34-byte Transform binary headroom must be rechecked
+after every Function change.
+
+Real tokens emitted by the native Cart Transform were passed into the compiled
+scheduled Discount Function in a 10-parent cart. The matching owner produced its
+20% candidate in 2,224,925 instructions; expiration, wrong country, stale revision
+and a tampered token produced no discount. The standard owner produced no scheduled
+candidate. This proves local binary interoperability, not Shopify-hosted expiry or
+provider behavior.
+
+Hosted SIT preparation found a separate native update constraint: nested automatic
+discount metafield updates must use `$app` namespace plus key without also including
+the existing metafield ID. Combining those identities was rejected by Shopify.
+The scheduled-owner service now uses namespace/key consistently; a regression test
+covers resync of an existing owner, and the same hosted preview preparation then
+returned `ready: true`.
+
+**Hosted release gate remains open.** On `agent-5sfidg3m`, the temporary unlisted
+`Checkout Release QA 2026-09-15` fixture was prepared, but a fresh Admin preview and
+cache-cleared reload still requested an invalid `dev-ae97e563-1966-487e-8446-af737be1702b`
+theme-extension handle. Bundle JS/CSS failed with `net::ERR_BLOCKED_BY_ORB` and the
+widget version was absent. Clean and restart the SIT dev preview using the documented
+manual workflow before testing checkout expiry, recurrence, country, subscriptions,
+add-ons, combinations and overflow. No hosted checkout or third-party provider
+compatibility is certified by these local resource results.
+
+Native contracts: [Function limits](https://shopify.dev/docs/api/functions/latest#limitations),
+[automatic discount input](https://shopify.dev/docs/api/admin-graphql/latest/input-objects/DiscountAutomaticAppInput),
+[metafieldsSet](https://shopify.dev/docs/api/admin-graphql/latest/mutations/metafieldsSet),
+[componentizable cart lines](https://shopify.dev/docs/api/storefront/latest/objects/ComponentizableCartLine).
+
 ## Language & Build
 
 - **Language**: Rust
@@ -138,14 +360,14 @@ No target migration remains for the active extension.
 - **Output**: `extensions/bundle-cart-transform-rs/target/wasm32-unknown-unknown/release/`
 
 The release build uses Rust size optimization and Shopify CLI's compatible
-WASM optimizer. Keep the authorization payload deserialization shared between
-v1 and v2 and deserialize only fields consumed by this Function; unknown signed
-payload fields are intentionally ignored. The current Shopify-optimized
-artifact is 284,120 bytes after cart-metafield authorization and passes
-`shopify app function build`. Country authorization uses one signed `countryRule` string
-(`include:CA,US`, `exclude:US`, or empty when disabled) instead of adding a
-nested Rust JSON deserializer. This is an internal signed-token ABI; the Admin
-and persisted offer policy remain directly typed.
+trampoline and WASM optimizer. Use an isolated Cargo target directory for profiling
+while the user's dev watcher is active, so QA does not compete for build artifacts.
+Shopify `jsonValue` and native SDK value access read runtime settings and current
+policy records without reparsing the shop JSON map for every bundle. This follows
+[Shopify's Rust JSON metafield guidance](https://shopify.dev/docs/apps/build/functions/programming-languages/rust-for-functions).
+HMAC-SHA256 uses RustCrypto with constant-time verification and a shared Function
+module; Node crypto fixtures protect the existing signature contract. Do not infer
+release readiness from a successful compiler exit alone.
 
 MERGE and EXPAND share a cart-line-index bitmap. Do not replace it with cloned
 line IDs in a `HashSet`: line indices are already stable for one Function run,
@@ -220,7 +442,7 @@ The token payload contains:
 - parent bundle variant GID
 - price adjustment config copied from current bundle pricing
 
-The HMAC covers the base64url payload string, so Rust verifies the signature before decoding JSON. If `runtimeTokenSecret` is configured inside the CartTransform owner's `$app.runtime_configuration` and a line token is missing, tampered, or mismatched against actual cart line variants/quantities, the function emits no merge or add-on discount. The same JSON also carries `bundleCartLineMessaging`; consolidating those settings keeps the Function input query at Shopify's complexity limit of 30.
+The HMAC covers the base64url payload string, so Rust verifies the signature before decoding JSON. If `runtimeTokenSecret` is configured inside the CartTransform owner's `$app.runtime_configuration` and a line token is missing, tampered, or mismatched against actual cart line variants/quantities, the function emits no merge or add-on discount. The same JSON also carries `bundleCartLineMessaging`; consolidating those settings reduces the Function input query cost.
 
 Offer analytics must not add separate Cart Transform input attributes. The
 storefront nests its normalized `offerAnalytics` object inside the existing
@@ -344,18 +566,14 @@ approval for that exact operation.
 
 ### BXY rounding
 
-Shopify's merge operation can apply only one parent `percentageDecrease`, so mixed-price Buy X Get Y bundles use a percentage equivalent to the exact reward value. Component detail rows may need proportional allocation, but parent cart metadata must use whole-bundle cents derived from the rounded discount amount. Do not sum rounded per-component bundle cents into `_bundle_total_price_cents`; that can drift by one cent for mixed-price BXY groups. The authoritative parent attributes are:
-
-- `_bundle_total_retail_cents`
-- `_bundle_total_price_cents`
-- `_bundle_total_savings_cents`
+Shopify's merge operation can apply only one parent `percentageDecrease`, so mixed-price Buy X Get Y bundles use a percentage equivalent to the exact reward value. Calculate this from the whole-bundle totals, not summed rounded component savings. Native prices and discount allocations own the payable result. `_bundle_total_retail_cents` remains only for checkout-offer eligibility; removed private savings attributes are not an integration contract.
 
 ---
 
 ## Bundle Instance Tracking
 
 - Each add-to-cart generates one 12-character EB-style session key and writes `_wolfpackProductBundle:OfferId` as `{offerId}_{sessionKey}_{itemIndex}`
-- Cart Transform groups component lines by the `{offerId}_{sessionKey}` base and uses `_bundleName` for the parent title
+- Cart Transform groups component lines by the `{offerId}_{sessionKey}` base and uses the cart metafield display data for the parent title
 - Shopify's cart line properties still differ per component line because the trailing item index differs
 - See [[Features/Bundle Instance Tracking]]
 

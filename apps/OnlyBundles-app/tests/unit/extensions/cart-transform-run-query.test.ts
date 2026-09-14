@@ -10,9 +10,7 @@ describe("Cart Transform input query", () => {
 
   it.each([
     ["component_reference", "component_reference"],
-    ["component_quantities", "component_quantities"],
     ["price_adjustment", "price_adjustment"],
-    ["component_pricing", "component_pricing"],
   ])("queries app-owned %s metafield with the app namespace", (_label, key) => {
     expect(normalizedQuery).toContain(`metafield(namespace: "$app", key: "${key}")`);
   });
@@ -28,9 +26,9 @@ describe("Cart Transform input query", () => {
   it("stays within Shopify's maximum input-query complexity", () => {
     const metafieldCost = (normalizedQuery.match(/\bmetafield\(/g) ?? []).length * 3;
     const attributeCost = (normalizedQuery.match(/\battribute\(/g) ?? []).length;
-    const requiredLeafCost = 6;
+    const requiredLeafCost = 8;
 
-    expect(metafieldCost + attributeCost + requiredLeafCost).toBeLessThanOrEqual(30);
+    expect(metafieldCost + attributeCost + requiredLeafCost).toBe(26);
     expect(normalizedQuery).toContain("sellingPlanAllocation { __typename }");
     expect(normalizedQuery).toContain("localization { country { isoCode } }");
   });
@@ -42,7 +40,7 @@ describe("Cart Transform input query", () => {
     expect(normalizedQuery).not.toContain('attribute(key: "_wpb_');
   });
 
-  it("groups merge lines from EB public cart attributes instead of private bundle IDs", () => {
+  it("groups merge lines by the public offer attribute", () => {
     expect(normalizedQuery).toContain('wolfpackProductBundleOfferId: attribute(key: "_wolfpackProductBundle:OfferId")');
     expect(normalizedQuery).not.toContain('attribute(key: "_bundleName")');
     expect(normalizedQuery).toContain('lineAuthorization: attribute(key: "_wolfpack_line_auth")');

@@ -1,6 +1,8 @@
 import { BundleType } from "../../../app/constants/bundle";
 import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 
+jest.mock("../../../app/services/scheduled-bundle-discount.server", () => ({ syncScheduledBundleDiscounts: jest.fn().mockResolvedValue({}) }));
+
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn(), startTimer: jest.fn(() => jest.fn()),
@@ -18,14 +20,15 @@ jest.mock("../../../app/utils/variant-lookup.server", () => ({
 
 function makeAdmin() {
   return {
-    graphql: jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue({
+    graphql: jest.fn().mockImplementation(async (_query: string, options?: any) => ({
+      json: async () => ({
         data: {
-          metafieldsSet: { metafields: [{ key: "bundle_ui_config", value: "{}" }], userErrors: [] },
-          productVariantsBulkUpdate: { productVariants: [], userErrors: [] },
+          shop: { id: "gid://shopify/Shop/1", policy: null },
+        productVariantsBulkUpdate: { productVariants: options?.variables?.variants ?? [], userErrors: [] },
+          metafieldsSet: { metafields: options?.variables?.metafields ?? [], userErrors: [] },
         },
       }),
-    }),
+    })),
   };
 }
 
@@ -41,7 +44,7 @@ describe("checkout offer bundle_ui_config sync", () => {
   it("writes FPB checkout offers with tier maximum and variants", async () => {
     const admin = makeAdmin();
     await updateBundleProductMetafields(admin as any, "gid://shopify/Product/999", {
-      id: "bundle-1",
+      id: "bundle-1", shopId: "test.myshopify.com",
       name: "Bundle",
       description: "",
       status: "ACTIVE",

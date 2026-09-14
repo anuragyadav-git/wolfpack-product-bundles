@@ -1,3 +1,7 @@
+const mockRevokePolicy = jest.fn().mockResolvedValue(undefined);
+const mockRemoveScheduled = jest.fn().mockResolvedValue(undefined);
+jest.mock("../../../app/services/bundle-authorization-policy.server", () => ({ removePublishedBundlePolicy: mockRevokePolicy }));
+jest.mock("../../../app/services/scheduled-bundle-discount.server", () => ({ removeScheduledBundleDiscounts: mockRemoveScheduled }));
 const mockDb = {
   bundle: {
     findUnique: jest.fn(),
@@ -77,6 +81,8 @@ describe("handleDeleteBundle resource cleanup", () => {
 
     expect(response.status).toBe(200);
     expect(admin.graphql).not.toHaveBeenCalled();
+    expect(mockRevokePolicy).toHaveBeenCalled();
+    expect(mockRemoveScheduled).toHaveBeenCalled();
     expect(mockDb.bundle.delete).toHaveBeenCalledTimes(1);
   });
 
@@ -127,6 +133,8 @@ describe("handleDeleteBundle resource cleanup", () => {
     expect(admin.graphql.mock.invocationCallOrder[0]).toBeLessThan(
       mockDb.bundle.delete.mock.invocationCallOrder[0],
     );
+    expect(mockRevokePolicy).toHaveBeenCalled();
+    expect(mockRemoveScheduled).toHaveBeenCalled();
     expect(mockDb.bundle.delete).toHaveBeenCalledTimes(1);
   });
 
@@ -164,6 +172,8 @@ describe("handleDeleteBundle resource cleanup", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(mockRevokePolicy).toHaveBeenCalled();
+    expect(mockRemoveScheduled).toHaveBeenCalled();
     expect(mockDb.bundle.delete).toHaveBeenCalledTimes(1);
   });
 

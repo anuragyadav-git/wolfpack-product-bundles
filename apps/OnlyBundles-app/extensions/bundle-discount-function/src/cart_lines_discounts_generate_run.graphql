@@ -2,7 +2,7 @@ query Input {
   presentmentCurrencyRate
   localization { country { isoCode } }
   shop {
-    ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value }
+    ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value: jsonValue }
   }
   cart {
     lines {

@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-12
+last_audited: 2026-09-15
 owners:
   - engineering
 domains:
@@ -232,7 +232,8 @@ Configure page storefront sync status:
 
 - Full-page and product-page configure pages do not show a separate Storefront sync status or retry banner.
 - Save persists DB changes and publishes Shopify storefront data synchronously before returning a compact success response.
-- Existing Sync Bundle actions run the same direct storefront sync path.
+- Existing Sync Bundle actions run the same direct storefront sync path, including native scheduled-discount owner reconciliation and current policy publication.
+- FPB, PPB and SDK additions serialize metafield sync and cart add with Web Locks. Capacity/conflict failures stop the addition; cart add is never retried blindly.
 - Preview Bundle reserves a tab synchronously and posts one compact `/prepare-preview` request; FPB receives a fresh signed app-proxy URL in that response, while PPB receives its preview token. The reserved tab navigates after the response so popup protection does not discard it. Failed checks close the blank tab and surface through the preview error toast while the button spinner is active.
 - Bundle creation and cloning route directly to the bundle type's configure page; there is no intermediate configuration wizard route.
 
@@ -947,12 +948,12 @@ Checkout order summary → Bundle & Save
 | `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns priority-ordered eligible DTOs with private ETag caching |
 | `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns the highest-priority eligible formatted PPB with private ETag caching |
 | `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup with Shopify ISO-country filtering: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
-| `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that merges EB-style cart `bundle_details` metafield entries                                                                                                                            |
+| `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that paginates active cart groups, prunes stale bundle details, combines required pendingLineCount with native existing component/add-on lines to enforce 10 bundle lines per cart before add, enforces the full UTF-8 payload limit and verifies native metafield readback                                                                                                                            |
 | `/apps/product-bundles/api/storefront-products`                | Signed Storefront-context product hydration with ID validation and inventory normalization                                                                                                                       |
 | `/apps/product-bundles/api/storefront-collections`             | Signed Storefront-context collection hydration with product deduplication and membership mapping                                                                                                                 |
-| `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime`, including the canonical country rule, for independent Cart Transform / Discount Function verification |
+| `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that checks current published revision, schedule, canonical Shopify variant membership and country authorization before signing selected bundle lines |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations                                                                                                   |
-| `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
+| `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates the current published parent revision and merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
 | `/apps/product-bundles/api/controls-settings`                  | Shopify app-proxy-authenticated Controls JSON; derives shop identity from the verified app-proxy session                                                                                                        |
 | `/apps/product-bundles/api/language-settings`                  | Shopify app-proxy-authenticated Language JSON; derives shop identity from the verified app-proxy session                                                                                                        |
 | `/app/billing/return`                                          | Verify Shopify App Pricing state through the Partner API after a hosted-plan redirect                                                                                                                           |

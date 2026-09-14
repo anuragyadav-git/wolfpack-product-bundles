@@ -6,6 +6,8 @@ import {
 } from '../../lib/specific-link-offer-eligibility.server';
 import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from '../../lib/specific-link-offer';
 import { authenticate } from '../../shopify.server';
+import { verifyBundlePreviewToken } from '../../lib/bundle-preview-token.server';
+import { BUNDLE_PREVIEW_QUERY_PARAM } from '../../lib/bundle-preview-url';
 
 const NO_STORE_HEADERS = {
   'Cache-Control': 'private, no-store',
@@ -74,11 +76,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
       );
     }
 
-    const decision = resolveSpecificLinkOfferEligibility({
-      policy: bundle.offerPolicy,
-      token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
-      countryCode: url.searchParams.get('country'),
+    const hasValidPreviewToken = verifyBundlePreviewToken({
+      token: url.searchParams.get(BUNDLE_PREVIEW_QUERY_PARAM),
+      shop: session.shop,
+      bundleId,
     });
+
+    const decision = hasValidPreviewToken
+      ? { eligible: true, reasonCode: 'not_required' as const }
+      : resolveSpecificLinkOfferEligibility({
+        policy: bundle.offerPolicy,
+        token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
+        countryCode: url.searchParams.has('country')
+          ? url.searchParams.get('country')
+          : undefined,
+      });
 
     if (bundle.offerPolicy) {
       try {

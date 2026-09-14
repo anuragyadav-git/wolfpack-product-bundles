@@ -4,10 +4,14 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const extensionRoot = resolve(appRoot, "extensions/bundle-discount-function");
+const extensionHandle = process.argv[2] ?? "bundle-discount-function";
+if (!["bundle-discount-function", "scheduled-bundle-discount"].includes(extensionHandle)) {
+  throw new Error(`Unknown Discount Function extension: ${extensionHandle}`);
+}
+const extensionRoot = resolve(appRoot, "extensions", extensionHandle);
 const wasmPath = resolve(
   extensionRoot,
-  "target/wasm32-unknown-unknown/release/bundle-discount-function.wasm",
+  `target/wasm32-unknown-unknown/release/${extensionHandle}.wasm`,
 );
 
 const rustc = spawnSync("rustup", ["which", "--toolchain", "stable", "rustc"], {
