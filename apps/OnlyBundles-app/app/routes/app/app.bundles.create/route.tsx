@@ -367,7 +367,6 @@ export default function CreateBundleEntry() {
                   )}
                   selected={bundleType === BundleType.PRODUCT_PAGE}
                   selectedLabel={t("createBundle.actions.selected")}
-                  selectLabel={t("createBundle.actions.select")}
                   thumbnail="product-page"
                   title={t("createBundle.bundleType.productPage.title")}
                   onSelect={() =>
@@ -380,7 +379,6 @@ export default function CreateBundleEntry() {
                   )}
                   selected={bundleType === BundleType.FULL_PAGE}
                   selectedLabel={t("createBundle.actions.selected")}
-                  selectLabel={t("createBundle.actions.select")}
                   thumbnail="full-page"
                   title={t("createBundle.bundleType.fullPage.title")}
                   onSelect={() => handleSelectBundleType(BundleType.FULL_PAGE)}

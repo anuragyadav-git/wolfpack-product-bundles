@@ -26,7 +26,6 @@ const requiredKeys = [
   "createBundle.bundleType.fullPage.title",
   "createBundle.bundleType.fullPage.description",
   "createBundle.actions.selected",
-  "createBundle.actions.select",
   "createBundle.actions.next",
 ];
 

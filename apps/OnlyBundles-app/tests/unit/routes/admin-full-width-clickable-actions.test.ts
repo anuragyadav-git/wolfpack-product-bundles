@@ -37,6 +37,18 @@ function findClickable(
   return null;
 }
 
+function findBadge(node: React.ReactNode): React.ReactElement | null {
+  for (const child of React.Children.toArray(node)) {
+    if (!React.isValidElement(child)) continue;
+    if (child.type === "s-badge") {
+      return child;
+    }
+    const nested = findBadge(child.props.children);
+    if (nested) return nested;
+  }
+  return null;
+}
+
 function findActionOwners(node: React.ReactNode): React.ReactElement[] {
   if (!React.isValidElement(node)) return [];
   const current = ["button", "s-button", "s-clickable"].includes(
@@ -53,13 +65,12 @@ function findActionOwners(node: React.ReactNode): React.ReactElement[] {
 }
 
 describe("full-width Polaris clickable action ownership", () => {
-  it("delegates bundle-type card activation to one clickable owner", () => {
+  it("delegates bundle-type card activation to one clickable owner without select text", () => {
     const onSelect = jest.fn();
     const view = BundleTypeSelectionCard({
       description: "Display this builder on an existing product page",
       selected: false,
       selectedLabel: "Selected",
-      selectLabel: "Select",
       thumbnail: "product-page",
       title: "Product page bundle builder",
       onSelect,
@@ -69,9 +80,30 @@ describe("full-width Polaris clickable action ownership", () => {
     const action = findClickable(view, "Product page bundle builder");
     expect(action?.type).toBe("s-clickable");
     expect(findActionOwners(view)).toHaveLength(1);
+    expect(textContent(view)).not.toContain("Select");
+    expect(textContent(view)).not.toContain("Selected");
     action!.props.onClick();
 
     expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders a native Polaris success badge when bundle-type card is selected", () => {
+    const onSelect = jest.fn();
+    const view = BundleTypeSelectionCard({
+      description: "Create a dedicated landing page for your bundle",
+      selected: true,
+      selectedLabel: "Selected",
+      thumbnail: "full-page",
+      title: "Full page bundle builder",
+      onSelect,
+    });
+
+    expect(view.type).toBe("s-clickable");
+    expect(findActionOwners(view)).toHaveLength(1);
+    const badge = findBadge(view);
+    expect(badge).not.toBeNull();
+    expect(badge?.props.tone).toBe("success");
+    expect(textContent(badge)).toBe("Selected");
   });
 
   it("delegates Add Tier Rule to the FPB tier owner", () => {
