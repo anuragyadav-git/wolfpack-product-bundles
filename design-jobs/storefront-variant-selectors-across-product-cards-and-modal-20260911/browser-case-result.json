@@ -43,6 +43,11 @@
       "name": "two-dimensional selectors remain above price and CTA",
       "status": "passed",
       "evidence": "Selector ends at y=646.28, price ends at y=667.28, and action follows at y=667.28 through y=711.28."
+    },
+    {
+      "name": "responsive close controls delegate to the shared modal lifecycle",
+      "status": "passed",
+      "evidence": "On a fresh signed preview serving widget 22.1.3, the desktop X dismissed the picker and restored focus to Product 1; the narrow-window close control also dismissed the picker."
     }
   ],
   "observations": {
@@ -64,6 +69,13 @@
       "classification": "recovered",
       "result": "passed",
       "evidence": "Fresh signed preview serving widget 22.1.2 at exact 1280x800, plus the genuine 500x844 rerun after the responsive header correction; screenshots reviewed inline and not persisted."
+    },
+    {
+      "attempt": 3,
+      "at": "2026-09-14T07:35:00Z",
+      "classification": "recovered",
+      "result": "passed",
+      "evidence": "Fresh Preview Bundle URL serving widget 22.1.3 passed desktop and narrow-window modal close, focus restoration, two-row Size and Color layout, equal-card, aligned price/action, and zero-overflow checks."
     }
   ]
 }

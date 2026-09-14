@@ -28,7 +28,7 @@ keywords:
 # Visual QA Report
 
 Artifact job ID: storefront-variant-selectors-across-product-cards-and-modal-20260911
-Artifact revision: 4
+Artifact revision: 5
 Artifact status: complete
 
 ## Semantic review
@@ -65,5 +65,11 @@ Direct semantic and measured geometry review passes for the executed FPB cases a
 | Region | Reference | Actual | Difference | Severity | Measured evidence | Canonical owner | Required fix |
 |---|---|---|---|---|---|---|---|
 | PPB Vertical Slots picker at 1280×800 | Product cards and Add to Cart actions are fully visible on initial open above the normal-flow footer | Equal 428.28px cards end at y=692.28 and both CTAs end at y=679.28 before the y=696 body/footer boundary | None after remediation | ACCEPTED | Cards retain a 3.72px boundary gap; CTAs retain 16.72px; zero overflow | Shared PPB bottom-sheet header/body/footer layout | None |
+| PPB picker close target | The visible desktop X owns its complete hit target and delegates to the existing modal lifecycle | Fresh widget 22.1.3 preview dismissed from the desktop X and restored focus to Product 1; the narrow-window close control also dismissed the picker | None after remediation | ACCEPTED | Direct Chrome activation at 1280×800 and genuine 500×844 | Shared PPB picker header stacking and modal lifecycle | None |
 
 The genuine 500×844 narrow-window rerun also passed: equal 473.47px cards, fully visible 44px actions, zero overflow, and stable `M / Navy` selection with the expected Navy image and `$30.00` amount. Exact 390px PPB evidence remains constrained by the host Chrome minimum width and is not claimed.
+
+The final fresh signed Preview Bundle URL served widget `22.1.3`. The desktop
+and narrow-window close controls both dismissed the same modal owner, and the
+desktop path restored focus to its `Product 1` opener. The previously open
+signed URL was stale and is not treated as current dev-tunnel evidence.

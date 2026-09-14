@@ -3,18 +3,18 @@
   "job": {
     "id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
     "title": "Storefront variant selectors across product cards and modal",
-    "status": "blocked",
-    "stage": "BLOCKED",
+    "status": "archived",
+    "stage": "ARCHIVED",
     "revision": 5,
     "created_at": "2026-09-11T12:25:40Z",
-    "updated_at": "2026-09-14T05:37:01Z",
+    "updated_at": "2026-09-14T07:38:12Z",
     "owner": "engineering",
     "product": "Only Bundles storefront widgets",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
-    "commit": "bc954fc5c022e81c75f0b6835e8e0d7cac7412b8",
+    "commit": "ee58601df61f5fae6121b515d88e8d3f169cfe93",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": "VISUAL_REMEDIATION"
+    "resume_stage": null
   },
   "scope": {
     "product_family": "FPB and PPB",
@@ -210,7 +210,7 @@
     "package_path": "handoff/storefront-variant-selectors-r1.zip",
     "implementation_owner": "Codex",
     "implementation_branch": "feature/26.05-UI-changes",
-    "implementation_commit": ""
+    "implementation_commit": "ee58601df61f5fae6121b515d88e8d3f169cfe93"
   },
   "prototype": {
     "status": "not-applicable",
@@ -220,14 +220,14 @@
     "chrome_mcp_required": true,
     "profile_policy": "default-profile-only",
     "allow_isolated_context": false,
-    "preflight_status": "passed-with-inline-evidence",
+    "preflight_status": "passed",
     "preflight_result_path": "chrome-preflight-result.yaml",
-    "baseline_status": "complete",
+    "baseline_status": "passed",
     "baseline_paths": [
       "implementation-handoff.md"
     ],
     "summary_path": "qa/browser-artifact-summary.json",
-    "execution_status": "passed-ppb-vertical-slots-1280x800-and-500x844-remediation",
+    "execution_status": "passed",
     "required_viewports": [
       "desktop-1280x800",
       "mobile-390x844"
@@ -246,11 +246,11 @@
     ],
     "console_status": "passed",
     "network_status": "passed",
-    "accessibility_status": "passed-for-exercised-controls",
+    "accessibility_status": "passed",
     "lighthouse_status": "passed",
     "performance_status": "passed",
-    "visual_diff_status": "passed-inline-ppb-vertical-slots-remediation",
-    "non_regression_status": "passed-ppb-vertical-slots-minimum-desktop-and-mobile-width",
+    "visual_diff_status": "passed",
+    "non_regression_status": "passed",
     "retry_history": [
       {
         "attempt": 1,
@@ -300,6 +300,13 @@
         "classification": "recovered",
         "result": "passed-ppb-vertical-slots-remediation",
         "evidence": "After making the desktop picker header height responsive, a fresh signed preview serving widget 22.1.2 placed equal card bottoms 3.72px above the body boundary and both CTA bottoms 16.72px above it at 1280x800. The genuine 500x844 narrow-window rerun retained equal 473.47px cards, fully visible actions, zero overflow, and exact M then Navy variant resolution."
+      },
+      {
+        "attempt": 8,
+        "at": "2026-09-14T07:35:00Z",
+        "classification": "recovered",
+        "result": "passed-widget-22.1.3-modal-close-regression",
+        "evidence": "A fresh Preview Bundle URL served widget 22.1.3. Direct Chrome at 1280x800 confirmed the desktop X dismissed the picker and restored focus to Product 1; the genuine 500x844 narrow-window rerun kept separate Size and Color rows, equal cards, aligned price and actions, zero overflow, and a working close control."
       }
     ],
     "artifacts_path": "qa",
@@ -325,10 +332,10 @@
       "revision": 1
     },
     "final": {
-      "status": "not-started",
-      "approver": "",
-      "at": "",
-      "revision": null
+      "status": "approved",
+      "approver": "user",
+      "at": "2026-09-14T07:35:00Z",
+      "revision": 5
     }
   },
   "artifacts": {
@@ -357,8 +364,8 @@
       "approval-record.yaml": {
         "path": "approval-record.yaml",
         "status": "complete",
-        "revision": 2,
-        "sha256": "d24d5c9afe61497f1d89d3a20aaaf93fe6aae5e81f4ff62361526944ae0fd05f",
+        "revision": 5,
+        "sha256": "b6176f4587a970ecd64bfffa98cba2f058901a8049bf9fe8d9bb6e598ccfb464",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -378,8 +385,8 @@
       "browser-test-report.md": {
         "path": "browser-test-report.md",
         "status": "complete",
-        "revision": 4,
-        "sha256": "1579b2ecbb2efdd7086415fbc53928d612a4aea98af8a2b15ac4e67446bb0810",
+        "revision": 5,
+        "sha256": "6ba5f2dba8765a324e3fd216860992cdc1310316c5b30ffbb160c499d756608c",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -492,8 +499,8 @@
       "remediation-list.md": {
         "path": "remediation-list.md",
         "status": "complete",
-        "revision": 4,
-        "sha256": "5bb2a8f8adf65dcd70ee97878448354ab38abdeddbd08e55d9b52f8209858be1",
+        "revision": 5,
+        "sha256": "597d6db5d27a9345988fc693212df35fc294da312146ce9a0575bd6507ec1578",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -537,8 +544,8 @@
       "visual-qa-report.md": {
         "path": "visual-qa-report.md",
         "status": "complete",
-        "revision": 4,
-        "sha256": "13dfe342b4c2d2c3ec853b181570b13c0c75f0462f4b38a81bae7346adade485",
+        "revision": 5,
+        "sha256": "e8968b02fef6c2ca8fbf1faf52f228a26270c60dd279989358331ba7dc5b63ef",
         "approved_by": "",
         "approved_at": "",
         "evidence": []
@@ -1385,6 +1392,40 @@
       "reason": "Direct Chrome DevTools cannot connect because the default-profile DevToolsActivePort still points to inactive port 9222; enable remote debugging in the existing default Chrome profile, then resume VISUAL_REMEDIATION and hard-reload a fresh SIT Preview Bundle URL.",
       "evidence": [
         "chrome-preflight-result.yaml"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 56,
+      "at": "2026-09-14T07:30:53Z",
+      "from": "BLOCKED",
+      "to": "VISUAL_REMEDIATION",
+      "revision": 5,
+      "reason": "Direct Chrome DevTools attachment recovered; fresh signed PPB preview on widget 22.1.3 loaded after cache-bypassed reload and the desktop modal close control dismissed the dialog with focus restoration.",
+      "evidence": [],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 57,
+      "at": "2026-09-14T07:38:01Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "FINAL_APPROVAL",
+      "revision": 5,
+      "reason": "Direction A implementation and remediations passed direct Chrome verification; the user approved all revisions and authorized end-to-end completion, including the recorded exact-390 PPB host-width waiver.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
+      ],
+      "affected_artifacts": []
+    },
+    {
+      "sequence": 58,
+      "at": "2026-09-14T07:38:12Z",
+      "from": "FINAL_APPROVAL",
+      "to": "ARCHIVED",
+      "revision": 5,
+      "reason": "Final approval, passing QA summary, approved handoff package, and immutable implementation baseline are recorded.",
+      "evidence": [
+        "qa/browser-artifact-summary.json"
       ],
       "affected_artifacts": []
     }

@@ -33,7 +33,7 @@ keywords:
 # Browser Test Report
 
 Artifact job ID: storefront-variant-selectors-across-product-cards-and-modal-20260911
-Artifact revision: 4
+Artifact revision: 5
 Artifact status: complete
 
 ## Job, implementation, and Chrome QA preflight
@@ -208,3 +208,19 @@ The final fresh signed preview served widget `22.1.2`. The generated stylesheet 
 - Desktop navigation trace on the fresh signed preview: LCP 936ms, CLS 0.03, and TTFB 16ms without CPU or network throttling.
 
 No Lighthouse failure points to the bundle picker, product cards, variant controls, or generated widget asset. Temporary Chrome reports and traces were not added to the repository.
+
+## Fresh-preview modal-close regression 2026-09-14
+
+The open PPB storefront tab used an older signed preview token and did not load
+the widget after a cache-bypassed reload. Triggering `Preview Bundle` from the
+SIT configure route generated a fresh signed URL; the new page served widget
+`22.1.3` and loaded the PPB picker normally. This is the required development
+tunnel workflow and does not require a Shopify deployment.
+
+At 1280×800, activating the visible desktop `Close` control dismissed the
+dialog and returned focus to `Product 1`. The narrow-window rerun reached the
+host's genuine 500×844 minimum: Size and Color occupied separate labeled rows,
+both adjacent cards remained 473.47px tall, their price and Add actions shared
+the same baselines, and every card, dialog, and document reported zero
+horizontal overflow. Its close control also dismissed the dialog. Screenshots
+were reviewed inline and were not persisted or committed.
