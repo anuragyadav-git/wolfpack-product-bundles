@@ -5,7 +5,7 @@ title: Bundle Types
 type: feature
 status: authoritative
 summary: Defines the storefront hosts and runtime responsibilities of full-page and product-page bundles.
-last_audited: 2026-08-28
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -79,6 +79,16 @@ parent bundle variant.
   `inventoryPolicy: CONTINUE`. Wolfpack does not calculate or write an
   artificial parent quantity such as
   `MIN(component_inventory / component_quantity)`.
+- Shopify Admin can therefore show **Bundle with inventory not tracked** in the
+  Products list and **Track quantity: No** on the customized bundle parent.
+  This is expected for the Cart Transform model and does not mean component
+  inventory is bypassed. Verify inventory on the selected component variant and
+  its adjustment history, where Shopify records committed, available, and
+  on-hand quantity changes for the order.
+- Merchants who require a hard out-of-stock stop must track inventory on every
+  eligible component variant and turn off **Continue selling when out of
+  stock** for those variants. Wolfpack must preserve that Shopify inventory
+  policy: an enabled continue-selling policy intentionally allows backorders.
 - `inventory_levels/update` is not subscribed, and there is no webhook-driven
   parent-inventory synchronization service. See [[Shopify Integration/Webhooks]].
 - Exact component quantities require the
