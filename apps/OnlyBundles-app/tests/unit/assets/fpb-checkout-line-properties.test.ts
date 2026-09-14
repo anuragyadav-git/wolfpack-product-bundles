@@ -227,6 +227,7 @@ describe("FPB checkout cart-line properties", () => {
   });
 
   it("uses resolved selected variant id even if product.variantId is not the selected variant", async () => {
+    const callOrder: string[] = [];
     const fetchMock = jest.fn(async (url: string) => {
       if (url === "/apps/product-bundles/api/cart-transform-runtime-token") {
         return {
@@ -235,6 +236,7 @@ describe("FPB checkout cart-line properties", () => {
         };
       }
       if (url === "/cart/add.js") {
+        callOrder.push("cart-add");
         return {
           ok: true,
           json: async () => ({}),
@@ -277,6 +279,9 @@ describe("FPB checkout cart-line properties", () => {
       getPropertyValue: () => "",
     });
     (global as any).setTimeout = jest.fn();
+    const syncBundleDetailsCartMetafield = jest.fn(async () => {
+      callOrder.push("cart-metafield");
+    });
 
     try {
       await fullPageStepFooterMethods.addBundleToCart.call({
@@ -320,7 +325,7 @@ describe("FPB checkout cart-line properties", () => {
         _setWidgetBusy: jest.fn(),
         showLoadingOverlay: jest.fn(),
         hideLoadingOverlay: jest.fn(),
-        syncBundleDetailsCartMetafield: jest.fn(),
+        syncBundleDetailsCartMetafield,
         _emitStorefrontEvent: jest.fn(),
         _handlePostAddToCartAction: jest.fn(),
         _getLandingPageControls: () => ({ checkout: null }),
@@ -337,12 +342,14 @@ describe("FPB checkout cart-line properties", () => {
     expect(addRequest).toBeDefined();
     const body = JSON.parse(String(addRequest[1]?.body));
     expect(body.items).toEqual([expect.objectContaining({ id: "111" })]);
-    expect(JSON.parse(body.items[0].properties._bundle_display_properties).offerAnalytics).toEqual({
-      bundleId: "bundle-1",
-      offerPolicyId: "policy-1",
-      offerRuleVersion: 5,
-      offerEligibilitySource: "specific_link",
-    });
+    expect(body.items[0].properties).not.toHaveProperty("_bundle_display_properties");
+    expect(body.items[0].properties).not.toHaveProperty("_wolfpack_bundle_runtime");
+    expect(syncBundleDetailsCartMetafield).toHaveBeenCalledWith(
+      "FBP-1_ABC",
+      expect.objectContaining({ _bundle_display_properties: expect.any(String) }),
+      "runtime-token",
+    );
+    expect(callOrder).toEqual(["cart-metafield", "cart-add"]);
   });
 
   it("omits Box cart properties for BXY when bundle quantity options are hidden", async () => {
@@ -461,15 +468,8 @@ describe("FPB checkout cart-line properties", () => {
     expect(body.items).toHaveLength(2);
     body.items.forEach((item: { properties: Record<string, string> }) => {
       expect(item.properties).not.toHaveProperty("Box");
-      expect(item.properties).toHaveProperty("_bundle_display_properties");
-      expect(JSON.parse(item.properties._bundle_display_properties)).toEqual({
-        bundleName: "Daily Essentials",
-        items: "1 x First product, 1 x Second product",
-        retailPrice: "$1,448.00",
-        offerAnalytics: {
-          bundleId: "bundle-1",
-        },
-      });
+      expect(item.properties).not.toHaveProperty("_bundle_display_properties");
+      expect(item.properties).not.toHaveProperty("_wolfpack_bundle_runtime");
     });
   });
 
@@ -566,7 +566,8 @@ describe("FPB checkout cart-line properties", () => {
     );
 
     expect(addonLine.properties.Box).toBe("1");
-    expect(addonLine.properties).toHaveProperty("_bundle_display_properties");
+    expect(addonLine.properties).not.toHaveProperty("_bundle_display_properties");
+    expect(addonLine.properties).toHaveProperty("_wolfpack_bundle_runtime", "runtime-token");
     expect(addonLine.properties).not.toHaveProperty("Items");
     expect(addonLine.properties).not.toHaveProperty("Retail Price");
     expect(addonLine.properties).not.toHaveProperty("You Save");
@@ -1008,17 +1009,8 @@ describe("FPB checkout cart-line properties", () => {
     expect(addonLine.properties._addon_product).toBe("true");
     expect(addonLine.properties._addonTierId).toBe("tier2");
     expect(addonLine.properties._bundle_step_type).not.toBe("free_gift");
-    expect(JSON.parse(paidLine.properties._bundle_display_properties)).toEqual({
-      box: "1",
-      bundleName: "Daily Essentials",
-      items: "1 x Paid product",
-      retailPrice: "$829.00",
-      labels: {
-        items: "Items",
-        retailPrice: "Retail Price",
-        youSave: "You Save",
-      },
-    });
+    expect(paidLine.properties).not.toHaveProperty("_bundle_display_properties");
+    expect(paidLine.properties).not.toHaveProperty("_wolfpack_bundle_runtime");
   });
 
   it("keeps active flat 100 percent add-on tier lines eligible for checkout savings", async () => {
@@ -1259,24 +1251,12 @@ describe("FPB checkout cart-line properties", () => {
     const addRequest = fetchMock.mock.calls.find(([url]: any) => url === "/cart/add.js")!;
     expect(addRequest).toBeDefined();
     const body = JSON.parse(String(addRequest[1]?.body));
-    const displayProperties = JSON.parse(body.items[0].properties._bundle_display_properties);
-
     expect(body.items).toHaveLength(2);
     expect(body.items.every((item: { properties: Record<string, string> }) =>
       item.properties._bundle_step_type === "fixed_price_display_only"
     )).toBe(false);
     expect(body.items[0].properties._bundle_price_adjustment_mode).toBeUndefined();
-    expect(displayProperties).toEqual({
-      box: "1",
-      bundleName: "Daily Essentials",
-      items: "1 x First product, 1 x Second product",
-      retailPrice: "",
-      labels: {
-        items: "Items",
-        retailPrice: "Retail Price",
-        youSave: "You Save",
-      },
-    });
-    expect(displayProperties).not.toHaveProperty("youSave");
+    expect(body.items[0].properties).not.toHaveProperty("_bundle_display_properties");
+    expect(body.items[0].properties).not.toHaveProperty("_wolfpack_bundle_runtime");
   });
 });

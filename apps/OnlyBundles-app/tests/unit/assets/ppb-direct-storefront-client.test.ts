@@ -225,7 +225,7 @@ describe("PPB direct Shopify Storefront client", () => {
     const fetchMock = jest.fn()
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ data: { cart: { metafields: [{ value: '{"existing":{"displayProperties":{"Box":"1"}}}' }] } } }),
+        json: async () => ({ data: { cart: { metafields: [{ value: '[{"key":"existing","displayProperties":{"Box":"1"},"runtimeToken":"old-token"}]' }] } } }),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -239,15 +239,20 @@ describe("PPB direct Shopify Storefront client", () => {
       cartToken: "cart-token?key=secret",
       bundleDetailsKey: "MIX-bundle_SESSION",
       displayProperties: { Box: "2" },
+      runtimeToken: "signed-runtime-token",
       fetchImpl: fetchMock,
     })).resolves.toBe(true);
 
     const mutationBody = JSON.parse(fetchMock.mock.calls[1][1].body);
     expect(mutationBody.query).toContain("[CartMetafieldsSetInput!]!");
     const value = JSON.parse(mutationBody.variables.metafields[0].value);
-    expect(value).toEqual({
-      existing: { displayProperties: { Box: "1" } },
-      "MIX-bundle_SESSION": { displayProperties: { Box: "2" } },
-    });
+    expect(value).toEqual([
+      { key: "existing", displayProperties: { Box: "1" }, runtimeToken: "old-token" },
+      {
+        key: "MIX-bundle_SESSION",
+        displayProperties: { Box: "2" },
+        runtimeToken: "signed-runtime-token",
+      },
+    ]);
   });
 });

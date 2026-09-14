@@ -175,6 +175,16 @@ pub struct CartLineDisplayProperties {
     pub offer_analytics: Option<CartLineOfferAnalytics>,
 }
 
+#[derive(serde::Deserialize, Debug, Clone, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CartBundleDetailsEntry {
+    pub key: String,
+    #[serde(default)]
+    pub display_properties: CartLineDisplayProperties,
+    #[serde(default)]
+    pub runtime_token: Option<String>,
+}
+
 #[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CartLineOfferAnalytics {

@@ -5,7 +5,7 @@ title: Pricing Pipeline
 type: feature
 status: authoritative
 summary: Defines canonical minor-unit pricing, presentment-currency handling, discount operators, and checkout ownership.
-last_audited: 2026-09-12
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -21,6 +21,7 @@ source_paths:
   - apps/OnlyBundles-app/app/assets/widgets/shared/pricing-calculator.ts
   - apps/OnlyBundles-app/app/assets/widgets/shared/template-manager.ts
   - apps/OnlyBundles-app/app/assets/widgets/full-page/methods/validation-addons-methods.ts
+  - apps/OnlyBundles-app/app/assets/widgets/full-page/methods/product-processing-methods.ts
   - apps/OnlyBundles-app/app/assets/widgets/full-page/modal/variant-methods.ts
   - apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-app-embed.liquid
   - apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-product-page.liquid
@@ -46,6 +47,14 @@ All runtime arithmetic uses integer minor units. Shopify Storefront API
 `MoneyV2` values are parsed from decimal amounts into minor units while keeping
 their `currencyCode`. Those product prices are already market-contextual and
 must not be converted again.
+
+FPB metafield snapshots can contain complete-looking product records whose
+minor-unit prices were synchronized in the shop's base currency. The runtime
+therefore hydrates every configured FPB product from Shopify in the shopper's
+country context, even when the cached record already has variants and images.
+Use Shopify's returned amount and `currencyCode` directly. Do not format or
+presentment-convert a cached base-currency amount as though it were a
+market-contextual Storefront amount; that creates inflated storefront totals.
 
 Merchant-authored absolute thresholds, fixed discounts, and fixed bundle prices
 are saved in the shop's base currency. The storefront applies Shopify's

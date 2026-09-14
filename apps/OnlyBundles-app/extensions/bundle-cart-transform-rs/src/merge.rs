@@ -8,7 +8,9 @@ use crate::runtime_token::{
     token_components_match, verify_ppb_bundle_token, verify_ppb_line_token, verify_runtime_token,
 };
 use crate::schema;
-use crate::types::{CartLineMessagingSettings, ComponentParent, PricingMethod};
+use crate::types::{
+    CartBundleDetailsEntry, CartLineMessagingSettings, ComponentParent, PricingMethod,
+};
 
 fn non_empty(value: &Option<String>) -> Option<String> {
     value
@@ -97,14 +99,6 @@ fn validate_ppb_v2_group(
     let mut group_quantities = vec![0_i64; bundle.groups.len()];
     for &idx in line_indices {
         let line = &lines[idx];
-        if line
-            .runtime_token()
-            .and_then(|value| value.value())
-            .map(|value| value.as_str())
-            != Some(token)
-        {
-            return None;
-        }
         let authorization = line
             .line_authorization()
             .and_then(|value| value.value())
@@ -255,6 +249,12 @@ pub fn process_merge_operations(
         .shop()
         .ppb_policy_revisions()
         .map(|metafield| metafield.value().as_str());
+    let cart_bundle_details: Vec<CartBundleDetailsEntry> = parse_json_or_default(
+        input
+            .cart()
+            .bundle_details()
+            .map(|metafield| metafield.value().as_str()),
+    );
 
     for (offer_group_id, line_indices) in &bundle_groups {
         if line_indices
@@ -295,14 +295,13 @@ pub fn process_merge_operations(
             continue;
         }
 
+        let cart_bundle_entry = cart_bundle_details
+            .iter()
+            .find(|entry| entry.key == *offer_group_id);
         let runtime_parent = runtime_token_secret.and_then(|secret| {
-            let token = merge_line_indices.iter().find_map(|&idx| {
-                lines[idx]
-                    .runtime_token()
-                    .and_then(|attribute| attribute.value())
-                    .map(|value| value.as_str())
-                    .filter(|value| !value.trim().is_empty())
-            })?;
+            let token = cart_bundle_entry
+                .and_then(|entry| entry.runtime_token.as_deref())
+                .filter(|value| !value.trim().is_empty())?;
             if let Some(payload) = verify_runtime_token(token, secret) {
                 if !country_is_eligible(&payload.country_rule, current_country) {
                     return None;
@@ -327,6 +326,10 @@ pub fn process_merge_operations(
                     token.to_string(),
                 ));
             }
+
+            // PPB's static version-2 contract still requires a bundle token and
+            // per-line authorization because each selectable line has its own
+            // synchronized policy bounds.
             validate_ppb_v2_group(
                 lines,
                 &merge_line_indices,
@@ -421,13 +424,9 @@ pub fn process_merge_operations(
             0.0
         };
 
-        let source_display_properties: crate::types::CartLineDisplayProperties =
-            parse_json_or_default(merge_line_indices.iter().find_map(|&idx| {
-                lines[idx]
-                    .bundle_display_properties()
-                    .and_then(|attribute| attribute.value())
-                    .map(|value| value.as_str())
-            }));
+        let source_display_properties = cart_bundle_entry
+            .map(|entry| entry.display_properties.clone())
+            .unwrap_or_default();
 
         // -------------------------------------------------------------------------
         // Step 5: Build unique bundle title.
@@ -640,7 +639,7 @@ pub fn process_merge_operations(
             }),
         });
 
-        let merge_op = schema::LinesMergeOperation {
+        let merge_op = schema::MergeOperation {
             cart_lines,
             parent_variant_id,
             title: Some(bundle_name),
@@ -649,7 +648,7 @@ pub fn process_merge_operations(
             image: None,
         };
 
-        operations.push(schema::CartOperation::LinesMerge(merge_op));
+        operations.push(schema::CartOperation::Merge(merge_op));
 
         for &idx in &addon_line_indices {
             processed_lines[idx] = true;

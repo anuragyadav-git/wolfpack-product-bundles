@@ -126,7 +126,11 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         runtimeToken,
         sellingPlanId,
       });
-      await this.syncBundleDetailsCartMetafield(cartContext.bundleDetailsKey, cartContext.sourceProperties);
+      await this.syncBundleDetailsCartMetafield(
+        cartContext.bundleDetailsKey,
+        cartContext.sourceProperties,
+        runtimeToken,
+      );
 
       const response = await fetch('/cart/add', {
         method: 'POST',
@@ -418,16 +422,17 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return data.token;
   },
 
-  async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any) {
-    try {
+  async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any) {
       const displayProperties = this.buildBundleDetailsDisplayProperties(sourceProperties);
-      if (!bundleDetailsKey || Object.keys(displayProperties).length === 0) return;
+      if (!bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
+        throw new Error('Missing bundle cart authorization');
+      }
 
       const cartToken = await this.getBundleDetailsCartToken();
-      if (!cartToken) return;
+      if (!cartToken) throw new Error('Unable to identify the Shopify cart');
 
       const runtime = this.config?.storefrontRuntime;
-      if (!runtime?.storefrontAccessToken) return;
+      if (!runtime?.storefrontAccessToken) throw new Error('Storefront authorization is unavailable');
       await setPpbBundleDetailsCartMetafield({
         shop: window.Shopify?.shop || this.container?.dataset?.shop,
         apiVersion: runtime.storefrontApiVersion,
@@ -435,11 +440,9 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         cartToken,
         bundleDetailsKey,
         displayProperties,
+        runtimeToken,
         fetchImpl: fetch,
       });
-    } catch (error: any) {
-      console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', error);
-    }
   },
 
   buildBundleDetailsDisplayProperties(sourceProperties: any) {

@@ -241,14 +241,6 @@ function productGraphqlId(product: any) {
   return null;
 }
 
-function hasCompleteRuntimeProductData(product: any) {
-  if (!product || typeof product !== 'object') return false;
-  const price = Number(product.price);
-  const variants = Array.isArray(product.variants) ? product.variants : [];
-  const images = Array.isArray(product.images) ? product.images : [];
-  return Number.isFinite(price) && price > 0 && variants.length > 0 && images.length > 1;
-}
-
 function parseFinitePrice(value: any) {
   if (value == null) return null;
   if (typeof value === 'object' && typeof value?.amount !== 'undefined') {
@@ -484,13 +476,10 @@ async loadStepProducts(stepIndex: string|number) {
 
   // Process explicit products.
   // The server formatter owns persistence translation and exposes only the
-  // canonical steps[].products contract to the widget. Multi-image records can
-  // render directly when inventory tracking is off; compact records are
-  // hydrated so the product drawer receives the complete Shopify gallery.
+  // canonical steps[].products contract to the widget. Storefront hydration
+  // remains authoritative for market-contextual prices and live inventory.
   const stepProductsAlreadyEnriched = !step?.isFreeGift && Array.isArray(step.products) && step.products.length > 0
     && step.products.some((p: any)  => (Array.isArray(p.images) && p.images.length > 0) || p.featuredImage);
-  const shouldRefreshRuntimeInventory = stepProductsAlreadyEnriched
-    && fullPageProductProcessingMethods.isInventoryTrackingOnAddToCartEnabled.call(this);
   const productIds = !step?.isFreeGift ? this.collectStepProductIds(step) : [];
 
   if (stepProductsAlreadyEnriched) {
@@ -498,14 +487,11 @@ async loadStepProducts(stepIndex: string|number) {
     // Prices in metafield are stored as cents (e.g. 82900 = ₹829.00).
     // processProductsForStep multiplies by 100 assuming decimal input, so
     // divide by 100 here to normalise before that multiplication.
-    const incompleteProducts = step.products.filter(
-      (product: any) => !hasCompleteRuntimeProductData(product),
-    );
-
     const fetchedProductsByKey = new Map();
-    const productsToHydrate = shouldRefreshRuntimeInventory
-      ? step.products
-      : incompleteProducts;
+    // Shopify's Storefront response owns market-contextual money. Refresh every
+    // configured product so a complete base-currency cache is never formatted
+    // or converted as if it were already a presentment-market amount.
+    const productsToHydrate = step.products;
     if (productsToHydrate.length > 0) {
       const missingProductIds = productsToHydrate
         .map(productGraphqlId)

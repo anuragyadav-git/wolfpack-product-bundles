@@ -338,7 +338,6 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       tierId: captureDiscountTierState(this).tierId,
     });
     items.forEach(item => {
-      Object.assign(item.properties, sourceProperties);
       if (hasSelectedAddonLine && hasAddonStepConfigured) {
         item.properties._addon_offer_id = item.properties._addon_offer_id || baseOfferId;
       }
@@ -359,9 +358,20 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       });
       items = mergeDuplicateCartLines(itemsForRuntimeToken);
       items.forEach(item => {
-        item.properties._wolfpack_bundle_runtime = runtimeToken;
+        if (
+          this.selectedSellingPlanId
+          || String(item?.properties?._bundle_step_type || '').startsWith('addon')
+        ) {
+          item.properties._wolfpack_bundle_runtime = runtimeToken;
+        }
         delete item._runtimeProductId;
       });
+
+      await this.syncBundleDetailsCartMetafield(
+        `${offerId}_${sessionKey}`,
+        sourceProperties,
+        runtimeToken,
+      );
 
       // Add to Shopify cart
       const response = await fetch('/cart/add.js', {
@@ -387,8 +397,6 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       }
 
       await response.json();
-
-      await this.syncBundleDetailsCartMetafield(`${offerId}_${sessionKey}`, sourceProperties);
 
       // Storefront analytics: bundle successfully added to cart.
       this._sendEngagementBeacon?.('bundle-add-to-cart-success');

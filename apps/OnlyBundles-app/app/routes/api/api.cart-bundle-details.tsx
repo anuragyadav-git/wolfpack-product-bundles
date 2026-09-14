@@ -6,6 +6,11 @@ import type { StorefrontApiContext } from "@shopify/shopify-app-remix/server";
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 
 type DisplayProperties = Record<string, string>;
+type CartBundleDetailsEntry = {
+  key: string;
+  displayProperties: DisplayProperties;
+  runtimeToken: string;
+};
 
 const GET_CART_BUNDLE_DETAILS_QUERY = `
   query GetCartBundleDetails($cartId: ID!) {
@@ -21,7 +26,7 @@ const GET_CART_BUNDLE_DETAILS_QUERY = `
 `;
 
 const SET_CART_BUNDLE_DETAILS_MUTATION = `
-  mutation SetCartBundleDetails($metafields: [MetafieldsSetInput!]!) {
+  mutation SetCartBundleDetails($metafields: [CartMetafieldsSetInput!]!) {
     cartMetafieldsSet(metafields: $metafields) {
       metafields {
         key
@@ -82,25 +87,37 @@ export function sanitizeDisplayProperties(props: unknown): DisplayProperties {
   return sanitized;
 }
 
+export function sanitizeRuntimeToken(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const token = value.trim();
+  return token.length > 0 && token.length <= 12_000 ? token : null;
+}
+
 export function mergeBundleDetailsValue(
   existingValue: string | null,
   bundleDetailsKey: string,
   displayProperties: DisplayProperties,
-): Record<string, { displayProperties: DisplayProperties }> {
-  let detailsMap: Record<string, { displayProperties: DisplayProperties }> = {};
+  runtimeToken: string,
+): CartBundleDetailsEntry[] {
+  let entries: CartBundleDetailsEntry[] = [];
   if (existingValue) {
     try {
       const parsed = JSON.parse(existingValue);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        detailsMap = parsed;
+      if (Array.isArray(parsed)) {
+        entries = parsed.filter((entry): entry is CartBundleDetailsEntry => (
+          entry
+          && typeof entry === "object"
+          && typeof entry.key === "string"
+          && entry.key !== bundleDetailsKey
+        ));
       }
     } catch {
-      detailsMap = {};
+      entries = [];
     }
   }
 
-  detailsMap[bundleDetailsKey] = { displayProperties };
-  return detailsMap;
+  entries.push({ key: bundleDetailsKey, displayProperties, runtimeToken });
+  return entries;
 }
 
 async function postStorefrontGraphql(
@@ -130,8 +147,9 @@ export async function action({ request }: ActionFunctionArgs) {
   const cartId = normalizeCartId(body?.cartId, body?.cartToken);
   const bundleDetailsKey = validateBundleDetailsKey(body?.bundleDetailsKey);
   const displayProperties = sanitizeDisplayProperties(body?.displayProperties);
+  const runtimeToken = sanitizeRuntimeToken(body?.runtimeToken);
 
-  if (!cartId || !bundleDetailsKey || Object.keys(displayProperties).length === 0) {
+  if (!cartId || !bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
     return json({ ok: false, error: "Invalid bundle details payload" }, { status: 400 });
   }
 
@@ -142,7 +160,12 @@ export async function action({ request }: ActionFunctionArgs) {
       { cartId },
     );
     const existingValue = existingPayload?.data?.cart?.metafields?.[0]?.value ?? null;
-    const mergedDetails = mergeBundleDetailsValue(existingValue, bundleDetailsKey, displayProperties);
+    const mergedDetails = mergeBundleDetailsValue(
+      existingValue,
+      bundleDetailsKey,
+      displayProperties,
+      runtimeToken,
+    );
 
     const setPayload = await postStorefrontGraphql(
       context.storefront,

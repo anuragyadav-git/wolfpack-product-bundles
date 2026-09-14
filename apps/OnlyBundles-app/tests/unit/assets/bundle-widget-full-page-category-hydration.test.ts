@@ -538,6 +538,91 @@ describe('Full Page widget category hydration behavior', () => {
     }
   });
 
+  it('replaces complete cached base-currency prices with Shopify market prices', async () => {
+    const previousWindow = (global as any).window;
+    const previousFetch = (global as any).fetch;
+    (global as any).window = {
+      Shopify: { shop: 'test.myshopify.com', country: 'IN' },
+      location: { host: 'test.myshopify.com' },
+    };
+    (global as any).fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        products: [{
+          id: 'gid://shopify/Product/1',
+          title: 'Headband',
+          images: [
+            { url: 'https://cdn.example.test/primary.jpg' },
+            { url: 'https://cdn.example.test/detail.jpg' },
+          ],
+          price: '1400.00',
+          currencyCode: 'INR',
+          variants: [{
+            id: 'gid://shopify/ProductVariant/11',
+            title: 'Black',
+            price: '1400.00',
+            currencyCode: 'INR',
+            available: true,
+          }],
+        }],
+      }),
+    });
+
+    const context: any = {
+      selectedBundle: {
+        steps: [{
+          products: [{
+            id: 'gid://shopify/Product/1',
+            title: 'Headband',
+            images: [
+              { url: 'https://cdn.example.test/primary.jpg' },
+              { url: 'https://cdn.example.test/detail.jpg' },
+            ],
+            price: 2000,
+            variants: [{
+              id: 'gid://shopify/ProductVariant/11',
+              selectionId: 'gid://shopify/ProductVariant/11',
+              title: 'Black',
+              price: 2000,
+              available: true,
+            }],
+          }],
+        }],
+      },
+      stepProductData: [[]],
+      stepCollectionProductIds: {},
+      selectedProducts: [{}],
+      resolveStorefrontApiBase: () => '/apps/product-bundles',
+      collectStepProductIds: fullPageSearchCategoryMethods.collectStepProductIds,
+      collectStepCollectionHandles: () => [],
+      shouldExpandStepProductsDuringLoad: () => false,
+      extractId: (id: string) => String(id || '').split('/').pop(),
+      isVariantSelectableForInventory: () => true,
+      isInventoryTrackingOnAddToCartEnabled: () => false,
+      getFirstAvailableVariant: fullPageProductProcessingMethods.getFirstAvailableVariant,
+      processProductsForStep: fullPageProductProcessingMethods.processProductsForStep,
+      enrichMissingProductDescriptions: async (products: any[]) => products,
+      mergeCategoryProductVariantAvailability:
+        fullPageProductProcessingMethods.mergeCategoryProductVariantAvailability,
+      _mergeDirectDefaultProductsIntoStep: (_stepIndex: number, products: any[]) => products,
+    };
+
+    try {
+      await fullPageProductProcessingMethods.loadStepProducts.call(context, 0);
+
+      expect((global as any).fetch).toHaveBeenCalledWith(
+        expect.stringContaining('country=IN'),
+      );
+      expect(context.stepProductData[0][0]).toEqual(expect.objectContaining({
+        price: 140000,
+        currencyCode: 'INR',
+      }));
+    } finally {
+      (global as any).window = previousWindow;
+      (global as any).fetch = previousFetch;
+    }
+  });
+
   it('resolves empty-product copy from FPB runtime language settings', () => {
     const overridden = getNoProductsAvailableMessage.call({
       _resolveText: (key: string, fallback: string) => (

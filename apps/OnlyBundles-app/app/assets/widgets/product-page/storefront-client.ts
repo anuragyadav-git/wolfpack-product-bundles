@@ -219,6 +219,7 @@ export async function setPpbBundleDetailsCartMetafield({
   cartToken,
   bundleDetailsKey,
   displayProperties,
+  runtimeToken,
   fetchImpl = fetch,
 }: any) {
   const endpoint = resolvePpbStorefrontEndpoint(shop, apiVersion);
@@ -234,14 +235,17 @@ export async function setPpbBundleDetailsCartMetafield({
     variables: { cartId },
     fetchImpl,
   });
-  let details: Record<string, unknown> = {};
+  let details: any[] = [];
   try {
-    const parsed = JSON.parse(existingData?.cart?.metafields?.[0]?.value ?? '{}');
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) details = parsed;
+    const parsed = JSON.parse(existingData?.cart?.metafields?.[0]?.value ?? '[]');
+    if (Array.isArray(parsed)) {
+      details = parsed.filter(entry => entry?.key !== bundleDetailsKey);
+    }
   } catch {
-    details = {};
+    details = [];
   }
-  details[bundleDetailsKey] = { displayProperties };
+  if (!runtimeToken) throw new Error('Missing bundle cart authorization');
+  details.push({ key: bundleDetailsKey, displayProperties, runtimeToken });
   const data = await requestStorefront({
     endpoint,
     accessToken,
