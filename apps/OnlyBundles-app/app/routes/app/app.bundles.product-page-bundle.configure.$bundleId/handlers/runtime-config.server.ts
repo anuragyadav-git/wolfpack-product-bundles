@@ -1,226 +1,22 @@
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import { buildOfferDecisionMarker } from "../../../../lib/offer-policy-decision";
 import { buildCountdownRuntimeConfig } from "../../../../lib/bundle-countdown";
 import { AppLogger } from "../../../../lib/logger";
-import {
-  updateBundleProductMetafields,
-} from "../../../../services/bundles/metafield-sync.server";
-import { parseConditionValue } from "../../../../lib/parse-condition-value";
+import { updateBundleProductMetafields } from "../../../../services/bundles/metafield-sync/operations/bundle-product.server";
 import { formatStepCategoryForRuntime } from "../../../../lib/bundle-config/category-runtime";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { safeJsonParse } from "../../../../services/bundles/bundle-configure-handlers.server";
-
-function buildRuntimePricingRule(rule: any): Record<string, unknown> {
-  const flatRule: Record<string, unknown> = {
-    id: rule.id,
-    conditionType: rule.conditionType || "quantity",
-    conditionValue: Number(rule.conditionValue ?? 0) || 0,
-    discountValue: Number(rule.discountValue ?? 0) || 0,
-  };
-
-  if (rule.fixedBundlePrice !== undefined) {
-    flatRule.fixedBundlePrice = Number(rule.fixedBundlePrice) || 0;
-  }
-  if (rule.customerBuys !== undefined) {
-    flatRule.customerBuys = Number(rule.customerBuys) || 0;
-  }
-  if (rule.customerGets !== undefined) {
-    flatRule.customerGets = Number(rule.customerGets) || 0;
-  }
-  if (rule.bxyDiscountType !== undefined) {
-    flatRule.bxyDiscountType = rule.bxyDiscountType;
-  }
-  if (rule.bxyApplyMode !== undefined) {
-    flatRule.bxyApplyMode = rule.bxyApplyMode;
-  }
-  if (rule.tierBadge !== undefined) {
-    flatRule.tierBadge = rule.tierBadge;
-  }
-
-  return flatRule;
-}
-
-/** Build the base bundle configuration object passed to metafield update functions. */
-export function buildBundleBaseConfig(
-  updatedBundle: {
-    id: string;
-    name: string;
-    description: string | null;
-    status: string;
-    bundleType: string;
-    templateName: string | null;
-    shopifyProductId: string | null;
-    bundleDesignTemplate?: string | null;
-    bundleDesignPresetId?: string | null;
-    defaultProductsData?: unknown;
-    boxSelection?: unknown;
-    bundleUpsellConfig?: unknown;
-    bundleTextConfig?: unknown;
-    bundleSubscriptionConfig?: unknown;
-    discountDisplayOverride?: unknown;
-    validateQuantityPerProduct?: unknown;
-    useSingleStepCategoriesAsBundleSteps?: boolean | null;
-    pricing?: {
-      displayOptions?: unknown;
-      messages?: unknown;
-      ruleMessagesByLocale?: unknown;
-    } | null;
-  },
-  stepsData: any[],
-  stepConditionsData: Record<string, any[]>,
-  discountData: any,
-  bundleParentVariantId: string | null,
-): Record<string, unknown> {
-  const optimizedSteps = (stepsData || []).map((step: any) => ({
-    id: step.id,
-    name: step.name || "Step",
-    pageTitle: step.pageTitle ?? null,
-    multiLangData: step.multiLangData ?? {},
-    stepImage: step.stepImage ?? null,
-    minQuantity: step.minQuantity,
-    maxQuantity: step.maxQuantity,
-    enabled: step.enabled !== false,
-    conditionType: stepConditionsData[step.id]?.[0]?.type || null,
-    conditionOperator: stepConditionsData[step.id]?.[0]?.operator || null,
-    conditionValue: parseConditionValue(
-      stepConditionsData[step.id]?.[0]?.value,
-    ),
-    conditionOperator2: stepConditionsData[step.id]?.[1]?.operator || null,
-    conditionValue2: parseConditionValue(
-      stepConditionsData[step.id]?.[1]?.value,
-    ),
-    products: (step.StepProduct || []).map((product: any) => ({
-      id: product.id,
-      title: product.title || product.name || "Product",
-      imageUrl: product.imageUrl || product.image?.url || null,
-      variants: Array.isArray(product.variants) ? product.variants : [],
-    })),
-    collections: (step.collections || []).map((collection: any) => ({
-      id: collection.id,
-      title: collection.title || "Collection",
-    })),
-    categories: Array.isArray(step.StepCategory)
-      ? step.StepCategory.map((cat: any) => ({
-          name: cat.name || "",
-          title: cat.title || cat.name || "",
-          sortOrder: cat.sortOrder ?? 0,
-          multiLangData: cat.multiLangData ?? {},
-          products: (cat.products || []).map((p: any) => ({
-            id: p.id,
-            title: p.title || "Product",
-            imageUrl: p.imageUrl || null,
-          })),
-          collections: (cat.collections || []).map((c: any) => ({
-            id: c.id,
-            title: c.title || "Collection",
-          })),
-        }))
-      : [],
-    isFreeGift: step.isFreeGift === true,
-    freeGiftName: step.freeGiftName ?? null,
-    addonLabel: step.addonLabel ?? null,
-    addonTitle: step.addonTitle ?? null,
-    addonAddText: step.addonAddText ?? null,
-    addonReplaceText: step.addonReplaceText ?? null,
-    addonDisplayFree: step.addonDisplayFree === true,
-    addonTiers: Array.isArray(step.addonTiers) ? step.addonTiers : [],
-    addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
-  }));
-
-  const savedPricingMessages = safeJsonParse(
-    updatedBundle.pricing?.messages,
-    {},
-  );
-  const pricingDisplayOptions =
-    updatedBundle.pricing?.displayOptions ??
-    discountData.displayOptions ?? null;
-  const pricingRuleMessages =
-    savedPricingMessages.ruleMessages ?? discountData.ruleMessages ?? {};
-  const firstRuleId =
-    discountData.discountRules?.[0]?.id ?? Object.keys(pricingRuleMessages)[0];
-  const firstRuleMsg = firstRuleId && pricingRuleMessages?.[firstRuleId];
-
-  return {
-    bundleId: updatedBundle.id,
-    id: updatedBundle.id,
-    name: updatedBundle.name,
-    description: updatedBundle.description,
-    status: updatedBundle.status,
-    bundleType: updatedBundle.bundleType,
-    templateName: updatedBundle.templateName,
-    bundleDesignTemplate: updatedBundle.bundleDesignTemplate ?? null,
-    bundleDesignPresetId: updatedBundle.bundleDesignPresetId ?? null,
-    defaultProductsData: updatedBundle.defaultProductsData ?? {},
-    boxSelection: updatedBundle.boxSelection ?? null,
-    bundleUpsellConfig: updatedBundle.bundleUpsellConfig ?? null,
-    bundleTextConfig: updatedBundle.bundleTextConfig ?? null,
-    bundleSubscriptionConfig: updatedBundle.bundleSubscriptionConfig ?? null,
-    discountDisplayOverride: updatedBundle.discountDisplayOverride ?? null,
-    validateQuantityPerProduct: updatedBundle.validateQuantityPerProduct ?? {
-      isEnabled: false,
-      allowedQuantity: 1,
-    },
-  useSingleStepCategoriesAsBundleSteps:
-      updatedBundle.useSingleStepCategoriesAsBundleSteps ?? false,
-    steps: optimizedSteps,
-    pricing: {
-      enabled: discountData.discountEnabled,
-      method: discountData.discountType,
-      rules: (discountData.discountRules || []).map(
-        (value: Parameters<typeof buildRuntimePricingRule>[0]) =>
-          buildRuntimePricingRule(value),
-      ),
-      display: { showFooter: discountData.showFooter !== false },
-      displayOptions: pricingDisplayOptions,
-      messages: {
-        progress:
-          firstRuleMsg?.discountText ||
-          "Add {conditionText} to get {discountText}",
-        qualified:
-          firstRuleMsg?.successMessage ||
-          "Congratulations! You got {discountText}",
-        showDiscountMessaging: discountData.discountMessagingEnabled || false,
-        showDiscountDisplay: savedPricingMessages.showDiscountDisplay ?? true,
-        ruleMessages: pricingRuleMessages,
-        ruleMessagesByLocale:
-          updatedBundle.pricing?.ruleMessagesByLocale ??
-          discountData.ruleMessagesByLocale ??
-          null,
-        successMessage:
-          savedPricingMessages.successMessage ??
-          discountData.successMessage ??
-          null,
-        successMessageByLocale:
-          savedPricingMessages.successMessageByLocale ??
-          discountData.successMessageByLocale ??
-          null,
-        displayOptions: pricingDisplayOptions,
-        tierTextByRuleId:
-          savedPricingMessages.tierTextByRuleId ??
-          discountData.tierTextByRuleId ??
-          null,
-        tierTextByLocaleByRuleId:
-          savedPricingMessages.tierTextByLocaleByRuleId ??
-          discountData.tierTextByLocaleByRuleId ??
-          null,
-        showInCart: true,
-      },
-    },
-    bundleParentVariantId: bundleParentVariantId,
-    shopifyProductId: updatedBundle.shopifyProductId,
-    updatedAt: new Date().toISOString(),
-  };
-}
+import { parsePricingRule } from "../../../../lib/pricing-rule-parser";
 
 function normalizeSyncVariants(
-  variants: unknown,
+  variants: unknown
 ): Array<Record<string, unknown>> {
   if (!Array.isArray(variants)) return [];
 
   return variants
     .filter(
       (variant: any) =>
-        typeof variant?.id === "string" && variant.id.trim() !== "",
+        typeof variant?.id === "string" && variant.id.trim() !== ""
     )
     .map((variant: any) => {
       const normalized: Record<string, unknown> = { id: variant.id };
@@ -256,7 +52,7 @@ function normalizeSyncProduct(product: any): Record<string, unknown> | null {
 function pushUniqueProduct(
   target: Array<Record<string, unknown>>,
   seen: Set<string>,
-  product: any,
+  product: any
 ) {
   const normalized = normalizeSyncProduct(product);
   if (!normalized) return;
@@ -267,7 +63,7 @@ function pushUniqueProduct(
 }
 
 function normalizeSyncCollection(
-  collection: any,
+  collection: any
 ): Record<string, unknown> | null {
   if (!collection || typeof collection !== "object") return null;
   const id = collection.id ?? collection.collectionId ?? collection.handle;
@@ -283,7 +79,7 @@ function normalizeSyncCollection(
 function pushUniqueCollection(
   target: Array<Record<string, unknown>>,
   seen: Set<string>,
-  collection: any,
+  collection: any
 ) {
   const normalized = normalizeSyncCollection(collection);
   if (!normalized) return;
@@ -294,27 +90,26 @@ function pushUniqueCollection(
 }
 
 function normalizeSyncCategories(step: any): Array<Record<string, unknown>> {
+  const stepProducts = Array.isArray(step.StepProduct) ? step.StepProduct : [];
   return (Array.isArray(step.StepCategory) ? step.StepCategory : []).map(
     (category: any, index: number) => {
-      const formatted = formatStepCategoryForRuntime(category, index);
+      const formatted = formatStepCategoryForRuntime(
+        category,
+        index,
+        stepProducts
+      );
       return {
         ...formatted,
-        products: Array.isArray(category.products)
-          ? category.products
-              .map((value: Parameters<typeof normalizeSyncProduct>[0]) =>
-                normalizeSyncProduct(value),
-              )
-              .filter(Boolean)
-          : [],
+        products: Array.isArray(formatted.products) ? formatted.products : [],
         collections: Array.isArray(formatted.collections)
           ? formatted.collections
               .map((value: Parameters<typeof normalizeSyncCollection>[0]) =>
-                normalizeSyncCollection(value),
+                normalizeSyncCollection(value)
               )
               .filter(Boolean)
           : [],
       };
-    },
+    }
   );
 }
 
@@ -328,9 +123,6 @@ function buildSyncOptimizedSteps(steps: any[]): Array<Record<string, unknown>> {
     for (const product of Array.isArray(step.StepProduct)
       ? step.StepProduct
       : []) {
-      pushUniqueProduct(products, seenProductIds, product);
-    }
-    for (const product of Array.isArray(step.products) ? step.products : []) {
       pushUniqueProduct(products, seenProductIds, product);
     }
     for (const collection of Array.isArray(step.collections)
@@ -392,24 +184,9 @@ function buildSyncPricingConfig(pricing: any): Record<string, unknown> | null {
   return {
     enabled: pricing.enabled,
     method: pricing.method,
-    rules: safeJsonParse(pricing.rules, []).map((rule: any) => {
-      const flat: Record<string, unknown> = {
-        id: rule.id,
-        conditionType: rule.conditionType || rule.type || "quantity",
-        conditionValue: parseFloat(rule.conditionValue ?? rule.value ?? 0) || 0,
-        discountValue:
-          parseFloat(rule.discountValue ?? rule.discount?.value ?? 0) || 0,
-      };
-      if (rule.customerBuys !== undefined)
-        flat.customerBuys = Number(rule.customerBuys);
-      if (rule.customerGets !== undefined)
-        flat.customerGets = Number(rule.customerGets);
-      if (rule.bxyDiscountType !== undefined)
-        flat.bxyDiscountType = rule.bxyDiscountType;
-      if (rule.bxyApplyMode !== undefined)
-        flat.bxyApplyMode = rule.bxyApplyMode;
-      return flat;
-    }),
+    rules: safeJsonParse(pricing.rules, []).map((rule: unknown) =>
+      parsePricingRule(rule)
+    ),
     messages: {
       progress:
         syncFirstRuleMsg?.discountText ||
@@ -432,19 +209,22 @@ function buildSyncPricingConfig(pricing: any): Record<string, unknown> | null {
 
 export function buildSyncBundleConfiguration(
   bundle: any,
-  shopifyProductId: string,
-  extra: Record<string, unknown> = {},
+  shopifyProductId: string
 ): Record<string, unknown> {
+  if (bundle?.bundleType !== BundleType.PRODUCT_PAGE) {
+    throw new Error("PPB sync requires bundleType product_page");
+  }
+
   const bundleDesignPresetId = bundle.bundleDesignPresetId ?? null;
   return {
     shopId: bundle.shopId,
-    bundleId: bundle.id,
+    offerPolicy: bundle.offerPolicy ?? null,
     id: bundle.id,
     name: bundle.name,
     description: bundle.description || "",
     status: bundle.status || BundleStatus.ACTIVE,
     templateName: bundle.templateName || null,
-    bundleType: bundle.bundleType || BundleType.PRODUCT_PAGE,
+    bundleType: BundleType.PRODUCT_PAGE,
     shopifyProductId,
     type: "cart_transform",
     bundleDesignTemplate: bundle.bundleDesignTemplate ?? null,
@@ -462,8 +242,7 @@ export function buildSyncBundleConfiguration(
     },
     lowStockAlertEnabled: bundle.lowStockAlertEnabled ?? false,
     lowStockAlertThreshold: bundle.lowStockAlertThreshold ?? 5,
-    lowStockAlertMessage:
-      bundle.lowStockAlertMessage ?? "Only {{stock}} left",
+    lowStockAlertMessage: bundle.lowStockAlertMessage ?? "Only {{stock}} left",
     stickyAddToCartEnabled: bundle.stickyAddToCartEnabled ?? false,
     stickyAddToCartShowDesktop: bundle.stickyAddToCartShowDesktop ?? true,
     stickyAddToCartShowMobile: bundle.stickyAddToCartShowMobile ?? true,
@@ -476,37 +255,27 @@ export function buildSyncBundleConfiguration(
       bundle.useSingleStepCategoriesAsBundleSteps ?? false,
     steps: buildSyncOptimizedSteps(bundle.steps || []),
     pricing: buildSyncPricingConfig(bundle.pricing),
-    loadingGif: bundle.loadingGif ?? null,
     floatingBadgeEnabled: bundle.floatingBadgeEnabled ?? false,
     floatingBadgeText: bundle.floatingBadgeText ?? "",
     textOverrides: bundle.textOverrides ?? null,
     textOverridesByLocale: bundle.textOverridesByLocale ?? null,
     sdkMode: bundle.sdkMode ?? false,
     offerDelivery: buildOfferDecisionMarker(bundle.offerPolicy ?? null),
-    updatedAt: new Date().toISOString(),
-    ...extra,
   };
 }
 
 export async function updateSyncMetafields(
   admin: ShopifyAdmin,
   productId: string,
-  bundle: any,
-  extra: Record<string, unknown> = {},
+  bundle: any
 ) {
-  const bundleConfiguration = buildSyncBundleConfiguration(
-    bundle,
-    productId,
-    extra,
-  );
+  const bundleConfiguration = buildSyncBundleConfiguration(bundle, productId);
   const configSize = JSON.stringify(bundleConfiguration).length;
   AppLogger.debug(
     "[METAFIELD] Sync optimized configuration size:",
     {},
-    `${configSize} chars`,
+    `${configSize} chars`
   );
 
   await updateBundleProductMetafields(admin, productId, bundleConfiguration);
-
-  return bundleConfiguration;
 }

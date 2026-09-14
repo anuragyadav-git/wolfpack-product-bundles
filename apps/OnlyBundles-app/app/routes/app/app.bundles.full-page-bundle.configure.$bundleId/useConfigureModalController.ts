@@ -4,9 +4,32 @@ import {
   showPolarisModal,
   useModalHideListener,
 } from "../_shared/bundle-configure/modal-utils";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
+import type { useConfigureAddonState } from "./useConfigureAddonState";
+import type { useConfigureVisibilityTemplateState } from "./useConfigureVisibilityTemplateState";
 
-export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
+type ConfigureModalDependencies = Pick<
+  ReturnType<typeof useConfigureBundleController>,
+  | "closeCollectionsModal"
+  | "closeProductsModal"
+  | "isCollectionsModalOpen"
+  | "isProductsModalOpen"
+  | "setCurrentModalStepId"
+> &
+  Pick<
+    ReturnType<typeof useConfigureAddonState>,
+    | "isAddonSelectedProductsModalOpen"
+    | "setAddonSelectedProductsTierIndex"
+    | "setIsAddonSelectedProductsModalOpen"
+  > &
+  Pick<
+    ReturnType<typeof useConfigureVisibilityTemplateState>,
+    "isSyncModalOpen" | "setIsSyncModalOpen"
+  >;
+
+export function useConfigureModalController(
+  dependencies: ConfigureModalDependencies
+) {
   const {
     closeCollectionsModal,
     closeProductsModal,
@@ -15,9 +38,10 @@ export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
     isProductsModalOpen,
     isSyncModalOpen,
     setCurrentModalStepId,
+    setAddonSelectedProductsTierIndex,
     setIsAddonSelectedProductsModalOpen,
     setIsSyncModalOpen,
-  } = flow;
+  } = dependencies;
   const productsModalRef = useRef<any>(null);
   const collectionsModalRef = useRef<any>(null);
   const syncModalRef = useRef<any>(null);
@@ -80,7 +104,7 @@ export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
   };
   const handleCloseAddonSelectedProductsModal = () => {
     setIsAddonSelectedProductsModalOpen(false);
-    flow.setAddonSelectedProductsTierIndex(null);
+    setAddonSelectedProductsTierIndex(null);
     hidePolarisModal(addonSelectedProductsModalRef);
   };
 
@@ -88,20 +112,20 @@ export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
   useModalHideListener(collectionsModalRef, handleCloseCollectionsModal);
   useModalHideListener(syncModalRef, () => setIsSyncModalOpen(false));
   useModalHideListener(discountVariablesModalRef, () =>
-    setIsDiscountVariablesModalOpen(false),
+    setIsDiscountVariablesModalOpen(false)
   );
   useModalHideListener(addonVariablesModalRef, () =>
-    setIsAddonVariablesModalOpen(false),
+    setIsAddonVariablesModalOpen(false)
   );
   useModalHideListener(
     addonSelectedProductsModalRef,
-    handleCloseAddonSelectedProductsModal,
+    handleCloseAddonSelectedProductsModal
   );
   useModalHideListener(disableAddonStepModalRef, () =>
-    setIsDisableAddonStepModalOpen(false),
+    setIsDisableAddonStepModalOpen(false)
   );
 
-  Object.assign(flow, {
+  return {
     addonSelectedProductsModalRef,
     addonVariablesModalRef,
     collectionsModalRef,
@@ -124,5 +148,5 @@ export function useConfigureModalController(flow: ConfigureBundleFlowDraft) {
     syncModalRef,
     templateVariablesModalRef,
     useModalHideListener,
-  });
+  };
 }

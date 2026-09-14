@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-export const BUNDLE_PREVIEW_TOKEN_TTL_MS = 15 * 60 * 1000;
+export const BUNDLE_PREVIEW_TOKEN_TTL_MS = 60 * 60 * 1000;
 const BUNDLE_PREVIEW_KEY_CONTEXT = "wolfpack:bundle-preview:v1";
 
 interface BundlePreviewTokenPayload {

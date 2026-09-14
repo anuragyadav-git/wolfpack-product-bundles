@@ -1,0 +1,954 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 5,
+  "status": "approved",
+  "chrome_mcp_required": true,
+  "environment": "development",
+  "base_url": "https://admin.shopify.com/store/agent-5sfidg3m/apps/wolfpack-product-bundles-sit/app/",
+  "fixture": "Normal Admin-saved FPB and PPB multi-variant Agent-store fixtures that survive hard reload; storefront routes are opened only from fresh Preview Bundle actions.",
+  "authentication_mode": "Connected default Chrome profile authenticated to the Agent Shopify Admin and password-protected storefront.",
+  "setup": {
+    "profile_policy": "default-profile-only",
+    "allow_isolated_context": false,
+    "zoom_percent": 100,
+    "artifact_directory": "qa",
+    "max_retries": 2,
+    "locale": "en",
+    "currency": "USD market context baseline; assertions remain currency-agnostic",
+    "theme": "Agent-store active preview theme",
+    "feature_flags": [],
+    "random_time_control": "Record dynamic timestamps; do not mask tested selector or adjacent-control pixels.",
+    "device_pixel_ratio_policy": "record-actual",
+    "waits": [
+      "document.fonts.ready",
+      "images-complete",
+      "Shopify product hydration complete",
+      "selector target state ready"
+    ],
+    "scroll": {
+      "x": 0,
+      "y": 0
+    },
+    "disable_nonessential_animation": true,
+    "hide_caret_and_transient_cursors": true,
+    "dynamic_region_policy": "No masks unless the user explicitly approves a positive rectangle that covers no tested assertion."
+  },
+  "viewports": [
+    {
+      "id": "desktop",
+      "mode": "desktop",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "id": "mobile",
+      "mode": "mobile",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "states": [
+    {
+      "id": "fpb-card",
+      "description": "FPB card selectors across Standard and Classic, including single/multiple and adjacent-control states."
+    },
+    {
+      "id": "fpb-drawer",
+      "description": "FPB Compact selector and mobile drawer mutual exclusion, safe-area, and sticky-action state."
+    },
+    {
+      "id": "fpb-modal",
+      "description": "FPB Horizontal and product-details overlay selector, focus, scroll, and container-boundary state."
+    },
+    {
+      "id": "ppb-modes",
+      "description": "PPB Grid dropdown, pill, canonical color swatch, canonical image swatch, and missing-swatch states."
+    },
+    {
+      "id": "stress-availability",
+      "description": "Long and many values, two dimensions, mixed/all unavailable, long identity, price, and quantity states."
+    },
+    {
+      "id": "ppb-picker",
+      "description": "PPB Horizontal Slots picker selection, focus restoration, scroll ownership, and sticky-action state."
+    },
+    {
+      "id": "failure-accessibility",
+      "description": "PPB Vertical Slots fail-closed hydration, keyboard, focus, reduced-motion, and high-zoom states."
+    }
+  ],
+  "interactions": [
+    {
+      "id": "fpb-standard-desktop",
+      "purpose": "Verify FPB Standard selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "fpb-card",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Open the product-details overlay and verify the selector uses the same option semantics."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-standard-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-standard-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "fpb-standard-mobile",
+      "purpose": "Verify FPB Standard selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "fpb-card",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Open the product-details overlay and verify the selector uses the same option semantics."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-standard-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-standard-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "fpb-classic-desktop",
+      "purpose": "Verify FPB Classic selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "fpb-card",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Verify the compact card treatment retains every directly reachable value."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-classic-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-classic-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "fpb-classic-mobile",
+      "purpose": "Verify FPB Classic selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "fpb-card",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Verify the compact card treatment retains every directly reachable value."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-classic-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-classic-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "fpb-compact-desktop",
+      "purpose": "Verify FPB Compact selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "fpb-drawer",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "On mobile, open and close the existing drawer and verify selector content never covers footer actions."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-compact-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-compact-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "fpb-compact-mobile",
+      "purpose": "Verify FPB Compact selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "fpb-drawer",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "On mobile, open and close the existing drawer and verify selector content never covers footer actions."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-compact-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-compact-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "fpb-horizontal-desktop",
+      "purpose": "Verify FPB Horizontal selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "fpb-modal",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "At desktop, resize across FPB container widths 799, 800, and 801 before restoring the target viewport."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-horizontal-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-horizontal-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "fpb-horizontal-mobile",
+      "purpose": "Verify FPB Horizontal selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant FPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "fpb-modal",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "At desktop, resize across FPB container widths 799, 800, and 801 before restoring the target viewport."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/fpb-horizontal-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/fpb-horizontal-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#case-results",
+        "visual-qa-report.md#semantic-review"
+      ]
+    },
+    {
+      "id": "ppb-grid-desktop",
+      "purpose": "Verify PPB Grid selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "ppb-modes",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Exercise dropdown and pill unchanged, then color_swatch and image_swatch with the exact seven-size by four-color Agent-store product; verify Size uses one native select while Color keeps canonical Shopify swatches. At mobile also check widths 479, 480, and 481."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Explicit dropdown uses native select semantics and explicit pill uses one named radio group. In multi-dimensional swatch modes, dimensions without the requested canonical swatch kind use one native select while mapped dimensions keep one named swatch radio group.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-grid-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-grid-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#ppb-direction-a-completion-evidence",
+        "visual-qa-report.md#baseline-and-comparison-status"
+      ]
+    },
+    {
+      "id": "ppb-grid-mobile",
+      "purpose": "Verify PPB Grid selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "ppb-modes",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Exercise dropdown and pill unchanged, then color_swatch and image_swatch with the exact seven-size by four-color Agent-store product; verify Size uses one native select while Color keeps canonical Shopify swatches. At mobile also check widths 479, 480, and 481."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Explicit dropdown uses native select semantics and explicit pill uses one named radio group. In multi-dimensional swatch modes, dimensions without the requested canonical swatch kind use one native select while mapped dimensions keep one named swatch radio group.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-grid-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-grid-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "ppb-list-desktop",
+      "purpose": "Verify PPB List selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "stress-availability",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Exercise long labels, twelve values, two dimensions, mixed availability, and widths 767, 768, and 769."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-list-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-list-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#ppb-direction-a-completion-evidence",
+        "visual-qa-report.md#baseline-and-comparison-status"
+      ]
+    },
+    {
+      "id": "ppb-list-mobile",
+      "purpose": "Verify PPB List selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "stress-availability",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Exercise long labels, twelve values, two dimensions, mixed availability, and widths 767, 768, and 769."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-list-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-list-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "ppb-horizontal-slots-desktop",
+      "purpose": "Verify PPB Horizontal Slots selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "ppb-picker",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Open the existing picker, change a variant, close it, and verify focus restoration and sticky action clearance."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-horizontal-slots-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-horizontal-slots-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-test-report.md#ppb-direction-a-completion-evidence",
+        "visual-qa-report.md#baseline-and-comparison-status"
+      ]
+    },
+    {
+      "id": "ppb-horizontal-slots-mobile",
+      "purpose": "Verify PPB Horizontal Slots selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "ppb-picker",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Open the existing picker, change a variant, close it, and verify focus restoration and sticky action clearance."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-horizontal-slots-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-horizontal-slots-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    },
+    {
+      "id": "ppb-vertical-slots-desktop",
+      "purpose": "Verify PPB Vertical Slots selectors at the required desktop viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "desktop",
+      "state": "failure-accessibility",
+      "steps": [
+        "Resize the actual Chrome window to 1280x800 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Exercise keyboard focus, missing swatches, reduced motion, 200 percent zoom, and fail-closed hydration."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-vertical-slots-desktop.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-vertical-slots-desktop.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "passed",
+      "evidence_links": [
+        "browser-case-result.json",
+        "browser-test-report.md#ppb-minimum-desktop-rerun-2026-09-14",
+        "visual-qa-report.md#resolved-minimum-desktop-remediation"
+      ]
+    },
+    {
+      "id": "ppb-vertical-slots-mobile",
+      "purpose": "Verify PPB Vertical Slots selectors at the required mobile viewport under Direction A.",
+      "precondition": "The normal Admin-saved multi-variant PPB fixture persists after hard reload and a fresh signed Preview Bundle URL is open in the Agent store.",
+      "viewport": "mobile",
+      "state": "failure-accessibility",
+      "steps": [
+        "Resize the actual Chrome window to 390x844 and record the achieved inner viewport, DPR, and zoom.",
+        "Clear Cache Storage, hard reload with cache bypass, and wait for fonts, images, Shopify hydration, and selector readiness.",
+        "Capture the initial card or picker state, activate available option values by pointer and keyboard, and capture the resulting state.",
+        "Exercise keyboard focus, missing swatches, reduced motion, 200 percent zoom, and fail-closed hydration."
+      ],
+      "expected_semantic_result": "Every applicable option is directly reachable, exactly one variant update occurs per activation, unavailable values remain disabled, and existing product/card/modal behavior is preserved.",
+      "dom_assertions": [
+        "Each option dimension has one visible label and one selector group with unique instance-scoped IDs or names.",
+        "Dropdown uses native select semantics; non-dropdown values use one named radio group and expose selected and disabled state.",
+        "Variant image, price, compare-at price, availability, inventory context, selected summary, quantity clamp, and Add eligibility reflect the active variant."
+      ],
+      "style_geometry_assertions": [
+        "No selector, card, overlay, drawer, sticky action, or page clipping or unintended overflow is present.",
+        "Values use normal-flow intrinsic wrapping with no hidden +N control, horizontal rail, or selector-owned scroller.",
+        "Selection, hover, focus, and unavailable states do not change geometry; adjacent controls remain unobstructed and same-row cards remain equal height.",
+        "Tested sibling shell, card, grid or list, sidebar, tray, footer, and CTA rectangles do not move by more than one CSS pixel outside approved selector accommodation."
+      ],
+      "screenshot_path": "qa/screenshots/after/ppb-vertical-slots-mobile.png",
+      "baseline_path": "qa/screenshots/baseline/ppb-vertical-slots-mobile.png",
+      "allowed_masks": [],
+      "console_expectations": {
+        "new_uncaught_errors": 0,
+        "new_severe_warnings": 0,
+        "hydration_errors": 0
+      },
+      "network_expectations": {
+        "unexpected_failures": 0,
+        "duplicate_mutations": 0,
+        "required_assets_blocked": 0
+      },
+      "cleanup": [
+        "Restore 100 percent zoom, default motion preference, initial option, and closed overlay or drawer state.",
+        "Restore the actual Chrome window to 1280x800 after mobile or boundary checks."
+      ],
+      "status": "not-run",
+      "evidence_links": []
+    }
+  ],
+  "assertions": {
+    "library": "references/chrome-devtools-test-protocol.md",
+    "require_json_serializable_results": true
+  },
+  "screenshots": {
+    "format": "png",
+    "index_path": "qa/screenshot-index.json",
+    "element_required": true,
+    "viewport_required": true,
+    "before_after_critical_interactions": true,
+    "full_page_only_when_needed": true,
+    "metadata_required": [
+      "viewport",
+      "actual-inner-viewport",
+      "dpr",
+      "zoom",
+      "state",
+      "revision",
+      "served-widget-version"
+    ]
+  },
+  "console_policy": {
+    "fail_on": [
+      "uncaught-exception",
+      "unhandled-promise-rejection",
+      "severe-application-error",
+      "failed-resource-parse",
+      "new-repeated-warning",
+      "accessibility-runtime-error",
+      "hydration-error",
+      "duplicate-key-warning",
+      "change-caused-csp-violation",
+      "tested-interaction-error"
+    ],
+    "allowlist": []
+  },
+  "network_policy": {
+    "fail_on": [
+      "unexpected-4xx-5xx",
+      "blocked-required-asset",
+      "implementation-caused-abort",
+      "cors-error",
+      "duplicate-mutation",
+      "missing-product-media",
+      "missing-translation",
+      "local-to-production-request",
+      "real-order-or-destructive-action"
+    ],
+    "expected_analytics": [
+      "Existing storefront view and selector-related analytics may fire once according to current ownership; no new analytics contract is introduced."
+    ],
+    "redact_secrets_and_private_bodies": true
+  },
+  "lighthouse": {
+    "required": true,
+    "devices": [
+      "desktop",
+      "mobile"
+    ],
+    "modes": [
+      "snapshot",
+      "navigation"
+    ],
+    "categories": [
+      "accessibility",
+      "best-practices",
+      "seo"
+    ],
+    "performance_excluded": true,
+    "report_paths": {
+      "desktop": "qa/lighthouse/desktop.json",
+      "mobile": "qa/lighthouse/mobile.json"
+    }
+  },
+  "performance": {
+    "required": true,
+    "triggers": [
+      "initial selector render after Shopify hydration",
+      "available variant activation",
+      "existing modal or picker open and close"
+    ],
+    "not_applicable_reason": "",
+    "trace_paths": [
+      "qa/performance/desktop.json",
+      "qa/performance/mobile.json"
+    ],
+    "metrics": [
+      "LCP",
+      "CLS",
+      "interaction-findings",
+      "long-tasks",
+      "layout-shift-sources",
+      "image-font-loading"
+    ]
+  },
+  "visual_diff": {
+    "format": "png",
+    "comparison": ".agents/skills/storefront-design-director/scripts/compare_images.py",
+    "diff_required": true,
+    "json_summary_required": true,
+    "approved_reference_and_actual_side_by_side": true,
+    "allowed_masks": []
+  },
+  "non_regression": {
+    "required": true,
+    "cases": [
+      "fpb-standard-desktop",
+      "fpb-standard-mobile",
+      "fpb-classic-desktop",
+      "fpb-classic-mobile",
+      "fpb-compact-desktop",
+      "fpb-compact-mobile",
+      "fpb-horizontal-desktop",
+      "fpb-horizontal-mobile",
+      "ppb-grid-desktop",
+      "ppb-grid-mobile",
+      "ppb-list-desktop",
+      "ppb-list-mobile",
+      "ppb-horizontal-slots-desktop",
+      "ppb-horizontal-slots-mobile",
+      "ppb-vertical-slots-desktop",
+      "ppb-vertical-slots-mobile"
+    ]
+  },
+  "cleanup": [
+    "Remove temporary capture-only styles or state changes.",
+    "Restore 100 percent zoom, reduced-motion preference, scroll position, and 1280x800 Chrome window.",
+    "Restore reversible fixture state through the normal Admin flow only.",
+    "Delete transient sensitive evidence and keep all screenshots uncommitted."
+  ]
+}

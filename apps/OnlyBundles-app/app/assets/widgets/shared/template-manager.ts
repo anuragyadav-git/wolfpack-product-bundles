@@ -19,14 +19,14 @@ export class TemplateManager {
     const normalizedOp = PricingCalculator.normalizeCondition(operator);
 
     switch (normalizedOp) {
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN:
+      case 'gt':
         return Math.max(0, (targetValue + unitStep) - currentValue);
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN:
+      case 'lt':
         return Math.max(0, currentValue - (targetValue - unitStep));
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO:
+      case 'lte':
         return Math.max(0, currentValue - targetValue);
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.EQUAL_TO:
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO:
+      case 'eq':
+      case 'gte':
       default:
         // For pricing rules, equal_to is treated as a threshold (>= target).
         return Math.max(0, targetValue - currentValue);
@@ -73,7 +73,7 @@ export class TemplateManager {
     const conditionType = PricingCalculator.getRuleConditionType(ruleToUse);
     const targetValue = PricingCalculator.getRuleConditionValue(ruleToUse, discountMethod);
     const conditionOperator = PricingCalculator.getRuleConditionOperator(ruleToUse);
-    const rawDiscountValue = PricingCalculator.getRuleDiscountValue(ruleToUse);
+    const rawDiscountValue = PricingCalculator.getRuleDiscountValue(ruleToUse, discountMethod);
     const discountedItems = discountMethod === BUNDLE_WIDGET.DISCOUNT_METHODS.BUY_X_GET_Y
       ? String(Number(ruleToUse.customerGets || 0))
       : (conditionType === 'quantity' ? targetValue.toString() : '0');
@@ -110,7 +110,7 @@ export class TemplateManager {
       // Discount-specific variables
       discountText: discountData.discountText,
       discountConditionDiff: conditionType === 'amount' ? conditionData.amountNeeded : conditionData.itemsNeeded,
-      discountUnit: conditionType === 'amount' ? currencyInfo.display.symbol : '',
+      discountUnit: '',
       discountValue: discountData.discountValue,
       discountValueUnit: discountData.discountValueUnit,
       discountedItems,
@@ -119,9 +119,9 @@ export class TemplateManager {
       alreadyQualified: conditionData.alreadyQualified || false,
 
       // Progress variables
-      currentAmount: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.format),
+      currentAmount: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.code),
       currentQuantity: totalQuantity.toString(),
-      targetAmount: conditionType === 'amount' ? CurrencyManager.formatMoney(targetValue, currencyInfo.display.format) : '0',
+      targetAmount: conditionType === 'amount' ? CurrencyManager.formatMoney(targetValue, currencyInfo.display.code) : '0',
       targetQuantity: conditionType === 'quantity' ? targetValue.toString() : '0',
       progressPercentage: Math.round(progressPercentage).toString(),
 
@@ -129,9 +129,9 @@ export class TemplateManager {
       bundleName: bundle.name || 'Bundle',
 
       // Pricing information
-      originalPrice: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.format),
-      finalPrice: CurrencyManager.formatMoney(discountInfo.finalPrice, currencyInfo.display.format),
-      savingsAmount: CurrencyManager.formatMoney(discountInfo.discountAmount, currencyInfo.display.format),
+      originalPrice: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.code),
+      finalPrice: CurrencyManager.formatMoney(discountInfo.finalPrice, currencyInfo.display.code),
+      savingsAmount: CurrencyManager.formatMoney(discountInfo.discountAmount, currencyInfo.display.code),
       savingsPercentage: Math.round(discountInfo.discountPercentage).toString(),
 
       // Currency information
@@ -188,14 +188,14 @@ export class TemplateManager {
     const label = targetValue === 1 ? unit : `${unit}s`;
 
     switch (normalizedOp) {
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN:
+      case 'gt':
         return `more than ${targetValue} ${label}`;
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN:
+      case 'lt':
         return `fewer than ${targetValue} ${label}`;
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO:
+      case 'lte':
         return `${targetValue} or fewer ${label}`;
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.EQUAL_TO:
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO:
+      case 'eq':
+      case 'gte':
       default:
         // "equal_to" acts as a threshold (>= N) in discount rules,
         // and "greater_than_or_equal_to" is the most common default.
@@ -211,42 +211,37 @@ export class TemplateManager {
       const alreadyQualified = PricingCalculator.checkCondition(totalPrice, conditionOperator, targetValue);
       const amountNeeded = this.getQualificationGap(totalPrice, targetValue, conditionOperator, 1);
 
-      // Convert for display if needed
-      const convertedAmountNeeded = CurrencyManager.convertCurrency(
+      // The pricing calculator converts merchant-authored thresholds once before
+      // calling this formatter. These values are already presentment minor units.
+      const amountNeededFormatted = CurrencyManager.formatMoney(
         amountNeeded,
-        currencyInfo.calculation.code,
         currencyInfo.display.code,
-        currencyInfo.display.rate
+        currencyInfo.locale,
       );
-
-      // Format for display (convert from cents to decimal)
-      const amountNeededFormatted = (convertedAmountNeeded / 100).toFixed(2);
-      const targetValueFormatted = CurrencyManager.convertCurrency(
+      const targetValueFormatted = CurrencyManager.formatMoney(
         targetValue,
-        currencyInfo.calculation.code,
         currencyInfo.display.code,
-        currencyInfo.display.rate
+        currencyInfo.locale,
       );
-      const targetValueFormattedDecimal = (targetValueFormatted / 100).toFixed(2);
 
       // Build operator-aware condition text for amount
       let conditionText;
       if (alreadyQualified) {
-        if (normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN) {
-          conditionText = `less than ${currencyInfo.display.symbol}${targetValueFormattedDecimal} met`;
-        } else if (normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO) {
-          conditionText = `at most ${currencyInfo.display.symbol}${targetValueFormattedDecimal} met`;
+        if (normalizedOp === 'lt') {
+          conditionText = `less than ${targetValueFormatted} met`;
+        } else if (normalizedOp === 'lte') {
+          conditionText = `at most ${targetValueFormatted} met`;
         } else {
-          conditionText = `${currencyInfo.display.symbol}${targetValueFormattedDecimal} minimum met`;
+          conditionText = `${targetValueFormatted} minimum met`;
         }
-      } else if (normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN) {
-        conditionText = `${currencyInfo.display.symbol}${amountNeededFormatted} more`;
-      } else if (normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN) {
-        conditionText = `less than ${currencyInfo.display.symbol}${targetValueFormattedDecimal}`;
-      } else if (normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO) {
-        conditionText = `at most ${currencyInfo.display.symbol}${targetValueFormattedDecimal}`;
+      } else if (normalizedOp === 'gt') {
+        conditionText = `${amountNeededFormatted} more`;
+      } else if (normalizedOp === 'lt') {
+        conditionText = `less than ${targetValueFormatted}`;
+      } else if (normalizedOp === 'lte') {
+        conditionText = `at most ${targetValueFormatted}`;
       } else {
-        conditionText = `${currencyInfo.display.symbol}${amountNeededFormatted} more`;
+        conditionText = `${amountNeededFormatted} more`;
       }
 
       return {
@@ -265,17 +260,17 @@ export class TemplateManager {
       let conditionText;
       if (alreadyQualified) {
         if (
-          normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN ||
-          normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO
+          normalizedOp === 'lt' ||
+          normalizedOp === 'lte'
         ) {
           conditionText = `${this.formatOperatorText(conditionOperator, targetValue, 'item')} met`;
         } else {
           conditionText = `${targetValue} ${targetValue === 1 ? 'item' : 'items'} minimum met`;
         }
       } else if (
-        normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN ||
-        normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO ||
-        normalizedOp === BUNDLE_WIDGET.CONDITION_OPERATORS.EQUAL_TO
+        normalizedOp === 'gt' ||
+        normalizedOp === 'gte' ||
+        normalizedOp === 'eq'
       ) {
         conditionText = `${itemsNeeded} more ${itemsNeeded === 1 ? 'item' : 'items'}`;
       } else {
@@ -307,47 +302,45 @@ export class TemplateManager {
         };
 
       case BUNDLE_WIDGET.DISCOUNT_METHODS.FIXED_AMOUNT_OFF:
-        // safeValue is already in cents
-        const convertedAmount = CurrencyManager.convertCurrency(
+        // safeValue is already in presentment cents.
+        const amountOff = CurrencyManager.formatMoney(
           safeValue,
-          currencyInfo.calculation.code,
           currencyInfo.display.code,
-          currencyInfo.display.rate
+          currencyInfo.locale,
         );
-        const amountOff = (convertedAmount / 100).toFixed(2);
         return {
-          discountText: `${currencyInfo.display.symbol}${amountOff} off`,
+          discountText: `${amountOff} off`,
           discountValue: amountOff,
-          discountValueUnit: currencyInfo.display.symbol
+          discountValueUnit: ''
         };
 
       case BUNDLE_WIDGET.DISCOUNT_METHODS.FIXED_BUNDLE_PRICE:
-        // safeValue is already in cents
-        const convertedPrice = CurrencyManager.convertCurrency(
+        // safeValue is already in presentment cents.
+        const bundlePrice = CurrencyManager.formatMoney(
           safeValue,
-          currencyInfo.calculation.code,
           currencyInfo.display.code,
-          currencyInfo.display.rate
+          currencyInfo.locale,
         );
-        const bundlePrice = (convertedPrice / 100).toFixed(2);
         return {
-          discountText: `${currencyInfo.display.symbol}${bundlePrice}`,
-          discountValue: `${currencyInfo.display.symbol}${bundlePrice}`,
+          discountText: bundlePrice,
+          discountValue: bundlePrice,
           discountValueUnit: ''
         };
 
       case BUNDLE_WIDGET.DISCOUNT_METHODS.BUY_X_GET_Y:
         if ((rule?.bxyDiscountType || rule?.discountType) === 'fixed_amount') {
-          const convertedBxyAmount = CurrencyManager.convertCurrency(
+          const convertedBxyAmount = CurrencyManager.convertMerchantAmountToPresentment(
             safeValue,
-            currencyInfo.calculation.code,
-            currencyInfo.display.code,
-            currencyInfo.display.rate
+            currencyInfo,
           );
-          const bxyAmountOff = (convertedBxyAmount / 100).toFixed(2);
+          const bxyAmountOff = CurrencyManager.formatMoney(
+            convertedBxyAmount,
+            currencyInfo.display.code,
+            currencyInfo.locale,
+          );
           return {
-            discountText: `${currencyInfo.display.symbol}${bxyAmountOff} off`,
-            discountValue: `${currencyInfo.display.symbol}${bxyAmountOff}`,
+            discountText: `${bxyAmountOff} off`,
+            discountValue: bxyAmountOff,
             discountValueUnit: ''
           };
         }
@@ -467,7 +460,7 @@ export class TemplateManager {
       discountedItems: '0',
 
       // Progress variables
-      currentAmount: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.format),
+      currentAmount: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.code),
       currentQuantity: totalQuantity.toString(),
       targetAmount: '0',
       targetQuantity: '0',
@@ -477,8 +470,8 @@ export class TemplateManager {
       bundleName: bundle.name || 'Bundle',
 
       // Pricing information
-      originalPrice: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.format),
-      finalPrice: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.format),
+      originalPrice: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.code),
+      finalPrice: CurrencyManager.formatMoney(totalPrice, currencyInfo.display.code),
       savingsAmount: '0',
       savingsPercentage: '0',
 

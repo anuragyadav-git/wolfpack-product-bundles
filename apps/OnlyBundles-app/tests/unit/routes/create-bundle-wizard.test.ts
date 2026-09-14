@@ -1,4 +1,4 @@
-import { action, headers, links } from "../../../app/routes/app/app.bundles.create/route";
+import { action, headers, links, loader } from "../../../app/routes/app/app.bundles.create/route";
 import { authenticate } from "../../../app/shopify.server";
 import { handleCreateBundle } from "../../../app/routes/app/app.dashboard/handlers/handlers.server";
 
@@ -53,6 +53,21 @@ beforeEach(() => {
 });
 
 describe("app.bundles.create action", () => {
+  it("authenticates the loader", async () => {
+    const request = new Request(
+      "https://test.myshopify.com/app/bundles/create",
+    );
+
+    const response = await loader({
+      request,
+      params: {},
+      context: {},
+    } as any);
+
+    expect(mockAuthenticate.admin).toHaveBeenCalledWith(request);
+    expect(response.status).toBe(200);
+  });
+
   it("preloads first-viewport bundle type thumbnails for LCP", () => {
     const preloads = links();
     const responseHeaders = headers({} as any) as Record<string, string>;
@@ -191,5 +206,62 @@ describe("app.bundles.create action", () => {
     expect(calledFormData.get("bundleName")).toBe("Full Page Test");
     expect(calledFormData.get("bundleType")).toBe("full_page");
     expect(calledFormData.has("description")).toBe(false);
+  });
+
+  it("returns the Shopify Product GID after a Sidekick-confirmed create", async () => {
+    mockHandleCreateBundle.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: true,
+          bundleId: "bundle-sidekick",
+          bundleProductId: "gid://shopify/Product/99",
+          redirectTo:
+            "/app/bundles/product-page-bundle/configure/bundle-sidekick?mode=create",
+          showFirstLoadTour: false,
+          widgetStatus: { checked: false },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ) as any,
+    );
+    const request = makeRequest({
+      bundleName: "Sidekick Bundle",
+      bundleType: "product_page",
+      submissionMode: "sidekick",
+    });
+
+    const response = await action({ request, params: {}, context: {} } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      success: true,
+      bundleId: "bundle-sidekick",
+      bundleProductId: "gid://shopify/Product/99",
+      redirectTo:
+        "/app/bundles/product-page-bundle/configure/bundle-sidekick?mode=create",
+    });
+  });
+
+  it("sanitizes Sidekick creation failures", async () => {
+    mockHandleCreateBundle.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: "Bundle limit reached. Upgrade to create more bundles.",
+        }),
+        { status: 403, headers: { "Content-Type": "application/json" } },
+      ) as any,
+    );
+    const request = makeRequest({
+      bundleName: "Sidekick Bundle",
+      bundleType: "product_page",
+      submissionMode: "sidekick",
+    });
+
+    const response = await action({ request, params: {}, context: {} } as any);
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({
+      success: false,
+      errorCode: "bundle_create_failed",
+    });
   });
 });

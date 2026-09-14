@@ -1,43 +1,99 @@
-export function toNumericShopifyId(id: string | undefined | null): string {
-  if (!id) return "";
-  const match = id.match(/\/(\d+)$/);
-  return match ? match[1] : id;
+import type {
+  AddonDraft,
+  AddonDraftInput,
+  AddonSelectedProductDraft,
+  AddonTierConditionDraft,
+  AddonTierDraft,
+} from "./addon-draft.types";
+
+type AddonPickerVariantInput = {
+  id?: string | number;
+  variantId?: string | number;
+  variantGraphqlId?: string;
+  inventoryQuantity?: number | null;
+  inventoryPolicy?: string | null;
+  price?: string | number | null;
+  title?: string;
+  variantTitle?: string;
+};
+
+type AddonPickerProductInput = {
+  id?: string | number;
+  productId?: string | number;
+  graphqlId?: string;
+  handle?: string | null;
+  variants?: AddonPickerVariantInput[];
+  images?: Array<{ originalSrc?: string | null; url?: string | null }>;
+  image?: { url?: string | null };
+  imageUrl?: string | null;
+  hasOnlyDefaultVariant?: boolean;
+  title?: string;
+  name?: string;
+  tags?: string[];
+};
+
+type AddonTierInput = AddonTierDraft & {
+  selectedAddonProducts?: AddonPickerProductInput[];
+  conditions?: AddonTierConditionDraft[];
+};
+
+type AddonPersonalizationInput = {
+  isPersonalizationEnabled?: boolean;
+  personalizeStepText?: string;
+  personalizePageSubtext?: string;
+  stepImage?: string | null;
+  addonProducts?: {
+    isEnabled?: boolean;
+    title?: string;
+    tiers?: AddonTierInput[];
+    multiLangData?: Record<string, Record<string, string>>;
+  };
+};
+
+export function toNumericShopifyId(id: unknown): string {
+  if (typeof id !== "string" && typeof id !== "number") return "";
+  const value = String(id);
+  if (!value) return "";
+  const match = value.match(/\/(\d+)$/);
+  return match ? match[1] : value;
 }
 
-export function toProductGid(product: any): string {
-  return (
-    product?.graphqlId ||
-    product?.id ||
-    (product?.productId ? `gid://shopify/Product/${product.productId}` : "")
-  );
+export function toProductGid(product: AddonPickerProductInput): string {
+  if (product.graphqlId) return product.graphqlId;
+  if (product.id !== undefined && product.id !== "") return String(product.id);
+  return product.productId
+    ? `gid://shopify/Product/${product.productId}`
+    : "";
 }
 
-export function toVariantGid(variant: any): string {
-  return (
-    variant?.variantGraphqlId ||
-    variant?.id ||
-    (variant?.variantId
-      ? `gid://shopify/ProductVariant/${variant.variantId}`
-      : "")
-  );
+export function toVariantGid(variant: AddonPickerVariantInput): string {
+  if (variant.variantGraphqlId) return variant.variantGraphqlId;
+  if (variant.id !== undefined && variant.id !== "") return String(variant.id);
+  return variant.variantId
+    ? `gid://shopify/ProductVariant/${variant.variantId}`
+    : "";
 }
 
-export function normalizeAddonPickerProduct(product: any) {
+export function normalizeAddonPickerProduct(
+  product: AddonPickerProductInput,
+): AddonSelectedProductDraft {
   const productGid = toProductGid(product);
   const variants = Array.isArray(product?.variants) ? product.variants : [];
-  const imageUrl =
+  const candidateImageUrl =
     product?.images?.[0]?.originalSrc ||
     product?.images?.[0]?.url ||
     product?.image?.url ||
     product?.imageUrl ||
     null;
+  const imageUrl =
+    typeof candidateImageUrl === "string" ? candidateImageUrl : null;
 
   return {
     id: productGid,
     productId: toNumericShopifyId(productGid || product?.productId),
     graphqlId: productGid,
     handle: product?.handle ?? null,
-    variants: variants.map((variant: any) => {
+    variants: variants.map((variant) => {
       const variantGid = toVariantGid(variant);
       return {
         variantId: toNumericShopifyId(variantGid || variant?.variantId),
@@ -60,7 +116,7 @@ export function normalizeAddonPickerProduct(product: any) {
   };
 }
 
-export function normalizeAddonTier(tier: any, index: number) {
+export function normalizeAddonTier(tier: AddonTierInput, index: number) {
   const eligibilityType =
     tier?.eligibilityCondition?.type || tier?.eligibilityType || "QUANTITY";
   const rawEligibilityValue =
@@ -81,9 +137,8 @@ export function normalizeAddonTier(tier: any, index: number) {
     tierId: tier?.tierId || `tier${index + 1}`,
     title: tier?.title || `Tier ${index + 1}`,
     selectedAddonProducts: Array.isArray(tier?.selectedAddonProducts)
-      ? tier.selectedAddonProducts.map(
-          (value: Parameters<typeof normalizeAddonPickerProduct>[0]) =>
-            normalizeAddonPickerProduct(value),
+      ? tier.selectedAddonProducts.map((value) =>
+          normalizeAddonPickerProduct(value),
         )
       : [],
     eligibilityCondition: {
@@ -100,7 +155,7 @@ export function normalizeAddonTier(tier: any, index: number) {
     displayVariantsAsIndividualProducts_addons:
       tier?.displayVariantsAsIndividualProducts_addons === true,
     conditions: Array.isArray(tier?.conditions)
-      ? tier.conditions.map((condition: any) => ({
+      ? tier.conditions.map((condition) => ({
           type: condition?.type || "quantity",
           condition: condition?.condition || "lessThanOrEqualTo",
           value: String(condition?.value ?? "1"),
@@ -132,7 +187,10 @@ export function createDefaultAddonTierCondition() {
   };
 }
 
-export function addonTierToDraft(tier: any, index: number) {
+export function addonTierToDraft(
+  tier: AddonTierInput,
+  index: number,
+): AddonTierDraft {
   return {
     ...createDefaultAddonDraftTier(index),
     tierId: tier?.tierId || `tier${index + 1}`,
@@ -153,7 +211,7 @@ export function addonTierToDraft(tier: any, index: number) {
       tier?.displayVariantsAsIndividualProducts_addons === true,
     displayFree: false,
     conditions: Array.isArray(tier?.conditions)
-      ? tier.conditions.map((condition: any) => ({
+      ? tier.conditions.map((condition) => ({
           type: condition?.type || "quantity",
           condition: condition?.condition || "lessThanOrEqualTo",
           value: String(condition?.value ?? "1"),
@@ -163,14 +221,14 @@ export function addonTierToDraft(tier: any, index: number) {
 }
 
 export function buildAddonDraftFromPersonalizationData(
-  personalizationData: any,
-) {
+  personalizationData: AddonPersonalizationInput | null | undefined,
+): AddonDraft {
   const addonProducts = personalizationData?.addonProducts || {};
   const tiers =
     Array.isArray(addonProducts?.tiers)
       ? addonProducts.tiers.map(
           (
-            value: Parameters<typeof addonTierToDraft>[0],
+            value: AddonTierInput,
             index: number,
           ) => addonTierToDraft(value, index),
         )
@@ -190,7 +248,7 @@ export function buildAddonDraftFromPersonalizationData(
 }
 
 export function buildPersonalizationDataFromDraft(
-  addonDraft: any,
+  addonDraft: AddonDraftInput,
   addonMessages: { discountText?: string; successMessage?: string } | null,
 ) {
   const isPersonalizationEnabled = addonDraft?.isPersonalizationEnabled === true;
@@ -206,7 +264,7 @@ export function buildPersonalizationDataFromDraft(
       normalizeAddonTier(value, index),
   );
 
-  const personalizationData: Record<string, any> = {
+  const personalizationData = {
     isPersonalizationEnabled,
     personalizeStepText: addonDraft?.personalizeStepText || "",
     personalizePageSubtext: addonDraft?.personalizePageSubtext || "",

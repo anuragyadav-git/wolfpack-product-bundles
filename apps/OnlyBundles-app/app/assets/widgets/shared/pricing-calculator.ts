@@ -9,6 +9,7 @@
 'use strict';
 
 import { BUNDLE_WIDGET } from './constants.js';
+import { CurrencyManager } from './currency-manager.js';
 
 function isDiscountedAddonStep(step: any) {
   if (!step || step.isFreeGift !== true) return false;
@@ -17,15 +18,19 @@ function isDiscountedAddonStep(step: any) {
 }
 
 export class PricingCalculator {
-  static calculateBundleTotal(selectedProducts: any[], stepProductData: any[], steps: any = null) {
+  static calculateBundleTotal(selectedProducts: any[], stepProductData: any[], steps: any[]) {
+    if (!Array.isArray(steps)) {
+      throw new Error('Bundle steps are required for pricing');
+    }
+
     let totalPrice = 0;
     let totalQuantity = 0;
     const unitPrices: any[] = [];
 
     selectedProducts.forEach((stepSelections: any, stepIndex: number) => {
-      // Skip only legacy free gifts. EB-style add-on tiers remain in the
-      // original subtotal so their native line discount can reduce them to zero.
-      const step = steps?.[stepIndex];
+      // Add-on tiers remain in the original subtotal so their native line
+      // discount can reduce them to zero. Display-free gifts do not.
+      const step = steps[stepIndex];
       if (step?.isFreeGift && step?.addonDisplayFree === true && !isDiscountedAddonStep(step)) return;
 
       const productsInStep = stepProductData[stepIndex] || [];
@@ -51,7 +56,7 @@ export class PricingCalculator {
         }
 
         if (product && quantity > 0) {
-          // All prices in our pipeline are in cents (see MEMORY.md pricing pipeline).
+          // All prices in our pipeline are in cents; see internal docs/Features/Pricing Pipeline.md.
           // Use variant price if matched via nested lookup, otherwise use product-level price.
           const price = matchedVariant
             ? (Number(matchedVariant.price) || 0)
@@ -92,11 +97,18 @@ export class PricingCalculator {
       }
     }
 
-    return Number(rule?.conditionValue ?? 0);
+    const value = Number(rule?.conditionValue ?? 0);
+    return this.getRuleConditionType(rule) === 'amount'
+      ? CurrencyManager.convertMerchantAmountToPresentment(value, CurrencyManager.getCurrencyInfo())
+      : value;
   }
 
-  static getRuleDiscountValue(rule: any) {
-    return Number(rule?.discountValue ?? 0);
+  static getRuleDiscountValue(rule: any, discountMethod?: string) {
+    const value = Number(rule?.discountValue ?? 0);
+    return discountMethod === BUNDLE_WIDGET.DISCOUNT_METHODS.FIXED_AMOUNT_OFF
+      || discountMethod === BUNDLE_WIDGET.DISCOUNT_METHODS.FIXED_BUNDLE_PRICE
+      ? CurrencyManager.convertMerchantAmountToPresentment(value, CurrencyManager.getCurrencyInfo())
+      : value;
   }
 
   static calculateDiscount(bundle: any, totalPrice: number, totalQuantity: number, unitPrices: any[] = []) {
@@ -150,7 +162,7 @@ export class PricingCalculator {
     }
 
     let discountAmount = 0;
-    const discountValue = this.getRuleDiscountValue(bestRule);
+    const discountValue = this.getRuleDiscountValue(bestRule, discountMethod);
 
     switch (discountMethod) {
       case BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF:
@@ -199,8 +211,11 @@ export class PricingCalculator {
   static calculateBuyXGetYDiscountAmount(rule: any, totalPrice: number, totalQuantity: number, unitPrices: any[] = []) {
     const customerBuys = Number(rule?.customerBuys || 0);
     const customerGets = Number(rule?.customerGets || 0);
-    const discountValue = this.getRuleDiscountValue(rule);
+    const rawDiscountValue = this.getRuleDiscountValue(rule);
     const discountType = rule?.bxyDiscountType || rule?.discountType || 'percentage';
+    const discountValue = discountType === 'fixed_amount'
+      ? CurrencyManager.convertMerchantAmountToPresentment(rawDiscountValue, CurrencyManager.getCurrencyInfo())
+      : rawDiscountValue;
     const applyMode = rule?.bxyApplyMode || rule?.applyDiscountTo || 'lowest_priced';
     const groupSize = customerBuys + customerGets;
 
@@ -242,42 +257,28 @@ export class PricingCalculator {
     const normalizedCondition = this.normalizeCondition(condition);
 
     switch (normalizedCondition) {
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.EQUAL_TO:
+      case 'eq':
         // For discount pricing rules, "equal to N" means "at N or more" (threshold).
         // For step conditions, the ConditionValidator handles exact matching separately.
         return value >= targetValue;
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN:
+      case 'gt':
         return value > targetValue;
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN:
+      case 'lt':
         return value < targetValue;
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO:
+      case 'gte':
         return value >= targetValue;
-      case BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO:
+      case 'lte':
         return value <= targetValue;
       default:
-        // Default to >= for backward compatibility
-        return value >= targetValue;
+        return false;
     }
   }
 
   static normalizeCondition(condition: string|number) {
-    // Handle different condition formats from admin
-    const conditionMap: any = {
-      'gte': BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO,
-      'gt': BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN,
-      'lte': BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO,
-      'lt': BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN,
-      'eq': BUNDLE_WIDGET.CONDITION_OPERATORS.EQUAL_TO,
-      'equal_to': BUNDLE_WIDGET.CONDITION_OPERATORS.EQUAL_TO,
-      'greater_than': BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN,
-      'less_than': BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN,
-      'greater_than_or_equal_to': BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO,
-      'greater_than_equal_to': BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO,
-      'less_than_or_equal_to': BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO,
-      'less_than_equal_to': BUNDLE_WIDGET.CONDITION_OPERATORS.LESS_THAN_OR_EQUAL_TO
-    };
-
-    return conditionMap[condition] || condition || BUNDLE_WIDGET.CONDITION_OPERATORS.GREATER_THAN_OR_EQUAL_TO;
+    if (condition === null || condition === undefined || condition === '') return 'gte';
+    return ['gte', 'gt', 'lte', 'lt', 'eq'].includes(String(condition))
+      ? String(condition)
+      : null;
   }
 
   static getNextDiscountRule(bundle: any, currentQuantity: number, currentAmount: number|undefined) {

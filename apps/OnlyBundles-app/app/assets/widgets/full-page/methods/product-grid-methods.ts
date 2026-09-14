@@ -7,7 +7,6 @@ import { TemplateManager } from '../../shared/template-manager.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
 import {
   buildCartLineDisplayProperties,
   buildCartLineSourceProperties,
@@ -42,6 +41,13 @@ function getSelectionId(item: any = {}) {
 
 export function shouldCategoryTabActivateProducts(_context?: any) {
   return true;
+}
+
+export function resolveVariantSelectorCategory(step: any, activeCategory: any) {
+  if (activeCategory) return activeCategory;
+
+  const categories = Array.isArray(step?.categories) ? step.categories : [];
+  return categories.length === 1 ? categories[0] : null;
 }
 
 export const fullPageProductGridMethods: Record<string, any> & ThisType<any> = {
@@ -249,6 +255,7 @@ createFullPageProductGrid(stepIndex: string|number) {
 
 
   const activeCategory = this.getActiveStepCategoryEntry(step);
+  const variantSelectorCategory = resolveVariantSelectorCategory(step, activeCategory);
   const activeCollectionId = activeCategory ? activeCategory.id : this.activeCollectionId;
 
   // Filter by active category/collection if selected
@@ -306,6 +313,8 @@ createFullPageProductGrid(stepIndex: string|number) {
   expandedProducts.forEach((product: any)  => {
     const productCard = this.createProductCard(product, stepIndex, {
       displayVariantsAsIndividualProducts: shouldDisplayVariantsAsIndividual,
+      variantSelectorMode: variantSelectorCategory?.variantSelectorMode,
+      swatchTooltipEnabled: variantSelectorCategory?.swatchTooltipEnabled === true,
     });
     grid.appendChild(productCard);
   });
@@ -426,31 +435,6 @@ renderProductGridLoadingState(productGridContainer: any) {
 // Product loading is owned by the widget-level loading screen.
 createProductGridLoadingState() {
   return '';
-},
-
-// Preload ALL remaining steps' products in the background (parallel).
-// Called after step 0 renders so subsequent step transitions feel instant.
-// loadStepProducts() is a no-op when data is already cached, so this is safe to call
-// at any step without re-fetching.
-preloadAllSteps() {
-  const steps = this.selectedBundle?.steps;
-  if (!steps) return;
-
-  steps.forEach((_: any, index: string|number) => {
-    // Skip the step already on screen — it's been loaded synchronously
-    if (index === this.currentStepIndex) return;
-    // Skip steps already cached
-    if (this.stepProductData[index]?.length > 0) return;
-
-    this.loadStepProducts(index).catch(() => {
-      // Silent — background prefetch; errors here don't affect the user
-    });
-  });
-},
-
-// Keep legacy alias so any call sites that still say preloadNextStep() keep working
-preloadNextStep() {
-  this.preloadAllSteps();
 },
 
 // Create a product card DOM element for full-page layout

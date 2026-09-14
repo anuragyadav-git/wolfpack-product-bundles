@@ -10,7 +10,7 @@ process.env.SHOPIFY_API_KEY = 'test_api_key';
 process.env.SHOPIFY_API_SECRET = 'test_api_secret';
 process.env.SHOPIFY_APP_URL = 'https://test-app.example.com';
 process.env.SHOPIFY_BUNDLE_CART_TRANSFORM_TS_ID = 'test-function-id';
-// Enables INNGEST_AVAILABLE=true in webhook-worker.server so inngest.send() is called
+// Enables the Inngest client used by authenticated Remix webhook ingress.
 process.env.INNGEST_EVENT_KEY = 'test-inngest-key';
 
 // Global test timeout
@@ -211,4 +211,14 @@ export const createMockCartTransformInput = (overrides = {}) => ({
 // Reset all mocks before each test
 beforeEach(() => {
   jest.clearAllMocks();
+  (globalThis as any).Shopify = {
+    shop: 'test-shop.myshopify.com',
+    currency: { active: 'USD', rate: 1 },
+  };
+  (globalThis as any).shopCurrency = 'USD';
+  (globalThis as any).shopifyMultiCurrency = {
+    shopBaseCurrency: 'USD',
+    customerCurrency: 'USD',
+  };
+  delete (globalThis as any).__WOLFPACK_PRESENTMENT_CURRENCY__;
 });

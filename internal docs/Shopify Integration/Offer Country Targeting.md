@@ -5,7 +5,7 @@ title: Offer Country Targeting
 type: shopify-integration
 status: authoritative
 summary: Defines Shopify-selected country as the canonical geography signal for bundle offer eligibility and rejects unstable market identifiers and IP inference.
-last_audited: 2026-09-01
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -75,27 +75,36 @@ avoid rendering an ineligible offer, but a browser decision is never checkout
 authorization.
 
 Cart Transform and Discount Function behavior must independently compare the
-Shopify Function localization country against the signed offer rule. The Cart
-Transform input query is already at Shopify's calculated complexity limit of
-30, so an existing selected line attribute must be consolidated before adding
-the country leaf. Do not exceed the limit or introduce an unsigned cart-line
-eligibility flag.
+Shopify Function localization country against the authorized offer rule. Browser
+visibility and a previously issued token do not prove present checkout eligibility.
 
 The signed Function token encodes the normalized rule as one internal
 `countryRule` string (`include:CA,US`, `exclude:US`, or empty when disabled).
-This is a size-conscious authorization ABI, not the merchant persistence
-model. Both Functions fail closed for malformed non-empty rules.
+This is an authorization contract, not the merchant persistence model.
 
-The Cart Transform query obtains the canonical country from
-`localization.country.isoCode`. To keep the query at complexity 30, the bundle
-name travels inside the existing signed `_bundle_display_properties` envelope
-instead of consuming a separate `_bundleName` attribute leaf. Shopify CLI must
-successfully build both Functions after any change to this contract; a local
-GraphQL parser alone does not prove Shopify accepts the query complexity.
+Direct parent EXPAND reads an explicit `countryRule` in the app-owned
+`price_adjustment` JSON and compares it with `localization.country.isoCode`.
+Missing or invalid parent policy produces no expansion. Optional display data
+in `component_pricing` remains separate: its absence must not erase an otherwise
+valid country policy. Critical parent pricing JSON is bounded to 10,000 UTF-8
+bytes before publication because Shopify omits oversized Function metafields.
+This contract requires bundle synchronization; there is no reader for an older
+parent policy without `countryRule`.
 
-## Identity Boundary
+Both FPB and PPB save/sync config builders must pass the complete `offerPolicy`
+to the metafield writer. `offerDelivery` is a storefront decision marker and is
+not a substitute for the source policy. The FPB builder also preserves shop
+identity and subscription configuration needed by authorization consumers.
 
-Country targeting does not authorize customer-tag or purchase-history access.
-Those features retain their separate protected-customer-data gate. Do not add
-`read_customers`, query Customer records, or persist raw customer facts as part
-of this country slice.
+PPB static policy revisions include canonical schedule settings in addition to
+pricing, country, subscription and selection bounds. Priority and countdown
+presentation do not change that revision. Runtime token issuance rejects
+unavailable bundle statuses and inactive or malformed schedules before signing.
+Existing-cart expiry is enforced by the wired native scheduled Discount Function,
+not by issuance alone. Its owners use Shopify dates and local-time predicates.
+Both Functions require the current policy revision and pricing ownership mode.
+
+The Cart Transform query costs 26 after reading quantities from critical pricing
+and removing unused Function display data. Public quantity and display metafields
+remain published. Local schema/compiler tests do not replace Shopify-hosted
+expiry, country-switch and checkout QA before release.

@@ -1,33 +1,84 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { CountdownSettingsSection } from "../../_shared/bundle-configure/CountdownSettingsSection";
+import type { MultiLanguageField } from "../../../../components/bundle-configure/MultiLanguageTextModal";
+import type {
+  CountdownExpiryAction,
+  CountdownLayout,
+  CountdownPosition,
+} from "../../../../lib/bundle-countdown";
 import { translateAdmin } from "~/i18n/config";
+import { SettingsRow } from "../SmallComponents";
+
+export interface FpbSummaryTextSettingsProps {
+  clearValidationError: (path: string) => void;
+  countdownEnabled: boolean;
+  countdownExpiryAction: CountdownExpiryAction;
+  countdownExpiredMessage: string;
+  countdownLayout: CountdownLayout;
+  countdownPosition: CountdownPosition;
+  countdownTitle: string;
+  lowStockAlertEnabled: boolean;
+  lowStockAlertMessage: string;
+  lowStockAlertThreshold: string;
+  markAsDirty: () => void;
+  openMultiLanguageModal: (
+    title: string,
+    fields: MultiLanguageField[],
+  ) => void;
+  scheduledEndsAt: string | null;
+  setCountdownEnabled: (enabled: boolean) => void;
+  setCountdownExpiryAction: (action: CountdownExpiryAction) => void;
+  setCountdownExpiredMessage: (message: string) => void;
+  setCountdownLayout: (layout: CountdownLayout) => void;
+  setCountdownPosition: (position: CountdownPosition) => void;
+  setCountdownTitle: (title: string) => void;
+  setLowStockAlertEnabled: (enabled: boolean) => void;
+  setLowStockAlertMessage: (message: string) => void;
+  setLowStockAlertThreshold: (threshold: string) => void;
+  setShowTextOnAddButton: (enabled: boolean) => void;
+  setTextOverrides: (
+    update: (previous: Record<string, string>) => Record<string, string>,
+  ) => void;
+  setVariantSelectorEnabled: (enabled: boolean) => void;
+  shopLocales: Array<{locale: string; name: string; primary: boolean}>;
+  showTextOnAddButton: boolean;
+  textOverrides: Record<string, string>;
+  validationErrors?: Record<string, string | undefined>;
+  variantSelectorEnabled: boolean;
+}
 
 export function FpbSummaryTextSettings({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    markAsDirty,
-    lowStockAlertEnabled,
-    lowStockAlertMessage,
-    lowStockAlertThreshold,
-    openMultiLanguageModal,
-    setShowTextOnAddButton,
-    setLowStockAlertEnabled,
-    setLowStockAlertMessage,
-    setLowStockAlertThreshold,
-    setTextOverrides,
-    SettingsRow,
-    setVariantSelectorEnabled,
-    showTextOnAddButton,
-    shopLocales,
-    textOverrides,
-    variantSelectorEnabled,
-    validationErrors = {},
-    clearValidationError,
-  } = flow;
+  clearValidationError,
+  countdownEnabled,
+  countdownExpiryAction,
+  countdownExpiredMessage,
+  countdownLayout,
+  countdownPosition,
+  countdownTitle,
+  lowStockAlertEnabled,
+  lowStockAlertMessage,
+  lowStockAlertThreshold,
+  markAsDirty,
+  openMultiLanguageModal,
+  scheduledEndsAt,
+  setCountdownEnabled,
+  setCountdownExpiryAction,
+  setCountdownExpiredMessage,
+  setCountdownLayout,
+  setCountdownPosition,
+  setCountdownTitle,
+  setLowStockAlertEnabled,
+  setLowStockAlertMessage,
+  setLowStockAlertThreshold,
+  setShowTextOnAddButton,
+  setTextOverrides,
+  setVariantSelectorEnabled,
+  shopLocales,
+  showTextOnAddButton,
+  textOverrides,
+  validationErrors = {},
+  variantSelectorEnabled,
+}: FpbSummaryTextSettingsProps) {
 
   return (
     <>
@@ -165,20 +216,20 @@ export function FpbSummaryTextSettings({
         </s-stack>
       </s-section>
       <CountdownSettingsSection
-        enabled={flow.countdownEnabled}
-        layout={flow.countdownLayout}
-        position={flow.countdownPosition}
-        title={flow.countdownTitle}
-        expiryAction={flow.countdownExpiryAction}
-        expiredMessage={flow.countdownExpiredMessage}
-        scheduledEndsAt={flow.offerDeliveryState.endsAt}
-        markAsDirty={flow.markAsDirty}
-        setEnabled={flow.setCountdownEnabled}
-        setLayout={flow.setCountdownLayout}
-        setPosition={flow.setCountdownPosition}
-        setTitle={flow.setCountdownTitle}
-        setExpiryAction={flow.setCountdownExpiryAction}
-        setExpiredMessage={flow.setCountdownExpiredMessage}
+        enabled={countdownEnabled}
+        layout={countdownLayout}
+        position={countdownPosition}
+        title={countdownTitle}
+        expiryAction={countdownExpiryAction}
+        expiredMessage={countdownExpiredMessage}
+        scheduledEndsAt={scheduledEndsAt}
+        markAsDirty={markAsDirty}
+        setEnabled={setCountdownEnabled}
+        setLayout={setCountdownLayout}
+        setPosition={setCountdownPosition}
+        setTitle={setCountdownTitle}
+        setExpiryAction={setCountdownExpiryAction}
+        setExpiredMessage={setCountdownExpiredMessage}
       />
       {/* Bundle Cart */}
     </>

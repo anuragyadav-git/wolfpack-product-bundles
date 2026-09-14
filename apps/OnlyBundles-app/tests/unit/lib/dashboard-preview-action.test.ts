@@ -89,7 +89,6 @@ describe("decideDashboardPreviewAction", () => {
       expect(decideDashboardPreviewAction({
         ...baseFpb,
         appEmbedEnabled: true,
-        bundleStatus: "active",
       })).toEqual({ kind: "create_fpb_preview" });
     });
 
@@ -97,7 +96,6 @@ describe("decideDashboardPreviewAction", () => {
       expect(decideDashboardPreviewAction({
         ...baseFpb,
         appEmbedEnabled: true,
-        bundleStatus: "unlisted",
       })).toEqual({ kind: "create_fpb_preview" });
     });
 
@@ -105,7 +103,6 @@ describe("decideDashboardPreviewAction", () => {
       expect(decideDashboardPreviewAction({
         ...baseFpb,
         appEmbedEnabled: true,
-        bundleStatus: "draft",
       })).toEqual({ kind: "create_fpb_preview" });
     });
 
@@ -113,7 +110,6 @@ describe("decideDashboardPreviewAction", () => {
       expect(decideDashboardPreviewAction({
         ...baseFpb,
         appEmbedEnabled: false,
-        bundleStatus: "active",
       })).toEqual({ kind: "create_fpb_preview" });
     });
 
@@ -121,7 +117,6 @@ describe("decideDashboardPreviewAction", () => {
       expect(decideDashboardPreviewAction({
         ...baseFpb,
         appEmbedEnabled: true,
-        bundleStatus: "active",
       })).toEqual({ kind: "create_fpb_preview" });
     });
 
@@ -132,7 +127,6 @@ describe("decideDashboardPreviewAction", () => {
         shopifyProductHandle: "summer-bundle",
         shop: "s.myshopify.com",
         appEmbedEnabled: true,
-        bundleStatus: "active",
       })).toEqual({ kind: "open_url", url: "https://s.myshopify.com/products/summer-bundle" });
     });
   });

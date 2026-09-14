@@ -3,7 +3,7 @@ import {
   handleCreateBundle,
 } from "../../../app/routes/app/app.dashboard/handlers/handlers.server";
 import db from "../../../app/db.server";
-import { WidgetInstallationService } from "../../../app/services/widget-installation.server";
+import { WidgetInstallationService } from "../../../app/services/widget-installation/widget-installation-core.server";
 import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
 import { createBundleWithPublicNumber } from "../../../app/services/bundles/fpb-public-number.server";
 
@@ -33,7 +33,7 @@ jest.mock("../../../app/db.server", () => ({
   },
 }));
 
-jest.mock("../../../app/services/widget-installation.server", () => ({
+jest.mock("../../../app/services/widget-installation/widget-installation-core.server", () => ({
   WidgetInstallationService: {
     validateProductBundleWidgetSetup: jest.fn(),
   },

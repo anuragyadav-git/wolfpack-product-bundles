@@ -5,7 +5,7 @@ title: Build a Product Page Bundle
 type: tutorial
 status: published
 summary: Create a contextual mix-and-match offer, configure products and variant selectors, place its Shopify app block, and verify the result on the correct product template.
-last_audited: 2026-09-03
+last_audited: 2026-09-11
 owners:
   - growth
 domains:
@@ -58,8 +58,10 @@ Only Bundles exposes variant selector choices including **Dropdown**, **Pills**,
 
 - Use a dropdown when there are many values or long option names.
 - Use pills for a short list such as size or pack count.
-- Use color swatches only when values map cleanly to understandable colors.
-- Use image swatches when variant imagery is consistent and materially helps the decision.
+- Use color swatches when the product option values are connected to Shopify's Color category metafield and provide canonical colors.
+- Use image swatches when those Shopify option-value swatches provide canonical images.
+
+If the products are not set up with Shopify-native swatches yet, follow [Set up product variant swatches](/blogs/set-up-product-variant-swatches/) before selecting a swatch mode. Variant images and option-value swatches are separate Shopify resources; Only Bundles never guesses one from the other.
 
 Preview products with one option and products with multiple options. Do not let a visually attractive swatch hide an unavailable combination or remove the variant label customers need.
 
@@ -98,7 +100,7 @@ Repeat in a genuinely resized mobile browser window. Then add a valid bundle to 
 
 **The block appears on the wrong products.** Review the template assignment and bundle eligibility. Shopify templates can be shared by many products, so placement and eligibility must work together.
 
-**Swatches look wrong or ambiguous.** Check the underlying Shopify option values and variant images. Switch to pills or a dropdown if the catalog does not provide reliable swatch data.
+**Swatches look wrong or ambiguous.** Check that the option is connected to the correct Shopify category metafield and that each category entry contains the intended swatch. Switch to pills or a dropdown if the catalog does not provide canonical swatch data.
 
 **The theme has two competing add-to-cart experiences.** Reconsider placement and instructions. Do not hide or rewrite the theme’s main product behavior with custom scripts; make the bundle’s purpose explicit.
 

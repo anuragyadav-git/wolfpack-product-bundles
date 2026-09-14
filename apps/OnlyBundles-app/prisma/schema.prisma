@@ -86,10 +86,6 @@ model Bundle {
   shopId                               String
   shopifyProductId                     String? // Shopify Product ID (GID) for product-page bundles
   shopifyProductHandle                 String? // Shopify Product handle for preview URLs (e.g., "summer-bundle")
-  shopifyPageHandle                    String? // Shopify Page handle for full-page bundles (e.g., "build-your-bundle")
-  shopifyPageId                        String? // Shopify Page ID (GID) for full-page bundles
-  shopifyPreviewPageId                 String? // GID of draft preview page (cleared after publishing)
-  shopifyPreviewPageHandle             String? // Handle of draft preview page (for reference and cleanup)
   templateName                         String? // Template name for bundle container (e.g., "cart-transform", "product")
   promoBannerBgImage                   String? // URL of the promo banner background image (full-page bundles only)
   loadingGif                           String? // URL of the loading GIF shown during bundle load, step transitions, and add-to-cart
@@ -167,7 +163,6 @@ model Bundle {
   @@index([shopId])
   @@index([status])
   @@index([bundleType])
-  @@index([shopifyPageHandle])
   @@index([shopifyProductId])
   @@index([shopId, status])
   @@index([shopId, bundleType, status])
@@ -732,6 +727,7 @@ model OrderAttribution {
   customUtmAttributes    Json     @default("{}")
   landingPage            String? // The URL customer landed on
   revenue                Int // cents
+  bundleRevenue          Int      @default(0) // bundle-line value in cents
   currency               String   @default("USD")
   createdAt              DateTime @default(now())
 

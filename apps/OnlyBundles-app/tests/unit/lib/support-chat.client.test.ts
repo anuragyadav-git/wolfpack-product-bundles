@@ -1,36 +1,11 @@
 import {
   installSupportChatLoader,
-  installSupportChatPresentation,
   openSupportChat,
   openSupportChatWithMessage,
   openSupportChatWithDraft,
+  showSupportChatLauncher,
   type SupportChatWindow,
 } from "../../../app/lib/support-chat.client";
-
-function createMediaQueryList(initialMatches: boolean) {
-  let matches = initialMatches;
-  const listeners = new Set<(event: { matches: boolean }) => void>();
-
-  return {
-    get matches() {
-      return matches;
-    },
-    addEventListener: jest.fn(
-      (_name: "change", listener: (event: { matches: boolean }) => void) => {
-        listeners.add(listener);
-      },
-    ),
-    removeEventListener: jest.fn(
-      (_name: "change", listener: (event: { matches: boolean }) => void) => {
-        listeners.delete(listener);
-      },
-    ),
-    setMatches(nextMatches: boolean) {
-      matches = nextMatches;
-      listeners.forEach((listener) => listener({ matches }));
-    },
-  };
-}
 
 describe("support chat client", () => {
   beforeEach(() => {
@@ -154,53 +129,15 @@ describe("support chat client", () => {
     ]);
   });
 
-  it("hides the floating launcher on narrow screens and after chat closes", () => {
-    const mediaQuery = createMediaQueryList(true);
-    const win: SupportChatWindow = {
-      matchMedia: jest.fn(() => mediaQuery),
-    };
+  it("keeps the floating launcher visible without responsive listeners", () => {
+    const matchMedia = jest.fn();
+    const win = {
+      matchMedia,
+    } as SupportChatWindow & {matchMedia: jest.Mock};
 
-    installSupportChatPresentation({ win });
+    showSupportChatLauncher({ win });
 
-    expect(win.$crisp?.[0]).toEqual(["do", "chat:hide"]);
-    const closeRegistration = win.$crisp?.find(
-      (entry: any) => entry[0] === "on" && entry[1] === "chat:closed",
-    ) as [string, string, () => void];
-
-    closeRegistration[2]();
-
-    expect(win.$crisp?.at(-1)).toEqual(["do", "chat:hide"]);
-  });
-
-  it("keeps chat visible on desktop and follows viewport changes", () => {
-    const mediaQuery = createMediaQueryList(false);
-    const win: SupportChatWindow = {
-      matchMedia: jest.fn(() => mediaQuery),
-    };
-
-    installSupportChatPresentation({ win });
-    expect(win.$crisp?.[0]).toEqual(["do", "chat:show"]);
-
-    mediaQuery.setMatches(true);
-    expect(win.$crisp?.at(-1)).toEqual(["do", "chat:hide"]);
-
-    mediaQuery.setMatches(false);
-    expect(win.$crisp?.at(-1)).toEqual(["do", "chat:show"]);
-  });
-
-  it("removes responsive and Crisp listeners during cleanup", () => {
-    const mediaQuery = createMediaQueryList(true);
-    const win: SupportChatWindow = {
-      matchMedia: jest.fn(() => mediaQuery),
-    };
-
-    const cleanup = installSupportChatPresentation({ win });
-    cleanup();
-
-    expect(mediaQuery.removeEventListener).toHaveBeenCalledWith(
-      "change",
-      expect.any(Function),
-    );
-    expect(win.$crisp?.at(-1)).toEqual(["off", "chat:closed"]);
+    expect(win.$crisp).toEqual([["do", "chat:show"]]);
+    expect(matchMedia).not.toHaveBeenCalled();
   });
 });

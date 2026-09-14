@@ -1,3 +1,4 @@
+import { withBundleCartLock } from "../../lib/bundle-cart-lock.js";
 'use strict';
 
 import { buildStorefrontApiPath } from '../../config/storefront-proxy-routes.js';
@@ -129,10 +130,6 @@ export function buildCartItems(state: any) {
     bundleName: state.bundleName,
     offerDelivery: state.bundleData && state.bundleData.offerDelivery,
   });
-  items.forEach(function (item) {
-    Object.assign(item.properties, sourceProperties);
-  });
-
   return {
     items: items,
     bundleInstanceId: bundleInstanceId,
@@ -143,7 +140,7 @@ export function buildCartItems(state: any) {
   };
 }
 
-export function buildProductPageCartFormData(items: any[], runtimeToken: any) {
+function buildProductPageCartFormData(items: any[]) {
   var formData = new FormData();
   items.forEach(function (item: any, index: number) {
     formData.append('items[' + index + '][id]', String(item.id));
@@ -151,11 +148,9 @@ export function buildProductPageCartFormData(items: any[], runtimeToken: any) {
     Object.keys(item.properties || {}).forEach(function (key) {
       var value = item.properties[key];
       if (value === null || typeof value === 'undefined') return;
+      if (key === '_bundle_display_properties' || key === '_wolfpack_bundle_runtime') return;
       formData.append('items[' + index + '][properties][' + key + ']', String(value));
     });
-    if (runtimeToken) {
-      formData.append('items[' + index + '][properties][_wolfpack_bundle_runtime]', String(runtimeToken));
-    }
   });
   return formData;
 }
@@ -197,13 +192,15 @@ function getBundleDetailsCartToken() {
     .catch(function () { return null; });
 }
 
-function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any) {
+function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any, pendingLineCount: number) {
   var displayProperties = buildBundleDetailsDisplayProperties(sourceProperties);
-  if (!bundleDetailsKey || Object.keys(displayProperties).length === 0) return Promise.resolve();
+  if (!bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
+    return Promise.reject(new Error('Missing bundle cart authorization'));
+  }
 
   return getBundleDetailsCartToken()
     .then(function (cartToken) {
-      if (!cartToken) return null;
+      if (!cartToken) throw new Error('Unable to identify the Shopify cart');
       return fetch(buildStorefrontApiPath('cart-bundle-details'), {
         method: 'POST',
         credentials: 'same-origin',
@@ -212,20 +209,19 @@ function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties:
           cartToken: cartToken,
           bundleDetailsKey: bundleDetailsKey,
           displayProperties: displayProperties,
+          runtimeToken: runtimeToken,
+          pendingLineCount,
         }),
       });
     })
     .then(function (response) {
-      if (!response || !response.ok) return null;
+      if (!response || !response.ok) throw new Error('Failed to sync bundle cart authorization');
       return response.json().catch(function () { return null; });
     })
     .then(function (data) {
-      if (data && data.ok !== true) {
-        console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', data.error || data);
+      if (!data || data.ok !== true) {
+        throw new Error((data && data.error) || 'Failed to sync bundle cart authorization');
       }
-    })
-    .catch(function (error) {
-      console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', error);
     });
 }
 
@@ -271,13 +267,22 @@ export function addBundleToCart(state: any, validateBundleFn: any, emitFn: any) 
     return Promise.resolve();
   }
 
-  return requestCartTransformRuntimeToken(state, cartResult)
+  return withBundleCartLock(() => requestCartTransformRuntimeToken(state, cartResult)
     .then(function (runtimeToken) {
+      return syncBundleDetailsCartMetafield(
+        cartResult.bundleDetailsKey,
+        cartResult.sourceProperties,
+        runtimeToken,
+        cartResult.items.length,
+      ).then(function () { return runtimeToken; });
+    })
+    .then(function () {
       return fetch('/cart/add', {
         method: 'POST',
-        body: buildProductPageCartFormData(cartResult.items, runtimeToken),
+        body: buildProductPageCartFormData(cartResult.items),
       });
     })
+    )
     .then(function (response) {
       return response.text().then(function (text) {
         if (!response.ok) {
@@ -287,9 +292,6 @@ export function addBundleToCart(state: any, validateBundleFn: any, emitFn: any) 
         }
         return text;
       });
-    })
-    .then(function () {
-      return syncBundleDetailsCartMetafield(cartResult.bundleDetailsKey, cartResult.sourceProperties);
     })
     .then(function () {
       emitFn('wbp:cart-success', { bundleId: state.bundleId });

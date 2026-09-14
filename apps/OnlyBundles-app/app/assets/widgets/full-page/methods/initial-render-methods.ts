@@ -203,7 +203,6 @@ buildAddonStepFromPersonalization() {
     addonDiscount: null,
     addonMessaging: addonProductsEnabled ? (addonProducts.addonsMessaging || null) : null,
     displayVariantsAsIndividual: false,
-    StepProduct: selectedAddonProducts,
     products: selectedAddonProducts,
     collections: [],
   };

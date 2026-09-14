@@ -168,6 +168,8 @@ describe("buildCategoryContract", () => {
       conditions: [condition],
       categoryBanner: "https://cdn.example/banner.png",
       categoryImg: "https://cdn.example/icon.png",
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
       autoNextStepOnConditionMet: true,
       multiLangData: { en: { title: "Rings" } },
     })).toEqual({
@@ -180,6 +182,8 @@ describe("buildCategoryContract", () => {
       products: [product],
       collections: [collection],
       categoryBanner: "https://cdn.example/banner.png",
+      variantSelectorMode: "color_swatch",
+      swatchTooltipEnabled: true,
       multiLangData: { en: { title: "Rings" } },
     });
   });
@@ -201,6 +205,8 @@ describe("buildCategoryContract", () => {
       products: [],
       collections: [collection],
       categoryBanner: "",
+      variantSelectorMode: "dropdown",
+      swatchTooltipEnabled: false,
       multiLangData: {},
     });
   });

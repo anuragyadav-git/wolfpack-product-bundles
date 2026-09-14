@@ -52,7 +52,7 @@ class TestRunner {
     console.log('🚀 Starting Comprehensive Test Suite for Shopify Bundle App\n');
     console.log('=' .repeat(80));
     console.log('📋 Test Plan:');
-    console.log('  • Unit Tests: Services, Extensions, Routes, Assets');
+    console.log('  • Unit Tests: Lib, Services, Extensions, Routes, Assets');
     console.log('  • Integration Tests: Complete workflows');
     console.log('  • End-to-End Tests: Full application flows');
     console.log('=' .repeat(80));
@@ -60,6 +60,7 @@ class TestRunner {
 
     try {
       // Run unit tests
+      await this.runTestSuite('Unit Tests - Lib', 'tests/unit/lib/**/*.test.ts');
       await this.runTestSuite('Unit Tests - Services', 'tests/unit/services/**/*.test.ts');
       await this.runTestSuite('Unit Tests - Extensions', 'tests/unit/extensions/**/*.test.ts');
       await this.runTestSuite('Unit Tests - Routes', 'tests/unit/routes/**/*.test.ts');
@@ -427,6 +428,7 @@ class TestRunner {
 
     switch (type) {
       case 'unit':
+        await this.runTestSuite('Unit Tests - Lib', 'tests/unit/lib/**/*.test.ts');
         await this.runTestSuite('Unit Tests - Services', 'tests/unit/services/**/*.test.ts');
         await this.runTestSuite('Unit Tests - Extensions', 'tests/unit/extensions/**/*.test.ts');
         await this.runTestSuite('Unit Tests - Routes', 'tests/unit/routes/**/*.test.ts');

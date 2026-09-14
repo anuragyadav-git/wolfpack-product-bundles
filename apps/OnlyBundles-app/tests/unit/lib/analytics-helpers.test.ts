@@ -16,6 +16,7 @@ import {
 
 function makeRow(overrides: Partial<OrderAttributionRow> = {}): OrderAttributionRow {
   return {
+    orderId: "gid://shopify/Order/1",
     bundleId: "bundle-1",
     revenue: 5000, // $50.00
     createdAt: new Date("2026-03-01T12:00:00Z"),

@@ -1,4 +1,4 @@
-export type AddonTierAccordionIndex = number | null;
+type AddonTierAccordionIndex = number | null;
 
 export function getNextAddonTierAccordionIndex(
   currentIndex: AddonTierAccordionIndex,

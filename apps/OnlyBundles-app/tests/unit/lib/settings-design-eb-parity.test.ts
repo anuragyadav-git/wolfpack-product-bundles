@@ -167,6 +167,12 @@ describe("buildSettingsDesignRuntime", () => {
         slotIconFit: "badge",
         slotIconUrl: "",
       },
+      tierBadge: {
+        shape: "Pill",
+        visibility: "Always",
+        textColor: "#ffffff",
+        backgroundColor: "#1f2937",
+      },
     });
   });
 

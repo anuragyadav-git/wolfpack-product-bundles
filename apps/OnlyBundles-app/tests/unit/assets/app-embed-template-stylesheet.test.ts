@@ -73,7 +73,9 @@ describe('FPB app-embed template stylesheet resolution', () => {
     try {
       global.document = {
         querySelector: jest.fn(() => null),
-        querySelectorAll: jest.fn(() => links),
+        querySelectorAll: jest.fn((selector: string) =>
+          selector === 'link[rel="stylesheet"]' ? links : []
+        ),
         createElement: jest.fn(() => ({ dataset: {} })),
         head: { append },
         body: { append: jest.fn() },
@@ -88,6 +90,45 @@ describe('FPB app-embed template stylesheet resolution', () => {
       ensureStylesheet(existingHref);
 
       expect(append).not.toHaveBeenCalled();
+    } finally {
+      global.document = originalDocument;
+      global.window = originalWindow;
+      jest.resetModules();
+    }
+  });
+
+  it('exposes Shopify currency context from the owned app embed before storefront hydration', () => {
+    const originalDocument = global.document;
+    const originalWindow = global.window;
+    const marker = {
+      dataset: {
+        storefrontProxyRoot: '/apps/product-bundles-sit',
+        shopBaseCurrency: 'USD',
+        customerCurrency: 'CAD',
+      },
+      matches: (selector: string) => selector === '[data-wpb-app-embed]',
+    };
+    const runtimeWindow: Record<string, any> = {};
+
+    try {
+      global.document = {
+        currentScript: null,
+        querySelectorAll: jest.fn((selector: string) =>
+          selector === '[data-wpb-app-embed]' ? [marker] : []
+        ),
+        readyState: 'loading',
+        addEventListener: jest.fn(),
+      } as unknown as Document;
+      global.window = runtimeWindow as Window & typeof globalThis;
+      jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('../../../app/storefront/app-embed');
+
+      expect(runtimeWindow.shopCurrency).toBe('USD');
+      expect(runtimeWindow.shopifyMultiCurrency).toEqual({
+        shopBaseCurrency: 'USD',
+        customerCurrency: 'CAD',
+      });
     } finally {
       global.document = originalDocument;
       global.window = originalWindow;

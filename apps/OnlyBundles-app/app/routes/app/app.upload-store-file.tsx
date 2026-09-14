@@ -4,7 +4,6 @@ import {
   type LoaderFunctionArgs,
 } from "@remix-run/node";
 import { authenticate } from "../../shopify.server";
-import type { StoreFile } from "./app.store-files";
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -57,8 +56,6 @@ const FILE_STATUS_QUERY = `
     node(id: $id) {
       id
       ... on MediaImage {
-        alt
-        createdAt
         fileStatus
         image {
           url
@@ -67,16 +64,6 @@ const FILE_STATUS_QUERY = `
     }
   }
 `;
-
-function filenameFromUrl(url: string): string {
-  try {
-    const path = new URL(url).pathname;
-    const parts = path.split("/");
-    return decodeURIComponent(parts[parts.length - 1] ?? url);
-  } catch {
-    return url;
-  }
-}
 
 function errorResponse(message: string) {
   return json({ ok: false, error: message });
@@ -103,12 +90,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   if (node.fileStatus === "READY" && node.image?.url) {
     const cdnUrl: string = node.image.url;
-    const storeFile: StoreFile = {
+    const storeFile = {
       id: fileId,
       url: cdnUrl,
-      filename: filenameFromUrl(cdnUrl),
-      alt: node.alt ?? "",
-      createdAt: node.createdAt ?? new Date().toISOString(),
     };
     return json({ fileStatus: "READY", file: storeFile });
   }
@@ -146,7 +130,7 @@ export async function action({ request }: ActionFunctionArgs) {
         {
           filename: file.name,
           mimeType: file.type,
-          resource: "FILE",
+          resource: "IMAGE",
           httpMethod: "POST",
         },
       ],

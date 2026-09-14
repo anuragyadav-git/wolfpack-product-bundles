@@ -5,7 +5,7 @@ title: Shopify Admin API
 type: shopify-integration
 status: active
 summary: Authentication, rate-limit, and operational contracts for Wolfpack Admin API access.
-last_audited: 2026-09-03
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -16,7 +16,6 @@ systems:
 source_paths:
   - app/shopify.server.ts
   - prisma/schema.prisma
-  - app/lib/legacy-offline-token-cutover.server.ts
   - app/services/bundles/metafield-sync/operations/bundle-product.server.ts
 related_docs:
   - internal docs/Architecture/Bundle Field Ownership.md
@@ -30,24 +29,21 @@ keywords:
 
 # Shopify Admin API
 
-## Rate Limits (corrected)
+## Rate limits
 
-> ⚠️ `docs/API_ENDPOINTS.md` states "40 requests/second" — **this is incorrect**.
+Shopify applies calculated query-cost limits to the GraphQL Admin API for each
+app-and-store combination. Restore rates depend on the merchant's plan: the
+current published rates are 100 points/second for Standard, 200 for Advanced,
+1,000 for Plus, and 2,000 for Commerce Components. Shopify can temporarily
+reduce limits to protect platform stability.
 
-### Actual Rate Limit: Leaky Bucket
+Do not encode one plan's bucket or restore rate as an application constant.
+Inspect the GraphQL response `extensions.cost.throttleStatus`, retry throttled
+work with bounded backoff, and use bulk operations for large asynchronous data
+sets. Deduplicate identifiers, batch compatible reads, request at most 250
+connection nodes per page, and follow cursors only for overflowing resources.
 
-- **Capacity**: 1,000 points
-- **Leak rate**: 50 points/second (restores 50 points/sec back to 1,000)
-- **Cost per query**: varies by operation complexity (1–1,000 points)
-  - Simple queries: ~1–10 points
-  - `inventoryAdjustQuantities` bulk mutation: higher cost
-  - Exact cost returned in `X-GraphQL-Cost-Include-Fields` response header
-
-### Practical Guidance
-- Burst up to 1,000 points, then throttle
-- Use `X-Shopify-Shop-Api-Call-Limit` header to monitor remaining
-- Deduplicate identifiers, batch compatible reads, request at most 250 connection nodes per page, and follow cursors only for overflowing resources
-- REST API: separate rate limit, roughly 2 req/sec per store on Basic plans
+Source: [Shopify API limits](https://shopify.dev/docs/api/usage/limits).
 
 ---
 
@@ -83,21 +79,37 @@ their own boundary. Avoid duplicating authentication only for a child loader
 whose sole owner is the authenticated layout, because parallel one-time ID-token
 exchanges can race.
 
-Existing non-expiring rows require a one-time operator cutover. Select only offline rows with no expiry or refresh metadata, then call Shopify's native `migrateToExpiringToken` and store the returned session through `PrismaSessionStorage`. Run this temporary utility in SIT first. Production apply requires explicit approval because each successful exchange irreversibly revokes the previous non-expiring token; abort and report the first failed shop.
+Call `authenticate.admin(request)` before parsing or validating a direct Admin
+resource request, and keep it outside broad application `try/catch` blocks.
+Shopify uses thrown responses for reauthorization and embedded redirects;
+catching those responses and converting them to generic JSON errors breaks the
+platform auth flow. An action-only resource route should also authenticate its
+direct loader before returning `405`.
 
-Production rollout requirement:
-- New merchant launches naturally acquire expiring offline tokens.
-- Do not deploy the schema cutover until the explicit SIT and production migration gates have completed successfully.
+The `/auth/login` loader and action delegate shop validation and OAuth navigation
+to Shopify's `login(request)` helper. The `/auth/$` OAuth route calls
+`authenticate.admin(request)` and returns `null` after successful completion;
+it must not add a second generic Remix redirect.
+
+The temporary legacy-token cutover helper is no longer part of the deployable
+application. The SIT database returned zero non-expiring offline rows on
+2026-09-14. The production database did not: 57 of its 162 offline sessions
+lacked `expires`, `refreshToken`, and `refreshTokenExpires`, and all 57 belonged
+to installed shops. Production must remain behind the strict-token release gate
+until every affected merchant has launched the expiring-token build or the
+documented Shopify offline-token exchange has completed and the zero-count
+query passes. A non-expiring row must never be accepted through a permanent
+compatibility branch in session storage.
 
 Read-only Admin audits must classify credential state before interpreting a
 Shopify `401`. Enforcing PostgreSQL read-only transactions prevents an expiring
 session from persisting its rotated token; a subsequent query can therefore
 fail even though the refresh exchange itself succeeded. Refresh only rows with
 an unexpired refresh token in a separately authorized session-maintenance step,
-then rerun the audit read-only. Legacy rows rejected by token exchange and rows
-with unusable refresh tokens require a merchant to launch the embedded app so a
-fresh browser session token can be exchanged. Never weaken the audit by reading
-raw stored access tokens or treating an unaudited shop as ready.
+then rerun the audit read-only. Rows with unusable or absent refresh metadata
+require a merchant to launch the embedded app so a fresh browser session token
+can be exchanged. Never weaken the audit by reading raw stored access tokens or
+treating an unaudited shop as ready.
 
 Treat successful authentication and sufficient scopes as separate gates.
 `urlRedirects` requires online-store-navigation access; an older otherwise-valid

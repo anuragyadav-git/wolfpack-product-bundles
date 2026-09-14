@@ -15,15 +15,35 @@ import {
   normalizeVisibilityProductForDisplayConfiguration,
   normalizeVisibilityProductPageTarget,
 } from "./ConfigureBundleFlow.helpers";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type {
+  usePpbVisibilityState,
+  VisibilityResource,
+} from "./usePpbVisibilityState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
 
 export function usePpbPlacementHandlers({
   base,
   visibility,
   templateState,
 }: {
-  base: any;
-  visibility: any;
-  templateState: any;
+  base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
+    | "activeSection" | "apiKey" | "blockHandle" | "bundle" | "bundleProduct"
+    | "clearOperationAlert" | "closeCollectionsModal" | "closePageSelectionModal"
+    | "closeProductsModal" | "fetcher" | "markAsDirty" | "setCurrentModalStepId"
+    | "setIsLoadingPages" | "setOperationAlert" | "setSelectedPage" | "shop" | "shopify"
+  >;
+  visibility: Pick<ReturnType<typeof usePpbVisibilityState>,
+    | "bundleEmbedCollectionsSelectedData" | "bundleEmbedSelectedProducts"
+    | "setBundleEmbedCollectionsSelectedData" | "setBundleEmbedSelectedProducts"
+    | "setBundleEmbedSpecificCollectionPages" | "setBundleEmbedSpecificProductPages"
+    | "setUpsellWidgetCollectionsSelectedData" | "setUpsellWidgetSelectedProducts"
+    | "setUpsellWidgetSpecificCollectionPages" | "setUpsellWidgetSpecificProductPages"
+    | "upsellWidgetCollectionsSelectedData" | "upsellWidgetSelectedProducts"
+  >;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>,
+    "pendingPlacementModalRef" | "setIsPreparingPlacementTemplates"
+  >;
 }) {
   const handleCloseProductsModal = useCallback(() => {
     base.closeProductsModal();
@@ -120,14 +140,14 @@ export function usePpbPlacementHandlers({
   const removeVisibilityProductTarget = useCallback(
     (target: "widget" | "embed", indexToRemove: number) => {
       if (target === "widget") {
-        visibility.setUpsellWidgetSelectedProducts((prev: unknown[]) =>
+        visibility.setUpsellWidgetSelectedProducts((prev: VisibilityResource[]) =>
           prev.filter((_, index) => index !== indexToRemove),
         );
         visibility.setUpsellWidgetSpecificProductPages((prev: unknown[]) =>
           prev.filter((_, index) => index !== indexToRemove),
         );
       } else {
-        visibility.setBundleEmbedSelectedProducts((prev: unknown[]) =>
+        visibility.setBundleEmbedSelectedProducts((prev: VisibilityResource[]) =>
           prev.filter((_, index) => index !== indexToRemove),
         );
         visibility.setBundleEmbedSpecificProductPages((prev: unknown[]) =>
@@ -141,14 +161,14 @@ export function usePpbPlacementHandlers({
   const removeVisibilityCollectionTarget = useCallback(
     (target: "widget" | "embed", indexToRemove: number) => {
       if (target === "widget") {
-        visibility.setUpsellWidgetCollectionsSelectedData((prev: unknown[]) =>
+        visibility.setUpsellWidgetCollectionsSelectedData((prev: VisibilityResource[]) =>
           prev.filter((_, index) => index !== indexToRemove),
         );
         visibility.setUpsellWidgetSpecificCollectionPages((prev: unknown[]) =>
           prev.filter((_, index) => index !== indexToRemove),
         );
       } else {
-        visibility.setBundleEmbedCollectionsSelectedData((prev: unknown[]) =>
+        visibility.setBundleEmbedCollectionsSelectedData((prev: VisibilityResource[]) =>
           prev.filter((_, index) => index !== indexToRemove),
         );
         visibility.setBundleEmbedSpecificCollectionPages((prev: unknown[]) =>
@@ -211,12 +231,20 @@ export function usePpbPlacementHandlers({
         }
         const representativeProduct =
           visibility.bundleEmbedSelectedProducts?.[0] ?? null;
-        const pageProductHandle = isBundleEmbedPlacement
+        const pageProductHandleCandidate = isBundleEmbedPlacement
           ? representativeProduct?.handle ?? base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle
           : base.bundleProduct?.handle ?? base.bundle.shopifyProductHandle;
-        const productPreviewUrl = isBundleEmbedPlacement
+        const pageProductHandle =
+          typeof pageProductHandleCandidate === "string"
+            ? pageProductHandleCandidate
+            : undefined;
+        const productPreviewUrlCandidate = isBundleEmbedPlacement
           ? representativeProduct?.onlineStorePreviewUrl ?? representativeProduct?.onlineStoreUrl
           : base.bundleProduct?.onlineStorePreviewUrl;
+        const productPreviewUrl =
+          typeof productPreviewUrlCandidate === "string"
+            ? productPreviewUrlCandidate
+            : undefined;
         const themeEditorUrl = buildProductPageThemeEditorDeepLink({
           shop: base.shop,
           apiKey: base.apiKey,

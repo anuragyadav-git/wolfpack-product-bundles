@@ -258,9 +258,6 @@ openModal(stepIndex: any, originFocusElement: any = null) {
     if (this.currentStepIndex !== capturedStepIndex) return; // user navigated away
     this.renderModalProducts(capturedStepIndex);
     this.updateModalFooterMessaging();
-
-    // PRELOAD NEXT STEP
-    this.preloadNextStep();
   }).catch(() => {
     if (this.currentStepIndex !== capturedStepIndex) return;
     const productGrid = this.elements.modal.querySelector('.product-grid');

@@ -191,9 +191,11 @@
   margin-bottom: 12px;
   flex-shrink: 0;
   position: relative;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  align-items: stretch;
 }
 
 .modal-body .product-card .variant-selector {
@@ -356,6 +358,25 @@
   font-weight: 600;
   line-height: 1.25;
   text-align: start;
+}
+
+#bundle-builder-modal .product-card-price-action {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-rows: auto 1fr auto auto;
+  min-height: 0;
+}
+
+#bundle-builder-modal .product-card-price-action > .variant-selector-wrapper {
+  grid-row: 1;
+}
+
+#bundle-builder-modal .product-card-price-action > .product-price-row {
+  grid-row: 3;
+}
+
+#bundle-builder-modal .product-card-price-action > .product-card-action {
+  grid-row: 4;
 }
 
 @media (max-width: 768px) {

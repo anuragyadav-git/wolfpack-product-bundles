@@ -5,7 +5,7 @@ title: Bundle Parent Product
 type: architecture
 status: authoritative
 summary: Shared neutral Shopify parent-product contract for FPB and PPB bundles.
-last_audited: 2026-08-28
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -67,16 +67,31 @@ The `bundle-product-configuration` extension registers Shopify's required produc
 
 Parents created before this contract can remain `isBundle: true` with no section owner and display Shopify's unavailable-app warning. They are not automatically recreated or converted to fixed-component bundles; this preserves product IDs and the customized Cart Transform model.
 
-Only Bundles classification tags are `Only Bundles` and `only-bundles-parent`. New parents receive both at creation. Explicit Sync Product or Sync Bundle first adds these tags and Rebuy's compatibility tag, then removes only the legacy `WP-Bundles` and `wolfpack-bundle-parent` tags with `tagsRemove`; merchant-authored tags are never replaced. The older `wolfpack-hide-bundle-options` tag remains inert and is outside this targeted transition.
+Only Bundles classification tags are `Only Bundles` and
+`only-bundles-parent`. New parents receive both at creation. Explicit Sync
+Product or Sync Bundle adds these tags and Rebuy's compatibility tag with
+Shopify's additive `tagsAdd` mutation; merchant-authored tags are never
+replaced. Removal of the retired `WP-Bundles` and `wolfpack-bundle-parent`
+brand tags was a one-time cleanup operation after the release-environment
+zero-state checks. Normal creation and sync no longer carry recurring
+`tagsRemove` compatibility work.
 
-The separate `smart-cart-hide-bundle-options` tag is an exact third-party contract consumed by Rebuy Smart Cart. Rebuy uses it to suppress the bundle-options dropdown for Shopify bundle lines that it cannot represent correctly. New FPB and PPB parents receive the exact tag during creation. Explicit sync adds it to existing parents with Shopify's additive `tagsAdd` mutation, which preserves merchant-authored tags and is safe when the tag already exists. Failure to add the current brand or Rebuy tags, or to remove the two targeted legacy tags, fails the parent sync so Only Bundles never reports an incomplete transition as successful.
+The separate `smart-cart-hide-bundle-options` tag is an exact third-party
+contract consumed by Rebuy Smart Cart. Rebuy uses it to suppress the
+bundle-options dropdown for Shopify bundle lines that it cannot represent
+correctly. New FPB and PPB parents receive the exact tag during creation.
+Explicit sync adds it to existing parents with Shopify's additive `tagsAdd`
+mutation, which preserves merchant-authored tags and is safe when the tag
+already exists. Failure to add the current brand or Rebuy tags fails the
+parent sync.
 
 ## Explicit sync sequence
 
 Sync Product and Sync Bundle both:
 
 1. Ensure the parent exists.
-2. Add Only Bundles classification tags plus Rebuy's Smart Cart compatibility tag without replacing merchant tags, then remove the two targeted legacy brand tags.
+2. Add Only Bundles classification tags plus Rebuy's Smart Cart compatibility
+   tag without replacing merchant tags.
 3. Enforce the neutral default-variant contract.
 4. Ensure Online Store publication.
 5. Write standard Shopify bundle metafields and app-owned parent-variant metafields.

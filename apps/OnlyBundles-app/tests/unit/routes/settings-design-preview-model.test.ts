@@ -5,21 +5,23 @@ import {
 import {
   DESIGN_PREVIEW_FIXTURE,
   DESIGN_PREVIEW_TEMPLATES,
-  DESIGN_PREVIEW_VIEWPORTS,
   buildDesignPreviewTheme,
   buildDesignPreviewStorefrontCss,
-  calculateDesignPreviewFitScale,
-  getDesignPreviewCanvasSize,
-  getDesignPreviewFitPresentation,
   getDesignPreviewContextKind,
   getDesignPreviewFieldTarget,
   getDesignPreviewScene,
-  getDesignPreviewContextFidelity,
   getSupportedDesignPreviewAreas,
   getSupportedDesignPreviewScenarios,
   getDesignFieldsForPreviewContext,
   isDesignPreviewFieldApplicable,
 } from "../../../app/routes/app/app.settings/design-preview-model";
+import {
+  DESIGN_PREVIEW_VIEWPORTS,
+  calculateDesignPreviewFitScale,
+  getDesignPreviewCanvasSize,
+  getDesignPreviewContextFidelity,
+  getDesignPreviewFitPresentation,
+} from "../../../app/routes/app/app.settings/design-preview-layout";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -138,7 +140,7 @@ describe("Settings Design preview model", () => {
         categories: "tabs",
         summary: "list-selected-drawer",
         areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
-        scenarios: ["default", "validation"],
+        scenarios: ["default", "loading", "validation"],
       },
       {
         key: "product-grid",
@@ -148,7 +150,7 @@ describe("Settings Design preview model", () => {
         categories: "tabs",
         summary: "pdp-footer",
         areas: ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"],
-        scenarios: ["default", "validation"],
+        scenarios: ["default", "loading", "validation"],
       },
       {
         key: "horizontal-slots",
@@ -158,7 +160,7 @@ describe("Settings Design preview model", () => {
         categories: "none",
         summary: "modal-footer",
         areas: ["bundle-header", "product-slots", "cart-summary"],
-        scenarios: ["default", "product-picker", "validation"],
+        scenarios: ["default", "product-picker", "loading", "validation"],
       },
       {
         key: "vertical-slots",
@@ -168,7 +170,7 @@ describe("Settings Design preview model", () => {
         categories: "none",
         summary: "modal-footer",
         areas: ["bundle-header", "product-slots", "cart-summary"],
-        scenarios: ["default", "product-picker", "validation"],
+        scenarios: ["default", "product-picker", "loading", "validation"],
       },
     ]);
   });
@@ -206,7 +208,7 @@ describe("Settings Design preview model", () => {
     )?.target).toEqual({ kind: "area", value: "cart-summary" });
     expect(getDesignPreviewFieldTarget(
       "generalSettings.loadingBgColor",
-      "standard",
+      "product-grid",
     )?.target).toEqual({ kind: "scenario", value: "loading" });
     expect(getDesignPreviewFieldTarget(
       "expert.generalSettings.conditionToastBgColor",
@@ -235,9 +237,9 @@ describe("Settings Design preview model", () => {
     expect(getDesignFieldsForPreviewContext(fields, "standard", { kind: "area", value: "product-card" }).map((field) => field.label))
       .toEqual(expect.arrayContaining(["Primary Color", "Image Fit"]));
     expect(getDesignFieldsForPreviewContext(fields, "standard", { kind: "scenario", value: "loading" }).map((field) => field.label))
-      .toEqual(["FPB Loading GIF", "Loading Screen Background Color"]);
+      .toEqual(["Loading GIF", "Loading Screen Background Color"]);
     expect(getDesignFieldsForPreviewContext(fields, "product-list", { kind: "scenario", value: "loading" }).map((field) => field.label))
-      .toEqual([]);
+      .toEqual(["Loading GIF", "Loading Screen Background Color"]);
   });
 
   it("builds family-specific themes from normalized storefront runtime values", () => {
@@ -326,7 +328,7 @@ describe("Settings Design preview model", () => {
     expect(DESIGN_PREVIEW_FIXTURE.products.every((product) => (
       // Fixture paths are constrained by the assertion above to public root PNGs.
       // eslint-disable-next-line security/detect-non-literal-fs-filename
-      existsSync(join(process.cwd(), "public", product.imageUrl.slice(1)))
+      existsSync(join(__dirname, "../../../public", product.imageUrl.slice(1)))
     ))).toBe(true);
     expect(DESIGN_PREVIEW_FIXTURE.validationMessage).toBeTruthy();
     expect(DESIGN_PREVIEW_FIXTURE.upsell).toBeTruthy();

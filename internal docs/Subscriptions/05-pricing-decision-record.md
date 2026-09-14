@@ -5,7 +5,7 @@ title: Subscription Pricing Decision Record
 type: decision-record
 status: approved
 summary: Records the approved permanent Free tier and Growth plan with monthly and annual billing plus one Shopify-managed trial.
-last_audited: 2026-08-29
+last_audited: 2026-09-11
 owners:
   - product
 domains:
@@ -32,9 +32,9 @@ keywords:
 | Field | Configuration default | Production status |
 |---|---:|---|
 | Free | $0 | Approved |
-| Growth monthly | $19.99 USD | Approved |
-| Growth annual | $199 USD | Approved |
-| Annual saving | $40.88 versus twelve monthly payments, approximately 17.04% | Approved calculation |
+| Growth monthly | $9.99 USD | Approved |
+| Growth annual | $99.90 USD | Approved |
+| Annual saving | $19.98 versus twelve monthly payments, approximately 16.67% | Approved calculation |
 | Growth trial | 14 days | Approved |
 | Cutover policy | One atomic cutover with immediate enforcement | Approved |
 | Existing billing policy | No legacy billing or migration support | Approved |
@@ -43,6 +43,6 @@ Growth is one Shopify App Pricing plan configured as monthly with a yearly optio
 
 ## Approval gate
 
-The product owner approved the prices and cutover direction on 2026-08-28 and the 14-day Growth trial on 2026-08-29. Partner Dashboard configuration and manual release verification remain operational gates, not pricing-decision gates.
+The product owner approved the original prices and cutover direction on 2026-08-28, the 14-day Growth trial on 2026-08-29, and the revised $9.99 monthly and $99.90 annual Growth prices on 2026-09-11. Partner Dashboard configuration and manual release verification remain operational gates, not pricing-decision gates.
 
-**Owner approval:** Aditya Awasthi, 2026-08-29.
+**Owner approval:** Aditya Awasthi, revised 2026-09-11.

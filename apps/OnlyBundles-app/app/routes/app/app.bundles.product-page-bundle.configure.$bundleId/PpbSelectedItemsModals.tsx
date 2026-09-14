@@ -1,21 +1,35 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import { DiscardChangesModal } from "../../../components/bundle-configure/DiscardChangesModal";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbSelectedItemsModals() {
-  const {
-    DiscardChangesModal,
-    closeDiscardModal,
-    collectionsModalRef,
-    currentModalStepId,
-    handleCloseCollectionsModal,
-    handleCloseProductsModal,
-    handleConfirmDiscard,
-    openProductInAdmin,
-    productsModalRef,
-    selectedCollections,
-    showDiscardModal,
-    stepsState,
-  } = usePpbConfigureContext();
+export type PpbSelectedItemsModalsProps = Pick<
+  PpbConfigureFlow,
+  | "closeDiscardModal"
+  | "collectionsModalRef"
+  | "currentModalStepId"
+  | "handleCloseCollectionsModal"
+  | "handleCloseProductsModal"
+  | "handleConfirmDiscard"
+  | "openProductInAdmin"
+  | "productsModalRef"
+  | "selectedCollections"
+  | "showDiscardModal"
+  | "stepsState"
+>;
+
+export function PpbSelectedItemsModals({
+  closeDiscardModal,
+  collectionsModalRef,
+  currentModalStepId,
+  handleCloseCollectionsModal,
+  handleCloseProductsModal,
+  handleConfirmDiscard,
+  openProductInAdmin,
+  productsModalRef,
+  selectedCollections,
+  showDiscardModal,
+  stepsState,
+}: PpbSelectedItemsModalsProps) {
 
   return (
     <>
@@ -55,19 +69,14 @@ export function PpbSelectedItemsModals() {
                               gap="small"
                               alignItems="center"
                             >
-                              <img
+                              <s-thumbnail
                                 src={
                                   product.imageUrl ||
                                   product.image?.url ||
                                   "/bundle.avif"
                                 }
                                 alt={product.title || product.name || "Product"}
-                                style={{
-                                  width: 40,
-                                  height: 40,
-                                  objectFit: "cover",
-                                  borderRadius: 4,
-                                }}
+                                size="small"
                               />
                               <s-stack direction="block">
                                 <s-button

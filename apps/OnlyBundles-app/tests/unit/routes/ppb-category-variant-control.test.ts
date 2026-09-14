@@ -3,15 +3,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { PpbCategoryAccordion } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbCategoryAccordion";
 
-const mockUsePpbConfigureContext = jest.fn();
-
-jest.mock(
-  "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({
-    usePpbConfigureContext: () => mockUsePpbConfigureContext(),
-  }),
-);
-
 function makeFlow() {
   return {
     categoryActiveTabs: {},
@@ -24,13 +15,16 @@ function makeFlow() {
     handleCatDrop: jest.fn(),
     markAsDirty: jest.fn(),
     openStepCategoryMultiLanguageModal: jest.fn(),
+    clearValidationError: jest.fn(),
     setCategoryActiveTabs: jest.fn(),
     setCategoryOpen: jest.fn(),
     setDragOverCatKey: jest.fn(),
     showPolarisModal: jest.fn(),
     hidePolarisModal: jest.fn(),
     shopify: { resourcePicker: jest.fn() },
+    shopLocales: [],
     stepsState: { updateStepField: jest.fn() },
+    validationErrors: {},
   } as any;
 }
 
@@ -46,14 +40,13 @@ describe("PPB category variant control", () => {
       swatchTooltipEnabled: true,
     };
     const step = { id: "step-1", StepCategory: [category] };
-    mockUsePpbConfigureContext.mockReturnValue(makeFlow());
-
     const view = renderToStaticMarkup(
       React.createElement(PpbCategoryAccordion, {
+        adapter: makeFlow(),
         step,
         cat: category,
         catIndex: 0,
-      }),
+      } as unknown as React.ComponentProps<typeof PpbCategoryAccordion>),
     );
 
     expect(view).toContain('label="Display variants as individual products"');
@@ -73,14 +66,13 @@ describe("PPB category variant control", () => {
       collections: [],
       variantSelectorMode: "image_swatch",
     };
-    mockUsePpbConfigureContext.mockReturnValue(makeFlow());
-
     const view = renderToStaticMarkup(
       React.createElement(PpbCategoryAccordion, {
+        adapter: makeFlow(),
         step: { id: "step-1", StepCategory: [category] },
         cat: category,
         catIndex: 0,
-      }),
+      } as unknown as React.ComponentProps<typeof PpbCategoryAccordion>),
     );
 
     expect(view).toContain("Shopify product option swatches");

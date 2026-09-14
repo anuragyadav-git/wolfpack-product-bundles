@@ -12,7 +12,7 @@ export const APP_BRAND = {
     accent: "#FE8A65",
   },
   links: {
-    company: "https://apps.shopify.com/partners/wolfpack6",
+    company: "https://onlybundles.com",
     listing: "https://apps.shopify.com/wolfpack-product-bundles-1",
   },
 } as const;

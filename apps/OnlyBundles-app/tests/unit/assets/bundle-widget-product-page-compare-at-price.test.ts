@@ -13,7 +13,7 @@ describe('PPB compare-at price visibility contract', () => {
     const card = createSharedProductCardElement(
       { selectionId: 'variant-1', title: 'Sale product', price: 800, compareAtPrice: 1000 },
       0,
-      { currencySymbol: '$', decimalPlaces: 2 },
+      { display: { code: 'USD' } },
       { showCompareAtPrice: false, document },
     );
 
@@ -26,7 +26,7 @@ describe('PPB compare-at price visibility contract', () => {
     const card = createSharedProductCardElement(
       { selectionId: 'variant-1', title: 'Regular product', price: 800 },
       0,
-      { currencySymbol: '$', decimalPlaces: 2 },
+      { display: { code: 'USD' } },
       { showCompareAtPrice: true, document },
     );
 

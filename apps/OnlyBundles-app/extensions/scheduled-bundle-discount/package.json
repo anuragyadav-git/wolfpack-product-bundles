@@ -1,0 +1,7 @@
+{
+  "name": "scheduled-bundle-discount",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "rustup run stable cargo test" }
+}

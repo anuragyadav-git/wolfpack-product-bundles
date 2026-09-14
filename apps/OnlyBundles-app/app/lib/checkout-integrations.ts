@@ -103,14 +103,14 @@ export const CHECKOUT_INTEGRATION_PROVIDERS = [
 
 export type CheckoutIntegrationProvider = typeof CHECKOUT_INTEGRATION_PROVIDERS[number];
 export type CheckoutIntegrationProviderId = CheckoutIntegrationProvider["id"];
-export type CheckoutIntegrationCallbackMode = CheckoutIntegrationProvider["callbackMode"];
-export type ThirdPartyCheckoutIntegrationProviderId = Exclude<CheckoutIntegrationProviderId, "native">;
+type CheckoutIntegrationCallbackMode = CheckoutIntegrationProvider["callbackMode"];
+type ThirdPartyCheckoutIntegrationProviderId = Exclude<CheckoutIntegrationProviderId, "native">;
 export type DiscountCodeCheckoutIntegrationProviderId = Extract<
   CheckoutIntegrationProvider,
   { requiresDiscountCode: true }
 >["id"];
 
-export const CHECKOUT_INTEGRATION_PROVIDER_IDS = CHECKOUT_INTEGRATION_PROVIDERS.map(
+const CHECKOUT_INTEGRATION_PROVIDER_IDS = CHECKOUT_INTEGRATION_PROVIDERS.map(
   (provider) => provider.id,
 ) as CheckoutIntegrationProviderId[];
 

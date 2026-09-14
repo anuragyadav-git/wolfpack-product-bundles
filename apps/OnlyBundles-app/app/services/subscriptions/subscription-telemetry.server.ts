@@ -6,7 +6,7 @@ import type {
 } from "../../lib/subscriptions/entitlements";
 import { recordBusinessEvent } from "../app-events.server";
 
-export type SubscriptionEventHandle =
+type SubscriptionEventHandle =
   | "subscription_pricing_page_viewed"
   | "subscription_interval_selected"
   | "subscription_checkout_started"

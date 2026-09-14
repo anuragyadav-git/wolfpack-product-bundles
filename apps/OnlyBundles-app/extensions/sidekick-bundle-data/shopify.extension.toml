@@ -1,0 +1,14 @@
+api_version = "2025-10"
+
+[[extensions]]
+name = "Bundle data"
+description = "Search and inspect Only Bundles product bundles and open their configuration pages"
+handle = "sidekick-bundle-data"
+type = "ui_extension"
+uid = "dfc52732-7f79-383c-c8f0-9bbc806a25a54b5e2c59"
+
+[[extensions.targeting]]
+module = "./src/index.js"
+target = "admin.app.tools.data"
+tools = "./tools.json"
+instructions = "./instructions.md"

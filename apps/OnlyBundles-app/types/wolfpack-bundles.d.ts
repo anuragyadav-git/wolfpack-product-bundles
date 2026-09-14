@@ -78,7 +78,7 @@ export interface ProductOption {
 export interface DiscountRule {
   readonly id?: string;
   readonly conditionType: 'quantity' | 'amount';
-  readonly conditionOperator: 'gte' | 'gt' | 'lte' | 'lt' | 'eq' | 'equal_to' | 'greater_than' | 'less_than' | 'greater_than_or_equal_to' | 'less_than_or_equal_to';
+  readonly conditionOperator: 'gte' | 'gt' | 'lte' | 'lt' | 'eq';
   readonly conditionValue: number;
   readonly discountValue: number;
   readonly customerBuys?: number;

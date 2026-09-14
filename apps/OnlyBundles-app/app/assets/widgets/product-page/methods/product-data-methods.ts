@@ -1,6 +1,5 @@
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { fetchPpbStorefrontProducts } from '../storefront-client.js';
-import { STOREFRONT_PROXY_ROOT } from '../../../../config/storefront-proxy-routes.js';
 
 function normalizeWeightToGrams(weight: any, unit: any) {
   const numeric = Number(weight);
@@ -25,27 +24,9 @@ function normalizeWeightToGrams(weight: any, unit: any) {
   }
 }
 
-export function requiresPpbCanonicalSwatchHydration(step: any, products: any[]) {
-  const categories = Array.isArray(step?.categories) ? step.categories : [];
-  const usesShopifySwatches = categories.some((category: any) => (
-    category?.variantSelectorMode === 'color_swatch'
-    || category?.variantSelectorMode === 'image_swatch'
-  ));
-  if (!usesShopifySwatches) return false;
-
-  return products.some((product: any) => {
-    const options = Array.isArray(product?.options) ? product.options : [];
-    const variants = Array.isArray(product?.variants) ? product.variants : [];
-    const hasCanonicalOptions = options.length > 0 && options.every((option: any) => (
-      option
-      && typeof option === 'object'
-      && Array.isArray(option.optionValues)
-    ));
-    const hasCanonicalSelections = variants.every(
-      (variant: any) => Array.isArray(variant?.selectedOptions),
-    );
-    return !hasCanonicalOptions || !hasCanonicalSelections;
-  });
+export function hasProductPageHydrationFailure(stepFetchFailed: unknown) {
+  if (!stepFetchFailed || typeof stepFetchFailed !== 'object') return false;
+  return Object.values(stepFetchFailed).some((failed) => failed === true);
 }
 
 export const ProductPageProductDataMethods: Record<string, any> & ThisType<any> = {
@@ -58,7 +39,7 @@ resolveStorefrontApiBase() {
   return this.config?.storefrontRuntime || null;
 },
 
-collectStepProductIds(step: any) {
+collectStepProductIds(step: any, stepIndex?: string|number) {
   const productIds: any[] = [];
   const addProductId = (product: any) => {
     const raw = product?.productId ?? product?.id ?? product?.graphqlId;
@@ -72,6 +53,9 @@ collectStepProductIds(step: any) {
   (step.categories || []).forEach((category: any)  => {
     (category.products || []).forEach(addProductId);
   });
+  if (Number(stepIndex) === 0 && typeof this._getDirectDefaultProductIds === 'function') {
+    this._getDirectDefaultProductIds().forEach((id: string) => addProductId({ productId: id }));
+  }
 
   return productIds;
 },
@@ -94,81 +78,41 @@ collectStepCollectionHandles(step: any) {
 async loadStepProducts(stepIndex: string|number) {
   const step = this.selectedBundle.steps[stepIndex];
 
-  const cachedProducts = this.stepProductData[stepIndex] || [];
-  const hasHydratedProducts = cachedProducts.some((product: any)  =>
-    product?.selectionId
-    || product?.imageUrl
-    || (Array.isArray(product?.variants) && product.variants.length > 0)
-    || typeof product?.price === 'number'
-  );
-  const requiresSwatchHydration = requiresPpbCanonicalSwatchHydration(
-    step,
-    cachedProducts,
-  );
-
-  if (cachedProducts.length > 0 && hasHydratedProducts && !requiresSwatchHydration) {
-    return;
-  }
-
   let allProducts: any[] = [];
   let fetchFailed = false;
 
   const storefrontRuntime = this.resolveStorefrontApiBase();
 
-  const productIds = this.collectStepProductIds(step);
+  const productIds = this.collectStepProductIds(step, stepIndex);
   if (productIds.length > 0) {
     try {
-      const products = storefrontRuntime?.storefrontAccessToken
-        ? await fetchPpbStorefrontProducts({
-          shop: window.Shopify?.shop || this.container?.dataset?.shop,
-          apiVersion: storefrontRuntime.storefrontApiVersion,
-          accessToken: storefrontRuntime.storefrontAccessToken,
-          productIds,
-          country: window.Shopify?.country || null,
-          fetchImpl: fetch,
-        })
-        : this.config?.isEmbedSource
-          ? await fetch(`${STOREFRONT_PROXY_ROOT}/api/storefront-products?ids=${encodeURIComponent(productIds.join(','))}`)
-            .then(async (response) => response.ok ? (await response.json()).products ?? [] : Promise.reject(new Error('Product hydration failed')))
-          : Promise.reject(new Error('Missing Shopify Storefront runtime'));
-      if (products.length > 0) allProducts = allProducts.concat(products);
+      if (!storefrontRuntime?.storefrontAccessToken) {
+        throw new Error('Missing Shopify Storefront runtime');
+      }
+      const products = await fetchPpbStorefrontProducts({
+        shop: window.Shopify?.shop || this.container?.dataset?.shop,
+        apiVersion: storefrontRuntime.storefrontApiVersion,
+        accessToken: storefrontRuntime.storefrontAccessToken,
+        productIds,
+        country: window.Shopify?.country || null,
+        fetchImpl: fetch,
+      });
+      if (products.length !== productIds.length) {
+        throw new Error('Incomplete Shopify product hydration');
+      }
+      allProducts = allProducts.concat(products);
     } catch (_e: any) {
       fetchFailed = true;
     }
   }
-
-  if (this.config?.isEmbedSource && !storefrontRuntime?.storefrontAccessToken) {
-    const handles = this.collectStepCollectionHandles(step);
-    if (handles.length > 0) {
-      try {
-        const response = await fetch(`${STOREFRONT_PROXY_ROOT}/api/storefront-collections?handles=${encodeURIComponent(handles.join(','))}`);
-        if (!response.ok) throw new Error('Collection hydration failed');
-        const data = await response.json();
-        if (data.products?.length > 0) allProducts = allProducts.concat(data.products);
-      } catch {
-        fetchFailed = true;
-      }
-    }
-  }
-
-  if (allProducts.length === 0) {
-    const fallbackProducts = [
-      ...(Array.isArray(step?.products) ? step.products : []),
-      ...(Array.isArray(step?.categories)
-        ? step.categories.flatMap((cat: any) => Array.isArray(cat?.products) ? cat.products : [])
-        : []),
-    ];
-    if (fallbackProducts.length > 0) {
-      allProducts = fallbackProducts;
-      fetchFailed = false;
-    }
-  }
+  if (fetchFailed) allProducts = [];
 
   // Process and normalize product data
   const processedProducts = this._mergeDirectDefaultProductsIntoStep(
     stepIndex,
     this.processProductsForStep(allProducts, step)
   );
+  if (this._directDefaultHydrationFailed === true) fetchFailed = true;
 
   // Remove duplicates
   const seen = new Set();
@@ -205,25 +149,33 @@ processProductsForStep(products: any[], step: any) {
     )
   );
   const toCents = (value: any) => Math.round(parseFloat(value || '0') * 100);
-  const normalizeVariant = (v: any) => ({
-    id: this.extractId(v.id || v.selectionId),
-    selectionId: this.extractId(v.selectionId || v.id),
-    title: v.title,
-    price: toCents(v.price),
-    compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
-    available: isVariantSelectableForInventory(v),
-    quantityAvailable: typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null,
-    currentlyNotInStock: v.currentlyNotInStock === true,
-    weight: normalizeWeightToGrams(v.weight, v.weightUnit),
-    weightUnit: 'GRAMS',
-    option1: v.option1 || null,
-    option2: v.option2 || null,
-    option3: v.option3 || null,
-    selectedOptions: Array.isArray(v.selectedOptions)
-      ? v.selectedOptions.map((option: any) => ({ name: option.name, value: option.value }))
-      : [],
-    image: v.image || null
-  });
+  const normalizeVariant = (v: any) => {
+    const currencyCode = typeof v.currencyCode === 'string' ? v.currencyCode.toUpperCase() : null;
+    if (currencyCode) {
+      (globalThis as any).__WOLFPACK_PRESENTMENT_CURRENCY__ = currencyCode;
+    }
+    return {
+      id: this.extractId(v.id || v.selectionId),
+      selectionId: this.extractId(v.selectionId || v.id),
+      title: v.title,
+      price: toCents(v.price),
+      currencyCode,
+      compareAtPrice: v.compareAtPrice ? toCents(v.compareAtPrice) : null,
+      compareAtCurrencyCode: v.compareAtCurrencyCode ?? null,
+      available: isVariantSelectableForInventory(v),
+      quantityAvailable: typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null,
+      currentlyNotInStock: v.currentlyNotInStock === true,
+      weight: normalizeWeightToGrams(v.weight, v.weightUnit),
+      weightUnit: 'GRAMS',
+      option1: v.option1 || null,
+      option2: v.option2 || null,
+      option3: v.option3 || null,
+      selectedOptions: Array.isArray(v.selectedOptions)
+        ? v.selectedOptions.map((option: any) => ({ name: option.name, value: option.value }))
+        : [],
+      image: v.image || null,
+    };
+  };
 
   return products.flatMap((product: any)  => {
     const sourceVariants = Array.isArray(product.variants) ? product.variants : [];
@@ -266,7 +218,9 @@ processProductsForStep(products: any[], step: any) {
             title: `${product.title} - ${variant.title}`,
             imageUrl,
             price: toCents(variant.price),
+            currencyCode: variant.currencyCode ?? null,
             compareAtPrice: variant.compareAtPrice ? toCents(variant.compareAtPrice) : null,
+            compareAtCurrencyCode: variant.compareAtCurrencyCode ?? null,
             variantId: this.extractId(variant.id || variant.selectionId),
             available: isVariantSelectableForInventory(variant),
             quantityAvailable: typeof variant.quantityAvailable === 'number' ? variant.quantityAvailable : null,
@@ -321,7 +275,9 @@ processProductsForStep(products: any[], step: any) {
           price: defaultVariant
             ? toCents(defaultVariant.price)
             : toCents(product.price),
+          currencyCode: defaultVariant?.currencyCode ?? product.currencyCode ?? null,
           compareAtPrice: defaultVariant?.compareAtPrice ? toCents(defaultVariant.compareAtPrice) : null,
+          compareAtCurrencyCode: defaultVariant?.compareAtCurrencyCode ?? null,
           variantId: this.extractId(defaultVariant?.id || defaultVariant?.selectionId || product.id || product.selectionId),
           selectionId: this.extractId(defaultVariant?.selectionId || defaultVariant?.id || product.selectionId || product.id),
           available: defaultVariant ? isVariantSelectableForInventory(defaultVariant) : false,

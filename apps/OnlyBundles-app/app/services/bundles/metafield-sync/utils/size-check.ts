@@ -8,9 +8,9 @@ import { AppLogger } from "../../../../lib/logger";
 import type { MetafieldSizeCheck } from "../types";
 
 // Metafield size constants (Shopify limits)
-export const METAFIELD_SIZE_WARNING = 50 * 1024; // 50KB - start warning at this size
-export const METAFIELD_SIZE_CRITICAL = 60 * 1024; // 60KB - critical warning
-export const METAFIELD_SIZE_LIMIT = 64 * 1024; // 64KB - Shopify's hard limit
+const METAFIELD_SIZE_WARNING = 50 * 1024; // 50KB - start warning at this size
+const METAFIELD_SIZE_CRITICAL = 60 * 1024; // 60KB - critical warning
+const METAFIELD_SIZE_LIMIT = 64 * 1024; // 64KB - Shopify's hard limit
 
 /**
  * Check metafield size and log warnings/errors if approaching or exceeding limits
@@ -85,7 +85,7 @@ export function checkMetafieldSize(
 /**
  * Helper function to safely parse JSON
  */
-export function safeJsonParse<T>(json: any, defaultValue: T): T {
+function safeJsonParse<T>(json: any, defaultValue: T): T {
   if (typeof json === 'string') {
     try {
       return JSON.parse(json);

@@ -1,15 +1,15 @@
 import type { Prisma } from "@prisma/client";
 
-export const DEFAULT_ATTRIBUTION_DAYS = 30;
-export const MAX_ATTRIBUTION_DAYS = 90;
-export const MAX_CUSTOM_UTM_PARAMETERS = 10;
+const DEFAULT_ATTRIBUTION_DAYS = 30;
+const MAX_ATTRIBUTION_DAYS = 90;
+const MAX_CUSTOM_UTM_PARAMETERS = 10;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const CUSTOM_PARAM_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 const BLOCKED_CUSTOM_PARAM_RE = /(email|phone|address|customer|buyer|token|secret|password)/i;
 
-export interface AttributionWindow {
+interface AttributionWindow {
   since: Date;
   until: Date;
   days: number;
@@ -17,11 +17,15 @@ export interface AttributionWindow {
   to?: string;
 }
 
-export interface CustomUtmInputAnalysis {
+interface CustomUtmInputAnalysis {
   accepted: string[];
   rejected: string[];
   limitReached: boolean;
 }
+
+type AttributionRangeSelection =
+  | { days: number; from?: never; to?: never }
+  | { days?: never; from: string; to: string };
 
 function clampDays(value: number): number {
   if (!Number.isFinite(value)) return DEFAULT_ATTRIBUTION_DAYS;
@@ -38,6 +42,42 @@ function parseDateKey(value: string | null | undefined): Date | null {
   const [year, month, day] = value.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function validateAttributionDateRange(
+  from: string | null | undefined,
+  to: string | null | undefined,
+  today: string
+): boolean {
+  const fromDate = parseDateKey(from);
+  const toDate = parseDateKey(to);
+  const todayDate = parseDateKey(today);
+  return Boolean(
+    fromDate &&
+      toDate &&
+      todayDate &&
+      fromDate.getTime() <= toDate.getTime() &&
+      toDate.getTime() <= todayDate.getTime()
+  );
+}
+
+export function buildAttributionRangePath(
+  currentUrl: string,
+  selection: AttributionRangeSelection,
+): string {
+  const url = new URL(currentUrl);
+  url.searchParams.delete("days");
+  url.searchParams.delete("from");
+  url.searchParams.delete("to");
+
+  if (selection.from && selection.to) {
+    url.searchParams.set("from", selection.from);
+    url.searchParams.set("to", selection.to);
+  } else {
+    url.searchParams.set("days", String(selection.days));
+  }
+
+  return `${url.pathname}?${url.searchParams.toString()}`;
 }
 
 function startOfUtcDay(date: Date): Date {

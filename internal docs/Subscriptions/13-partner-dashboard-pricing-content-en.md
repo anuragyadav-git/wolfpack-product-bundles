@@ -5,7 +5,7 @@ title: Partner Dashboard Pricing Content - English
 type: operator-handoff
 status: sit-entered-prod-pending
 summary: Records the English-only App Pricing values entered for SIT and approved for later production entry.
-last_audited: 2026-08-29
+last_audited: 2026-09-11
 owners:
   - product
   - engineering
@@ -50,8 +50,8 @@ Live Partner Dashboard check on 2026-08-29 found one published listing locale: *
 | Display name | Growth |
 | Plan handle | `growth` |
 | Billing | Monthly with yearly option |
-| Monthly charge | `$19.99 USD` |
-| Yearly charge | `$199 USD` |
+| Monthly charge | `$9.99 USD` |
+| Yearly charge | `$99.90 USD` |
 | Free trial duration | `14` days |
 | Top feature 1 | Unlimited public bundles and steps |
 | Top feature 2 | All bundle templates |

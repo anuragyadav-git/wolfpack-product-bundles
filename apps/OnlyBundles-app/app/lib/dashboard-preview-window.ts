@@ -7,9 +7,7 @@ type OpenWindow = (
 export function openPendingDashboardPreview(
   openWindow: OpenWindow = window.open.bind(window),
 ): Window | null {
-  const popup = openWindow("about:blank", "_blank");
-  if (popup) popup.opener = null;
-  return popup;
+  return openWindow("about:blank", "_blank");
 }
 
 export function navigatePendingDashboardPreview(
@@ -18,6 +16,7 @@ export function navigatePendingDashboardPreview(
 ): boolean {
   if (!popup || popup.closed) return false;
   popup.location.replace(previewUrl);
+  popup.opener = null;
   return true;
 }
 

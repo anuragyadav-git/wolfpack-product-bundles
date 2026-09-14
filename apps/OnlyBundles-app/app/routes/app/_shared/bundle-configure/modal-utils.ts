@@ -4,18 +4,28 @@
 
 import { useEffect, useRef } from "react";
 
-export function showPolarisModal(ref: { current: any }): void {
-  const modal = ref.current as any;
-  modal?.showOverlay?.();
+type PolarisOverlay =
+  | HTMLElement
+  | {
+      showOverlay?: () => void;
+      hideOverlay?: () => void;
+    };
+
+type PolarisOverlayRef = { current: PolarisOverlay | null };
+
+export function showPolarisModal(ref: PolarisOverlayRef): void {
+  const modal = ref.current;
+  if (modal && "showOverlay" in modal) modal.showOverlay?.();
 }
 
-export function hidePolarisModal(ref: { current: any }): void {
-  const modal = ref.current as any;
-  modal?.hideOverlay?.();
+export function hidePolarisModal(ref: PolarisOverlayRef): void {
+  const modal = ref.current;
+  if (modal && "hideOverlay" in modal) modal.hideOverlay?.();
 }
 
 /**
- * Keeps app-owned state synchronized with Polaris's documented hide events.
+ * Keeps app-owned state synchronized with Polaris's documented hide event.
+ * `afterhide` is the later phase of the same close and must not repeat cleanup.
  */
 export function useModalHideListener(
   ref: { current: HTMLElement | null },
@@ -29,10 +39,8 @@ export function useModalHideListener(
     if (!modal) return;
     const handler = () => handlerRef.current();
     modal.addEventListener("hide", handler);
-    modal.addEventListener("afterhide", handler);
     return () => {
       modal.removeEventListener("hide", handler);
-      modal.removeEventListener("afterhide", handler);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 }

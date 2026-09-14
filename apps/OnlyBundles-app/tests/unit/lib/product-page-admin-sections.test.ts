@@ -65,13 +65,24 @@ describe("product page admin sections", () => {
     expect(navigate).toHaveBeenCalledWith("/app/settings");
   });
 
+  it("stays on the configure flow when the Save Bar rejects leaving", async () => {
+    const leaveConfirmation = jest.fn(() => Promise.reject(new Error("stay")));
+    const navigate = jest.fn();
+
+    await expect(
+      navigateToProductPageDefaults(leaveConfirmation, navigate),
+    ).resolves.toBe(false);
+
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it("uses the captured no-common-selling-plan validation message", () => {
     expect(SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE).toBe(
       "To offer this bundle as a subscription, all of its products must be part of the same subscription plan in your Shopify settings. Please update your product selling plans and try again."
     );
   });
 
-  it("extracts direct, category, default, and collection sources for subscription validation", () => {
+  it("extracts canonical StepProduct, default, and collection sources for subscription validation", () => {
     const sources = extractSellingPlanValidationSources({
       defaultProductsData: {
         products: [
@@ -100,10 +111,8 @@ describe("product page admin sections", () => {
     expect(sources.productIds).toEqual([
       "gid://shopify/Product/101",
       "gid://shopify/Product/102",
-      "gid://shopify/Product/201",
       "gid://shopify/Product/202",
       "gid://shopify/Product/203",
-      "gid://shopify/Product/204",
     ]);
     expect(sources.collectionIds).toEqual([
       "gid://shopify/Collection/301",
@@ -223,7 +232,6 @@ describe("product page admin sections", () => {
 
   it("lists only merchant theme product templates without generated fallback rows", () => {
     expect(getThemeTemplatesSource).toContain('return template.handle === "product" || template.handle.startsWith("product.")');
-    expect(getThemeTemplatesSource).not.toContain("ensureProductTemplate(product.handle)");
     expect(getThemeTemplatesSource).not.toMatch(/bundle-product-\$\{product\.handle\}/);
     expect(getThemeTemplatesSource).not.toContain("All Product Pages (General)");
   });

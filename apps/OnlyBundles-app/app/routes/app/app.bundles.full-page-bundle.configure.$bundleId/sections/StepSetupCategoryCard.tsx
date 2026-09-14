@@ -1,21 +1,30 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { CommonStepCategoryAccordionAdapter } from "../../_shared/bundle-configure/CommonStepCategoryAccordion";
 import { FpbStepCategoryAccordion } from "./StepSetupCategoryAccordion";
 import { FpbStepCategoryFooter } from "./StepSetupCategoryFooter";
 import { translateAdmin } from "~/i18n/config";
+import { QuestionHelpTooltip } from "../SmallComponents";
 
 export function FpbStepCategoryCard({
-  flow,
+  adapter,
+  styles,
   step,
+  validationErrors,
+  onAddCategory,
+  onDisplayVariantsChange,
 }: {
-  flow: ConfigureBundleFlowContext;
+  adapter: CommonStepCategoryAccordionAdapter;
+  styles: Record<string, string>;
   step: any;
+  validationErrors?: Record<string, string>;
+  onAddCategory: () => void;
+  onDisplayVariantsChange: (enabled: boolean) => void;
 }) {
-  const { fullPageBundleStyles, QuestionHelpTooltip } = flow;
   const categories = (step.StepCategory as any[] | undefined) ?? [];
+  const resourceError = validationErrors?.[`steps.${step.id}.resources`];
 
   return (
     <>
-      <div className={fullPageBundleStyles.card}>
+      <div className={styles.card}>
         <div
           style={{
             display: "flex",
@@ -41,7 +50,7 @@ export function FpbStepCategoryCard({
           )}
         </p>
         {categories.length === 0 && (
-          <div className={fullPageBundleStyles.emptyState}>
+          <div className={styles.emptyState}>
             {translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategorycard.noCategoryDefinedYet"
             )}
@@ -50,13 +59,24 @@ export function FpbStepCategoryCard({
         {categories.map((cat: any, catIndex: number) => (
           <FpbStepCategoryAccordion
             key={cat.id ?? catIndex}
-            flow={flow}
+            adapter={adapter}
             step={step}
             cat={cat}
             catIndex={catIndex}
           />
         ))}
-        <FpbStepCategoryFooter flow={flow} step={step} />
+        <FpbStepCategoryFooter
+          step={step}
+          onAddCategory={onAddCategory}
+          onDisplayVariantsChange={onDisplayVariantsChange}
+        />
+        {resourceError && (
+          <div style={{ marginTop: 12 }}>
+            <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
+              {resourceError}
+            </s-text>
+          </div>
+        )}
       </div>
     </>
   );

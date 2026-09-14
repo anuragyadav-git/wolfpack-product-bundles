@@ -24,6 +24,7 @@ interface OfferOperationsSectionProps {
   ) => void;
   onRecurrenceEndsOnChange: (date: string | null) => void;
   onRecurrenceRunCountChange: (count: number | null) => void;
+  validationErrors?: Record<string, string>;
 }
 
 function minuteValue(value: string | null): number | null {
@@ -46,6 +47,7 @@ export function OfferOperationsSection({
   onRecurrenceTerminationChange,
   onRecurrenceEndsOnChange,
   onRecurrenceRunCountChange,
+  validationErrors,
 }: OfferOperationsSectionProps) {
   if (!active) return null;
 
@@ -83,11 +85,13 @@ export function OfferOperationsSection({
           </s-paragraph>
         </s-banner>
         <s-number-field
+          id="configure-offerDelivery-priority"
           label={i18n.t("offerOperations.priorityLabel")}
           details={i18n.t("offerOperations.priorityDetails")}
           min={1}
           max={9999}
           value={String(state.priority)}
+          error={validationErrors?.["offerDelivery.priority"]}
           onInput={(event) => {
             const priority = Number((event.target as HTMLInputElement).value);
             if (Number.isInteger(priority)) onPriorityChange(priority);
@@ -138,20 +142,24 @@ export function OfferOperationsSection({
         {state.scheduleMode === "one_time" ? (
           <>
             <s-text-field
+              id="configure-offerDelivery-startsAt"
               label={i18n.t("offerOperations.startsAtLabel")}
               details={i18n.t("offerOperations.dateDetails")}
               value={state.startsAt ?? ""}
               placeholder={i18n.t("offerOperations.datePlaceholder")}
+              error={validationErrors?.["offerDelivery.startsAt"]}
               onInput={(event) => {
                 const value = (event.target as HTMLInputElement).value.trim();
                 onStartsAtChange(value || null);
               }}
             />
             <s-text-field
+              id="configure-offerDelivery-endsAt"
               label={i18n.t("offerOperations.endsAtLabel")}
               details={i18n.t("offerOperations.dateDetails")}
               value={state.endsAt ?? ""}
               placeholder={i18n.t("offerOperations.datePlaceholder")}
+              error={validationErrors?.["offerDelivery.endsAt"]}
               onInput={(event) => {
                 const value = (event.target as HTMLInputElement).value.trim();
                 onEndsAtChange(value || null);
@@ -196,6 +204,7 @@ export function OfferOperationsSection({
             <s-grid
               gridTemplateColumns="repeat(auto-fit, minmax(12rem, 1fr))"
               gap="base"
+              alignItems="start"
             >
               <s-text-field
                 label={i18n.t("offerOperations.recurrenceWindowStartLabel")}

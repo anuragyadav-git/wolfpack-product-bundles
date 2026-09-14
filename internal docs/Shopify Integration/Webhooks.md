@@ -4,23 +4,24 @@ id: shopify-webhooks
 title: Webhooks
 type: architecture-note
 status: active
-summary: Defines Wolfpack's app-specific Shopify webhook subscriptions, payload version, processing ownership, and delivery-volume safeguards.
-last_audited: 2026-08-31
+summary: Defines authenticated Remix webhook ingress, active Shopify subscriptions, Inngest handoff, and delivery-volume safeguards.
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
   - shopify-integration
 systems:
-  - webhook-worker
+  - remix-webhook-ingress
   - webhook-processor
   - inngest
 source_paths:
-  - shopify.app.toml
-  - shopify.app.wolfpack-product-bundles-sit.toml
-  - app/services/webhook-worker.server.ts
-  - app/services/webhooks/topics.ts
-  - app/services/webhooks/product-delete-relevance.server.ts
-  - app/services/webhooks/processor.server.ts
+  - apps/OnlyBundles-app/shopify.app.toml
+  - apps/OnlyBundles-app/shopify.app.wolfpack-product-bundles-sit.toml
+  - apps/OnlyBundles-app/shopify.web.toml
+  - apps/OnlyBundles-app/app/routes/api/webhooks.tsx
+  - apps/OnlyBundles-app/app/services/webhooks/topics.ts
+  - apps/OnlyBundles-app/app/services/webhooks/product-delete-relevance.server.ts
+  - apps/OnlyBundles-app/app/services/webhooks/processor.server.ts
 related_docs:
   - internal docs/Shopify Integration/Admin API.md
 tags:
@@ -31,6 +32,26 @@ keywords:
 ---
 
 # Webhooks
+
+## Ingress Ownership
+
+Both Shopify app configurations deliver to `/webhooks`. The Remix action calls
+`authenticate.webhook(request)`, so Shopify's maintained app library owns HMAC
+verification, topic/shop extraction, and invalid-request handling. There is no
+standalone `node:http` worker or app-owned HMAC implementation.
+
+`shopify.web.toml` uses the same `/webhooks` path. In Shopify CLI 4.8.0 this
+field targets the sample `APP_UNINSTALLED` webhook that `shopify app dev` sends
+to the local web process after the remote app configuration changes; it is not
+a separate subscription route. Keeping it aligned ensures the CLI probe also
+exercises the authenticated Remix ingress.
+
+After authentication, ingress rejects inactive topics and applies the
+shop-scoped product-delete relevance gate. Relevant events are awaited into
+Inngest before a success response is returned. An enqueue failure returns HTTP
+503 so Shopify can retry; the request is never acknowledged and processed
+directly as a fallback. `WebhookProcessor` remains idempotent by webhook ID and
+rechecks the active-topic contract.
 
 ## App Config Subscriptions
 
@@ -71,12 +92,12 @@ native fixed-bundle APIs own their component relationships; Wolfpack's
 configurable FPB and PPB Cart Transform bundles use app-owned database and
 metafield references instead.
 
-The direct webhook worker therefore performs one indexed, shop-scoped
-`StepProduct` lookup after HMAC validation. An unreferenced deletion is
+The authenticated Remix action therefore performs one indexed, shop-scoped
+`StepProduct` lookup after authentication. An unreferenced deletion is
 acknowledged without creating an Inngest event or `WebhookEvent` row. A
 referenced deletion is sent to Inngest for durable cleanup. If the relevance
-lookup itself fails, the worker fails open to Inngest so a potentially relevant
-deletion is not lost.
+lookup itself fails, the authenticated Remix ingress fails open to Inngest so a
+potentially relevant deletion is not lost.
 
 Shopify cannot usefully filter this subscription by current product state: the
 classic delete payload contains only the deleted product ID, and the Events
@@ -111,7 +132,7 @@ retired.
 
 ## Storage Gotcha
 
-The direct worker accepts only the six topics in `ACTIVE_WEBHOOK_TOPICS` before
+The Remix ingress accepts only the six topics in `ACTIVE_WEBHOOK_TOPICS` before
 calling Inngest. `WebhookProcessor` applies the same contract before decoding or
 inserting a `WebhookEvent`, so a stale subscription or direct Inngest event
 cannot restore retired traffic. The inactive set includes
@@ -143,9 +164,11 @@ to delete. The deliveries came from outside that per-shop subscription surface,
 most plausibly an app-version-managed contract that was active when Shopify
 emitted them.
 
-The Shopify CLI showed production version `wolfpack-product-bundles-280` from
-2026-07-31 as active and newer production versions as inactive. SIT version
-`wolfpack-bundles-sit-404` from 2026-08-17 was active. A future approved release
-must deploy the current TOML contract so Shopify's active app version and the
-repository agree; processor and ingress guards remain required even after that
-release.
+The original 2026-08-31 CLI audit found production version
+`wolfpack-product-bundles-280` active. A fresh read-only Shopify CLI inventory on
+2026-09-14 found production version `wolfpack-product-bundles-294` active, while
+SIT still had `wolfpack-bundles-sit-404` from 2026-08-17 active and SIT versions
+405 through 415 inactive. The remediation's `/webhooks` TOML contract is
+therefore not active in SIT yet. A future approved release must deploy the
+current TOML contract so Shopify's active app version and the repository agree;
+processor and ingress guards remain required even after that release.

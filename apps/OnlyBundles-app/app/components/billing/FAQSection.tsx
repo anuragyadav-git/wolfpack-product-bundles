@@ -2,7 +2,7 @@ import { PRICING_FAQ, type FAQItem } from "../../constants/pricing-data";
 import { useTranslation } from "react-i18next";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 
-export interface FAQSectionProps {
+interface FAQSectionProps {
   faqs?: FAQItem[];
 }
 

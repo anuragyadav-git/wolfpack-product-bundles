@@ -38,9 +38,7 @@
     "migrate:dev": "npm run app:migrate:dev",
     "push:db": "npm run app:push:db",
     "generate:prisma": "npm run app:generate:prisma",
-    "graphql-codegen": "npm run app:graphql-codegen",
     "vite": "npm run app:vite --",
-    "webhook-worker": "npm run app:webhook-worker",
     "bulk-sync": "npm run app:bulk-sync",
     "deployment:general-sync": "npm run app:deployment:general-sync",
     "cart-transform:repair": "npm run app:cart-transform:repair",
@@ -52,7 +50,7 @@
     "test:watch": "npm run app:test:watch",
     "test:coverage": "npm run app:test:coverage",
     "test:ci": "npm run app:test:ci",
-    "knip": "npm run app:knip",
+    "knip": "knip --workspace . --workspace wolfpack-product-bundles --workspace './apps/OnlyBundles-app/extensions/*' --treat-config-hints-as-errors --no-progress",
     "typecheck": "npm run app:typecheck",
     "graphify:rebuild": "npm run app:graphify:rebuild",
     "pre-deploy": "npm run app:pre-deploy",
@@ -84,9 +82,7 @@
     "app:migrate:dev": "npm run migrate:dev --workspace=wolfpack-product-bundles",
     "app:push:db": "npm run push:db --workspace=wolfpack-product-bundles",
     "app:generate:prisma": "npm run generate:prisma --workspace=wolfpack-product-bundles",
-    "app:graphql-codegen": "npm run graphql-codegen --workspace=wolfpack-product-bundles",
     "app:vite": "npm run vite --workspace=wolfpack-product-bundles --",
-    "app:webhook-worker": "npm run webhook-worker --workspace=wolfpack-product-bundles",
     "app:bulk-sync": "npm run bulk-sync --workspace=wolfpack-product-bundles",
     "app:deployment:general-sync": "npm run deployment:general-sync --workspace=wolfpack-product-bundles",
     "app:cart-transform:repair": "npm run cart-transform:repair --workspace=wolfpack-product-bundles",
@@ -98,7 +94,7 @@
     "app:test:watch": "npm run test:watch --workspace=wolfpack-product-bundles",
     "app:test:coverage": "npm run test:coverage --workspace=wolfpack-product-bundles",
     "app:test:ci": "npm run test:ci --workspace=wolfpack-product-bundles",
-    "app:knip": "npm run knip --workspace=wolfpack-product-bundles",
+    "app:knip": "npm run knip --workspace=wolfpack-product-bundles --",
     "app:typecheck": "npm run typecheck --workspace=wolfpack-product-bundles",
     "app:graphify:rebuild": "npm run graphify:rebuild --workspace=wolfpack-product-bundles",
     "app:pre-deploy": "npm run pre-deploy --workspace=wolfpack-product-bundles",
@@ -117,6 +113,10 @@
   },
   "engines": {
     "node": ">=22 <26"
+  },
+  "devDependencies": {
+    "knip": "^5.88.1",
+    "prisma": "^6.19.0"
   },
   "trustedDependencies": [
     "@shopify/plugin-cloudflare"

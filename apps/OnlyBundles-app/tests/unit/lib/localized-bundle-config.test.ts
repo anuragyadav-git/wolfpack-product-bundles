@@ -151,6 +151,26 @@ describe("localizeBundleConfig", () => {
     expect(localized.pricing.messages.tierTextByRuleId["rule-1"].tierText).toBe("Buy two");
   });
 
+  it("ignores a stale messages display-options copy when the direct owner is absent", () => {
+    const localized = localizeBundleConfig({
+      pricing: {
+        messages: {
+          displayOptions: {
+            bundleQuantityOptions: {
+              optionsByRuleId: {
+                "rule-1": { label: "Stale", subtext: "Ignore me" },
+              },
+            },
+          },
+        },
+      },
+    }, "fr");
+
+    expect(localized.pricing.displayOptions).toEqual({
+      bundleQuantityOptions: { optionsByRuleId: {} },
+    });
+  });
+
   it("leaves subscription translations for the dedicated runtime resolver", () => {
     const subscription = {
       copy: { title: "Purchase options" },

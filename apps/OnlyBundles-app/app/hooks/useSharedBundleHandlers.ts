@@ -68,7 +68,7 @@ export function buildClonedStepPayload(stepToClone: any, cloneTimestamp: number)
   };
 }
 
-export interface SharedBundleHandlersParams {
+interface SharedBundleHandlersParams {
   // From useBundleConfigurationState
   stepsState: {
     steps: any[];

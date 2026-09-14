@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/knip/schema-jsonc.json",
+  "workspaces": {
+    "apps/OnlyBundles-app": {
+      "entry": [
+        "app/routes.ts",
+        "app/storefront/{app-embed,full-page,product-page,sdk}.ts",
+        "graphql.config.js",
+        "scripts/build-discount-function.mjs",
+        "scripts/pre-commit-critical.mjs",
+        "design-system/scripts/{extract-config-registry,extract-copy-registry,generate-fixtures,validate-registry,validate-token-coverage,validate-state-coverage,validate-copy-coverage,generate-browser-test-plan,validate-completion}.mjs",
+        "extensions/sidekick-bundle-data/src/index.js"
+      ],
+      "project": [
+        "app/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}",
+        "scripts/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}",
+        "tests/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}",
+        "design-system/scripts/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}",
+        "extensions/sidekick-*/src/**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}",
+        "*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}"
+      ],
+      "ignoreBinaries": ["shopify"]
+    },
+    "apps/OnlyBundles-app/extensions/bundle-checkout-ui": {
+      "entry": ["src/BundleOffers.tsx", "src/TotalSavings.tsx"],
+      "project": ["src/**/*.{js,jsx,ts,tsx}"]
+    },
+    "apps/OnlyBundles-app/extensions/bundle-product-configuration": {
+      "entry": [
+        "src/ProductDetailsConfigurationExtension.tsx",
+        "src/ProductVariantDetailsConfigurationExtension.tsx"
+      ],
+      "project": ["src/**/*.{js,jsx,ts,tsx}"]
+    },
+    "apps/OnlyBundles-app/extensions/wolfpack-utm-pixel": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.{js,jsx,ts,tsx}"]
+    }
+  }
+}

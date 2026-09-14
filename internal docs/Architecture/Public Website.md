@@ -4,8 +4,8 @@ id: public-website
 title: Public Website
 type: architecture
 status: active
-summary: Defines the static Only Bundles public site, production-renderer demo, limited-release SDK guide, legal content, and release gate.
-last_audited: 2026-09-03
+summary: Defines the static Only Bundles public site, production-renderer demo, merchant tutorial evidence, limited-release SDK guide, legal content, and release gate.
+last_audited: 2026-09-14
 owners:
   - product
   - engineering
@@ -79,21 +79,28 @@ Only entries with `status: published` are emitted at `/blogs/{id}/`. The
 collection schema rejects malformed metadata, and the route rejects a filename
 whose content entry ID differs from its stable frontmatter `id`. Tutorial pages
 publish canonical and Open Graph metadata plus `HowTo` structured data. The
-Workers hostname is the canonical origin until a custom domain is connected;
-`SITE_ORIGIN` is the single source to update during that cutover.
+canonical origin is `https://onlybundles.com`; `SITE_ORIGIN` owns generated
+canonical, Open Graph, structured-data, and sitemap URLs. The static
+`public/robots.txt` sitemap destination must match this origin.
 
 Merchant-facing Admin help destinations are centralized in
-`apps/OnlyBundles-app/app/lib/tutorial-links.ts`. Contextual actions link to a
+`apps/OnlyBundles-app/app/lib/tutorial-links.ts`, using
+`APP_BRAND.links.company` as the single application website origin. Contextual actions link to a
 specific tutorial or section, while the Welcome footer links to `/blogs/`.
 During the custom-domain cutover, update both the website `SITE_ORIGIN` and this
 application URL owner so canonical metadata and in-app destinations change
 together.
 
-Tutorial screenshots are read-only captures of existing production Admin
-states. Capturing documentation must not save fixture changes. Public pages use
-the cropped app iframe rather than the outer Shopify Admin shell, include
-descriptive alternative text, and must not imply behavior that was not verified
-in the current app or authoritative internal feature notes.
+Tutorial screenshots are read-only captures of verified Admin and storefront
+states. Capturing documentation must not save incidental fixture changes. Public
+pages normally use the cropped app iframe rather than the outer Shopify Admin
+shell. A tutorial about Shopify-owned catalog configuration may show the
+relevant product-editor controls because those controls are the feature being
+taught, but the capture must exclude account details, unrelated navigation,
+private URLs, and unrelated store data. Every image includes descriptive
+alternative text and must not imply behavior that was not verified in the
+current app, Shopify's current documentation, or authoritative internal feature
+notes.
 
 ## Demo boundary
 
@@ -102,11 +109,38 @@ in the current app or authoritative internal feature notes.
 same source stylesheets and the Settings Design preview fixture builder. It is
 therefore a production-renderer preview, not a separately modelled simulator.
 
+The production renderer mounts directly in `/demo/`; there is no device frame,
+iframe, scale transform, or manual Desktop/Mobile mode. The template controls
+sit above the storefront surface so they do not compress its desktop container
+into an artificial narrow column. The renderer receives the browser's actual
+available inline size and its production media and container queries therefore
+own component placement. A narrow mobile browser renders the production mobile
+layout, while a desktop browser renders the production desktop layout.
+
+The direct mount must preserve the storefront bootstrap contract. Every preview
+root uses `bundle-widget-container`; full-page roots additionally use
+`bundle-widget-full-page`, which activates the `fpb-shell` and `fpb-catalog`
+container-query owners. Template changes wait for every stylesheet in
+`getStorefrontPreviewStylesheetManifest` to finish loading before the production
+controller renders or the demo announces readiness. This is the same ordering
+used by the Settings Design preview.
+
+On desktop, the marketing page bounds the direct storefront surface with a
+content-driven block size and vertical scrolling so a tall fixture does not
+expand the full page. This changes neither the renderer's inline size nor its
+internal CSS. At the mobile breakpoint the bound is removed and the widget
+returns to natural document flow, avoiding a nested mobile scroll region.
+
+The only public state encoded in the URL is the `template` query. Selecting a
+template replaces the direct production mount and preserves the browser's real
+responsive context; the demo wrapper does not add rules targeting storefront
+widget components.
+
 The public boundary deliberately overrides analytics, selection persistence,
 controls scripts, external navigation, network, and cart actions. Products,
 prices, and preselected quantities are deterministic Shopify-shaped preview
 data from `buildStorefrontPreviewFixture`; no merchant data or live store is
-connected. The only query interface is `template`, with the four current FPB
+connected. The query accepts the four current FPB
 and four current PPB template keys. Any invalid value normalizes to `standard`.
 
 ## Legal release gate
@@ -128,7 +162,25 @@ without an analytics environment variable.
 
 ## Deployment boundary
 
-The target Worker is `only-bundles-website` on the account's generated
-`workers.dev` hostname. Workers Builds installs from the repository root and
+The target Worker is `only-bundles-website`, with `onlybundles.com` and
+`www.onlybundles.com` declared as custom domains in `wrangler.jsonc`.
+GoDaddy retains domain registration; Cloudflare owns authoritative DNS through
+`moura.ns.cloudflare.com` and `olga.ns.cloudflare.com`. The existing DMARC and
+Domain Connect records are preserved; no MX records existed at cutover.
+DNSSEC signing is enabled in Cloudflare. GoDaddy holds the matching DS record
+(key tag `2371`, algorithm `13`, digest type `2`). Cloudflare owns signing keys;
+GoDaddy owns their delegation in the `.com` registry.
+Cloudflare Single Redirect rule `6eae210d712b439996368877a2028f48` redirects
+`www` and apex HTTP requests to HTTPS on `onlybundles.com`, preserving paths
+and query strings. The generated `workers.dev` hostname remains available for
+existing links; canonical metadata points to the custom domain.
+
+Workers Builds installs from the repository root and
 uses the root workspace lockfile. Website deployment does not alter Render,
 Shopify configuration, merchant data, database schema, or extension versions.
+
+Astro 7 prerender output imports `cookie` from the website build directory.
+The website explicitly declares `cookie@2.0.1` as a build dependency so this
+import does not resolve to the Shopify app's hoisted `cookie@0.7.2`, which lacks
+`parseCookie` and `stringifySetCookie`. A clean lockfile install reproduces the
+failure without this workspace dependency.

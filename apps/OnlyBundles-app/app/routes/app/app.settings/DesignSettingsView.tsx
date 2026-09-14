@@ -16,7 +16,7 @@ import type {
   DesignPreviewArea,
   DesignPreviewContext,
   DesignPreviewScenario,
-} from "./design-preview-model";
+} from "./design-preview-contract";
 import { getDesignFieldsForPreviewContext } from "./design-preview-model";
 import type { TemplateKey } from "../../../lib/bundle-config/template-selection";
 import styles from "./DesignSettingsView.module.css";

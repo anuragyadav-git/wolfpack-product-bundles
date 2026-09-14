@@ -44,8 +44,6 @@ describe("handleRecordBundlePreview", () => {
       bundleType: "product_page",
       status: "active",
       shopifyProductHandle: "bundle-product",
-      shopifyPageHandle: null,
-      shopifyPreviewPageHandle: null,
     });
 
     const response = await handleRecordBundlePreview(

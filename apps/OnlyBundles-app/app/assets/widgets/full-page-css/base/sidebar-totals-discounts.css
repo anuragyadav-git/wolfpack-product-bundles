@@ -151,12 +151,18 @@
 }
 
 .side-panel-btn-next {
-  background: var(--bundle-side-panel-next-bg, #7132ff);
-  color: var(--bundle-side-panel-next-color, #ffffff);
+  background: var(
+    --bundle-sidebar-button-bg,
+    var(--bundle-global-primary-button, #111111)
+  );
+  color: var(
+    --bundle-sidebar-button-text,
+    var(--bundle-global-button-text, #ffffff)
+  );
 }
 
 .side-panel-btn-next:not(:disabled):hover {
-  background: var(--bundle-side-panel-next-hover, #5f2dd8);
+  opacity: 0.88;
 }
 
 .side-panel-btn-back {

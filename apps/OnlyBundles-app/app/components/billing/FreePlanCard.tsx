@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 
-export interface FreePlanCardProps {
+interface FreePlanCardProps {
   isCurrentPlan: boolean;
 }
 
@@ -79,7 +79,6 @@ export function FreePlanCard({ isCurrentPlan }: FreePlanCardProps) {
                 <s-button
                   variant={isCurrentPlan ? "secondary" : "primary"}
                   disabled={isHydrated || undefined}
-                  inlineSize="fill"
                 >
                   {isCurrentPlan
                     ? t("billing.cards.currentPlan")

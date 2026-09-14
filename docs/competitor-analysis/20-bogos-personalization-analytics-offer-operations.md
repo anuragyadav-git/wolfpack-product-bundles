@@ -5,7 +5,7 @@ title: BOGOS Personalization, Analytics, and Offer Operations
 type: competitor-analysis
 status: current
 summary: Documents installed-app and vendor evidence for BOGOS targeting, analytics, prioritization, scheduling, and bulk offer operations, with Shopify and Wolfpack implications.
-last_audited: 2026-09-01
+last_audited: 2026-09-05
 owners:
   - product
   - engineering
@@ -56,7 +56,10 @@ Wolfpack already has stronger bundle-funnel and campaign-attribution plumbing th
 
 ## Research method and confidence
 
-Research ran on 2026-08-30 against `agent-5sfidg3m.myshopify.com` using direct Chrome DevTools. BOGOS was installed alone, kept on its free 30-lifetime-order plan, explored with an unsaved custom offer, discarded, and uninstalled. No paid trial was accepted and no BOGOS offer was published.
+Research ran on 2026-08-30 and the Bundle Analytics surface was rechecked on
+2026-09-05 against `agent-5sfidg3m.myshopify.com` using direct Chrome DevTools.
+BOGOS is installed on its free 30-lifetime-order plan. No paid trial was
+accepted, no BOGOS offer was published, and the app embed remains disabled.
 
 Evidence labels used below:
 
@@ -148,18 +151,36 @@ Conditions should remain configured but inert when the master switch is off, mat
 
 ### Installed empty-state contract
 
-The authenticated Analytics page exposed:
+With the Analytics filter set to Bundle, the authenticated Analytics page
+exposed:
 
 - offer-type filter: Gift, Bundle, Upsell, Discount;
 - date range defaulting to Last 7 days;
-- KPI cards for Total sales, Average order value, and Orders;
-- chart metric toggles;
+- six KPI cards: Total order revenue, Total bundle revenue, Orders with bundles,
+  Average order value, Add to cart value, and Total bundle purchased;
+- an `Overview funnel` card with Bundle view, Add to carts, and Orders stages;
+- separate Bundle revenue and Orders with bundle line charts;
 - an orders table with search;
-- an Export action, disabled because the account had no data.
+- an Export action.
 
-Observed network requests included offer analytics, order filtering, and plan lookup endpoints. The account was empty and the app remained disabled, so this pass did **not** prove populated calculations, attribution rules, export columns, time-zone boundaries, refunds, currency handling, or deduplication.
+Observed network requests included offer analytics, order filtering, and plan
+lookup endpoints. The account was empty and the app remained disabled, so this
+pass did **not** prove populated calculations, attribution rules, export
+columns, time-zone boundaries, refunds, currency handling, or deduplication.
+In the zero state, all six KPI values render as `$0` or `0`, and the funnel
+collapses to three zero-value stages without flow bands.
 
 BOGOS vendor material also claims impressions, clicks, conversions, and revenue, with some booster analytics limited to a recent window. Those claims are useful as a target vocabulary but were not populated in the installed account.
+
+The current official Bundle Analytics guide defines six Bundle-view KPIs:
+Total order revenue, Total bundle revenue, Orders with bundles, Average order
+value, Add to cart value, and Total bundle purchased. It defines AOV as total
+order revenue divided by orders with bundles, and add-to-cart value as total
+bundle revenue divided by add-to-cart clicks. The same guide shows an Overview
+funnel from bundle views to add-to-cart clicks to orders, plus separate Bundle
+revenue and Orders with bundle line charts. This is vendor proof of the labels
+and formulas; the empty installed account still does not prove refund, tax, or
+multi-currency treatment.
 
 ### Comparison with Wolfpack Analytics
 
@@ -168,7 +189,7 @@ BOGOS vendor material also claims impressions, clicks, conversions, and revenue,
 | Revenue, AOV, orders | Installed empty KPI surface. | `OrderAttribution`, `/app/attribution`, funnel aggregation. | Wolfpack already has these bundle-scoped measures. |
 | Offer-type filtering | Gift/Bundle/Upsell/Discount filter. | Analytics is bundle-centric, not generalized offer-type-centric. | Add only after a canonical offer entity/taxonomy exists. |
 | Impressions/clicks/conversions | Vendor claim; not populated live. | `BundleEngagement`, storefront beacons, funnel helpers. | Wolfpack has the better internal foundation but impressions remain conditional until the impression beacon is authoritative. |
-| Funnel | Not visible in the empty BOGOS surface. | Engaged → Added to Cart → Checked Out → Revenue. | Retain Wolfpack's funnel. |
+| Funnel | Vendor guide shows Bundle views → Added to cart → Orders; the installed account was empty. | Bundle views → Added to Cart → Orders. | Use the documented three-stage funnel while retaining Wolfpack's canonical event owners. |
 | Per-bundle performance | Not established in this pass. | Searchable/sortable Bundle Performance table with views, orders, value, conversions. | Retain and extend with offer dimensions. |
 | Campaign attribution | Not established in this pass. | UTM capture, Top Campaigns, custom UTM attributes. | Retain Wolfpack's differentiated capability. |
 | Date comparison | Not established in this pass. | Compare mode and prior-period calculations. | Retain. |

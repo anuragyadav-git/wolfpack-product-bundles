@@ -75,7 +75,7 @@ export type SettingsControlsRuntime = {
   };
 };
 
-export type SettingsControlsRuntimeResult = {
+type SettingsControlsRuntimeResult = {
   settingsControls: SettingsControlsRuntime;
   bundleCartLineMessaging: BundleCartLineMessagingRuntime;
   fullPageCustomCss: string | null;

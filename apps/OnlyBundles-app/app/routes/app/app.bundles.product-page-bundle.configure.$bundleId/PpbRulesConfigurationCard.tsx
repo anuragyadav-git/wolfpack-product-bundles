@@ -1,27 +1,48 @@
-import { PpbCategoryRulesList } from "./PpbCategoryRulesList";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import {
+  PpbCategoryRulesList,
+  type PpbCategoryRulesAdapter,
+  type PpbCategoryRulesListProps,
+} from "./PpbCategoryRulesList";
 import { getStepCategories } from "./PpbStepSetupShared";
 import { PpbStepRulesList } from "./PpbStepRulesList";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
+import { deriveControlDependencies } from "../../../lib/bundle-config/control-dependencies";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbRulesConfigurationCard({ step }: { step: any }) {
-  const {
-    addCategoryConditionRule,
-    clearCategoryConditionRules,
-    conditionsState,
-    deriveControlDependencies,
-    productPageBundleStyles,
-    QuestionHelpTooltip,
-  } = usePpbConfigureContext();
-  const stepCategories = getStepCategories(step);
+type RulesStep = {
+  id: string;
+  StepCategory?: PpbCategoryRulesListProps["stepCategories"];
+  [key: string]: unknown;
+};
+
+export type PpbRulesConfigurationCardProps = Pick<
+  PpbConfigureFlow,
+  "addCategoryConditionRule" | "clearCategoryConditionRules" | "conditionsState"
+> & {
+  categoryRulesAdapter: PpbCategoryRulesAdapter;
+  step: RulesStep;
+};
+
+export function PpbRulesConfigurationCard({
+  addCategoryConditionRule,
+  categoryRulesAdapter,
+  clearCategoryConditionRules,
+  conditionsState,
+  step,
+}: PpbRulesConfigurationCardProps) {
+  const stepCategories = getStepCategories(
+    step
+  ) as PpbCategoryRulesListProps["stepCategories"];
   const categoryRulesAvailable = deriveControlDependencies({
     categoryCount: stepCategories.length,
   }).categoryRulesVisible;
   const hasStepRules =
     (conditionsState.stepConditions[step.id] || []).length > 0;
   const hasCategoryRules = stepCategories.some(
-    (category: any) => (category.conditions || []).length > 0
+    (category) => (category.conditions ?? []).length > 0
   );
   const activeRuleMode = hasCategoryRules
     ? "category"
@@ -59,71 +80,60 @@ export function PpbRulesConfigurationCard({ step }: { step: any }) {
 
   return (
     <div className={productPageBundleStyles.card}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          marginBottom: 4,
-        }}
-      >
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+      <s-stack direction="block" gap="base">
+        <s-grid
+          gridTemplateColumns="minmax(0, 1fr) auto"
+          gap="base"
+          alignItems="center"
+        >
+          <s-stack direction="inline" gap="small" alignItems="center">
+            <s-heading>
+              {translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+              )}
+            </s-heading>
+            <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
+          </s-stack>
+          <s-link href={TUTORIAL_LINKS.productPageRules} target="_blank">
+            {translateAdmin("common.actions.learnMore")}
+          </s-link>
+        </s-grid>
+        <s-text color="subdued">
           {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
+          )}
+        </s-text>
+        <div
+          role="radiogroup"
+          aria-label={translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
           )}
-        </h3>
-        <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
-      </div>
-      <p
-        style={{
-          margin: "0 0 8px",
-          fontSize: 14,
-          color: "#6d7175",
-        }}
-      >
-        {translateAdmin(
-          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
+        >
+          <s-stack direction="inline" gap="base">
+            {ruleModeOptions.map((opt) => (
+              <label key={opt.value}>
+                <input
+                  type="radio"
+                  name={`step-rule-mode-${step.id}`}
+                  value={opt.value}
+                  checked={activeRuleMode === opt.value}
+                  onChange={() => handleRuleModeChange(opt.value)}
+                />{" "}
+                {opt.label}
+              </label>
+            ))}
+          </s-stack>
+        </div>
+        {activeRuleMode === "category" ? (
+          <PpbCategoryRulesList
+            adapter={categoryRulesAdapter}
+            step={step}
+            stepCategories={stepCategories}
+          />
+        ) : (
+          <PpbStepRulesList conditionsState={conditionsState} step={step} />
         )}
-      </p>
-      <button
-        type="button"
-        className={productPageBundleStyles.linkButton}
-        style={{ marginBottom: 12, display: "inline-block" }}
-        onClick={() =>
-          window.open(
-            TUTORIAL_LINKS.productPageRules,
-            "_blank",
-            "noopener,noreferrer"
-          )
-        }
-      >
-        {translateAdmin("common.actions.learnMore")}
-      </button>
-      <div
-        style={{
-          display: "flex",
-          gap: 20,
-          marginBottom: 12,
-        }}
-      >
-        {ruleModeOptions.map((opt) => (
-          <s-choice-list
-            key={opt.value}
-            label={`${opt.label} rule mode`}
-            labelAccessibilityVisibility="exclusive"
-            name={`step-rule-mode-${step.id}`}
-            values={activeRuleMode === opt.value ? [opt.value] : []}
-            onChange={() => handleRuleModeChange(opt.value)}
-          >
-            <s-choice value={opt.value}>{opt.label}</s-choice>
-          </s-choice-list>
-        ))}
-      </div>
-      {activeRuleMode === "category" ? (
-        <PpbCategoryRulesList step={step} stepCategories={stepCategories} />
-      ) : (
-        <PpbStepRulesList step={step} />
-      )}
+      </s-stack>
     </div>
   );
 }

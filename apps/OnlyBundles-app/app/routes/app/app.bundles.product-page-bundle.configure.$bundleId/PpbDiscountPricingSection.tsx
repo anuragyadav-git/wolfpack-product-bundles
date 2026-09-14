@@ -1,9 +1,24 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
-import { PpbDiscountDisplayOptions } from "./PpbDiscountDisplayOptions";
-import { PpbDiscountRulesPanel } from "./PpbDiscountRulesPanel";
+import {
+  PpbDiscountDisplayOptions,
+  type PpbDiscountDisplayOptionsProps,
+} from "./PpbDiscountDisplayOptions";
+import {
+  PpbDiscountRulesPanel,
+  type PpbDiscountRulesPanelProps,
+} from "./PpbDiscountRulesPanel";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbDiscountPricingSection() {
-  const { activeSection } = usePpbConfigureContext();
+export type PpbDiscountPricingSectionProps = {
+  activeSection: PpbConfigureFlow["activeSection"];
+  display: PpbDiscountDisplayOptionsProps;
+  rules: PpbDiscountRulesPanelProps;
+};
+
+export function PpbDiscountPricingSection({
+  activeSection,
+  display,
+  rules,
+}: PpbDiscountPricingSectionProps) {
 
   if (activeSection !== "discount_pricing") {
     return null;
@@ -12,8 +27,8 @@ export function PpbDiscountPricingSection() {
   return (
     <div data-tour-target="ppb-discount-pricing">
       <s-stack direction="block" gap="base">
-        <PpbDiscountRulesPanel />
-        <PpbDiscountDisplayOptions />
+        <PpbDiscountRulesPanel {...rules} />
+        <PpbDiscountDisplayOptions {...display} />
       </s-stack>
     </div>
   );

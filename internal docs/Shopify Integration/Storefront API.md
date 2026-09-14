@@ -5,7 +5,7 @@ title: Shopify Storefront API Notes
 type: reference
 status: authoritative
 summary: Storefront GraphQL contracts used for product data, Shop Brand colors, and bundle runtime behavior.
-last_audited: 2026-09-03
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -72,6 +72,17 @@ with each product; products with more variants continue through explicit cursor
 pagination. Queries use Shopify market context and return live availability,
 inventory, prices, compare-at prices, options, images, and weight. A GraphQL or
 transport failure has no Wolfpack fallback.
+
+Native option swatches additionally depend on
+`unauthenticated_read_metaobjects`, because Shopify category-metafield option
+values point to Shopify-owned Color or Pattern metaobjects. A token that can
+read product listings but lacks this scope can still return the product and its
+option values while silently returning `ProductOptionValue.swatch: null`; a
+direct `metaobjects` query exposes the underlying access denial. Runtime sync
+therefore reuses the titled token only when its `accessScopes` include the
+complete PPB Storefront scope set. After an app scope change, it creates a new
+eligible token before the synchronized runtime switches tokens. It does not
+delete the previously serving token during that operation.
 
 The same direct client reads and merges cart `$app.bundle_details` with
 `cartMetafieldsSet`. Shopify's Storefront schema requires

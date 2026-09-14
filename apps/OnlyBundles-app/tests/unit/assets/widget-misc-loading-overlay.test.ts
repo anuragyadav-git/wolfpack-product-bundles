@@ -5,7 +5,7 @@ const { ProductPageWidgetMiscMethods } = require('../../../app/assets/widgets/pr
 /* eslint-disable jest-dom/prefer-to-have-style */
 
 type MockElement = {
-  style: Record<string, string>;
+  style: Record<string, string> & { setProperty: (name: string, value: string) => void };
   dataset: Record<string, string>;
   children: MockElement[];
   className: string;
@@ -28,8 +28,13 @@ type MockElement = {
 function createMockElement(): MockElement {
   const classes = new Set<string>();
   const attributes = new Map<string, string>();
+  const style = {
+    setProperty(name: string, value: string) {
+      style[name] = value;
+    },
+  } as MockElement["style"];
   return {
-    style: {},
+    style,
     dataset: {},
     children: [],
     className: '',
@@ -87,7 +92,10 @@ describe('ProductPageWidgetMiscMethods loading overlay', () => {
     const container = createMockElement();
     global.document = createMockDocument() as unknown as Document;
     global.getComputedStyle = (() => ({ position: 'static' })) as unknown as typeof global.getComputedStyle;
-    const widget = { container };
+    const widget = {
+      container,
+      config: { loadingScreen: { backgroundColor: '#123456' } },
+    };
 
     ProductPageWidgetMiscMethods.showLoadingOverlay.call(widget, null);
 
@@ -96,6 +104,7 @@ describe('ProductPageWidgetMiscMethods loading overlay', () => {
     expect(overlay?.style.minHeight).toBe('var(--bundle-ppb-loading-overlay-min-height, 180px)');
     expect(overlay?.style.minWidth).toBe('var(--bundle-ppb-loading-overlay-min-width, 180px)');
     expect(container.style.position).toBe('relative');
+    expect(overlay?.style['--wpb-loading-screen-bg']).toBe('#123456');
   });
 
   it('marks and clears bootstrap loading separately from action loading', () => {

@@ -1,53 +1,61 @@
 {
-  "timestamp": "2026-08-29T10:33:36.107Z",
+  "timestamp": "2026-09-14T21:06:20.952Z",
   "summary": {
-    "totalSuites": 6,
-    "totalTests": 2228,
-    "totalPassed": 2228,
+    "totalSuites": 7,
+    "totalTests": 3825,
+    "totalPassed": 3825,
     "totalFailed": 0,
     "totalSkipped": 0,
-    "totalDuration": 15124
+    "totalDuration": 20739
   },
-  "totalDuration": 15126,
+  "totalDuration": 20742,
   "suites": [
     {
-      "suite": "Unit Tests - Services",
-      "passed": 268,
+      "suite": "Unit Tests - Lib",
+      "passed": 980,
       "failed": 0,
       "skipped": 0,
-      "duration": 3211,
+      "duration": 3366,
+      "commandFailed": false
+    },
+    {
+      "suite": "Unit Tests - Services",
+      "passed": 405,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 2659,
       "commandFailed": false
     },
     {
       "suite": "Unit Tests - Extensions",
-      "passed": 34,
+      "passed": 46,
       "failed": 0,
       "skipped": 0,
-      "duration": 1669,
+      "duration": 2075,
       "commandFailed": false
     },
     {
       "suite": "Unit Tests - Routes",
-      "passed": 604,
+      "passed": 935,
       "failed": 0,
       "skipped": 0,
-      "duration": 3347,
+      "duration": 5040,
       "commandFailed": false
     },
     {
       "suite": "Unit Tests - Assets",
-      "passed": 1294,
+      "passed": 1433,
       "failed": 0,
       "skipped": 0,
-      "duration": 4254,
+      "duration": 4486,
       "commandFailed": false
     },
     {
       "suite": "Integration Tests",
-      "passed": 26,
+      "passed": 24,
       "failed": 0,
       "skipped": 0,
-      "duration": 1490,
+      "duration": 1612,
       "commandFailed": false
     },
     {
@@ -55,13 +63,13 @@
       "passed": 2,
       "failed": 0,
       "skipped": 0,
-      "duration": 1153,
+      "duration": 1501,
       "commandFailed": false
     }
   ],
   "environment": {
     "nodeVersion": "v25.1.0",
     "platform": "darwin",
-    "cwd": "/Users/adityaawasthi/Developer/wolfpack-product-bundles"
+    "cwd": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/apps/OnlyBundles-app"
   }
 }

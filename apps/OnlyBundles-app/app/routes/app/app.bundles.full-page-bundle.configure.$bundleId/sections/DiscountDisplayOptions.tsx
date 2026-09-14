@@ -1,4 +1,4 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { ComponentProps } from "react";
 import { FpbBundleQuantityOptions } from "./DiscountBundleQuantityOptions";
 import { FpbDiscountMessagingOptions } from "./DiscountMessagingOptions";
 import { FpbProgressBarOptions } from "./DiscountProgressBarOptions";
@@ -6,15 +6,19 @@ import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/Disa
 import { translateAdmin } from "~/i18n/config";
 
 export function FpbDiscountDisplayOptions({
-  flow,
+  inactive,
+  quantity,
+  progress,
+  messaging,
 }: {
-  flow: ConfigureBundleFlowContext;
+  inactive: boolean;
+  quantity: ComponentProps<typeof FpbBundleQuantityOptions>;
+  progress: ComponentProps<typeof FpbProgressBarOptions>;
+  messaging: ComponentProps<typeof FpbDiscountMessagingOptions>;
 }) {
-  const { displayOptionsInactive } = flow;
-
   return (
     <s-section>
-      <DisabledConfigurationRegion disabled={displayOptionsInactive}>
+      <DisabledConfigurationRegion disabled={inactive}>
         <s-stack direction="block" gap="small">
           <s-stack direction="block" gap="small-400">
             <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
@@ -28,9 +32,9 @@ export function FpbDiscountDisplayOptions({
               )}
             </p>
           </s-stack>
-          <FpbBundleQuantityOptions flow={flow} />
-          <FpbProgressBarOptions flow={flow} />
-          <FpbDiscountMessagingOptions flow={flow} />
+          <FpbBundleQuantityOptions {...quantity} />
+          <FpbProgressBarOptions {...progress} />
+          <FpbDiscountMessagingOptions {...messaging} />
         </s-stack>
       </DisabledConfigurationRegion>
     </s-section>

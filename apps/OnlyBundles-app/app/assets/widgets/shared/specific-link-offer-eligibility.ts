@@ -14,13 +14,14 @@ export async function resolveSpecificLinkOfferStorefrontEligibility({
   fetchImpl?: typeof fetch;
 }): Promise<boolean> {
   if (bundle?.offerDelivery?.decisionRequired !== true) return true;
+  if (new URLSearchParams(locationSearch).has('wpb_preview')) return true;
 
   if (!resolveOfferCountryEligibility(bundle.offerDelivery, countryCode)) {
     return false;
   }
   if (bundle.offerDelivery.serverDecisionRequired !== true) return true;
 
-  const bundleId = String(bundle?.id ?? bundle?.bundleId ?? '').trim();
+  const bundleId = String(bundle?.id ?? '').trim();
   const token = new URLSearchParams(locationSearch).get(
     SPECIFIC_LINK_OFFER_QUERY_PARAM,
   );

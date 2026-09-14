@@ -272,13 +272,14 @@ resolveFullPageOfferId() {
   return offerId.startsWith('FBP-') ? offerId : `FBP-${offerId}`;
 },
 
-async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any) {
-  try {
+async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any, pendingLineCount: number) {
     const displayProperties = this.buildBundleDetailsDisplayProperties(sourceProperties);
-    if (!bundleDetailsKey || Object.keys(displayProperties).length === 0) return;
+    if (!bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
+      throw new Error('Missing bundle cart authorization');
+    }
 
     const cartToken = await this.getBundleDetailsCartToken();
-    if (!cartToken) return;
+    if (!cartToken) throw new Error('Unable to identify the Shopify cart');
 
     const response = await fetch(buildStorefrontApiPath('cart-bundle-details'), {
       method: 'POST',
@@ -289,7 +290,9 @@ async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: an
       body: JSON.stringify({
         cartToken,
         bundleDetailsKey,
-        displayProperties
+        displayProperties,
+        runtimeToken,
+        pendingLineCount,
       })
     });
 
@@ -301,9 +304,6 @@ async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: an
     if (data?.ok !== true) {
       throw new Error(data?.error || 'bundle_details sync failed');
     }
-  } catch (error: any) {
-    console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', error);
-  }
 },
 
 buildBundleDetailsDisplayProperties(sourceProperties: any) {

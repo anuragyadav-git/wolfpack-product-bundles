@@ -2,7 +2,7 @@ import { Temporal } from 'temporal-polyfill';
 
 import type { OfferEligibilitySource } from './analytics/offer-dimensions';
 
-export type OfferScheduleState = 'active' | 'scheduled' | 'expired' | 'invalid';
+type OfferScheduleState = 'active' | 'scheduled' | 'expired' | 'invalid';
 export type OfferScheduleMode = 'always' | 'one_time' | 'recurring';
 export type OfferRecurrenceFrequency = 'weekly' | 'monthly';
 export type OfferRecurrenceTermination = 'never' | 'on_date' | 'after_runs';
@@ -21,7 +21,7 @@ export type OfferPolicyTiming = {
   recurrenceRunCount?: number | null;
 };
 
-export type OfferScheduleDecision = {
+type OfferScheduleDecision = {
   effective: boolean;
   state: OfferScheduleState;
   nextTransitionAt: string | null;
@@ -48,7 +48,7 @@ type OfferDecisionPolicy = OfferPolicyTiming & {
   countryCodes?: readonly string[] | null;
 };
 
-export type OfferDecisionMarker = {
+type OfferDecisionMarker = {
   decisionRequired: boolean;
   serverDecisionRequired: boolean;
   specificLinkRequired: boolean;
@@ -82,24 +82,32 @@ function plainDate(value: Date | string | null | undefined): Temporal.PlainDate 
   }
 }
 
-function toIso(zonedDateTime: Temporal.ZonedDateTime): string {
-  return new Date(Number(zonedDateTime.epochMilliseconds)).toISOString();
-}
-
-function occurrenceBoundary(
-  date: Temporal.PlainDate,
-  minute: number,
-  timeZone: string,
-): Temporal.ZonedDateTime {
-  const hour = Math.floor(minute / 60);
-  return Temporal.ZonedDateTime.from({
-    timeZone,
-    year: date.year,
-    month: date.month,
-    day: date.day,
-    hour,
-    minute: minute - hour * 60,
-  }, { disambiguation: 'compatible' });
+// Shopify's local-time predicates follow the wall clock, including both copies
+// of a repeated hour. Temporal owns IANA offsets and ambiguous/nonexistent times.
+function occurrenceTransitions(date: Temporal.PlainDate, startMinute: number, endMinute: number, timeZone: string) {
+  const zone = new Temporal.TimeZone(timeZone);
+  const dayStart = date.toZonedDateTime(timeZone).toInstant();
+  const dayEnd = date.add({ days: 1 }).toZonedDateTime(timeZone).toInstant();
+  const activeAt = (instant: Temporal.Instant) => {
+    const local = instant.toZonedDateTimeISO(timeZone);
+    const minute = local.hour * 60 + local.minute;
+    return local.toPlainDate().equals(date) && minute >= startMinute && minute < endMinute;
+  };
+  const candidates = [dayStart, dayEnd];
+  for (const minute of [startMinute, endMinute]) {
+    const local = date.toPlainDateTime({ hour: Math.floor(minute / 60), minute: minute % 60 });
+    candidates.push(...zone.getPossibleInstantsFor(local));
+  }
+  let transition = zone.getNextTransition(dayStart.subtract({ nanoseconds: 1 }));
+  while (transition && Temporal.Instant.compare(transition, dayEnd) < 0) {
+    candidates.push(transition);
+    transition = zone.getNextTransition(transition);
+  }
+  const transitions = candidates
+    .sort(Temporal.Instant.compare)
+    .filter((instant, index, all) => (index === 0 || Temporal.Instant.compare(instant, all[index - 1]) !== 0)
+      && activeAt(instant) !== activeAt(instant.subtract({ nanoseconds: 1 })));
+  return { activeAt, transitions };
 }
 
 function monthSerial(date: Temporal.PlainDate): number {
@@ -197,24 +205,23 @@ function recurringDecision(
       occurrenceNumber = monthlyOccurrenceNumber(anchor, occurrence);
     }
 
-    const occurrenceStart = occurrenceBoundary(occurrence, startMinute!, timeZone);
-    const occurrenceEnd = occurrenceBoundary(occurrence, endMinute!, timeZone);
-
-    if (Temporal.PlainDate.compare(occurrence, localDate) === 0
-      && Temporal.Instant.compare(nowInstant, occurrenceEnd.toInstant()) < 0) {
-      if (termination === 'on_date' && Temporal.PlainDate.compare(occurrence, endsOn!) > 0) {
+    while (true) {
+      if ((termination === 'on_date' && Temporal.PlainDate.compare(occurrence, endsOn!) > 0)
+        || (termination === 'after_runs' && occurrenceNumber > runCount!)) {
         return { effective: false, state: 'expired', nextTransitionAt: null };
       }
-      if (termination === 'after_runs' && occurrenceNumber > runCount!) {
-        return { effective: false, state: 'expired', nextTransitionAt: null };
+      const { activeAt, transitions } = occurrenceTransitions(occurrence, startMinute!, endMinute!, timeZone);
+      const next = transitions.find(instant => Temporal.Instant.compare(instant, nowInstant) > 0);
+      if (next) {
+        const effective = activeAt(nowInstant);
+        return {
+          effective,
+          state: effective ? 'active' : 'scheduled',
+          nextTransitionAt: new Date(Number(next.epochMilliseconds)).toISOString(),
+        };
       }
-      if (Temporal.Instant.compare(nowInstant, occurrenceStart.toInstant()) >= 0) {
-        return { effective: true, state: 'active', nextTransitionAt: toIso(occurrenceEnd) };
-      }
-      return { effective: false, state: 'scheduled', nextTransitionAt: toIso(occurrenceStart) };
-    }
-
-    if (Temporal.Instant.compare(nowInstant, occurrenceEnd.toInstant()) >= 0) {
+      // An entirely skipped local window never opens. It still counts as its
+      // configured calendar occurrence, matching the Function's run counter.
       if (frequency === 'weekly') {
         occurrence = occurrence.add({ weeks: 1 });
         occurrenceNumber += 1;
@@ -224,16 +231,6 @@ function recurringDecision(
       }
     }
 
-    if ((termination === 'on_date' && Temporal.PlainDate.compare(occurrence, endsOn!) > 0)
-      || (termination === 'after_runs' && occurrenceNumber > runCount!)) {
-      return { effective: false, state: 'expired', nextTransitionAt: null };
-    }
-
-    return {
-      effective: false,
-      state: 'scheduled',
-      nextTransitionAt: toIso(occurrenceBoundary(occurrence, startMinute!, timeZone)),
-    };
   } catch {
     return INVALID_SCHEDULE;
   }

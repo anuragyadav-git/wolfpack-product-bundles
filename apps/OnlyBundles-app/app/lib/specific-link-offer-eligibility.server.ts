@@ -6,7 +6,7 @@ import { resolveOfferSchedule } from './offer-policy-decision';
 import type { OfferPolicyTiming } from './offer-policy-decision';
 import { resolveOfferCountryEligibility } from './offer-country-eligibility';
 
-export type SpecificLinkEligibilityReasonCode =
+type SpecificLinkEligibilityReasonCode =
   | 'not_required'
   | 'schedule_not_started'
   | 'schedule_ended'
@@ -36,7 +36,7 @@ export interface SpecificLinkOfferPolicy extends OfferPolicyTiming {
   conditions: SpecificLinkOfferCondition[];
 }
 
-export interface SpecificLinkEligibilityDecision {
+interface SpecificLinkEligibilityDecision {
   eligible: boolean;
   reasonCode: SpecificLinkEligibilityReasonCode;
   offerPolicyId?: string;

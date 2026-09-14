@@ -8,6 +8,18 @@ mod tests {
     use shopify_function::run_function_with_input;
     use std::collections::{BTreeMap, HashMap};
 
+    fn native_merge_percentage(output: &schema::FunctionRunResult) -> f64 {
+        let schema::CartOperation::Merge(merge) = &output.operations[0] else {
+            panic!("expected merge")
+        };
+        merge
+            .price
+            .as_ref()
+            .and_then(|p| p.percentage_decrease.as_ref())
+            .map(|p| p.value.as_f64())
+            .unwrap_or(0.0)
+    }
+
     fn test_runtime_secret() -> String {
         std::env::var("WPB_TEST_RUNTIME_SECRET")
             .unwrap_or_else(|_| "wpb-runtime-token-test-secret".to_string())
@@ -15,7 +27,7 @@ mod tests {
 
     fn runtime_merge_payload() -> String {
         serde_json::json!({
-            "version": 1,
+            "version": 1, "revision": "rev-1",
             "shop": "test-shop.myshopify.com",
             "bundleId": "bundle-1",
             "bundleType": "full_page",
@@ -39,7 +51,7 @@ mod tests {
 
     fn merge_attributes(output: &schema::FunctionRunResult) -> HashMap<String, String> {
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
 
@@ -54,7 +66,7 @@ mod tests {
 
     fn merge_discount_percentage(output: &schema::FunctionRunResult) -> Option<String> {
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
 
@@ -138,6 +150,42 @@ mod tests {
             .max_by_key(|parent| parent_match_count(parent, &variant_ids))
     }
 
+    fn copy_line_runtime_tokens_to_cart(root: &mut Value) {
+        let mut entries = Vec::new();
+        if let Some(lines) = root
+            .get("cart")
+            .and_then(|cart| cart.get("lines"))
+            .and_then(|lines| lines.as_array())
+        {
+            for line in lines {
+                let Some(group_id) =
+                    attr_value(line, "wolfpackProductBundleOfferId").and_then(offer_group_id)
+                else {
+                    continue;
+                };
+                if entries.iter().any(|entry: &Value| entry["key"] == group_id) {
+                    continue;
+                }
+                let Some(runtime_token) = attr_value(line, "runtimeToken") else {
+                    continue;
+                };
+                let display_properties = attr_value(line, "bundleDisplayProperties")
+                    .and_then(|value| serde_json::from_str::<Value>(value).ok())
+                    .unwrap_or_else(|| serde_json::json!({}));
+                entries.push(serde_json::json!({
+                    "key": group_id,
+                    "runtimeToken": runtime_token,
+                    "displayProperties": display_properties,
+                }));
+            }
+        }
+        if !entries.is_empty() {
+            root["cart"]["bundleDetails"] = serde_json::json!({
+                "value": Value::Array(entries).to_string(),
+            });
+        }
+    }
+
     fn with_runtime_tokens(input: &str) -> String {
         let mut root: Value = serde_json::from_str(input).expect("test input should be valid JSON");
         root["localization"] = serde_json::json!({ "country": { "isoCode": "CA" } });
@@ -187,8 +235,9 @@ mod tests {
                 configuration["bundleCartLineMessaging"] = messaging;
             }
             root["cartTransform"] = serde_json::json!({
-                "runtimeConfiguration": { "value": configuration.to_string() },
+                "runtimeConfiguration": { "value": configuration },
             });
+            copy_line_runtime_tokens_to_cart(&mut root);
             return root.to_string();
         }
 
@@ -247,9 +296,9 @@ mod tests {
                 .cloned()
                 .unwrap_or_else(|| serde_json::json!({}));
             let payload = serde_json::json!({
-                "version": 1,
+                "version": 1, "revision": "rev-1",
                 "shop": "test-shop.myshopify.com",
-                "bundleId": "test-bundle",
+                "bundleId": "bundle-1",
                 "bundleType": "full_page",
                 "offerGroupId": group_id,
                 "parentVariantId": parent_variant_id,
@@ -274,8 +323,9 @@ mod tests {
             configuration["bundleCartLineMessaging"] = messaging;
         }
         root["cartTransform"] = serde_json::json!({
-            "runtimeConfiguration": { "value": configuration.to_string() },
+            "runtimeConfiguration": { "value": configuration },
         });
+        copy_line_runtime_tokens_to_cart(&mut root);
         root.to_string()
     }
 
@@ -286,7 +336,7 @@ mod tests {
 
     fn expand_discount_percentage(output: &schema::FunctionRunResult) -> Option<String> {
         let expand = match &output.operations[0] {
-            schema::CartOperation::LineExpand(e) => e,
+            schema::CartOperation::Expand(e) => e,
             _ => panic!("expected Expand operation"),
         };
 
@@ -329,7 +379,7 @@ mod tests {
 
         format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             {cart_transform_fragment}
             "cart": {{
                 "lines": [
@@ -379,7 +429,7 @@ mod tests {
 
     #[test]
     fn test_empty_cart_no_operations() {
-        let input = r#"{"shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate":"1.0","cartTransform":{"bundleCartLineMessaging":null},"cart":{"lines":[]}}"#;
+        let input = r#"{"shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate":"1.0","cartTransform":{"bundleCartLineMessaging":null},"cart":{"lines":[]}}"#;
         let output: schema::FunctionRunResult = run_cart_transform(input);
         assert!(output.operations.is_empty());
     }
@@ -387,7 +437,7 @@ mod tests {
     #[test]
     fn test_non_bundle_line_ignored() {
         let input = r#"{
-            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
+            "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": { "bundleCartLineMessaging": null },
             "cart": {
                 "lines": [{
@@ -416,32 +466,38 @@ mod tests {
     fn test_runtime_token_merge_without_component_parents() {
         let runtime_secret = test_runtime_secret();
         let runtime_token = sign_runtime_token_for_test(&runtime_merge_payload(), &runtime_secret);
-        let offer_analytics_display = serde_json::json!({
-            "offerAnalytics": {
+        let bundle_details = serde_json::json!([{
+              "key": "FBP-bundle-1_ABC",
+              "runtimeToken": runtime_token,
+              "displayProperties": {
+                "bundleName": "Runtime Bundle",
+                "offerAnalytics": {
                 "bundleId": "bundle-1",
                 "offerPolicyId": "policy-1",
                 "offerRuleVersion": 8,
                 "offerTierId": "tier-3",
                 "offerEligibilitySource": "schedule"
-            }
-        })
+                }
+              }
+        }])
         .to_string();
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{
                 "bundleCartLineMessaging": null,
                 "runtimeTokenSecret": {{ "value": "{runtime_secret}" }}
             }},
             "cart": {{
+                "bundleDetails": {{ "value": {bundle_details:?} }},
                 "lines": [
                     {{
                         "id": "line1", "quantity": 1,
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_1" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
-                        "runtimeToken": {{ "value": "{runtime_token}" }},
+                        "runtimeToken": null,
                         "stepType": null,
-                        "bundleDisplayProperties": {{ "value": {offer_analytics_display:?} }},
+                        "bundleDisplayProperties": null,
                         "merchandise": {{
                             "__typename": "ProductVariant",
                             "id": "gid://shopify/ProductVariant/101",
@@ -456,9 +512,9 @@ mod tests {
                         "id": "line2", "quantity": 1,
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_2" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
-                        "runtimeToken": {{ "value": "{runtime_token}" }},
+                        "runtimeToken": null,
                         "stepType": null,
-                        "bundleDisplayProperties": {{ "value": {offer_analytics_display:?} }},
+                        "bundleDisplayProperties": null,
                         "merchandise": {{
                             "__typename": "ProductVariant",
                             "id": "gid://shopify/ProductVariant/102",
@@ -527,7 +583,7 @@ mod tests {
         );
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{
                 "bundleCartLineMessaging": null,
                 "runtimeTokenSecret": {{ "value": "{runtime_secret}" }}
@@ -597,11 +653,17 @@ mod tests {
         );
         let input = serde_json::json!({
             "localization": { "country": { "isoCode": "CA" } },
-            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
+            "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
                 "runtimeTokenSecret": runtime_secret
-            }).to_string() } },
-            "cart": { "lines": [{
+            }) } },
+            "cart": {
+              "bundleDetails": { "value": serde_json::json!([{
+                "key": "MIX-bundle-1_ABC",
+                "runtimeToken": bundle_token,
+                "displayProperties": { "bundleName": "Runtime Bundle" }
+              }]).to_string() },
+              "lines": [{
                 "id": "line1", "quantity": 1,
                 "wolfpackProductBundleOfferId": { "value": "MIX-bundle-1_ABC_1" },
                 "wolfpackProductBundleName": { "value": "Runtime Bundle" },
@@ -610,7 +672,7 @@ mod tests {
                 "stepType": null, "bundleDisplayProperties": null, "sellingPlanAllocation": null,
                 "merchandise": {
                     "__typename": "ProductVariant", "id": "gid://shopify/ProductVariant/101",
-                    "product": { "id": "gid://shopify/Product/1", "ppbComponentPolicies": { "value": "{\"bundle-1\":\"rev-1\"}" } },
+                    "product": { "id": "gid://shopify/Product/1", "ppbComponentPolicies": { "value": "{\"bundle-1\":{\"revision\":\"rev-1\",\"pricingMode\":\"standard\"}}" } },
                     "component_reference": null, "component_quantities": null,
                     "price_adjustment": null, "component_pricing": null
                 },
@@ -645,9 +707,17 @@ mod tests {
         );
         let input = serde_json::json!({
             "localization": { "country": { "isoCode": "CA" } },
-            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
-            "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
-            "cart": { "lines": [{
+            "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0",
+            "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
+                "runtimeTokenSecret": runtime_secret
+            }) } },
+            "cart": {
+              "bundleDetails": { "value": serde_json::json!([{
+                "key": "MIX-bundle-1_ABC",
+                "runtimeToken": bundle_token,
+                "displayProperties": { "bundleName": "Runtime Bundle" }
+              }]).to_string() },
+              "lines": [{
                 "id": "line1", "quantity": 1,
                 "wolfpackProductBundleOfferId": { "value": "MIX-bundle-1_ABC_1" },
                 "wolfpackProductBundleName": { "value": "Runtime Bundle" },
@@ -698,7 +768,7 @@ mod tests {
                 "stepType": null, "bundleDisplayProperties": null, "sellingPlanAllocation": null,
                 "merchandise": {
                     "__typename": "ProductVariant", "id": "gid://shopify/ProductVariant/101",
-                    "product": { "id": "gid://shopify/Product/1", "ppbComponentPolicies": { "value": "{\"bundle-1\":\"rev-1\"}" } },
+                    "product": { "id": "gid://shopify/Product/1", "ppbComponentPolicies": { "value": "{\"bundle-1\":{\"revision\":\"rev-1\",\"pricingMode\":\"standard\"}}" } },
                     "component_reference": null, "component_quantities": null,
                     "price_adjustment": null, "component_pricing": null
                 },
@@ -707,9 +777,18 @@ mod tests {
         };
         let input = serde_json::json!({
             "localization": { "country": { "isoCode": "CA" } },
-            "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
-            "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
-            "cart": { "lines": [line("line1"), line("line2")] }
+            "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0",
+            "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
+                "runtimeTokenSecret": runtime_secret
+            }) } },
+            "cart": {
+              "bundleDetails": { "value": serde_json::json!([{
+                "key": "MIX-bundle-1_ABC",
+                "runtimeToken": bundle_token,
+                "displayProperties": { "bundleName": "Runtime Bundle" }
+              }]).to_string() },
+              "lines": [line("line1"), line("line2")]
+            }
         });
         let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
         assert!(output.operations.is_empty());
@@ -727,7 +806,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -777,7 +856,7 @@ mod tests {
 
         let op = &output.operations[0];
         let merge = match op {
-            schema::CartOperation::LinesMerge(ref m) => m,
+            schema::CartOperation::Merge(ref m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.parent_variant_id, "gid://shopify/ProductVariant/999");
@@ -810,7 +889,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -877,7 +956,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -960,7 +1039,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1036,7 +1115,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.cart_lines.len(), 2);
@@ -1096,7 +1175,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1128,7 +1207,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.parent_variant_id, "gid://shopify/ProductVariant/999");
@@ -1190,7 +1269,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1267,17 +1346,14 @@ mod tests {
             Some("177700")
         );
         assert_eq!(
-            attributes
-                .get("_bundle_total_price_cents")
-                .map(String::as_str),
-            Some("144800")
+            (attributes["_bundle_total_retail_cents"]
+                .parse::<f64>()
+                .unwrap()
+                * (1.0 - native_merge_percentage(&output) / 100.0))
+                .round() as i64,
+            144800
         );
-        assert_eq!(
-            attributes
-                .get("_bundle_total_savings_cents")
-                .map(String::as_str),
-            Some("32900")
-        );
+        assert!(!attributes.contains_key("_bundle_total_savings_cents"));
     }
 
     #[test]
@@ -1288,7 +1364,7 @@ mod tests {
 
         let attributes = merge_attributes(&output);
         assert_eq!(attributes.get("Box").map(String::as_str), Some("1"));
-        assert_eq!(attributes.get("_Items").map(String::as_str), Some(""));
+        assert!(!attributes.contains_key("_Items"));
         assert_eq!(
             attributes.get("Items").map(String::as_str),
             Some("1 x 18k Bloom Earrings, 2 x 18k Pedal Ring - 6 (6)")
@@ -1342,7 +1418,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1393,7 +1469,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         let pct = merge
@@ -1411,23 +1487,15 @@ mod tests {
             Some("144800")
         );
         assert_eq!(
-            attributes
-                .get("_bundle_total_price_cents")
-                .map(String::as_str),
-            Some("144800")
+            (attributes["_bundle_total_retail_cents"]
+                .parse::<f64>()
+                .unwrap()
+                * (1.0 - native_merge_percentage(&output) / 100.0))
+                .round() as i64,
+            144800
         );
-        assert_eq!(
-            attributes
-                .get("_bundle_total_savings_cents")
-                .map(String::as_str),
-            Some("0")
-        );
-        assert_eq!(
-            attributes
-                .get("_bundle_discount_percent")
-                .map(String::as_str),
-            Some("0.00")
-        );
+        assert!(!attributes.contains_key("_bundle_total_savings_cents"));
+        assert_eq!(native_merge_percentage(&output), 0.0);
         assert_eq!(
             attributes.get("Items").map(String::as_str),
             Some("1 x First product, 1 x Second product")
@@ -1457,7 +1525,7 @@ mod tests {
 
         let attributes = merge_attributes(&output);
         assert_eq!(attributes.get("Box").map(String::as_str), Some("1"));
-        assert_eq!(attributes.get("_Items").map(String::as_str), Some(""));
+        assert!(!attributes.contains_key("_Items"));
         assert!(!attributes.contains_key("Items"));
         assert!(!attributes.contains_key("Retail Price"));
         assert!(!attributes.contains_key("You Save"));
@@ -1519,7 +1587,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1562,7 +1630,7 @@ mod tests {
             .operations
             .iter()
             .filter_map(|op| match op {
-                schema::CartOperation::LinesMerge(m) => m.title.as_deref(),
+                schema::CartOperation::Merge(m) => m.title.as_deref(),
                 _ => None,
             })
             .collect();
@@ -1595,7 +1663,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1644,7 +1712,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(
@@ -1683,7 +1751,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1756,7 +1824,7 @@ mod tests {
             .operations
             .iter()
             .find_map(|operation| match operation {
-                schema::CartOperation::LinesMerge(m) => Some(m),
+                schema::CartOperation::Merge(m) => Some(m),
                 _ => None,
             })
             .expect("expected paid bundle lines to merge");
@@ -1774,11 +1842,8 @@ mod tests {
             .iter()
             .map(|attr| (attr.key.clone(), attr.value.clone()))
             .collect();
-        assert_eq!(
-            attributes
-                .get("_bundle_component_count")
-                .map(String::as_str),
-            Some("2")
+        assert!(
+            matches!(&output.operations[0], schema::CartOperation::Merge(merge) if merge.cart_lines.len() == 2)
         );
         assert_eq!(
             attributes
@@ -1789,7 +1854,7 @@ mod tests {
         let line_update = output
             .operations
             .iter()
-            .find(|operation| matches!(operation, schema::CartOperation::LineUpdate(_)));
+            .find(|operation| matches!(operation, schema::CartOperation::Update(_)));
         assert!(
             line_update.is_none(),
             "paid add-on discounting is handled by the Discount Function"
@@ -1808,7 +1873,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [
@@ -1864,23 +1929,15 @@ mod tests {
             Some("24600")
         );
         assert_eq!(
-            attributes
-                .get("_bundle_total_price_cents")
-                .map(String::as_str),
-            Some("12300")
+            (attributes["_bundle_total_retail_cents"]
+                .parse::<f64>()
+                .unwrap()
+                * (1.0 - native_merge_percentage(&output) / 100.0))
+                .round() as i64,
+            12300
         );
-        assert_eq!(
-            attributes
-                .get("_bundle_total_savings_cents")
-                .map(String::as_str),
-            Some("12300")
-        );
-        assert_eq!(
-            attributes
-                .get("_bundle_discount_percent")
-                .map(String::as_str),
-            Some("50.00")
-        );
+        assert!(!attributes.contains_key("_bundle_total_savings_cents"));
+        assert_eq!(native_merge_percentage(&output), 50.0);
     }
 
     // =========================================================================
@@ -1898,11 +1955,11 @@ mod tests {
             "discountPercent": 10.0, "savingsAmount": 500
         }])
         .to_string();
-        let pa = serde_json::json!({ "method": "percentage_off", "value": 10.0 }).to_string();
+        let pa = serde_json::json!({ "componentQuantities": serde_json::from_str::<serde_json::Value>(&cq).unwrap(), "shop": "test-shop.myshopify.com", "bundleId": "bundle-1", "revision": "rev-1", "countryRule": "", "method": "percentage_off", "value": 10.0 }).to_string();
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -1934,7 +1991,7 @@ mod tests {
 
         let op = &output.operations[0];
         let expand = match op {
-            schema::CartOperation::LineExpand(ref e) => e,
+            schema::CartOperation::Expand(ref e) => e,
             _ => panic!("expected Expand operation"),
         };
         assert_eq!(expand.cart_line_id, "flex-line");
@@ -1952,11 +2009,11 @@ mod tests {
     fn test_expand_fixed_amount_off() {
         let cr = serde_json::json!(["gid://shopify/ProductVariant/A"]).to_string();
         let cq = serde_json::json!([1]).to_string();
-        let pa = serde_json::json!({ "method": "fixed_amount_off", "value": 1000.0 }).to_string();
+        let pa = serde_json::json!({ "componentQuantities": serde_json::from_str::<serde_json::Value>(&cq).unwrap(), "shop": "test-shop.myshopify.com", "bundleId": "bundle-1", "revision": "rev-1", "countryRule": "", "method": "fixed_amount_off", "value": 1000.0 }).to_string();
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -1992,11 +2049,11 @@ mod tests {
     fn test_expand_fixed_bundle_price() {
         let cr = serde_json::json!(["gid://shopify/ProductVariant/A"]).to_string();
         let cq = serde_json::json!([1]).to_string();
-        let pa = serde_json::json!({ "method": "fixed_bundle_price", "value": 3000.0 }).to_string();
+        let pa = serde_json::json!({ "componentQuantities": serde_json::from_str::<serde_json::Value>(&cq).unwrap(), "shop": "test-shop.myshopify.com", "bundleId": "bundle-1", "revision": "rev-1", "countryRule": "", "method": "fixed_bundle_price", "value": 3000.0 }).to_string();
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -2032,7 +2089,9 @@ mod tests {
     fn test_expand_buy_x_get_y() {
         let cr = serde_json::json!(["gid://shopify/ProductVariant/A"]).to_string();
         let cq = serde_json::json!([3]).to_string();
-        let pa = serde_json::json!({
+        let pa = serde_json::json!({ "componentQuantities": serde_json::from_str::<serde_json::Value>(&cq).unwrap(),
+            "shop": "test-shop.myshopify.com", "bundleId": "bundle-1", "revision": "rev-1",
+            "countryRule": "",
             "method": "buy_x_get_y",
             "value": 100.0,
             "customerBuys": 2,
@@ -2045,7 +2104,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -2087,7 +2146,7 @@ mod tests {
 
         let input = format!(
             r#"{{
-            "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0",
+            "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0",
             "cartTransform": {{ "bundleCartLineMessaging": null }},
             "cart": {{
                 "lines": [{{
@@ -2101,7 +2160,7 @@ mod tests {
                         "component_parents": null,
                         "component_reference": {{ "value": {cr:?} }},
                         "component_quantities": {{ "value": {cq:?} }},
-                        "price_adjustment": null,
+                        "price_adjustment": {{ "value": "{{\"componentQuantities\":[1],\"countryRule\":\"\",\"shop\":\"test-shop.myshopify.com\",\"bundleId\":\"bundle-1\",\"revision\":\"rev-1\"}}" }},
                         "component_pricing": null,
                         "product": {{ "id": "gid://shopify/Product/20", "title": "No Discount Bundle" }}
                     }},
@@ -2118,7 +2177,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let expand = match &output.operations[0] {
-            schema::CartOperation::LineExpand(e) => e,
+            schema::CartOperation::Expand(e) => e,
             _ => panic!("expected EXPAND"),
         };
         assert!(expand.price.is_none(), "price should be absent at 0%");

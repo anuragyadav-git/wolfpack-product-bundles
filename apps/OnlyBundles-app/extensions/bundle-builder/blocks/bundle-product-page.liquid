@@ -28,8 +28,8 @@
 {% endif %}
 
 {% assign bundle_id = nil %}
-{% if bundle_ui_config.bundleId %}
-  {% assign bundle_id = bundle_ui_config.bundleId %}
+{% if bundle_ui_config.id %}
+  {% assign bundle_id = bundle_ui_config.id %}
 {% elsif block.settings.bundle_id != blank %}
   {% assign bundle_id = block.settings.bundle_id %}
 {% endif %}
@@ -43,7 +43,7 @@
   {{ block.shopify_attributes }}
   id="bundle-builder-app"
   data-bundle-id="{{ bundle_id }}"
-  data-bundle-type="{% if bundle_ui_config and bundle_ui_config.bundleType %}{{ bundle_ui_config.bundleType }}{% else %}product_page{% endif %}"
+  data-bundle-type="{% if bundle_ui_config and bundle_ui_config.bundleType %}{{ bundle_ui_config.bundleType }}{% endif %}"
   data-is-bundle-product="{{ is_bundle_product }}"
   data-is-container-product="{{ is_bundle_product }}"
   data-container-bundle-id="{{ bundle_id }}"
@@ -95,7 +95,6 @@
 </style>
 {% endif %}
 
-{% assign server_url_field = shop.metafields[app_namespace]['serverUrl'] %}
 {% assign ppb_runtime_field = shop.metafields[app_namespace]['ppb_storefront_runtime'] %}
 {% assign ppb_css_field = shop.metafields[app_namespace]['ppb_storefront_css'] %}
 <script type="application/json" data-wpb-context="product-page">
@@ -116,7 +115,6 @@
     },
     "bundleWidgetContext": true,
     "__WOLFPACK_PPB_STOREFRONT_RUNTIME__": {% if ppb_runtime_field and ppb_runtime_field.value %}{{ ppb_runtime_field.value | json }}{% else %}null{% endif %},
-    "__BUNDLE_APP_URL__": {% if server_url_field %}{{ server_url_field.value | json }}{% else %}null{% endif %},
     "__WOLFPACK_PPB_TEMPLATE_CSS_URLS__": {
       "GRID": {{ 'bundle-widget-product-page-grid.css' | asset_url | json }},
       "LIST": {{ 'bundle-widget-product-page-cascade.css' | asset_url | json }},

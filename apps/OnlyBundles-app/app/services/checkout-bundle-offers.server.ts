@@ -1,4 +1,4 @@
-import { normalizeProductVariantGid, type RuntimeTokenPayload } from "./cart-transform-runtime-token.server";
+import { normalizeProductVariantGid } from "../lib/shopify-product-gid";
 
 export type CheckoutOfferDiscount = {
   type: "PERCENTAGE";
@@ -24,8 +24,15 @@ export type CheckoutOffer = {
   variants: CheckoutOfferVariant[];
 };
 
-export type CheckoutOfferRuntime = {
+type CheckoutOfferRuntime = {
   offers: CheckoutOffer[];
+};
+
+type CheckoutOfferSelection = {
+  components: Array<{
+    variantId: string;
+    quantity: number;
+  }>;
 };
 
 function positiveInteger(value: unknown, fallback = 1) {
@@ -115,10 +122,7 @@ function fpbOffers(bundle: any): CheckoutOffer[] {
 function ppbOffers(bundle: any): CheckoutOffer[] {
   return (Array.isArray(bundle?.steps) ? bundle.steps : []).flatMap((step: any) => {
     if (step?.isFreeGift !== true || step?.enabled === false) return [];
-    const products = [
-      ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
-      ...(Array.isArray(step?.products) ? step.products : []),
-    ];
+    const products = Array.isArray(step?.StepProduct) ? step.StepProduct : [];
     const variants = collectVariants(products);
     if (variants.length === 0) return [];
     const tiers = Array.isArray(step?.addonTiers) && step.addonTiers.length > 0
@@ -152,18 +156,14 @@ export function buildCheckoutOfferRuntime(bundle: any): CheckoutOfferRuntime {
 }
 
 function cachedComponentProducts(bundle: any) {
-  return (Array.isArray(bundle?.steps) ? bundle.steps : []).flatMap((step: any) => [
-    ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
-    ...(Array.isArray(step?.products) ? step.products : []),
-    ...(Array.isArray(step?.StepCategory) ? step.StepCategory : []).flatMap(
-      (category: any) => Array.isArray(category?.products) ? category.products : [],
-    ),
-  ]);
+  return (Array.isArray(bundle?.steps) ? bundle.steps : []).flatMap((step: any) =>
+    Array.isArray(step?.StepProduct) ? step.StepProduct : [],
+  );
 }
 
 export function calculateCheckoutOfferSelectionAmount(
   bundle: any,
-  payload: Pick<RuntimeTokenPayload, "components">,
+  payload: CheckoutOfferSelection,
 ) {
   const prices = new Map<string, number>();
   for (const product of cachedComponentProducts(bundle)) {
@@ -186,7 +186,7 @@ export function calculateCheckoutOfferSelectionAmount(
 export function resolveActiveCheckoutOffer(
   offers: CheckoutOffer[],
   requestedKey: string,
-  payload: Pick<RuntimeTokenPayload, "components">,
+  payload: CheckoutOfferSelection,
   amount = 0,
 ) {
   const requested = offers.find((offer) => offer.key === requestedKey);

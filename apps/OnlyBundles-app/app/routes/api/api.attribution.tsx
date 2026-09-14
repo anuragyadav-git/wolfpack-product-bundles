@@ -13,9 +13,10 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
 import db from "../../db.server";
 import { AppLogger } from "../../lib/logger";
-import { matchLineItemsToBundles, normalizeToOrderGid } from "../../lib/analytics/bundle-matcher.server";
+import { matchLineItemsToBundles } from "../../lib/analytics/bundle-matcher.server";
 import { sanitizeCustomUtmAttributes } from "../../lib/analytics/attribution-controls";
 import { normalizeOfferAnalyticsDimensions } from "../../lib/analytics/offer-dimensions";
+import { collectBundleLineRevenue } from "../../lib/analytics/bundle-line-revenue";
 
 function linePropertyMap(value: unknown): Record<string, unknown> {
   if (Array.isArray(value)) {
@@ -86,6 +87,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
+const SHOPIFY_ORDER_GID = /^gid:\/\/shopify\/Order\/[1-9]\d*$/;
 
 // Handle CORS preflight (OPTIONS) — browser sends this before the actual POST
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -125,18 +127,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (!shopId) {
       return json({ error: "Missing required field: shopId" }, { status: 400, headers: CORS_HEADERS });
     }
+    if (typeof orderId !== "string" || !SHOPIFY_ORDER_GID.test(orderId)) {
+      return json({ error: "Invalid Shopify order ID" }, { status: 400, headers: CORS_HEADERS });
+    }
 
     // Calculate revenue in cents
     const revenue = totalPrice ? Math.round(parseFloat(totalPrice) * 100) : 0;
 
-    // Normalize orderId to canonical GID form so the pixel-driven insert and the
-    // backfill service produce matching keys — otherwise dedup fails and the
-    // dashboard shows duplicate revenue.
-    const normalizedOrderId = orderId ? normalizeToOrderGid(orderId as string) : "unknown";
-
     // Match line items to bundles. See matchLineItemsToBundles for the two-pass
     // strategy — it also normalizes numeric vs GID productId formats.
     const bundleIds = await matchLineItemsToBundles(shopId, lineItems ?? []);
+    const bundleRevenueById = collectBundleLineRevenue(lineItems ?? [], bundleIds);
 
     // Create attribution record(s) — one per bundle, or one with null bundleId if no bundles matched
     if (bundleIds.length > 0) {
@@ -145,7 +146,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           ...offerDimensionsForBundle(lineItems, bundleId),
           shopId,
           bundleId,
-          orderId: normalizedOrderId,
+          bundleRevenue: bundleRevenueById[bundleId] ?? 0,
+          orderId,
           orderNumber: orderNumber || null,
           utmSource,
           utmMedium: utmMedium || null,
@@ -164,7 +166,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         data: {
           shopId,
           bundleId: null,
-          orderId: normalizedOrderId,
+          bundleRevenue: 0,
+          orderId,
           orderNumber: orderNumber || null,
           utmSource,
           utmMedium: utmMedium || null,

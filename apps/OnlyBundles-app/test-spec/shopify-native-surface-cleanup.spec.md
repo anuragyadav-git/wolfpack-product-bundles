@@ -5,7 +5,7 @@ title: Shopify Native Surface Cleanup Test Spec
 type: test-spec
 status: active
 summary: Defines Wolfpack-owned behavior retained while Shopify-native authentication, Storefront, app-extension, Save Bar, modal, and Web Vitals wrappers are removed.
-last_audited: 2026-08-24
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -51,13 +51,13 @@ Retain tests for Wolfpack validation, transformation, and fail-closed policy whi
 | 5 | Storefront GraphQL fails | Native client returns transport or GraphQL errors | Return an app-owned error response | Error mapping |
 | 6 | Cart metafield update succeeds | Valid cart payload and native Storefront client | Merge existing bundle details and persist the result | Wolfpack persistence policy |
 
-### Legacy Offline Token Cutover
+### Expiring Offline Token Release Gate
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Legacy rows are selected | Offline rows without refresh metadata | Return only migration candidates | Do not retest Shopify exchange internals |
-| 2 | One migration fails | Candidate batch with one rejected migration | Abort the cutover and report failure | Fail closed; utility remains uncommitted |
-| 3 | Every migration succeeds | Candidate batch with successful native migrations | Report the batch safe to cut over | Operator-gated SIT then production |
+| 1 | Configured database is audited | Offline sessions without refresh metadata are counted | Count is zero before the compatibility helper is removed | Verified for the configured development database |
+| 2 | SIT is prepared for release | The same count is run against SIT | Deployment is blocked unless the count is zero | Environment-specific operator gate |
+| 3 | Production is prepared for release | The same count is run against production | Deployment is blocked unless the count is zero | Environment-specific operator gate |
 
 ### Native Theme Extension Data
 
@@ -70,6 +70,9 @@ Retain tests for Wolfpack validation, transformation, and fail-closed policy whi
 ## Acceptance Criteria
 
 - [x] Official Prisma session storage is configured with expiring offline access tokens.
+- [x] The legacy offline-token compatibility helper is removed after the configured database reported zero legacy sessions.
+- [x] SIT reports zero legacy offline sessions before release.
+- [ ] Production reports zero legacy offline sessions before release; the 2026-09-14 read-only recheck found 57 installed-shop sessions without refresh metadata.
 - [x] Signed app-proxy routes use Shopify's native Storefront context and reject a missing installed-shop session.
 - [x] Manual Storefront-token creation, persistence, direct-host clients, and CORS fallbacks are removed.
 - [x] App-embed state is derived from native extension resources and the current-theme editor deep link.

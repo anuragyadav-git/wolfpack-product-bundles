@@ -31,7 +31,7 @@ export function OfferAnalyticsCard({
   return (
     <s-section heading={t("analyticsPage.offers.title")}>
       <s-grid
-        gridTemplateColumns="@container (inline-size > 700px) minmax(16rem, 28rem) minmax(0, 1fr), 1fr"
+        gridTemplateColumns="@container analytics-offers (inline-size > 700px) minmax(16rem, 28rem) minmax(0, 1fr), 1fr"
         gap="base"
       >
         <s-select

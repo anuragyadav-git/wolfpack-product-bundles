@@ -123,4 +123,26 @@ describe("WebhookProcessor retired topic ingestion", () => {
       },
     });
   });
+
+  it("skips a duplicate delivery after the first webhook was processed", async () => {
+    mockDb.webhookEvent.findUnique.mockResolvedValue({
+      id: "webhook-event-1",
+      processed: true,
+    });
+    const { WebhookProcessor } = await import(
+      "../../../../app/services/webhooks/processor.server"
+    );
+
+    const result = await WebhookProcessor.processWebhookMessage(
+      buildMessage("products/delete", { id: 123 }, "wh-123")
+    );
+
+    expect(result).toEqual({
+      success: true,
+      message: "Webhook already processed",
+    });
+    expect(mockDb.webhookEvent.create).not.toHaveBeenCalled();
+    expect(mockHandleProductDelete).not.toHaveBeenCalled();
+    expect(mockDb.webhookEvent.updateMany).not.toHaveBeenCalled();
+  });
 });

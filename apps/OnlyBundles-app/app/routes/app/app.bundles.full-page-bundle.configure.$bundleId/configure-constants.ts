@@ -1,4 +1,3 @@
-import type { HelpTooltipKey } from "../../../constants/help-tooltips";
 import {
   buildBundleVisibilityChildItems,
   buildConfigureSetupItems,
@@ -65,5 +64,3 @@ export const ADDON_TEMPLATE_VARIABLES: [string, string][] = [
   ],
   ["{{addonsDiscountValueUnit}}", "Discount type (e.g., %)"],
 ];
-
-export type { HelpTooltipKey };

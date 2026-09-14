@@ -1,20 +1,37 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
-import { FpbGlobalOverlays } from "./ConfigureGlobalOverlays";
-import { FpbSelectedItemsModals } from "./ConfigureSelectedItemsModals";
-import { FpbSyncAndLanguageModals } from "./ConfigureSyncAndLanguageModals";
-import { FpbTemplateDialog } from "./ConfigureTemplateDialog";
+import {
+  FpbGlobalOverlays,
+  type FpbGlobalOverlaysProps,
+} from "./ConfigureGlobalOverlays";
+import {
+  FpbSelectedItemsModals,
+  type FpbSelectedItemsModalsProps,
+} from "./ConfigureSelectedItemsModals";
+import {
+  FpbSyncAndLanguageModals,
+  type FpbSyncAndLanguageModalsProps,
+} from "./ConfigureSyncAndLanguageModals";
+import {
+  FpbTemplateDialog,
+  type FpbTemplateDialogProps,
+} from "./ConfigureTemplateDialog";
 
 export function ConfigureRouteModals({
-  flow,
+  globalOverlays,
+  selectedItems,
+  syncAndLanguage,
+  templateDialog,
 }: {
-  flow: ConfigureBundleFlowContext;
+  globalOverlays: FpbGlobalOverlaysProps;
+  selectedItems: FpbSelectedItemsModalsProps;
+  syncAndLanguage: FpbSyncAndLanguageModalsProps;
+  templateDialog: FpbTemplateDialogProps;
 }) {
   return (
     <>
-      <FpbSelectedItemsModals flow={flow} />
-      <FpbGlobalOverlays flow={flow} />
-      <FpbTemplateDialog flow={flow} />
-      <FpbSyncAndLanguageModals flow={flow} />
+      <FpbSelectedItemsModals {...selectedItems} />
+      <FpbGlobalOverlays {...globalOverlays} />
+      <FpbTemplateDialog {...templateDialog} />
+      <FpbSyncAndLanguageModals {...syncAndLanguage} />
     </>
   );
 }

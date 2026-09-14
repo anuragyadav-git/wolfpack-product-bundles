@@ -5,7 +5,7 @@ title: Bundle Persistence and Storefront Contract Cleanup
 type: test-spec
 status: active
 summary: Verifies that bundle persistence and storefront synchronization use one current contract without dead response fields or unused sync bookkeeping.
-last_audited: 2026-08-11
+last_audited: 2026-09-08
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -20,6 +20,8 @@ source_paths:
   - app/services/bundles/storefront-sync.server.ts
   - app/services/deployment-general-sync.server.ts
   - app/services/bundles/bundle-parent-product.server.ts
+  - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.graphql
+  - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.rs
   - prisma/schema.prisma
 related_docs:
   - internal docs/Architecture/Bundle Field Ownership.md
@@ -75,6 +77,7 @@ Shopify contract and must not invoke placeholder metaobject work.
 | 1 | Save and format a category | Current Admin category | `id`, `sortOrder`, `products`, and `collections` cross persistence/runtime boundaries | No alias reads or writes |
 | 2 | Save pricing display options | FPB or PPB pricing form | Direct `BundlePricing.displayOptions` is persisted and emitted | Messages contain text only |
 | 3 | Ensure variant definitions | Current Shopify Admin client | Five current variant definitions are ensured | No `component_parents` definition |
+| 4 | Evaluate an unsigned legacy component metafield | Checkout integration cart lines without a valid signed runtime token | No bundle discount candidate is emitted | Discount Function does not query or trust `$app.component_parents` |
 
 ### FpbParentProductHost
 
@@ -92,5 +95,6 @@ Shopify contract and must not invoke placeholder metaobject work.
 - [x] Storefront sync does not persist operational attempt/status columns.
 - [x] Deployment general sync contains no empty metaobject abstraction.
 - [x] Categories and pricing display options have one persisted owner each.
+- [x] Discount calculation requires signed runtime authorization and does not read `$app.component_parents`.
 - [x] FPB parent-product routing is owned by normal save/sync with no migration command.
 - [x] Focused and full unit tests, lint, Prisma validation, widget build, asset minification, and production build pass.

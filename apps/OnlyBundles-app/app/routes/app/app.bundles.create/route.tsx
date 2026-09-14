@@ -8,6 +8,7 @@ import {
 import {
   Form,
   useActionData,
+  useFetcher,
   useNavigate,
   useNavigation,
   useSearchParams,
@@ -26,6 +27,20 @@ import {
 } from "../../../services/app-events.server";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
+import {
+  initializeSidekickBundleIntentBridge,
+  resolveSidekickAppBridge,
+  type SidekickBundleDraft,
+} from "../../../lib/sidekick-create-bundle";
+import { BundleTypeSelectionCard } from "./BundleTypeSelectionCard";
+
+type SidekickAppBridge = {
+  tools: typeof shopify.tools;
+  intents: {
+    request: typeof shopify.intents.request;
+    response: NonNullable<typeof shopify.intents.response>;
+  };
+};
 
 export const links: LinksFunction = () => [
   {
@@ -66,6 +81,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const bundleName = formData.get("bundleName");
   const bundleType = formData.get("bundleType");
+  const submissionMode = formData.get("submissionMode");
+  const isSidekickSubmission = submissionMode === "sidekick";
   const createFormData = new FormData();
   if (typeof bundleName === "string")
     createFormData.set("bundleName", bundleName);
@@ -80,13 +97,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     actor: "merchant",
     routeFamily: "create",
     attributes: {
-      entry_point: "create_route",
+      entry_point: isSidekickSubmission ? "sidekick" : "create_route",
     },
   });
   const result = await handleCreateBundle(admin, session, createFormData);
   const data = (await result.json()) as {
     error?: string;
     bundleId?: string;
+    bundleProductId?: string;
     redirectTo?: string;
     showFirstLoadTour?: boolean;
     success?: boolean;
@@ -106,6 +124,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         template_id: typeof bundleType === "string" ? bundleType : null,
       },
     });
+    if (isSidekickSubmission && data.bundleId && data.bundleProductId) {
+      return json({
+        success: true,
+        bundleId: data.bundleId,
+        bundleProductId: data.bundleProductId,
+        redirectTo: data.redirectTo,
+      });
+    }
     if (!data.showFirstLoadTour) {
       return redirect(data.redirectTo);
     }
@@ -126,6 +152,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       error_message_safe: data.error ?? "Bundle creation failed",
     },
   });
+  if (isSidekickSubmission) {
+    return json(
+      { success: false, errorCode: "bundle_create_failed" },
+      { status: result.status },
+    );
+  }
   return json(data, { status: result.status });
 };
 
@@ -133,9 +165,12 @@ export default function CreateBundleEntry() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const actionData = useActionData<typeof action>();
+  const sidekickFetcher = useFetcher<typeof action>();
   const navigation = useNavigation();
   const { t } = useTranslation();
-  const isSubmitting = navigation.state === "submitting";
+  const isSubmitting =
+    navigation.state === "submitting" ||
+    sidekickFetcher.state === "submitting";
 
   const [bundleType, setBundleType] = useState<string | null>(() =>
     searchParams.has("bundleType")
@@ -148,7 +183,56 @@ export default function CreateBundleEntry() {
   const bundleNameRef = useRef<any>(null);
   const nameModalRef = useRef<any>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const sidekickSubmissionPendingRef = useRef(false);
   const [bundleName, setBundleName] = useState("");
+  const [isSidekickIntent, setIsSidekickIntent] = useState(false);
+
+  const getSidekick = useCallback((): SidekickAppBridge | null => {
+    if (typeof shopify === "undefined" || !shopify.intents.response) {
+      return null;
+    }
+    return resolveSidekickAppBridge({
+      shopify: {
+        tools: shopify.tools,
+        intents: {
+          request: shopify.intents.request,
+          response: shopify.intents.response,
+        },
+      },
+    });
+  }, []);
+
+  const applySidekickDraft = useCallback((draft: SidekickBundleDraft) => {
+    setIsSidekickIntent(true);
+    if (draft.bundleType) {
+      setBundleType(draft.bundleType);
+      setBundleTypeError(null);
+    }
+    if (draft.title) {
+      setBundleName(draft.title);
+      setBundleNameError(null);
+    }
+    if (draft.bundleType && draft.title) {
+      showPolarisModal(nameModalRef);
+    }
+  }, []);
+
+  useEffect(() => {
+    const sidekick = getSidekick();
+    if (!sidekick) return;
+
+    return initializeSidekickBundleIntentBridge({
+        tools: sidekick.tools,
+        request: sidekick.intents.request,
+        applyDraft: applySidekickDraft,
+        onInvalidIntent: () => {
+          setIsSidekickIntent(true);
+          void sidekick.intents.response.error(
+            t("common.alerts.operationFailed"),
+          );
+        },
+      });
+  }, [applySidekickDraft, getSidekick, t]);
 
   useEffect(() => {
     const el = bundleNameRef.current;
@@ -159,16 +243,46 @@ export default function CreateBundleEntry() {
     return () => el.removeEventListener("input", handler);
   }, []);
 
-  const serverError =
-    actionData && "error" in actionData ? String(actionData.error) : null;
+  const operationError =
+    actionData && "error" in actionData
+      ? t("common.alerts.operationFailed")
+      : sidekickFetcher.data && "errorCode" in sidekickFetcher.data
+        ? t("common.alerts.operationFailed")
+        : null;
 
   useEffect(() => {
-    if (serverError) showPolarisModal(nameModalRef);
-  }, [serverError]);
+    if (!sidekickSubmissionPendingRef.current || !sidekickFetcher.data) return;
+    sidekickSubmissionPendingRef.current = false;
+    const sidekick = getSidekick();
+    if (!sidekick) return;
+
+    if (
+      "success" in sidekickFetcher.data &&
+      sidekickFetcher.data.success === true &&
+      "bundleProductId" in sidekickFetcher.data &&
+      typeof sidekickFetcher.data.bundleProductId === "string"
+    ) {
+      void sidekick.intents.response.ok({
+        id: sidekickFetcher.data.bundleProductId,
+      });
+      return;
+    }
+
+    void sidekick.intents.response.error(t("common.alerts.operationFailed"));
+  }, [getSidekick, sidekickFetcher.data, t]);
+
+  useEffect(() => {
+    if (operationError) showPolarisModal(nameModalRef);
+  }, [operationError]);
 
   const handleBackToDashboard = useCallback(() => {
+    if (isSidekickIntent) {
+      const sidekick = getSidekick();
+      if (sidekick) void sidekick.intents.response.closed();
+      return;
+    }
     navigate("/app/dashboard", { replace: true });
-  }, [navigate]);
+  }, [getSidekick, isSidekickIntent, navigate]);
 
   const handleSelectBundleType = useCallback((type: string) => {
     setBundleType(type);
@@ -200,8 +314,17 @@ export default function CreateBundleEntry() {
       return;
     }
     setBundleNameError(null);
+    if (isSidekickIntent && bundleType) {
+      const formData = new FormData();
+      formData.set("bundleName", name);
+      formData.set("bundleType", bundleType);
+      formData.set("submissionMode", "sidekick");
+      sidekickSubmissionPendingRef.current = true;
+      sidekickFetcher.submit(formData, { method: "post" });
+      return;
+    }
     submitButtonRef.current?.click();
-  }, [bundleName, t]);
+  }, [bundleName, bundleType, isSidekickIntent, sidekickFetcher, t]);
 
   return (
     <>
@@ -233,90 +356,38 @@ export default function CreateBundleEntry() {
 
         <div className={styles.formContent}>
           <div className={styles.formSection}>
-            {bundleTypeError && (
-              <p className={styles.errorText}>{bundleTypeError}</p>
-            )}
-            <div className={styles.bundleTypeGrid}>
-              <div
-                className={`${styles.bundleTypeCard} ${
-                  bundleType === BundleType.PRODUCT_PAGE
-                    ? styles.bundleTypeCardSelected
-                    : ""
-                }`}
-                onClick={() => handleSelectBundleType(BundleType.PRODUCT_PAGE)}
+            <s-query-container containerName="create-bundle-entry">
+              <s-grid
+                gap="base"
+                gridTemplateColumns="@container create-bundle-entry (inline-size > 600px) 1fr 1fr, 1fr"
               >
-                <div className={styles.bundleThumbnailWrap}>
-                  <span
-                    className={`${styles.bundleThumbnailImg} ${styles.productPageThumbnail}`}
-                    aria-hidden="true"
-                  />
-                </div>
-                <div className={styles.bundleCardBody}>
-                  <div className={styles.bundleCardText}>
-                    <strong>
-                      {t("createBundle.bundleType.productPage.title")}
-                    </strong>
-                    <p>
-                      {t("createBundle.bundleType.productPage.description")}
-                    </p>
-                  </div>
-                  <s-button
-                    variant={
-                      bundleType === BundleType.PRODUCT_PAGE
-                        ? "primary"
-                        : "secondary"
-                    }
-                    onClick={(e: Event) => {
-                      e.stopPropagation();
-                      handleSelectBundleType(BundleType.PRODUCT_PAGE);
-                    }}
-                  >
-                    {bundleType === BundleType.PRODUCT_PAGE
-                      ? t("createBundle.actions.selected")
-                      : t("createBundle.actions.select")}
-                  </s-button>
-                </div>
-              </div>
-
-              <div
-                className={`${styles.bundleTypeCard} ${
-                  bundleType === BundleType.FULL_PAGE
-                    ? styles.bundleTypeCardSelected
-                    : ""
-                }`}
-                onClick={() => handleSelectBundleType(BundleType.FULL_PAGE)}
-              >
-                <div className={styles.bundleThumbnailWrap}>
-                  <span
-                    className={`${styles.bundleThumbnailImg} ${styles.fullPageThumbnail}`}
-                    aria-hidden="true"
-                  />
-                </div>
-                <div className={styles.bundleCardBody}>
-                  <div className={styles.bundleCardText}>
-                    <strong>
-                      {t("createBundle.bundleType.fullPage.title")}
-                    </strong>
-                    <p>{t("createBundle.bundleType.fullPage.description")}</p>
-                  </div>
-                  <s-button
-                    variant={
-                      bundleType === BundleType.FULL_PAGE
-                        ? "primary"
-                        : "secondary"
-                    }
-                    onClick={(e: Event) => {
-                      e.stopPropagation();
-                      handleSelectBundleType(BundleType.FULL_PAGE);
-                    }}
-                  >
-                    {bundleType === BundleType.FULL_PAGE
-                      ? t("createBundle.actions.selected")
-                      : t("createBundle.actions.select")}
-                  </s-button>
-                </div>
-              </div>
-            </div>
+                <BundleTypeSelectionCard
+                  description={t(
+                    "createBundle.bundleType.productPage.description",
+                  )}
+                  selected={bundleType === BundleType.PRODUCT_PAGE}
+                  selectedLabel={t("createBundle.actions.selected")}
+                  thumbnail="product-page"
+                  title={t("createBundle.bundleType.productPage.title")}
+                  onSelect={() =>
+                    handleSelectBundleType(BundleType.PRODUCT_PAGE)
+                  }
+                />
+                <BundleTypeSelectionCard
+                  description={t(
+                    "createBundle.bundleType.fullPage.description",
+                  )}
+                  selected={bundleType === BundleType.FULL_PAGE}
+                  selectedLabel={t("createBundle.actions.selected")}
+                  thumbnail="full-page"
+                  title={t("createBundle.bundleType.fullPage.title")}
+                  onSelect={() => handleSelectBundleType(BundleType.FULL_PAGE)}
+                />
+              </s-grid>
+            </s-query-container>
+            {bundleTypeError ? (
+              <s-text tone="critical">{bundleTypeError}</s-text>
+            ) : null}
           </div>
         </div>
 
@@ -330,15 +401,23 @@ export default function CreateBundleEntry() {
           }
         >
           <Form method="post" className={styles.modalForm}>
+            {operationError ? (
+              <s-banner
+                tone="critical"
+                heading={operationError}
+                dismissible={false}
+              />
+            ) : null}
             <s-text-field
               ref={bundleNameRef}
               label={t("createBundle.fields.name")}
               name="bundleName"
+              value={bundleName}
               placeholder={t("createBundle.fields.namePlaceholder")}
               autocomplete="off"
               onInput={handleBundleNameInput}
               onChange={handleBundleNameInput}
-              error={bundleNameError ?? serverError ?? undefined}
+              error={bundleNameError ?? undefined}
             />
             {bundleType && (
               <input type="hidden" name="bundleType" value={bundleType} />

@@ -1,7 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { createBundleBannerElement } = require('../../../app/assets/widgets/shared/components/bundle-banners.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { createStepBannerImageElement } = require('../../../app/assets/widgets/shared/components/bundle-banners.js');
 
 export {};
 
@@ -49,25 +47,5 @@ describe('shared bundle banners contract', () => {
     expect(images?.[0]?.getAttribute('loading')).toBe('lazy');
     expect(images?.[1]?.getAttribute('src')).toBe('https://cdn.example.test/mobile.jpg');
     expect(images?.[1]?.getAttribute('loading')).toBe('lazy');
-  });
-});
-
-describe('shared step banner image contract', () => {
-  it('returns null when a step has no banner image URL', () => {
-    expect(createStepBannerImageElement({}, (value: string) => value, createFakeDocument())).toBeNull();
-  });
-
-  it('renders the step banner image with escaped alt text', () => {
-    const element = createStepBannerImageElement({
-      name: '<Step One>',
-      bannerImageUrl: 'https://cdn.example.test/step.jpg',
-    }, (value: string) => value.replaceAll('<', '&lt;').replaceAll('>', '&gt;'), createFakeDocument());
-
-    expect(element).not.toBeNull();
-
-    const images = element?.querySelectorAll('img');
-    expect(images).toHaveLength(1);
-    expect(images?.[0]?.getAttribute('src')).toBe('https://cdn.example.test/step.jpg');
-    expect(images?.[0]?.getAttribute('alt')).toBe('&lt;Step One&gt;');
   });
 });

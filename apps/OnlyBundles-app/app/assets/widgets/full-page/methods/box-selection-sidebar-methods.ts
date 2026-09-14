@@ -8,7 +8,6 @@ import { ConditionValidator } from '../../shared/condition-validator.js';
 import { createDefaultLoadingAnimation } from '../../shared/default-loading-animation.js';
 import { hideLoadingOverlayElement, markLoadingOverlayVisible } from '../../shared/loading-overlay.js';
 import { getDiscountProgressData, getSelectedQuantity, getTimelineEntryState } from '../../shared/engine/bundle-selectors.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
 import { createSelectedProductSlotsElement } from '../../shared/components/selected-product-slots.js';
 import {
   buildCartLineDisplayProperties,
@@ -71,7 +70,7 @@ getSidebarTierCtaContent(nextRule: any) {
     ? option.subtext.trim()
     : (typeof option?.tierSubtext === 'string' ? option.tierSubtext.trim() : '');
   if (pricing.method === BUNDLE_WIDGET.DISCOUNT_METHODS.FIXED_BUNDLE_PRICE && rule) {
-    const discountValue = Number(rule.discountValue ?? rule.discount?.value ?? 0) || 0;
+    const discountValue = Number(rule.discountValue ?? 0) || 0;
     if (discountValue > 0) {
       subtext = `Bundle for ${CurrencyManager.convertAndFormat(discountValue, CurrencyManager.getCurrencyInfo())}`;
     }

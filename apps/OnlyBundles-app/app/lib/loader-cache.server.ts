@@ -108,6 +108,3 @@ class LoaderCache {
 }
 
 export const loaderCache = new LoaderCache();
-
-/** Default TTL (30 s) exported for callers that want to make it explicit. */
-export const LOADER_CACHE_DEFAULT_TTL_MS = DEFAULT_TTL_MS;

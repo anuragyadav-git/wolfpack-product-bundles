@@ -1,46 +1,38 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
 
 export function FpbAddonFooterMessaging({
-  flow,
+  enabled,
+  hasTiers,
+  messages,
+  styles,
+  translationsAvailable,
+  onMessagesChange,
+  onOpenTranslations,
+  onShowVariables,
 }: {
-  flow: ConfigureBundleFlowContext;
+  enabled: boolean;
+  hasTiers: boolean;
+  messages: { discountText: string; successMessage: string };
+  styles: Record<string, string>;
+  translationsAvailable: boolean;
+  onMessagesChange: (messages: {
+    discountText: string;
+    successMessage: string;
+  }) => void;
+  onOpenTranslations: () => void;
+  onShowVariables: () => void;
 }) {
-  const {
-    ADDON_MESSAGE_KEY,
-    bundle,
-    addonDraft,
-    fullPageBundleStyles,
-    markAsDirty,
-    openAddonFooterMultiLanguageModal,
-    ruleMessages,
-    setIsAddonVariablesModalOpen,
-    setRuleMessages,
-    shopLocales,
-  } = flow;
-  const savedAddonMessages =
-    (bundle as any).personalizationData?.addonProducts?.addonsMessaging
-      ?.tier1 || {};
-  const addonMessages = ruleMessages[ADDON_MESSAGE_KEY] || {
-    discountText: savedAddonMessages.ineligibleState || "",
-    successMessage: savedAddonMessages.eligibleState || "",
-  };
-  const hasAddonTiers =
-    Array.isArray(addonDraft.addonTiers) && addonDraft.addonTiers.length > 0;
-
-  if (!hasAddonTiers) {
+  if (!hasTiers) {
     return null;
   }
 
   return (
     <>
-      <DisabledConfigurationRegion disabled={!addonDraft.addonProductsEnabled}>
-        <div
-          className={`${fullPageBundleStyles.card} ${fullPageBundleStyles.addonsFooterCard}`}
-        >
-          <div className={fullPageBundleStyles.panelHeader}>
-            <h3 className={fullPageBundleStyles.panelTitle}>
+      <DisabledConfigurationRegion disabled={!enabled}>
+        <div className={`${styles.card} ${styles.addonsFooterCard}`}>
+          <div className={styles.panelHeader}>
+            <h3 className={styles.panelTitle}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonfootermessaging.footerMessaging"
               )}
@@ -49,7 +41,7 @@ export function FpbAddonFooterMessaging({
               <s-button
                 variant="tertiary"
                 icon="code"
-                onClick={() => setIsAddonVariablesModalOpen(true)}
+                onClick={onShowVariables}
               >
                 {translateAdmin(
                   "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.showVariables"
@@ -58,12 +50,8 @@ export function FpbAddonFooterMessaging({
               <s-button
                 variant="secondary"
                 icon="language-translate"
-                disabled={
-                  !addonDraft.addonProductsEnabled ||
-                  shopLocales.length === 0 ||
-                  undefined
-                }
-                onClick={openAddonFooterMultiLanguageModal}
+                disabled={!enabled || !translationsAvailable || undefined}
+                onClick={onOpenTranslations}
               >
                 {translateAdmin(
                   "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
@@ -79,20 +67,13 @@ export function FpbAddonFooterMessaging({
             </h4>
             <s-text-field
               label={translateAdmin("adminAttributes.messageWhenRuleNotMet")}
-              value={addonMessages.discountText}
+              value={messages.discountText}
               placeholder={translateAdmin(
                 "adminAttributes.addAddonsConditionDiffMoreProductSToClaimAddonsDiscountValueAddonsDiscountValueUnit"
               )}
               onInput={(e) => {
                 const value = (e.target as HTMLInputElement).value;
-                setRuleMessages((prev: Record<string, any>) => ({
-                  ...prev,
-                  [ADDON_MESSAGE_KEY]: {
-                    ...(prev[ADDON_MESSAGE_KEY] || addonMessages),
-                    discountText: value,
-                  },
-                }));
-                markAsDirty();
+                onMessagesChange({ ...messages, discountText: value });
               }}
               autocomplete="off"
             />
@@ -100,20 +81,13 @@ export function FpbAddonFooterMessaging({
               label={translateAdmin(
                 "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
               )}
-              value={addonMessages.successMessage}
+              value={messages.successMessage}
               placeholder={translateAdmin(
                 "adminAttributes.congratsYouAreEligibleForAddonsDiscountValueAddonsDiscountValueUnitOffOn"
               )}
               onInput={(e) => {
                 const value = (e.target as HTMLInputElement).value;
-                setRuleMessages((prev: Record<string, any>) => ({
-                  ...prev,
-                  [ADDON_MESSAGE_KEY]: {
-                    ...(prev[ADDON_MESSAGE_KEY] || addonMessages),
-                    successMessage: value,
-                  },
-                }));
-                markAsDirty();
+                onMessagesChange({ ...messages, successMessage: value });
               }}
               autocomplete="off"
             />

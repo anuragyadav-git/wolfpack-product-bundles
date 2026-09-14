@@ -2,8 +2,14 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 import { action as fpbAction } from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route";
 import { action as ppbAction } from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/route";
 import { authenticate } from "../../app/shopify.server";
-import * as fpbHandlers from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers";
-import * as ppbHandlers from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers";
+import * as sharedHandlers from "../../app/services/bundles/bundle-configure-handlers.server";
+import * as fpbSaveHandler from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server";
+import * as fpbSyncHandler from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/sync-product.server";
+import * as fpbTemplateHandler from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/page-handlers.server";
+import * as ppbSaveHandler from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server";
+import * as ppbSyncHandler from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/sync-product.server";
+import * as ppbTemplateHandler from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/design-template.server";
+import * as ppbPlacementHandlers from "../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/widget-placement.server";
 import * as storefrontSyncAction from "../../app/routes/app/shared/storefront-sync-action.server";
 import * as subscriptionDiscovery from "../../app/services/bundle-subscription-discovery.server";
 
@@ -16,25 +22,41 @@ jest.mock("../../app/db.server", () => ({
   default: {},
 }));
 
-jest.mock("../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers", () => ({
-  handleSaveBundle: jest.fn(),
+jest.mock("../../app/services/bundles/bundle-configure-handlers.server", () => ({
   handleUpdateBundleStatus: jest.fn(),
-  handleSyncProduct: jest.fn(),
   handleUpdateBundleProduct: jest.fn(),
+  handleGetPages: jest.fn(),
+  handleGetThemeTemplates: jest.fn(),
+  handleGetCurrentTheme: jest.fn(),
+}));
+
+jest.mock("../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server", () => ({
+  handleSaveBundle: jest.fn(),
+}));
+
+jest.mock("../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/sync-product.server", () => ({
+  handleSyncProduct: jest.fn(),
+}));
+
+jest.mock("../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/page-handlers.server", () => ({
   handleUpdateBundleDesignTemplate: jest.fn(),
 }));
 
-jest.mock("../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers", () => ({
+jest.mock("../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server", () => ({
   handleSaveBundle: jest.fn(),
-  handleUpdateBundleStatus: jest.fn(),
+}));
+
+jest.mock("../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/sync-product.server", () => ({
   handleSyncProduct: jest.fn(),
-  handleUpdateBundleProduct: jest.fn(),
-  handleGetThemeTemplates: jest.fn(),
-  handleGetCurrentTheme: jest.fn(),
-  handleEnsureBundleTemplates: jest.fn(),
+}));
+
+jest.mock("../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/design-template.server", () => ({
+  handleUpdateBundleDesignTemplate: jest.fn(),
+}));
+
+jest.mock("../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/widget-placement.server", () => ({
   handleValidateWidgetPlacement: jest.fn(),
   handleAssignProductTemplate: jest.fn(),
-  handleUpdateBundleDesignTemplate: jest.fn(),
 }));
 
 jest.mock("../../app/services/bundle-subscription-discovery.server", () => ({
@@ -51,8 +73,8 @@ jest.mock("../../app/routes/app/shared/bundle-preview-action.server", () => ({
   handleRecordBundlePreview: jest.fn(),
 }));
 
-jest.mock("../../app/components/shared/FilePicker", () => ({
-  FilePicker: () => null,
+jest.mock("../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: () => null,
 }));
 
 jest.mock("../../app/components/bundle-configure/BundleGuidedTour", () => ({
@@ -71,6 +93,24 @@ jest.mock("@shopify/app-bridge-react", () => ({
 const mockRequireAdminSession = authenticate.admin as jest.MockedFunction<typeof authenticate.admin>;
 const mockSession = { shop: "test-shop.myshopify.com", accessToken: "token" } as any;
 const mockAdmin = { graphql: jest.fn() } as any;
+const fpbHandlers = {
+  handleSaveBundle: fpbSaveHandler.handleSaveBundle,
+  handleUpdateBundleStatus: sharedHandlers.handleUpdateBundleStatus,
+  handleSyncProduct: fpbSyncHandler.handleSyncProduct,
+  handleUpdateBundleProduct: sharedHandlers.handleUpdateBundleProduct,
+  handleUpdateBundleDesignTemplate: fpbTemplateHandler.handleUpdateBundleDesignTemplate,
+};
+const ppbHandlers = {
+  handleSaveBundle: ppbSaveHandler.handleSaveBundle,
+  handleUpdateBundleStatus: sharedHandlers.handleUpdateBundleStatus,
+  handleSyncProduct: ppbSyncHandler.handleSyncProduct,
+  handleUpdateBundleProduct: sharedHandlers.handleUpdateBundleProduct,
+  handleGetThemeTemplates: sharedHandlers.handleGetThemeTemplates,
+  handleGetCurrentTheme: sharedHandlers.handleGetCurrentTheme,
+  handleValidateWidgetPlacement: ppbPlacementHandlers.handleValidateWidgetPlacement,
+  handleUpdateBundleDesignTemplate: ppbTemplateHandler.handleUpdateBundleDesignTemplate,
+  handleAssignProductTemplate: ppbPlacementHandlers.handleAssignProductTemplate,
+};
 
 function makeActionArgs(intent: string, extras: Record<string, string> = {}): ActionFunctionArgs {
   const formData = new FormData();
@@ -97,6 +137,19 @@ beforeEach(() => {
 });
 
 describe("FPB configure action dispatch", () => {
+  it("propagates Shopify authentication responses before action handling", async () => {
+    const authResponse = new Response(null, {
+      status: 302,
+      headers: { Location: "https://admin.shopify.com" },
+    });
+    mockRequireAdminSession.mockRejectedValue(authResponse);
+
+    await expect(fpbAction(makeActionArgs("saveBundle"))).rejects.toBe(
+      authResponse,
+    );
+    expect(fpbHandlers.handleSaveBundle).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["saveBundle", "handleSaveBundle"],
     ["updateBundleStatus", "handleUpdateBundleStatus"],
@@ -168,6 +221,19 @@ describe("FPB configure action dispatch", () => {
 });
 
 describe("PPB configure action dispatch", () => {
+  it("propagates Shopify authentication responses before action handling", async () => {
+    const authResponse = new Response(null, {
+      status: 302,
+      headers: { Location: "https://admin.shopify.com" },
+    });
+    mockRequireAdminSession.mockRejectedValue(authResponse);
+
+    await expect(ppbAction(makeActionArgs("saveBundle"))).rejects.toBe(
+      authResponse,
+    );
+    expect(ppbHandlers.handleSaveBundle).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["saveBundle", "handleSaveBundle"],
     ["updateBundleStatus", "handleUpdateBundleStatus"],
@@ -175,7 +241,6 @@ describe("PPB configure action dispatch", () => {
     ["updateBundleProduct", "handleUpdateBundleProduct"],
     ["getThemeTemplates", "handleGetThemeTemplates"],
     ["getCurrentTheme", "handleGetCurrentTheme"],
-    ["ensureBundleTemplates", "handleEnsureBundleTemplates"],
     ["validateWidgetPlacement", "handleValidateWidgetPlacement"],
     ["updateBundleDesignTemplate", "handleUpdateBundleDesignTemplate"],
     ["assignProductTemplate", "handleAssignProductTemplate"],
@@ -198,6 +263,13 @@ describe("PPB configure action dispatch", () => {
 
     expect(await response.json()).toEqual({ success: true, intent: "validateSellingPlanGroups" });
     expect(handler).toHaveBeenCalledWith(mockAdmin, mockSession, "bundle-1", "product_page");
+  });
+
+  it("rejects the retired ensureBundleTemplates intent", async () => {
+    const response = await ppbAction(makeActionArgs("ensureBundleTemplates"));
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual(expect.objectContaining({ success: false }));
   });
 
   it("routes syncBundle to shared storefront sync with product_page type", async () => {

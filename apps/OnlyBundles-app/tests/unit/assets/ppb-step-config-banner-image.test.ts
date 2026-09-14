@@ -89,13 +89,13 @@ describe('PPB Step Config banner image', () => {
     expect(image?.getAttribute('alt')).toBe('Step 1');
   });
 
-  it('keeps bannerImageUrl as a fallback image source', () => {
+  it('does not read the retired PPB bannerImageUrl field', () => {
     const banner = ProductPageLayoutShellMethods._createStepBannerImage({
       name: 'Step 2',
       bannerImageUrl: 'https://cdn.example.test/banner.png',
     });
 
-    expect(banner?.querySelector('img')?.getAttribute('src')).toBe('https://cdn.example.test/banner.png');
+    expect(banner).toBeNull();
   });
 
   it('does not create a banner image without an image source', () => {

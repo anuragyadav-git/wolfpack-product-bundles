@@ -7,12 +7,12 @@ export const VARIANT_SELECTOR_MODES = [
 
 export type VariantSelectorMode = (typeof VARIANT_SELECTOR_MODES)[number];
 
-export interface VariantSelectorConfiguration {
+interface VariantSelectorConfiguration {
   variantSelectorMode: VariantSelectorMode;
   swatchTooltipEnabled: boolean;
 }
 
-export interface VariantSelectorConfigurationInput {
+interface VariantSelectorConfigurationInput {
   variantSelectorMode?: unknown;
   swatchTooltipEnabled?: unknown;
 }

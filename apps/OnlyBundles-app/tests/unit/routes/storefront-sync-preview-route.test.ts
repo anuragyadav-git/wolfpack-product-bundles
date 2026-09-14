@@ -71,9 +71,12 @@ describe("/app/bundles/:bundleType/configure/:bundleId/prepare-preview", () => {
     );
   });
 
-  it("rejects invalid bundle route params before auth work", async () => {
+  it("authenticates before rejecting invalid bundle route params", async () => {
+    const request = new Request("https://app.example.com/app/bad", {
+      method: "POST",
+    });
     const response = await action({
-      request: new Request("https://app.example.com/app/bad", { method: "POST" }),
+      request,
       params: { bundleType: "unknown", bundleId: "bundle-1" },
       context: {},
     });
@@ -85,14 +88,32 @@ describe("/app/bundles/:bundleType/configure/:bundleId/prepare-preview", () => {
       statusCode: 400,
       error: "Invalid bundle preview route",
     });
-    expect(mockRequireAdminSession).not.toHaveBeenCalled();
+    expect(mockRequireAdminSession).toHaveBeenCalledWith(request);
   });
 
-  it("does not allow GET requests", async () => {
+  it("propagates authentication failure before route validation", async () => {
+    const authFailure = new Response(null, { status: 401 });
+    mockRequireAdminSession.mockRejectedValue(authFailure);
+
+    await expect(
+      action({
+        request: new Request("https://app.example.com/app/bad", {
+          method: "POST",
+        }),
+        params: { bundleType: "unknown", bundleId: "bundle-1" },
+        context: {},
+      }),
+    ).rejects.toBe(authFailure);
+
+    expect(mockHandlePrepareStorefrontPreview).not.toHaveBeenCalled();
+  });
+
+  it("authenticates before rejecting GET requests", async () => {
+    const request = new Request(
+      "https://app.example.com/app/bundles/full-page-bundle/configure/bundle-1/prepare-preview",
+    );
     const response = await loader({
-      request: new Request(
-        "https://app.example.com/app/bundles/full-page-bundle/configure/bundle-1/prepare-preview",
-      ),
+      request,
       params: { bundleType: "full-page-bundle", bundleId: "bundle-1" },
       context: {},
     });
@@ -100,5 +121,6 @@ describe("/app/bundles/:bundleType/configure/:bundleId/prepare-preview", () => {
 
     expect(response.status).toBe(405);
     expect(body).toEqual({ success: false, error: "Method not allowed" });
+    expect(mockRequireAdminSession).toHaveBeenCalledWith(request);
   });
 });

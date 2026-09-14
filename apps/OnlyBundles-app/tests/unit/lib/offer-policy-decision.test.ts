@@ -304,3 +304,35 @@ describe('buildOfferDecisionMarker', () => {
     });
   });
 });
+
+describe('recurrence follows Shopify local clock predicates across DST', () => {
+  const policy = {
+    scheduleMode: 'recurring' as const, recurrenceFrequency: 'weekly' as const,
+    recurrenceTimezone: 'America/Toronto', recurrenceAnchorDate: '2026-11-01',
+    recurrenceWindowStartMinute: 60, recurrenceWindowEndMinute: 90,
+    recurrenceTermination: 'never' as const,
+  };
+  it.each([
+    ['2026-11-01T05:15:00Z', true, '2026-11-01T05:30:00.000Z'],
+    ['2026-11-01T05:45:00Z', false, '2026-11-01T06:00:00.000Z'],
+    ['2026-11-01T06:15:00Z', true, '2026-11-01T06:30:00.000Z'],
+    ['2026-11-01T06:30:00Z', false, '2026-11-08T06:00:00.000Z'],
+  ])('re-evaluates the repeated hour at %s', (at, effective, nextTransitionAt) => {
+    expect(resolveOfferSchedule(policy, new Date(at))).toMatchObject({ effective, nextTransitionAt });
+  });
+  it('temporarily stops a window when the clock rolls back before its start', () => {
+    const shifted = { ...policy, recurrenceWindowStartMinute: 90, recurrenceWindowEndMinute: 150 };
+    expect(resolveOfferSchedule(shifted, new Date('2026-11-01T05:45:00Z'))).toMatchObject({ effective: true, nextTransitionAt: '2026-11-01T06:00:00.000Z' });
+    expect(resolveOfferSchedule(shifted, new Date('2026-11-01T06:15:00Z'))).toMatchObject({ effective: false, nextTransitionAt: '2026-11-01T06:30:00.000Z' });
+  });
+  it('starts a partly skipped window when the clock first enters it', () => {
+    const spring = { ...policy, recurrenceAnchorDate: '2026-03-08', recurrenceWindowStartMinute: 150, recurrenceWindowEndMinute: 210 };
+    expect(resolveOfferSchedule(spring, new Date('2026-03-08T06:45:00Z'))).toMatchObject({ effective: false, nextTransitionAt: '2026-03-08T07:00:00.000Z' });
+    expect(resolveOfferSchedule(spring, new Date('2026-03-08T07:00:00Z'))).toMatchObject({ effective: true, nextTransitionAt: '2026-03-08T07:30:00.000Z' });
+  });
+  it('never authorizes an entirely skipped window or extends its run count', () => {
+    const spring = { ...policy, recurrenceAnchorDate: '2026-03-08', recurrenceWindowStartMinute: 120, recurrenceWindowEndMinute: 150 };
+    expect(resolveOfferSchedule(spring, new Date('2026-03-08T06:45:00Z'))).toMatchObject({ effective: false, nextTransitionAt: '2026-03-15T06:00:00.000Z' });
+    expect(resolveOfferSchedule({ ...spring, recurrenceTermination: 'after_runs', recurrenceRunCount: 1 }, new Date('2026-03-08T06:45:00Z'))).toEqual({ effective: false, state: 'expired', nextTransitionAt: null });
+  });
+});

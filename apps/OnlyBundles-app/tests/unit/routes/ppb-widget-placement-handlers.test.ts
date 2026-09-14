@@ -3,7 +3,7 @@ import {
   handleValidateWidgetPlacement,
 } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/widget-placement.server";
 import db from "../../../app/db.server";
-import { WidgetInstallationService } from "../../../app/services/widget-installation.server";
+import { WidgetInstallationService } from "../../../app/services/widget-installation/widget-installation-core.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -19,7 +19,7 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/widget-installation.server", () => ({
+jest.mock("../../../app/services/widget-installation/widget-installation-core.server", () => ({
   WidgetInstallationService: {
     validateProductBundleWidgetSetup: jest.fn(),
   },

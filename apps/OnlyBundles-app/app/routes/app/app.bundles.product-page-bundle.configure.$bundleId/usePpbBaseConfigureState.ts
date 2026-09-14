@@ -42,12 +42,7 @@ interface SubscriptionValidationResponse {
 
 export function usePpbBaseConfigureState() {
   const loaderData = useLoaderData<LoaderData>();
-  const bundle =
-    loaderData.bundle as unknown as import("../../../hooks/useBundleConfigurationState").BundleData & {
-      loadingGif?: string | null;
-      shopifyProductHandle?: string;
-      bundleSubscriptionConfig?: unknown;
-    };
+  const bundle = loaderData.bundle;
   const {
     bundleProduct: loadedBundleProduct,
     shop,
@@ -55,7 +50,8 @@ export function usePpbBaseConfigureState() {
     blockHandle,
     shopLocales = [],
     shopCurrencyCode,
-  } = loaderData as any;
+    isFreePlan = true,
+  } = loaderData;
   const themeEditorUrl = buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed");
   const navigate = useNavigate();
   const shopify = useAppBridge();
@@ -82,8 +78,8 @@ export function usePpbBaseConfigureState() {
   const isSaveInFlight = fetcher.state !== "idle";
   const saveBarRef = useRef<UISaveBarElement | null>(null);
   const triggerSaveBarIrritation = useCallback(() => {
-    void saveBarRef.current?.show?.();
-  }, []);
+    void shopify.saveBar.leaveConfirmation();
+  }, [shopify]);
   const blockConfigurationChangeWhileSaving = useCallback(
     (event: SyntheticEvent) => {
       handleAdminSaveLockedEvent(
@@ -96,7 +92,7 @@ export function usePpbBaseConfigureState() {
   );
   const configState = useBundleConfigurationState({
     bundle,
-    bundleProduct: loadedBundleProduct,
+    bundleProduct: loadedBundleProduct ?? null,
     shopify,
     shopCurrencyCode,
   });
@@ -148,6 +144,9 @@ export function usePpbBaseConfigureState() {
     operationAlert,
     setOperationAlert,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
   } = configState;
   const setSubscriptionConfig = useCallback(
     (
@@ -228,12 +227,6 @@ export function usePpbBaseConfigureState() {
     setCurrentAppEmbedEnabled(appEmbedEnabled);
     return appEmbedEnabled;
   }, [shopify]);
-  const [loadingGif, setLoadingGif] = useState<string | null>(
-    bundle.loadingGif ?? null
-  );
-  const originalLoadingGifRef = useRef<string | null>(
-    bundle.loadingGif ?? null
-  );
   const [showProductPrices, setShowProductPrices] = useState<boolean>(
     (bundle as any).showProductPrices ?? true
   );
@@ -363,11 +356,11 @@ export function usePpbBaseConfigureState() {
     operationAlert,
     setOperationAlert,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
     parentProductStatusUi,
     refreshParentProductStatusFromShopify,
-    loadingGif,
-    setLoadingGif,
-    originalLoadingGifRef,
     showProductPrices,
     setShowProductPrices,
     originalShowProductPricesRef,
@@ -386,6 +379,7 @@ export function usePpbBaseConfigureState() {
     textOverridesByLocale,
     setTextOverridesByLocale,
     originalTextOverridesByLocaleRef,
+    isFreePlan,
     ...specificLinkOffer,
   };
 }

@@ -494,7 +494,7 @@
 .layout-sidebar[data-fpb-design-preset="HORIZONTAL"] .vs-options {
   position: absolute;
   inset: calc(100% + 0.25rem) 0 auto;
-  z-index: 50;
+  z-index: var(--fpb-variant-options-z-index, 10000);
   display: grid;
   width: 100%;
   max-height: 50dvh;
@@ -506,6 +506,17 @@
   border-radius: var(--bundle-side-panel-btn-radius, 0.3125rem);
   background: var(--bundle-product-card-bg, #fff);
   box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.14);
+}
+
+.layout-sidebar[data-fpb-design-preset="HORIZONTAL"]
+  .product-card:has(.vs-options:not([hidden])) {
+  z-index: var(--fpb-variant-options-z-index, 10000);
+}
+
+@container fpb-shell (max-width: 799px) {
+  .layout-sidebar[data-fpb-design-preset="HORIZONTAL"] .vs-options {
+    max-height: 40dvh;
+  }
 }
 
 .layout-sidebar[data-fpb-design-preset="HORIZONTAL"] .vs-options[hidden] {

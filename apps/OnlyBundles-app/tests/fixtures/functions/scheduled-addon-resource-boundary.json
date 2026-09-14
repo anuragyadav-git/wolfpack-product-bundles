@@ -1,0 +1,344 @@
+{
+  "presentmentCurrencyRate": "1.0",
+  "localization": {
+    "country": {
+      "isoCode": "CA"
+    }
+  },
+  "shop": {
+    "ppbPolicyRevisions": {
+      "value": {
+        "cmf12345678901234567890123": {
+          "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "pricingMode": "scheduled"
+        }
+      }
+    },
+    "localTime": {
+      "date": "2026-09-14",
+      "windowStarted": true,
+      "windowEnded": false
+    }
+  },
+  "cart": {
+    "lines": [
+      {
+        "id": "gid://shopify/CartLine/1",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_0"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NjciLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.y9FUbpYRkpFa5XkOQ2_GN3X96K_5zx3HLSdMnN5jls4"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234567",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/2",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_1"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NjgiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.h6MO-1f361Jui3-opyLu0XDAc0qdJbTG1Gv8HxDWnDM"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234568",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/3",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_2"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NjkiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.FliVxa4Gdg9mCqPHqxkzNbZZPTLL1CCuz9e0Se2kGUg"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234569",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/4",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_3"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NzAiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.iuehly_QYbNN57y2tHlP3fdg4WV3qF1oJKmaN_SwneA"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234570",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/5",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_4"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NzEiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.2tpv7dYVnHIz8vfZc-34BFxwqXczUC-ApKA352BX0yI"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234571",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/6",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_5"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NzIiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.UquO8RNU1UMhm2Y7itUZPLM88qyXNgZvFgjSaenckO0"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234572",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/7",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_6"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NzMiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.-Gw4Pzu58wY2qUK_ps5CL0m0LKqp0jt9KJdgqUql4ZQ"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234573",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/8",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_7"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NzQiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.eom7EXWfgBWCh57FLOL5z3K_-NcgNwuiSAkxCc4-T1I"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234574",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/9",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_8"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NzUiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.5G2Ezc0MzH1Ctc2sNM871xR5iodVB0ai5zre9I2jOH8"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234575",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      },
+      {
+        "id": "gid://shopify/CartLine/10",
+        "quantity": 1,
+        "wolfpackProductBundleOfferId": {
+          "value": "group0_9"
+        },
+        "stepType": {
+          "value": "addon:PERCENTAGE:20"
+        },
+        "lineAuthorization": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoibGluZSIsInZhcmlhbnRJZCI6ImdpZDovL3Nob3BpZnkvUHJvZHVjdFZhcmlhbnQvNDU2Nzg5MDEyMzQ1NzYiLCJyb2xlIjoiYWRkb24iLCJncm91cElkIjoiY21mOTg3NjU0MzIxMDk4NzY1NDMyMTA5ODciLCJtYXhRdWFudGl0eSI6MSwibWF4RGlzY291bnRQZXJjZW50YWdlIjoyMCwicHJvZHVjdElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzEyMzQ1Njc4OTAxMjM0In0.scAP7bXLY7Wggjrk8airywAtWVy6B4KdYu3VjvzOz_8"
+        },
+        "sellingPlanAllocation": null,
+        "cost": {
+          "amountPerQuantity": {
+            "amount": "10.00"
+          }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/45678901234576",
+          "product": {
+            "id": "gid://shopify/Product/12345678901234"
+          },
+          "component_pricing": null
+        },
+        "runtimeToken": {
+          "value": "eyJ2ZXJzaW9uIjoyLCJzaG9wIjoid29sZnBhY2tkZW1vc3RvcmUubXlzaG9waWZ5LmNvbSIsImJ1bmRsZUlkIjoiY21mMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjMiLCJyZXZpc2lvbiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJraW5kIjoiYnVuZGxlIiwicGFyZW50VmFyaWFudElkIjoiZ2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC85IiwiY291bnRyeVJ1bGUiOiJpbmNsdWRlOkNBLFVTLEdCLEFVLERFLEZSLElOLEpQLE5aLEJSLE1YIiwiZ3JvdXBzIjpbeyJpZCI6ImNtZjk4NzY1NDMyMTA5ODc2NTQzMjEwOTg3Iiwicm9sZSI6ImFkZG9uIiwibWluUXVhbnRpdHkiOjEsIm1heFF1YW50aXR5IjoxMH1dLCJwcmljZUFkanVzdG1lbnQiOnsibWV0aG9kIjoicGVyY2VudGFnZV9vZmYiLCJ2YWx1ZSI6MjB9fQ.mrLdxE9RKWQ3zswtL6a8VMHnuH3ctBaETGxW_u26W54"
+        }
+      }
+    ]
+  },
+  "discount": {
+    "discountClasses": [
+      "PRODUCT"
+    ],
+    "runtimeTokenSecret": {
+      "value": "secret"
+    },
+    "discountRole": {
+      "value": "scheduled_initial"
+    },
+    "scheduledOffer": {
+      "value": "{\"version\":1,\"bundleId\":\"cmf12345678901234567890123\",\"shop\":\"wolfpackdemostore.myshopify.com\",\"parentVariantId\":\"gid://shopify/ProductVariant/9\",\"revision\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"countryRule\":\"include:CA\",\"scheduleMode\":\"recurring\",\"recurrenceFrequency\":\"weekly\",\"recurrenceAnchorDate\":\"2026-09-14\",\"recurrenceTermination\":\"never\",\"windowStart\":\"09:00:00\",\"windowEnd\":\"11:00:00\"}"
+    },
+    "checkoutIntegrationConfig": null
+  },
+  "enteredDiscountCodes": [],
+  "triggeringDiscountCode": null
+}

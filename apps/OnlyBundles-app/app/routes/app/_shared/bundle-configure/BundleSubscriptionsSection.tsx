@@ -19,36 +19,13 @@ import { AdminWarningGroup } from "../../../../components/AdminWarningGroup";
 import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
 import { TUTORIAL_LINKS } from "../../../../lib/tutorial-links";
+import { BundleSubscriptionPlanTiers } from "./BundleSubscriptionPlanTiers";
+import { BundleSubscriptionConfiguration } from "./BundleSubscriptionConfiguration";
+import type { BundleSubscriptionsSectionProps } from "./bundle-subscription-section.types";
 
-type SubscriptionValidationResponse = {
-  success?: boolean;
-  isValid?: boolean;
-  groups?: BundleSubscriptionConfigV1["selectedGroup"][];
-  message?: string | null;
-  error?: string;
-};
-
-type BundleSubscriptionsSectionProps = {
-  activeSection: string;
-  bundle: { personalizationData?: unknown };
-  pricingState: { discountType?: string | null };
-  setShowSubscriptionSetupGuide: (
-    value: boolean | ((current: boolean) => boolean)
-  ) => void;
-  showSubscriptionSetupGuide: boolean;
-  shopLocales: Array<{ locale: string; name: string; primary: boolean }>;
-  stepsState: { steps: Array<{ isFreeGift?: boolean | null }> };
-  subscriptionConfig: BundleSubscriptionConfigV1;
-  setSubscriptionConfig: (
-    updater: (current: BundleSubscriptionConfigV1) => BundleSubscriptionConfigV1
-  ) => void;
-  subscriptionFetcher: {
-    data?: SubscriptionValidationResponse;
-    state: string;
-    submit: (formData: FormData, options: { method: string }) => void;
-  };
-  validationErrors: Record<string, string | undefined>;
-};
+type BundleSubscriptionGroup = NonNullable<
+  BundleSubscriptionConfigV1["selectedGroup"]
+>;
 
 export function BundleSubscriptionsSection(
   props: BundleSubscriptionsSectionProps
@@ -70,10 +47,12 @@ export function BundleSubscriptionsSection(
   const [activeTranslationLocale, setActiveTranslationLocale] = useState(
     selectDefaultTranslationLocale(shopLocales)
   );
-  const discoveredGroups =
+  const discoveredGroups: BundleSubscriptionGroup[] =
     subscriptionFetcher.data?.success === true &&
     subscriptionFetcher.data?.isValid === true
-      ? (subscriptionFetcher.data.groups ?? []).filter(Boolean)
+      ? (subscriptionFetcher.data.groups ?? []).filter(
+          (group): group is BundleSubscriptionGroup => Boolean(group)
+        )
       : [];
 
   useEffect(() => {
@@ -100,17 +79,15 @@ export function BundleSubscriptionsSection(
     discoveredGroups.length > 0
       ? discoveredGroups
       : subscriptionConfig.selectedGroup
-      ? [subscriptionConfig.selectedGroup]
-      : [];
+        ? [subscriptionConfig.selectedGroup]
+        : [];
   const subscriptionsBlocked = compatibilityIssues.length > 0;
   const uniquePlanRows = subscriptionConfig.selectedGroup
     ? Array.from(
         new Map(
-          (subscriptionConfig.selectedGroup.plans ?? [])
-            .filter(
-              (plan: any) => typeof plan?.id === "string" && plan.id.length > 0
-            )
-            .map((plan: any) => [plan.id, plan])
+          subscriptionConfig.selectedGroup.plans
+            .filter((plan) => plan.id.length > 0)
+            .map((plan) => [plan.id, plan])
         ).values()
       )
     : [];
@@ -118,8 +95,8 @@ export function BundleSubscriptionsSection(
     validation?.success === false
       ? validation.error
       : validation?.isValid === false
-      ? validation.message ?? SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE
-      : null;
+        ? validation.message ?? SUBSCRIPTION_NO_COMMON_PLAN_MESSAGE
+        : null;
   const subscriptionWarnings = [
     ...(subscriptionsBlocked
       ? [
@@ -143,15 +120,10 @@ export function BundleSubscriptionsSection(
       : []),
   ];
   const setGroup = (groupId: string) => {
-    const selectedGroup =
-      groups.find((group: any) => group?.id === groupId) ?? null;
-    setSubscriptionConfig((current: any) => {
+    const selectedGroup = groups.find((group) => group.id === groupId) ?? null;
+    setSubscriptionConfig((current) => {
       const selectedPlanIds = Array.from(
-        new Set(
-          (selectedGroup?.plans ?? [])
-            .map((plan: any) => plan?.id)
-            .filter((id: any) => typeof id === "string" && id.length > 0)
-        )
+        new Set((selectedGroup?.plans ?? []).map((plan) => plan.id))
       );
       return {
         ...current,
@@ -245,7 +217,7 @@ export function BundleSubscriptionsSection(
                       undefined
                     }
                     onChange={(event) =>
-                      setSubscriptionConfig((current: any) => ({
+                      setSubscriptionConfig((current) => ({
                         ...current,
                         enabled: (event.target as HTMLInputElement).checked,
                       }))
@@ -323,7 +295,7 @@ export function BundleSubscriptionsSection(
                             )
                           }
                         >
-                          {groups.map((group: any) => (
+                          {groups.map((group) => (
                             <s-choice key={group.id} value={group.id}>
                               {group.name}
                             </s-choice>
@@ -399,7 +371,7 @@ export function BundleSubscriptionsSection(
                     disabled={!subscriptionConfig.enabled || undefined}
                     error={validationErrors["subscriptions.copy.title"]}
                     onInput={(event) =>
-                      setSubscriptionConfig((current: any) => ({
+                      setSubscriptionConfig((current) => ({
                         ...current,
                         copy: {
                           ...current.copy,
@@ -413,507 +385,22 @@ export function BundleSubscriptionsSection(
             </s-stack>
           </s-section>
 
-          {subscriptionConfig.selectedGroup ? (
-            <DisabledConfigurationRegion disabled={!subscriptionConfig.enabled}>
-              <s-section>
-                <s-stack direction="block" gap="base">
-                  <s-grid
-                    gridTemplateColumns="minmax(0, 1fr) auto"
-                    gap="base"
-                    alignItems="center"
-                  >
-                    <s-heading>
-                      {translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.planTiers"
-                      )}
-                    </s-heading>
-                    <s-button
-                      variant="secondary"
-                      icon={getConfigureActionIcon("refresh")}
-                      loading={
-                        subscriptionFetcher.state === "submitting" || undefined
-                      }
-                      disabled={
-                        subscriptionFetcher.state !== "idle" ||
-                        subscriptionsBlocked ||
-                        undefined
-                      }
-                      onClick={() => {
-                        const formData = new FormData();
-                        formData.append("intent", "validateSellingPlanGroups");
-                        subscriptionFetcher.submit(formData, {
-                          method: "post",
-                        });
-                      }}
-                    >
-                      {translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.refreshPlan"
-                      )}
-                    </s-button>
-                  </s-grid>
-
-                  {uniquePlanRows.map((plan: any) => {
-                    const planCopy = subscriptionConfig.planCopy[plan.id] ?? {
-                      displayName: plan.sourceName,
-                      discountPill: "",
-                      description: "",
-                    };
-                    return (
-                      <s-box
-                        key={plan.id}
-                        padding="base"
-                        background="subdued"
-                        borderRadius="base"
-                      >
-                        <s-stack direction="block" gap="base">
-                          <s-grid
-                            gridTemplateColumns="minmax(0, 1fr) minmax(7.5rem, 0.45fr)"
-                            gap="base"
-                          >
-                            <s-text-field
-                              label={translateAdmin(
-                                "adminAttributes.planNameInDropdown"
-                              )}
-                              value={planCopy.displayName}
-                              error={
-                                validationErrors[
-                                  `subscriptions.planCopy.${plan.id}.displayName`
-                                ]
-                              }
-                              onInput={(event) =>
-                                setSubscriptionConfig((current: any) => ({
-                                  ...current,
-                                  planCopy: {
-                                    ...current.planCopy,
-                                    [plan.id]: {
-                                      ...current.planCopy[plan.id],
-                                      displayName: (
-                                        event.target as HTMLInputElement
-                                      ).value,
-                                    },
-                                  },
-                                }))
-                              }
-                            />
-                            <s-text-field
-                              label={translateAdmin(
-                                "adminAttributes.discountPill"
-                              )}
-                              value={planCopy.discountPill}
-                              onInput={(event) =>
-                                setSubscriptionConfig((current: any) => ({
-                                  ...current,
-                                  planCopy: {
-                                    ...current.planCopy,
-                                    [plan.id]: {
-                                      ...current.planCopy[plan.id],
-                                      discountPill: (
-                                        event.target as HTMLInputElement
-                                      ).value,
-                                    },
-                                  },
-                                }))
-                              }
-                            />
-                          </s-grid>
-                          <s-divider />
-                          <s-text-area
-                            label={translateAdmin(
-                              "adminAttributes.subscriptionOptionDescription"
-                            )}
-                            value={planCopy.description}
-                            onInput={(event) =>
-                              setSubscriptionConfig((current: any) => ({
-                                ...current,
-                                planCopy: {
-                                  ...current.planCopy,
-                                  [plan.id]: {
-                                    ...current.planCopy[plan.id],
-                                    description: (
-                                      event.target as HTMLTextAreaElement
-                                    ).value,
-                                  },
-                                },
-                              }))
-                            }
-                          />
-                        </s-stack>
-                      </s-box>
-                    );
-                  })}
-                </s-stack>
-              </s-section>
-            </DisabledConfigurationRegion>
-          ) : null}
-
-          {subscriptionConfig.selectedGroup ? (
-            <DisabledConfigurationRegion disabled={!subscriptionConfig.enabled}>
-              <s-section>
-                <s-stack direction="block" gap="base">
-                  <s-grid
-                    gridTemplateColumns="minmax(0, 1fr) auto"
-                    gap="base"
-                    alignItems="center"
-                  >
-                    <s-stack direction="block" gap="small">
-                      <s-heading>
-                        {translateAdmin(
-                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.configurations"
-                        )}
-                      </s-heading>
-                      <s-paragraph>
-                        {translateAdmin(
-                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.configureTheSettingsForTheSubscriptionBundle"
-                        )}
-                      </s-paragraph>
-                    </s-stack>
-                    <s-button
-                      variant="tertiary"
-                      tone="neutral"
-                      icon={getConfigureActionIcon("translate")}
-                      disabled={
-                        shopLocales.length === 0 ||
-                        !subscriptionConfig.selectedGroup ||
-                        undefined
-                      }
-                      onClick={() => setTranslationModalOpen(true)}
-                    >
-                      {translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
-                      )}
-                    </s-button>
-                  </s-grid>
-
-                  <s-switch
-                    label={translateAdmin(
-                      "adminAttributes.enableRecurringDiscounts"
-                    )}
-                    checked={
-                      subscriptionConfig.recurringBundleDiscount || undefined
-                    }
-                    onChange={(event) =>
-                      setSubscriptionConfig((current: any) => ({
-                        ...current,
-                        recurringBundleDiscount: (
-                          event.target as HTMLInputElement
-                        ).checked,
-                      }))
-                    }
-                  />
-                  <s-switch
-                    label={translateAdmin("adminAttributes.oneTimePurchase")}
-                    checked={
-                      subscriptionConfig.oneTimePurchase.enabled || undefined
-                    }
-                    onChange={(event) =>
-                      setSubscriptionConfig((current: any) => {
-                        const enabled = (event.target as HTMLInputElement)
-                          .checked;
-                        return {
-                          ...current,
-                          oneTimePurchase: {
-                            ...current.oneTimePurchase,
-                            enabled,
-                          },
-                          defaultPurchaseOption: enabled
-                            ? current.defaultPurchaseOption
-                            : getDefaultPurchaseOptionFromOneTimeToggle(
-                                current,
-                                false
-                              ),
-                        };
-                      })
-                    }
-                  />
-                  <DisabledConfigurationRegion
-                    disabled={!subscriptionConfig.oneTimePurchase.enabled}
-                  >
-                    <s-stack direction="block" gap="base">
-                      <s-text-field
-                        label={translateAdmin(
-                          "adminAttributes.oneTimePurchaseLabel"
-                        )}
-                        value={subscriptionConfig.oneTimePurchase.title}
-                        disabled={
-                          !subscriptionConfig.oneTimePurchase.enabled ||
-                          undefined
-                        }
-                        error={
-                          validationErrors[
-                            "subscriptions.oneTimePurchase.title"
-                          ]
-                        }
-                        onInput={(event) =>
-                          setSubscriptionConfig((current: any) => ({
-                            ...current,
-                            oneTimePurchase: {
-                              ...current.oneTimePurchase,
-                              title: (event.target as HTMLInputElement).value,
-                            },
-                          }))
-                        }
-                      />
-                      <s-text-area
-                        label={translateAdmin(
-                          "adminAttributes.oneTimePurchaseDescription"
-                        )}
-                        value={subscriptionConfig.oneTimePurchase.description}
-                        disabled={
-                          !subscriptionConfig.oneTimePurchase.enabled ||
-                          undefined
-                        }
-                        onInput={(event) =>
-                          setSubscriptionConfig((current: any) => ({
-                            ...current,
-                            oneTimePurchase: {
-                              ...current.oneTimePurchase,
-                              description: (event.target as HTMLTextAreaElement)
-                                .value,
-                            },
-                          }))
-                        }
-                      />
-                      <s-checkbox
-                        label={translateAdmin(
-                          "adminAttributes.makeOneTimePurchaseSelectedByDefault"
-                        )}
-                        disabled={
-                          !subscriptionConfig.oneTimePurchase.enabled ||
-                          undefined
-                        }
-                        checked={
-                          subscriptionConfig.defaultPurchaseOption.kind ===
-                            "one_time" || undefined
-                        }
-                        error={
-                          validationErrors[
-                            "subscriptions.defaultPurchaseOption"
-                          ]
-                        }
-                        onChange={(event) =>
-                          setSubscriptionConfig((current) => ({
-                            ...current,
-                            defaultPurchaseOption:
-                              getDefaultPurchaseOptionFromOneTimeToggle(
-                                current,
-                                (event.target as HTMLInputElement).checked
-                              ),
-                          }))
-                        }
-                      />
-                    </s-stack>
-                  </DisabledConfigurationRegion>
-                  <s-text-area
-                    label={translateAdmin(
-                      "adminAttributes.purchaseOptionsSubtitle"
-                    )}
-                    value={subscriptionConfig.copy.subtitle}
-                    onInput={(event) =>
-                      setSubscriptionConfig((current: any) => ({
-                        ...current,
-                        copy: {
-                          ...current.copy,
-                          subtitle: (event.target as HTMLTextAreaElement).value,
-                        },
-                      }))
-                    }
-                  />
-                  <s-text-area
-                    label={translateAdmin(
-                      "adminAttributes.unavailablePlanMessage"
-                    )}
-                    value={subscriptionConfig.copy.unavailableMessage}
-                    onInput={(event) =>
-                      setSubscriptionConfig((current: any) => ({
-                        ...current,
-                        copy: {
-                          ...current.copy,
-                          unavailableMessage: (
-                            event.target as HTMLTextAreaElement
-                          ).value,
-                        },
-                      }))
-                    }
-                  />
-                  <s-checkbox
-                    label={translateAdmin(
-                      "adminAttributes.showSubscriptionDiscountOnProductCards"
-                    )}
-                    checked={
-                      subscriptionConfig.showDiscountOnProductCards || undefined
-                    }
-                    onChange={(event) =>
-                      setSubscriptionConfig((current: any) => ({
-                        ...current,
-                        showDiscountOnProductCards: (
-                          event.target as HTMLInputElement
-                        ).checked,
-                      }))
-                    }
-                  />
-                  {subscriptionConfig.defaultPurchaseOption.kind ===
-                    "selling_plan" &&
-                  subscriptionConfig.selectedPlanIds.length > 1 ? (
-                    <s-choice-list
-                      label={translateAdmin(
-                        "adminAttributes.defaultSubscriptionPlan"
-                      )}
-                      values={[
-                        subscriptionConfig.defaultPurchaseOption.sellingPlanId,
-                      ]}
-                      error={
-                        validationErrors["subscriptions.defaultPurchaseOption"]
-                      }
-                      onChange={(event) => {
-                        const value = (
-                          (event.currentTarget as any).values as
-                            | string[]
-                            | undefined
-                        )?.[0];
-                        if (!value) return;
-                        setSubscriptionConfig((current) => ({
-                          ...current,
-                          defaultPurchaseOption: {
-                            kind: "selling_plan",
-                            sellingPlanId: value,
-                          },
-                        }));
-                      }}
-                    >
-                      {uniquePlanRows
-                        .filter((plan: any) =>
-                          subscriptionConfig.selectedPlanIds.includes(plan.id)
-                        )
-                        .map((plan: any) => (
-                          <s-choice key={plan.id} value={plan.id}>
-                            {subscriptionConfig.planCopy[plan.id]
-                              ?.displayName || plan.sourceName}
-                          </s-choice>
-                        ))}
-                    </s-choice-list>
-                  ) : null}
-
-                  <s-divider />
-                  <s-stack direction="block" gap="small">
-                    <s-heading>
-                      {translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.bundleDiscountAppliesOn"
-                      )}
-                    </s-heading>
-                    <s-paragraph>
-                      {translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.applyBundleDiscountsToSubscriptionPurchasesOnlyOneTimePurchasesO"
-                      )}
-                    </s-paragraph>
-                  </s-stack>
-                  <s-grid
-                    gridTemplateColumns="repeat(3, minmax(0, 1fr))"
-                    gap="base"
-                  >
-                    <s-choice-list
-                      label={translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnSubscriptionPurchase"
-                      )}
-                      labelAccessibilityVisibility="exclusive"
-                      values={
-                        subscriptionConfig.bundleDiscountAppliesOn ===
-                        "subscription"
-                          ? ["subscription"]
-                          : []
-                      }
-                      onChange={(event) => {
-                        const value = (
-                          (event.currentTarget as any).values as
-                            | string[]
-                            | undefined
-                        )?.[0];
-                        if (!value) return;
-                        setSubscriptionConfig((current: any) => ({
-                          ...current,
-                          bundleDiscountAppliesOn: value,
-                        }));
-                      }}
-                    >
-                      <s-choice value="subscription">
-                        {translateAdmin(
-                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnSubscriptionPurchase"
-                        )}
-                      </s-choice>
-                    </s-choice-list>
-                    <s-choice-list
-                      label={translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnOneTimePurchase"
-                      )}
-                      labelAccessibilityVisibility="exclusive"
-                      values={
-                        subscriptionConfig.bundleDiscountAppliesOn ===
-                        "one_time"
-                          ? ["one_time"]
-                          : []
-                      }
-                      onChange={(event) => {
-                        const value = (
-                          (event.currentTarget as any).values as
-                            | string[]
-                            | undefined
-                        )?.[0];
-                        if (!value) return;
-                        setSubscriptionConfig((current: any) => ({
-                          ...current,
-                          bundleDiscountAppliesOn: value,
-                        }));
-                      }}
-                    >
-                      <s-choice value="one_time">
-                        {translateAdmin(
-                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onlyOnOneTimePurchase"
-                        )}
-                      </s-choice>
-                    </s-choice-list>
-                    <s-choice-list
-                      label={translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onBoth"
-                      )}
-                      labelAccessibilityVisibility="exclusive"
-                      values={
-                        subscriptionConfig.bundleDiscountAppliesOn === "both"
-                          ? ["both"]
-                          : []
-                      }
-                      onChange={(event) => {
-                        const value = (
-                          (event.currentTarget as any).values as
-                            | string[]
-                            | undefined
-                        )?.[0];
-                        if (!value) return;
-                        setSubscriptionConfig((current: any) => ({
-                          ...current,
-                          bundleDiscountAppliesOn: value,
-                        }));
-                      }}
-                    >
-                      <s-choice value="both">
-                        {translateAdmin(
-                          "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.onBoth"
-                        )}
-                      </s-choice>
-                    </s-choice-list>
-                  </s-grid>
-                  {subscriptionConfig.enabled &&
-                  Object.keys(validationErrors).some((path) =>
-                    path.startsWith("subscriptions.")
-                  ) ? (
-                    <s-text tone="critical">
-                      {translateAdmin(
-                        "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.fixTheSubscriptionFieldsBeforeSaving"
-                      )}
-                    </s-text>
-                  ) : null}
-                </s-stack>
-              </s-section>
-            </DisabledConfigurationRegion>
-          ) : null}
+          <BundleSubscriptionPlanTiers
+            subscriptionConfig={subscriptionConfig}
+            setSubscriptionConfig={setSubscriptionConfig}
+            subscriptionFetcher={subscriptionFetcher}
+            subscriptionsBlocked={subscriptionsBlocked}
+            uniquePlanRows={uniquePlanRows}
+            validationErrors={validationErrors}
+          />
+          <BundleSubscriptionConfiguration
+            subscriptionConfig={subscriptionConfig}
+            setSubscriptionConfig={setSubscriptionConfig}
+            uniquePlanRows={uniquePlanRows}
+            validationErrors={validationErrors}
+            shopLocales={shopLocales}
+            onOpenTranslations={() => setTranslationModalOpen(true)}
+          />
         </s-stack>
       </s-query-container>
 

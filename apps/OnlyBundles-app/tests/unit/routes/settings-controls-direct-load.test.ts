@@ -1,6 +1,5 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { useSelector } from "react-redux";
 
 jest.mock("@remix-run/react", () => ({
   Await: ({ children }: { children: (value: unknown[]) => React.ReactNode }) => children([{}, []]),
@@ -14,10 +13,7 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("../../../app/routes/app/app.settings/SettingsRoute", () => ({
-  SettingsRoute: () => {
-    useSelector((state: unknown) => state);
-    return React.createElement("span", null, "Controls workspace");
-  },
+  SettingsRoute: () => React.createElement("span", null, "Controls workspace"),
 }));
 
 jest.mock("../../../app/shopify.server", () => ({
@@ -36,7 +32,7 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
 }));
 
 describe("Settings Controls direct load", () => {
-  it("provides the application store to the directly loaded Settings workspace", async () => {
+  it("renders the directly loaded Settings workspace", async () => {
     const { default: SettingsControlsRoute } = await import(
       "../../../app/routes/app/app.settings_.controls"
     );

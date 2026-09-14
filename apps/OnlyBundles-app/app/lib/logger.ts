@@ -3,7 +3,7 @@
  * Provides structured, contextual logging for server-side operations
  */
 
-export interface AppLogContext {
+interface AppLogContext {
   operation?: string;
   bundleId?: string;
   shopId?: string;

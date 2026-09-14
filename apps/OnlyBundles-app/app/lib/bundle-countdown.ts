@@ -2,7 +2,7 @@ export type CountdownLayout = "compact" | "full";
 export type CountdownPosition = "above" | "below";
 export type CountdownExpiryAction = "hide" | "show_zeros" | "show_message";
 
-export interface CountdownSettings {
+interface CountdownSettings {
   countdownEnabled: boolean;
   countdownLayout: CountdownLayout;
   countdownPosition: CountdownPosition;
@@ -45,9 +45,15 @@ export function parseCountdownSettings(formData: FormData): CountdownSettings {
 
 export function buildCountdownRuntimeConfig(
   settings: CountdownSettings,
-  offerPolicy: { endsAt?: Date | string | null } | null | undefined,
+  offerPolicy: { scheduleMode?: string; endsAt?: Date | string | null } | null | undefined,
 ): CountdownRuntimeConfig | null {
-  if (!settings.countdownEnabled || offerPolicy?.endsAt == null) return null;
+  if (
+    !settings.countdownEnabled ||
+    (offerPolicy?.scheduleMode != null && offerPolicy.scheduleMode !== "one_time") ||
+    offerPolicy?.endsAt == null
+  ) {
+    return null;
+  }
 
   const endsAt = offerPolicy.endsAt instanceof Date
     ? offerPolicy.endsAt

@@ -7,7 +7,7 @@ import {
   runDeploymentGeneralSync,
 } from "../app/services/deployment-general-sync.server";
 import { syncBundleStorefrontNow } from "../app/services/bundles/storefront-sync.server";
-import { ensureVariantBundleMetafieldDefinitions } from "../app/services/bundles/metafield-sync.server";
+import { ensureVariantBundleMetafieldDefinitions } from "../app/services/bundles/metafield-sync/operations/definitions.server";
 import { AddOnDiscountFunctionService } from "../app/services/addon-discount-function-service.server";
 import { syncPpbStorefrontRuntime } from "../app/services/ppb-storefront-runtime.server";
 

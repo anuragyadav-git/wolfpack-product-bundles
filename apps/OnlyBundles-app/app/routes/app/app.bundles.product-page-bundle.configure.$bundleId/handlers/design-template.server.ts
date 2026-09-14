@@ -1,13 +1,17 @@
 import { json } from "@remix-run/node";
 import type { Session } from "@shopify/shopify-api";
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import db from "../../../../db.server";
 import { parseBundleDesignTemplate } from "./parsers";
 import { updateSyncMetafields } from "./runtime-config.server";
 import { BundleStatus } from "../../../../constants/bundle";
 import { resolveShopEntitlements } from "../../../../services/subscriptions/subscription-service.server";
 import { shopUsesAdvancedDesign } from "../../../../services/subscriptions/design-entitlement-state.server";
-import { updateBundleWithPublicationGate } from "../../../../services/subscriptions/bundle-entitlement-gate.server";
+import {
+  assertTemplateSelectionAllowed,
+  updateBundleWithPublicationGate,
+} from "../../../../services/subscriptions/bundle-entitlement-gate.server";
+import { EntitlementDeniedError } from "../../../../lib/subscriptions/entitlements";
 
 export async function handleUpdateBundleDesignTemplate(
   _admin: ShopifyAdmin,
@@ -18,6 +22,32 @@ export async function handleUpdateBundleDesignTemplate(
   const { bundleDesignTemplate, bundleDesignPresetId } =
     parseBundleDesignTemplate(formData);
 
+  const entitlementContext = await resolveShopEntitlements({
+    shopDomain: session.shop,
+    forceRefresh: true,
+  });
+
+  try {
+    assertTemplateSelectionAllowed({
+      bundleType: "PRODUCT_PAGE",
+      designTemplate: bundleDesignTemplate,
+      designPresetId: bundleDesignPresetId,
+      entitlements: entitlementContext?.entitlements ?? null,
+    });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) {
+      return json(
+        {
+          success: false,
+          error: "The selected template requires the Growth plan.",
+          entitlementFailure: error.toJSON(),
+        },
+        { status: 403 },
+      );
+    }
+    throw error;
+  }
+
   const currentBundle = await db.bundle.findUnique({
     where: { id: bundleId, shopId: session.shop },
     include: { steps: true },
@@ -25,9 +55,6 @@ export async function handleUpdateBundleDesignTemplate(
   if (!currentBundle) return json({ success: false, error: "Bundle not found" }, { status: 404 });
   const publicBundle = currentBundle.status === BundleStatus.ACTIVE
     || currentBundle.status === BundleStatus.UNLISTED;
-  const entitlementContext = publicBundle
-    ? await resolveShopEntitlements({ shopDomain: session.shop, forceRefresh: true })
-    : null;
 
   const updatedBundle = await updateBundleWithPublicationGate<any>({
     database: db,

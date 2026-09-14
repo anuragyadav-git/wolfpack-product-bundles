@@ -1,3 +1,20 @@
+---
+schema_version: 1
+id: repository-agent-instructions
+title: Repository Agent Instructions
+type: instructions
+status: authoritative
+summary: Engineering constraints, verification requirements, and authorized release workflows for Only Bundles.
+last_audited: 2026-09-12
+owners: [engineering]
+domains: [development, operations]
+systems: [only-bundles, shopify, canny]
+source_paths: [AGENTS.md]
+related_docs: [internal docs/Operations/Canny.md]
+tags: [agent-instructions]
+keywords: [development, changelog, publication]
+---
+
 # Shopify-Native First — Do Not Reinvent the Wheel
 
 Before planning or implementing anything, check whether Shopify already provides the capability through its canonical APIs, Functions, extensions, Admin components, platform configuration, or documented patterns. Use the Shopify-provided solution when it exists. Do not recreate Shopify behavior with custom models, secrets, endpoints, abstractions, fallback chains, or duplicated business logic merely because a custom implementation is possible.
@@ -13,9 +30,60 @@ If existing project logic conflicts with Shopify's current recommended approach,
 3. **Do not touch unrelated code.** If a file or function is not part of the current task, do not modify it even if you think it could be improved.
 4. **Flag uncertainty explicitly.** If you are not confident about an approach or technical detail, say so before proceeding. Confidence without certainty causes damage.
 
+### Open/Closed and Cohesion Rule
+
+Do not use file length, line-count tests, or oversized-file allowlists as
+architecture gates. They measure formatting and encourage arbitrary extraction
+without proving that the design or behavior improved.
+
+Keep a module cohesive even when it is long. Split it only when the extracted
+unit has a distinct responsibility, data owner, lifecycle, platform boundary,
+or behavior that can be named and verified independently. A good split should
+reduce the dependencies needed to understand or change each owner; moving JSX
+or logic behind a large pass-through prop bag solely to shorten a file is not an
+improvement.
+
+Apply the Open/Closed Principle at real variation points: keep stable owners
+closed to unrelated edits and add a narrow typed component, adapter, strategy,
+or handler when a new Shopify surface, bundle type, pricing method, or workflow
+truly varies. Prefer direct imports and explicit feature props. Do not create a
+generic abstraction for code that only looks similar or is expected to have
+different bundle-type semantics.
+
+Tests must protect behavior, public contracts, validation, persistence, and
+integration wiring. Do not add tests that inspect source length, file names,
+internal class names, or the mere presence or absence of implementation text.
+
 ---
 
 ## Architecture and Gotcha Documentation
+
+### Canny Changelog Publication Authorization
+
+The user authorizes agents to draft and publish Only Bundles changelog entries
+through the logged-in Canny dashboard without asking for repeat publication
+approval. Canny login and MFA are always handled by the user: if login is
+required, stop that browser workflow and prompt the user to log in. Never
+retrieve credentials or attempt login on their behalf.
+
+- Evaluate every change for merchant impact. Publish meaningful new features,
+  improvements, fixes, and breaking changes that merchants need to know about.
+  Do not publish internal refactors, test-only changes, or unsupported claims.
+- Before writing, check existing drafts and published entries for duplicates.
+  Preserve unrelated drafts. Use Canny's New, Improved, or Fixed classification.
+- Drafts may be prepared during development. Publish only after the matching
+  production release is live and its merchant behavior has been verified.
+  A local/SIT test or merged commit alone is not release proof.
+- For action-required changes, state affected merchants, exact required steps,
+  any verified deadline, and the consequence of not acting. Reference the
+  existing bundle Sync prompt where applicable; do not invent deadlines.
+- Verify the published entry URL and its appearance through the Dashboard bell.
+  Keep Canny as the source of truth; do not add publishing APIs or a parallel
+  local release-note database.
+- Development/SIT fixtures and test entries belong only in Only Bundles QA.
+  Never put test feedback or simulated releases in the production workspace.
+- This authorization does not override manual Shopify deployment gates or
+  authorize paid plan upgrades. See `internal docs/Operations/Canny.md`.
 
 Do not create issue files or run the feature pipeline by default. They are overhead for normal repo work.
 
@@ -166,6 +234,12 @@ When visual parity requires measured evidence, keep exact measurements in docs o
 
 Use Polaris web components (`s-*`) for **all** Admin-embedded app UI. Fall back to custom HTML only when no Polaris component exists.
 
+Before changing Admin UI composition, read
+`internal docs/Shopify Integration/Polaris Web Components Reference.md`. It is
+the single authority for durable cross-Admin design philosophy and composition
+decisions. Add any new reusable Admin UI design decision to that file instead
+of scattering it through feature-specific notes.
+
 **Components (polaris-app-home surface):**
 - Actions: `s-button`, `s-button-group`, `s-link`, `s-menu`
 - Forms: `s-checkbox`, `s-select`, `s-text-field`, `s-text-area`, `s-switch`, `s-number-field`, `s-search-field`, `s-drop-zone`
@@ -236,6 +310,51 @@ Let me know once it completes.
 
 The root npm scripts delegate deployment to `apps/OnlyBundles-app` — never call `shopify app deploy` directly.
 
+## 🧰 Global Shopify CLI Rule
+
+Use the installed global Shopify CLI directly for local Shopify validation:
+
+```bash
+command -v shopify
+type -a shopify
+shopify version
+shopify app build --help
+```
+
+Do not invoke Shopify CLI through `npx`, `pnpx`, or a project-local package.
+This development machine currently resolves `shopify` from the active Node
+installation under `~/.nvm/`; always use `command -v shopify` instead of
+hardcoding that versioned path. Confirm the required subcommand with its own
+`--help` output before relying on it. If a listed command is unexpectedly
+unavailable, check for multiple installations before diagnosing the command
+surface itself.
+
+Keep exactly one global Shopify CLI installation active. Before diagnosing a
+CLI-only failure, run `type -a shopify`; an npm/NVM installation and a Homebrew
+installation can coexist and make the parent command and its subprocesses
+report or execute different versions. Do not hardcode one absolute binary to
+work around this. Stop, record both paths and versions, and consolidate the
+installations with explicit user approval before trusting dev/build evidence.
+
+Re-run `command -v shopify`, `type -a shopify`, and `shopify version` after any
+CLI command that reports an automatic upgrade. The upgrade uses the npm prefix
+resolved by that process and can recreate a second global installation even
+after a previous consolidation. On 2026-09-10, Homebrew CLI 4.8.0 passed both
+app-configuration validations, the full SIT app build, and a cache-bypassed
+Agent-store dev-preview check with the Dev Console connected. The older
+NVM-owned 4.7.1 package was then removed with the user's approval.
+`type -a shopify` now resolves only `/opt/homebrew/bin/shopify`, which reports
+4.8.0.
+
+For Shopify Function builds, Shopify CLI remains the platform-level validation
+owner, while the extension's `extensions.build.command` owns compilation. Do
+not weaken or delete valid app configuration merely to make an older or
+inconsistent local CLI parser pass. Record that CLI validation as blocked,
+retain the exact failure, and still run the configured compiler command and
+Function behavior tests as separate local evidence.
+
+This rule does not authorize deployment. The Shopify Deploy Rule still applies.
+
 ## 🔄 Deployment General Sync Rule
 
 Deployment scripts run `npm run deployment:general-sync` after Shopify deploy.
@@ -294,6 +413,90 @@ npm run dev:sit
 
 Do not run dev against `apps/OnlyBundles-app/shopify.web.toml` / the production Shopify app configuration.
 
+Do not run `shopify app build` while `shopify app dev` is active. With the
+global Shopify CLI 4.7.1, the standalone build can reuse and rewrite the active
+`.shopify/dev-bundle` workspace instead of producing an independent deploy
+bundle. The Admin Dev Console can then lose its **Connected** state even though
+the CLI, Remix, and Cloudflare child processes remain alive, and the theme
+extension preview can continue resolving an unpublished CDN handle. Stop the
+dev process before a full app build; restart `npm run dev:sit` after the build
+and open the preview emitted by that new session.
+
+### Stale theme-extension preview handles
+
+Restarting `npm run dev:sit` can leave an already-open storefront tab attached to
+the previous Shopify theme-extension preview session. The visible product or
+app-proxy URL can remain identical while Shopify resolves `asset_url` references
+through an obsolete `/extensions/.../dev-<handle>/...` path.
+
+Recognize this state by all of the following evidence:
+
+- The embedded Admin dev console is connected to the new tunnel, but storefront
+  theme-extension JS/CSS requests still use the earlier `dev-<handle>`.
+- Those requests return `404` or `net::ERR_BLOCKED_BY_ORB`.
+- A deployed production extension asset may still load, so
+  `window.__BUNDLE_WIDGET_VERSION__` reports an older version and the widget can
+  remain on its loading surface.
+
+Do not diagnose widget logic from that stale page, and do not rely on a normal
+or cache-bypassed reload to replace the preview session. Open the bundle again
+with the Admin **Preview Bundle** / **Preview in store** action, or open the
+fresh storefront preview from the active Shopify CLI session (normally `p` in
+the terminal). Then:
+
+1. Clear Cache Storage and hard-reload with cache bypass.
+2. Confirm the theme-extension `dev-<handle>` changed and its JS/CSS responses
+   are `200`.
+3. Confirm `window.__BUNDLE_WIDGET_VERSION__` matches the local build.
+4. Confirm the bootstrap/loading marker clears before gathering storefront
+   behavior or visual evidence.
+
+A fresh Admin preview is a diagnostic, not a repair guarantee. Shopify can
+render a new product document that still references the same invalid remote
+`dev-<handle>`. If every asset under that handle returns Shopify's CDN 404
+(Chrome reports `net::ERR_BLOCKED_BY_ORB`) while the files exist in
+`.shopify/dev-bundle`, the active remote dev preview is stale or incomplete.
+Disabling the app embed does not repair it: a PPB app block loads its own assets
+from the same theme-extension version. Stop the dev process, clean the SIT
+preview with `shopify app dev clean --config
+shopify.app.wolfpack-product-bundles-sit.toml`, restart with `npm run dev:sit`,
+and open the CLI's fresh preview before repeating the cache-cleared checks. Do
+not run `app dev clean` against a live dev process, and do not uninstall either
+app to repair a preview handle.
+
+Also check for duplicate app-embed metadata before trusting app-proxy evidence.
+If both production and SIT app embeds are enabled on the same theme, the current
+dev PPB block can render while the deployed production embed still issues its
+own settings requests. Because both embeds publish shared storefront runtime
+state, script load order can also make the current PPB widget use the other
+environment's proxy root and remain hidden after bootstrap. Opening Preview
+Bundle creates a new document and can change that order, so an apparently fixed
+widget after that click is intermittent evidence—not proof that the earlier
+product URL was stale. Inspect every `[data-wpb-app-embed]` owner and its proxy
+root. Do not attribute a request from `/apps/product-bundles` to SIT when SIT
+owns `/apps/product-bundles-sit`.
+
+Do not uninstall the other app merely to switch test environments. Shopify owns
+app-embed and app-block activation as theme configuration, while uninstalling
+removes the app's theme resources and exercises a different lifecycle. Use this
+environment-isolation order:
+
+1. Prefer a separate Shopify dev/test store for each app environment.
+2. When one store must host both apps concurrently, dedicate separate themes to
+   them. A PROD theme contains only PROD app embeds and app blocks; an
+   unpublished/development SIT theme contains only SIT app embeds and app
+   blocks. Preview the selected theme explicitly.
+3. When testing both apps sequentially on the same theme, disable the dormant
+   app embed and remove or disable its app blocks before enabling the app under
+   test. Save the theme, open the environment's current preview action, clear
+   Cache Storage, and hard-reload with cache bypass.
+
+Stopping `shopify app dev` does not clean its dev preview. Before switching from
+a local SIT preview back to the released extension, use Shopify's **Clean dev
+preview** action or run `shopify app dev clean` with the SIT app configuration.
+This restores the app's released version; it is not a substitute for toggling
+the correct theme embed, and it is not the same as uninstalling the app.
+
 ---
 
 ## 🔐 Shopify Expiring Offline Token Rule
@@ -332,16 +535,17 @@ Do not keep the bridge in committed runtime code after the measurement cycle. If
 
 ## 🔧 Widget Bundle Build Process
 
-**ALWAYS build after modifying these source files:**
+**ALWAYS build after modifying the source graph rooted at these entrypoints:**
 
 Widget sources → `npm run build:widgets`:
-- `apps/OnlyBundles-app/app/assets/bundle-widget-components.js`
-- `apps/OnlyBundles-app/app/assets/bundle-modal-component.js`
-- `apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js`
-- `apps/OnlyBundles-app/app/assets/bundle-widget-product-page.js`
+- `apps/OnlyBundles-app/app/storefront/full-page.ts`
+- `apps/OnlyBundles-app/app/storefront/product-page.ts`
+- `apps/OnlyBundles-app/app/storefront/app-embed.ts`
+- their imports under `apps/OnlyBundles-app/app/assets/`
 
 SDK sources → `npm run build:sdk`:
-- `apps/OnlyBundles-app/app/assets/sdk/` (state.js, events.js, config-loader.js, cart.js, validate-bundle.js, get-display-price.js, debug.js, wolfpack-bundles.js)
+- `apps/OnlyBundles-app/app/storefront/sdk.ts`
+- its imports under `apps/OnlyBundles-app/app/assets/sdk/`
 - Output: `apps/OnlyBundles-app/extensions/bundle-builder/assets/wolfpack-bundles-sdk.js`
 
 **Build commands:**
@@ -352,14 +556,16 @@ npm run build:widgets:product-page
 npm run build:sdk
 ```
 
-**Raw widget JS syntax check:** after editing raw storefront widget JS, run `node --check <file>` before commit.
+The raw storefront sources are TypeScript, so `npm run typecheck` validates
+them. After building, run `node --check` against the generated JavaScript that
+Shopify will serve:
 
 Examples:
 ```bash
-node --check apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js
-node --check apps/OnlyBundles-app/app/assets/bundle-widget-product-page.js
-node --check apps/OnlyBundles-app/app/assets/bundle-modal-component.js
-node --check apps/OnlyBundles-app/app/assets/bundle-widget-components.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget-full-page-bundled.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-widget-product-page-bundled.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/bundle-app-embed.js
+node --check apps/OnlyBundles-app/extensions/bundle-builder/assets/wolfpack-bundles-sdk.js
 ```
 
 **Forgetting to build = changes won't appear in the storefront.**
@@ -417,22 +623,22 @@ Storefront asset strategy: theme/app-extension Liquid must load storefront JS/CS
 
 ## 🚨 Do Not Touch — Bundle Config Loading (FPB Widget)
 
-**NEVER modify the bundle config loading priority order in `bundle-widget-full-page.js`.**
+**NEVER modify the bundle config loading priority order in `loadBundleData()`.**
 
 Two-stage load strategy:
-1. **Stage 1 — Metafield cache (primary):** Liquid block writes config into `data-bundle-config` attribute. Widget reads on init — zero network, instant first paint.
-2. **Stage 2 — Proxy API fallback:** If metafield absent/empty/malformed, falls back to `GET /apps/product-bundles/api/bundle/{id}.json` with single retry after 3s for `503`/`504` (Render cold-starts).
+1. **Stage 1 — App-proxy document marker (primary):** The signed `/wpb/{publicNumber}` route writes the complete, source-marked config into `data-bundle-config`. Widget reads it on init without a second bundle request.
+2. **Stage 2 — Proxy API fallback:** If the marker is absent, empty, malformed, or does not match the current bundle, fall back to `GET /apps/product-bundles/api/bundle/{id}.json` with one retry after 3s for `503`/`504` (Render cold-starts).
 
 **Rules:**
-- ❌ Do NOT remove or reorder the `data-bundle-config` check — must run before proxy fetch
+- ❌ Do NOT remove or reorder the source-marked `data-bundle-config` check — it must run before the fallback fetch
 - ❌ Do NOT remove `503`/`504` retry logic — Render cold-starts are 3–10s
 - ❌ Do NOT add a third source between Stage 1 and Stage 2
 - ✅ If bundle config structure changes, update server writer AND widget parser together
 
 **Relevant files:**
-- Widget: `apps/OnlyBundles-app/app/assets/bundle-widget-full-page.js` — `loadBundleConfig()` (~line 325)
-- Liquid: `apps/OnlyBundles-app/extensions/bundle-builder/blocks/bundle-full-page.liquid` — `data-bundle-config`
-- Server: `apps/OnlyBundles-app/app/services/bundles/metafield-sync/bundle-config-metafield.server.ts`
+- Widget: `apps/OnlyBundles-app/app/assets/widgets/full-page/methods/analytics-config-methods.ts` — `loadBundleData()`
+- App-proxy document: `apps/OnlyBundles-app/app/routes/root/wpb.$bundleId.tsx` — source-marked `data-bundle-config`
+- Formatter: `apps/OnlyBundles-app/app/lib/bundle-formatter.server.ts`
 
 ---
 
@@ -660,5 +866,5 @@ Always `select_page` to the **iframe target** before `evaluate_script`. For thir
 
 ---
 
-**Last Updated:** 2026-07-29
+**Last Updated:** 2026-09-09
 **Author:** Aditya Awasthi

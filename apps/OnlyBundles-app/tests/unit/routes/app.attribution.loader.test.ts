@@ -95,16 +95,20 @@ describe("app.attribution loader — campaign aggregation", () => {
 
     const currentAttributions = [
       {
+        orderId: "gid://shopify/Order/100",
         bundleId: null,
         revenue: 1200,
+        bundleRevenue: 0,
         createdAt: new Date("2026-06-01T00:00:00.000Z"),
         utmSource: "google",
         utmMedium: "search",
         utmCampaign: "summer-caps",
       },
       {
+        orderId: "gid://shopify/Order/101",
         bundleId: "bundle-1",
         revenue: 500,
+        bundleRevenue: 500,
         createdAt: new Date("2026-06-01T00:10:00.000Z"),
         utmSource: "google",
         utmMedium: "search",
@@ -128,6 +132,23 @@ describe("app.attribution loader — campaign aggregation", () => {
     getDb().bundle.findMany.mockResolvedValueOnce([
       { id: "bundle-1", name: "Summer Bundle", status: "active" },
     ]);
+  });
+
+  it("propagates Shopify authentication failures before loading route data", async () => {
+    const authResponse = new Response(null, { status: 401 });
+    mockRequireAdminSession.mockRejectedValueOnce(authResponse);
+
+    await expect(
+      loader({
+        request: new Request("https://test.myshopify.com/app/attribution"),
+        params: {},
+        context: {},
+      } as any)
+    ).rejects.toBe(authResponse);
+
+    expect(mockResolveShopEntitlements).not.toHaveBeenCalled();
+    expect(mockGetPixelStatus).not.toHaveBeenCalled();
+    expect(getDb().orderAttribution.findMany).not.toHaveBeenCalled();
   });
 
   it("excludes attribution rows without bundleId from campaign totals", async () => {
@@ -221,8 +242,10 @@ describe("app.attribution loader — campaign aggregation", () => {
     getDb().orderAttribution.findMany
       .mockResolvedValueOnce([
         {
+          orderId: "gid://shopify/Order/102",
           bundleId: "bundle-1",
           revenue: 5000,
+          bundleRevenue: 5000,
           createdAt: new Date("2026-07-10T00:10:00.000Z"),
           utmSource: "google",
           utmMedium: "search",
@@ -380,12 +403,14 @@ describe("app.attribution loader — campaign aggregation", () => {
 
     getDb().orderAttribution.findMany
       .mockResolvedValueOnce([{
+        orderId: "gid://shopify/Order/103",
         bundleId: "bundle-1",
         offerPolicyId: "policy-1",
         offerRuleVersion: 6,
         offerTierId: "tier-2",
         offerEligibilitySource: "specific_link",
         revenue: 4200,
+        bundleRevenue: 4200,
         createdAt: new Date("2026-06-05T00:00:00.000Z"),
       }])
       .mockResolvedValueOnce([]);
@@ -444,10 +469,23 @@ describe("app.attribution loader — campaign aggregation", () => {
       .mockResolvedValueOnce(8)
       .mockResolvedValueOnce(3)
       .mockResolvedValueOnce(2);
-    getDb().orderAttribution.aggregate.mockResolvedValueOnce({
-      _count: { _all: 2 },
-      _sum: { revenue: 4500 },
-    });
+    getDb().orderAttribution.findMany.mockReset();
+    getDb().orderAttribution.findMany.mockResolvedValueOnce([
+      {
+        orderId: "gid://shopify/Order/201",
+        bundleId: "bundle-1",
+        revenue: 2500,
+        bundleRevenue: 2000,
+        createdAt: new Date("2026-07-10T00:00:00.000Z"),
+      },
+      {
+        orderId: "gid://shopify/Order/202",
+        bundleId: "bundle-2",
+        revenue: 2000,
+        bundleRevenue: 1500,
+        createdAt: new Date("2026-07-10T01:00:00.000Z"),
+      },
+    ]);
 
     const response = await loader({
       request: new Request("https://test.myshopify.com/app/attribution?days=90"),
@@ -465,6 +503,6 @@ describe("app.attribution loader — campaign aggregation", () => {
         totalOrders: 2,
       },
     });
-    expect(getDb().orderAttribution.findMany).not.toHaveBeenCalled();
+    expect(getDb().orderAttribution.findMany).toHaveBeenCalledTimes(1);
   });
 });

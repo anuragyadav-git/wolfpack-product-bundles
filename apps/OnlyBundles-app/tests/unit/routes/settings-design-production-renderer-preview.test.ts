@@ -30,6 +30,7 @@ describe("Settings Design production renderer preview", () => {
         areaLabel: "Product cards",
         scenario: "default",
         designCss: ":root{--bundle-global-primary-button:#123456}",
+        loadingScreen: { gifUrl: null, backgroundColor: "#ffffff" },
         locale: "en",
         currency: "USD",
       },
@@ -64,7 +65,14 @@ describe("Settings Design production renderer preview", () => {
 
   it("accepts the complete command and event vocabulary", () => {
     const commands = [
-      { version: 2, type: "UPDATE_DESIGN", payload: { designCss: "body{}" } },
+      {
+        version: 2,
+        type: "UPDATE_DESIGN",
+        payload: {
+          designCss: "body{}",
+          loadingScreen: { gifUrl: null, backgroundColor: "#ffffff" },
+        },
+      },
       { version: 2, type: "SET_TEMPLATE", payload: { bundleType: "product_page", templateKey: "product-grid" } },
       { version: 2, type: "SET_VIEWPORT", payload: { viewport: "mobile" } },
       { version: 2, type: "SET_AREA", payload: { area: "cart-summary", areaLabel: "Cart / summary" } },
@@ -263,9 +271,16 @@ describe("Settings Design production renderer preview", () => {
     const hideLoadingOverlay = jest.fn();
     const controller = { showLoadingOverlay, hideLoadingOverlay };
 
-    setStorefrontPreviewLoadingPersistent(controller, true);
+    setStorefrontPreviewLoadingPersistent(
+      controller,
+      true,
+      "https://cdn.shopify.com/loading.gif",
+    );
 
-    expect(showLoadingOverlay).toHaveBeenCalledWith(null, { bootstrap: true });
+    expect(showLoadingOverlay).toHaveBeenCalledWith(
+      "https://cdn.shopify.com/loading.gif",
+      { bootstrap: true },
+    );
     controller.hideLoadingOverlay();
     expect(hideLoadingOverlay).not.toHaveBeenCalled();
 

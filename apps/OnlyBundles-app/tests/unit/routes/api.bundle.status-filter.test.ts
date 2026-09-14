@@ -72,13 +72,14 @@ function makeApiRequest(
   return new Request(`https://test.myshopify.com/apps/product-bundles/api/bundle/${bundleId}.json?${params.toString()}`);
 }
 
-function makeProxyRequest(bundleId: string, offerToken?: string) {
+function makeProxyRequest(bundleId: string, offerToken?: string, previewToken?: string) {
   const params = new URLSearchParams({
     shop: 'test-shop.myshopify.com',
     path_prefix: '/apps/product-bundles',
     timestamp: '1770000000',
   });
   if (offerToken) params.set('wpb_offer', offerToken);
+  if (previewToken) params.set('wpb_preview', previewToken);
   const message = [...params.entries()]
     .map(([k, v]: any) => `${k}=${v}`)
     .sort()
@@ -244,6 +245,95 @@ describe('api.bundle.$bundleId.json — status filtering', () => {
 
     expect(response.status).toBe(404);
   });
+
+  it('serves an ACTIVE bundle with country targeting when an authorized preview token is provided', async () => {
+    mockFindFirst().mockResolvedValue({
+      ...draftBundle,
+      status: BundleStatus.ACTIVE,
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: 'include',
+        countryCodes: ['CA'],
+        ruleVersion: 2,
+        conditions: [],
+      },
+    });
+    const previewToken = createBundlePreviewToken({
+      shop: 'test.myshopify.com',
+      bundleId: 'bundle-1',
+      apiSecret: 'test_api_secret',
+    });
+
+    const response = await apiBundleLoader({
+      request: makeApiRequest('bundle-1', previewToken),
+      params: { bundleId: 'bundle-1' },
+      context: {},
+    } as any) as Response;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+
+  it('serves an ACTIVE bundle with specific-link policy when an authorized preview token is provided', async () => {
+    const created = createSpecificLinkOfferToken({
+      token: 'a'.repeat(43),
+    });
+    mockFindFirst().mockResolvedValue({
+      ...draftBundle,
+      status: BundleStatus.ACTIVE,
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: true,
+        ruleVersion: 1,
+        conditions: [{
+          type: 'specific_link',
+          tokenHash: created.tokenHash,
+          expiresAt: null,
+          revokedAt: null,
+        }],
+      },
+    });
+    const previewToken = createBundlePreviewToken({
+      shop: 'test.myshopify.com',
+      bundleId: 'bundle-1',
+      apiSecret: 'test_api_secret',
+    });
+
+    const response = await apiBundleLoader({
+      request: makeApiRequest('bundle-1', previewToken),
+      params: { bundleId: 'bundle-1' },
+      context: {},
+    } as any) as Response;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+
+  it('serves an ACTIVE bundle with country targeting when public request omits country parameter', async () => {
+    mockFindFirst().mockResolvedValue({
+      ...draftBundle,
+      status: BundleStatus.ACTIVE,
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: false,
+        countryTargetingEnabled: true,
+        countryTargetingMode: 'include',
+        countryCodes: ['CA'],
+        ruleVersion: 2,
+        conditions: [],
+      },
+    });
+
+    const response = await apiBundleLoader({
+      request: makeApiRequest('bundle-1'),
+      params: { bundleId: 'bundle-1' },
+      context: {},
+    } as any) as Response;
+
+    expect(response.status).toBe(200);
+  });
 });
 
 describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
@@ -334,5 +424,42 @@ describe('wpb.$bundleId (FPB proxy page) — draft access control', () => {
     expect(hidden.status).toBe(404);
     expect(visible.status).toBe(200);
     expect(visible.headers.get('Cache-Control')).toBe('no-store');
+  });
+
+  it('serves an ACTIVE FPB bundle with specific-link policy when an authorized preview token is provided', async () => {
+    mockFindFirst().mockResolvedValue({
+      id: 'bundle-1',
+      publicNumber: 1,
+      shopId: 'test-shop.myshopify.com',
+      bundleType: 'full_page',
+      status: BundleStatus.ACTIVE,
+      steps: [],
+      pricing: null,
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: true,
+        ruleVersion: 1,
+        conditions: [{
+          type: 'specific_link',
+          tokenHash: 'some-hash',
+          expiresAt: null,
+          revokedAt: null,
+        }],
+      },
+    });
+    const previewToken = createBundlePreviewToken({
+      shop: 'test-shop.myshopify.com',
+      bundleId: 'bundle-1',
+      apiSecret: 'test_api_secret',
+    });
+
+    const response = await wpbProxyLoader({
+      request: makeProxyRequest('1', undefined, previewToken),
+      params: { bundleId: '1' },
+      context: {},
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
   });
 });

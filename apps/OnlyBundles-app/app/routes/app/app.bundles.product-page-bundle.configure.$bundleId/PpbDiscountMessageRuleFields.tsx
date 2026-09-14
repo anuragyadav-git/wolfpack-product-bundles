@@ -1,24 +1,44 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import {
+  getDefaultDiscountRuleSuccessMessage,
+  getDefaultDiscountRuleText,
+} from "../../../lib/pricing-display-options";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbDiscountMessageRuleFields() {
-  const {
-    activeDiscountLocale,
-    discountMessagingMultiLanguageEnabled,
-    getDefaultDiscountRuleSuccessMessage,
-    getDefaultDiscountRuleText,
-    globalSuccessMessage,
-    markAsDirty,
-    pricingState,
-    productPageBundleStyles,
-    ruleMessages,
-    ruleMessagesByLocale,
-    setGlobalSuccessMessage,
-    setRuleMessagesByLocale,
-    setSuccessMessageByLocale,
-    successMessageByLocale,
-    updateRuleMessage,
-  } = usePpbConfigureContext();
+export type PpbDiscountMessageRuleFieldsProps = Pick<
+  PpbConfigureFlow,
+  | "activeDiscountLocale"
+  | "discountMessagingMultiLanguageEnabled"
+  | "globalSuccessMessage"
+  | "markAsDirty"
+  | "pricingState"
+  | "ruleMessages"
+  | "ruleMessagesByLocale"
+  | "setGlobalSuccessMessage"
+  | "setRuleMessagesByLocale"
+  | "setSuccessMessageByLocale"
+  | "successMessageByLocale"
+  | "updateRuleMessage"
+> & {
+  validationErrors?: Record<string, string>;
+};
+
+export function PpbDiscountMessageRuleFields({
+  activeDiscountLocale,
+  discountMessagingMultiLanguageEnabled,
+  globalSuccessMessage,
+  markAsDirty,
+  pricingState,
+  ruleMessages,
+  ruleMessagesByLocale,
+  setGlobalSuccessMessage,
+  setRuleMessagesByLocale,
+  setSuccessMessageByLocale,
+  successMessageByLocale,
+  updateRuleMessage,
+  validationErrors,
+}: PpbDiscountMessageRuleFieldsProps) {
 
   if (pricingState.discountRules.length === 0) {
     return (
@@ -41,7 +61,7 @@ export function PpbDiscountMessageRuleFields() {
 
   return (
     <s-stack direction="block" gap="small">
-      {pricingState.discountRules.map((rule: any, index: number) => {
+      {pricingState.discountRules.map((rule, index) => {
         const localeMessages = discountMessagingMultiLanguageEnabled
           ? ruleMessagesByLocale[activeDiscountLocale]?.[rule.id] ??
             ruleMessages[rule.id]
@@ -63,8 +83,14 @@ export function PpbDiscountMessageRuleFields() {
                 })}
               </h5>
               <s-text-field
+                id={`configure-discount-messages-${rule.id}-discountText`}
                 label={translateAdmin("adminAttributes.discountText")}
                 value={localeMessages?.discountText || defaultDiscountText}
+                error={
+                  validationErrors?.[
+                    `discount.messages.${rule.id}.discountText`
+                  ]
+                }
                 onInput={(e) => {
                   const value = (e.target as HTMLInputElement).value;
                   if (discountMessagingMultiLanguageEnabled) {
@@ -99,9 +125,11 @@ export function PpbDiscountMessageRuleFields() {
             )}
           </h5>
           <s-text-field
+            id="configure-discount-messages-successMessage"
             label={translateAdmin(
               "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
             )}
+            error={validationErrors?.["discount.messages.successMessage"]}
             value={(() => {
               const defaultMessage = getDefaultDiscountRuleSuccessMessage(
                 pricingState.discountType

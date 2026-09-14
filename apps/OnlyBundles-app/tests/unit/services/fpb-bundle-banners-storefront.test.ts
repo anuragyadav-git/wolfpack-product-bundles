@@ -5,6 +5,8 @@ import {
   getFirstVariantId,
 } from "../../../app/utils/variant-lookup.server";
 
+jest.mock("../../../app/services/scheduled-bundle-discount.server", () => ({ syncScheduledBundleDiscounts: jest.fn().mockResolvedValue({}) }));
+
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
     info: jest.fn(),
@@ -27,29 +29,30 @@ const mockBatchGetFirstVariantsWithPrices = batchGetFirstVariantsWithPrices as j
 
 function makeAdmin() {
   return {
-    graphql: jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue({
+    graphql: jest.fn().mockImplementation(async (_query: string, options?: any) => ({
+      json: async () => ({
         data: {
+          shop: { id: "gid://shopify/Shop/1", policy: null },
+        productVariantsBulkUpdate: { productVariants: options?.variables?.variants ?? [], userErrors: [] },
           metafieldsSet: {
-            metafields: [{ key: "bundle_ui_config", value: "{}" }],
+            metafields: options?.variables?.metafields ?? [],
             userErrors: [],
           },
         },
       }),
-    }),
+    })),
   };
 }
 
 function makeFullPageBundleConfig(overrides: Record<string, unknown> = {}) {
   return {
-    id: "bundle-1",
+    id: "bundle-1", shopId: "test.myshopify.com",
     bundleId: "bundle-1",
     name: "Test FPB",
     description: "Bundle description",
     status: "active",
     bundleType: BundleType.FULL_PAGE,
     shopifyProductId: null,
-    shopifyPageHandle: "build-your-bundle",
     bundleVariantId: "gid://shopify/ProductVariant/111",
     steps: [
       {

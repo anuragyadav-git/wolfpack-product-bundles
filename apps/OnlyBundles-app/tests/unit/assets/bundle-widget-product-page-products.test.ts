@@ -9,10 +9,7 @@ const { shouldDisableProductPageVariantOption } = require('../../../app/assets/w
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   ProductPageProductDataMethods,
-  requiresPpbCanonicalSwatchHydration,
 } = require('../../../app/assets/widgets/product-page/methods/product-data-methods.js');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { ProductPageDefaultProductMethods } = require('../../../app/assets/widgets/product-page/methods/default-product-methods.js');
 /**
  * Unit Tests — Product Page widget product normalization
  *
@@ -84,28 +81,6 @@ function processProductPageProductsForStep(
 }
 
 describe('processProductPageProductsForStep', () => {
-  it('requires Storefront hydration when a swatch category has only legacy product snapshots', () => {
-    const step = {
-      categories: [{ variantSelectorMode: 'color_swatch' }],
-    };
-    expect(requiresPpbCanonicalSwatchHydration(step, [{
-      id: '1',
-      variants: [{ id: '11', option1: 'Navy' }],
-      options: ['Color'],
-    }])).toBe(true);
-    expect(requiresPpbCanonicalSwatchHydration(step, [{
-      id: '1',
-      variants: [{ id: '11', selectedOptions: [{ name: 'Color', value: 'Navy' }] }],
-      options: [{ name: 'Color', optionValues: [{ name: 'Navy', swatch: null }] }],
-    }])).toBe(false);
-  });
-
-  it('does not require swatch hydration for non-swatch category modes', () => {
-    expect(requiresPpbCanonicalSwatchHydration({
-      categories: [{ variantSelectorMode: 'pill' }],
-    }, [{ id: '1', variants: [{ id: '11' }] }])).toBe(false);
-  });
-
   it('normalizes Shopify variant weight to grams for step-rule validation', () => {
     const products = processProductPageProductsForStep([{
       id: 'gid://shopify/Product/900',
@@ -539,47 +514,5 @@ describe('Product Page widget product-level inventory tracking', () => {
     });
   });
 
-  it('preserves explicit zero inventory on direct default products', () => {
-    const product = ProductPageDefaultProductMethods._normalizeDirectDefaultProduct.call({
-      extractId,
-      _normalizeRequiredQuantity: ProductPageDefaultProductMethods._normalizeRequiredQuantity,
-    }, {
-      title: 'Default Product',
-      imageUrl: 'https://cdn.example/default.jpg',
-      selectionId: 'gid://shopify/Product/9506413773059',
-      variants: [{
-        selectionId: 'gid://shopify/ProductVariant/48720141091075',
-        price: '829.00',
-        inventoryQuantity: 0,
-      }],
-    });
-
-    expect(product).toEqual(expect.objectContaining({
-      variantId: '48720141091075',
-      available: true,
-      quantityAvailable: 0,
-    }));
-  });
-
-  it('keeps missing direct default inventory unbounded', () => {
-    const product = ProductPageDefaultProductMethods._normalizeDirectDefaultProduct.call({
-      extractId,
-      _normalizeRequiredQuantity: ProductPageDefaultProductMethods._normalizeRequiredQuantity,
-    }, {
-      title: 'Default Product',
-      imageUrl: 'https://cdn.example/default.jpg',
-      selectionId: 'gid://shopify/Product/9506413773059',
-      variants: [{
-        selectionId: 'gid://shopify/ProductVariant/48720141091075',
-        price: '829.00',
-      }],
-    });
-
-    expect(product).toEqual(expect.objectContaining({
-      variantId: '48720141091075',
-      available: true,
-      quantityAvailable: null,
-    }));
-  });
 });
 export {};

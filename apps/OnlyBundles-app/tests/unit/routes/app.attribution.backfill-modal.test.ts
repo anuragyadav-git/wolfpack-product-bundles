@@ -13,22 +13,26 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: jest.fn(),
 }));
 
-jest.mock("../../../app/components/analytics", () => ({
+jest.mock("../../../app/components/analytics/BundlePerformanceMatrix", () => ({
   BundlePerformanceMatrix: () => null,
-  FunnelHero: () => null,
-  LiveActivityFeed: () => null,
-  TopCampaigns: () => null,
 }));
-
-jest.mock("../../../app/components/analytics/lazy", () => ({
-  LazyEngagementPulse: () => null,
-  LazyRevenueAttribution: () => null,
+jest.mock("../../../app/components/analytics/BundleConversionFunnel", () => ({
+  BundleConversionFunnel: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleKeyStatistics", () => ({
+  BundleKeyStatistics: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleSalesTrends", () => ({
+  BundleSalesTrends: () => null,
+}));
+jest.mock("../../../app/components/analytics/TopCampaigns", () => ({
+  TopCampaigns: () => null,
 }));
 
 describe("BackfillWindowModal", () => {
   it("explains the selected-window reconciliation before submission", async () => {
     const { BackfillWindowModal } = await import(
-      "../../../app/routes/app/app.attribution/AttributionDashboard"
+      "../../../app/routes/app/app.attribution/AttributionDateRangeControls"
     );
 
     const view = renderToStaticMarkup(
@@ -42,14 +46,14 @@ describe("BackfillWindowModal", () => {
     expect(view).toContain("Backfill analytics window");
     expect(view).toContain("Last 7 days");
     expect(view).toContain("queries Shopify orders");
-    expect(view).toContain("Existing attribution records are skipped");
+    expect(view).toContain("Existing bundle rows are refreshed from Shopify");
     expect(view).toContain("Backfill selected window");
     expect(view).toContain("Close");
   });
 
   it("shows an explicit custom date range", async () => {
     const { BackfillWindowModal } = await import(
-      "../../../app/routes/app/app.attribution/AttributionDashboard"
+      "../../../app/routes/app/app.attribution/AttributionDateRangeControls"
     );
 
     const view = renderToStaticMarkup(

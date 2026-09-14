@@ -1,61 +1,46 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { ComponentProps } from "react";
 import { FpbStepRuleModeContent } from "./StepSetupRuleModeContent";
 import { TUTORIAL_LINKS } from "../../../../lib/tutorial-links";
 import { translateAdmin } from "~/i18n/config";
+import { QuestionHelpTooltip } from "../SmallComponents";
 
 export function FpbStepRulesCard({
-  flow,
+  styles,
+  ruleMode,
   step,
 }: {
-  flow: ConfigureBundleFlowContext;
+  styles: Record<string, string>;
+  ruleMode: Omit<ComponentProps<typeof FpbStepRuleModeContent>, "step">;
   step: any;
 }) {
-  const { fullPageBundleStyles, QuestionHelpTooltip } = flow;
-
   return (
     <>
-      <div className={fullPageBundleStyles.card}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            marginBottom: 4,
-          }}
-        >
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+      <div className={styles.card}>
+        <s-stack direction="block" gap="base">
+          <s-grid
+            gridTemplateColumns="minmax(0, 1fr) auto"
+            gap="base"
+            alignItems="center"
+          >
+            <s-stack direction="inline" gap="small" alignItems="center">
+              <s-heading>
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+                )}
+              </s-heading>
+              <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
+            </s-stack>
+            <s-link href={TUTORIAL_LINKS.fullPageRules} target="_blank">
+              {translateAdmin("common.actions.learnMore")}
+            </s-link>
+          </s-grid>
+          <s-text color="subdued">
             {translateAdmin(
-              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
             )}
-          </h3>
-          <QuestionHelpTooltip tooltipKey="rulesConfiguration" />
-        </div>
-        <p
-          style={{
-            margin: "0 0 8px",
-            fontSize: 14,
-            color: "#6d7175",
-          }}
-        >
-          {translateAdmin(
-            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.applyRulesToTheEntireStepOrToSpecificCategoriesToGuideYourCustom"
-          )}
-        </p>
-        <button
-          type="button"
-          className={fullPageBundleStyles.linkButton}
-          style={{ marginBottom: 12, display: "inline-block" }}
-          onClick={() =>
-            window.open(
-              TUTORIAL_LINKS.fullPageRules,
-              "_blank",
-              "noopener,noreferrer"
-            )
-          }
-        >
-          {translateAdmin("common.actions.learnMore")}
-        </button>
-        <FpbStepRuleModeContent flow={flow} step={step} />
+          </s-text>
+          <FpbStepRuleModeContent {...ruleMode} step={step} />
+        </s-stack>
       </div>
     </>
   );

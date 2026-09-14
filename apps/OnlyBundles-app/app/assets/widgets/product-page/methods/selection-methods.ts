@@ -323,7 +323,6 @@ _autoProgressBottomSheet(stepIndex: any) {
         }
         this.renderModalProducts(next);
         this.updateModalFooterMessaging();
-        this.preloadNextStep();
       }).catch(() => {})
         .finally(() => {
           clearAutoAdvance();

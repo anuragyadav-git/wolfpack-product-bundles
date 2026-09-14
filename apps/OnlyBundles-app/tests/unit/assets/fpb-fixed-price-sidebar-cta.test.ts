@@ -8,9 +8,15 @@ const originalWindow = global.window;
 beforeEach(() => {
   (global as any).window = {
     Shopify: {
-      shop: { currency: 'PKR' },
+      shop: 'shop.myshopify.com',
+      currency: { active: 'PKR', rate: 1 },
     },
     shopMoneyFormat: 'PKR{{amount}}',
+  };
+  (globalThis as any).shopCurrency = 'PKR';
+  (globalThis as any).shopifyMultiCurrency = {
+    shopBaseCurrency: 'PKR',
+    customerCurrency: 'PKR',
   };
 });
 
@@ -56,7 +62,7 @@ describe('fullPageBoxSelectionSidebarMethods.getSidebarTierCtaContent', () => {
 
     expect(content).toEqual({
       label: 'Box of 5',
-      subtext: 'Bundle for Rs.5000.00',
+      subtext: 'Bundle for PKR\u00a05,000.00',
     });
   });
 

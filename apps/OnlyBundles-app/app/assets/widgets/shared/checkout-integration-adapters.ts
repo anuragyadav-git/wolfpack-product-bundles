@@ -84,11 +84,7 @@ const LABEL_TO_PROVIDER = new Map(
   ]),
 );
 
-export { CHECKOUT_INTEGRATION_PROVIDERS };
-export { CHECKOUT_INTEGRATION_PROVIDER_OPTIONS };
-export { CHECKOUT_INTEGRATION_PROVIDER_LABELS };
-
-export function normalizeCheckoutIntegrationProvider(value: string) {
+function normalizeCheckoutIntegrationProvider(value: string) {
   if (typeof value !== 'string') return 'native';
   const normalized = value.trim().toLowerCase();
   if (!normalized) return 'native';
@@ -101,11 +97,11 @@ export function getCheckoutIntegrationProvider(value: any) {
     ?? CHECKOUT_INTEGRATION_PROVIDERS[0];
 }
 
-export function isDiscountCodeCheckoutIntegrationProvider(value: any) {
+function isDiscountCodeCheckoutIntegrationProvider(value: any) {
   return getCheckoutIntegrationProvider(value).requiresDiscountCode;
 }
 
-export function isSupportedCheckoutIntegrationProvider(value: any) {
+function isSupportedCheckoutIntegrationProvider(value: any) {
   return isDiscountCodeCheckoutIntegrationProvider(value);
 }
 

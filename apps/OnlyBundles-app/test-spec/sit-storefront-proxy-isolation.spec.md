@@ -5,7 +5,7 @@ title: SIT Storefront Proxy Isolation Test Spec
 type: test-spec
 status: implemented
 summary: Verifies that SIT storefront proxy traffic is isolated from the production app while production keeps its canonical proxy URL.
-last_audited: 2026-08-30
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -14,6 +14,7 @@ systems:
   - app-proxy
 source_paths:
   - app/config/storefront-proxy-routes.ts
+  - app/assets/widgets/product-page/methods/config-lifecycle-methods.ts
   - app/lib/fpb-storefront-url.ts
   - shopify.app.toml
   - shopify.app.wolfpack-product-bundles-sit.toml
@@ -46,11 +47,13 @@ app-proxy path when both are installed on one QA store.
 | 1 | Production default | No configured override | `/apps/product-bundles` | Existing merchant contract is unchanged |
 | 2 | Explicit SIT root | `/apps/product-bundles-sit` | `/apps/product-bundles-sit` | Used by the SIT server environment |
 | 3 | FPB browser inference | `/apps/product-bundles-sit/wpb/3` | `/apps/product-bundles-sit` | Keeps FPB runtime requests on the active signed proxy |
-| 4 | Invalid override | Absolute URL or malformed path | `/apps/product-bundles` | Do not emit unsafe storefront URLs |
+| 4 | Invalid override | Absolute URL or malformed path | Resolver rejects the value | Do not emit unsafe storefront URLs or silently cross environments |
 | 5 | FPB preview URL | Shop, public number, SIT root | SIT-rooted storefront URL | Preview must not route into PROD |
 | 6 | Shopify app configs | PROD and SIT TOML files | Distinct subpaths | Prevents installation-level collisions |
 | 7 | Built FPB runtime request | Signed SIT FPB page | Token request uses `/apps/product-bundles-sit/api/cart-transform-runtime-token` | Generated assets must contain the resolver change |
 | 8 | SIT Cart Transform transaction | One authorized SIT component | Shopify returns one merged parent line at the component total | Proves the current tunnel Function and signed token agree |
+| 9 | Controls quick-add response | Active FPB parent with the SIT root configured | Target URL uses `/apps/product-bundles-sit/wpb/{publicNumber}` | Collection actions stay in the installed app environment |
+| 10 | PPB preview without synchronized proxy root | Browser product URL with `wpb_preview`, but no hosted proxy root | No request is sent and the widget fails closed | Never silently route SIT previews into PROD |
 
 ## Acceptance Criteria
 

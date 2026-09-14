@@ -1,15 +1,14 @@
 import {
-  isVariantExistsOnShopifyStorefront,
   validateVariantIdFromShopify,
 } from "../lib/variant-existence.server";
 
 type BundleType = "full_page" | "product_page";
 
-export interface DeploymentGeneralSyncOptions {
+interface DeploymentGeneralSyncOptions {
   enabled: boolean;
 }
 
-export interface DeploymentGeneralSyncSummary {
+interface DeploymentGeneralSyncSummary {
   mode: "disabled" | "apply";
   scannedShops: number;
   scannedBundles: number;
@@ -72,7 +71,7 @@ interface GeneralSyncPrisma {
   };
 }
 
-export interface DeploymentGeneralSyncDependencies {
+interface DeploymentGeneralSyncDependencies {
   prisma: GeneralSyncPrisma;
   getAdmin: (shopDomain: string) => Promise<unknown>;
   ensureMetafieldDefinitions: (admin: unknown) => Promise<unknown>;
@@ -210,8 +209,44 @@ async function runBundleVariantRemediation(
   bundle: GeneralSyncBundle,
   deps: DeploymentGeneralSyncDependencies,
   summary: DeploymentGeneralSyncSummary["variantRemediation"],
+  admin: unknown,
 ) {
-  const resolvedVariantsByShop = new Map<string, Awaited<ReturnType<typeof isVariantExistsOnShopifyStorefront>>>();
+  const variantIds = new Set<string>();
+  for (const step of bundle.steps) {
+    for (const stepProduct of step.StepProduct) {
+      for (const ref of Array.isArray(stepProduct.variants) ? stepProduct.variants : []) {
+        const raw = toVariantReference(ref);
+        if (raw === null) continue;
+        const parsed = await validateVariantIdFromShopify(raw);
+        if (parsed.isValidFormat) variantIds.add(`gid://shopify/ProductVariant/${parsed.numericId}`);
+      }
+    }
+  }
+  const existingVariants = new Set<string>();
+  const ids = [...variantIds];
+  const client = admin as { graphql: (query: string, options: { variables: { ids: string[] } }) => Promise<{ json: () => Promise<any> }> };
+  // Resolve every batch before changing saved composition. A transport, access or
+  // malformed-response failure must never be interpreted as a deleted variant.
+  for (let offset = 0; offset < ids.length; offset += 250) {
+    const batch = ids.slice(offset, offset + 250);
+    const response = await client.graphql(`
+      query BundleVariantExistence($ids: [ID!]!) {
+        nodes(ids: $ids) { __typename ... on ProductVariant { id } }
+      }
+    `, { variables: { ids: batch } });
+    const payload = await response.json();
+    const nodes = payload.data?.nodes;
+    if (payload.errors?.length || !Array.isArray(nodes) || nodes.length !== batch.length) {
+      throw new Error("Unable to verify bundle variant existence through Shopify Admin");
+    }
+    nodes.forEach((node, index) => {
+      if (node === null) return;
+      if (node?.__typename !== "ProductVariant" || node.id !== batch[index]) {
+        throw new Error("Unexpected Shopify Admin variant existence response");
+      }
+      existingVariants.add(node.id);
+    });
+  }
   let bundleUpdated = false;
 
   for (const step of bundle.steps) {
@@ -254,18 +289,14 @@ async function runBundleVariantRemediation(
           continue;
         }
 
-        const cachedLookup = resolvedVariantsByShop.get(parsed.numericId);
-        const lookup = cachedLookup
-          || (await isVariantExistsOnShopifyStorefront(shopDomain, parsed.numericId));
-        resolvedVariantsByShop.set(parsed.numericId, lookup);
-        if (!lookup.ok) {
+        if (!existingVariants.has(`gid://shopify/ProductVariant/${parsed.numericId}`)) {
           hasInvalidRef = true;
           summary.failures.push({
             shopDomain,
             bundleId: bundle.id,
             stepProductId: stepProduct.id,
             variantId: String(rawVariantId),
-            error: `${lookup.message || "variant not found"} (${lookup.status})`,
+            error: "Variant no longer exists in Shopify Admin",
           });
           continue;
         }
@@ -302,6 +333,7 @@ async function runBundleVariantRemediation(
             variantId: "",
             error: errorMessage(error),
           });
+          throw error;
         }
       }
     }
@@ -399,6 +431,13 @@ export async function runDeploymentGeneralSync(
 
     try {
       const admin = adminByShop.get(bundle.shopId)!;
+      await runBundleVariantRemediation(
+        bundle.shopId,
+        bundle,
+        deps,
+        summary.variantRemediation,
+        admin,
+      );
       await deps.syncBundle({
         admin,
         shopDomain: bundle.shopId,
@@ -419,12 +458,7 @@ export async function runDeploymentGeneralSync(
       if (hasEnabledRecurringSubscription(bundle.bundleSubscriptionConfig)) {
         recurringSubscriptionShops.add(bundle.shopId);
       }
-      await runBundleVariantRemediation(
-        bundle.shopId,
-        bundle,
-        deps,
-        summary.variantRemediation,
-      );
+
     } catch (error: any) {
       const message = errorMessage(error);
       summary.failedBundles += 1;

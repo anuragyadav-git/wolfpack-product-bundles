@@ -15,6 +15,7 @@ module.exports = {
     "extensions/**/*.js",
     "scripts/**",
     "tests/__mocks__/*.js",
+    "tests/native/**",
     "jest.config.js",
     "postcss.config.js",
     "tailwind.config.js",

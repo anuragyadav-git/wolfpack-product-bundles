@@ -17,6 +17,7 @@ describe("common configure page model", () => {
         "step_setup",
         "discount_pricing",
         "bundle_visibility",
+        "images_gifs",
         "bundle_settings",
         "subscriptions",
         "select_template",
@@ -51,6 +52,19 @@ describe("common configure page model", () => {
         (item) => item.id === "bundle_settings",
       )?.iconType,
     ).toBe("settings");
+  });
+
+  it("keeps the Polaris image icon only for the FPB per-bundle media editor", () => {
+    expect(
+      buildConfigureSetupItems("full_page").find(
+        (item) => item.id === "images_gifs",
+      )?.iconType,
+    ).toBe("image");
+    expect(
+      buildConfigureSetupItems("product_page").find(
+        (item) => item.id === "images_gifs",
+      ),
+    ).toBeUndefined();
   });
 
   it("keeps Bundle Embed as a PPB-only visibility child", () => {

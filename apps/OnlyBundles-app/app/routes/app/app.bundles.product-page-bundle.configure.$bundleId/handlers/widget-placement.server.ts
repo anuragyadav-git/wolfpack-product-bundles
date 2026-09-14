@@ -1,11 +1,11 @@
 import { json } from "@remix-run/node";
 import type { Session } from "@shopify/shopify-api";
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import db from "../../../../db.server";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { AppLogger } from "../../../../lib/logger";
 import { normaliseShopifyProductId } from "../../../../services/bundles/bundle-configure-handlers.server";
-import { WidgetInstallationService } from "../../../../services/widget-installation.server";
+import { WidgetInstallationService } from "../../../../services/widget-installation/widget-installation-core.server";
 
 export async function handleValidateWidgetPlacement(
   admin: ShopifyAdmin,

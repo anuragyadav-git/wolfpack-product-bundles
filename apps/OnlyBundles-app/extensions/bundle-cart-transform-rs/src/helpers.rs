@@ -3,14 +3,14 @@ use shopify_function::scalars::Decimal;
 
 /// Convert a shopify_function Decimal scalar to f64.
 ///
-/// Decimal stores its value as a string representation (e.g. "29.99", "1.35").
-/// We format it via Display and parse; returns 0.0 on any error or non-finite value.
+/// Shopify's scalar owns conversion; invalid monetary inputs fail closed.
 pub fn decimal_to_f64(d: &Decimal) -> f64 {
-    format!("{d}")
-        .parse::<f64>()
-        .ok()
-        .filter(|v| v.is_finite())
-        .unwrap_or(0.0)
+    let value = d.as_f64();
+    if value.is_finite() {
+        value
+    } else {
+        0.0
+    }
 }
 
 /// Parse a JSON string into `T`, returning `T::default()` on any error.
@@ -22,17 +22,16 @@ where
         .unwrap_or_default()
 }
 
-/// Normalize a condition operator string to a typed Operator.
-/// Handles both short aliases (gte/lte/gt/lt/eq) and long Shopify forms.
-/// Unknown operators default to Gte — matches the TypeScript default case.
-pub fn normalize_operator(operator: &str) -> Operator {
+/// Parse the canonical pricing-condition operator vocabulary.
+/// Unknown and non-canonical values fail closed.
+pub fn normalize_operator(operator: &str) -> Option<Operator> {
     match operator {
-        "gte" | "greater_than_or_equal_to" => Operator::Gte,
-        "gt" | "greater_than" => Operator::Gt,
-        "lte" | "less_than_or_equal_to" => Operator::Lte,
-        "lt" | "less_than" => Operator::Lt,
-        "eq" | "equal_to" => Operator::Eq,
-        _ => Operator::Gte,
+        "gte" => Some(Operator::Gte),
+        "gt" => Some(Operator::Gt),
+        "lte" => Some(Operator::Lte),
+        "lt" => Some(Operator::Lt),
+        "eq" => Some(Operator::Eq),
+        _ => None,
     }
 }
 
@@ -51,3 +50,20 @@ pub fn is_addon_line(step_type_value: Option<&str>) -> bool {
 #[cfg(test)]
 #[path = "helpers_tests.rs"]
 mod tests;
+/// Evaluate the canonical country rule published by the server for both bundle paths.
+pub fn country_is_eligible(rule: &str, current_country: &str) -> bool {
+    if rule.is_empty() {
+        return true;
+    }
+    let Some((mode, countries)) = rule.split_once(':') else {
+        return false;
+    };
+    let matches = countries
+        .split(',')
+        .any(|country| country == current_country);
+    match mode {
+        "include" => matches,
+        "exclude" => !matches,
+        _ => false,
+    }
+}

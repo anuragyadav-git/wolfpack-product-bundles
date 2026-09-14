@@ -52,11 +52,12 @@ describe("/app/bundles/product-page-bundle/configure/:bundleId/validate-widget-p
     );
   });
 
-  it("rejects a missing bundle ID before authentication", async () => {
+  it("authenticates before rejecting a missing bundle ID", async () => {
+    const request = new Request("https://app.example.com/app/bad", {
+      method: "POST",
+    });
     const response = await action({
-      request: new Request("https://app.example.com/app/bad", {
-        method: "POST",
-      }),
+      request,
       params: {},
       context: {},
     });
@@ -66,14 +67,32 @@ describe("/app/bundles/product-page-bundle/configure/:bundleId/validate-widget-p
       success: false,
       error: "Invalid bundle widget placement route",
     });
-    expect(mockRequireAdminSession).not.toHaveBeenCalled();
+    expect(mockRequireAdminSession).toHaveBeenCalledWith(request);
   });
 
-  it("does not allow GET requests", async () => {
+  it("propagates authentication failure before route validation", async () => {
+    const authFailure = new Response(null, { status: 401 });
+    mockRequireAdminSession.mockRejectedValue(authFailure);
+
+    await expect(
+      action({
+        request: new Request("https://app.example.com/app/bad", {
+          method: "POST",
+        }),
+        params: {},
+        context: {},
+      }),
+    ).rejects.toBe(authFailure);
+
+    expect(mockHandleValidateWidgetPlacement).not.toHaveBeenCalled();
+  });
+
+  it("authenticates before rejecting GET requests", async () => {
+    const request = new Request(
+      "https://app.example.com/app/bundles/product-page-bundle/configure/bundle-1/validate-widget-placement",
+    );
     const response = await loader({
-      request: new Request(
-        "https://app.example.com/app/bundles/product-page-bundle/configure/bundle-1/validate-widget-placement",
-      ),
+      request,
       params: { bundleId: "bundle-1" },
       context: {},
     });
@@ -83,5 +102,6 @@ describe("/app/bundles/product-page-bundle/configure/:bundleId/validate-widget-p
       success: false,
       error: "Method not allowed",
     });
+    expect(mockRequireAdminSession).toHaveBeenCalledWith(request);
   });
 });

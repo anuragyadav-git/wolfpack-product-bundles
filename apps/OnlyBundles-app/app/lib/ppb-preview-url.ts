@@ -1,4 +1,4 @@
-export type PpbPreviewInput = {
+type PpbPreviewInput = {
   appEmbedEnabled: boolean;
   bundleStatus: string;
   productHandle: string | null;

@@ -5,14 +5,14 @@ import { generateCartTransformRuntimeTokenSecret } from "./cart-transform-runtim
 
 type AdminApiContext = Awaited<ReturnType<typeof authenticate.admin>>['admin'];
 
-export interface CartTransformActivationResult {
+interface CartTransformActivationResult {
   success: boolean;
   cartTransformId?: string;
   error?: string;
   alreadyExists?: boolean;
 }
 
-export interface CartTransformMetafieldSyncResult {
+interface CartTransformMetafieldSyncResult {
   success: boolean;
   cartTransformId?: string;
   error?: string;

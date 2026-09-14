@@ -10,6 +10,7 @@ import {
 } from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../../shopify.server";
+import { getCannyPublicConfig } from "../../services/canny.server";
 import { ErrorPage } from "../../components/ErrorPage";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import {
   loadAdminLocaleResources,
   resolveAdminLocaleFromRequest,
 } from "../../i18n/config";
+import { navigateWithSaveBarConfirmation } from "../../lib/admin-unsaved-navigation";
 
 type AdminLoadingApi = (isLoading?: boolean) => void;
 
@@ -50,6 +52,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     apiKey: process.env.SHOPIFY_API_KEY || "",
     locale,
     shop: session.shop,
+    canny: getCannyPublicConfig(),
   };
 };
 
@@ -81,7 +84,10 @@ function AdminNavigation() {
       navigate(href);
       return;
     }
-    void shopify.saveBar.leaveConfirmation().then(() => navigate(href));
+    void navigateWithSaveBarConfirmation(
+      () => shopify.saveBar!.leaveConfirmation!(),
+      () => navigate(href),
+    );
   };
 
   return (
@@ -112,6 +118,9 @@ function AdminNavigation() {
         onClick={handleNavigation("/app/offer-operations")}
       >
         {t("nav.offerOperations")}
+      </s-link>
+      <s-link href="/app/feature-requests" onClick={handleNavigation("/app/feature-requests")}>
+        {t("nav.featureRequests")}
       </s-link>
       <s-link href="/app/billing" onClick={handleNavigation("/app/billing")}>
         {t("nav.billing")}

@@ -64,7 +64,6 @@ export function ErrorPage({ error }: ErrorPageProps) {
   let title = FALLBACK_5XX.title;
   let description = FALLBACK_5XX.description;
   let hint = FALLBACK_5XX.hint;
-  let detail: string | null = null;
 
   if (isRouteErrorResponse(error)) {
     const routeError = error as { status: number };
@@ -80,58 +79,72 @@ export function ErrorPage({ error }: ErrorPageProps) {
         "An unexpected error occurred. Please try again or return to the dashboard.";
       hint = "If this keeps happening, contact support.";
     }
-  } else if (error instanceof Error) {
-    detail = error.message;
   }
 
   const is4xx = status >= 400 && status < 500;
 
   return (
-    <main className="ob-error-page" aria-labelledby="error-page-title">
-      <section className="ob-error-page__panel">
-        <div className="ob-error-page__logo">
-          <s-image
-            src={APP_BRAND.markPath}
-            alt={APP_BRAND.name}
-            aspectRatio="1/1"
-            objectFit="cover"
-          />
-        </div>
+    <s-grid
+      minBlockSize="100%"
+      alignItems="center"
+      justifyItems="center"
+      padding="large-400"
+    >
+      <s-box inlineSize="100%" maxInlineSize="576px">
+        <s-section accessibilityLabel={`${status} ${title}`}>
+          <s-grid
+            gap="large-300"
+            justifyItems="center"
+            padding="large-400"
+          >
+            <s-box
+              inlineSize="96px"
+              blockSize="96px"
+              overflow="hidden"
+              borderRadius="large-200"
+            >
+              <s-image
+                src={APP_BRAND.markPath}
+                alt={APP_BRAND.name}
+                aspectRatio="1/1"
+                objectFit="cover"
+                inlineSize="fill"
+              />
+            </s-box>
 
-        <div className="ob-error-page__status">
-          <s-badge tone={is4xx ? "info" : "critical"}>{status}</s-badge>
-        </div>
+            <s-badge tone={is4xx ? "info" : "critical"}>{status}</s-badge>
 
-        <div className="ob-error-page__copy">
-          <s-heading id="error-page-title">{title}</s-heading>
-          <s-paragraph>{description}</s-paragraph>
-          <s-paragraph tone="neutral" color="subdued">
-            {hint}
-          </s-paragraph>
-        </div>
+            <s-grid justifyItems="center" maxInlineSize="448px" gap="base">
+              <s-stack direction="block" gap="small-200" alignItems="center">
+                <s-heading>{title}</s-heading>
+                <s-paragraph>{description}</s-paragraph>
+                <s-paragraph tone="neutral" color="subdued">
+                  {hint}
+                </s-paragraph>
+              </s-stack>
 
-        {detail && !is4xx ? (
-          <details className="ob-error-page__details">
-            <summary>
-              {translateAdmin(
-                "adminExtracted.components.errorpage.technicalDetails"
-              )}
-            </summary>
-            <pre>{detail}</pre>
-          </details>
-        ) : null}
-
-        <div className="ob-error-page__actions">
-          <s-button variant="primary" onClick={handleGoToDashboard}>
-            {translateAdmin(
-              "adminExtracted.components.errorpage.goToDashboard"
-            )}
-          </s-button>
-          <s-button variant="secondary" onClick={() => openSupportChat()}>
-            {translateAdmin("billing.actions.contactSupport")}
-          </s-button>
-        </div>
-      </section>
-    </main>
+              <s-button-group gap="base">
+                <s-button
+                  slot="primary-action"
+                  variant="primary"
+                  onClick={handleGoToDashboard}
+                >
+                  {translateAdmin(
+                    "adminExtracted.components.errorpage.goToDashboard"
+                  )}
+                </s-button>
+                <s-button
+                  slot="secondary-actions"
+                  variant="secondary"
+                  onClick={() => openSupportChat()}
+                >
+                  {translateAdmin("billing.actions.contactSupport")}
+                </s-button>
+              </s-button-group>
+            </s-grid>
+          </s-grid>
+        </s-section>
+      </s-box>
+    </s-grid>
   );
 }

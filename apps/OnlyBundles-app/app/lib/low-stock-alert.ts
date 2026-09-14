@@ -3,26 +3,26 @@ const DEFAULT_LOW_STOCK_MESSAGE = "Only {{stock}} left";
 const LOW_STOCK_MESSAGE_TOKEN = "{{stock}}";
 const MAX_LOW_STOCK_MESSAGE_LENGTH = 200;
 
-export interface LowStockAlertSettings {
+interface LowStockAlertSettings {
   lowStockAlertEnabled: boolean;
   lowStockAlertThreshold: number;
   lowStockAlertMessage: string;
 }
 
-export interface LowStockAlertConfig {
+interface LowStockAlertConfig {
   enabled: boolean;
   threshold: number;
   message: string;
 }
 
-export interface LowStockComponentInventory {
+interface LowStockComponentInventory {
   quantityAvailable: number | null;
   currentlyNotInStock?: boolean | null;
   availableForSale?: boolean | null;
   requiredQuantity?: number | null;
 }
 
-export interface LowStockAlertValidationIssue {
+interface LowStockAlertValidationIssue {
   path: "settings.lowStockThreshold" | "settings.lowStockMessage";
   message: string;
 }

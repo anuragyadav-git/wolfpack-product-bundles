@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "新着情報",
+    "unavailable": "新着情報とフィードバックは一時的に利用できません。",
+    "loading": "機能リクエストを読み込み中",
+    "retry": "再試行",
+    "retryHelp": "再試行するか、新しいタブでフィードバックポータルを開いてください。",
+    "openPortal": "フィードバックポータルを開く",
+    "feedbackIntro": "改善を提案し、アイデアに投票して、進捗を確認できます。リクエストと投票はストアの全員で共有されます。"
+  },
   "nav": {
+    "featureRequests": "機能リクエスト",
     "dashboard": "ダッシュボード",
     "designControlPanel": "デザインコントロールパネル",
     "settings": "設定",
@@ -88,6 +98,8 @@
       "deleteBundle": "バンドルを削除",
       "cloneSuccess": "バンドルが複製されました",
       "deleteSuccess": "バンドルが削除されました",
+      "renameBundle": "バンドル名を変更",
+      "renameSuccess": "バンドル名を変更しました",
       "themeEditorUnavailable": "このストアではテーマエディターのリンクを利用できません。"
     },
     "deleteModal": {
@@ -95,6 +107,15 @@
       "delete": "削除",
       "cancel": "キャンセル",
       "body": "この操作は取り消せません。バンドルの設定、ステップ、割引ルールがすべて完全に削除されます。"
+    },
+    "renameModal": {
+      "heading": "バンドル名を変更",
+      "nameLabel": "バンドル名",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "errorEmpty": "バンドル名を入力してください。",
+      "errorTooLong": "バンドル名は255文字以内で入力してください。",
+      "errorFailed": "バンドル名を変更できませんでした。"
     },
     "resources": {
       "bundleInspiration": "バンドルのインスピレーション",
@@ -437,6 +458,11 @@
       "title": "バンドルサブスクリプション",
       "description": "買い物客は、バンドル製品で共有されているShopifyの販売プランから選択できるようにします。",
       "imageAlt": "バンドルのワンタイム購入とサブスクリプションのオプション"
+    },
+    "floatingPromoBadge": {
+      "title": "フローティングプロモーションバッジ",
+      "description": "フルページバンドルの左下に閉じることができるプロモーションバッジを表示します。設定したテキストとバンドルのメインボタンの色が使用されます。",
+      "imageAlt": "ストアフロントの左下に表示された、マーチャントのテキストと閉じるボタンを含む丸いプロモーションバッジ"
     }
   },
   "specificLinkOffer": {
@@ -609,7 +635,7 @@
       "body": "見つけられるようにするには、Shopifyの商品でバンドル商品のステータスを有効に変更してください。"
     },
     "warningGroup": {
-      "heading": "操作が必要です",
+      "heading": "いくつかの項目に対応が必要です",
       "summary": "バンドルを公開するには、いくつかの操作が必要です。",
       "modalTitle": "必要な操作"
     },
@@ -696,7 +722,22 @@
       "tryAgain": "再試行",
       "contactSupport": "サポートに連絡",
       "cancel": "キャンセル",
-      "back": "前のページに戻る"
+      "back": "前のページに戻る",
+      "viewPlans": "プランを確認",
+      "saveAsDraft": "下書きとして保存",
+      "keepEditing": "編集を続ける"
+    },
+    "entitlements": {
+      "publicLimitHeading": "公開バンドル数の上限に達しました",
+      "publicLimitDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。無制限に公開するにはGrowthプランにアップグレードするか、下書きとして保存して変更を保持してください。",
+      "premiumTemplateHeading": "Growthプランテンプレート",
+      "premiumTemplateDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。このテンプレートで公開するにはGrowthプランにアップグレードするか、下書きとして保存して変更を保持してください。",
+      "advancedDesignHeading": "Growthプランのデザイン機能",
+      "advancedDesignDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。カスタムスタイルで公開するにはGrowthプランにアップグレードするか、下書きとして保存してください。",
+      "stepsLimitHeading": "ステップ数の上限に達しました",
+      "stepsLimitDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。無制限のステップを利用するにはGrowthプランにアップグレードするか、下書きとして保存してください。",
+      "growthRequiredHeading": "Growthプランが必要です",
+      "growthRequiredDescription": "Freeプランには公開中のバンドル1件と標準テンプレートのみが含まれています。この機能を利用して公開するにはGrowthプランにアップグレードするか、このバンドルを下書きとして保存してください。"
     },
     "error": {
       "heading": "サブスクリプションの問題",
@@ -834,6 +875,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "主要な統計",
+      "sales": "売上",
+      "totalOrderRevenue": "注文総売上",
+      "totalOrderRevenueDefinition": "少なくとも1つのバンドルを含む注文の合計金額です。",
+      "totalBundleRevenue": "バンドル総売上",
+      "totalBundleRevenueDefinition": "完了した注文に含まれるバンドル商品の合計金額です。",
+      "ordersWithBundles": "バンドルを含む注文",
+      "ordersWithBundlesDefinition": "少なくとも1つのバンドルを含む完了済み注文です。",
+      "averageOrderValue": "平均注文額",
+      "averageOrderValueDefinition": "注文総売上をバンドルを含む注文数で割った値です。",
+      "addToCartValue": "カート追加あたりの価値",
+      "addToCartValueDefinition": "バンドル総売上をカート追加に成功したセッション数で割った値です。",
+      "totalBundlesPurchased": "購入されたバンドル合計",
+      "totalBundlesPurchasedDefinition": "注文ごとの一意のバンドル数です。数量の重複は1回として数えます。",
+      "bundleRevenue": "バンドル売上"
+    },
     "offers": {
       "title": "パフォーマンスを提供",
       "description": "プライバシーに保護されたオファーの決定をバンドルエンゲージメント、カートへの追加アクティビティ、完了した注文、収益と比較します。",
@@ -958,7 +1016,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "バンドルファネル",
-          "howShoppersMoveThroughYourBundles": "お客さまのバンドルの移動方法"
+          "howShoppersMoveThroughYourBundles": "お客さまのバンドルの移動方法",
+          "bundleViews": "バンドルビュー",
+          "conversion": "変換"
         },
         "liveactivityfeed": {
           "liveActivity": "ライブアクティビティ",
@@ -1075,9 +1135,6 @@
         "configurecontextualsavebar": {
           "discard": "破棄する"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "保存する前に次のフィールドを修正:"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "ヒント：割引はカート内のすべてのアイテムに基づいています。 Don't forget to include the Pre Selected Product's quantity or amount"
         },
@@ -1110,7 +1167,7 @@
         "apply": "適用",
         "backfillSelectedWindow": "選択したウィンドウをバックフィルする",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "バンドルおよびインポート可能な収益、ランディングページ、およびUTMの詳細に対応する注文行項目が一致します。",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "既存のアトリビューションレコードはスキップされるため、再び同じウィンドウを実行しても重複は作成されません。",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "既存のバンドル行は可能な場合にShopifyから更新され、重複レコードは作成されません。",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopifyの注文とストアフトラッキングは変更されません。",
         "customUtmAttributes": "UTMのカスタム属性",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Only Bundlesは、今後の訪問時に一致するURL値をキャプチャし、チェックアウト属性で保存します。",
@@ -1194,6 +1251,7 @@
           "syncBundle": "バンドルを同期"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "コンバージョン率の向上に役立つ他のテンプレートを利用するには、Growthプランにアップグレードしてください。",
           "customizeYourBundle": "バンドルをカスタマイズ",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "あなたのニーズに合ったデザインを選択してください",
           "customizeColorsAmpLanguage": "色 & 言語をカスタマイズ",
@@ -1269,21 +1327,9 @@
           "addAddOnsTier": "Add Ons Tierを追加"
         },
         "imagesgifspanel": {
-          "mediaAssets": "メディアアセット",
-          "addVisualMediaToEnhanceTheBundleExperienceForShoppers": "買い物客のバンドル体験を向上させるために視覚的なメディアを追加します。",
           "promoBanner": "プロモーション旗",
           "wideBannerDisplayedAtTheTopOfTheFullPageBundle": "全ページバンドルの上部にワイドバナーが表示されます",
           "pageHeader": "ページヘッダー",
-          "jpgPngWebpGifSvgAvif": "UIラベル: JPG、PNG、WebP、GIF、SVG、AVIF",
-          "recommendedSize": "推奨サイズ",
-          "1600400Px41Ratio": "UI label: 1600 × 400 px · 4:1 ratio",
-          "stepImages": "ステップ画像",
-          "tabIconAndBannerImagePerStepShownInTheWidget": "ステップごとのタブアイコンとバナー画像 — ウィジェットに表示",
-          "perStep": "ステップごと",
-          "tabIcon": "UIラベル: タブアイコン",
-          "circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1": "ステップタブの円形アイコン。設定時にステップ番号を置き換えます。推奨: 100 x 100 px 正方形。",
-          "stepBannerImage": "ステップバナー画像",
-          "fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended": "このステップがアクティブな場合、製品グリッドの上にフル幅の画像を表示します。推奨: 1600 × 400 px。",
           "floatingPromoBadge": "フローティングプロモーションバッジ",
           "fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks": "ページの左下にあるバッジを修正しました — 買い物客がXをクリックしたときにセッションが解除されました",
           "storefront": "ストアフロント"
@@ -1470,6 +1516,8 @@
     "uploadFailed": "アップロードに失敗しました",
     "searchFiles": "ファイルを検索",
     "searchFiles2": "Search files…",
+    "noFilesMatchSearch": "検索条件に一致するファイルはありません。",
+    "noImageFilesFound": "ストアに画像ファイルが見つかりませんでした。",
     "uploadProcessing": "アップロード処理中",
     "loadingFiles": "ファイルを読み込み中",
     "uploading": "アップロード中",
@@ -1574,8 +1622,6 @@
     "bundleCartSubtitle": "バンドルカートの字幕",
     "reviewYourBundle": "バンドルをレビューする",
     "addCustomCSSForThisBundle": "/* Add custom CSS for this bundle */",
-    "chooseTabIcon": "タブのアイコンを選択",
-    "chooseBannerImage": "バナー画像を選択",
     "showFloatingPromoBadge": "フローティングプロモーションバッジを表示",
     "eGSave20TodayOnly": "例: 今日だけ20% 割引!",
     "enableMultiLanguage": "多言語を有効にする",
@@ -1658,6 +1704,8 @@
     "clickToUploadImage": "クリックして画像またはアイコンをアップロード",
     "chooseGifFile": "GIF ファイルを選択します。",
     "chooseSupportedImageFile": "サポートされている画像ファイルを選択してください。",
+    "fileMustBeUnder20Mb": "ファイルは20MB未満にしてください。",
+    "fileMustBeSmallerThan50Kb": "50KB未満のファイルをアップロードしてください。",
     "integrationLogo": "{{name}}ロゴ",
     "guidedTourProgress": "ガイドツアー：全 {{total}} ステップ中 {{current}} ステップ目",
     "guidedTourStep": "全 {{total}} ステップ中 {{current}} ステップ目",

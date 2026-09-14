@@ -1,25 +1,57 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import type { Dispatch, SetStateAction } from "react";
 import { PpbDiscountMessageRuleFields } from "./PpbDiscountMessageRuleFields";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import { DiscountMethod } from "../../../types/pricing";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type {
+  RuleMessages,
+  RuleMessagesByLocale,
+} from "../../../lib/bundle-configure-translations";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbDiscountMessagingOptions() {
-  const {
-    DiscountMethod,
-    discountMessagingMultiLanguageEnabled,
-    markAsDirty,
-    pricingState,
-    productPageBundleStyles,
-    QuestionHelpTooltip,
-    ruleMessages,
-    ruleMessagesByLocale,
-    setActiveDiscountLocale,
-    setDiscountMessagingMultiLanguageEnabled,
-    setIsDiscountVariablesModalOpen,
-    setRuleMessagesByLocale,
-    shopLocales,
-    activeDiscountLocale,
-  } = usePpbConfigureContext();
+export type PpbDiscountMessagingOptionsProps = Pick<
+  PpbConfigureFlow,
+  | "activeDiscountLocale"
+  | "discountMessagingMultiLanguageEnabled"
+  | "globalSuccessMessage"
+  | "markAsDirty"
+  | "pricingState"
+  | "ruleMessages"
+  | "ruleMessagesByLocale"
+  | "setActiveDiscountLocale"
+  | "setDiscountMessagingMultiLanguageEnabled"
+  | "setGlobalSuccessMessage"
+  | "setIsDiscountVariablesModalOpen"
+  | "setRuleMessagesByLocale"
+  | "setSuccessMessageByLocale"
+  | "shopLocales"
+  | "successMessageByLocale"
+  | "updateRuleMessage"
+> & {
+  validationErrors?: Record<string, string>;
+};
+
+export function PpbDiscountMessagingOptions({
+  activeDiscountLocale,
+  discountMessagingMultiLanguageEnabled,
+  globalSuccessMessage,
+  markAsDirty,
+  pricingState,
+  ruleMessages,
+  ruleMessagesByLocale,
+  setActiveDiscountLocale,
+  setDiscountMessagingMultiLanguageEnabled,
+  setGlobalSuccessMessage,
+  setIsDiscountVariablesModalOpen,
+  setRuleMessagesByLocale,
+  setSuccessMessageByLocale,
+  shopLocales,
+  successMessageByLocale,
+  updateRuleMessage,
+  validationErrors,
+}: PpbDiscountMessagingOptionsProps) {
 
   return (
     <div className={productPageBundleStyles.displayOptionRow}>
@@ -102,7 +134,23 @@ export function PpbDiscountMessagingOptions() {
                 )}
               </s-button>
             </div>
-            <PpbDiscountMessageRuleFields />
+            <PpbDiscountMessageRuleFields
+              activeDiscountLocale={activeDiscountLocale}
+              discountMessagingMultiLanguageEnabled={
+                discountMessagingMultiLanguageEnabled
+              }
+              globalSuccessMessage={globalSuccessMessage}
+              markAsDirty={markAsDirty}
+              pricingState={pricingState}
+              ruleMessages={ruleMessages}
+              ruleMessagesByLocale={ruleMessagesByLocale}
+              setGlobalSuccessMessage={setGlobalSuccessMessage}
+              setRuleMessagesByLocale={setRuleMessagesByLocale}
+              setSuccessMessageByLocale={setSuccessMessageByLocale}
+              successMessageByLocale={successMessageByLocale}
+              updateRuleMessage={updateRuleMessage}
+              validationErrors={validationErrors}
+            />
           </s-stack>
         </div>
       </DisabledConfigurationRegion>
@@ -121,10 +169,10 @@ function PpbDiscountLanguageSelector({
 }: {
   activeDiscountLocale: string;
   markAsDirty: () => void;
-  ruleMessages: Record<string, any>;
-  ruleMessagesByLocale: Record<string, Record<string, any>>;
+  ruleMessages: RuleMessages;
+  ruleMessagesByLocale: RuleMessagesByLocale;
   setActiveDiscountLocale: (locale: string) => void;
-  setRuleMessagesByLocale: (updater: any) => void;
+  setRuleMessagesByLocale: Dispatch<SetStateAction<RuleMessagesByLocale>>;
   shopLocales: Array<{ locale: string; name: string; primary: boolean }>;
 }) {
   return (

@@ -22,7 +22,11 @@ describe('ProductPageModalMethods.renderModalProductsLoading', () => {
     const customGifUrl = 'https://cdn.shopify.com/custom-spinner.gif';
     const { modal, productGrid, restore } = createModal();
     try {
-      ProductPageModalMethods.renderModalProductsLoading.call({ elements: { modal }, selectedBundle: { loadingGif: customGifUrl } }, 0);
+      ProductPageModalMethods.renderModalProductsLoading.call({
+        elements: { modal },
+        config: { loadingScreen: { gifUrl: customGifUrl } },
+        selectedBundle: { loadingGif: "https://cdn.example.test/retired.gif" },
+      }, 0);
       expect(productGrid.querySelector('[role="status"]')).not.toBeNull();
       expect(productGrid.querySelector('img')?.src).toBe(customGifUrl);
     } finally {
@@ -33,7 +37,10 @@ describe('ProductPageModalMethods.renderModalProductsLoading', () => {
   it('renders the default accessible loading status when media is absent', () => {
     const { modal, productGrid, restore } = createModal();
     try {
-      ProductPageModalMethods.renderModalProductsLoading.call({ elements: { modal }, selectedBundle: { loadingGif: null } }, 0);
+      ProductPageModalMethods.renderModalProductsLoading.call({
+        elements: { modal },
+        config: { loadingScreen: { gifUrl: null } },
+      }, 0);
       expect(productGrid.querySelector('[role="status"]')?.getAttribute('aria-label')).toBe('Loading products');
       expect(productGrid.querySelector('img')).toBeNull();
     } finally {
@@ -44,7 +51,7 @@ describe('ProductPageModalMethods.renderModalProductsLoading', () => {
   it('handles a missing product grid safely', () => {
     expect(() => ProductPageModalMethods.renderModalProductsLoading.call({
       elements: { modal: { querySelector: () => null } },
-      selectedBundle: { loadingGif: null },
+      config: { loadingScreen: { gifUrl: null } },
     }, 0)).not.toThrow();
   });
 });

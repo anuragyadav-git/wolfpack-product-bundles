@@ -1,89 +1,80 @@
 import { BundleStatusSection } from "../../_shared/bundle-configure/BundleStatusSection";
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { BundleStatus } from "../../../../constants/bundle";
 import { translateAdmin } from "~/i18n/config";
 
-export function FpbBundleCssSettings({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    bundleLevelCss,
-    bundleLevelCssExpanded,
-    formState,
-    markAsDirty,
-    setBundleLevelCss,
-    setBundleLevelCssExpanded,
-  } = flow;
+export interface FpbBundleCssSettingsProps {
+  bundleLevelCss: string;
+  bundleLevelCssExpanded: boolean;
+  bundleStatus: BundleStatus;
+  markAsDirty: () => void;
+  setBundleLevelCss: (value: string) => void;
+  setBundleLevelCssExpanded: (update: (previous: boolean) => boolean) => void;
+  setBundleStatus: (status: BundleStatus) => void;
+}
 
+export function FpbBundleCssSettings({
+  bundleLevelCss,
+  bundleLevelCssExpanded,
+  bundleStatus,
+  markAsDirty,
+  setBundleLevelCss,
+  setBundleLevelCssExpanded,
+  setBundleStatus,
+}: FpbBundleCssSettingsProps) {
   return (
     <>
       {/* Bundle Level CSS — collapsible */}
       <s-section>
         <s-stack direction="block" gap="small">
-          <button
-            type="button"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-            }}
+          <s-clickable
+            inlineSize="100%"
+            padding="small"
+            aria-expanded={bundleLevelCssExpanded}
             onClick={() => setBundleLevelCssExpanded((prev) => !prev)}
           >
-            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-              {translateAdmin(
+            <s-stack
+              direction="inline"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <s-heading>
+                {translateAdmin(
+                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingscss.bundleLevelCss"
+                )}
+              </s-heading>
+              <s-icon
+                type={bundleLevelCssExpanded ? "chevron-up" : "chevron-down"}
+                tone="neutral"
+              />
+            </s-stack>
+          </s-clickable>
+          {bundleLevelCssExpanded && (
+            <s-text-area
+              label={translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingscss.bundleLevelCss"
               )}
-            </h3>
-            <span
-              style={{
-                fontSize: 18,
-                color: "#6d7175",
-                display: "inline-block",
-                transform: bundleLevelCssExpanded ? "rotate(180deg)" : "none",
-                transition: "transform 0.2s",
-              }}
-            >
-              {"▾"}
-            </span>
-          </button>
-          {bundleLevelCssExpanded && (
-            <textarea
+              labelAccessibilityVisibility="exclusive"
               value={bundleLevelCss}
               placeholder={translateAdmin(
                 "adminAttributes.addCustomCSSForThisBundle"
               )}
               rows={6}
-              style={{
-                width: "100%",
-                fontFamily: "monospace",
-                fontSize: 13,
-                padding: "8px 10px",
-                borderRadius: 6,
-                border: "1px solid #c9cccf",
-                resize: "vertical",
-                boxSizing: "border-box",
-              }}
-              onInput={(e) => {
-                setBundleLevelCss((e.target as HTMLTextAreaElement).value);
+              onInput={(e: Event) => {
+                setBundleLevelCss((e.currentTarget as HTMLTextAreaElement).value);
                 markAsDirty();
               }}
             />
           )}
         </s-stack>
       </s-section>
-      <s-section>
-        <BundleStatusSection
-          status={formState.bundleStatus}
-          onChange={formState.setBundleStatus}
-          showHeading={false}
-        />
-      </s-section>
+      <div data-tour-target="fpb-bundle-status">
+        <s-section>
+          <BundleStatusSection
+            status={bundleStatus}
+            onChange={setBundleStatus}
+          />
+        </s-section>
+      </div>
     </>
   );
 }

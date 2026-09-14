@@ -7,13 +7,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   filterAndSortBundleResults,
-  type BundleMatrixRow,
   type BundleResultSortDirection,
   type BundleResultSortKey,
-} from "../../lib/analytics";
+} from "../../lib/analytics/bundle-results";
+import type { BundleMatrixRow } from "../../lib/analytics/engagement-helpers";
 import { translateAdmin } from "~/i18n/config";
 
-export interface BundlePerformanceMatrixProps {
+interface BundlePerformanceMatrixProps {
   rows: BundleMatrixRow[];
   formatRevenue: (cents: number) => string;
   onRowClick?: (bundleId: string) => void;

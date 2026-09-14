@@ -8,7 +8,7 @@ export const OFFER_ELIGIBILITY_SOURCES = [
 
 export type OfferEligibilitySource = typeof OFFER_ELIGIBILITY_SOURCES[number];
 
-export type OfferAnalyticsDimensions = {
+type OfferAnalyticsDimensions = {
   offerPolicyId: string | null;
   offerRuleVersion: number | null;
   offerTierId: string | null;

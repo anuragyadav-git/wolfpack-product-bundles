@@ -1,7 +1,7 @@
 import type { BillingInterval } from "../../lib/subscriptions/entitlements";
 import type { ProviderVerification } from "./subscription-resolution.server";
 
-export interface ShopifyAppPricingConfig {
+interface ShopifyAppPricingConfig {
   accessToken: string;
   appId: string;
 }

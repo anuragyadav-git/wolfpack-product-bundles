@@ -36,4 +36,19 @@ describe("bundle preview token", () => {
       bundleId: "bundle-2",
     })).toBe(false);
   });
+
+  it("has a 1-hour time-to-live and remains valid within the hour", () => {
+    expect(BUNDLE_PREVIEW_TOKEN_TTL_MS).toBe(60 * 60 * 1000);
+    const token = createBundlePreviewToken(input);
+    expect(verifyBundlePreviewToken({
+      ...input,
+      token,
+      now: input.now + (59 * 60 * 1000),
+    })).toBe(true);
+    expect(verifyBundlePreviewToken({
+      ...input,
+      token,
+      now: input.now + (60 * 60 * 1000),
+    })).toBe(false);
+  });
 });

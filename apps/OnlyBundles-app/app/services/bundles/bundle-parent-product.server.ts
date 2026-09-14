@@ -1,5 +1,5 @@
 import db from "../../db.server";
-import type { ShopifyAdmin } from "../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../shopify.server";
 import { AppLogger } from "../../lib/logger";
 import { buildBundleProductDescriptionHtml } from "../../lib/bundle-product-description.server";
 import { buildGeneratedBundleProductMetadata } from "../../lib/bundle-product-data.server";
@@ -36,12 +36,8 @@ const ONLY_BUNDLES_PARENT_TAGS = [
   "only-bundles-parent",
   REBUY_SMART_CART_BUNDLE_TAG,
 ] as const;
-const LEGACY_BUNDLE_PARENT_TAGS = [
-  "WP-Bundles",
-  "wolfpack-bundle-parent",
-] as const;
 
-export type BundleParentProductResult = {
+type BundleParentProductResult = {
   productId: string;
   variantId: string;
   handle: string;
@@ -291,31 +287,6 @@ async function syncOnlyBundlesParentTags(
     addData.data?.tagsAdd?.userErrors,
   );
 
-  const removeResponse = await admin.graphql(
-    `
-      mutation RemoveLegacyBundleParentTags($id: ID!, $tags: [String!]!) {
-        tagsRemove(id: $id, tags: $tags) {
-          node { id }
-          userErrors { field message }
-        }
-      }
-    `,
-    {
-      variables: {
-        id: productId,
-        tags: [...LEGACY_BUNDLE_PARENT_TAGS],
-      },
-    },
-  );
-  const removeData = (await removeResponse.json()) as {
-    data?: { tagsRemove?: { userErrors?: ShopifyUserError[] } };
-    errors?: unknown[];
-  };
-  throwTransportErrors("remove legacy bundle parent tags", removeData.errors);
-  throwUserErrors(
-    "remove legacy bundle parent tags",
-    removeData.data?.tagsRemove?.userErrors,
-  );
 }
 
 async function loadParentProduct(

@@ -1,6 +1,6 @@
-export const FPB_UPSELL_HANDOFF_TTL_MS = 10 * 60 * 1000;
+const FPB_UPSELL_HANDOFF_TTL_MS = 10 * 60 * 1000;
 
-export type FpbUpsellHandoff = {
+type FpbUpsellHandoff = {
   version: 1;
   bundleId: string;
   productId: string;
@@ -12,7 +12,7 @@ export type FpbUpsellHandoff = {
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-export function fpbUpsellHandoffKey(bundleId: string) {
+function fpbUpsellHandoffKey(bundleId: string) {
   return `wpb:fpb-upsell-handoff:${bundleId}`;
 }
 

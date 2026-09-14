@@ -1,0 +1,30 @@
+{
+  "$schema": "https://extensions.shopifycdn.com/shopifycloud/schemas/v1/shopify-intent.json",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 255,
+        "description": "Optional proposed bundle product name."
+      },
+      "bundle_type": {
+        "type": "string",
+        "enum": ["full_page", "product_page"],
+        "description": "Optional Only Bundles bundle type."
+      }
+    },
+    "additionalProperties": false
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "$ref": "https://extensions.shopifycdn.com/shopifycloud/schemas/v1/shopify/product/gid.json"
+      }
+    },
+    "required": ["id"],
+    "additionalProperties": false
+  }
+}

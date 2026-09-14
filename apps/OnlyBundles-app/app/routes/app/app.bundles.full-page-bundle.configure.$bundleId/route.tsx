@@ -9,19 +9,18 @@ import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import { fetchBundleConfigureShopifyData } from "../../../lib/bundle-configure-loader.server";
 import {
-  handleSaveBundle,
   handleUpdateBundleStatus,
-  handleSyncProduct,
   handleUpdateBundleProduct,
-  handleUpdateBundleDesignTemplate,
-} from "./handlers";
+} from "../../../services/bundles/bundle-configure-handlers.server";
+import { handleSaveBundle } from "./handlers/save-bundle.server";
+import { handleSyncProduct } from "./handlers/sync-product.server";
+import { handleUpdateBundleDesignTemplate } from "./handlers/page-handlers.server";
 import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
 import {
   handleSyncStorefrontNow,
   handlePrepareStorefrontPreview,
 } from "../shared/storefront-sync-action.server";
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
-import { ReduxProvider } from "../../../store/ReduxProvider";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 import { buildSpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
 import {
@@ -29,6 +28,7 @@ import {
   handleRevokeSpecificLinkOffer,
 } from "../shared/specific-link-offer-action.server";
 import { resolveStorefrontProxyRoot } from "../../../config/storefront-proxy-routes";
+import { resolveShopEntitlements } from "../../../services/subscriptions/subscription-service.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -101,7 +101,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     configuredRoot: process.env.STOREFRONT_PROXY_ROOT,
   });
 
-  const [shopifyData, availableBundles] = await Promise.all([
+  const [shopifyData, availableBundles, entitlementContext] = await Promise.all([
     fetchBundleConfigureShopifyData(admin, bundle.shopifyProductId, bundleId),
     db.bundle.findMany({
       where: {
@@ -112,7 +112,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
+    resolveShopEntitlements({ shopDomain: session.shop }),
   ]);
+
+  const isFreePlan = entitlementContext?.entitlements?.planCode !== "GROWTH";
 
   const { offerPolicy, ...safeBundle } = bundle;
   return json({
@@ -123,6 +126,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     ),
     bundleProduct: shopifyData.bundleProduct,
     availableBundles,
+    isFreePlan,
     shop: session.shop,
     configureMode,
     showFirstLoadTour,
@@ -134,8 +138,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+  const { session, admin } = await authenticate.admin(request);
+
   try {
-    const { session, admin } = await authenticate.admin(request);
     const { bundleId } = params;
 
     if (!session?.shop) {
@@ -244,9 +249,5 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 };
 
 export default function FullPageBundleConfigureRoute() {
-  return (
-    <ReduxProvider>
-      <ConfigureBundleFlow />
-    </ReduxProvider>
-  );
+  return <ConfigureBundleFlow />;
 }

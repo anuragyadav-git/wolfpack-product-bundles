@@ -1,8 +1,16 @@
+import { buildBundleAuthorizationPolicy } from '../../../app/services/bundle-authorization-policy.server';
 import {
-  buildPpbPolicyRevisionMetafield,
-  buildPpbStaticAuthorization,
+  buildPpbStaticAuthorization as signAuthorization,
   verifyPpbStaticToken,
 } from "../../../app/services/ppb-static-authorization.server";
+import type { BundleSubscriptionConfigV1 } from "../../../app/lib/bundle-subscriptions";
+
+function buildPpbStaticAuthorization(input: any) {
+  const bundle = { ...input.bundle, offerPolicy: input.offerPolicy, bundleSubscriptionConfig: input.subscription,
+    steps: input.bundle.steps?.map((step: any) => ({ ...step, StepProduct: step.products })) };
+  const policy = buildBundleAuthorizationPolicy({ bundle, shop: input.shop, parentVariantId: input.parentVariantId });
+  return signAuthorization({ ...input, revision: policy.revision });
+}
 
 describe("PPB static purchase authorization", () => {
   const bundle = {
@@ -15,12 +23,21 @@ describe("PPB static purchase authorization", () => {
       minQuantity: 1,
       maxQuantity: 3,
       isFreeGift: false,
-      StepProduct: [{
+      products: [{
         productId: "gid://shopify/Product/1",
         variants: [{ id: "gid://shopify/ProductVariant/11" }],
       }],
     }],
-    pricing: { enabled: true, method: "percentage_off", rules: [{ discountValue: 10 }] },
+    pricing: {
+      enabled: true,
+      method: "percentage_off",
+      rules: [{
+        id: "rule-1",
+        conditionType: "quantity",
+        conditionValue: 1,
+        discountValue: 10,
+      }],
+    },
   };
 
   it("signs one bundle policy and one bounded line authorization per variant and role", () => {
@@ -68,6 +85,7 @@ describe("PPB static purchase authorization", () => {
       shop: "shop.myshopify.com",
       parentVariantId: "gid://shopify/ProductVariant/99",
       secret: "secret",
+      offerPolicy: targetedBundle.offerPolicy,
     });
     const untargeted = buildPpbStaticAuthorization({
       bundle,
@@ -94,6 +112,106 @@ describe("PPB static purchase authorization", () => {
       secret: "secret",
     });
     expect(verifyPpbStaticToken(`${result.authorization.bundleToken}x`, "secret")).toBeNull();
+  });
+
+  it("revises authorization for schedule edits but not priority or countdown presentation", () => {
+    const authorize = (offerPolicy: any) => buildPpbStaticAuthorization({
+      bundle, shop: "shop.myshopify.com", parentVariantId: "gid://shopify/ProductVariant/99", secret: "secret", offerPolicy,
+    });
+    const policy = { scheduleMode: "one_time", startsAt: new Date("2026-09-14T10:00:00Z"), endsAt: new Date("2026-09-14T11:00:00Z") };
+    const original = authorize(policy);
+    const changed = authorize({ ...policy, endsAt: new Date("2026-09-14T12:00:00Z") });
+    expect(changed.policy.revision).not.toBe(original.policy.revision);
+    expect(verifyPpbStaticToken(changed.authorization.bundleToken, "secret")?.revision).toBe(changed.policy.revision);
+    expect(authorize({ ...policy, priority: 1, stopLowerPriority: true, countdownTitle: "Changed" }).policy.revision)
+      .toBe(original.policy.revision);
+    expect(authorize({ ...policy, startsAt: policy.startsAt.toISOString(), endsAt: policy.endsAt.toISOString() }).policy.revision)
+      .toBe(original.policy.revision);
+  });
+
+  it("revises authorization for recurrence window edits", () => {
+    const policy = { scheduleMode: "recurring" as const, recurrenceFrequency: "weekly" as const, recurrenceTimezone: "UTC", recurrenceAnchorDate: "2026-09-14", recurrenceWindowStartMinute: 600, recurrenceWindowEndMinute: 660 };
+    const authorize = (offerPolicy: any) => buildPpbStaticAuthorization({
+      bundle, shop: "shop.myshopify.com", parentVariantId: "gid://shopify/ProductVariant/99", secret: "secret", offerPolicy,
+    }).policy.revision;
+    expect(authorize(policy)).not.toBe(authorize({ ...policy, recurrenceWindowEndMinute: 720 }));
+  });
+
+  it("requires the canonical bundle id instead of a legacy bundleId alias", () => {
+    expect(() => buildPpbStaticAuthorization({
+      bundle: { ...bundle, id: undefined, bundleId: "legacy-bundle" },
+      shop: "shop.myshopify.com",
+      parentVariantId: "gid://shopify/ProductVariant/99",
+      secret: "secret",
+    })).toThrow();
+  });
+
+  it("does not authorize persistence-shaped product aliases", () => {
+    expect(() => buildPpbStaticAuthorization({
+      bundle: {
+        ...bundle,
+        steps: [{
+          id: "step-legacy",
+          minQuantity: 1,
+          maxQuantity: 1,
+          StepProduct: [{
+            productId: "gid://shopify/Product/7",
+            variants: [{ id: "gid://shopify/ProductVariant/77" }],
+          }],
+        }],
+      },
+      shop: "shop.myshopify.com",
+      parentVariantId: "gid://shopify/ProductVariant/99",
+      secret: "secret",
+    })).toThrow("PPB static authorization requires cached variant IDs");
+  });
+
+  it("signs explicit subscription and country policy inputs", () => {
+    const subscription: BundleSubscriptionConfigV1 = {
+      version: 1,
+      enabled: true,
+      selectedGroup: {
+        id: "gid://shopify/SellingPlanGroup/1",
+        name: "Subscribe",
+        options: [],
+        plans: [{ id: "gid://shopify/SellingPlan/1", sourceName: "Monthly", options: [], position: 1, pricingPolicies: [] }],
+      },
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+      defaultPurchaseOption: { kind: "selling_plan", sellingPlanId: "gid://shopify/SellingPlan/1" },
+      oneTimePurchase: { enabled: true, title: "One time", description: "" },
+      copy: { title: "Purchase options", subtitle: "", unavailableMessage: "Unavailable" },
+      planCopy: { "gid://shopify/SellingPlan/1": { displayName: "Monthly", discountPill: "", description: "" } },
+      showDiscountOnProductCards: false,
+      recurringBundleDiscount: false,
+      bundleDiscountAppliesOn: "both",
+      translations: {},
+    };
+    const result = buildPpbStaticAuthorization({
+      bundle,
+      shop: "shop.myshopify.com",
+      parentVariantId: "gid://shopify/ProductVariant/99",
+      secret: "secret",
+      subscription,
+      offerPolicy: {
+        countryTargetingEnabled: true,
+        countryTargetingMode: "include",
+        countryCodes: ["US"],
+      },
+    });
+
+    expect(result.policy.subscription).toMatchObject({
+      enabled: true,
+      selectedPlanIds: ["gid://shopify/SellingPlan/1"],
+    });
+    expect(result.policy.countryTargeting).toEqual({
+      enabled: true,
+      mode: "include",
+      countryCodes: ["US"],
+    });
+    expect(verifyPpbStaticToken(result.authorization.bundleToken, "secret")).toMatchObject({
+      countryRule: "include:US",
+      subscription: expect.objectContaining({ enabled: true }),
+    });
   });
 
   it("signs direct default products with their required quantity", () => {
@@ -131,26 +249,4 @@ describe("PPB static purchase authorization", () => {
     });
   });
 
-  it("advances the shop policy revision without disturbing other bundles", async () => {
-    const admin = {
-      graphql: jest.fn().mockResolvedValue({
-        json: async () => ({
-          data: { shop: {
-            id: "gid://shopify/Shop/1",
-            policy: { value: '{"other":"keep","bundle-1":"old"}' },
-          } },
-        }),
-      }),
-    };
-
-    const metafield = await buildPpbPolicyRevisionMetafield({
-      admin,
-      bundleId: "bundle-1",
-      revision: "new",
-      active: true,
-    });
-
-    expect(metafield).toMatchObject({ ownerId: "gid://shopify/Shop/1", key: "ppb_policy_revisions" });
-    expect(JSON.parse(metafield.value)).toEqual({ other: "keep", "bundle-1": "new" });
-  });
 });

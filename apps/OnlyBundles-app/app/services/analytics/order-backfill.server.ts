@@ -11,11 +11,17 @@
  */
 
 import db from "../../db.server";
-import { matchLineItemGroupsToBundles, orderIdMatchForms } from "../../lib/analytics/bundle-matcher.server";
+import { matchLineItemGroupsToBundles } from "../../lib/analytics/bundle-matcher.server";
 import { AppLogger } from "../../lib/logger";
+import { collectBundleLineRevenue } from "../../lib/analytics/bundle-line-revenue";
+import {
+  generateCartTransformRuntimeTokenSecret,
+  verifyRuntimeCartToken,
+} from "../cart-transform-runtime-token.server";
 
-export interface BackfillResult {
+interface BackfillResult {
   created: number;
+  repaired: number;
   skipped: number;
   pages: number;
 }
@@ -34,7 +40,7 @@ const ORDERS_QUERY = `
         id
         name
         createdAt
-        totalPriceSet { shopMoney { amount currencyCode } }
+        currentTotalPriceSet { shopMoney { amount currencyCode } }
         customerJourneySummary {
           lastVisit {
             landingPage
@@ -42,7 +48,12 @@ const ORDERS_QUERY = `
           }
         }
         lineItems(first: 50) {
-          nodes { product { id } quantity }
+          nodes {
+            product { id }
+            quantity
+            discountedTotalSet(withCodeDiscounts: true) { shopMoney { amount } }
+            customAttributes { key value }
+          }
         }
       }
     }
@@ -53,7 +64,7 @@ interface OrderNode {
   id: string;
   name?: string | null;
   createdAt: string;
-  totalPriceSet?: { shopMoney?: { amount?: string | null; currencyCode?: string | null } | null } | null;
+  currentTotalPriceSet?: { shopMoney?: { amount?: string | null; currencyCode?: string | null } | null } | null;
   customerJourneySummary?: {
     lastVisit?: {
       landingPage?: string | null;
@@ -66,7 +77,15 @@ interface OrderNode {
       } | null;
     } | null;
   } | null;
-  lineItems?: { nodes?: Array<{ product?: { id?: string | null } | null }> | null } | null;
+  lineItems?: {
+    nodes?: Array<{
+      product?: { id?: string | null } | null;
+      customAttributes?: Array<{ key?: string | null; value?: string | null }> | null;
+      discountedTotalSet?: {
+        shopMoney?: { amount?: string | null } | null;
+      } | null;
+    }> | null;
+  } | null;
 }
 
 function extractOrderNumber(gid: string): string | null {
@@ -79,6 +98,55 @@ function toRevenueCents(amount?: string | null): number {
   return Math.round(parseFloat(amount) * 100);
 }
 
+function verifiedRuntimeBundleIds(node: OrderNode, shopId: string): string[] {
+  let secret: string;
+  try {
+    secret = generateCartTransformRuntimeTokenSecret(shopId);
+  } catch {
+    return [];
+  }
+
+  const bundleIds = new Set<string>();
+  for (const lineItem of node.lineItems?.nodes ?? []) {
+    const runtimeToken = lineItem.customAttributes?.find(
+      (attribute) => attribute.key === "_wolfpack_bundle_runtime",
+    )?.value;
+    if (!runtimeToken) continue;
+    const payload = verifyRuntimeCartToken(runtimeToken, secret);
+    if (payload?.shop === shopId && payload.bundleId) {
+      bundleIds.add(payload.bundleId);
+    }
+  }
+  return [...bundleIds];
+}
+
+function bundleRevenueById(
+  node: OrderNode,
+  shopId: string,
+  bundleIds: string[],
+): Record<string, number> {
+  let secret: string;
+  try {
+    secret = generateCartTransformRuntimeTokenSecret(shopId);
+  } catch {
+    return Object.fromEntries(bundleIds.map((bundleId) => [bundleId, 0]));
+  }
+
+  const lines = (node.lineItems?.nodes ?? []).map((lineItem) => {
+    const runtimeToken = lineItem.customAttributes?.find(
+      (attribute) => attribute.key === "_wolfpack_bundle_runtime",
+    )?.value;
+    const payload = runtimeToken
+      ? verifyRuntimeCartToken(runtimeToken, secret)
+      : null;
+    return {
+      ...lineItem,
+      bundleId: payload?.shop === shopId ? payload.bundleId : null,
+    };
+  });
+  return collectBundleLineRevenue(lines, bundleIds);
+}
+
 export async function backfillOrderAttribution(
   admin: AdminClient,
   shopId: string,
@@ -89,6 +157,7 @@ export async function backfillOrderAttribution(
 
   let cursor: string | null = null;
   let created = 0;
+  let repaired = 0;
   let skipped = 0;
   let pages = 0;
 
@@ -106,18 +175,44 @@ export async function backfillOrderAttribution(
       break;
     }
 
-    // Dedup pre-check: which of these orderIds already exist in DB? We check
-    // both GID and numeric forms because early pixel writes may have stored the
-    // raw sandbox id (numeric) while backfill always writes canonical GID.
+    // Shopify Admin returns canonical Order GIDs; attribution rows use the same
+    // exact identifier so both ingestion paths share one key.
     const orderIds = nodes.map((n) => n.id);
-    const lookupForms = orderIds.flatMap((value) => orderIdMatchForms(value));
     const existing = await db.orderAttribution.findMany({
-      where: { shopId, orderId: { in: lookupForms } },
-      select: { orderId: true },
+      where: { shopId, orderId: { in: orderIds } },
+      select: { orderId: true, bundleId: true },
     });
-    const storedForms = new Set(existing.map((r: { orderId: string }) => r.orderId));
-    const alreadyStored = new Set(
-      orderIds.filter((id) => orderIdMatchForms(id).some((f) => storedForms.has(f)))
+
+    const existingRowsForOrder = (orderId: string) => existing.filter(
+      (row: { orderId: string; bundleId: string | null }) => row.orderId === orderId,
+    );
+
+    const explicitBundleIdsByOrder = nodes.map((node) => (
+      verifiedRuntimeBundleIds(node, shopId)
+    ));
+    const fallbackNodeIndexes = nodes.flatMap((node, index) => {
+      const existingRows = existingRowsForOrder(node.id);
+      const alreadyAttributed = existingRows.some((row: { bundleId: string | null }) => (
+        row.bundleId !== null
+      ));
+      return !alreadyAttributed && explicitBundleIdsByOrder[index].length === 0
+        ? [index]
+        : [];
+    });
+    const fallbackMatches = fallbackNodeIndexes.length > 0
+      ? await matchLineItemGroupsToBundles(
+          shopId,
+          fallbackNodeIndexes.map((index) => (
+            (nodes[index].lineItems?.nodes ?? []).map((lineItem) => ({
+              productId: lineItem.product?.id ?? null,
+            }))
+          )),
+        )
+      : [];
+    const fallbackMatchesByIndex = new Map(
+      fallbackNodeIndexes.map((nodeIndex, resultIndex) => (
+        [nodeIndex, fallbackMatches[resultIndex] ?? []] as const
+      )),
     );
 
     const rows: Array<{
@@ -133,27 +228,26 @@ export async function backfillOrderAttribution(
       landingPage: string | null;
       revenue: number;
       currency: string;
+      bundleRevenue: number;
+      createdAt: Date;
     }> = [];
 
-    const unstoredNodes = nodes.filter((node) => !alreadyStored.has(node.id));
-    skipped += nodes.length - unstoredNodes.length;
-    const lineItemGroups = unstoredNodes.map((node) =>
-      (node.lineItems?.nodes ?? []).map((li) => ({
-        productId: li.product?.id ?? null,
-      })),
-    );
-    const bundleIdsByOrder = lineItemGroups.length > 0
-      ? await matchLineItemGroupsToBundles(shopId, lineItemGroups)
-      : [];
+    for (const [nodeIndex, node] of nodes.entries()) {
+      const existingRows = existingRowsForOrder(node.id);
+      const existingBundleIds = existingRows.flatMap(
+        (row: { bundleId: string | null }) => row.bundleId ? [row.bundleId] : [],
+      );
+      const hasExplicitBundleIdentity = explicitBundleIdsByOrder[nodeIndex].length > 0;
+      const bundleIds = hasExplicitBundleIdentity
+        ? explicitBundleIdsByOrder[nodeIndex]
+        : fallbackMatchesByIndex.get(nodeIndex) ?? existingBundleIds;
 
-    for (const [nodeIndex, node] of unstoredNodes.entries()) {
-      const bundleIds = bundleIdsByOrder[nodeIndex] ?? [];
       const visit = node.customerJourneySummary?.lastVisit ?? null;
       const utm = visit?.utmParameters ?? null;
-      const revenue = toRevenueCents(node.totalPriceSet?.shopMoney?.amount);
-      const currency = node.totalPriceSet?.shopMoney?.currencyCode ?? "USD";
+      const revenue = toRevenueCents(node.currentTotalPriceSet?.shopMoney?.amount);
+      const currency = node.currentTotalPriceSet?.shopMoney?.currencyCode ?? "USD";
       const orderNumber = extractOrderNumber(node.id);
-
+      const revenueByBundleId = bundleRevenueById(node, shopId, bundleIds);
       const baseRow = {
         shopId,
         orderId: node.id,
@@ -166,14 +260,66 @@ export async function backfillOrderAttribution(
         landingPage: visit?.landingPage ?? null,
         revenue,
         currency,
+        createdAt: new Date(node.createdAt),
       };
 
-      if (bundleIds.length > 0) {
-        for (const bundleId of bundleIds) {
-          rows.push({ ...baseRow, bundleId });
+      if (existingBundleIds.length > 0) {
+        if (!hasExplicitBundleIdentity) {
+          skipped += 1;
+          continue;
         }
-      } else {
-        rows.push({ ...baseRow, bundleId: null });
+        for (const bundleId of existingBundleIds) {
+          await db.orderAttribution.updateMany({
+            where: {
+              shopId,
+              orderId: node.id,
+              bundleId,
+            },
+            data: {
+              revenue,
+              bundleRevenue: revenueByBundleId[bundleId] ?? 0,
+              currency,
+              createdAt: new Date(node.createdAt),
+            },
+          });
+        }
+        repaired += 1;
+        continue;
+      }
+
+      if (existingRows.length > 0) {
+        if (bundleIds.length === 0) {
+          skipped += 1;
+          continue;
+        }
+        await db.orderAttribution.updateMany({
+          where: {
+            shopId,
+            orderId: node.id,
+            bundleId: null,
+          },
+          data: {
+            bundleId: bundleIds[0],
+            revenue,
+            bundleRevenue: revenueByBundleId[bundleIds[0]] ?? 0,
+            currency,
+            createdAt: new Date(node.createdAt),
+          },
+        });
+        repaired += 1;
+      }
+
+      if (bundleIds.length > 0) {
+        const newBundleIds = existingRows.length > 0 ? bundleIds.slice(1) : bundleIds;
+        for (const bundleId of newBundleIds) {
+          rows.push({
+            ...baseRow,
+            bundleId,
+            bundleRevenue: revenueByBundleId[bundleId] ?? 0,
+          });
+        }
+      } else if (existingRows.length === 0) {
+        rows.push({ ...baseRow, bundleId: null, bundleRevenue: 0 });
       }
     }
 
@@ -193,9 +339,10 @@ export async function backfillOrderAttribution(
     component: "order-backfill",
     shopId,
     created,
+    repaired,
     skipped,
     pages,
   });
 
-  return { created, skipped, pages };
+  return { created, repaired, skipped, pages };
 }

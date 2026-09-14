@@ -5,7 +5,7 @@ title: Only Bundles Brand and Compatibility Boundary
 type: architecture
 status: authoritative
 summary: Defines the Only Bundles visible identity and the legacy technical identifiers intentionally preserved for installed-shop compatibility.
-last_audited: 2026-08-30
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -17,6 +17,8 @@ systems:
   - shopify-extensions
 source_paths:
   - app/lib/app-brand.ts
+  - app/components/ErrorPage.tsx
+  - app/root.tsx
   - public/branding/only-bundles/
   - shopify.app.toml
 related_docs:
@@ -38,6 +40,14 @@ The production application and publisher identity is **Only Bundles**. The canon
 
 All merchant-visible Admin copy, Theme Editor labels, extension descriptions, analytics exports, loading/error states, and product-configuration ownership messages use the current brand.
 
+The shared Remix error boundary is a Shopify-native empty-state splash composed
+only from Polaris web components. `s-grid`, `s-box`, and `s-section` own the
+centred padded layout; `s-button-group` owns spacing and primary/secondary action
+semantics for dashboard recovery and Crisp support. Merchant-facing error pages
+never expose thrown messages or a technical-details disclosure. The root error
+document loads Polaris and Crisp directly because it cannot rely on the normal
+embedded-app route shell; it does not load a dedicated error-page stylesheet.
+
 ## Preserved identifiers
 
 The rebrand does not rename contracts that existing installations, carts, bundles, or integrations depend on:
@@ -53,7 +63,11 @@ These strings are implementation identifiers, not co-branding. No dual-read fall
 
 ## Parent-product transition
 
-New parents use `Only Bundles`, `only-bundles-parent`, and `smart-cart-hide-bundle-options`. Explicit Sync Product or Sync Bundle adds those tags to existing parents and removes only `WP-Bundles` and `wolfpack-bundle-parent`, preserving all merchant-authored tags.
+New parents use `Only Bundles`, `only-bundles-parent`, and
+`smart-cart-hide-bundle-options`. Explicit Sync Product or Sync Bundle adds
+those current tags to existing parents while preserving all merchant-authored
+tags. Retired brand tags were handled by a one-time cleanup after zero-state
+verification; recurring sync does not retain a legacy-tag removal branch.
 
 ## Legacy URL stage
 

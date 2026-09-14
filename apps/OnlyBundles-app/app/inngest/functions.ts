@@ -7,8 +7,8 @@ import { runSubscriptionReconciliation } from "../services/subscriptions/subscri
  * Inngest function: shopify-webhook
  *
  * Single durable function that handles all Shopify webhook topics.
- * Topic routing is handled inside WebhookProcessor — unchanged from the
- * existing direct-processing path.
+ * Topic routing is handled inside WebhookProcessor, after the authenticated
+ * Remix ingress has handed the delivery to Inngest.
  *
  * Retry behaviour: if the processor returns { success: false } or throws,
  * this function throws so Inngest marks the run as failed and retries it

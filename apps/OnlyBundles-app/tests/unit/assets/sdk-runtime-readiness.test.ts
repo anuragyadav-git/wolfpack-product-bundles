@@ -103,7 +103,7 @@ describe("SDK hydration", () => {
       runtime: { storefrontApiVersion: "2026-07", storefrontAccessToken: "token" },
       shop: "shop.myshopify.com",
       fetchImpl: jest.fn().mockResolvedValue(empty),
-    })).rejects.toThrow(/configured products/i);
+    })).rejects.toThrow(/incomplete shopify product hydration/i);
     expect(state.isReady).toBe(false);
   });
 });

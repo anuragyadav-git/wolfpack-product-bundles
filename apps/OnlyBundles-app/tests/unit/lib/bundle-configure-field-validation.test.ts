@@ -41,6 +41,51 @@ describe("validateBundleConfigureFormData", () => {
     expect(validateBundleConfigureFormData(form(), "fpb")).toEqual([]);
   });
 
+  it("does not accept legacy step JSON products as configured resources", () => {
+    const issues = validateBundleConfigureFormData(form({
+      stepsData: JSON.stringify([{
+        id: "step-1",
+        name: "Choose products",
+        enabled: true,
+        products: [{ id: "gid://shopify/Product/999" }],
+        StepProduct: [],
+        StepCategory: [],
+        collections: [],
+      }]),
+    }), "fpb");
+
+    expect(issues).toEqual(expect.arrayContaining([
+      expect.objectContaining({ path: "steps.step-1.resources" }),
+    ]));
+  });
+
+  it.each(["fpb", "ppb"] as const)(
+    "rejects unsupported category variant selector modes for %s",
+    (kind) => {
+      const issues = validateBundleConfigureFormData(form({
+        stepsData: JSON.stringify([{
+          id: "step-1",
+          name: "Choose products",
+          enabled: true,
+          StepProduct: [],
+          StepCategory: [{
+            id: "category-1",
+            name: "Products",
+            collections: [{ id: "gid://shopify/Collection/1" }],
+            products: [],
+            variantSelectorMode: "unsupported",
+          }],
+        }]),
+      }), kind);
+
+      expect(issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          path: "steps.step-1.categories.category-1.variantSelectorMode",
+        }),
+      ]));
+    },
+  );
+
   it.each(["fpb", "ppb"] as const)(
     "validates enabled subscription configuration for %s",
     (kind) => {
@@ -136,6 +181,153 @@ describe("validateBundleConfigureFormData", () => {
         "discount.rules.discount-1.discountValue",
       ]),
     );
+  });
+
+  it.each(["fpb", "ppb"] as const)(
+    "accepts inclusive whole-number percentage boundaries for %s",
+    (kind) => {
+      for (const discountValue of [0, 100]) {
+        const issues = validateBundleConfigureFormData(
+          form({
+            discountData: JSON.stringify({
+              discountEnabled: true,
+              discountType: "percentage_off",
+              discountRules: [
+                {
+                  id: "discount-1",
+                  conditionType: "quantity",
+                  conditionValue: 1,
+                  discountValue,
+                },
+              ],
+            }),
+          }),
+          kind,
+        );
+
+        expect(issues).not.toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: "discount.rules.discount-1.discountValue",
+            }),
+          ]),
+        );
+      }
+    },
+  );
+
+  it.each(["fpb", "ppb"] as const)(
+    "rejects out-of-range and fractional percentages for %s",
+    (kind) => {
+      for (const discountValue of [-1, 12.5, 101, null, "", "not-a-number"]) {
+        const issues = validateBundleConfigureFormData(
+          form({
+            discountData: JSON.stringify({
+              discountEnabled: true,
+              discountType: "percentage_off",
+              discountRules: [
+                {
+                  id: "discount-1",
+                  conditionType: "quantity",
+                  conditionValue: 1,
+                  discountValue,
+                },
+              ],
+            }),
+          }),
+          kind,
+        );
+
+        expect(issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: "discount.rules.discount-1.discountValue",
+              message: "Enter a whole percentage from 0 to 100.",
+            }),
+          ]),
+        );
+      }
+    },
+  );
+
+  it.each(["fpb", "ppb"] as const)(
+    "applies the whole-number percentage range to Buy X Get Y for %s",
+    (kind) => {
+      const issues = validateBundleConfigureFormData(
+        form({
+          discountData: JSON.stringify({
+            discountEnabled: true,
+            discountType: "buy_x_get_y",
+            discountRules: [
+              {
+                id: "discount-1",
+                conditionType: "quantity",
+                conditionValue: 2,
+                customerBuys: 2,
+                customerGets: 1,
+                bxyDiscountType: "percentage",
+                discountValue: 25.5,
+              },
+            ],
+          }),
+        }),
+        kind,
+      );
+
+      expect(issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "discount.rules.discount-1.discountValue",
+            message: "Enter a whole percentage from 0 to 100.",
+          }),
+        ]),
+      );
+    },
+  );
+
+  it("applies the whole-number percentage range to FPB add-on discounts", () => {
+    const makeAddonDraft = (discountValue: number) => ({
+      addonProductsEnabled: true,
+      addonProductsTitle: "Add-ons",
+      addonTiers: [
+        {
+          tierId: "tier-1",
+          title: "Extras",
+          selectedAddonProducts: [{ id: "gid://shopify/Product/2" }],
+          eligibilityValue: 1,
+          discountValue,
+        },
+      ],
+    });
+
+    for (const discountValue of [0, 100]) {
+      const issues = validateBundleConfigureFormData(
+        form({ validationAddonDraft: JSON.stringify(makeAddonDraft(discountValue)) }),
+        "fpb",
+      );
+      expect(issues).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "addons.products.tiers.tier-1.discount",
+          }),
+        ]),
+      );
+    }
+
+    for (const discountValue of [-1, 12.5, 101]) {
+      const issues = validateBundleConfigureFormData(
+        form({ validationAddonDraft: JSON.stringify(makeAddonDraft(discountValue)) }),
+        "fpb",
+      );
+      expect(issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: "addons.products.tiers.tier-1.discount",
+            message: "Enter a whole percentage from 0 to 100.",
+          }),
+        ]),
+      );
+    }
   });
 
   it("validates the PPB category selector mode", () => {

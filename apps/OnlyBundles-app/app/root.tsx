@@ -1,4 +1,4 @@
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import {
   Links,
   Meta,
@@ -11,12 +11,7 @@ import {
 } from "@remix-run/react";
 import CrispChat from "./components/CrispChat";
 import { ErrorPage } from "./components/ErrorPage";
-import errorPageStylesheet from "./components/ErrorPage.css?url";
 import { APP_BRAND } from "./lib/app-brand";
-
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: errorPageStylesheet },
-];
 
 export function isStorefrontPreviewFramePath(pathname: string) {
   return pathname === "/settings-design-preview-frame"
@@ -45,7 +40,6 @@ export function ErrorBoundary() {
         <meta name="shopify-api-key" content={apiKey} />
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" />
         <script src="https://cdn.shopify.com/shopifycloud/polaris.js" />
-        <link rel="stylesheet" href={errorPageStylesheet} />
         <link
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
@@ -57,6 +51,7 @@ export function ErrorBoundary() {
       <body
         style={{
           margin: 0,
+          minHeight: "100vh",
           fontFamily:
             "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
         }}

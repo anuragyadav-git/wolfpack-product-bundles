@@ -10,7 +10,7 @@ import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server"
 import { BUNDLE_PREVIEW_QUERY_PARAM } from "../../lib/bundle-preview-url";
 import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
 import { buildOfferDecisionMarker } from "../../lib/offer-policy-decision";
-import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer";
 
 /**
  * Public API endpoint to fetch a single bundle by ID
@@ -123,12 +123,13 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
 
     const isPublic = bundle?.status === BundleStatus.ACTIVE
       || bundle?.status === BundleStatus.UNLISTED;
+    const hasValidPreviewToken = verifyBundlePreviewToken({
+      token: url.searchParams.get(BUNDLE_PREVIEW_QUERY_PARAM),
+      shop: shopDomain,
+      bundleId,
+    });
     const isAuthorizedDraftPreview = bundle?.status === BundleStatus.DRAFT
-      && verifyBundlePreviewToken({
-        token: url.searchParams.get(BUNDLE_PREVIEW_QUERY_PARAM),
-        shop: shopDomain,
-        bundleId,
-      });
+      && hasValidPreviewToken;
 
     if (!bundle || (!isPublic && !isAuthorizedDraftPreview)) {
       AppLogger.warn(ERROR_MESSAGES.BUNDLE_NOT_FOUND, {
@@ -143,12 +144,14 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
       }, { status: 404, headers: CORS_HEADERS });
     }
 
-    const offerDecision = isAuthorizedDraftPreview
+    const offerDecision = hasValidPreviewToken
       ? { eligible: true, reasonCode: 'not_required' as const }
       : resolveSpecificLinkOfferEligibility({
         policy: bundle.offerPolicy,
         token: url.searchParams.get(SPECIFIC_LINK_OFFER_QUERY_PARAM),
-        countryCode: url.searchParams.get('country'),
+        countryCode: url.searchParams.has('country')
+          ? url.searchParams.get('country')
+          : undefined,
       });
     if (!offerDecision.eligible) {
       return json({
@@ -175,7 +178,7 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
     const offerDecisionRequired = buildOfferDecisionMarker(bundle.offerPolicy).decisionRequired;
     const commonHeaders = {
       ...CORS_HEADERS,
-      'Cache-Control': isAuthorizedDraftPreview || offerDecisionRequired
+      'Cache-Control': hasValidPreviewToken || offerDecisionRequired
         ? 'private, no-store'
         : 'public, max-age=10, s-maxage=30, must-revalidate',
       'Vary': 'Accept-Encoding',
@@ -184,7 +187,7 @@ export const loader: LoaderFunction = async ({ request, params }: any) => {
     };
 
     if (
-      !isAuthorizedDraftPreview
+      !hasValidPreviewToken
       && !offerDecisionRequired
       && isFreshByCacheHeaders(request, `"${etag}"`, lastModified)
     ) {

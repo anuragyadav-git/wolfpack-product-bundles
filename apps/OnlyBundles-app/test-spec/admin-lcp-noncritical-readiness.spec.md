@@ -5,7 +5,7 @@ title: Admin LCP Noncritical Readiness Test Spec
 type: test-spec
 status: active
 summary: Keeps Admin page content paint independent from noncritical status and banner lookups.
-last_audited: 2026-08-25
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -50,6 +50,10 @@ Paint useful Dashboard and bundle-configure content without waiting for status c
 | 7 | Configure route opens another section | Supported non-Step Setup section id | Only that section's deferred module key is selected | Image and visibility views share their existing combined section |
 | 8 | Configure route initial server paint | Configure editor loads | Closed modal and overlay trees are not part of the initial paint | They become available after client mount |
 | 9 | Configure route Shopify loader data | Bundle product id is present or absent | Product, currency, and published locales resolve through one Admin GraphQL request | Avoids three concurrent route-blocking requests |
+| 10 | Optional product field fails | Shopify returns partial shop data plus a product-path GraphQL error | Required currency/timezone and locales remain usable; product is `null` and the failure is logged | A missing optional product must not hide the editor |
+| 11 | Optional locale field fails | Shopify returns partial shop data plus a `shopLocales`-path GraphQL error | Required currency/timezone remain usable; locales are empty and the failure is logged | Translation controls retain their existing empty-locale behavior |
+| 12 | Required shop configuration is incomplete | Shopify omits currency or timezone | Loader fails instead of fabricating merchant configuration | No hardcoded currency/timezone fallback |
+| 13 | Combined Admin request fails | Admin GraphQL transport rejects | Error propagates after one request | No latency-increasing fallback chain |
 
 ## Acceptance Criteria
 
@@ -57,7 +61,7 @@ Paint useful Dashboard and bundle-configure content without waiting for status c
 - [x] Preview still performs its established live app-embed guard.
 - [x] Dashboard content does not wait for proxy-health or subscription banner data.
 - [x] Dashboard content does not wait for the app-embed status lookup.
-- [ ] Dashboard App Embed Status owns native Polaris loading feedback while unresolved.
+- [x] Dashboard App Embed Status owns native Polaris loading feedback while unresolved.
 - [x] An unhealthy proxy still produces its warning after deferred data resolves.
 - [x] Configure routes load Step Setup without requesting inactive section modules.
 - [x] Navigating to another configure section loads the correct section module.

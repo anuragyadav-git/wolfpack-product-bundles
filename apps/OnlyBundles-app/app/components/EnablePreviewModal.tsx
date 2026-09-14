@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { openThemeEditorInNewTab } from "../lib/theme-editor-navigation.client";
-import styles from "./EnablePreviewModal.module.css";
+import { LocalAppModal } from "./bundle-configure/LocalAppModal";
 
 interface EnablePreviewModalProps {
   open: boolean;
@@ -20,55 +20,34 @@ export function EnablePreviewModal({
   if (!open) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="enable-preview-modal-title"
-      className={styles.backdrop}
-      onClick={onClose}
+    <LocalAppModal
+      title={t("common.previewGate.title")}
+      onClose={onClose}
+      secondaryAction={
+        <s-button variant="secondary" onClick={onClose}>
+          {t("common.actions.maybeLater")}
+        </s-button>
+      }
+      primaryAction={
+        <s-button
+          variant="primary"
+          onClick={() => {
+            if (onSetupVisibility) {
+              onSetupVisibility();
+            } else if (themeEditorUrl) {
+              openThemeEditorInNewTab(themeEditorUrl);
+            }
+            onClose();
+          }}
+        >
+          {t("common.actions.setUpVisibility")}
+        </s-button>
+      }
     >
-      <div
-        className={styles.dialog}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className={styles.iconFrame}>
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#555"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </div>
-        <h2 id="enable-preview-modal-title" className={styles.title}>
-          {t("common.previewGate.title")}
-        </h2>
-        <p className={styles.body}>{t("common.previewGate.body")}</p>
-        <div className={styles.actions}>
-          <s-button variant="secondary" onClick={onClose}>
-            {t("common.actions.maybeLater")}
-          </s-button>
-          <s-button
-            variant="primary"
-            onClick={() => {
-              if (onSetupVisibility) {
-                onSetupVisibility();
-              } else if (themeEditorUrl) {
-                openThemeEditorInNewTab(themeEditorUrl);
-              }
-              onClose();
-            }}
-          >
-            {t("common.actions.setUpVisibility")}
-          </s-button>
-        </div>
-      </div>
-    </div>
+      <s-stack direction="block" gap="base" alignItems="center">
+        <s-icon type="view" />
+        <s-paragraph>{t("common.previewGate.body")}</s-paragraph>
+      </s-stack>
+    </LocalAppModal>
   );
 }

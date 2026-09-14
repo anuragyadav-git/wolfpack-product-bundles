@@ -5,6 +5,39 @@ import {
   DEFAULT_PROGRESS_BAR_PROGRESS_TEXT,
   DEFAULT_PROGRESS_BAR_SUCCESS_TEXT,
 } from "../../../lib/pricing-display-options";
+import type { RuleMessagesByLocale } from "../../../lib/bundle-configure-translations";
+import type { useBundlePricing } from "../../../hooks/useBundlePricing";
+
+type SavedBundleQuantityOptions = {
+  enabled?: boolean;
+  defaultRuleId?: string | null;
+  optionsByRuleId?: Record<string, { label?: string; subtext?: string }>;
+  optionsByLocaleByRuleId?: Record<
+    string,
+    Record<string, { label: string; subtext: string }>
+  >;
+};
+
+type SavedProgressBar = {
+  enabled?: boolean;
+  type?: string;
+  progressText?: string;
+  successText?: string;
+};
+
+type PpbDisplayOptionsBundle = {
+  pricing?: {
+    displayOptions?: {
+      bundleQuantityOptions?: SavedBundleQuantityOptions;
+      progressBar?: SavedProgressBar;
+    };
+    ruleMessagesByLocale?: RuleMessagesByLocale;
+    messages?: {
+      successMessage?: string;
+      successMessageByLocale?: Record<string, string>;
+    };
+  };
+};
 
 export function usePpbDisplayOptionsState({
   bundle,
@@ -12,12 +45,12 @@ export function usePpbDisplayOptionsState({
   pricingState,
   markAsDirty,
 }: {
-  bundle: any;
+  bundle: PpbDisplayOptionsBundle;
   shopLocales: Array<{ primary: boolean; locale: string }>;
-  pricingState: any;
+  pricingState: ReturnType<typeof useBundlePricing>;
   markAsDirty: () => void;
 }) {
-  const _savedDisplayOpts = (bundle as any).pricing?.displayOptions ?? {};
+  const _savedDisplayOpts = bundle.pricing?.displayOptions ?? {};
   const savedQuantityOptionsByRuleId = (_savedDisplayOpts?.bundleQuantityOptions
     ?.optionsByRuleId ?? {}) as Record<
     string,
@@ -31,7 +64,7 @@ export function usePpbDisplayOptionsState({
   >(_savedDisplayOpts?.bundleQuantityOptions?.defaultRuleId ?? null);
   const [qtyRuleLabels, setQtyRuleLabels] = useState<Record<string, string>>(
     Object.fromEntries(
-      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]: any) => [
+      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]) => [
         ruleId,
         option.label ?? "",
       ]),
@@ -41,7 +74,7 @@ export function usePpbDisplayOptionsState({
     Record<string, string>
   >(
     Object.fromEntries(
-      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]: any) => [
+      Object.entries(savedQuantityOptionsByRuleId).map(([ruleId, option]) => [
         ruleId,
         option.subtext ?? "",
       ]),
@@ -92,17 +125,10 @@ export function usePpbDisplayOptionsState({
   const [
     discountMessagingMultiLanguageEnabled,
     setDiscountMessagingMultiLanguageEnabled,
-  ] = useState<boolean>(!!(bundle as any).pricing?.ruleMessagesByLocale);
-  const [ruleMessagesByLocale, setRuleMessagesByLocale] = useState<
-    Record<
-      string,
-      Record<string, { discountText: string; successMessage: string }>
-    >
-  >(
-    ((bundle as any).pricing?.ruleMessagesByLocale as Record<
-      string,
-      Record<string, { discountText: string; successMessage: string }>
-    >) ?? {},
+  ] = useState<boolean>(!!bundle.pricing?.ruleMessagesByLocale);
+  const [ruleMessagesByLocale, setRuleMessagesByLocale] =
+    useState<RuleMessagesByLocale>(
+      bundle.pricing?.ruleMessagesByLocale ?? {},
   );
   const [activeDiscountLocale, setActiveDiscountLocale] = useState<string>(
     shopLocales.find((l) => l.primary)?.locale ??
@@ -110,15 +136,12 @@ export function usePpbDisplayOptionsState({
       "",
   );
   const [globalSuccessMessage, setGlobalSuccessMessage] = useState<string>(
-    (bundle as any).pricing?.messages?.successMessage ?? "",
+    bundle.pricing?.messages?.successMessage ?? "",
   );
   const [successMessageByLocale, setSuccessMessageByLocale] = useState<
     Record<string, string>
   >(
-    ((bundle as any).pricing?.messages?.successMessageByLocale as Record<
-      string,
-      string
-    >) ?? {},
+    bundle.pricing?.messages?.successMessageByLocale ?? {},
   );
   const templateVariablesModalRef = useRef<any>(null);
   const discountVariablesModalRef = useRef<any>(null);

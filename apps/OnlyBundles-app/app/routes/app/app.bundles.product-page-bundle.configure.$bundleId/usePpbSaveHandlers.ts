@@ -8,8 +8,85 @@ import { i18n } from "../../../i18n/config";
 import {
   mergePpbBundleEmbedTranslations,
   mergePpbBundleWidgetTranslations,
-  removeLegacyPpbEmbedTextOverrides,
 } from "../../../lib/ppb-bundle-embed";
+import { BundleStatus } from "../../../constants/bundle";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type { usePpbVisibilityState } from "./usePpbVisibilityState";
+import type { usePpbDisplayOptionsState } from "./usePpbDisplayOptionsState";
+import type { usePpbBundleSettingsState } from "./usePpbBundleSettingsState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
+import type { usePpbCategoryHandlers } from "./usePpbCategoryHandlers";
+
+type BaseDependencies = Pick<ReturnType<typeof usePpbBaseConfigureState>,
+  | "allowQuantityChanges" | "bundle" | "bundleProduct" | "cartRedirectToCheckout"
+  | "checkAppEmbedStatusBeforePreview" | "clearEntitlementFailure" | "conditionsState" | "discardSpecificLinkOfferChanges"
+  | "entitlementFailure" | "fetcher" | "formState" | "hookHandleDiscard" | "offerDeliveryState"
+  | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
+  | "originalSdkModeRef" | "originalShowProductPricesRef"
+  | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
+  | "originalTextOverridesRef" | "originalValuesRef" | "pricingState" | "ruleMessages" | "sdkMode"
+  | "selectedCollections" | "setActiveSection" | "setAllowQuantityChanges"
+  | "setCartRedirectToCheckout" | "setOperationAlert" | "setSdkMode"
+  | "setShowProductPrices" | "setSubscriptionConfigState" | "setTextOverrides"
+  | "setTextOverridesByLocale" | "showProductPrices" | "stepsState" | "subscriptionConfig"
+  | "textOverrides" | "textOverridesByLocale"
+>;
+type VisibilityDependencies = Pick<ReturnType<typeof usePpbVisibilityState>,
+  | "autoSelectBrowsedProduct" | "bundleEmbedAddBrowsedProduct"
+  | "bundleEmbedCollectionsSelectedData" | "bundleEmbedDisplayOn" | "bundleEmbedEnabled"
+  | "bundleEmbedMultiLangText" | "bundleEmbedSelectedProducts"
+  | "bundleEmbedSpecificCollectionPages" | "bundleEmbedSpecificProductPages"
+  | "bundleEmbedSubTitle" | "bundleEmbedTitle" | "bundleWidgetMultiLangText"
+  | "originalAutoSelectBrowsedProductRef" | "originalBundleEmbedAddBrowsedProductRef"
+  | "originalBundleEmbedCollectionsSelectedDataRef" | "originalBundleEmbedDisplayOnRef"
+  | "originalBundleEmbedEnabledRef" | "originalBundleEmbedMultiLangTextRef"
+  | "originalBundleEmbedSelectedProductsRef" | "originalBundleEmbedSpecificCollectionPagesRef"
+  | "originalBundleEmbedSpecificProductPagesRef" | "originalBundleEmbedSubTitleRef"
+  | "originalBundleEmbedTitleRef" | "originalUpsellWidgetButtonTextRef"
+  | "originalUpsellWidgetDescriptionRef" | "originalUpsellWidgetDisplayModeRef"
+  | "originalUpsellWidgetDisplayOnRef" | "originalUpsellWidgetEnabledRef"
+  | "originalUpsellWidgetImageUrlRef" | "originalUpsellWidgetTitleRef"
+  | "savedBundleUpsellConfig" | "setAutoSelectBrowsedProduct"
+  | "setBundleEmbedAddBrowsedProduct" | "setBundleEmbedCollectionsSelectedData"
+  | "setBundleEmbedDisplayOn" | "setBundleEmbedEnabled" | "setBundleEmbedMultiLangText"
+  | "setBundleEmbedSelectedProducts" | "setBundleEmbedSpecificCollectionPages"
+  | "setBundleEmbedSpecificProductPages" | "setBundleEmbedSubTitle" | "setBundleEmbedTitle"
+  | "setUpsellWidgetButtonText" | "setUpsellWidgetDescription" | "setUpsellWidgetDisplayMode"
+  | "setUpsellWidgetDisplayOn" | "setUpsellWidgetEnabled" | "setUpsellWidgetImageUrl"
+  | "setUpsellWidgetTitle" | "upsellWidgetButtonText" | "upsellWidgetCollectionsSelectedData"
+  | "upsellWidgetDescription" | "upsellWidgetDisplayMode" | "upsellWidgetDisplayOn"
+  | "upsellWidgetEnabled" | "upsellWidgetImageUrl" | "upsellWidgetSelectedProducts"
+  | "upsellWidgetSpecificCollectionPages" | "upsellWidgetSpecificProductPages"
+  | "upsellWidgetTitle"
+>;
+type DisplayDependencies = Pick<ReturnType<typeof usePpbDisplayOptionsState>,
+  | "discountMessagingMultiLanguageEnabled" | "globalSuccessMessage" | "progressBarEnabled"
+  | "progressBarProgressText" | "progressBarSuccessText" | "progressBarType"
+  | "qtyOptionsDefaultRuleId" | "qtyOptionsEnabled" | "qtyRuleLabels"
+  | "qtyRuleSubtexts" | "qtyRuleTextsByLocaleByRuleId" | "ruleMessagesByLocale"
+  | "successMessageByLocale" | "tierTextByLocaleByRuleId" | "tierTextByRuleId"
+>;
+type SettingsDependencies = Pick<ReturnType<typeof usePpbBundleSettingsState>,
+  | "bundleBannerDesktopUrl" | "bundleBannerMobileUrl" | "bundleCartSubtitle"
+  | "bundleCartTitle" | "bundleLevelCss" | "countdownEnabled" | "countdownExpiredMessage"
+  | "countdownExpiryAction" | "countdownLayout" | "countdownPosition" | "countdownTitle"
+  | "defaultProductsData" | "lowStockAlertEnabled" | "lowStockAlertMessage"
+  | "lowStockAlertThreshold" | "maxQtyPerProduct" | "originalCountdownEnabledRef"
+  | "originalCountdownExpiredMessageRef" | "originalCountdownExpiryActionRef"
+  | "originalCountdownLayoutRef" | "originalCountdownPositionRef" | "originalCountdownTitleRef"
+  | "originalDefaultProductsDataRef" | "originalLowStockAlertEnabledRef"
+  | "originalLowStockAlertMessageRef" | "originalLowStockAlertThresholdRef"
+  | "originalStickyAddToCartActionRef" | "originalStickyAddToCartEnabledRef"
+  | "originalStickyAddToCartShowDesktopRef" | "originalStickyAddToCartShowMobileRef"
+  | "preSelectedProductVariantId" | "quantityValidationEnabled" | "setCountdownEnabled"
+  | "setCountdownExpiredMessage" | "setCountdownExpiryAction" | "setCountdownLayout"
+  | "setCountdownPosition" | "setCountdownTitle" | "setDefaultProductsData"
+  | "setLowStockAlertEnabled" | "setLowStockAlertMessage" | "setLowStockAlertThreshold"
+  | "setStickyAddToCartAction" | "setStickyAddToCartEnabled" | "setStickyAddToCartShowDesktop"
+  | "setStickyAddToCartShowMobile" | "showTextOnAddButton" | "stickyAddToCartAction"
+  | "stickyAddToCartEnabled" | "stickyAddToCartShowDesktop" | "stickyAddToCartShowMobile"
+  | "useSingleStepCategoriesAsBundleSteps" | "variantSelectorEnabled"
+>;
 
 export function usePpbSaveHandlers({
   base,
@@ -19,12 +96,12 @@ export function usePpbSaveHandlers({
   templateState,
   categoryHandlers,
 }: {
-  base: any;
-  visibility: any;
-  display: any;
-  settings: any;
-  templateState: any;
-  categoryHandlers: any;
+  base: BaseDependencies;
+  visibility: VisibilityDependencies;
+  display: DisplayDependencies;
+  settings: SettingsDependencies;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>, "setActiveTabIndex">;
+  categoryHandlers: Pick<ReturnType<typeof usePpbCategoryHandlers>, "setCategoryOpen">;
 }) {
   const validation = useConfigureValidation({
     kind: "ppb",
@@ -114,7 +191,7 @@ export function usePpbSaveHandlers({
     visibility.upsellWidgetTitle,
   ]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (statusOverride?: any) => {
     try {
       if (visibility.bundleEmbedEnabled) {
         const appEmbedEnabled =
@@ -155,7 +232,7 @@ export function usePpbSaveHandlers({
       formData.append("bundleName", base.formState.bundleName);
       formData.append("bundleDescription", base.formState.bundleDescription);
       formData.append("templateName", base.formState.templateName);
-      formData.append("bundleStatus", base.formState.bundleStatus);
+      formData.append("bundleStatus", statusOverride ?? base.formState.bundleStatus);
       const stepsWithCollections = base.stepsState.steps.map((step: any) => ({
         ...step,
         collections:
@@ -228,7 +305,6 @@ export function usePpbSaveHandlers({
         JSON.stringify(base.conditionsState.stepConditions),
       );
       formData.append("bundleProduct", JSON.stringify(base.bundleProduct));
-      formData.append("loadingGif", base.loadingGif ?? "");
       formData.append("showProductPrices", String(base.showProductPrices));
       formData.append(
         "cartRedirectToCheckout",
@@ -245,20 +321,14 @@ export function usePpbSaveHandlers({
       );
       formData.append(
         "textOverrides",
-        Object.keys(removeLegacyPpbEmbedTextOverrides(base.textOverrides)).length > 0
-          ? JSON.stringify(removeLegacyPpbEmbedTextOverrides(base.textOverrides))
+        Object.keys(base.textOverrides).length > 0
+          ? JSON.stringify(base.textOverrides)
           : "",
-      );
-      const canonicalTextOverridesByLocale = Object.fromEntries(
-        Object.entries(base.textOverridesByLocale).map(([locale, values]: any) => [
-          locale,
-          removeLegacyPpbEmbedTextOverrides(values as Record<string, string>),
-        ]),
       );
       formData.append(
         "textOverridesByLocale",
-        Object.keys(canonicalTextOverridesByLocale).length > 0
-          ? JSON.stringify(canonicalTextOverridesByLocale)
+        Object.keys(base.textOverridesByLocale).length > 0
+          ? JSON.stringify(base.textOverridesByLocale)
           : "",
       );
       formData.append(
@@ -454,7 +524,6 @@ export function usePpbSaveHandlers({
 
   const handleDiscard = useCallback(() => {
     base.hookHandleDiscard();
-    base.setLoadingGif(base.originalLoadingGifRef.current);
     base.setShowProductPrices(base.originalShowProductPricesRef.current);
     base.setCartRedirectToCheckout(
       base.originalCartRedirectToCheckoutRef.current,
@@ -560,10 +629,47 @@ export function usePpbSaveHandlers({
     validation.clearValidationErrors();
   }, [base, settings, validation, visibility]);
 
+  const handleSaveAsDraft = useCallback(async () => {
+    base.formState.setBundleStatus(BundleStatus.DRAFT);
+    base.clearEntitlementFailure?.();
+    await handleSave("draft");
+  }, [base, handleSave]);
+
+  const handleDismissEntitlementModal = useCallback(() => {
+    const failure = base.entitlementFailure;
+    if (failure) {
+      if (
+        failure.entitlement === "bundle.public.limit" ||
+        (!failure.entitlement && failure.code === "LIMIT_REACHED")
+      ) {
+        const originalStatus = base.originalValuesRef.current?.status;
+        const revertedStatus =
+          originalStatus &&
+          originalStatus !== BundleStatus.ACTIVE &&
+          originalStatus !== BundleStatus.UNLISTED
+            ? originalStatus
+            : BundleStatus.DRAFT;
+        base.formState.setBundleStatus(revertedStatus);
+      } else if (failure.entitlement === "bundle.steps.limit") {
+        if (base.originalValuesRef.current?.steps) {
+          try {
+            const originalSteps = JSON.parse(base.originalValuesRef.current.steps);
+            base.stepsState.setSteps(originalSteps);
+          } catch {
+            // ignore JSON parse error
+          }
+        }
+      }
+    }
+    base.clearEntitlementFailure?.();
+  }, [base]);
+
   return {
     buildDefaultProductsData,
     buildBundleUpsellConfig,
     handleSave,
+    handleSaveAsDraft,
+    handleDismissEntitlementModal,
     handleDiscard,
     ...validation,
   };

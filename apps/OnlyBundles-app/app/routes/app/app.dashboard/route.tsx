@@ -18,9 +18,12 @@ import {
   handleCreateFpbPreview,
   handleRecordBundlePreview,
 } from "../shared/bundle-preview-action.server";
-import { handleCloneBundle, handleDeleteBundle, handleRenameBundle } from "./handlers";
+import {
+  handleCloneBundle,
+  handleDeleteBundle,
+  handleRenameBundle,
+} from "./handlers/handlers.server";
 import { DashboardPage } from "./DashboardPage";
-import { ReduxProvider } from "../../../store/ReduxProvider";
 import { getDashboardInitialImagePreloads } from "./dashboard-media-state";
 import { queueDashboardBackgroundTask } from "./dashboard-background-tasks.server";
 import { buildStorefrontApiPath } from "../../../config/storefront-proxy-routes";
@@ -338,9 +341,5 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Dashboard() {
   const { banners } = useLoaderData<typeof loader>();
 
-  return (
-    <ReduxProvider>
-      <DashboardPage banners={banners} />
-    </ReduxProvider>
-  );
+  return <DashboardPage banners={banners} />;
 }

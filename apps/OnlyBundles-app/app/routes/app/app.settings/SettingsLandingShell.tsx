@@ -42,80 +42,81 @@ export function SettingsLandingShell({
 }) {
   return (
     <s-page inlineSize="large">
-      <s-query-container
-        containerName="settings-landing"
-        {...({ className: styles.settingsLandingViewport } as any)}
-      >
-        <div className={styles.settingsLandingContent}>
-          <s-stack direction="inline" gap="small" alignItems="center">
-            <s-button
-              variant="tertiary"
-              icon="arrow-left"
-              accessibilityLabel={translateAdmin("billing.actions.back")}
-              onClick={onBack}
-            />
-            <s-heading {...({ className: styles.settingsLandingTitle } as any)}>
-              {translateAdmin("nav.settings")}
-            </s-heading>
-          </s-stack>
-          <s-grid
-            gridTemplateColumns="@container settings-landing (inline-size > 840px) 1fr 1fr 1fr, 1fr"
-            gap="large"
-          >
-            {SETTINGS_SECTIONS.map((section) => (
-              <s-clickable
-                key={section.id}
-                {...({ className: styles.settingsLandingTile } as any)}
-                accessibilityLabel={`Open ${section.title} settings`}
-                background="base"
-                padding="large"
-                border="base"
-                borderRadius="large"
-                onFocus={onIntent}
-                onClick={() => onSelect(section.id)}
+      <div className={styles.settingsLandingViewport}>
+        <s-query-container containerName="settings-landing">
+          <div className={styles.settingsLandingContent}>
+            <s-stack direction="inline" gap="small" alignItems="center">
+              <s-button
+                variant="tertiary"
+                icon="arrow-left"
+                accessibilityLabel={translateAdmin("billing.actions.back")}
+                onClick={onBack}
+              />
+              <s-heading
+                {...({ className: styles.settingsLandingTitle } as any)}
               >
-                <s-stack gap="large">
-                  <s-stack
-                    direction="inline"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <s-box
-                      background="subdued"
-                      borderRadius="base"
-                      inlineSize="48px"
-                      blockSize="48px"
+                {translateAdmin("nav.settings")}
+              </s-heading>
+            </s-stack>
+            <s-grid
+              gridTemplateColumns="@container settings-landing (inline-size > 840px) 1fr 1fr 1fr, 1fr"
+              gap="large"
+            >
+              {SETTINGS_SECTIONS.map((section) => (
+                <s-clickable
+                  key={section.id}
+                  {...({ className: styles.settingsLandingTile } as any)}
+                  accessibilityLabel={`Open ${section.title} settings`}
+                  background="base"
+                  padding="large"
+                  border="base"
+                  borderRadius="large"
+                  onFocus={onIntent}
+                  onClick={() => onSelect(section.id)}
+                >
+                  <s-stack gap="large">
+                    <s-stack
+                      direction="inline"
+                      justifyContent="space-between"
+                      alignItems="center"
                     >
-                      <s-stack
-                        direction="inline"
-                        justifyContent="center"
-                        alignItems="center"
-                        inlineSize="100%"
-                        blockSize="100%"
+                      <s-box
+                        background="subdued"
+                        borderRadius="base"
+                        inlineSize="48px"
+                        blockSize="48px"
                       >
-                        <s-icon type={section.icon} size={"large" as any} />
-                      </s-stack>
-                    </s-box>
-                    <s-icon
-                      {...({
-                        className: styles.settingsLandingTileArrow,
-                      } as any)}
-                      type="arrow-right"
-                      size="base"
-                    />
+                        <s-stack
+                          direction="inline"
+                          justifyContent="center"
+                          alignItems="center"
+                          inlineSize="100%"
+                          blockSize="100%"
+                        >
+                          <s-icon type={section.icon} size={"large" as any} />
+                        </s-stack>
+                      </s-box>
+                      <s-icon
+                        {...({
+                          className: styles.settingsLandingTileArrow,
+                        } as any)}
+                        type="arrow-right"
+                        size="base"
+                      />
+                    </s-stack>
+                    <s-stack gap="small">
+                      <s-heading>{section.title}</s-heading>
+                      <s-paragraph color="subdued">
+                        {section.description}
+                      </s-paragraph>
+                    </s-stack>
                   </s-stack>
-                  <s-stack gap="small">
-                    <s-heading>{section.title}</s-heading>
-                    <s-paragraph color="subdued">
-                      {section.description}
-                    </s-paragraph>
-                  </s-stack>
-                </s-stack>
-              </s-clickable>
-            ))}
-          </s-grid>
-        </div>
-      </s-query-container>
+                </s-clickable>
+              ))}
+            </s-grid>
+          </div>
+        </s-query-container>
+      </div>
     </s-page>
   );
 }
