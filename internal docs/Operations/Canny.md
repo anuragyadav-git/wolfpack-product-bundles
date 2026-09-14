@@ -167,9 +167,7 @@ confirmed the merchant-facing locations and labels for Bundle Visibility offer
 scheduling/priority and country targeting, Bundle Settings countdown and
 low-stock controls, the shared Subscriptions section, and the top-level Offer
 operations CSV workflow. A cache-bypassed reload of the public entry confirmed
-that the full body rendered. The same PROD Dashboard did not render the
-configured `What's new` bell, so in-app changelog discovery remains a separate
-production configuration/deployment check rather than completed evidence.
+that the full body rendered.
 
 Impact: DashboardHeader and authenticated app navigation/config loader are the
 existing integration points. `authenticate` is a graph god node used but not
