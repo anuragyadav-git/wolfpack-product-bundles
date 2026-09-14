@@ -1,3 +1,4 @@
+import { withBundleCartLock } from "../../../../lib/bundle-cart-lock.js";
 import { buildCartLineSourceProperties } from '../../shared/engine/cart-lines.js';
 import {
   buildOfferAnalyticsCartProperties,
@@ -6,13 +7,16 @@ import {
 import { ToastManager } from '../../shared/toast-manager.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
-import { calculateBundleDiscountForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
-import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
+import {
+  calculateBundleDiscountForPurchaseOption,
+  calculateBundleTotalForPurchaseOption,
+} from '../../shared/subscription-storefront-methods.js';
 import { areRequiredProductPageStepsValid } from './step-validation.js';
 import { preflightVariantOnStorefront, resolveRuntimeVariantNumericId } from '../../shared/variant-preflight.js';
 import { setPpbBundleDetailsCartMetafield } from '../storefront-client.js';
 import { buildStorefrontApiPath } from '../../../../config/storefront-proxy-routes.js';
 import { captureDiscountTierState } from '../../shared/discount-tier-feedback.js';
+import { hasProductPageHydrationFailure } from './product-data-methods.js';
 
 function getProductPageSelectedQuantityTotal(selectedProducts: any[] = []) {
   return selectedProducts.reduce((sum: number, stepSelections: any) => {
@@ -46,6 +50,8 @@ function resolveRuntimeTokenProductId(product: any = {}) {
 export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
   async addToCart() {
     try {
+      if (hasProductPageHydrationFailure(this._stepFetchFailed)) return;
+
       const { totalPrice, totalQuantity } = calculateBundleTotalForPurchaseOption(this,
         this.selectedProducts,
         this.stepProductData,
@@ -106,7 +112,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
 
       this.elements.addToCartButton.disabled = true;
       this.elements.addToCartButton.textContent = this._resolveText('addingToCart', 'Adding to Cart...');
-      this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
+      this.showLoadingOverlay(this.config?.loadingScreen?.gifUrl || null);
 
       const runtimeToken = this.config?.isEmbedSource && this.selectedBundle?.runtimeAuthorization?.version !== 2
         ? await this.requestEmbedCartTransformRuntimeToken(cartItems, {
@@ -121,11 +127,18 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         runtimeToken,
         sellingPlanId,
       });
-      await this.syncBundleDetailsCartMetafield(cartContext.bundleDetailsKey, cartContext.sourceProperties);
+      const response = await withBundleCartLock(async () => {
+      await this.syncBundleDetailsCartMetafield(
+        cartContext.bundleDetailsKey,
+        cartContext.sourceProperties,
+        runtimeToken,
+        cartItems.length,
+      );
 
-      const response = await fetch('/cart/add', {
+      return fetch('/cart/add', {
         method: 'POST',
         body: cartContext.formData
+      });
       });
       const responseText = await response.text();
 
@@ -413,16 +426,17 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return data.token;
   },
 
-  async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any) {
-    try {
+  async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any, pendingLineCount: number) {
       const displayProperties = this.buildBundleDetailsDisplayProperties(sourceProperties);
-      if (!bundleDetailsKey || Object.keys(displayProperties).length === 0) return;
+      if (!bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
+        throw new Error('Missing bundle cart authorization');
+      }
 
       const cartToken = await this.getBundleDetailsCartToken();
-      if (!cartToken) return;
+      if (!cartToken) throw new Error('Unable to identify the Shopify cart');
 
       const runtime = this.config?.storefrontRuntime;
-      if (!runtime?.storefrontAccessToken) return;
+      if (!runtime?.storefrontAccessToken) throw new Error('Storefront authorization is unavailable');
       await setPpbBundleDetailsCartMetafield({
         shop: window.Shopify?.shop || this.container?.dataset?.shop,
         apiVersion: runtime.storefrontApiVersion,
@@ -430,11 +444,10 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         cartToken,
         bundleDetailsKey,
         displayProperties,
+        runtimeToken,
+        pendingLineCount,
         fetchImpl: fetch,
       });
-    } catch (error: any) {
-      console.warn('[Only Bundles] Failed to sync bundle_details cart metafield', error);
-    }
   },
 
   buildBundleDetailsDisplayProperties(sourceProperties: any) {

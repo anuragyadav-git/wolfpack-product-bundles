@@ -1,9 +1,9 @@
 import {
-  SPECIFIC_LINK_OFFER_QUERY_PARAM,
   buildSpecificLinkOfferUrl,
   createSpecificLinkOfferToken,
   hashSpecificLinkOfferToken,
 } from '../../../app/lib/specific-link-offer-token.server';
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from '../../../app/lib/specific-link-offer';
 
 describe('specific-link offer tokens', () => {
   const input = { token: 'a'.repeat(43) };

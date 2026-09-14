@@ -1,33 +1,45 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "../../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
+import { AssetUpload } from "../../../../components/shared/AssetUpload";
 
 export function FpbAddonReferenceStepCard({
-  flow,
+  enabled,
+  imageUrl,
+  showImagePicker,
+  stepName,
+  stepTitle,
+  styles,
+  translationsAvailable,
+  onEnabledChange,
+  onImageChange,
+  onImagePickerOpenChange,
+  onOpenTranslations,
+  onStepNameChange,
+  onStepTitleChange,
+  validationErrors,
 }: {
-  flow: ConfigureBundleFlowContext;
+  enabled: boolean;
+  imageUrl: string | null;
+  showImagePicker: boolean;
+  stepName: string;
+  stepTitle: string;
+  styles: Record<string, string>;
+  translationsAvailable: boolean;
+  validationErrors?: Record<string, string>;
+  onEnabledChange: (enabled: boolean) => void;
+  onImageChange: (url: string | null) => void;
+  onImagePickerOpenChange: (open: boolean) => void;
+  onOpenTranslations: () => void;
+  onStepNameChange: (value: string) => void;
+  onStepTitleChange: (value: string) => void;
 }) {
-  const {
-    addonDraft,
-    FilePicker,
-    fullPageBundleStyles,
-    openAddonStepMultiLanguageModal,
-    setIsDisableAddonStepModalOpen,
-    setShowIconPickerForStep,
-    shopLocales,
-    showIconPickerForStep,
-    updateAddonDraft,
-  } = flow;
-
   return (
     <>
-      <div
-        className={`${fullPageBundleStyles.card} ${fullPageBundleStyles.addonsReferenceStepCard}`}
-      >
-        <div className={fullPageBundleStyles.panelHeader}>
-          <div className={fullPageBundleStyles.addonsTitleCluster}>
-            <h3 className={fullPageBundleStyles.panelTitle}>
+      <div className={`${styles.card} ${styles.addonsReferenceStepCard}`}>
+        <div className={styles.panelHeader}>
+          <div className={styles.addonsTitleCluster}>
+            <h3 className={styles.panelTitle}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.addOnsAndGiftingStep"
               )}
@@ -37,27 +49,18 @@ export function FpbAddonReferenceStepCard({
               accessibilityLabel={translateAdmin(
                 "adminAttributes.enableAddOnsAndGiftingStep"
               )}
-              checked={
-                addonDraft.isPersonalizationEnabled === true || undefined
+              checked={enabled || undefined}
+              onChange={(e) =>
+                onEnabledChange((e.target as HTMLInputElement).checked)
               }
-              onChange={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                if (checked)
-                  updateAddonDraft({ isPersonalizationEnabled: true });
-                else setIsDisableAddonStepModalOpen(true);
-              }}
             />
           </div>
-          <div className={fullPageBundleStyles.addonsHeaderActions}>
+          <div className={styles.addonsHeaderActions}>
             <s-button
               variant="secondary"
               icon="language-translate"
-              disabled={
-                !addonDraft.isPersonalizationEnabled ||
-                shopLocales.length === 0 ||
-                undefined
-              }
-              onClick={openAddonStepMultiLanguageModal}
+              disabled={!enabled || !translationsAvailable || undefined}
+              onClick={onOpenTranslations}
             >
               {translateAdmin(
                 "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
@@ -65,24 +68,25 @@ export function FpbAddonReferenceStepCard({
             </s-button>
           </div>
         </div>
-        <DisabledConfigurationRegion
-          disabled={!addonDraft.isPersonalizationEnabled}
-        >
+        <DisabledConfigurationRegion disabled={!enabled}>
           <div
-            className={`${fullPageBundleStyles.mediaFieldGrid} ${fullPageBundleStyles.addonsMediaFieldGrid}`}
+            className={`${styles.mediaFieldGrid} ${styles.addonsMediaFieldGrid}`}
           >
-            <div className={fullPageBundleStyles.addonsIconReplaceGroup}>
-              <div className={fullPageBundleStyles.addonsIconColumn}>
-                <div className={fullPageBundleStyles.addonsIconBox}>
-                  {addonDraft.stepImage ? (
-                    <img
-                      src={addonDraft.stepImage}
-                      alt={translateAdmin("adminAttributes.addOnsStepIcon")}
-                      className={fullPageBundleStyles.iconImg}
-                    />
+            <div className={styles.addonsIconReplaceGroup}>
+              <div className={styles.addonsIconColumn}>
+                <div className={styles.addonsIconBox}>
+                  {imageUrl ? (
+                    <div className={styles.iconImg}>
+                      <s-image
+                        src={imageUrl}
+                        alt={translateAdmin("adminAttributes.addOnsStepIcon")}
+                        aspectRatio="1/1"
+                        objectFit="contain"
+                      />
+                    </div>
                   ) : (
                     <svg
-                      className={fullPageBundleStyles.addonsGiftBoxDefault}
+                      className={styles.addonsGiftBoxDefault}
                       viewBox="0 0 48 48"
                       aria-hidden="true"
                     >
@@ -128,62 +132,61 @@ export function FpbAddonReferenceStepCard({
                   )}
                 </div>
               </div>
-              <button
-                type="button"
-                disabled={!addonDraft.isPersonalizationEnabled}
-                className={fullPageBundleStyles.addonsReplaceButton}
-                onClick={() => setShowIconPickerForStep("addon-direct")}
+              <s-button
+                variant="secondary"
+                disabled={!enabled || undefined}
+                onClick={() => onImagePickerOpenChange(true)}
               >
                 {translateAdmin(
                   "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
                 )}
-              </button>
+              </s-button>
             </div>
-            <div className={fullPageBundleStyles.addonsStepTextGroup}>
-              <div className={fullPageBundleStyles.addonsStepNameGroup}>
+            <div className={styles.addonsStepTextGroup}>
+              <div className={styles.addonsStepNameGroup}>
                 <s-text-field
+                  id="configure-addons-gifting-stepName"
                   label={translateAdmin("adminAttributes.stepName")}
-                  disabled={!addonDraft.isPersonalizationEnabled || undefined}
-                  value={addonDraft.personalizeStepText ?? ""}
+                  disabled={!enabled || undefined}
+                  error={validationErrors?.["addons.gifting.stepName"]}
+                  value={stepName}
                   placeholder={translateAdmin("adminAttributes.addOn")}
                   onInput={(e) => {
-                    const value = (e.target as HTMLInputElement).value;
-                    updateAddonDraft({ personalizeStepText: value });
+                    onStepNameChange((e.target as HTMLInputElement).value);
                   }}
                   autocomplete="off"
                 />
               </div>
-              <div className={fullPageBundleStyles.addonsStepTitleGroup}>
+              <div className={styles.addonsStepTitleGroup}>
                 <s-text-field
+                  id="configure-addons-gifting-stepTitle"
                   label={translateAdmin("adminAttributes.stepTitle")}
-                  disabled={!addonDraft.isPersonalizationEnabled || undefined}
-                  value={addonDraft.personalizePageSubtext ?? ""}
-                  onInput={(e) => {
-                    updateAddonDraft({
-                      personalizePageSubtext: (e.target as HTMLInputElement)
-                        .value,
-                    });
-                  }}
+                  disabled={!enabled || undefined}
+                  error={validationErrors?.["addons.gifting.stepTitle"]}
+                  value={stepTitle}
+                  onInput={(e) =>
+                    onStepTitleChange((e.target as HTMLInputElement).value)
+                  }
                   autocomplete="off"
                 />
               </div>
             </div>
           </div>
         </DisabledConfigurationRegion>
-        {showIconPickerForStep === "addon-direct" && (
-          <div className={fullPageBundleStyles.addonsIconPickerRow}>
-            <FilePicker
-              autoOpen
-              disabled={!addonDraft.isPersonalizationEnabled}
-              value={addonDraft.stepImage ?? null}
+        {showImagePicker && (
+          <div className={styles.addonsIconPickerRow}>
+            <AssetUpload
+              disabled={!enabled}
+              value={imageUrl}
               maxUploadBytes={50 * 1024}
-              maxUploadErrorMessage="Please upload a file smaller than 50KB"
+              maxUploadErrorMessage={translateAdmin(
+                "adminDynamic.fileMustBeSmallerThan50Kb"
+              )}
               onChange={(url: string | null) => {
-                updateAddonDraft({ stepImage: url });
-                setShowIconPickerForStep(null);
+                onImageChange(url);
+                onImagePickerOpenChange(false);
               }}
-              onClose={() => setShowIconPickerForStep(null)}
-              label=""
+              label={translateAdmin("adminAttributes.uploadImage")}
             />
           </div>
         )}

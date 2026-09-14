@@ -65,6 +65,24 @@ describe('specific-link offer storefront eligibility', () => {
     );
   });
 
+  it('fails closed when only the retired bundleId alias is present', async () => {
+    const fetchImpl = jest.fn();
+    await expect(resolveSpecificLinkOfferStorefrontEligibility({
+      bundle: {
+        bundleId: 'legacy-bundle',
+        offerDelivery: {
+          decisionRequired: true,
+          serverDecisionRequired: true,
+          specificLinkRequired: false,
+        },
+      },
+      locationSearch: '',
+      countryCode: 'CA',
+      fetchImpl,
+    })).resolves.toBe(false);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it('resolves a country-only decision locally from Shopify Liquid context', async () => {
     const fetchImpl = jest.fn();
     const bundle = {
@@ -91,6 +109,29 @@ describe('specific-link offer storefront eligibility', () => {
       countryCode: 'US',
       fetchImpl,
     })).resolves.toBe(false);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('bypasses offer eligibility when an authorized preview parameter is present on the page', async () => {
+    const fetchImpl = jest.fn();
+    const bundle = {
+      id: 'bundle-1',
+      offerDelivery: {
+        decisionRequired: true,
+        serverDecisionRequired: true,
+        specificLinkRequired: true,
+        countryTargetingEnabled: true,
+        countryTargetingMode: 'include',
+        countryCodes: ['CA'],
+      },
+    };
+
+    await expect(resolveSpecificLinkOfferStorefrontEligibility({
+      bundle,
+      locationSearch: '?wpb_preview=signed-preview-token',
+      countryCode: 'US',
+      fetchImpl,
+    })).resolves.toBe(true);
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 });

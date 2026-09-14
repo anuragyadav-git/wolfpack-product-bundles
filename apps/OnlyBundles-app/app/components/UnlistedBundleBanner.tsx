@@ -54,14 +54,19 @@ export function UnlistedBundleBanner({
       >
         <s-stack
           direction="inline"
+          inlineSize="100%"
+          alignItems="center"
           justifyContent="space-between"
-          alignItems="start"
           gap="base"
         >
-          <s-text>{t("common.unlistedBundle.body")}</s-text>
-          <s-button variant="secondary" tone="auto" onClick={onManage}>
-            {t("common.actions.manage")}
-          </s-button>
+          <s-box>
+            <s-text>{t("common.unlistedBundle.body")}</s-text>
+          </s-box>
+          <s-box>
+            <s-button variant="secondary" tone="auto" onClick={onManage}>
+              {t("common.actions.manage")}
+            </s-button>
+          </s-box>
         </s-stack>
       </s-banner>
     </s-box>

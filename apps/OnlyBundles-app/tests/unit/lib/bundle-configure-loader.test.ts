@@ -27,28 +27,19 @@ describe("fetchShopConfiguration", () => {
 });
 
 describe("fetchBundleConfigureShopifyData", () => {
-  it("loads product, currency, and published locales in isolated Shopify requests", async () => {
-    const graphql = jest.fn()
-      .mockResolvedValueOnce({
-        json: async () => ({
-          data: {
-            product: { id: "gid://shopify/Product/1", title: "Bundle product" },
-          },
-        }),
-      })
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shop: { currencyCode: "USD", ianaTimezone: "America/New_York" } } }),
-      })
-      .mockResolvedValueOnce({
-        json: async () => ({
-          data: {
-            shopLocales: [
-              { locale: "en", name: "English", primary: true, published: true },
-              { locale: "de", name: "German", primary: false, published: false },
-            ],
-          },
-        }),
-      });
+  it("loads product, currency, and published locales in one Shopify request", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          product: { id: "gid://shopify/Product/1", title: "Bundle product" },
+          shop: { currencyCode: "USD", ianaTimezone: "America/New_York" },
+          shopLocales: [
+            { locale: "en", name: "English", primary: true, published: true },
+            { locale: "de", name: "German", primary: false, published: false },
+          ],
+        },
+      }),
+    });
 
     await expect(fetchBundleConfigureShopifyData(
       { graphql },
@@ -60,7 +51,7 @@ describe("fetchBundleConfigureShopifyData", () => {
       shopIanaTimezone: "America/New_York",
       shopLocales: [{ locale: "en", name: "English", primary: true }],
     });
-    expect(graphql).toHaveBeenCalledTimes(3);
+    expect(graphql).toHaveBeenCalledTimes(1);
     expect(graphql).toHaveBeenCalledWith(
       expect.stringContaining("product(id: $id)"),
       { variables: { id: "gid://shopify/Product/1" } },
@@ -72,13 +63,14 @@ describe("fetchBundleConfigureShopifyData", () => {
   });
 
   it("loads shop data without a product query when the bundle has no Shopify product", async () => {
-    const graphql = jest.fn()
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shop: { currencyCode: "GBP", ianaTimezone: "Europe/London" } } }),
-      })
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shopLocales: [] } }),
-      });
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          shop: { currencyCode: "GBP", ianaTimezone: "Europe/London" },
+          shopLocales: [],
+        },
+      }),
+    });
 
     await expect(fetchBundleConfigureShopifyData(
       { graphql },
@@ -90,19 +82,26 @@ describe("fetchBundleConfigureShopifyData", () => {
       shopIanaTimezone: "Europe/London",
       shopLocales: [],
     });
-    expect(graphql).toHaveBeenCalledTimes(2);
+    expect(graphql).toHaveBeenCalledTimes(1);
     expect(graphql.mock.calls.every(([query]) => !query.includes("product(id:"))).toBe(true);
   });
 
-  it("keeps required shop data when the optional product query fails", async () => {
-    const graphql = jest.fn()
-      .mockRejectedValueOnce(new Error("Access denied for media field"))
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shop: { currencyCode: "USD", ianaTimezone: "America/Los_Angeles" } } }),
-      })
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shopLocales: [] } }),
-      });
+  it("keeps required shop data when Shopify returns a partial product error", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          product: null,
+          shop: { currencyCode: "USD", ianaTimezone: "America/Los_Angeles" },
+          shopLocales: [],
+        },
+        errors: [
+          {
+            message: "Access denied for product field",
+            path: ["product"],
+          },
+        ],
+      }),
+    });
 
     await expect(fetchBundleConfigureShopifyData(
       { graphql },
@@ -117,20 +116,25 @@ describe("fetchBundleConfigureShopifyData", () => {
     expect(AppLogger.warn).toHaveBeenCalledWith(
       "Failed to fetch bundle product",
       expect.objectContaining({ operation: "fetch-product" }),
-      expect.any(Error),
+      expect.objectContaining({ message: "Access denied for product field" }),
     );
   });
 
-  it("keeps required shop data when the optional locale query fails", async () => {
-    const graphql = jest.fn()
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shop: { currencyCode: "USD", ianaTimezone: "UTC" } } }),
-      })
-      .mockResolvedValueOnce({
-        json: async () => ({
-          errors: [{ message: "Access denied for shopLocales field" }],
-        }),
-      });
+  it("keeps required shop data when Shopify returns a partial locale error", async () => {
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          shop: { currencyCode: "USD", ianaTimezone: "UTC" },
+          shopLocales: null,
+        },
+        errors: [
+          {
+            message: "Access denied for shopLocales field",
+            path: ["shopLocales"],
+          },
+        ],
+      }),
+    });
 
     await expect(fetchBundleConfigureShopifyData(
       { graphql },
@@ -145,18 +149,14 @@ describe("fetchBundleConfigureShopifyData", () => {
     expect(AppLogger.warn).toHaveBeenCalledWith(
       "Failed to fetch published shop locales",
       expect.objectContaining({ operation: "fetch-shop-locales" }),
-      expect.any(Error),
+      expect.objectContaining({ message: "Access denied for shopLocales field" }),
     );
   });
 
   it("fails when Shopify omits the required shop currency", async () => {
-    const graphql = jest.fn()
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shop: {} } }),
-      })
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shopLocales: [] } }),
-      });
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({ data: { shop: {}, shopLocales: [] } }),
+    });
 
     await expect(fetchBundleConfigureShopifyData(
       { graphql },
@@ -166,18 +166,30 @@ describe("fetchBundleConfigureShopifyData", () => {
   });
 
   it("fails when Shopify omits the required shop timezone", async () => {
-    const graphql = jest.fn()
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shop: { currencyCode: "USD" } } }),
-      })
-      .mockResolvedValueOnce({
-        json: async () => ({ data: { shopLocales: [] } }),
-      });
+    const graphql = jest.fn().mockResolvedValue({
+      json: async () => ({
+        data: {
+          shop: { currencyCode: "USD" },
+          shopLocales: [],
+        },
+      }),
+    });
 
     await expect(fetchBundleConfigureShopifyData(
       { graphql },
       null,
       "bundle-1",
     )).rejects.toThrow("Shop timezone is missing");
+  });
+
+  it("propagates a failed combined request without starting a fallback chain", async () => {
+    const graphql = jest.fn().mockRejectedValue(new Error("Shopify unavailable"));
+
+    await expect(fetchBundleConfigureShopifyData(
+      { graphql },
+      "gid://shopify/Product/1",
+      "bundle-1",
+    )).rejects.toThrow("Shopify unavailable");
+    expect(graphql).toHaveBeenCalledTimes(1);
   });
 });

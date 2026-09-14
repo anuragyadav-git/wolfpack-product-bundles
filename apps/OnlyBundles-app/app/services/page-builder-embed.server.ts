@@ -1,7 +1,7 @@
 import {
-  resolveFpbLoadingScreenSettings,
-  type FpbLoadingScreenSettings,
-} from "../lib/fpb-loading-screen";
+  resolveBundleLoadingScreenSettings,
+  type BundleLoadingScreenSettings,
+} from "../lib/bundle-loading-screen";
 import type { PageBuilderEmbedRequest } from "../lib/page-builder-embed";
 import { resolveOfferSchedule } from "../lib/offer-policy-decision";
 import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility";
@@ -27,9 +27,9 @@ const bundleInclude = {
   offerPolicy: true,
 };
 
-export type PageBuilderEmbedResolution = {
+type PageBuilderEmbedResolution = {
   bundle: Record<string, any>;
-  loadingScreen: FpbLoadingScreenSettings | null;
+  loadingScreen: BundleLoadingScreenSettings | null;
 };
 
 export async function resolvePageBuilderEmbed(
@@ -79,6 +79,6 @@ export async function resolvePageBuilderEmbed(
   });
   return {
     bundle,
-    loadingScreen: resolveFpbLoadingScreenSettings(designSettings?.generalSettings),
+    loadingScreen: resolveBundleLoadingScreenSettings(designSettings?.generalSettings),
   };
 }

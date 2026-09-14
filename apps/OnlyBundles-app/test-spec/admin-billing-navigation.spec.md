@@ -5,7 +5,7 @@ title: Admin Billing Navigation
 type: test-spec
 status: active
 summary: Verifies that the main embedded app navigation links merchants to Subscription and Billing through a Billing item.
-last_audited: 2026-09-01
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -42,10 +42,12 @@ navigation through an option named Billing.
 |---|---|---|---|---|
 | 1 | Merchant opens the app navigation | Authenticated app shell | Billing item links to `/app/billing` | `/app/billing` owns plan management and parents `/app/billing/plans` |
 | 2 | Merchant uses a supported Admin locale | Any supported locale | Billing label resolves from the locale catalog | Catalog keys remain aligned |
+| 3 | Free merchant activates Upgrade Now inside the embedded app | Billing route rendered in Shopify Admin | Remix navigates to `/app/billing/plans` without loading the tunnel URL as a standalone document | Preserves the authenticated embedded context |
 
 ## Acceptance Criteria
 
 - [x] The main app navigation includes Billing.
 - [x] Billing navigates to `/app/billing`.
 - [x] All supported locale catalogs contain the Billing key.
+- [x] Upgrade Now uses client-side app routing and preserves the Shopify Admin shell.
 - [x] Focused tests and lint pass.

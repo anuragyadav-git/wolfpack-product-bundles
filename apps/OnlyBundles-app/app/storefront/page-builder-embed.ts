@@ -2,8 +2,9 @@ import {
   getFpbStylesheetUrls,
   type FpbDesignPreset,
 } from "./fpb-template-assets.js";
+import { exposeStorefrontContext } from "./ppb-bundle-embed.js";
 
-export type PageBuilderEmbedMode =
+type PageBuilderEmbedMode =
   | "eligible-product"
   | "product-page-bundle"
   | "full-page-bundle";
@@ -56,7 +57,7 @@ export function suppressesAutomaticPpbEmbed(
   return mode === "product-page-bundle" || mode === "full-page-bundle";
 }
 
-export function prepareEligiblePageBuilderMarker(
+function prepareEligiblePageBuilderMarker(
   root: ParentNode = document,
 ): HTMLElement | null {
   const marker = findPageBuilderEmbedMarker(root);
@@ -259,9 +260,7 @@ function mountDirectEmbed(
 
   if (payload.bundleType === "product_page") {
     ensureStylesheet(appEmbed.dataset.productPageStyleUrl, "wpbPageBuilderPpbStyle");
-    if (appEmbed.dataset.designSettingsStyleUrl) {
-      ensureStylesheet(appEmbed.dataset.designSettingsStyleUrl, "wpbPageBuilderDesignStyle");
-    }
+    exposeStorefrontContext(appEmbed);
     exposePpbTemplateAssets(appEmbed);
     loadProductPageRuntime(appEmbed);
     return;

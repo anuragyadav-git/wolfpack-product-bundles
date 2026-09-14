@@ -8,6 +8,8 @@ export {};
 const { getDisplayPrice } = require('../../../app/assets/sdk/get-display-price.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PricingCalculator } = require('../../../app/assets/widgets/shared/pricing-calculator.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { CurrencyManager } = require('../../../app/assets/widgets/shared/currency-manager.js');
 
 function makeBundle(discountMethod: string | null, discountValue: number | null) {
   if (!discountMethod) return { id: 'b1', name: 'B', steps: [], pricing: { enabled: false, rules: [] } };
@@ -44,6 +46,22 @@ function makeState(bundle: object, stepProductData: object[][], selections: Reco
 }
 
 describe('getDisplayPrice', () => {
+  beforeEach(() => {
+    (globalThis as any).Shopify = {
+      shop: 'shop.myshopify.com',
+      currency: { active: 'USD', rate: 1 },
+    };
+    (globalThis as any).shopifyMultiCurrency = {
+      shopBaseCurrency: 'USD',
+      customerCurrency: 'USD',
+    };
+  });
+
+  afterEach(() => {
+    delete (globalThis as any).Shopify;
+    delete (globalThis as any).shopifyMultiCurrency;
+  });
+
   it('returns zero prices when no items selected', () => {
     const bundle = makeBundle(null, null);
     const state = makeState(bundle, [], {});
@@ -109,6 +127,22 @@ describe('getDisplayPrice', () => {
     const result = getDisplayPrice(state, PricingCalculator);
     expect(typeof result.formatted).toBe('string');
     expect(result.formatted.length).toBeGreaterThan(0);
+  });
+
+  it('does not fabricate a USD string when canonical currency formatting fails', () => {
+    const bundle = makeBundle(null, null);
+    const state = makeState(
+      bundle,
+      [[{ selectionId: 'v1', price: 1999, available: true }]],
+      { step_0: { v1: 1 } },
+    );
+    (state as { steps: object[] }).steps = [{ id: 'step_0', isFreeGift: false, isDefault: false }];
+    const formatter = jest.spyOn(CurrencyManager, 'convertAndFormat')
+      .mockImplementation(() => { throw new RangeError('invalid currency'); });
+
+    expect(() => getDisplayPrice(state, PricingCalculator)).toThrow('invalid currency');
+
+    formatter.mockRestore();
   });
 
   it('clamps savingsPercent to 100 when discount equals total', () => {

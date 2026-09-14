@@ -20,46 +20,40 @@ export function DashboardResourcesCard({
     <div className={dashboardStyles.resourcesCard}>
       <div className={dashboardStyles.resourcesLayout}>
         <div className={dashboardStyles.resourcesList}>
-          <button
-            type="button"
-            className={`${dashboardStyles.resourceItem} ${
-              activeResource === "bundle-inspirations"
-                ? dashboardStyles.resourceItemActive
-                : ""
-            }`}
+          <s-clickable
+            {...{
+              className: `${dashboardStyles.resourceItem} ${
+                activeResource === "bundle-inspirations"
+                  ? dashboardStyles.resourceItemActive
+                  : ""
+              }`,
+            }}
             onClick={() => setActiveResource("bundle-inspirations")}
           >
-            <div className={dashboardStyles.resourceItemIcon}>
+            <s-stack direction="inline" alignItems="center" gap="base">
               <s-icon type="image" />
-            </div>
-            <span className={dashboardStyles.resourceItemLabel}>
-              {t("dashboard.resources.bundleInspiration")}
-            </span>
-          </button>
-          <button
-            type="button"
-            className={dashboardStyles.resourceItem}
+              <s-text>{t("dashboard.resources.bundleInspiration")}</s-text>
+            </s-stack>
+          </s-clickable>
+          <s-clickable
+            {...{ className: dashboardStyles.resourceItem }}
             onClick={handleDirectChat}
           >
-            <div className={dashboardStyles.resourceItemIcon}>
+            <s-stack direction="inline" alignItems="center" gap="base">
               <s-icon type="question-circle" />
-            </div>
-            <span className={dashboardStyles.resourceItemLabel}>
-              {t("dashboard.resources.support")}
-            </span>
-          </button>
+              <s-text>{t("dashboard.resources.support")}</s-text>
+            </s-stack>
+          </s-clickable>
           <s-clickable
-            {...({ className: dashboardStyles.resourceItem } as any)}
+            {...{ className: dashboardStyles.resourceItem }}
             href={SDK_DOCUMENTATION_URL}
             target="_blank"
             accessibilityLabel={t("dashboard.resources.sdkDocumentation")}
           >
-            <div className={dashboardStyles.resourceItemIcon}>
+            <s-stack direction="inline" alignItems="center" gap="base">
               <s-icon type="code" />
-            </div>
-            <span className={dashboardStyles.resourceItemLabel}>
-              {t("dashboard.resources.sdkDocumentation")}
-            </span>
+              <s-text>{t("dashboard.resources.sdkDocumentation")}</s-text>
+            </s-stack>
           </s-clickable>
         </div>
 

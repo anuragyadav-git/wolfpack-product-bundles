@@ -26,7 +26,6 @@ interface Step {
   isDefault?: boolean;
   defaultVariantId?: string | null;
   products?: any[];
-  StepProduct?: any[];
 }
 
 interface SelectedProduct {
@@ -45,10 +44,6 @@ type SelectedProducts = Record<number, Record<string, SelectedProduct>>;
 
 function getFreeGiftStep(steps: Step[]): Step | null {
   return steps.find(s => s.isFreeGift === true) ?? null;
-}
-
-function getFreeGiftStepIndex(steps: Step[]): number {
-  return steps.findIndex(s => s.isFreeGift === true);
 }
 
 function getPaidSteps(steps: Step[]): Step[] {
@@ -106,7 +101,7 @@ function initDefaultProducts(steps: Step[], selectedProducts: SelectedProducts):
     if (!step.isDefault || !step.defaultVariantId) return;
     const targetId = extractId(step.defaultVariantId);
     if (!targetId) return;
-    const allProducts = [...(step.products || []), ...(step.StepProduct || [])];
+    const allProducts = step.products || [];
     const product = allProducts.find(p =>
       extractId(p.variantId) === targetId ||
       extractId(p.id) === targetId ||
@@ -143,7 +138,6 @@ function makeStep(overrides: Partial<Step> = {}): Step {
     isDefault: false,
     defaultVariantId: null,
     products: [],
-    StepProduct: [],
     ...overrides,
   };
 }
@@ -436,22 +430,6 @@ describe('initDefaultProducts', () => {
     const steps = [makeStep({ isDefault: true, defaultVariantId: variantId, products: [product] })];
     const result = initDefaultProducts(steps, {});
     expect(result[0]['456'].isDefault).toBe(true);
-  });
-
-  it('finds product by StepProduct when not in products array', () => {
-    const variantId = 'gid://shopify/ProductVariant/789';
-    const stepProduct = { id: 'sp-1', title: 'Gift Box', variantId, price: 499 };
-    const steps = [
-      makeStep({
-        isDefault: true,
-        defaultVariantId: variantId,
-        products: [],
-        StepProduct: [stepProduct],
-      }),
-    ];
-    const result = initDefaultProducts(steps, {});
-    expect(result[0]['789']).toBeDefined();
-    expect(result[0]['789'].isDefault).toBe(true);
   });
 
   it('does not overwrite existing selections', () => {

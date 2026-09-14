@@ -351,7 +351,7 @@ body:has([data-fpb-design-preset]) {
 
 .layout-sidebar[data-fpb-design-preset="STANDARD"] .sidebar-content .vs-option {
   display: flex;
-  min-height: 2.2rem;
+  min-height: var(--bundle-control-hit-target, 2.75rem);
   align-items: center;
   gap: 0.625rem;
   padding: 0.3125rem;
@@ -738,8 +738,14 @@ body:has([data-fpb-design-preset]) {
     min-height: var(--ih-action-size, 2.1875rem);
     border: 0;
     border-radius: 0.3125rem;
-    background: #000;
-    color: #fff;
+    background: var(
+      --bundle-button-bg,
+      var(--bundle-add-btn-color, var(--bundle-global-primary-button, #111111))
+    );
+    color: var(
+      --bundle-button-text-color,
+      var(--bundle-global-button-text, #ffffff)
+    );
     font-family: Assistant, sans-serif;
     font-size: 1rem;
     font-weight: 700;
@@ -936,7 +942,10 @@ body:has([data-fpb-design-preset]) {
     .inline-quantity-controls {
     width: 100%;
     min-width: 0;
-    color: #fff;
+    color: var(
+      --bundle-button-text-color,
+      var(--bundle-global-button-text, #ffffff)
+    );
     font-family: Assistant, sans-serif;
     font-weight: 700;
   }

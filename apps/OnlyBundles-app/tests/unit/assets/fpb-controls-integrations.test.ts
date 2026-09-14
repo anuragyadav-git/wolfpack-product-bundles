@@ -2,7 +2,9 @@ import {
   buildJudgeMePreviewBadgeUrl,
   fetchJudgeMePreviewBadges,
   filterIrrelevantVariantImages,
+  hydrateJudgeMeReviewCards,
 } from "../../../app/assets/widgets/full-page/fpb-controls-integrations";
+import { JSDOM } from "jsdom";
 
 describe("FPB Controls integrations", () => {
   it("keeps variant media and media sharing the same alt text", () => {
@@ -56,5 +58,35 @@ describe("FPB Controls integrations", () => {
       productIds: [11],
       fetcher: jest.fn(async () => { throw new Error("offline"); }),
     })).resolves.toBeNull();
+  });
+
+  it("hydrates review badges inside each card identity region", async () => {
+    const dom = new JSDOM(`
+      <div id="grid">
+        <article class="bw-product-card">
+          <div class="bw-product-card__body">
+            <div class="bw-product-card__text">Product title</div>
+          </div>
+        </article>
+      </div>
+    `);
+    const root = dom.window.document.querySelector("#grid");
+    const fetcher = jest.fn(async () => new Response(JSON.stringify({
+      product_external_id: 11,
+      badge: "<div>4.9 stars</div>",
+    }), { status: 200 }));
+
+    await hydrateJudgeMeReviewCards({
+      root,
+      products: [{ id: 11 }],
+      shop: "test.myshopify.com",
+      token: "public-token",
+      fetcher,
+    });
+
+    expect(root?.querySelector(".bw-product-card__text [data-wpb-judgeme-badge='11']")?.textContent)
+      .toBe("4.9 stars");
+    expect(root?.querySelector(":scope > .bw-product-card > [data-wpb-judgeme-badge]"))
+      .toBeNull();
   });
 });

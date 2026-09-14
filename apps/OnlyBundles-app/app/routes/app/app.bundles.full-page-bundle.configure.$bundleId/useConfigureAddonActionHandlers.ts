@@ -1,26 +1,51 @@
 import { useCallback } from "react";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import {
   createDefaultAddonDraftTier,
   normalizeAddonPickerProduct,
 } from "./addon-helpers";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import { hidePolarisModal } from "../_shared/bundle-configure/modal-utils";
+import type {
+  AddonDraftUpdate,
+  AddonTierDraft,
+} from "./addon-draft.types";
+
+type AddonActionDependencies = {
+  addonDraft: { addonTiers?: AddonTierDraft[] };
+  addonSelectedProductsModalRef: {
+    current: HTMLElement | { hideOverlay?: () => void } | null;
+  };
+  setAddonSelectedProductsTierIndex: (index: number | null) => void;
+  setIsAddonSelectedProductsModalOpen: (open: boolean) => void;
+  setIsDisableAddonStepModalOpen: (open: boolean) => void;
+  updateAddonDraft: (updates: AddonDraftUpdate) => void;
+};
 
 export function useConfigureAddonActionHandlers(
-  flow: ConfigureBundleFlowDraft,
+  dependencies: AddonActionDependencies
 ) {
+  const shopify = useAppBridge();
+  const {
+    addonDraft,
+    addonSelectedProductsModalRef,
+    setAddonSelectedProductsTierIndex,
+    setIsAddonSelectedProductsModalOpen,
+    setIsDisableAddonStepModalOpen,
+    updateAddonDraft,
+  } = dependencies;
   const openAddonSelectedProductsModal = useCallback(
     (tierIndex: number) => {
-      flow.setAddonSelectedProductsTierIndex(tierIndex);
-      flow.setIsAddonSelectedProductsModalOpen(true);
+      setAddonSelectedProductsTierIndex(tierIndex);
+      setIsAddonSelectedProductsModalOpen(true);
     },
-    [flow],
+    [setAddonSelectedProductsTierIndex, setIsAddonSelectedProductsModalOpen]
   );
   const handleAddonSelectedProductRemove = useCallback(
     (tierIndex: number, productIndex: number) => {
-      const addonTiers = Array.isArray(flow.addonDraft.addonTiers)
-        ? flow.addonDraft.addonTiers
+      const addonTiers = Array.isArray(addonDraft.addonTiers)
+        ? addonDraft.addonTiers
         : [];
-      const updated = addonTiers.map((tier: any, index: number) => {
+      const updated = addonTiers.map((tier, index) => {
         if (index !== tierIndex) return tier;
         const selectedAddonProducts = Array.isArray(tier.selectedAddonProducts)
           ? tier.selectedAddonProducts
@@ -28,70 +53,78 @@ export function useConfigureAddonActionHandlers(
         return {
           ...tier,
           selectedAddonProducts: selectedAddonProducts.filter(
-            (_: any, selectedIndex: number) => selectedIndex !== productIndex,
+            (_, selectedIndex) => selectedIndex !== productIndex
           ),
         };
       });
-      flow.updateAddonDraft({ addonTiers: updated });
+      updateAddonDraft({ addonTiers: updated });
     },
-    [flow],
+    [addonDraft.addonTiers, updateAddonDraft]
   );
   const handleAddonSelectedProductAdd = useCallback(
     async (
       tierIndex: number,
-      options?: { reopenSelectedProductsModal?: boolean },
+      options?: { reopenSelectedProductsModal?: boolean }
     ) => {
       if (options?.reopenSelectedProductsModal) {
-        flow.setAddonSelectedProductsTierIndex(tierIndex);
-        flow.setIsAddonSelectedProductsModalOpen(false);
-        flow.hidePolarisModal(flow.addonSelectedProductsModalRef);
+        setAddonSelectedProductsTierIndex(tierIndex);
+        setIsAddonSelectedProductsModalOpen(false);
+        hidePolarisModal(addonSelectedProductsModalRef);
         await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
       }
-    const addonTiers = Array.isArray(flow.addonDraft.addonTiers)
-      ? flow.addonDraft.addonTiers
-      : [];
+      const addonTiers = Array.isArray(addonDraft.addonTiers)
+        ? addonDraft.addonTiers
+        : [];
       const currentProducts = Array.isArray(
-        addonTiers[tierIndex]?.selectedAddonProducts,
+        addonTiers[tierIndex]?.selectedAddonProducts
       )
         ? addonTiers[tierIndex].selectedAddonProducts
         : [];
       try {
-        const picked = await (flow.shopify as any).resourcePicker({
+        const picked = await shopify.resourcePicker({
           type: "product",
           multiple: true,
-          selectionIds: currentProducts.map((product: any) => ({
-            id: product.graphqlId || product.id,
-          })),
+          selectionIds: currentProducts.flatMap((product) => {
+            const id = product.graphqlId || product.id;
+            return id ? [{ id }] : [];
+          }),
         });
-        const selection = Array.isArray(picked) ? picked : picked?.selection;
+        const selection = Array.isArray(picked) ? picked : undefined;
         if (!selection) return;
-        const updated = addonTiers.map((tier: any, index: number) =>
+        const updated = addonTiers.map((tier, index) =>
           index === tierIndex
             ? {
                 ...tier,
-                selectedAddonProducts: selection.map((product: any) =>
-                  normalizeAddonPickerProduct(product),
+                selectedAddonProducts: selection.map((product) =>
+                  normalizeAddonPickerProduct(product)
                 ),
               }
-            : tier,
+            : tier
         );
-        flow.updateAddonDraft({ addonTiers: updated });
+        updateAddonDraft({ addonTiers: updated });
       } finally {
         if (options?.reopenSelectedProductsModal) {
-          flow.setAddonSelectedProductsTierIndex(tierIndex);
-          flow.setIsAddonSelectedProductsModalOpen(true);
+          setAddonSelectedProductsTierIndex(tierIndex);
+          setIsAddonSelectedProductsModalOpen(true);
         }
       }
     },
-    [flow],
+    [
+      addonDraft.addonTiers,
+      addonSelectedProductsModalRef,
+      setAddonSelectedProductsTierIndex,
+      setIsAddonSelectedProductsModalOpen,
+      shopify,
+      updateAddonDraft,
+    ]
   );
   const handleDisableAddonStepConfirm = useCallback(() => {
-    flow.setIsDisableAddonStepModalOpen(false);
-    flow.updateAddonDraft({
+    setIsDisableAddonStepModalOpen(false);
+    updateAddonDraft({
       isPersonalizationEnabled: false,
       addonProductsEnabled: false,
     });
-  }, [flow]);
+  }, [setIsDisableAddonStepModalOpen, updateAddonDraft]);
 
   return {
     createDefaultAddonDraftTier,

@@ -1,14 +1,14 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { DesignLivePreview } from "../../../app/routes/app/app.settings/DesignLivePreview";
+import { DESIGN_PREVIEW_TEMPLATES } from "../../../app/routes/app/app.settings/design-preview-model";
 import {
-  DESIGN_PREVIEW_TEMPLATES,
-  DesignLivePreview,
   createDesignPreviewState,
   setDesignPreviewArea,
   setDesignPreviewScenario,
   setDesignPreviewTemplate,
   setDesignPreviewViewport,
-} from "../../../app/routes/app/app.settings/DesignLivePreview";
+} from "../../../app/routes/app/app.settings/design-preview-state";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({

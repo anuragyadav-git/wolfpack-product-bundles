@@ -1,5 +1,5 @@
 import * as fs from "node:fs";
-import { join } from "node:path";
+import { resolve } from "node:path";
 
 const requiredTopics = [
   "app/uninstalled",
@@ -20,7 +20,7 @@ const webhookApiVersion = "2026-07";
 function readConfig(configPath: string) {
   // Test fixture paths are fixed by the table below.
   // eslint-disable-next-line security/detect-non-literal-fs-filename
-  return fs.readFileSync(join(process.cwd(), configPath), "utf8");
+  return fs.readFileSync(resolve(__dirname, "../../..", configPath), "utf8");
 }
 
 function readTopics(configPath: string) {
@@ -32,6 +32,18 @@ function readTopics(configPath: string) {
 function readWebhookApiVersion(configPath: string) {
   const source = readConfig(configPath);
   return source.match(/\[webhooks\]\s+api_version\s*=\s*"([^"]+)"/)?.[1];
+}
+
+function readWebhookSubscriptionUris(configPath: string) {
+  const source = readConfig(configPath);
+  return [...source.matchAll(/^\s*uri\s*=\s*"([^"]+)"\s*$/gm)].map(
+    (match) => match[1],
+  );
+}
+
+function readLocalWebhookPath() {
+  const source = readConfig("shopify.web.toml");
+  return source.match(/^webhooks_path\s*=\s*"([^"]+)"\s*$/m)?.[1];
 }
 
 describe("Shopify webhook subscriptions", () => {
@@ -52,5 +64,16 @@ describe("Shopify webhook subscriptions", () => {
     ["production", "shopify.app.toml"],
   ])("%s config serializes webhooks with the supported API version", (_label, configPath) => {
     expect(readWebhookApiVersion(configPath)).toBe(webhookApiVersion);
+  });
+
+  it.each([
+    ["SIT", "shopify.app.wolfpack-product-bundles-sit.toml"],
+    ["production", "shopify.app.toml"],
+  ])("%s config routes every webhook subscription through Remix", (_label, configPath) => {
+    expect(readWebhookSubscriptionUris(configPath)).toEqual(["/webhooks"]);
+  });
+
+  it("routes Shopify CLI's local webhook probe through Remix", () => {
+    expect(readLocalWebhookPath()).toBe("/webhooks");
   });
 });

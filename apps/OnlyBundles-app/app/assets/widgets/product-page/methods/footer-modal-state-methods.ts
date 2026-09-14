@@ -17,6 +17,7 @@ import {
   areRequiredProductPageStepsValid,
   getLastRequiredProductPageStepIndex,
 } from './step-validation.js';
+import { hasProductPageHydrationFailure } from './product-data-methods.js';
 
 function resolveDiscountProgressMode(displayOptions: any = {}) {
   const type = String(displayOptions?.type || '').toLowerCase().trim();
@@ -55,7 +56,7 @@ function getDiscountProgressMilestones(bundle: any, totalPrice = 0, totalQuantit
         ? `${threshold} Pack`
         : CurrencyManager.convertAndFormat(threshold, currencyInfo);
 
-      const discountValue = Number(rule.discountValue ?? rule.discount?.value ?? 0) || 0;
+      const discountValue = Number(rule.discountValue ?? 0) || 0;
       let fallbackSubText = '';
       if (discountValue > 0) {
         if (method === 'fixed_amount_off') {
@@ -99,22 +100,15 @@ export function shouldDisableIntermediateProductPageCta({
 }
 
 export const ProductPageFooterModalStateMethods: Record<string, any> & ThisType<any> = {
-renderFullPageLayout() {
-  // Current fallback mirrors product-page layout until a dedicated full-page tab UI ships.
-  this.renderProductPageLayout();
-},
-
 clearStepSelections(stepIndex: number) {
   // Clear all product selections for this step
   this.selectedProducts[stepIndex] = {};
   if (this.selectedProductCategoryIndexes) {
     this.selectedProductCategoryIndexes[stepIndex] = {};
   }
-  if (stepIndex === 0 && this.directDefaultProducts.length > 0) {
-    this.directDefaultProducts.forEach((product: any)  => {
-      const defaultQuantity = Number.parseFloat(product.defaultRequiredQuantity);
-      const normalizedDefaultQuantity = Number.isFinite(defaultQuantity) && defaultQuantity >= 0 ? defaultQuantity : 0;
-      this.setSelectedQuantity(0, product.variantId, normalizedDefaultQuantity);
+  if (stepIndex === 0 && (this.directDefaultProductRequirements || []).length > 0) {
+    this.directDefaultProductRequirements.forEach((requirement: any)  => {
+      this.setSelectedQuantity(0, requirement.variantId, requirement.defaultRequiredQuantity);
     });
   }
   this._persistSessionSelections?.();
@@ -423,6 +417,7 @@ updateAddToCartButton() {
     ? this.validateProductPageBoxSelectionCheckout.call(this)
     : { valid: true };
   const canCheckoutByBoxSelection = boxSelectionState.valid !== false;
+  const hasHydrationFailure = hasProductPageHydrationFailure(this._stepFetchFailed);
 
   // Count only paid (non-free-gift, non-default) step selections for the total check
   const paidTotalQuantity = this.selectedProducts.reduce((sum: number, stepSelections: any, i: number) => {
@@ -458,14 +453,14 @@ updateAddToCartButton() {
     };
     if (!formattedPrice) nextButtonContent.separator = '';
     this._renderCascadeAddToCartButtonContent(button, nextButtonContent);
-    const shouldDisable = shouldDisableIntermediateProductPageCta({
+    const shouldDisable = hasHydrationFailure || shouldDisableIntermediateProductPageCta({
       isGrid: this._isProductPageGridTemplate?.() === true,
       currentStepValid,
     });
     button.disabled = shouldDisable;
     button.classList.toggle('disabled', shouldDisable);
   // Disable button if no paid products selected or not all required steps are complete.
-  } else if (paidTotalQuantity === 0 || !allStepsValid || !canCheckoutByBoxSelection) {
+  } else if (hasHydrationFailure || paidTotalQuantity === 0 || !allStepsValid || !canCheckoutByBoxSelection) {
     if (paidTotalQuantity === 0 || usesCascadeStepFlow) {
       button.textContent = this._resolveText('addToCartButton', 'Add Bundle to Cart');
     } else {

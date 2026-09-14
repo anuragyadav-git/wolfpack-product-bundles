@@ -1,13 +1,16 @@
+import { buildBundleAuthorizationPolicy, buildBundlePolicyMetafield } from "../../../bundle-authorization-policy.server";
+import { syncScheduledBundleDiscounts } from "../../../scheduled-bundle-discount.server";
 /**
  * Bundle Product Metafield Operations
  *
  * Updates bundle variant metafields with Shopify Standard structure
  */
 
+import { isDeepStrictEqual } from "node:util";
 import { isUUID } from "../../../../utils/shopify-validators";
 import { getFirstVariantId, batchGetFirstVariantsWithPrices } from "../../../../utils/variant-lookup.server";
 import { AppLogger } from "../../../../lib/logger";
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import { checkMetafieldSize } from "../utils/size-check";
 import { calculateComponentPricing } from "../utils/pricing";
 import { buildPriceAdjustmentConfig } from "../utils/price-adjustment";
@@ -19,9 +22,11 @@ import { resolveShowProductComparedAtPrice } from "../../../../lib/bundle-config
 import { normalizeShopifyComponentQuantity } from "../utils/component-quantity";
 import { buildCheckoutOfferRuntime } from "../../../checkout-bundle-offers.server";
 import { buildPublicBundleSubscriptionConfig } from "../../../../lib/bundle-subscriptions";
-import { buildPpbPolicyRevisionMetafield, buildPpbStaticAuthorization } from "../../../ppb-static-authorization.server";
+import { buildPpbStaticAuthorization } from "../../../ppb-static-authorization.server";
 import { generateCartTransformRuntimeTokenSecret } from "../../../cart-transform-runtime-token.server";
 import { assertPpbStorefrontSnapshotSize } from "../../../ppb-storefront-runtime.server";
+import { parsePricingRule } from "../../../../lib/pricing-rule-parser";
+import { buildOfferCountryTargetingRule, encodeOfferCountryTargetingRule } from "../../../../lib/offer-country-eligibility";
 
 async function ensureBundleParentVariantRequiresComponents(
   admin: ShopifyAdmin,
@@ -52,11 +57,24 @@ async function ensureBundleParentVariantRequiresComponents(
     },
   });
 
-  const data = await response.json();
-  const userErrors = data.data?.productVariantsBulkUpdate?.userErrors ?? [];
-  if (userErrors.length > 0) {
-    throw new Error(`Failed to mark bundle parent variant as requiring components: ${userErrors[0].message}`);
+  const data = await response.json() as {
+    errors?: unknown[];
+    data?: { productVariantsBulkUpdate?: {
+      userErrors?: Array<{ message: string }>;
+      productVariants?: Array<{ id: string; requiresComponents: boolean }>;
+    } };
+  };
+  const result = data.data?.productVariantsBulkUpdate;
+  if (data.errors?.length || !result || !Array.isArray(result.userErrors)) {
+    throw new Error('Failed to mark bundle parent variant as requiring components: incomplete Shopify response');
   }
+  if (result.userErrors.length > 0) {
+    throw new Error(`Failed to mark bundle parent variant as requiring components: ${result.userErrors[0].message}`);
+  }
+  if (!result.productVariants?.some(variant => variant.id === bundleVariantId && variant.requiresComponents === true)) {
+    throw new Error('Shopify did not confirm that the bundle parent requires components');
+  }
+
 }
 
 function getProductReferenceId(product: any): string | null {
@@ -137,16 +155,6 @@ function collectCachedStepVariants(
 
     for (const stepProduct of Array.isArray(step.StepProduct) ? step.StepProduct : []) {
       appendProductVariants(stepProduct, quantity);
-    }
-
-    for (const product of Array.isArray(step.products) ? step.products : []) {
-      appendProductVariants(product, quantity);
-    }
-
-    for (const category of Array.isArray(step.StepCategory) ? step.StepCategory : []) {
-      for (const product of Array.isArray(category.products) ? category.products : []) {
-        appendProductVariants(product, quantity);
-      }
     }
   }
 
@@ -273,6 +281,14 @@ export async function updateBundleProductMetafields(
   bundleProductId: string,
   bundleConfiguration: any
 ): Promise<any[] | undefined> {
+  const bundleType = bundleConfiguration?.bundleType;
+  if (
+    bundleType !== BundleType.FULL_PAGE
+    && bundleType !== BundleType.PRODUCT_PAGE
+  ) {
+    throw new Error("bundle_ui_config requires an exact bundleType");
+  }
+
   AppLogger.debug("[METAFIELD] Starting bundle variant metafield update", {
     component: "bundle-product.server",
     bundleProductId,
@@ -315,11 +331,7 @@ export async function updateBundleProductMetafields(
   if (bundleConfiguration.steps && Array.isArray(bundleConfiguration.steps)) {
     for (const [stepIndex, step] of bundleConfiguration.steps.entries()) {
       const stepKey = String(step.id ?? stepIndex);
-      // CRITICAL FIX: Process ONLY ONE source to prevent duplicates
-      // Priority: StepProduct (database relation) > products array (UI config)
-
       if (step.StepProduct && Array.isArray(step.StepProduct) && step.StepProduct.length > 0) {
-        // Use StepProduct entries from database
         for (const stepProduct of step.StepProduct) {
           if (stepProduct.productId && !isUUID(stepProduct.productId)) {
             addResolvedProduct(stepKey, stepProduct.productId);
@@ -332,18 +344,6 @@ export async function updateBundleProductMetafields(
             AppLogger.warn("[METAFIELD] Skipping UUID product ID", {
               component: "bundle-product.server",
               productId: stepProduct.productId,
-            });
-          }
-        }
-      } else if (step.products && Array.isArray(step.products) && step.products.length > 0) {
-        // Fallback: Use products array from UI config (only if StepProduct is empty)
-        for (const product of step.products) {
-          if (product.id && !isUUID(product.id)) {
-            addResolvedProduct(stepKey, product.id);
-            productIdMap.push({
-              productId: product.id,
-              stepMinQuantity: step.minQuantity,
-              source: 'products'
             });
           }
         }
@@ -391,27 +391,14 @@ export async function updateBundleProductMetafields(
       const stepCats = Array.isArray(step.StepCategory) ? step.StepCategory : [];
       for (const [categoryIndex, cat] of stepCats.entries()) {
         const categoryKey = `${stepKey}:${String(cat.id ?? categoryIndex)}`;
-        // Direct product GIDs in this category
-        const catProducts = Array.isArray(cat.products) ? cat.products : [];
-        for (const p of catProducts) {
-          if (p.id && !isUUID(p.id) && !productIdMap.some(item => item.productId === p.id)) {
-            addResolvedProduct(stepKey, p.id, categoryKey);
-            productIdMap.push({
-              productId: p.id,
-              stepMinQuantity: step.minQuantity,
-              source: `StepCategory:${cat.name}`,
-            });
-          }
-        }
-
         // Collections in this category — resolve to product IDs
         const catCollections = Array.isArray(cat.collections) ? cat.collections : [];
         for (const collection of catCollections) {
           const handle = collection.handle;
           if (!handle) continue;
           for (const productId of collectionProductIds.get(handle) ?? []) {
+            addResolvedProduct(stepKey, productId, categoryKey);
             if (!productIdMap.some(item => item.productId === productId)) {
-              addResolvedProduct(stepKey, productId, categoryKey);
               productIdMap.push({
                 productId,
                 stepMinQuantity: step.minQuantity,
@@ -503,7 +490,16 @@ export async function updateBundleProductMetafields(
     );
   }
 
+  const shopDomain = String(bundleConfiguration.shopId ?? "").trim();
+  const authorizationPolicy = buildBundleAuthorizationPolicy({ bundle: bundleConfiguration, shop: shopDomain, parentVariantId: bundleVariantId });
   const priceAdjustment = buildPriceAdjustmentConfig(bundleConfiguration.pricing);
+  // Parent-only policy: keep it out of the shared signed-token pricing type.
+  const parentPriceAdjustment = {
+    componentQuantities,
+    ...priceAdjustment,
+    shop: shopDomain, bundleId: authorizationPolicy.bundleId, revision: authorizationPolicy.revision,
+    countryRule: encodeOfferCountryTargetingRule(buildOfferCountryTargetingRule(bundleConfiguration.offerPolicy)),
+  };
 
   // Calculate per-component pricing for expanded bundle checkout display
   const componentPricing: ComponentPricing[] = calculateComponentPricing(
@@ -514,15 +510,18 @@ export async function updateBundleProductMetafields(
   const publicSubscriptionConfig = buildPublicBundleSubscriptionConfig(
     bundleConfiguration.bundleSubscriptionConfig,
   );
+  const canonicalBundleId = String(bundleConfiguration.id ?? "").trim();
+  if (!canonicalBundleId) {
+    throw new Error("bundle_ui_config requires a canonical id");
+  }
 
   // Build bundle_ui_config for widget
   const bundleUiConfig: BundleUiConfig = {
-    id: bundleConfiguration.id || bundleConfiguration.bundleId, // Widget expects 'id' field
-    bundleId: bundleConfiguration.id || bundleConfiguration.bundleId, // Keep for backwards compatibility
+    id: canonicalBundleId,
     name: bundleConfiguration.name,
     description: bundleConfiguration.description || '',
     status: bundleConfiguration.status || BundleStatus.ACTIVE, // Widget needs this for filtering
-    bundleType: bundleConfiguration.bundleType || BundleType.PRODUCT_PAGE, // Widget needs this for selection
+    bundleType,
     publicNumber: bundleConfiguration.publicNumber ?? null,
     shopifyProductId: bundleConfiguration.shopifyProductId || null, // Product ID for matching
     bundleDesignTemplate: bundleConfiguration.bundleDesignTemplate ?? null,
@@ -611,8 +610,6 @@ export async function updateBundleProductMetafields(
       addonUnlockAfterCompletion: step.addonUnlockAfterCompletion !== false,
       isDefault: step.isDefault || false,
       defaultVariantId: step.defaultVariantId || null,
-      imageUrl: step.imageUrl ?? null,
-      bannerImageUrl: step.bannerImageUrl ?? null,
       stepImage: step.stepImage ?? step.timelineIconUrl ?? null,
       primaryVariantOption: step.primaryVariantOption ?? null,
       filters: Array.isArray(step.filters) ? step.filters : null,
@@ -620,20 +617,9 @@ export async function updateBundleProductMetafields(
     pricing: bundleConfiguration.pricing ? {
       enabled: bundleConfiguration.pricing.enabled || false,
       method: bundleConfiguration.pricing.method || 'percentage_off',
-      rules: (bundleConfiguration.pricing.rules || []).map((rule: any) => {
-        const flat: Record<string, unknown> = {
-          id: rule.id,
-          conditionType: rule.conditionType || rule.condition?.type || 'quantity',
-          conditionValue: parseFloat(rule.conditionValue ?? rule.condition?.value ?? 0) || 0,
-          discountValue: parseFloat(rule.discountValue ?? rule.discount?.value ?? 0) || 0,
-        };
-        if (rule.customerBuys !== undefined) flat.customerBuys = Number(rule.customerBuys);
-        if (rule.customerGets !== undefined) flat.customerGets = Number(rule.customerGets);
-        if (rule.bxyDiscountType !== undefined) flat.bxyDiscountType = rule.bxyDiscountType;
-        if (rule.bxyApplyMode !== undefined) flat.bxyApplyMode = rule.bxyApplyMode;
-        if (rule.tierBadge !== undefined) flat.tierBadge = rule.tierBadge;
-        return flat;
-      }),
+      rules: (bundleConfiguration.pricing.rules || []).map((rule: unknown) =>
+        parsePricingRule(rule),
+      ),
       messages: {
         ...((bundleConfiguration.pricing.messages as Record<string, unknown> | null) ?? {}),
         ...(bundleConfiguration.pricing.ruleMessagesByLocale
@@ -670,30 +656,25 @@ export async function updateBundleProductMetafields(
     },
   };
 
-  let ppbPolicyRevisionMetafield: Record<string, unknown> | null = null;
+
   if (bundleUiConfig.bundleType === BundleType.PRODUCT_PAGE) {
-    const shopDomain = String(bundleConfiguration.shopId ?? bundleConfiguration.shopDomain ?? "").trim();
-    if (!shopDomain) throw new Error("PPB Shopify-hosted sync requires shopId");
     const staticAuthorization = buildPpbStaticAuthorization({
       bundle: bundleUiConfig,
+      revision: authorizationPolicy.revision,
       shop: shopDomain,
       parentVariantId: bundleVariantId,
       secret: generateCartTransformRuntimeTokenSecret(shopDomain),
+      subscription: publicSubscriptionConfig,
+      offerPolicy: bundleConfiguration.offerPolicy,
     });
     bundleUiConfig.schemaVersion = 3;
     bundleUiConfig.runtimeAuthorization = staticAuthorization.authorization;
-    ppbPolicyRevisionMetafield = await buildPpbPolicyRevisionMetafield({
-      admin,
-      bundleId: bundleUiConfig.id,
-      revision: staticAuthorization.policy.revision,
-      active: staticAuthorization.policy.active,
-    });
     assertPpbStorefrontSnapshotSize("bundle_ui_config", bundleUiConfig);
   }
 
   // Check metafield sizes and log warnings
   const uiConfigSizeCheck = checkMetafieldSize(bundleUiConfig, 'bundle_ui_config', 'updateBundleProductMetafields');
-  const priceAdjustmentSizeCheck = checkMetafieldSize(priceAdjustment, 'price_adjustment', 'updateBundleProductMetafields');
+  const parentPriceAdjustmentJson = JSON.stringify(parentPriceAdjustment);
   const componentPricingSizeCheck = checkMetafieldSize(componentPricing, 'component_pricing', 'updateBundleProductMetafields');
 
   // Abort if any metafield exceeds size limit
@@ -701,13 +682,21 @@ export async function updateBundleProductMetafields(
     throw new Error(`bundle_ui_config metafield exceeds Shopify's 64KB limit (size: ${uiConfigSizeCheck.size} bytes). Bundle has too many products or complex configuration.`);
   }
 
-  if (!priceAdjustmentSizeCheck.withinLimit) {
-    throw new Error(`price_adjustment metafield exceeds Shopify's 64KB limit (size: ${priceAdjustmentSizeCheck.size} bytes).`);
+  if (Buffer.byteLength(parentPriceAdjustmentJson, 'utf8') > 10_000) {
+    throw new Error('price_adjustment exceeds the Shopify Function metafield limit of 10000 bytes.');
   }
 
   if (!componentPricingSizeCheck.withinLimit) {
     throw new Error(`component_pricing metafield exceeds Shopify's 64KB limit (size: ${componentPricingSizeCheck.size} bytes). Bundle has too many components.`);
   }
+
+  await syncScheduledBundleDiscounts({
+    admin, policy: authorizationPolicy, timing: bundleConfiguration.offerPolicy ?? {},
+    title: bundleConfiguration.name, secret: generateCartTransformRuntimeTokenSecret(shopDomain),
+    recurringSubscription: publicSubscriptionConfig?.recurringBundleDiscount === true
+      && publicSubscriptionConfig.bundleDiscountAppliesOn !== 'one_time',
+  });
+  const policyMetafield = await buildBundlePolicyMetafield({ admin, ...authorizationPolicy });
 
   // Set all 5 metafields on the bundle variant
   const SET_METAFIELDS = `
@@ -750,7 +739,7 @@ export async function updateBundleProductMetafields(
       namespace: "$app",
       key: 'price_adjustment',
       type: "json",
-      value: JSON.stringify(priceAdjustment)
+      value: parentPriceAdjustmentJson
     },
     {
       ownerId: bundleVariantId,
@@ -759,7 +748,7 @@ export async function updateBundleProductMetafields(
       type: "json",
       value: JSON.stringify(bundleUiConfig)
     },
-    ...(ppbPolicyRevisionMetafield ? [ppbPolicyRevisionMetafield] : []),
+    policyMetafield,
     {
       ownerId: bundleVariantId,
       namespace: "$app",
@@ -773,11 +762,21 @@ export async function updateBundleProductMetafields(
     variables: { metafields }
   });
 
-  const data = await response.json();
+  const data = await response.json() as { errors?: unknown[]; data?: { metafieldsSet?: { userErrors?: Array<{ message: string }>; metafields?: any[] } } };
 
-  if (data.data?.metafieldsSet?.userErrors?.length > 0) {
-    const error = data.data.metafieldsSet.userErrors[0];
-    throw new Error(`Failed to update bundle metafields: ${error.message}`);
+  const result = data.data?.metafieldsSet;
+  if (data.errors?.length || !result) {
+    throw new Error('Failed to update bundle metafields: Shopify returned an incomplete or failed response');
+  }
+  if (result.userErrors && result.userErrors.length > 0) {
+    throw new Error(`Failed to update bundle metafields: ${result.userErrors[0].message}`);
+  }
+  const writtenFields = result.metafields;
+  if (!Array.isArray(writtenFields) || writtenFields.length !== metafields.length
+    || metafields.some(field => !writtenFields.some((written: any) =>
+      written.key === field.key && typeof written.value === "string"
+        && isDeepStrictEqual(JSON.parse(written.value), JSON.parse(String(field.value)))))) {
+    throw new Error('Failed to update bundle metafields: Shopify did not confirm every published value');
   }
 
   AppLogger.info("[METAFIELD] Bundle variant metafields updated", {

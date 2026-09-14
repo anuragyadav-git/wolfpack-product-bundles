@@ -1,5 +1,5 @@
 import db from '../db.server';
-import type { ShopifyAdmin } from '../lib/auth-guards.server';
+import type { ShopifyAdmin } from '../shopify.server';
 import {
   parseOfferPolicyCsv,
   serializeOfferPolicyCsv,

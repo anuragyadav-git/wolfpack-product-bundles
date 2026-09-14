@@ -6,7 +6,7 @@ type BundleProductDescriptionInput = {
   status?: string | null;
 };
 
-export type BundleProductTroubleshootingCategory = "visibility_unlisted";
+type BundleProductTroubleshootingCategory = "visibility_unlisted";
 
 const escapeHtml = (value: string) =>
   value

@@ -10,7 +10,7 @@ interface NormalizedStep extends UnknownRecord {
   products: UnknownRecord[];
 }
 
-export interface NormalizedFpbConfiguration extends UnknownRecord {
+interface NormalizedFpbConfiguration extends UnknownRecord {
   defaults: UnknownRecord;
   identity: UnknownRecord;
   presentation: UnknownRecord;
@@ -18,7 +18,7 @@ export interface NormalizedFpbConfiguration extends UnknownRecord {
   template: UnknownRecord;
 }
 
-export interface ConfigurationDiff {
+interface ConfigurationDiff {
   added: string[];
   changed: string[];
   removed: string[];

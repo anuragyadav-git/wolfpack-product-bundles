@@ -20,7 +20,7 @@ const CONFIGURE_ACTION_ICONS = {
   'select-template': 'paint-brush-flat',
 } as const;
 
-export type ConfigureAction = keyof typeof CONFIGURE_ACTION_ICONS;
+type ConfigureAction = keyof typeof CONFIGURE_ACTION_ICONS;
 
 export function getConfigureActionIcon(action: ConfigureAction) {
   return CONFIGURE_ACTION_ICONS[action];

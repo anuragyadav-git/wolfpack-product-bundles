@@ -3,21 +3,61 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 const fpbFlow = {
   activeSection: "steps",
+  appEmbedEnabled: true,
   blockConfigurationChangeWhileSaving: jest.fn(),
-  bundle: {},
+  bundle: { shopifyProductId: null },
+  bundleProduct: null,
+  clearOperationAlert: jest.fn(),
+  conditionsState: { stepConditions: {} },
+  discountMessagingMultiLanguageEnabled: false,
   fetcher: { state: "idle" },
+  formState: {
+    bundleDescription: "",
+    bundleName: "Bundle",
+    bundleStatus: "draft",
+    templateName: "STANDARD",
+  },
+  fullPageBundleStyles: {},
+  handleBackClick: jest.fn(),
+  handlePreviewBundle: jest.fn(),
   handleSave: jest.fn(),
   isCriticalStatusReady: false,
   isDirty: false,
+  isPreviewBundleLoading: false,
   isSaveInFlight: false,
-  pricingState: {},
+  normalizedPricingDisplayOptions: {},
+  normalizedRuleMessages: {},
+  openProductInAdmin: jest.fn(),
+  openThemeEditorForAppEmbed: jest.fn(),
+  operationAlert: null,
+  parentProductStatusUi: {
+    isLoading: false,
+    showUnlistedBanner: false,
+  },
+  pricingState: {
+    discountEnabled: false,
+    discountMessagingEnabled: false,
+    discountRules: [],
+    discountType: "percentage_off",
+    showDiscountProgressBar: false,
+    showFooter: true,
+  },
+  readinessScore: 0,
+  ruleMessagesByLocale: {},
   saveBarRef: { current: null },
+  selectedCollections: {},
+  serializePricingDisplayOptions: jest.fn(),
+  setReadinessOpen: jest.fn(),
   SaveBar: ({ children }: { children: React.ReactNode }) => React.createElement("div", null, children),
   setShowDiscardModal: jest.fn(),
+  shop: "store.myshopify.com",
   shopLocales: [],
-  stepsState: {},
+  stepsState: { steps: [] },
   subscriptionConfig: {},
   subscriptionFetcher: {},
+  themeEditorUrl: null,
+  tierTextByLocaleByRuleId: {},
+  tierTextByRuleId: {},
   validationErrors: {},
   validationIssues: [],
 };
@@ -34,6 +74,9 @@ jest.mock("../../../app/routes/app/_shared/bundle-configure/CommonConfigureShell
 }));
 jest.mock("../../../app/components/ProxyHealthBanner", () => ({
   ProxyHealthBanner: () => React.createElement("aside", null, "Proxy warning"),
+}));
+jest.mock("../../../app/components/bundle-configure/BundleReadinessOverlay", () => ({
+  BundleReadinessOverlay: () => React.createElement("div", null, "Readiness control"),
 }));
 jest.mock("@remix-run/react", () => ({
   Await: ({ children, resolve }: { children: (value: unknown) => React.ReactNode; resolve: unknown }) =>
@@ -53,15 +96,10 @@ jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundl
 jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleSettingsSection", () => ({ BundleSettingsSection: () => null }));
 jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/BundleWidgetSection", () => ({ BundleWidgetSection: () => null }));
 jest.mock("../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureRouteModals", () => ({ ConfigureRouteModals: () => React.createElement("div", null, "Configure overlays") }));
-jest.mock("../../../app/routes/app/_shared/bundle-configure/ConfigureValidationSummary", () => ({ ConfigureValidationSummary: () => null }));
 jest.mock("../../../app/routes/app/_shared/bundle-configure/BundleSubscriptionsSection", () => ({ BundleSubscriptionsSection: () => null }));
 
 jest.mock("../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/usePpbConfigureFlow", () => ({
   usePpbConfigureFlow: () => ppbFlow,
-}));
-jest.mock("../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext", () => ({
-  PpbConfigureProvider: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
-  usePpbConfigureContext: () => ppbFlow,
 }));
 jest.mock("../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbCanvasHeader", () => ({ PpbCanvasHeader: () => null }));
 jest.mock("../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureSidebar", () => ({ PpbConfigureSidebar: () => null, PpbConfigureSupplement: () => null }));
@@ -95,6 +133,7 @@ describe("Admin LCP noncritical readiness", () => {
 
     const view = renderToStaticMarkup(React.createElement(ConfigureBundleFlow));
     expect(view).toContain("Configure canvas");
+    expect(view).toContain("Readiness control");
     expect(view).not.toContain("Configure overlays");
   });
 
@@ -105,6 +144,7 @@ describe("Admin LCP noncritical readiness", () => {
 
     const view = renderToStaticMarkup(React.createElement(ConfigureBundleFlow));
     expect(view).toContain("Configure canvas");
+    expect(view).toContain("Readiness control");
     expect(view).not.toContain("Configure overlays");
   });
 

@@ -1,3 +1,5 @@
+import { MAX_BUNDLE_CART_LINES } from "../lib/cart-bundle-details";
+import { maxAddonDiscount } from "./ppb-static-authorization.server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { buildPriceAdjustmentConfig } from "./bundles/metafield-sync/utils/price-adjustment";
 import { collectAddonComponentVariants } from "./bundles/metafield-sync/utils/addon-components";
@@ -9,11 +11,12 @@ import {
   buildOfferCountryTargetingRule,
   encodeOfferCountryTargetingRule,
 } from "../lib/offer-country-eligibility";
+import { normalizeProductVariantGid } from "../lib/shopify-product-gid";
 
 const RUNTIME_TOKEN_VERSION = 1;
 const RUNTIME_TOKEN_SECRET_CONTEXT = "wpb-runtime-token:";
 
-export type RuntimeTokenDiscount = {
+type RuntimeTokenDiscount = {
   type: "PERCENTAGE";
   value: number;
 };
@@ -29,6 +32,7 @@ export type RuntimeTokenAddonLine = RuntimeTokenLine & {
 
 export type RuntimeTokenPayload = {
   version: 1;
+  revision: string;
   shop: string;
   bundleId: string;
   bundleType: string;
@@ -75,15 +79,6 @@ function normalizeSubscriptionSelection(bundle: any, value: SelectionInput["subs
     sellingPlanId,
     recurringBundleDiscount: config.recurringBundleDiscount,
   };
-}
-
-export function normalizeProductVariantGid(value: unknown): string | null {
-  if (typeof value !== "string" && typeof value !== "number") return null;
-  const raw = String(value).trim();
-  if (!raw) return null;
-  if (raw.startsWith("gid://shopify/ProductVariant/")) return raw;
-  if (/^\d+$/.test(raw)) return `gid://shopify/ProductVariant/${raw}`;
-  return null;
 }
 
 function normalizeProductGid(value: unknown): string | null {
@@ -141,16 +136,6 @@ function collectAllowedSelectionIds(bundle: any): { variantIds: Set<string>; pro
     for (const stepProduct of Array.isArray(step?.StepProduct) ? step.StepProduct : []) {
       addProduct(stepProduct);
     }
-    for (const product of Array.isArray(step?.products) ? step.products : []) {
-      addProduct(product);
-    }
-    const categories = Array.isArray(step?.StepCategory) ? step.StepCategory : [];
-    for (const category of categories) {
-      const categoryProducts = Array.isArray(category?.products) ? category.products : [];
-      for (const product of categoryProducts) {
-        addProduct(product);
-      }
-    }
   }
 
   for (const addonVariant of collectAddonComponentVariants(bundle?.personalizationData)) {
@@ -182,6 +167,7 @@ function normalizeDiscount(value: unknown): RuntimeTokenDiscount | null {
 function normalizeLines(
   lines: SelectionInput["components"],
   allowedIds: { variantIds: Set<string>; productIds: Set<string> },
+  resolvedProducts: ReadonlyMap<string, string>,
 ): RuntimeTokenLine[] {
   if (!Array.isArray(lines) || lines.length === 0) {
     throw new Error("Runtime token payload must include selected components");
@@ -189,7 +175,7 @@ function normalizeLines(
 
   return lines.map((line) => {
     const variantId = normalizeProductVariantGid(line?.variantId);
-    const productId = normalizeProductGid(line?.productId);
+    const productId = variantId ? resolvedProducts.get(variantId) : undefined;
     const isAllowedVariant = Boolean(variantId && allowedIds.variantIds.has(variantId));
     const isAllowedHydratedProduct = Boolean(productId && allowedIds.productIds.has(productId));
     if (!variantId || (!isAllowedVariant && !isAllowedHydratedProduct)) {
@@ -204,32 +190,51 @@ function normalizeLines(
 
 function normalizeAddonLines(
   lines: SelectionInput["addons"],
-  allowedVariantIds: Set<string>,
+  allowedDiscounts: Map<string, number>,
 ): RuntimeTokenAddonLine[] {
   if (!Array.isArray(lines)) return [];
 
   return lines.map((line) => {
     const variantId = normalizeProductVariantGid(line?.variantId);
-    if (!variantId || !allowedVariantIds.has(variantId)) {
+    if (!variantId || !allowedDiscounts.has(variantId)) {
       throw new Error(`Selected add-on variant is not part of bundle: ${String(line?.variantId ?? "")}`);
     }
-    return {
-      variantId,
-      quantity: normalizeQuantity(line?.quantity),
-      discount: normalizeDiscount(line?.discount),
-    };
+    const discount = normalizeDiscount(line?.discount);
+    if ((discount?.value ?? 0) > allowedDiscounts.get(variantId)!) throw new Error('Selected add-on discount exceeds the configured ceiling');
+    return { variantId, quantity: normalizeQuantity(line?.quantity), discount };
   });
 }
 
-export function validateRuntimeTokenSelection(bundle: any, selection: SelectionInput) {
+function collectAllowedAddonDiscounts(bundle: any): Map<string, number> {
+  const discounts = new Map<string, number>();
+  const add = (id: string, maximum: number) => discounts.set(id, Math.max(discounts.get(id) ?? 0, maximum));
+  for (const step of bundle.steps ?? []) {
+    if (step.enabled === false || step.isDefault === true || step.isFreeGift !== true) continue;
+    const maximum = maxAddonDiscount(step, step.addonDisplayFree === true ? 'free_gift' : 'addon');
+    for (const id of collectAllowedSelectionIds({ steps: [step] }).variantIds) add(id, maximum);
+  }
+  const addons = bundle.personalizationData?.addonProducts;
+  if (addons?.isEnabled === true) {
+    for (const tier of addons.tiers ?? []) {
+      const maximum = maxAddonDiscount({ addonTiers: [tier] }, 'addon');
+      for (const variant of collectAddonComponentVariants({ addonProducts: { isEnabled: true, tiers: [tier] } })) {
+        if (variant.variantId) add(variant.variantId, maximum);
+      }
+    }
+  }
+  return discounts;
+}
+
+export function validateRuntimeTokenSelection(bundle: any, selection: SelectionInput, resolvedProducts: ReadonlyMap<string, string> = new Map()) {
+  if ((selection.components?.length ?? 0) + (selection.addons?.length ?? 0) > MAX_BUNDLE_CART_LINES) throw new Error("BUNDLE_CART_LINE_LIMIT_EXCEEDED");
   const allowedIds = collectAllowedSelectionIds(bundle);
   if (allowedIds.variantIds.size === 0 && allowedIds.productIds.size === 0) {
     throw new Error("Bundle has no cached selectable variants for runtime validation");
   }
 
   return {
-    components: normalizeLines(selection.components, allowedIds),
-    addons: normalizeAddonLines(selection.addons, allowedIds.variantIds),
+    components: normalizeLines(selection.components, allowedIds, resolvedProducts),
+    addons: normalizeAddonLines(selection.addons, collectAllowedAddonDiscounts(bundle)),
     subscription: normalizeSubscriptionSelection(bundle, selection.subscription),
   };
 }
@@ -329,13 +334,16 @@ export async function validateLiveSellingPlanSelection(
 }
 
 export function buildRuntimeTokenPayload(input: {
+  revision: string;
   shop: string;
   bundle: any;
   parentVariantId: string;
   offerGroupId: string;
   bundleType: string;
   selection: SelectionInput;
+  resolvedProducts?: ReadonlyMap<string, string>;
 }): RuntimeTokenPayload {
+  if (!input.revision) throw new Error("Published bundle revision is required");
   const normalizedParentVariantId = normalizeProductVariantGid(input.parentVariantId);
   if (!normalizedParentVariantId) {
     throw new Error("Bundle parent variant is required for runtime token payload");
@@ -346,7 +354,7 @@ export function buildRuntimeTokenPayload(input: {
     throw new Error("Runtime token offer group is required");
   }
 
-  const selection = validateRuntimeTokenSelection(input.bundle, input.selection);
+  const selection = validateRuntimeTokenSelection(input.bundle, input.selection, input.resolvedProducts);
   const subscriptionConfig = buildPublicBundleSubscriptionConfig(
     input.bundle.bundleSubscriptionConfig,
   );
@@ -357,6 +365,7 @@ export function buildRuntimeTokenPayload(input: {
 
   return {
     version: RUNTIME_TOKEN_VERSION,
+    revision: input.revision,
     shop: input.shop,
     bundleId: input.bundle.id,
     bundleType: input.bundleType,
@@ -414,4 +423,30 @@ export function verifyRuntimeCartToken(token: string, secret: string): RuntimeTo
   } catch {
     return null;
   }
+}
+
+/** Resolve newly hydrated variants through Shopify, never a browser-supplied product ID. */
+export async function resolveRuntimeSelectionProducts(
+  admin: { graphql: (query: string, options: any) => Promise<{ json: () => Promise<any> }> },
+  bundle: any, selection: SelectionInput,
+): Promise<Map<string, string>> {
+  const allowed = collectAllowedSelectionIds(bundle);
+  const ids = [...new Set((selection.components ?? []).map(line => normalizeProductVariantGid(line.variantId))
+    .filter((id): id is string => !!id && !allowed.variantIds.has(id)))];
+  const products = new Map<string, string>();
+  for (let offset = 0; offset < ids.length; offset += 250) {
+    const batch = ids.slice(offset, offset + 250);
+    const response = await admin.graphql(`query ResolveRuntimeSelectionProducts($ids: [ID!]!) {
+      nodes(ids: $ids) { ... on ProductVariant { id product { id } } }
+    }`, { variables: { ids: batch } });
+    const payload = await response.json();
+    if (payload.errors?.length || !Array.isArray(payload.data?.nodes) || payload.data.nodes.length !== batch.length) {
+      throw new Error('Unable to verify selected Shopify variants');
+    }
+    for (const [index, node] of payload.data.nodes.entries()) {
+      if (node?.id !== batch[index] || !allowed.productIds.has(node.product?.id)) throw new Error('Selected variant is not part of bundle');
+      products.set(node.id, node.product.id);
+    }
+  }
+  return products;
 }

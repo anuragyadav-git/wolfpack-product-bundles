@@ -1,8 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from './specific-link-offer';
 
-export { SPECIFIC_LINK_OFFER_QUERY_PARAM } from './specific-link-offer';
-
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
 
 export function hashSpecificLinkOfferToken(token: string) {

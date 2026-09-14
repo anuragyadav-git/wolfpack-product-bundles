@@ -5,6 +5,19 @@ import { CommonBundleWidgetSection } from "../../../app/routes/app/_shared/bundl
 
 const noop = jest.fn();
 
+function findElements(
+  node: React.ReactNode,
+  predicate: (element: React.ReactElement) => boolean
+): React.ReactElement[] {
+  const matches: React.ReactElement[] = [];
+  for (const child of React.Children.toArray(node)) {
+    if (!React.isValidElement(child)) continue;
+    if (predicate(child)) matches.push(child);
+    matches.push(...findElements(child.props.children, predicate));
+  }
+  return matches;
+}
+
 function makeProps(overrides: Record<string, unknown> = {}) {
   return {
     addBrowsedProduct: true,
@@ -15,7 +28,7 @@ function makeProps(overrides: Record<string, unknown> = {}) {
     displayMode: "block" as const,
     displayOn: "all" as const,
     enabled: true,
-    FilePicker: () => React.createElement("button", null, "Upload file"),
+    AssetUpload: () => React.createElement("button", null, "Upload file"),
     imageUrl: "",
     multiLanguageDisabled: false,
     onAddBrowsedProductChange: noop,
@@ -44,7 +57,7 @@ describe("CommonBundleWidgetSection", () => {
 
   it("renders the complete shared Widget contract", () => {
     const view = renderToStaticMarkup(
-      React.createElement(CommonBundleWidgetSection, makeProps()),
+      React.createElement(CommonBundleWidgetSection, makeProps())
     );
 
     expect(view).toContain("Product Page Bundle Upsell Widgets");
@@ -62,8 +75,8 @@ describe("CommonBundleWidgetSection", () => {
     const view = renderToStaticMarkup(
       React.createElement(
         CommonBundleWidgetSection,
-        makeProps({ displayMode: "button" }),
-      ),
+        makeProps({ displayMode: "button" })
+      )
     );
 
     expect(view).toContain('src="/Upsell-Button.png"');
@@ -77,15 +90,46 @@ describe("CommonBundleWidgetSection", () => {
     const view = renderToStaticMarkup(
       React.createElement(
         CommonBundleWidgetSection,
-        makeProps({ disabled: true, enabled: false }),
-      ),
+        makeProps({ disabled: true, enabled: false })
+      )
     );
 
     expect(view).toContain("Bundle &amp; Save");
     expect(view).toContain("inert");
     expect(view).toContain('aria-disabled="true"');
     expect(view).toMatch(
-      /<s-button[^>]*disabled="true"[^>]*>Embed Upsell Block<\/s-button>/,
+      /<s-button[^>]*disabled="true"[^>]*>Embed Upsell Block<\/s-button>/
     );
+  });
+
+  it("uses one choice list for the mutually exclusive widget presentation", () => {
+    const onDisplayModeChange = jest.fn();
+    const view = CommonBundleWidgetSection(
+      makeProps({ onDisplayModeChange }) as never
+    );
+    const widgetTypeLists = findElements(
+      view,
+      (element) =>
+        element.type === "s-choice-list" &&
+        element.props.label === "Widget type"
+    );
+
+    expect(widgetTypeLists).toHaveLength(1);
+    expect(
+      findElements(widgetTypeLists[0], (element) => element.type === "s-choice")
+    ).toHaveLength(2);
+    const iconActions = findElements(
+      view,
+      (element) => element.type === "s-button" && Boolean(element.props.icon)
+    );
+    expect(iconActions.length).toBeGreaterThan(0);
+    for (const action of iconActions) {
+      expect(action.props.accessibilityLabel).toEqual(expect.any(String));
+    }
+
+    widgetTypeLists[0].props.onChange({
+      currentTarget: { values: ["button"] },
+    });
+    expect(onDisplayModeChange).toHaveBeenCalledWith("button");
   });
 });

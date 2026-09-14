@@ -1,4 +1,4 @@
-export interface AddonComponentVariant {
+interface AddonComponentVariant {
   productId: string | null;
   variantId: string | null;
   priceCents: number | null;

@@ -1,5 +1,6 @@
 import {
   applyBrowsedProductPreselection,
+  exposePpbProductContext,
   findPpbBundleEmbedMount,
   shouldInitializePpbBundleEmbed,
 } from "../../../app/storefront/ppb-bundle-embed";
@@ -72,5 +73,69 @@ describe("PPB bundle embed storefront behavior", () => {
     };
     expect(applyBrowsedProductPreselection(controller, true, false)).toBe(true);
     expect(controller.setSelectedQuantity).toHaveBeenCalledWith(0, "999", 1);
+  });
+
+  it("exposes the owned Shopify-hosted runtime before an automatic PPB embed initializes", () => {
+    const previousWindow = global.window;
+    const runtimeWindow: Record<string, any> = {};
+    global.window = runtimeWindow as Window & typeof globalThis;
+    const storefrontRuntime = {
+      schemaVersion: 2,
+      storefrontApiVersion: "2026-07",
+      storefrontAccessToken: "public-token",
+    };
+    const embed = {
+      dataset: {
+        ppbStorefrontRuntime: JSON.stringify(storefrontRuntime),
+        shopBaseCurrency: "GBP",
+        customerCurrency: "EUR",
+      },
+    } as unknown as HTMLElement;
+
+    try {
+      exposePpbProductContext(embed, {
+        productId: "123",
+        productHandle: "product",
+        collectionIds: [],
+        locale: "en",
+        endpointUrl: "/apps/product-bundles/api/ppb-embed.json",
+        selectedVariantId: "456",
+        countryCode: "DE",
+      });
+
+      expect(runtimeWindow.__WOLFPACK_PPB_STOREFRONT_RUNTIME__).toEqual(storefrontRuntime);
+      expect(runtimeWindow.shopCurrency).toBe("GBP");
+      expect(runtimeWindow.shopifyMultiCurrency).toEqual({
+        shopBaseCurrency: "GBP",
+        customerCurrency: "EUR",
+      });
+    } finally {
+      global.window = previousWindow;
+    }
+  });
+
+  it("does not fabricate PPB runtime data from a malformed owned marker", () => {
+    const previousWindow = global.window;
+    const runtimeWindow: Record<string, any> = {};
+    global.window = runtimeWindow as Window & typeof globalThis;
+
+    try {
+      exposePpbProductContext(
+        { dataset: { ppbStorefrontRuntime: "{" } } as unknown as HTMLElement,
+        {
+          productId: "123",
+          productHandle: "product",
+          collectionIds: [],
+          locale: "en",
+          endpointUrl: "/apps/product-bundles/api/ppb-embed.json",
+          selectedVariantId: "456",
+          countryCode: "US",
+        },
+      );
+
+      expect(runtimeWindow.__WOLFPACK_PPB_STOREFRONT_RUNTIME__).toBeUndefined();
+    } finally {
+      global.window = previousWindow;
+    }
   });
 });

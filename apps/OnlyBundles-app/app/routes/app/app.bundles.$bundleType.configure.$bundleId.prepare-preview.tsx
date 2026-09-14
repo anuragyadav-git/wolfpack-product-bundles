@@ -16,10 +16,13 @@ function normalizeBundleType(bundleType: string | undefined) {
   return null;
 }
 
-export const loader = async (_args: LoaderFunctionArgs) =>
-  json({ success: false, error: "Method not allowed" }, { status: 405 });
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  await authenticate.admin(request);
+  return json({ success: false, error: "Method not allowed" }, { status: 405 });
+};
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+  const { admin, session } = await authenticate.admin(request);
   const bundleId = params.bundleId;
   const bundleType = normalizeBundleType(params.bundleType);
 
@@ -34,6 +37,5 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     );
   }
 
-  const { admin, session } = await authenticate.admin(request);
   return handlePrepareStorefrontPreview(admin, session, bundleId, bundleType);
 };

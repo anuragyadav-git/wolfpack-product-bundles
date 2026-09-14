@@ -72,11 +72,11 @@ export async function fetchJudgeMePreviewBadges({
   return Object.keys(badges).length > 0 ? { badges } : null;
 }
 
-export async function hydrateJudgeMeReviewCards({ root, products, shop, token }: any) {
+export async function hydrateJudgeMeReviewCards({ root, products, shop, token, fetcher = fetch }: any) {
   const productIds = products.map((product: { parentProductId: any; productId: any; id: any; }) => (
     product.parentProductId || product.productId || product.id
   )).filter(Boolean);
-  const result = await fetchJudgeMePreviewBadges({ shop, token, productIds });
+  const result = await fetchJudgeMePreviewBadges({ shop, token, productIds, fetcher });
   if (!result) return;
   Array.from(root.children as HTMLCollectionOf<HTMLElement>).forEach((card, index) => {
     const product = products[index];
@@ -91,6 +91,7 @@ export async function hydrateJudgeMeReviewCards({ root, products, shop, token }:
       'review-badge',
       runtimeDocument.defaultView as unknown as Window,
     ));
-    card.appendChild(mount);
+    const identityRegion = card.querySelector('.bw-product-card__text') || card;
+    identityRegion.appendChild(mount);
   });
 }

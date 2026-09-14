@@ -29,7 +29,7 @@ class FakeCard {
 }
 
 describe('FPB Standard variant availability', () => {
-  it('filters unavailable-only primary values from grouped selector choices', () => {
+  it('keeps unavailable-only primary values visible and disabled', () => {
     const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
     const view = VariantSelectorComponent.createElement({
       variantId: 'available-small',
@@ -48,8 +48,8 @@ describe('FPB Standard variant availability', () => {
       ],
     }, 'Size', runtimeDocument);
 
-    expect(view.querySelector('[data-primary-value="Small"]')).not.toBeNull();
-    expect(view.querySelector('[data-primary-value="Large"]')).toBeNull();
+    expect(view.querySelector('input[value="Small"]')?.hasAttribute('disabled')).toBe(false);
+    expect(view.querySelector('input[value="Large"]')?.hasAttribute('disabled')).toBe(true);
   });
 
   it('ignores unavailable-only primary variant selections', () => {
@@ -201,6 +201,54 @@ describe('FPB Standard variant availability', () => {
       expect.objectContaining({ id: '456', option1: 'S', option2: 'Black' }),
       expect.objectContaining({ id: '789', option1: 'M', option2: 'Navy' }),
     ]));
+  });
+
+  it('preserves Shopify price currency codes in grouped and individual FPB products', () => {
+    const product = {
+      id: 'gid://shopify/Product/123',
+      title: 'Canadian product',
+      imageUrl: 'https://cdn.example.test/product.jpg',
+      variants: [
+        {
+          id: 'gid://shopify/ProductVariant/456',
+          title: 'Default Title',
+          price: '30.00',
+          currencyCode: 'CAD',
+          compareAtPrice: '35.00',
+          compareAtCurrencyCode: 'CAD',
+          available: true,
+        },
+      ],
+    };
+    const context = {
+      extractId: (id: string) => String(id || '').split('/').pop(),
+      getFirstAvailableVariant: (candidate: any) => candidate.variants[0],
+      isVariantSelectableForInventory: () => true,
+      _getLandingPageControls: () => ({ trackInventoryOnAddToCart: false }),
+    };
+
+    const grouped = fullPageProductProcessingMethods.processProductsForStep.call({
+      ...context,
+      shouldExpandStepProductsDuringLoad: () => false,
+    }, [product], { displayVariantsAsIndividual: false });
+    const individual = fullPageProductProcessingMethods.processProductsForStep.call({
+      ...context,
+      shouldExpandStepProductsDuringLoad: () => true,
+    }, [product], { displayVariantsAsIndividual: true });
+
+    expect(grouped[0]).toMatchObject({
+      currencyCode: 'CAD',
+      compareAtCurrencyCode: 'CAD',
+      variants: [expect.objectContaining({
+        currencyCode: 'CAD',
+        compareAtCurrencyCode: 'CAD',
+      })],
+    });
+    expect(individual[0]).toMatchObject({
+      currencyCode: 'CAD',
+      compareAtCurrencyCode: 'CAD',
+      variants: [expect.objectContaining({ currencyCode: 'CAD' })],
+    });
   });
 
   it('omits explicitly unavailable variants from individual product expansion', () => {
@@ -392,11 +440,14 @@ describe('FPB Standard variant availability', () => {
     const context: any = {
       selectedBundle: {
         steps: [{
-          StepProduct: [{
-            productId: 'gid://shopify/Product/123',
+          products: [{
+            id: 'gid://shopify/Product/123',
             selectionId: 'gid://shopify/Product/123',
             title: 'Tracked zero-stock product',
-            imageUrl: 'https://cdn.example.test/product.jpg',
+            images: [
+              { url: 'https://cdn.example.test/product.jpg' },
+              { url: 'https://cdn.example.test/product-detail.jpg' },
+            ],
             price: 3000,
             description: 'Cached description.',
             variants: [{
@@ -433,6 +484,61 @@ describe('FPB Standard variant availability', () => {
       expect((global as any).fetch).toHaveBeenCalledWith(
         expect.stringContaining('/apps/product-bundles/api/storefront-products'),
       );
+      expect(context.stepProductData[0]).toEqual([]);
+    } finally {
+      (global as any).window = previousWindow;
+      (global as any).fetch = previousFetch;
+    }
+  });
+
+  it('ignores legacy-only StepProduct widget input', async () => {
+    const previousWindow = (global as any).window;
+    const previousFetch = (global as any).fetch;
+    (global as any).window = {
+      Shopify: { shop: 'test.myshopify.com', country: 'US' },
+      location: { host: 'test.myshopify.com' },
+    };
+    (global as any).fetch = jest.fn();
+
+    const context: any = {
+      selectedBundle: {
+        steps: [{
+          StepProduct: [{
+            productId: 'gid://shopify/Product/123',
+            title: 'Legacy product',
+            imageUrl: 'https://cdn.example.test/product.jpg',
+            price: 3000,
+            variants: [{
+              id: 'gid://shopify/ProductVariant/456',
+              title: 'Default Title',
+              price: 3000,
+              available: true,
+            }],
+          }],
+        }],
+      },
+      stepProductData: [[]],
+      stepCollectionProductIds: {},
+      selectedProducts: [{}],
+      resolveStorefrontApiBase: () => '/apps/product-bundles',
+      collectStepProductIds: fullPageSearchCategoryMethods.collectStepProductIds,
+      collectStepCollectionHandles: () => [],
+      shouldExpandStepProductsDuringLoad: () => false,
+      extractId: (id: string) => String(id || '').split('/').pop(),
+      isVariantSelectableForInventory: () => true,
+      isInventoryTrackingOnAddToCartEnabled: () => false,
+      getFirstAvailableVariant: fullPageProductProcessingMethods.getFirstAvailableVariant,
+      processProductsForStep: (products: any[]) => products,
+      enrichMissingProductDescriptions: async (products: any[]) => products,
+      mergeCategoryProductVariantAvailability: (products: any[]) => products,
+      _mergeDirectDefaultProductsIntoStep: (_stepIndex: number, products: any[]) => products,
+      _reconcileDirectDefaultProductsFromStorefront: async () => undefined,
+    };
+
+    try {
+      await fullPageProductProcessingMethods.loadStepProducts.call(context, 0);
+
+      expect((global as any).fetch).not.toHaveBeenCalled();
       expect(context.stepProductData[0]).toEqual([]);
     } finally {
       (global as any).window = previousWindow;

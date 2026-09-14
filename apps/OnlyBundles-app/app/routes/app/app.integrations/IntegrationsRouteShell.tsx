@@ -123,8 +123,7 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
                     <div className={`${styles.cardRow} ${styles.mediaRow}`}>
                       <span className={styles.logoFrame}>
                         {integration.logoUrl ? (
-                          <img
-                            className={styles.logoImage}
+                          <s-image
                             src={integration.logoUrl}
                             alt={translateAdmin(
                               "adminDynamic.integrationLogo",
@@ -132,6 +131,7 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
                                 name: integration.title,
                               }
                             )}
+                            objectFit="contain"
                           />
                         ) : (
                           <s-icon type="product" size="base" />
@@ -170,7 +170,6 @@ function IntegrationsCatalog({ onBack }: { onBack: () => void }) {
 
                     <div className={`${styles.cardRow} ${styles.actionRow}`}>
                       <s-button
-                        inlineSize="fill"
                         onClick={() => setSelectedIntegration(integration)}
                       >
                         {translateAdminCopy(integration.ctaLabel)}

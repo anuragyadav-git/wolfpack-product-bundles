@@ -2,19 +2,26 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFetcher } from "@remix-run/react";
 import {
   asVisibilityArray,
+  asVisibilityResources,
   getVisibilityDisplayTarget,
 } from "./visibility-helpers";
 import { resolveFpbTemplateSelection } from "../../../lib/fpb-template-selection";
 import { getPreviewReadinessStorageKey } from "../../../lib/bundle-preview-readiness";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
+import type { useConfigureContentState } from "./useConfigureContentState";
+
+type ConfigureVisibilityTemplateDependencies = Pick<
+  ReturnType<typeof useConfigureBundleController>,
+  "appEmbedEnabled" | "bundle" | "markAsDirty" | "stepsState"
+> &
+  Pick<ReturnType<typeof useConfigureContentState>, "textOverrides">;
 
 export function useConfigureVisibilityTemplateState(
-  flow: ConfigureBundleFlowDraft
+  dependencies: ConfigureVisibilityTemplateDependencies
 ) {
   const { appEmbedEnabled, bundle, markAsDirty, stepsState, textOverrides } =
-    flow;
+    dependencies;
   const [isInstallingWidget, setIsInstallingWidget] = useState(false);
-  const [activeAssetTabIndex, setActiveAssetTabIndex] = useState(0);
   const [searchBarEnabled, setSearchBarEnabled] = useState<boolean>(
     (bundle as any).searchBarEnabled ?? false
   );
@@ -31,11 +38,19 @@ export function useConfigureVisibilityTemplateState(
       (bundle as any).upsellWidgetEnabled ??
       false
   );
-  const [upsellWidgetDisplayMode, setUpsellWidgetDisplayMode] =
-    useState<string>((bundle as any).upsellWidgetDisplayMode ?? "button");
-  const [upsellWidgetDisplayOn, setUpsellWidgetDisplayOn] = useState<string>(
+  const [upsellWidgetDisplayMode, setUpsellWidgetDisplayMode] = useState<
+    "block" | "button"
+  >((bundle as any).upsellWidgetDisplayMode === "block" ? "block" : "button");
+  const initialWidgetDisplayOn =
     (bundle as any).upsellWidgetDisplayOn ??
-      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all")
+    getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all");
+  const [upsellWidgetDisplayOn, setUpsellWidgetDisplayOn] = useState<
+    "all" | "specific_products" | "specific_collections"
+  >(
+    initialWidgetDisplayOn === "specific_products" ||
+      initialWidgetDisplayOn === "specific_collections"
+      ? initialWidgetDisplayOn
+      : "all"
   );
   const [upsellWidgetTitle, setUpsellWidgetTitle] = useState<string>(
     savedWidgetConfiguration?.title ?? ""
@@ -43,9 +58,7 @@ export function useConfigureVisibilityTemplateState(
   const [upsellWidgetDescription, setUpsellWidgetDescription] =
     useState<string>(savedWidgetConfiguration?.description ?? "");
   const [upsellWidgetButtonText, setUpsellWidgetButtonText] = useState<string>(
-    savedWidgetConfiguration?.buttonText ??
-      textOverrides.widgetButtonText ??
-      ""
+    savedWidgetConfiguration?.buttonText ?? textOverrides.widgetButtonText ?? ""
   );
   const [upsellWidgetImageUrl, setUpsellWidgetImageUrl] = useState<string>(
     savedWidgetConfiguration?.imageUrl ?? ""
@@ -57,28 +70,30 @@ export function useConfigureVisibilityTemplateState(
         "SINGLE"
     );
   const [upsellWidgetSelectedProducts, setUpsellWidgetSelectedProducts] =
-    useState<unknown[]>(
-      asVisibilityArray(savedWidgetDisplayConfiguration?.selectedProducts)
+    useState(
+      asVisibilityResources(savedWidgetDisplayConfiguration?.selectedProducts)
     );
   const [
     upsellWidgetSpecificProductPages,
     setUpsellWidgetSpecificProductPages,
-  ] = useState<unknown[]>(
-    asVisibilityArray(
+  ] = useState(
+    asVisibilityResources(
       savedWidgetDisplayConfiguration?.showOnSpecificProductPages
     )
   );
   const [
     upsellWidgetCollectionsSelectedData,
     setUpsellWidgetCollectionsSelectedData,
-  ] = useState<unknown[]>(
-    asVisibilityArray(savedWidgetDisplayConfiguration?.collectionsSelectedData)
+  ] = useState(
+    asVisibilityResources(
+      savedWidgetDisplayConfiguration?.collectionsSelectedData
+    )
   );
   const [
     upsellWidgetSpecificCollectionPages,
     setUpsellWidgetSpecificCollectionPages,
-  ] = useState<unknown[]>(
-    asVisibilityArray(
+  ] = useState(
+    asVisibilityResources(
       savedWidgetDisplayConfiguration?.showOnSpecificCollectionPages
     )
   );
@@ -94,13 +109,8 @@ export function useConfigureVisibilityTemplateState(
       (bundle as any).upsellWidgetEnabled ??
       false
   );
-  const originalUpsellWidgetDisplayModeRef = useRef<string>(
-    (bundle as any).upsellWidgetDisplayMode ?? "button"
-  );
-  const originalUpsellWidgetDisplayOnRef = useRef<string>(
-    (bundle as any).upsellWidgetDisplayOn ??
-      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all")
-  );
+  const originalUpsellWidgetDisplayModeRef = useRef(upsellWidgetDisplayMode);
+  const originalUpsellWidgetDisplayOnRef = useRef(upsellWidgetDisplayOn);
   const originalUpsellWidgetButtonTextRef = useRef<string>(
     savedWidgetConfiguration?.buttonText ??
       (bundle as any).textOverrides?.widgetButtonText ??
@@ -283,7 +293,6 @@ export function useConfigureVisibilityTemplateState(
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [readinessOpen, setReadinessOpen] = useState(false);
   const [hasPreview, setHasPreview] = useState(false);
-  const [productMenuOpen, setProductMenuOpen] = useState(false);
 
   useEffect(() => {
     setHasPreview(
@@ -291,8 +300,7 @@ export function useConfigureVisibilityTemplateState(
     );
   }, [bundle.id]);
 
-  Object.assign(flow, {
-    activeAssetTabIndex,
+  return {
     addCategoryConditionRule,
     asVisibilityArray,
     autoSelectBrowsedProduct,
@@ -324,7 +332,6 @@ export function useConfigureVisibilityTemplateState(
     originalUpsellWidgetEnabledRef,
     pendingDesignPresetId,
     pendingDesignTemplate,
-    productMenuOpen,
     readinessOpen,
     removeCategoryConditionRule,
     savedBundleUpsellConfig,
@@ -333,7 +340,6 @@ export function useConfigureVisibilityTemplateState(
     searchBarEnabled,
     selectTemplateModalRef,
     selectTemplateOpenButtonRef,
-    setActiveAssetTabIndex,
     setAutoSelectBrowsedProduct,
     setBundleBannerDesktopUrl,
     setBundleBannerMobileUrl,
@@ -350,7 +356,6 @@ export function useConfigureVisibilityTemplateState(
     setIsSyncModalOpen,
     setPendingDesignPresetId,
     setPendingDesignTemplate,
-    setProductMenuOpen,
     setReadinessOpen,
     setSearchBarEnabled,
     setShowIconPickerForStep,
@@ -391,5 +396,5 @@ export function useConfigureVisibilityTemplateState(
     upsellWidgetSpecificCollectionPages,
     upsellWidgetSpecificProductPages,
     upsellWidgetTitle,
-  });
+  };
 }

@@ -103,7 +103,7 @@ register(({ analytics, browser, settings }: any) => {
         ? (JSON.parse(storedUtmsRaw) as Record<string, any>)
         : {};
 
-      // Normalise order ID — may be a GID ("gid://shopify/Order/123") or plain number
+      // Shopify's checkout_completed order identity is the canonical Order GID.
       const rawOrderId = checkout.order?.id != null ? String(checkout.order.id) : null;
       const orderNumber = rawOrderId
         ? (rawOrderId.includes("/") ? rawOrderId.split("/").pop() ?? null : rawOrderId)
@@ -121,6 +121,9 @@ register(({ analytics, browser, settings }: any) => {
           title: item.title ?? null,
           quantity: item.quantity ?? 0,
           price: item.variant?.price?.amount ?? null,
+          finalLinePrice: item.finalLinePrice
+            ? { amount: item.finalLinePrice.amount }
+            : null,
           properties: item.properties ?? [],
           lineComponents: (item.lineComponents ?? []).map((component: any) => ({
             productId: component.variant?.product?.id ?? null,

@@ -8,8 +8,6 @@ import {
 } from "../lib/shop-brand-colors";
 import type { StorefrontApiContext } from "@shopify/shopify-app-remix/server";
 
-export type { ShopBrandColors } from "../lib/shop-brand-colors";
-
 const SHOP_BRAND_COLORS_QUERY = `
   query ShopBrandColors {
     shop {

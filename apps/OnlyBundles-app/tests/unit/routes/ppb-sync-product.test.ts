@@ -1,8 +1,8 @@
-import { handleSyncProduct } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
+import { handleSyncProduct } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/sync-product.server";
 import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
 import {
   updateBundleProductMetafields,
-} from "../../../app/services/bundles/metafield-sync.server";
+} from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -14,7 +14,7 @@ jest.mock("../../../app/lib/logger", () => ({
 jest.mock("../../../app/services/bundles/bundle-parent-product.server", () => ({
   ensureBundleParentProduct: jest.fn(),
 }));
-jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn(),
   updateComponentProductMetafields: jest.fn(),
 }));
@@ -25,10 +25,6 @@ jest.mock("../../../app/services/app-events.server", () => ({
   ensureShopIdentity: jest.fn().mockResolvedValue("gid://shopify/Shop/1"),
   recordBusinessEvent: jest.fn(),
 }));
-jest.mock("../../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
-}));
-
 const getDb = () => require("../../../app/db.server").default;
 const mockEnsure = ensureBundleParentProduct as jest.MockedFunction<typeof ensureBundleParentProduct>;
 const mockUpdateParent = updateBundleProductMetafields as jest.Mock;
@@ -48,7 +44,12 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
         id: "step-1",
         name: "Step 1",
         position: 0,
-        StepProduct: [],
+        StepProduct: [
+          {
+            productId: "gid://shopify/Product/3",
+            variants: [{ id: "gid://shopify/ProductVariant/3" }],
+          },
+        ],
         StepCategory: [
           {
             categoryId: "category-1",
@@ -101,7 +102,7 @@ describe("PPB parent-product sync", () => {
     }));
     const runtimeConfig = mockUpdateParent.mock.calls[0][2];
     expect(runtimeConfig.steps[0].StepCategory[0].products[0]).toEqual(
-      expect.objectContaining({ id: "gid://shopify/Product/3" }),
+      expect.objectContaining({ selectionId: "gid://shopify/Product/3" }),
     );
   });
 

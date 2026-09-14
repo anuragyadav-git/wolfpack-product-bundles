@@ -141,7 +141,6 @@
 }
 
 .settingsBackButton,
-.settingsSubpageBackButton,
 .settingsPreviewButton {
   display: inline-flex;
   width: fit-content;
@@ -157,13 +156,6 @@
   font-size: 13px;
   font-weight: 700;
   line-height: 18px;
-}
-
-.settingsSubpageBackButton {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
-  padding: 0;
 }
 
 .settingsPreviewButton {
@@ -635,8 +627,7 @@
   font-weight: 750;
 }
 
-.languageLayoutButton::after,
-.controlsLayoutSelectWrap::after {
+.languageLayoutButton::after {
   content: "";
   position: absolute;
   right: 11px;
@@ -754,12 +745,6 @@
   font-size: 12px;
   font-weight: 500;
   line-height: 16px;
-}
-
-.controlsLayoutSelectWrap {
-  position: relative;
-  display: grid;
-  align-items: center;
 }
 
 .controlsLayoutSelect {

@@ -2,10 +2,10 @@
 
 import { PricingCalculator } from './pricing-calculator.js';
 
-export const DISCOUNT_TIER_EVENT = 'wpb:discount-tier-reached';
+const DISCOUNT_TIER_EVENT = 'wpb:discount-tier-reached';
 export const SDK_DISCOUNT_TIER_EVENT = 'wbp:discount-tier-reached';
-export const DISCOUNT_TIER_FEEDBACK_ATTRIBUTE = 'data-wpb-discount-feedback';
-export const DISCOUNT_TIER_PILL_ATTRIBUTE = 'data-wpb-discount-feedback-pill';
+const DISCOUNT_TIER_FEEDBACK_ATTRIBUTE = 'data-wpb-discount-feedback';
+const DISCOUNT_TIER_PILL_ATTRIBUTE = 'data-wpb-discount-feedback-pill';
 
 const FEEDBACK_DURATIONS = Object.freeze({
   tier: 650,
@@ -14,7 +14,7 @@ const FEEDBACK_DURATIONS = Object.freeze({
 
 export type DiscountTierFeedbackState = 'tier' | 'complete';
 
-export type DiscountTierReachedDetail = {
+type DiscountTierReachedDetail = {
   bundleId: string;
   tierId: string;
   tierIndex: number;
@@ -22,49 +22,65 @@ export type DiscountTierReachedDetail = {
   feedbackState: DiscountTierFeedbackState;
 };
 
-export type DiscountTierState = {
+type DiscountTierState = {
   bundleId: string;
   tierId: string | null;
   tierIndex: number;
   tierCount: number;
 };
 
-type DiscountRule = Record<string, any>;
+type DiscountRule = {
+  id?: unknown;
+  conditionType?: unknown;
+  conditionOperator?: unknown;
+  conditionValue?: unknown;
+  customerBuys?: unknown;
+  customerGets?: unknown;
+};
 
-function getRuleConditionType(rule: DiscountRule) {
-  return rule?.conditionType ?? rule?.condition?.type ?? null;
-}
+type EligibleDiscountRule = DiscountRule & {
+  id: string;
+  conditionType: 'quantity' | 'amount';
+};
 
-function getRuleConditionOperator(rule: DiscountRule) {
-  return rule?.conditionOperator ?? rule?.condition?.operator ?? 'gte';
-}
+type DiscountTierBundle = {
+  id?: unknown;
+  pricing?: {
+    enabled?: boolean;
+    method?: string;
+    rules?: DiscountRule[];
+  };
+  steps?: Array<Record<string, unknown>>;
+};
 
-function getRuleConditionValue(rule: DiscountRule) {
-  return Number(rule?.conditionValue ?? rule?.condition?.value ?? 0);
-}
+type DiscountTierController = {
+  selectedBundle?: DiscountTierBundle;
+  selectedProducts?: Array<Record<string, number>>;
+  stepProductData?: Array<Array<Record<string, unknown>>>;
+};
 
-function getRuleId(rule: DiscountRule, index: number) {
-  return String(rule?.id ?? rule?.ruleId ?? `tier-${index + 1}`);
-}
-
-function getEligibleRules(bundle: Record<string, any>) {
-  const pricing = bundle?.pricing ?? bundle?.discountConfiguration;
+function getEligibleRules(bundle: DiscountTierBundle): EligibleDiscountRule[] {
+  const pricing = bundle?.pricing;
   if (!pricing?.enabled || !Array.isArray(pricing.rules)) return [];
 
   return pricing.rules
-    .filter((rule: DiscountRule) => {
-      const conditionType = getRuleConditionType(rule);
+    .filter((rule: DiscountRule): rule is EligibleDiscountRule => {
+      const conditionType = PricingCalculator.getRuleConditionType(rule);
       return (conditionType === 'quantity' || conditionType === 'amount')
-        && Number.isFinite(getRuleConditionValue(rule));
+        && typeof rule?.id === 'string'
+        && rule.id.length > 0
+        && Number.isFinite(Number(rule?.conditionValue));
     })
     .sort((left: DiscountRule, right: DiscountRule) => (
-      getRuleConditionValue(left) - getRuleConditionValue(right)
+      PricingCalculator.getRuleConditionValue(left, pricing.method)
+      - PricingCalculator.getRuleConditionValue(right, pricing.method)
     ));
 }
 
-export function captureDiscountTierState(controller: Record<string, any>): DiscountTierState {
-  const bundle = controller?.selectedBundle ?? controller?.bundleData ?? {};
-  const bundleId = String(bundle?.id ?? controller?.bundleId ?? '');
+export function captureDiscountTierState(controller: DiscountTierController): DiscountTierState {
+  const bundle = controller?.selectedBundle ?? {};
+  const bundleId = typeof bundle?.id === 'string' ? bundle.id : '';
+  const pricingMethod = bundle.pricing?.method;
   const rules = getEligibleRules(bundle);
 
   if (!bundleId || rules.length === 0) {
@@ -74,18 +90,18 @@ export function captureDiscountTierState(controller: Record<string, any>): Disco
   const totals = PricingCalculator.calculateBundleTotal(
     Array.isArray(controller?.selectedProducts) ? controller.selectedProducts : [],
     Array.isArray(controller?.stepProductData) ? controller.stepProductData : [],
-    Array.isArray(bundle?.steps) ? bundle.steps : null,
+    bundle.steps ?? [],
   );
 
   let tierIndex = -1;
   rules.forEach((rule: DiscountRule, index: number) => {
-    const currentValue = getRuleConditionType(rule) === 'amount'
+    const currentValue = PricingCalculator.getRuleConditionType(rule) === 'amount'
       ? totals.totalPrice
       : totals.totalQuantity;
     if (PricingCalculator.checkCondition(
       currentValue,
-      getRuleConditionOperator(rule),
-      getRuleConditionValue(rule),
+      PricingCalculator.getRuleConditionOperator(rule),
+      PricingCalculator.getRuleConditionValue(rule, pricingMethod),
     )) {
       tierIndex = index;
     }
@@ -93,7 +109,7 @@ export function captureDiscountTierState(controller: Record<string, any>): Disco
 
   return {
     bundleId,
-    tierId: tierIndex >= 0 ? getRuleId(rules[tierIndex], tierIndex) : null,
+    tierId: tierIndex >= 0 ? rules[tierIndex].id : null,
     tierIndex,
     tierCount: rules.length,
   };
@@ -127,9 +143,14 @@ export function dispatchDiscountTierTransition({
   before,
   after,
   eventName = DISCOUNT_TIER_EVENT,
-}: any) {
+}: {
+  root?: EventTarget | null;
+  before: DiscountTierState;
+  after: DiscountTierState;
+  eventName?: string;
+}) {
   const detail = getDiscountTierTransition(before, after);
-  if (!detail || !root?.dispatchEvent) return null;
+  if (!detail || !root) return null;
 
   root.dispatchEvent(new CustomEvent(eventName, { detail, bubbles: true }));
   return detail;

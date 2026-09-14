@@ -16,7 +16,7 @@ const templates = [
     <div>
       <p class="eyebrow">Actual product renderer</p>
       <h2>Choose a storefront template</h2>
-      <p>The preview below runs the same production storefront renderer and styles used by Only Bundles.</p>
+      <p>The preview below runs the same production storefront renderer and styles used by Only Bundles. Resize the browser to see its real responsive layout.</p>
     </div>
     <div class="template-groups">
       {["Full-page", "Product-page"].map((surface) => (
@@ -42,7 +42,14 @@ const templates = [
       <span data-preview-label>Full-page · Standard</span>
     </header>
     <div class="preview-viewport" data-preview-viewport>
-      <div id="bundle-builder-app" data-production-widget-mount data-preview-template="standard" data-bundle-type="full_page"></div>
+      <div
+        id="bundle-builder-app"
+        class="bundle-widget-container bundle-widget-full-page"
+        data-production-widget-mount
+        data-preview-template="standard"
+        data-bundle-type="full_page"
+        data-bundle-id="public-demo"
+      ></div>
     </div>
     <p class="demo-status" role="status" aria-live="polite" data-demo-status>Production preview ready.</p>
   </section>
@@ -134,42 +141,60 @@ const templates = [
     controller.isInitialized = true;
   }
 
-  function syncStylesheets(templateKey: TemplateKey) {
+  async function syncStylesheets(templateKey: TemplateKey) {
     document.querySelectorAll("link[data-public-demo-widget-style]").forEach((link) => link.remove());
     const manifest = getStorefrontPreviewStylesheetManifest(templateKey);
-    for (const stylesheetId of manifest.stylesheets) {
+    const loads = manifest.stylesheets.map((stylesheetId) => new Promise<void>((resolve, reject) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
       link.href = stylesheetUrls[stylesheetId];
       link.dataset.publicDemoWidgetStyle = stylesheetId;
+      link.addEventListener("load", () => resolve(), { once: true });
+      link.addEventListener("error", () => reject(new Error(`Unable to load ${stylesheetId}`)), { once: true });
       document.head.appendChild(link);
-    }
+    }));
     (window as any).__WOLFPACK_PPB_TEMPLATE_CSS_URLS__ = {
       GRID: ppbGridUrl, LIST: ppbListUrl, HORIZONTAL_SLOTS: ppbModalUrl, VERTICAL_SLOTS: ppbModalUrl,
     };
+    await Promise.all(loads);
     return manifest.bundleType;
   }
 
   async function renderProductionPreview(root: HTMLElement, templateKey: TemplateKey) {
     const widgetRoot = document.createElement("div");
-    const bundleType = syncStylesheets(templateKey);
+    const bundleType = await syncStylesheets(templateKey);
     widgetRoot.id = "bundle-builder-app";
+    widgetRoot.classList.add("bundle-widget-container");
+    if (bundleType === "full_page") widgetRoot.classList.add("bundle-widget-full-page");
     widgetRoot.dataset.productionWidgetMount = "";
     widgetRoot.dataset.previewTemplate = templateKey;
     widgetRoot.dataset.bundleType = bundleType;
+    widgetRoot.dataset.bundleId = "public-demo";
     document.querySelectorAll(".bundle-product-modal-overlay, .bw-modal-overlay, .toast-container").forEach((element) => element.remove());
     root.querySelector("[data-production-widget-mount]")?.replaceWith(widgetRoot);
 
     if (bundleType === "full_page") {
       class PublicDemoFullPageWidget extends BundleWidgetFullPage {
-        override init() { return initializeController(this as unknown as PreviewController, templateKey); }
+        __previewReady?: Promise<void>;
+
+        override init() {
+          this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
+          return this.__previewReady;
+        }
       }
-      new PublicDemoFullPageWidget(widgetRoot);
+      const controller = new PublicDemoFullPageWidget(widgetRoot);
+      await controller.__previewReady;
     } else {
       class PublicDemoProductPageWidget extends BundleWidgetProductPage {
-        override init() { return initializeController(this as unknown as PreviewController, templateKey); }
+        __previewReady?: Promise<void>;
+
+        override init() {
+          this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
+          return this.__previewReady;
+        }
       }
-      new PublicDemoProductPageWidget(widgetRoot);
+      const controller = new PublicDemoProductPageWidget(widgetRoot);
+      await controller.__previewReady;
     }
   }
 
@@ -220,11 +245,11 @@ const templates = [
 </script>
 
 <style>
-  .production-demo { display: grid; grid-template-columns: minmax(17rem, 0.6fr) minmax(0, 1.65fr); gap: 1rem; align-items: start; }
-  .demo-controls { position: sticky; top: 1rem; display: grid; gap: 1.5rem; padding: clamp(1.2rem, 3vw, 2rem); background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 1rem 3rem rgba(20,54,39,0.06); }
+  .production-demo { display: grid; gap: 1rem; }
+  .demo-controls { display: grid; grid-template-columns: minmax(13rem, 0.8fr) minmax(31rem, 1.6fr) minmax(13rem, 0.8fr); gap: clamp(1rem, 2vw, 1.5rem); align-items: start; padding: clamp(1.2rem, 3vw, 2rem); background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 1rem 3rem rgba(20,54,39,0.06); }
   .demo-controls h2 { margin-bottom: 0.6rem; font-size: 2rem; }
   .demo-controls p { margin-bottom: 0; color: var(--ink-soft); }
-  .template-groups { display: grid; gap: 1.2rem; }
+  .template-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
   fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
   legend { margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 900; }
   .template-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
@@ -235,8 +260,8 @@ const templates = [
   .store-preview { overflow: hidden; background: white; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
   .store-header { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; color: white; background: var(--forest-dark); font-size: 0.75rem; }
   .store-wordmark { font-family: Georgia, serif; font-size: 1rem; font-weight: 900; }
-  .preview-viewport { min-height: 42rem; padding: clamp(0.6rem, 2vw, 1.4rem); overflow: hidden; background: #fff; }
+  .preview-viewport { block-size: clamp(36rem, 76svh, 48rem); min-height: 0; padding: clamp(0.6rem, 2vw, 1.4rem); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; background: #fff; }
   .demo-status { min-height: 2.8rem; margin: 0; padding: 0.75rem 1.25rem; color: var(--ink-soft); background: var(--cream); border-top: 1px solid var(--line); font-size: 0.75rem; }
-  @media (max-width: 960px) { .production-demo { grid-template-columns: 1fr; } .demo-controls { position: static; } }
-  @media (max-width: 520px) { .template-buttons { grid-template-columns: 1fr; } .store-header { display: grid; } .preview-viewport { padding-inline: 0.3rem; } }
+  @media (max-width: 960px) { .demo-controls { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .template-groups, .template-buttons { grid-template-columns: 1fr; } .store-preview { overflow: clip; } .store-header { display: grid; } .preview-viewport { block-size: auto; min-height: 32rem; padding-inline: 0.3rem; overflow: visible; overscroll-behavior: auto; scrollbar-gutter: auto; } }
 </style>

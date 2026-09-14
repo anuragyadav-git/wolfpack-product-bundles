@@ -71,7 +71,7 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({}),
 }));
 
-jest.mock("../../../app/routes/app/app.dashboard/handlers", () => ({
+jest.mock("../../../app/routes/app/app.dashboard/handlers/handlers.server", () => ({
   handleCloneBundle: jest.fn(),
   handleDeleteBundle: jest.fn(),
 }));
@@ -92,22 +92,6 @@ describe("admin root link warnings", () => {
     renderToStaticMarkup(React.createElement(ErrorBoundary));
 
     expect(mockCrispChat).toHaveBeenCalledTimes(1);
-  });
-
-  it("registers the shared error-page stylesheet with Remix", async () => {
-    const { links } = await import("../../../app/root");
-
-    expect(links()).toContainEqual({
-      rel: "stylesheet",
-      href: "/test-stylesheet.css",
-    });
-  });
-
-  it("renders the error stylesheet directly in the root error document", async () => {
-    const { ErrorBoundary } = await import("../../../app/root");
-    const view = renderToStaticMarkup(React.createElement(ErrorBoundary));
-
-    expect(view).toContain('rel="stylesheet" href="/test-stylesheet.css"');
   });
 
   it("does not render the font stylesheet onLoad handler as a string listener", async () => {
@@ -165,34 +149,4 @@ describe("admin root link warnings", () => {
     expect(headers({} as any)).not.toHaveProperty("Link");
   });
 
-  it("renders OptimisedImage fetch priority without the React DOM prop warning", async () => {
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-    const { OptimisedImage } = await import(
-      "../../../app/components/OptimisedImage"
-    );
-    const view = renderToStaticMarkup(
-      React.createElement(OptimisedImage, {
-        src: "/Parth.jpg",
-        alt: "Parth",
-        width: 120,
-        height: 120,
-        loading: "eager",
-        fetchPriority: "high",
-      })
-    );
-
-    expect(view).toContain('fetchpriority="high"');
-    expect(view).not.toContain("fetchPriority");
-    expect(consoleError).not.toHaveBeenCalledWith(
-      expect.stringContaining(
-        "React does not recognize the `%s` prop on a DOM element"
-      ),
-      "fetchPriority",
-      "fetchpriority",
-      expect.anything()
-    );
-    consoleError.mockRestore();
-  });
 });

@@ -8,6 +8,14 @@ import {
   PPB_DESIGN_CONTROL_PANEL_URL,
   resolveProductPageTemplateSelection,
 } from "./ConfigureBundleFlow.helpers";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type { usePpbDisplayOptionsState } from "./usePpbDisplayOptionsState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
+import type { usePpbPlacementHandlers } from "./usePpbPlacementHandlers";
+import type { usePpbPreviewReadinessHandlers } from "./usePpbPreviewReadinessHandlers";
+import type { usePpbSaveHandlers } from "./usePpbSaveHandlers";
+import { navigateWithSaveBarConfirmation } from "../../../lib/admin-unsaved-navigation";
+import { isFreeTemplate } from "../../../lib/subscriptions/entitlements";
 
 export function usePpbModalAndTemplateController({
   base,
@@ -17,12 +25,27 @@ export function usePpbModalAndTemplateController({
   previewReadiness,
   saveHandlers,
 }: {
-  base: any;
-  display: any;
-  templateState: any;
-  placement: any;
-  previewReadiness: any;
-  saveHandlers: any;
+  base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
+    "isCollectionsModalOpen" | "isProductsModalOpen" | "navigate" | "shopify" | "setEntitlementFailure"
+  > & {
+    isFreePlan?: boolean;
+  };
+  display: Pick<ReturnType<typeof usePpbDisplayOptionsState>,
+    "discountVariablesModalRef" | "isDiscountVariablesModalOpen" | "setIsDiscountVariablesModalOpen"
+  >;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>,
+    | "bundleDesignPresetId" | "bundleDesignTemplate" | "isSyncModalOpen"
+    | "lastTemplateRequestRef" | "lastTemplateResponseRef" | "pendingDesignPresetId"
+    | "pendingDesignTemplate" | "selectTemplateOpenButtonRef" | "setIsSelectTemplateModalOpen"
+    | "setIsSyncModalOpen" | "setPendingDesignPresetId" | "setPendingDesignTemplate"
+    | "setTemplateModalStep" | "setTemplateSaveError" | "templateFetcher"
+    | "templateSubmissionStartedRef"
+  >;
+  placement: Pick<ReturnType<typeof usePpbPlacementHandlers>,
+    "handleCloseCollectionsModal" | "handleCloseProductsModal"
+  >;
+  previewReadiness: Pick<ReturnType<typeof usePpbPreviewReadinessHandlers>, "handlePreviewBundle">;
+  saveHandlers: Pick<ReturnType<typeof usePpbSaveHandlers>, "handleDiscard">;
 }) {
   const syncModalRef = useRef<any>(null);
   const productsModalRef = useRef<any>(null);
@@ -92,15 +115,33 @@ export function usePpbModalAndTemplateController({
     templateState.setIsSelectTemplateModalOpen(true);
   }, [templateState]);
   const openDesignControlPanel = useCallback(() => {
-    void base.shopify.saveBar
-      .leaveConfirmation()
-      .then(() => base.navigate(PPB_DESIGN_CONTROL_PANEL_URL));
+    void navigateWithSaveBarConfirmation(
+      () => base.shopify.saveBar.leaveConfirmation(),
+      () => base.navigate(PPB_DESIGN_CONTROL_PANEL_URL),
+    );
   }, [base]);
   const handleTemplateNext = useCallback(() => {
     if (
       !templateState.pendingDesignTemplate ||
       !templateState.pendingDesignPresetId
     ) {
+      return;
+    }
+    if (
+      base.isFreePlan &&
+      !isFreeTemplate({
+        bundleType: "PRODUCT_PAGE",
+        designTemplate: templateState.pendingDesignTemplate,
+        designPresetId: templateState.pendingDesignPresetId,
+      })
+    ) {
+      templateState.setTemplateSaveError(null);
+      templateState.setIsSelectTemplateModalOpen(false);
+      base.setEntitlementFailure({
+        code: "ENTITLEMENT_REQUIRED",
+        entitlement: "bundle.template.premium",
+        requiredPlan: "GROWTH",
+      });
       return;
     }
     templateState.setTemplateSaveError(null);
@@ -121,7 +162,7 @@ export function usePpbModalAndTemplateController({
       templateState.pendingDesignPresetId ?? ""
     );
     templateState.templateFetcher.submit(fd, { method: "POST" });
-  }, [templateState]);
+  }, [base, templateState]);
   const handleTemplatePreview = useCallback((
     onPreviewOpened?: (previewUrl: string) => void,
   ) => {

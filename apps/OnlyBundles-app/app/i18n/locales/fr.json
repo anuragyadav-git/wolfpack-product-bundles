@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "Nouveautés",
+    "unavailable": "Les nouveautés et les commentaires sont temporairement indisponibles.",
+    "loading": "Chargement des demandes de fonctionnalités",
+    "retry": "Réessayer",
+    "retryHelp": "Réessayez ou ouvrez le portail de commentaires dans un nouvel onglet.",
+    "openPortal": "Ouvrir le portail de commentaires",
+    "feedbackIntro": "Proposez des améliorations, votez pour des idées et suivez leur progression. Les demandes et les votes sont partagés par tous les membres de votre boutique."
+  },
   "nav": {
+    "featureRequests": "Demandes de fonctionnalités",
     "dashboard": "Tableau de bord",
     "designControlPanel": "Panneau de contrôle du design",
     "settings": "Paramètres",
@@ -88,6 +98,8 @@
       "deleteBundle": "Supprimer le bundle",
       "cloneSuccess": "Bundle dupliqué avec succès",
       "deleteSuccess": "Bundle supprimé",
+      "renameBundle": "Renommer le bundle",
+      "renameSuccess": "Bundle renommé avec succès",
       "themeEditorUnavailable": "Le lien de l'éditeur de thème est indisponible."
     },
     "deleteModal": {
@@ -95,6 +107,15 @@
       "delete": "Supprimer",
       "cancel": "Annuler",
       "body": "Cette action est irréversible. Toute la configuration, les étapes et les règles de remise seront définitivement supprimées."
+    },
+    "renameModal": {
+      "heading": "Renommer le bundle",
+      "nameLabel": "Nom du bundle",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "errorEmpty": "Le nom du bundle ne peut pas être vide.",
+      "errorTooLong": "Le nom du bundle ne peut pas dépasser 255 caractères.",
+      "errorFailed": "Impossible de renommer le bundle."
     },
     "resources": {
       "bundleInspiration": "Inspiration de bundle",
@@ -437,6 +458,11 @@
       "title": "Abonnements groupés",
       "description": "Laissez les acheteurs choisir parmi les plans de vente compatibles Shopify partagés par les produits bundle .",
       "imageAlt": "Options d'achat à usage unique et d'abonnement pour un ensemble"
+    },
+    "floatingPromoBadge": {
+      "title": "Badge promotionnel flottant",
+      "description": "Affiche un badge promotionnel pouvant être fermé en bas à gauche du bundle pleine page. Il utilise le texte configuré et la couleur du bouton principal du bundle.",
+      "imageAlt": "Un badge promotionnel arrondi en bas à gauche d'une boutique avec le texte du marchand et un bouton de fermeture"
     }
   },
   "specificLinkOffer": {
@@ -609,7 +635,7 @@
       "body": "Pour le rendre visible, définissez le statut du produit du lot sur Actif dans Shopify Produits."
     },
     "warningGroup": {
-      "heading": "Action requise",
+      "heading": "Certains éléments nécessitent votre attention",
       "summary": "Quelques actions sont nécessaires pour publier le lot.",
       "modalTitle": "Actions nécessaires"
     },
@@ -696,7 +722,22 @@
       "tryAgain": "Réessayer",
       "contactSupport": "Contacter l'assistance",
       "cancel": "Annuler",
-      "back": "Retour à la page précédente"
+      "back": "Retour à la page précédente",
+      "viewPlans": "Voir les forfaits",
+      "saveAsDraft": "Enregistrer comme brouillon",
+      "keepEditing": "Continuer à modifier"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Limite de lots publics atteinte",
+      "publicLimitDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour des lots publics illimités, ou enregistrez ce lot comme brouillon pour conserver vos modifications.",
+      "premiumTemplateHeading": "Modèle du forfait Growth",
+      "premiumTemplateDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour publier avec ce modèle, ou enregistrez comme brouillon pour conserver vos modifications.",
+      "advancedDesignHeading": "Fonctionnalités de design Growth",
+      "advancedDesignDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour publier avec des styles personnalisés, ou enregistrez comme brouillon.",
+      "stepsLimitHeading": "Limite d'étapes atteinte",
+      "stepsLimitDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour des étapes illimitées, ou enregistrez comme brouillon.",
+      "growthRequiredHeading": "Forfait Growth requis",
+      "growthRequiredDescription": "Le forfait Free inclut uniquement 1 lot publié publiquement et des modèles standard. Passez à Growth pour publier avec cette fonctionnalité, ou enregistrez ce lot comme brouillon."
     },
     "error": {
       "heading": "Problème d'abonnement",
@@ -834,6 +875,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "Statistiques clés",
+      "sales": "Ventes",
+      "totalOrderRevenue": "Revenu total des commandes",
+      "totalOrderRevenueDefinition": "Valeur totale des commandes contenant au moins un lot.",
+      "totalBundleRevenue": "Revenu total des lots",
+      "totalBundleRevenueDefinition": "Valeur combinée des articles de lots dans les commandes terminées.",
+      "ordersWithBundles": "Commandes avec lots",
+      "ordersWithBundlesDefinition": "Commandes terminées contenant au moins un lot.",
+      "averageOrderValue": "Valeur moyenne des commandes",
+      "averageOrderValueDefinition": "Revenu total des commandes divisé par les commandes avec lots.",
+      "addToCartValue": "Valeur d'ajout au panier",
+      "addToCartValueDefinition": "Revenu total des lots divisé par les sessions d'ajout au panier réussies.",
+      "totalBundlesPurchased": "Total des lots achetés",
+      "totalBundlesPurchasedDefinition": "Lots uniques par commande ; une quantité répétée compte une fois.",
+      "bundleRevenue": "Revenu des lots"
+    },
     "offers": {
       "title": "Performance de l'offre",
       "description": "Comparez les décisions des offres sécurisées en matière de protection de la vie privée avec l'engagement du paquet, l'activité d'ajout au panier, les commandes terminées et les revenus.",
@@ -958,7 +1016,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "Entonnoir",
-          "howShoppersMoveThroughYourBundles": "Comment les acheteurs se déplacent à travers vos paquets"
+          "howShoppersMoveThroughYourBundles": "Comment les acheteurs se déplacent à travers vos paquets",
+          "bundleViews": "Vues groupées",
+          "conversion": "Conversion"
         },
         "liveactivityfeed": {
           "liveActivity": "Activité en direct",
@@ -1075,9 +1135,6 @@
         "configurecontextualsavebar": {
           "discard": "Abandonner"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "Corriger les champs suivants avant de sauvegarder :"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Astuce : Les remises sont basées sur tous les articles de votre panier. Don'N'oubliez pas d'inclure la quantité ou le montant du produit pré-sélectionné'lors de la configuration des réductions."
         },
@@ -1110,7 +1167,7 @@
         "apply": "Appliquer",
         "backfillSelectedWindow": "Remplissage de la fenêtre sélectionnée",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Correspond aux articles de la ligne de commande pour les regroupements et les importations de produits disponibles, de la page d'atterrissage et des détails UTM.",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Les enregistrements d'attribution existants sont ignorés, donc l'exécution de la même fenêtre ne crée pas de doublons.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Les lignes de lots existantes sont actualisées depuis Shopify lorsque possible ; aucun doublon n'est créé.",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Les commandes Shopify et le suivi de la vitrine ne sont pas modifiés.",
         "customUtmAttributes": "Attributs UTM personnalisés",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Entrez les noms de paramètres séparés par des virgules ou de nouvelles lignes. Only Bundles capture les valeurs d'URL correspondantes sur les visites futures et les stocke avec l'attribut checkout.",
@@ -1194,6 +1251,7 @@
           "syncBundle": "Pack de synchronisation"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Passez au forfait Growth pour obtenir plus de modèles qui vous aideront à augmenter vos conversions.",
           "customizeYourBundle": "Personnaliser votre bundle",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Choisissez un design qui correspond à vos besoins et à votre marque",
           "customizeColorsAmpLanguage": "Personnaliser les couleurs & langue",
@@ -1269,21 +1327,9 @@
           "addAddOnsTier": "Ajouter un niveau d'ajout"
         },
         "imagesgifspanel": {
-          "mediaAssets": "Actifs médiatiques",
-          "addVisualMediaToEnhanceTheBundleExperienceForShoppers": "Ajoutez des médias visuels pour améliorer l'expérience groupée pour les clients.",
           "promoBanner": "Bannière promotionnelle",
           "wideBannerDisplayedAtTheTopOfTheFullPageBundle": "Grande bannière affichée en haut du bundle pleine page",
           "pageHeader": "En-tête de page",
-          "jpgPngWebpGifSvgAvif": "JPG, PNG, WebP, GIF, SVG, AVIF",
-          "recommendedSize": "TAILLE RECOMMANDÉE",
-          "1600400Px41Ratio": "1600 × 400 px · 4:1 ratio",
-          "stepImages": "Images de l'étape",
-          "tabIconAndBannerImagePerStepShownInTheWidget": "Icône d'onglet et image de bannière par étape - affichée dans le widget",
-          "perStep": "Par étape",
-          "tabIcon": "Tab Icon",
-          "circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1": "Icône circulaire dans l'onglet étapes. Remplace le numéro d'étape lorsque défini. Recommandé: 100 × 100 px carré.",
-          "stepBannerImage": "Image de bannière étape",
-          "fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended": "Image pleine largeur au-dessus de la grille de produit lorsque cette étape est active. Recommandé: 1600 × 400 px.",
           "floatingPromoBadge": "Badge promotionnel flottant",
           "fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks": "Correction du badge en bas à gauche de la page — rejet de session lorsque le client clique sur X",
           "storefront": "Vitrine"
@@ -1470,6 +1516,8 @@
     "uploadFailed": "Échec de l'envoi",
     "searchFiles": "Rechercher des fichiers",
     "searchFiles2": "Rechercher les fichiers…",
+    "noFilesMatchSearch": "Aucun fichier ne correspond à votre recherche.",
+    "noImageFilesFound": "Aucun fichier image n’a été trouvé dans votre boutique.",
     "uploadProcessing": "Traitement du téléchargement",
     "loadingFiles": "Chargement des fichiers",
     "uploading": "Envoi en cours",
@@ -1574,8 +1622,6 @@
     "bundleCartSubtitle": "Sous-titre du pack panier",
     "reviewYourBundle": "Revoir votre lot",
     "addCustomCSSForThisBundle": "/* Add custom CSS for this bundle */",
-    "chooseTabIcon": "Choisir l'icône de l'onglet",
-    "chooseBannerImage": "Choisir une image de bannière",
     "showFloatingPromoBadge": "Afficher le badge de promotion flottant",
     "eGSave20TodayOnly": "par exemple économisez 20% seulement aujourd'hui !",
     "enableMultiLanguage": "Activer le multilingue",
@@ -1658,6 +1704,8 @@
     "clickToUploadImage": "Cliquez pour télécharger une image ou une icône",
     "chooseGifFile": "Choisissez un fichier GIF.",
     "chooseSupportedImageFile": "Choisissez un fichier image pris en charge.",
+    "fileMustBeUnder20Mb": "Le fichier doit faire moins de 20 Mo.",
+    "fileMustBeSmallerThan50Kb": "Importez un fichier de moins de 50 Ko.",
     "integrationLogo": "Logo {{name}}",
     "guidedTourProgress": "Etape guidée {{current}} de {{total}}",
     "guidedTourStep": "Étape {{current}} de {{total}}",

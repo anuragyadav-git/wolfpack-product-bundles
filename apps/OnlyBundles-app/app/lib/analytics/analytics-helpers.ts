@@ -8,13 +8,15 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface OrderAttributionRow {
+  orderId: string;
   bundleId: string | null;
   offerPolicyId?: string | null;
   revenue: number; // cents
+  bundleRevenue?: number; // cents
   createdAt: Date;
 }
 
-export interface BundleRevenueSummary {
+interface BundleRevenueSummary {
   // Current period
   totalBundleRevenue: number;
   totalBundleOrders: number;
@@ -27,7 +29,7 @@ export interface BundleRevenueSummary {
   prevBundleRevenuePercent: number; // 0-100
 }
 
-export interface LeaderboardRow {
+interface LeaderboardRow {
   bundleId: string;
   bundleName: string;
   bundleStatus: string;
@@ -42,9 +44,9 @@ export interface TrendPoint {
   totalRevenue: number; // cents
 }
 
-export type DeltaDirection = "positive" | "negative" | "neutral";
+type DeltaDirection = "positive" | "negative" | "neutral";
 
-export interface FormattedDelta {
+interface FormattedDelta {
   label: string; // e.g. "+23.0%", "-5.1%", or "—"
   direction: DeltaDirection;
 }

@@ -5,7 +5,7 @@ title: Common Configure Page Test Spec
 type: test-spec
 status: active
 summary: Behavioral coverage for the shared FPB and PPB configure-page model and dispatch contracts.
-last_audited: 2026-08-14
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -23,6 +23,7 @@ tags:
 keywords:
   - bundle-settings
   - settings-icon
+  - image-icon
 ---
 
 # Test Spec: Common Configure Page
@@ -49,6 +50,7 @@ Verify the shared FPB/PPB configure page model and dispatch behavior without ass
 | 12 | PPB Bundle Settings slots | `bundleType: product_page` | Shared default-products, quantity, summary text plus PPB-only variant selector, discount display, banner, CSS, subscription, and embed/place-widget slots | Bundle Settings adapter contract |
 | 13 | PPB category variant update | categories plus `displayVariantsAsIndividualProducts=true` | All categories update that PPB category field and preserve other category data | Shared slot behavior |
 | 14 | Bundle Settings navigation icon | FPB and PPB setup models | Bundle Settings uses the Polaris `settings` icon type | Shared navigation contract |
+| 15 | Images & GIFs navigation ownership | FPB and PPB setup models | FPB uses the Polaris `image` icon; PPB has no separate Images & GIFs item | PPB media remains in Bundle Settings and store-level Design settings |
 
 ### ConfigureActionDispatch
 | # | Scenario | Input | Expected Output | Notes |
@@ -57,6 +59,6 @@ Verify the shared FPB/PPB configure page model and dispatch behavior without ass
 | 2 | PPB syncBundle dispatch | `intent=syncBundle` | Shared storefront-sync action called with `product_page` | Existing route URL preserved |
 
 ## Acceptance Criteria
-- [ ] All listed test cases pass
-- [ ] Banned source-grep configure UI contract tests are removed or replaced
-- [ ] Focused Jest and lint pass for touched files
+- [x] All listed test cases pass
+- [x] Banned source-grep configure UI contract tests are removed or replaced
+- [x] Focused Jest and lint pass for touched files

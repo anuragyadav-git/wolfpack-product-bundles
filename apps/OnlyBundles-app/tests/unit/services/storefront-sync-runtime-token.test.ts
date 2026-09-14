@@ -1,7 +1,7 @@
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
 import db from "../../../app/db.server";
 import { CartTransformService } from "../../../app/services/cart-transform-service.server";
-import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync.server";
+import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 import { syncPpbStorefrontRuntime } from "../../../app/services/ppb-storefront-runtime.server";
 
 jest.mock("../../../app/db.server", () => ({
@@ -32,7 +32,7 @@ jest.mock("../../../app/services/cart-transform-service.server", () => ({
   },
 }));
 
-jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn(),
   updateComponentProductMetafields: jest.fn(),
 }));

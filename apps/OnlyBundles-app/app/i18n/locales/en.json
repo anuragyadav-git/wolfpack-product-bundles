@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "What’s new",
+    "unavailable": "Updates and feedback are temporarily unavailable.",
+    "loading": "Loading feature requests",
+    "retry": "Try again",
+    "retryHelp": "Try again, or open the feedback portal in a new tab.",
+    "openPortal": "Open feedback portal",
+    "feedbackIntro": "Suggest improvements, vote on ideas, and follow their progress. Requests and votes are shared by everyone on your store."
+  },
   "nav": {
+    "featureRequests": "Feature requests",
     "dashboard": "Dashboard",
     "designControlPanel": "Design Control Panel",
     "settings": "Settings",
@@ -448,6 +458,11 @@
       "title": "Bundle Subscriptions",
       "description": "Let shoppers choose from compatible Shopify selling plans shared by the bundle products.",
       "imageAlt": "One-time and subscription purchase options for a bundle"
+    },
+    "floatingPromoBadge": {
+      "title": "Floating Promo Badge",
+      "description": "Show a dismissible promotion badge at the bottom-left of the full-page bundle. It uses your configured text and the bundle's primary button color.",
+      "imageAlt": "A rounded promotional badge at the bottom-left of a storefront with merchant text and a dismiss button"
     }
   },
   "specificLinkOffer": {
@@ -620,7 +635,7 @@
       "body": "For discoverability, change the bundle product's status to Active in Shopify Products."
     },
     "warningGroup": {
-      "heading": "Action required",
+      "heading": "Some items need your attention",
       "summary": "Few actions are needed to publish the bundle.",
       "modalTitle": "Actions needed"
     },
@@ -707,7 +722,22 @@
       "tryAgain": "Try Again",
       "contactSupport": "Contact Support",
       "cancel": "Cancel",
-      "back": "Back to previous page"
+      "back": "Back to previous page",
+      "viewPlans": "View plans",
+      "saveAsDraft": "Save as draft",
+      "keepEditing": "Keep editing"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Public bundle limit reached",
+      "publicLimitDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth for unlimited public bundles, or save this bundle as a draft to keep your changes.",
+      "premiumTemplateHeading": "Growth plan template",
+      "premiumTemplateDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth to publish with this template, or save as a draft to keep your changes.",
+      "advancedDesignHeading": "Growth plan design features",
+      "advancedDesignDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth to publish with custom styling, or save as a draft.",
+      "stepsLimitHeading": "Step limit reached",
+      "stepsLimitDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth for unlimited steps, or save as a draft.",
+      "growthRequiredHeading": "Growth plan required",
+      "growthRequiredDescription": "The Free plan only includes 1 publicly published bundle and standard templates. Upgrade to Growth to publish with this feature, or save this bundle as a draft."
     },
     "error": {
       "heading": "Subscription Issue",
@@ -845,6 +875,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "Key statistics",
+      "sales": "Sales",
+      "totalOrderRevenue": "Total order revenue",
+      "totalOrderRevenueDefinition": "Total value of orders that contain at least one bundle.",
+      "totalBundleRevenue": "Total bundle revenue",
+      "totalBundleRevenueDefinition": "Combined value of bundle items in completed orders.",
+      "ordersWithBundles": "Orders with bundles",
+      "ordersWithBundlesDefinition": "Completed orders that contain at least one bundle.",
+      "averageOrderValue": "Average order value",
+      "averageOrderValueDefinition": "Total order revenue divided by orders with bundles.",
+      "addToCartValue": "Add to cart value",
+      "addToCartValueDefinition": "Total bundle revenue divided by successful add-to-cart sessions.",
+      "totalBundlesPurchased": "Total bundle purchased",
+      "totalBundlesPurchasedDefinition": "Unique bundles purchased per order; repeated quantity counts once.",
+      "bundleRevenue": "Bundle revenue"
+    },
     "offers": {
       "title": "Offer performance",
       "description": "Compare privacy-safe offer decisions with bundle engagement, add-to-cart activity, completed orders, and revenue.",
@@ -969,7 +1016,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "Bundle Funnel",
-          "howShoppersMoveThroughYourBundles": "How shoppers move through your bundles"
+          "howShoppersMoveThroughYourBundles": "How shoppers move through your bundles",
+          "bundleViews": "Bundle Views",
+          "conversion": "Conversion"
         },
         "liveactivityfeed": {
           "liveActivity": "Live Activity",
@@ -1086,9 +1135,6 @@
         "configurecontextualsavebar": {
           "discard": "Discard"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "Fix the following fields before saving:"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Tip: Discounts are based on all items in your cart. Don't forget to include the Pre Selected Product's quantity or amount when setting up discounts."
         },
@@ -1121,7 +1167,7 @@
         "apply": "Apply",
         "backfillSelectedWindow": "Backfill selected window",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Matches order line items to bundles and imports available revenue, landing-page, and UTM details.",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Existing attribution records are skipped, so running the same window again does not create duplicates.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Existing bundle rows are refreshed from Shopify when possible; no duplicate records are created.",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopify orders and storefront tracking are not modified.",
         "customUtmAttributes": "Custom UTM attributes",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Enter parameter names separated by commas or new lines. Only Bundles captures matching URL values on future visits and stores them with checkout attribution.",
@@ -1205,6 +1251,7 @@
           "syncBundle": "Sync bundle"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Upgrade to the Growth plan for more templates that will help in increasing conversions.",
           "customizeYourBundle": "Customize your bundle",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Choose a design that suits your needs and fits your brand",
           "customizeColorsAmpLanguage": "Customize Colors & Language",
@@ -1280,21 +1327,9 @@
           "addAddOnsTier": "Add Add Ons Tier"
         },
         "imagesgifspanel": {
-          "mediaAssets": "Media Assets",
-          "addVisualMediaToEnhanceTheBundleExperienceForShoppers": "Add visual media to enhance the bundle experience for shoppers.",
           "promoBanner": "Promo Banner",
           "wideBannerDisplayedAtTheTopOfTheFullPageBundle": "Wide banner displayed at the top of the full-page bundle",
           "pageHeader": "Page header",
-          "jpgPngWebpGifSvgAvif": "JPG, PNG, WebP, GIF, SVG, AVIF",
-          "recommendedSize": "RECOMMENDED SIZE",
-          "1600400Px41Ratio": "1600 × 400 px · 4:1 ratio",
-          "stepImages": "Step Images",
-          "tabIconAndBannerImagePerStepShownInTheWidget": "Tab icon and banner image per step — shown in the widget",
-          "perStep": "Per step",
-          "tabIcon": "Tab Icon",
-          "circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1": "Circular icon in the step tab. Replaces the step number when set. Recommended: 100 × 100 px square.",
-          "stepBannerImage": "Step Banner Image",
-          "fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended": "Full-width image above the product grid when this step is active. Recommended: 1600 × 400 px.",
           "floatingPromoBadge": "Floating Promo Badge",
           "fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks": "Fixed badge at bottom-left of the page — session-dismissed when shopper clicks X",
           "storefront": "Storefront"
@@ -1481,6 +1516,8 @@
     "uploadFailed": "Upload failed",
     "searchFiles": "Search files",
     "searchFiles2": "Search files…",
+    "noFilesMatchSearch": "No files match your search.",
+    "noImageFilesFound": "No image files found in your store.",
     "uploadProcessing": "Upload processing",
     "loadingFiles": "Loading files",
     "uploading": "Uploading",
@@ -1585,8 +1622,6 @@
     "bundleCartSubtitle": "Bundle Cart Subtitle",
     "reviewYourBundle": "Review your bundle",
     "addCustomCSSForThisBundle": "/* Add custom CSS for this bundle */",
-    "chooseTabIcon": "Choose tab icon",
-    "chooseBannerImage": "Choose banner image",
     "showFloatingPromoBadge": "Show floating promo badge",
     "eGSave20TodayOnly": "e.g. Save 20% today only!",
     "enableMultiLanguage": "Enable multi-language",
@@ -1669,6 +1704,8 @@
     "clickToUploadImage": "Click to upload an image or icon",
     "chooseGifFile": "Choose a GIF file.",
     "chooseSupportedImageFile": "Choose a supported image file.",
+    "fileMustBeUnder20Mb": "File must be under 20 MB.",
+    "fileMustBeSmallerThan50Kb": "Please upload a file smaller than 50 KB.",
     "integrationLogo": "{{name}} logo",
     "guidedTourProgress": "Guided tour step {{current}} of {{total}}",
     "guidedTourStep": "Step {{current}} of {{total}}",
@@ -1720,6 +1757,7 @@
     "backgroundColorForUpsellButtons": "Background color for upsell buttons",
     "backgroundColorOfIndividualProductCards": "Background color of individual product cards",
     "backgroundColorOfTheFullPageBundleLoadingScreen": "Background color of the full-page bundle loading screen.",
+    "backgroundColorShownWhileEitherBundleTypeIsLoading": "Background color shown while either bundle type is loading.",
     "base": "Base",
     "basicBundleConfiguration": "Basic bundle configuration",
     "blockForHidingQtySelectorAndOverwritingRemoveButtonFor": "Block for Hiding Qty Selector and Overwriting Remove Button for Bundle Products in Cart: Prevents individual quantity increase for bundle items and enforces removal of all bundle products if one is removed",
@@ -1836,6 +1874,7 @@
     "executeDefaultSideCartUpdate": "Execute Default Side Cart Update",
     "executeScript": "Execute Script",
     "fpbLoadingGIF": "FPB Loading GIF",
+    "loadingGIF": "Loading GIF",
     "fill": "Fill",
     "fillColorForCompletedPartOfDiscountProgressBar": "Fill color for completed part of discount progress bar",
     "fillColorForEmptyPartOfDiscountProgressBar": "Fill color for empty part of discount progress bar",
@@ -1866,6 +1905,7 @@
     "hungarian": "Hungarian",
     "imageFit": "Image Fit",
     "imageFitSlotIconAndFullPageBundleLoadingScreen": "Image-fit, slot icon, and full-page bundle loading screen controls.",
+    "imageFitSlotIconAndBundleLoadingScreenControls": "Image-fit, slot icon, and bundle loading screen controls.",
     "imagesGIFs": "Images & GIFs",
     "imagesAndGIFsConfigureProductImageFitPlusLoadingMedia": "Images and GIFs configure product image fit plus loading media for bundle and checkout states.",
     "inactiveTabBackgroundColor": "Inactive Tab Background Color",
@@ -1914,6 +1954,7 @@
     "noteByDefaultYourStorefrontThemeFontWillBePicked": "Note: By default, your storefront theme font will be picked.",
     "noteThisSectionIsOnlyForDevelopers": "Note: This section is only for developers.",
     "optionalGIFDisplayedInsteadOfTheDefaultSpinnerOnThe": "Optional GIF displayed instead of the default spinner on the full-page bundle loading screen.",
+    "optionalGIFDisplayedInsteadOfTheDefaultSpinnerWhileEither": "Optional GIF displayed instead of the default spinner while either bundle type is loading.",
     "optionalImageDisplayedInEmptyFPBAndPPBProductSlots": "Optional image displayed in empty FPB and PPB product slots.",
     "originalBundlePrice": "Original Bundle Price",
     "pageBuilders": "Page Builders",

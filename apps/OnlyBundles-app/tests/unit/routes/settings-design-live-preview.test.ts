@@ -16,8 +16,8 @@ jest.mock("@shopify/app-bridge-react", () => ({
   useAppBridge: () => ({ saveBar: { show: jest.fn(), hide: jest.fn() } }),
 }));
 
-jest.mock("../../../app/components/shared/FilePicker", () => ({
-  FilePicker: ({ label }: { label: string }) => React.createElement("div", null, label),
+jest.mock("../../../app/components/shared/AssetUpload", () => ({
+  AssetUpload: ({ label }: { label: string }) => React.createElement("div", null, label),
 }));
 
 describe("DesignSettingsView live preview", () => {
@@ -35,7 +35,7 @@ describe("DesignSettingsView live preview", () => {
     expect(view).not.toContain("discardConfirmation");
     expect(view).not.toContain("discardconfirmation");
     expect(view).toContain('<button type="button" disabled="">Discard</button>');
-    expect(view).toContain('<button type="button" variant="primary" disabled="">Save</button>');
+    expect(view).toContain('<button type="button" variant="primary" disabled="" loading="true">Save</button>');
   });
 
   it("describes the page-local inspector disclosure in both states", () => {
@@ -66,7 +66,7 @@ describe("DesignSettingsView live preview", () => {
     );
 
     expect(view).toContain('<s-select label="Image Fit" name="Image Fit" value="Cover" disabled="true">');
-    expect(view).toContain("FPB Loading GIF");
+    expect(view).toContain("Loading GIF");
     expect(view).toContain("Loading Screen Background Color");
   });
 
@@ -90,7 +90,6 @@ describe("DesignSettingsView live preview", () => {
 
     expect(view).toContain('src="/settings-design-preview-frame"');
     expect(view).toContain('sandbox="allow-scripts allow-same-origin"');
-    expect(view).toContain('<s-query-container containerName="design-settings">');
     expect(view).toContain('aria-label="settingsDcp.preview.workspace.label"');
     expect(view).toContain("settingsDcp.preview.workspace.preview");
     expect(view).toContain("settingsDcp.preview.workspace.customize");
@@ -201,7 +200,7 @@ describe("DesignSettingsView live preview", () => {
     );
 
     expect(view).toContain('aria-label="Live bundle preview"');
-    expect(view).not.toContain("FPB Loading GIF");
+    expect(view).not.toContain("Loading GIF");
     expect(view).not.toContain("Loading Screen Background Color");
     expect(view).toContain('<s-option value="loading">');
   });

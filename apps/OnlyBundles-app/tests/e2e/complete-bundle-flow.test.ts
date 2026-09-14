@@ -6,7 +6,7 @@
  */
 
 import { handleCreateBundle } from "../../app/routes/app/app.dashboard/handlers/handlers.server";
-import { handleSaveBundle } from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/handlers.server";
+import { handleSaveBundle } from "../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server";
 import { syncBundleStorefrontNow } from "../../app/services/bundles/storefront-sync.server";
 
 jest.mock("../../app/db.server", () => ({
@@ -38,7 +38,7 @@ jest.mock("../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../app/services/widget-installation.server", () => ({
+jest.mock("../../app/services/widget-installation/widget-installation-core.server", () => ({
   WidgetInstallationService: {
     validateProductBundleWidgetSetup: jest.fn().mockResolvedValue({
       widgetInstalled: false,
@@ -48,7 +48,7 @@ jest.mock("../../app/services/widget-installation.server", () => ({
   },
 }));
 
-jest.mock("../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn().mockResolvedValue(undefined),
   updateComponentProductMetafields: jest.fn().mockResolvedValue(undefined),
 }));
@@ -85,10 +85,6 @@ jest.mock("../../app/lib/css-sanitizer", () => ({
 
 jest.mock("../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
-}));
-
-jest.mock("../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
 }));
 
 const db = require("../../app/db.server").default as any;

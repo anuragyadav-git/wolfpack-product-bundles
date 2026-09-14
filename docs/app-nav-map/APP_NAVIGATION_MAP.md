@@ -5,7 +5,7 @@ title: Wolfpack Product Bundles App Navigation and UI Map
 type: navigation-map
 status: authoritative
 summary: Routes, screens, actions, modals, and storefront-preview flows for the embedded app.
-last_audited: 2026-09-03
+last_audited: 2026-09-15
 owners:
   - engineering
 domains:
@@ -30,7 +30,7 @@ keywords:
 > Any time a new page, modal, tab, sidebar section, or user flow is added or removed,
 > this document **must** be updated. See CLAUDE.md for the enforcement rule.
 
-**Last Updated:** 2026-09-03
+**Last Updated:** 2026-09-12
 **Environment mapped:** SIT (`wolfpack-product-bundles-sit`)
 **Test store:** `wolfpack-store-test-1.myshopify.com`
 
@@ -38,6 +38,8 @@ All merchant-facing Admin pages expose both the Shopify Admin breadcrumb and an
 app-owned back arrow. Dashboard, the `/app` welcome/auth entry point, billing
 callbacks, and resource/API routes are excluded. Both controls share the same
 page callback so configure and Settings dirty-state guards cannot be bypassed.
+The public root `/` preserves its query string and redirects to `/app`; the
+authenticated app layout owns Admin authentication.
 
 ---
 
@@ -70,6 +72,7 @@ Wolfpack Bundles SIT
 ├── Integrations        → /app/integrations
 ├── Analytics           → /app/attribution
 ├── Offer operations    → /app/offer-operations
+├── Feature requests    → /app/feature-requests   (Canny board)
 └── Billing             → /app/billing          (Subscription & Billing)
 ```
 
@@ -83,6 +86,17 @@ Same-screen submissions and revalidation do not start it.
 
 ## 2. Page-by-Page Map
 
+### Feature requests — `/app/feature-requests`
+
+Authenticated route with native Polaris page shell, shared back navigation,
+loading indicator, retryable errors, and the official Canny board embed. Stores
+can browse/search, submit, vote, and comment using one Shopify-store identity.
+The GET resource `/app/canny/session` authenticates with Shopify, reads canonical
+Shop GID/name/email, and returns a short-lived Canny SSO JWT with `no-store`.
+`basePath: null` keeps Canny from rewriting embedded Admin URLs. Hosted public
+Canny URLs remain the targets for sharing/email; no retired `/app/events` route
+is restored. See `internal docs/Operations/Canny.md` for setup and release gates.
+
 ### 2.1 Dashboard — `/app/dashboard`
 
 **Route file:** `app/routes/app/app.dashboard/route.tsx`
@@ -94,12 +108,14 @@ Dashboard
 ├── Subheader: "Access your bundles, customer support & more."
 │
 ├── [Button] "Create Bundle"  → opens Create Bundle Modal
+├── [Bell] "What’s new" → Canny changelog popup, immediately right of Create Bundle
 ├── Language selector → persists one shop-wide embedded Admin UI language for all staff accounts on change
 ├── Metrics: active bundle count
 ├── Storefront setup card → action-first core readiness and active-bundle summary
 │   └── [Finish setup / View details] → Storefront setup modal
 │       └── current theme blocks/embeds with Theme Editor action when needed
 ├── Section: "Your Bundles"
+│   ├── Visible Status and Type filters → native selects in one inline row
 │   └── DataTable of bundles (empty state if none exist)
 │       ├── Bundles per page dropdown → radio choices 10 / 20 / 50
 │       └── Per bundle row:
@@ -109,6 +125,7 @@ Dashboard
 │           └── [Button] "Delete" → opens Delete Confirmation Modal
 ├── Existing founder support card → direct support chat
 ├── Existing support issues card → feature/storefront/uninstall help and direct support chat
+├── Global Crisp launcher → visible on desktop and mobile; explicit support actions load and open chat immediately
 ├── Resources
 │   ├── Bundle Inspiration → selects the gallery preview panel
 │   ├── Support → opens Crisp
@@ -181,6 +198,28 @@ required Shopify parent product are created. The subsequent widget-status check
 is noncritical; a timeout or error leaves creation successful and the configure
 redirect intact.
 
+#### Shopify Sidekick Create Bridge
+
+Shopify's `admin.app.intent.link` opens the same `/app/bundles/create` page for a
+`shopify/product` `import` intent. Incoming intent data and the registered
+`stage_bundle_draft` tool can prefill the name and bundle type, but do not submit
+the form. The merchant must click Save. A Sidekick-marked POST reuses the normal
+create handler and returns the new parent Product GID to
+`shopify.intents.response.ok({id})`; ordinary submissions keep the redirects
+listed above. Back navigation during an active intent resolves it as closed and
+does not create a bundle.
+
+#### Shopify Sidekick Bundle Data Route
+
+**Route file:** `app/routes/app/app.sidekick.bundles.tsx`
+
+**URL:** `/app/sidekick/bundles`
+
+The headless `admin.app.tools.data` extension posts bundle search and summary
+operations to this authenticated resource route. The route returns current-shop,
+read-only JSON with `app://` links to existing FPB or PPB configure pages. It is
+not a merchant-facing page; GET returns `405` after authentication.
+
 #### Shopify Bundled Products Edit Bridge
 
 **Route file:** `app/routes/app/app.bundles.products.$productId/route.tsx`
@@ -193,7 +232,8 @@ Configure page storefront sync status:
 
 - Full-page and product-page configure pages do not show a separate Storefront sync status or retry banner.
 - Save persists DB changes and publishes Shopify storefront data synchronously before returning a compact success response.
-- Existing Sync Bundle actions run the same direct storefront sync path.
+- Existing Sync Bundle actions run the same direct storefront sync path, including native scheduled-discount owner reconciliation and current policy publication.
+- FPB, PPB and SDK additions serialize metafield sync and cart add with Web Locks. Capacity/conflict failures stop the addition; cart add is never retried blindly.
 - Preview Bundle reserves a tab synchronously and posts one compact `/prepare-preview` request; FPB receives a fresh signed app-proxy URL in that response, while PPB receives its preview token. The reserved tab navigates after the response so popup protection does not discard it. Failed checks close the blank tab and surface through the preview error toast while the button spinner is active.
 - Bundle creation and cloning route directly to the bundle type's configure page; there is no intermediate configuration wizard route.
 
@@ -242,19 +282,22 @@ Primary action:
 - The Design Control Panel lazy-loads after entry and uses a responsive preview-first workspace: the gutterless preview stage and its selectors sit beside one contextual inspector. On desktop, a vertically centered notch with a Polaris chevron straddles the preview/inspector boundary, remains centered in the visible sidebar edge while scrolling, and collapses the inspector so the width-driven storefront canvas grows without clearing unsaved settings or preview context. Canvas fitting is applied once per browser frame without React resize state or scale transitions. The canvas shows a centered Polaris spinner card and remains visually withheld until the isolated preview frame sends its trusted `READY` event. Mobile selection preserves the full 390 x 844 storefront viewport inside a decorative iPhone body whose chrome sits outside the iframe. At phone Admin widths the notch is hidden and a Preview / Customize segmented control remains the authoritative one-pane-at-a-time navigation.
 - Preview-only Bundle Type and Template selectors cover Landing Page Standard, Classic, Compact, and Horizontal plus Product Page Product List, Product Grid, Horizontal Slots, and Vertical Slots.
 - The template-aware Edit area control exposes only persistent regions owned by the selected template: Bundle header, Navigation, Categories, Product cards, Product slots, and Cart / summary. Selecting an area returns the separate Preview state control to Default, scrolls the production region into view, and identifies it with a persistent outline and localized `Editing` label.
-- The separate Preview state control exposes only applicable transient states: Default, Product picker, Loading, Validation, and Upsell. Product picker is limited to PPB slot templates, Loading to FPB templates, and state dismissal/default restores the previously selected edit area.
-- Images & GIFs owns the store-level FPB loading screen: merchants can retain the default spinner or select an uploaded GIF through one clickable drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. The former per-bundle FPB loading animation control is not exposed.
+- The separate Preview state control exposes only applicable transient states: Default, Product picker, Loading, Validation, and Upsell. Product picker is limited to PPB slot templates, Loading is available to all FPB and PPB templates, and state dismissal/default restores the previously selected edit area.
+- Images & GIFs owns the store-level FPB/PPB loading screen: merchants can retain the default spinner or upload a GIF through one native Polaris drop zone, change its background color, and see both choices in the local Loading preview. Image Fit is disabled on the Loading surface because it does not affect that screen. Per-bundle loading animation controls are not exposed.
 - Images & GIFs also owns one store-level FPB/PPB Slot Icon and a Slot Icon Presentation selector for every template. Centered badge replaces the native plus icon (recommended 96 x 96 px transparent square); Cover fills the responsive product slot; Fit contains an 800 x 800 px square image inside the responsive product slot.
+- Tier Badge owns the global discount tier badge styling controls (Shape, Visibility, Text Color, and Background Color) applied across discounted tiers on the storefront.
 - Component scenes use fixed logical 1280×1136 desktop and 390×844 mobile canvases that scale and center within the Admin panel. The isolated same-origin frame composes a neutral store header and FPB page or PPB product-detail context around the production widget. Product picker, Loading, Validation, and Upsell invoke the production renderer's corresponding state.
 - The contextual inspector follows the selected edit area or non-default preview state. Editing a shared field preserves the current area instead of jumping to another region; the inspector heading names the active context.
 - Unsaved design values are converted through the normalized storefront Design runtime and posted to the frame through a versioned same-origin protocol. The frame uses deterministic local media and fixture data, blocks navigation and cart submission, and disables persistence, analytics, and bundle fetching.
 - Local Design controls and template previews remain available without a storefront-ready bundle. The separate Preview Bundle action is disabled while Design values are dirty or saving. Its Polaris modal lists only active/unlisted bundles with a valid FPB public number or PPB product handle, reserves a tab, posts the existing configure `/prepare-preview` action, and navigates to the signed FPB or tokenized PPB storefront URL.
 - Relevant Expert Colour Control groups expose `Show Colour Guide` links to the five app-owned AVIF guide paths generated from tracked public PNG sources by CI/CD.
-- Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist.
+- Settings back actions await App Bridge Save Bar leave confirmation while unsaved changes exist; confirming Leave restores the last confirmed snapshot before the view changes.
 - Language uses Polaris web components for locale chips, layout/section navigation, fields, variable guidance, and the contextual save flow. English is mandatory; removing another locale removes it from Landing Page, Product Page, and shared language roots.
-- Language and Controls retain unsaved form state while switching configuration sections.
+- Language and Controls retain unsaved form state while the merchant stays; section changes await App Bridge leave confirmation and discard only after the merchant confirms Leave.
 - Settings has one landing owner; selecting a subpage lazy-loads the workspace and returning home is guarded by the contextual save bar.
 - Cart Messaging navigation from Controls to Language is also guarded by the contextual save bar.
+- Design, Language, and Controls keep the contextual bar visible while saving; Save uses App Bridge's native loading state and the bar clears only after the matching server-confirmed snapshot.
+- Configure and Settings save-bar owners hide their programmatic bar on unmount so route transitions and error boundaries cannot leak a stale busy bar into another Admin surface.
 
 ---
 
@@ -457,11 +500,12 @@ disclosure and preserves the existing configure state.
 **Route file:** `app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/route.tsx`
 **URL:** `/app/bundles/full-page-bundle/configure/:bundleId`
 
-When the app embed and parent-product status both require attention, FPB and
-PPB show one `Few actions are needed to publish the bundle.` warning. `View`
-opens the shared Actions Needed modal, which lists each warning with its
+When multiple publish conditions require attention, FPB and PPB show one
+`Some items need your attention` warning with a `Manage` action. Manage opens
+the shared Actions Needed modal, which lists each warning with its
 original remediation action. A single active warning remains directly
-actionable without the modal. The subscriptions section uses the same
+actionable without the modal. PPB widget placement participates in this group
+instead of rendering a separate critical banner. The subscriptions section uses the same
 single-banner/modal behavior when compatibility and plan-validation warnings
 coexist.
 
@@ -484,16 +528,23 @@ FPB Configure Page
 │   │
 │   ├── Steps
 │   │   ├── List of configured steps
-│   │   └── [Button] "Add Step" → inline step builder
-│   │       └── Product/Collection picker per step → opens Product Picker
+│   │   ├── [Button] "Add Step" → inline step builder
+│   │   │   └── Product/Collection picker per step → opens Product Picker
+│   │   └── Step Config icon tile → direct native drop zone → Shopify Files
 │   │
 │   ├── Discount & Pricing
 │   │   ├── Discount type selector: Fixed Amount Off / Percentage Off / Fixed Bundle Price / Buy X, get Y
 │   │   ├── Rule cards; Buy X, get Y uses Customer buys/gets, Discount value/type, and Apply Discount to
-│   │   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
+│   │   ├── Per-rule Tier Badge: enable toggle, badge text input, and [Show variables] modal (styling managed in Settings -> Design)
 │   │   ├── Bundle Quantity Options: Box Label/Subtext per eligible rule + Multi Language modal
 │   │   ├── Progress Bar: Simple Bar / Step-Based Bar + Multi Language modal
 │   │   └── Discount Messaging: per-rule Discount Text, one Success Message, Variables modal
+│   │
+│   ├── Images & GIFs
+│   │   ├── Promo banner → desktop + mobile native drop zones side-by-side in one row → Shopify Files
+│   │   └── Floating promo badge enablement and text
+│   ├── Free Gift & Add Ons
+│   │   └── Add-Ons with Bundles → independent visual info popover + external How to setup? guide
 │   │
 │   ├── Sync Bundle
 │   │   └── [Button] "Sync Now" → ensure parent + metafields; returns canonical proxy URL
@@ -522,10 +573,13 @@ FPB Configure Page
 │
 ├── Save Bar (App Bridge): [Discard] [Save]
 │   └── Save validates required fields for enabled persisted features; invalid drafts stay dirty, open/focus the first affected section, and show inline critical feedback without submitting
+│   └── Save remains visible with its native loading spinner until the configure request completes
+│   └── Back and app navigation await App Bridge leave confirmation; Product editor intents are blocked while the draft is dirty so an Admin modal cannot cover and dismiss the save bar
 │
 └── Modals:
     ├── Actions Needed Modal (multiple warnings + one remediation action per warning)
     ├── Bundle Status Modal (Draft / Active / Unlisted)
+    ├── Entitlement Upgrade Modal (triggers on save when plan limit is reached; provides "View plans" and "Save as draft")
     ├── Product Picker Modal (Shopify resource picker)
     ├── Variables Modal (Discount Messaging variable reference)
     ├── Bundle Quantity Options Multi Language Modal (Box Label / Box Subtext)
@@ -547,8 +601,10 @@ Responsive configure behavior:
 - FPB and PPB keep the full Bundle Product and Bundle Setup sidebar on wide screens.
 - Tablet and phone containers show Bundle Product first and replace the long setup sidebar with a compact native disclosure labelled with the active parent or nested section.
 - Selecting a section closes the mobile disclosure without changing save, dirty-state, or route adapter behavior.
-- The compact readiness trigger remains floating without covering editor actions. Opening it uses a labelled native modal dialog: a bounded floating checklist on desktop and a full-width, safe-area-aware bottom sheet on phones.
-- The readiness dialog supports Escape, safe backdrop dismissal, focus trapping, internal scrolling, and focus restoration without changing the existing readiness calculation or route adapter props.
+- The readiness score renders eagerly. Wide screens use only the floating 64px square trigger; phones hide it and show a native `s-button` in the same action row as Preview Bundle. Both open the same anchored Polaris popover through `commandFor`.
+- The non-blocking readiness popover contains only the checklist and readiness status, owns a bounded internal scroll region, and relies on Shopify for placement, Escape and outside dismissal, keyboard activation, and trigger-focus restoration. It never opens automatically on page load or repeats the score gauge inside the popover.
+- The guided configure tour is desktop-only and is suppressed below 768px; mobile retains the readiness popover without the tour overlay.
+- Guided-tour Step 2 highlights the desktop readiness control. Step 4 switches to Bundle Settings and highlights only Bundle Status for FPB and PPB.
 - Configure multi-language workflows share one staged Polaris `s-modal`; Apply updates route-owned draft state and Cancel/Escape/backdrop-close discard edits.
 - FPB and PPB expose curated visual help beside non-obvious setup, pricing, visibility, storefront, urgency, and subscription controls. Each info action opens the shared Polaris popover without changing configure state or activating the SaveBar.
 
@@ -569,10 +625,16 @@ contract as FPB.
 The shared Actions Needed modal described in FPB is also mounted by PPB when
 multiple publish or subscription warnings are simultaneously active.
 
+PPB preview checks the current app's `bundle-product-page` theme-extension
+activation through Shopify's App API before recording or opening the preview.
+The block must target the linked product's effective product template. Missing
+placement opens the existing Shopify Theme Editor deep link; an unavailable
+activation result fails closed and closes the reserved preview tab.
+
 ```
 PPB Configure Page
 ├── Header: guarded App Bridge breadcrumb + guarded app-owned back action
-├── Sidebar Nav (6 sections — clone hierarchy)
+├── Sidebar Nav (6 sections — PPB configure hierarchy)
 │   ├── [📝] Step Setup              → step_setup section
 │   ├── Discount & Pricing           → discount_pricing section
 │   ├── [👁] Bundle Visibility       → bundle_visibility section  [Pending badge when widget disabled]
@@ -583,7 +645,7 @@ PPB Configure Page
 ├── Step Setup
 │   ├── Bundle product picker (Shopify resource picker)
 │   ├── Accordion step cards (DnD reorder)
-│   │   ├── Step name, min/max qty
+│   │   ├── Step name, min/max qty, and canonical Step Config image
 │   │   ├── Multi Language actions for step and category copy
 │   │   ├── Products / Collections pickers
 │   │   ├── Per-category grouped variant style: Dropdown / Pills / Color swatches / Image swatches
@@ -597,7 +659,7 @@ PPB Configure Page
 │   ├── Buy X, get Y rule builder (shown when selected)
 │   │   └── Per-rule: Customer buys, Customer gets, Discount value/type, Apply Discount to
 │   ├── Standard and Fixed Bundle Price rule builders (shown for other types)
-│   ├── Per-rule Tier Badge: enable, text/variables, shape, visibility, text color, and background color
+│   ├── Per-rule Tier Badge: enable toggle, badge text input, and [Show variables] modal (styling managed in Settings -> Design)
 │   ├── Bundle Quantity Options sub-section
 │   │   ├── Per-rule: Box Label + Box Subtext inputs + Make this rule default action
 │   │   └── Multi Language modal: Select Language, Box Label, Box Subtext
@@ -663,7 +725,7 @@ PPB Configure Page
 │   │   ├── Pro Tip banner
 │   │   ├── FPB only: Product Slots toggle
 │   │   ├── FPB only: Product Slots helper text
-│   │   ├── FPB only: Slot Icon [Change Icon] opens bundle-level image picker; [Reset] clears icon
+│   │   ├── FPB only: Slot Icon [Change Icon] reveals a native asset drop zone; [Reset] clears icon
 │   │   ├── Settings -> Design: store-level FPB/PPB Slot Icon and Centered badge / Cover / Fit presentation control
 │   │   └── FPB only note: only applies when rules are quantity-based
 │   ├── PPB only: Low-stock alert
@@ -676,7 +738,6 @@ PPB Configure Page
 │   │   └── Action: Scroll to bundle offers / Add selected bundle
 │   ├── Cart line item discount display
 │   │   └── [Button] "Edit Defaults" → /app/settings
-│   ├── Bundle Banners (bundleBannerDesktopUrl + bundleBannerMobileUrl)
 │   ├── Custom CSS textarea (bundleLevelCss — sanitized via processCss)
 │   └── Bundle Status
 │
@@ -762,8 +823,17 @@ authorization, force-verifies the Partner API subscription, then redirects back.
 
 ```
 / (landing)
-  └── not authenticated → /auth/login → OAuth → /auth/callback → /app/dashboard
+  └── not authenticated → /auth/login
+      └── Shopify login(request) validates shop + owns OAuth navigation
+          └── /auth/callback
+              └── Shopify authenticate.admin(request) completes auth
+                  └── authenticated /app entry → /app/dashboard
 ```
+
+Admin actions and directly requested Admin resource loaders authenticate before
+request parsing, route validation, or method responses. Shopify-thrown auth and
+redirect responses propagate unchanged; authenticated in-app redirects use the
+`redirect` helper returned by `authenticate.admin(request)`.
 
 ### Flow B: Create & Configure Bundle
 
@@ -817,10 +887,12 @@ Shopify Admin product or variant details
 
 ```
 Dirty Admin form
-  └── App nav, Settings back, configure Design Control Panel, or PPB section change
+  └── App nav, Settings back/section change, configure Back, or Design Control Panel
       └── App Bridge Save Bar leaveConfirmation()
           ├── Discard/leave → requested navigation continues
           └── Stay → current form and unsaved values remain
+  └── Configure section change or Product editor intent
+      └── Navigation/action is blocked and the existing save bar is surfaced
 ```
 
 ### Flow D: Billing Upgrade
@@ -873,18 +945,17 @@ Checkout order summary → Bundle & Save
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/apps/product-bundles/api/bundle/:id.json`                    | HMAC-verified canonical storefront bundle response: exact `{ success, bundle }`; field-projection queries do not change the response shape                                                                      |
 | `/apps/product-bundles/api/offer-eligibility.json`             | Signed app-proxy decision for app-owned pre-cart schedule, specific-link, and Shopify ISO-country visibility; requires an opaque bearer token only for link-restricted offers and never returns its stored SHA-256 digest |
-| `/apps/product-bundles/api/bundles.json`                       | All active bundles for shop                                                                                                                                                                                     |
 | `/apps/product-bundles/api/fpb-upsells.json`                   | Signed, shop-scoped FPB product-page offer lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns priority-ordered eligible DTOs with private ETag caching |
 | `/apps/product-bundles/api/ppb-embed.json`                     | Signed, shop-scoped Product Page Bundle embed lookup by product, collections, locale, and Shopify ISO country; filters schedules/country rules and returns the highest-priority eligible formatted PPB with private ETag caching |
 | `/apps/product-bundles/api/page-builder-embed.json`            | Signed direct page-builder lookup with Shopify ISO-country filtering: resolves an Active or Unlisted PPB by generated parent-product handle or an FPB by shop-scoped public number; returns a formatted preloaded bundle with private ETag caching |
-| `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that merges EB-style cart `bundle_details` metafield entries                                                                                                                            |
+| `/apps/product-bundles/api/cart-bundle-details`                | Signed storefront route that paginates active cart groups, prunes stale bundle details, combines required pendingLineCount with native existing component/add-on lines to enforce 10 bundle lines per cart before add, enforces the full UTF-8 payload limit and verifies native metafield readback                                                                                                                            |
 | `/apps/product-bundles/api/storefront-products`                | Signed Storefront-context product hydration with ID validation and inventory normalization                                                                                                                       |
 | `/apps/product-bundles/api/storefront-collections`             | Signed Storefront-context collection hydration with product deduplication and membership mapping                                                                                                                 |
-| `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that validates selected bundle lines and returns `_wolfpack_bundle_runtime`, including the canonical country rule, for independent Cart Transform / Discount Function verification |
+| `/apps/product-bundles/api/cart-transform-runtime-token`       | Signed storefront route that checks current published revision, schedule, canonical Shopify variant membership and country authorization before signing selected bundle lines |
 | `/apps/product-bundles/api/checkout-integration-discount-code` | Signed storefront route that creates short-lived app discount codes for third-party FPB checkout integrations                                                                                                   |
-| `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates a signed parent and current merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
-| `/apps/product-bundles/api/design-settings/:shop`              | CSS vars for storefront widgets                                                                                                                                                                                 |
-| `/apps/product-bundles/api/language-settings/:shop`            | Settings -> Language JSON for storefront widget text and cart labels                                                                                                                                            |
+| `/api/checkout-bundle-offer-token`                             | Checkout-session-authenticated route that validates the current published parent revision and merchant offer config, then authorizes one exact add-on variant and quantity                                                    |
+| `/apps/product-bundles/api/controls-settings`                  | Shopify app-proxy-authenticated Controls JSON; derives shop identity from the verified app-proxy session                                                                                                        |
+| `/apps/product-bundles/api/language-settings`                  | Shopify app-proxy-authenticated Language JSON; derives shop identity from the verified app-proxy session                                                                                                        |
 | `/app/billing/return`                                          | Verify Shopify App Pricing state through the Partner API after a hosted-plan redirect                                                                                                                           |
 | `/api/activate-cart-transform`                                 | Deploy cart transform function                                                                                                                                                                                  |
 | `/api/activate-pixel`                                          | Activate UTM web pixel                                                                                                                                                                                          |
@@ -894,6 +965,7 @@ Checkout order summary → Bundle & Save
 | `/api/attribution`                                             | Web Pixel checkout attribution; consumes Shopify checkout line/component properties and persists normalized offer dimensions only for the matching bundle                                                      |
 | `/api/widget-error`                                            | Widget runtime error logging                                                                                                                                                                                    |
 | `/api/inngest`                                                 | Inngest background job handler                                                                                                                                                                                  |
+| `/webhooks`                                                    | Shopify-library-authenticated webhook ingress; applies active-topic and product-delete relevance gates, then awaits Inngest enqueue                                                                              |
 
 ---
 

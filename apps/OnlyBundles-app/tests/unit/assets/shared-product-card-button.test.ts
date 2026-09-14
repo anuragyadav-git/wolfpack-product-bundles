@@ -8,7 +8,7 @@ export {};
 describe('shared product card add button', () => {
   const createCard = (product: any, quantity: number, options: any = {}) => {
     const dom = new JSDOM('<!doctype html><html><body></body></html>');
-    return createSharedProductCardElement(product, quantity, { display: { format: '${{amount}}' } }, {
+    return createSharedProductCardElement(product, quantity, { display: { code: 'USD' } }, {
       ...options,
       document: dom.window.document,
     });

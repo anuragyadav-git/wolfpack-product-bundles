@@ -60,6 +60,7 @@ describe("buildCountdownRuntimeConfig", () => {
 
   it("derives the only runtime deadline from OfferPolicy.endsAt", () => {
     expect(buildCountdownRuntimeConfig(settings, {
+      scheduleMode: "one_time",
       endsAt: new Date("2030-01-02T03:04:05.000Z"),
     })).toEqual({
       layout: "full",
@@ -69,6 +70,12 @@ describe("buildCountdownRuntimeConfig", () => {
       expiredMessage: "This offer has ended",
       endsAt: "2030-01-02T03:04:05.000Z",
     });
+  });
+
+  it('does not reuse a one-time deadline for always-on or recurring offers', () => {
+    for (const scheduleMode of ['always', 'recurring'] as const) {
+      expect(buildCountdownRuntimeConfig(settings, { scheduleMode, endsAt: '2030-01-02T03:04:05Z' })).toBeNull();
+    }
   });
 
   it.each([

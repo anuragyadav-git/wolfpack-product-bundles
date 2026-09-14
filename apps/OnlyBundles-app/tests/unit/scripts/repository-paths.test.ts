@@ -54,9 +54,8 @@ describe("repository layout", () => {
     expect(manifest.scripts["dev:sit"]).toBe("npm run app:dev:sit");
     expect(manifest.scripts["deploy:prod"]).toBe("npm run app:deploy:prod");
     expect(manifest.scripts["deploy:sit"]).toBe("npm run app:deploy:sit");
-    expect(manifest.scripts["webhook-worker"]).toBe(
-      "npm run app:webhook-worker",
-    );
+    expect(manifest.scripts["webhook-worker"]).toBeUndefined();
+    expect(manifest.scripts["app:webhook-worker"]).toBeUndefined();
     expect(manifest.scripts["graphify:rebuild"]).toBe(
       "npm run app:graphify:rebuild",
     );

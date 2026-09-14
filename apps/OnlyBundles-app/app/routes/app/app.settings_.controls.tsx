@@ -14,7 +14,6 @@ import { SettingsWorkspaceError } from "./app.settings/SettingsLandingShell";
 import { SettingsRoute } from "./app.settings/SettingsRoute";
 import type { loader as settingsLoader } from "./app.settings";
 import { AdminSectionLoadingState } from "../../components/AdminSectionLoadingState";
-import { ReduxProvider } from "../../store/ReduxProvider";
 import { translateAdmin } from "~/i18n/config";
 
 export { action, loader } from "./app.settings";
@@ -69,16 +68,14 @@ export default function SettingsControlsRoute() {
         }
       >
         {([resolvedSettingsPage, resolvedPreviewBundles]: any) => (
-          <ReduxProvider>
-            <SettingsRoute
-              initialView="controls"
-              initialControlNavigation={initialNavigation}
-              onControlNavigationChange={handleNavigationChange}
-              onExit={() => navigate("/app/settings")}
-              settingsPage={resolvedSettingsPage}
-              previewBundles={resolvedPreviewBundles}
-            />
-          </ReduxProvider>
+          <SettingsRoute
+            initialView="controls"
+            initialControlNavigation={initialNavigation}
+            onControlNavigationChange={handleNavigationChange}
+            onExit={() => navigate("/app/settings")}
+            settingsPage={resolvedSettingsPage}
+            previewBundles={resolvedPreviewBundles}
+          />
         )}
       </Await>
     </Suspense>

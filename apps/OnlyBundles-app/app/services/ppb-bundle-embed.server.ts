@@ -7,7 +7,7 @@ import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility
 
 type AnyRecord = Record<string, any>;
 
-export type PpbBundleEmbedResolution = {
+type PpbBundleEmbedResolution = {
   bundle: AnyRecord;
   title: string;
   subTitle: string;
@@ -46,11 +46,10 @@ function enabledStepMatches(
   collectionIds: Set<string>,
 ) {
   if (step.enabled === false || step.isFreeGift === true) return false;
-  const productSources = [step.StepProduct, step.products];
+  const productSources = [step.StepProduct];
   const collectionSources = [step.collections];
-  for (const category of resources(step.StepCategory ?? step.categories) as AnyRecord[]) {
-    productSources.push(category.products);
-    collectionSources.push(category.collections ?? category.collectionsSelectedData);
+  for (const category of resources(step.StepCategory) as AnyRecord[]) {
+    collectionSources.push(category.collections);
   }
   return productSources.some((source) =>
     resources(source).some((item) => overlaps(resourceIdentifiers(item, "product"), productIds)),
@@ -90,7 +89,7 @@ function bundleMatches(bundle: AnyRecord, context: PpbBundleEmbedContext) {
   return collectionTargets.length > 0 && overlaps(targetSet(collectionTargets, "collection"), collectionIds);
 }
 
-export type PpbBundleEmbedContext = {
+type PpbBundleEmbedContext = {
   productId: string;
   productHandle: string;
   collectionIds: string[];

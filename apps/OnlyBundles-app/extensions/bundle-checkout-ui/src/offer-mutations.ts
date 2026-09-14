@@ -8,7 +8,7 @@ export type OfferCartLine = {
   discountAllocations?: Array<{ discountedAmount?: { amount?: number | string } }>;
 };
 
-export type MutableCheckoutOffer = {
+type MutableCheckoutOffer = {
   key: string;
   maxQuantity: number;
   discount: { type: "PERCENTAGE"; value: number } | null;

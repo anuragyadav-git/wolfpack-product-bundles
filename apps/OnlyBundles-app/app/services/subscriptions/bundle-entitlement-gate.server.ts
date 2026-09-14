@@ -1,15 +1,37 @@
 import {
   EntitlementDeniedError,
   detectBundleRequirements,
+  isFreeTemplate,
   type BundleEntitlementCandidate,
   type PlanEntitlements,
 } from "../../lib/subscriptions/entitlements";
 import { Prisma } from "@prisma/client";
 import db from "../../db.server";
 
-const PUBLICATION_TRANSACTION_TIMEOUT_MS = 10_000;
+const PUBLICATION_TRANSACTION_TIMEOUT_MS = 30_000;
 
-export interface BundlePublicationGateInput {
+interface TemplateSelectionGateInput {
+  bundleType: "FULL_PAGE" | "PRODUCT_PAGE" | "full_page" | "product_page";
+  designTemplate?: string | null;
+  designPresetId?: string | null;
+  entitlements: PlanEntitlements | null;
+}
+
+export function assertTemplateSelectionAllowed(
+  input: TemplateSelectionGateInput,
+): void {
+  if (isFreeTemplate(input)) return;
+
+  if (!input.entitlements?.capabilities.premiumTemplates) {
+    throw new EntitlementDeniedError({
+      code: "ENTITLEMENT_REQUIRED",
+      entitlement: "bundle.template.premium",
+      remediation: "UPGRADE",
+    });
+  }
+}
+
+interface BundlePublicationGateInput {
   candidate: BundleEntitlementCandidate;
   entitlements: PlanEntitlements | null;
   otherPublicBundleCount: number;
@@ -83,7 +105,7 @@ export function assertBundlePublicationAllowed(
   }
 }
 
-export interface UpdateBundleWithPublicationGateInput {
+interface UpdateBundleWithPublicationGateInput {
   database?: typeof db;
   shopDomain: string;
   bundleId: string;
@@ -114,6 +136,36 @@ export async function updateBundleWithPublicationGate<T = unknown>(
     return database.bundle.update({
       where: { id: input.bundleId, shopId: input.shopDomain },
       data: { ...input.data, publishedAt: input.now ?? new Date() },
+      ...(input.include ? { include: input.include } : {}),
+    } as any) as unknown as Promise<T>;
+  }
+
+  const existingBundle = await database.bundle.findUnique({
+    where: { id: input.bundleId, shopId: input.shopDomain },
+    select: { status: true, publishedAt: true },
+  });
+  const wasAlreadyPublic = existingBundle?.status === "active"
+    || existingBundle?.status === "unlisted";
+
+  if (wasAlreadyPublic) {
+    const otherPublicBundleCount = await database.bundle.count({
+      where: {
+        shopId: input.shopDomain,
+        id: { not: input.bundleId },
+        status: { in: ["active", "unlisted"] },
+      },
+    });
+    assertBundlePublicationAllowed({
+      candidate: input.candidate,
+      entitlements: input.entitlements,
+      otherPublicBundleCount,
+    });
+    return database.bundle.update({
+      where: { id: input.bundleId, shopId: input.shopDomain },
+      data: {
+        ...input.data,
+        publishedAt: existingBundle.publishedAt ?? input.now ?? new Date(),
+      },
       ...(input.include ? { include: input.include } : {}),
     } as any) as unknown as Promise<T>;
   }

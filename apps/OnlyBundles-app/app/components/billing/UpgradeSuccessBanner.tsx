@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 
-export interface UpgradeSuccessBannerProps {
+interface UpgradeSuccessBannerProps {
   onDismiss: () => void;
 }
 

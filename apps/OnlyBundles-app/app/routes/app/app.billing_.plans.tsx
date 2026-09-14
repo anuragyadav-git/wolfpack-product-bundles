@@ -18,23 +18,21 @@ import {
   useNavigate,
 } from "@remix-run/react";
 import { authenticate } from "../../shopify.server";
-import { PLANS } from "../../constants/plans";
+import type { PLANS } from "../../constants/plans";
 import { AppLogger } from "../../lib/logger";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import pricingStyles from "../../styles/routes/app-pricing.module.css";
 
 // Import shared billing components
-import {
-  SubscriptionQuotaCard,
-  FreePlanCard,
-  GrowthPlanCard,
-  FeatureComparisonTable,
-  UpgradeConfirmationModal,
-  ValuePropsSection,
-  FAQSection,
-  SubscriptionErrorBanner,
-} from "../../components/billing";
+import { SubscriptionQuotaCard } from "../../components/billing/SubscriptionQuotaCard";
+import { FreePlanCard } from "../../components/billing/FreePlanCard";
+import { GrowthPlanCard } from "../../components/billing/GrowthPlanCard";
+import { FeatureComparisonTable } from "../../components/billing/FeatureComparisonTable";
+import { UpgradeConfirmationModal } from "../../components/billing/UpgradeConfirmationModal";
+import { ValuePropsSection } from "../../components/billing/ValuePropsSection";
+import { FAQSection } from "../../components/billing/FAQSection";
+import { SubscriptionErrorBanner } from "../../components/billing/SubscriptionErrorBanner";
 import { navigateBackOrFallback } from "../../lib/navigation";
 import {
   AdminPageBackTitle,

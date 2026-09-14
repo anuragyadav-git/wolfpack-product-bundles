@@ -1,0 +1,11 @@
+{
+  "admin.app.intent.link": {
+    "tools": "tools.json",
+    "instructions": "instructions.md",
+    "intents": [
+      {
+        "schema": "product-import-schema.json"
+      }
+    ]
+  }
+}

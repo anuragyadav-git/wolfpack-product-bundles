@@ -26,17 +26,3 @@ export function createBundleBannerElement(config: any = {}, documentRef = docume
 
   return wrapper;
 }
-
-export function createStepBannerImageElement(step: any = {}, escapeHtml = (value: any)  => value, documentRef = document) {
-  if (!step.bannerImageUrl) return null;
-
-  const wrapper = documentRef.createElement('div');
-  wrapper.className = 'step-banner-image';
-
-  const img = documentRef.createElement('img');
-  img.src = step.bannerImageUrl;
-  img.alt = escapeHtml(step.name || '');
-  wrapper.appendChild(img);
-
-  return wrapper;
-}

@@ -3,7 +3,7 @@ import db from "../../db.server";
 import { detectBundleRequirements, type BundleEntitlementCandidate } from "../../lib/subscriptions/entitlements";
 import { savedSettingsUseAdvancedDesign } from "../../lib/subscriptions/design-entitlements";
 
-export interface PublicBundlePolicyState {
+interface PublicBundlePolicyState {
   id: string;
   status: "ACTIVE" | "UNLISTED";
   publishedAt: Date | null;

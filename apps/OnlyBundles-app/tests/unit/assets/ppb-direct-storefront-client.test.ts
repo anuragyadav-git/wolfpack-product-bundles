@@ -37,7 +37,7 @@ describe("PPB direct Shopify Storefront client", () => {
           availableForSale: true,
           quantityAvailable: 4,
           currentlyNotInStock: false,
-          price: { amount: "10.00" },
+          price: { amount: "10.00", currencyCode: "CAD" },
           compareAtPrice: null,
           weight: 0,
           weightUnit: "GRAMS",
@@ -62,6 +62,7 @@ describe("PPB direct Shopify Storefront client", () => {
       id: "gid://shopify/ProductVariant/11",
       available: true,
       quantityAvailable: 4,
+      currencyCode: "CAD",
     });
     expect(products[0].options).toEqual([{
       id: "gid://shopify/ProductOption/1",
@@ -95,7 +96,7 @@ describe("PPB direct Shopify Storefront client", () => {
   it("paginates beyond Shopify's first 250 variants", async () => {
     const variant = (id: string) => ({
       id, title: id, availableForSale: true, quantityAvailable: 1,
-      currentlyNotInStock: false, price: { amount: "10.00" }, compareAtPrice: null,
+      currentlyNotInStock: false, price: { amount: "10.00", currencyCode: "USD" }, compareAtPrice: null,
       weight: 0, weightUnit: "GRAMS", image: null, selectedOptions: [],
     });
     const fetchMock = jest.fn()
@@ -127,33 +128,131 @@ describe("PPB direct Shopify Storefront client", () => {
     ]);
   });
 
-  it("merges bundle_details through the direct Storefront cart metafield mutation", async () => {
-    const fetchMock = jest.fn()
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: { cart: { metafields: [{ value: '{"existing":{"displayProperties":{"Box":"1"}}}' }] } } }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ data: { cartMetafieldsSet: { metafields: [{ key: "bundle_details" }], userErrors: [] } } }),
-      });
+  it("fails closed when Shopify omits a requested product", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { nodes: [null] } }),
+    });
 
-    await expect(setPpbBundleDetailsCartMetafield({
+    await expect(fetchPpbStorefrontProducts({
+      shop: "shop.myshopify.com",
+      apiVersion: "2026-07",
+      accessToken: "public-token",
+      productIds: ["gid://shopify/Product/1"],
+      fetchImpl: fetchMock,
+    })).rejects.toThrow("Incomplete Shopify product hydration");
+  });
+
+  it("fails closed when Shopify returns a malformed response body", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw new SyntaxError("Unexpected token");
+      },
+    });
+
+    await expect(fetchPpbStorefrontProducts({
+      shop: "shop.myshopify.com",
+      apiVersion: "2026-07",
+      accessToken: "public-token",
+      productIds: ["gid://shopify/Product/1"],
+      fetchImpl: fetchMock,
+    })).rejects.toThrow("Incomplete Shopify product hydration");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails closed when a hydrated variant omits canonical money data", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: { nodes: [{
+        id: "gid://shopify/Product/1",
+        title: "Product",
+        handle: "product",
+        variants: { nodes: [{
+          id: "gid://shopify/ProductVariant/11",
+          availableForSale: true,
+          price: { amount: "10.00" },
+        }], pageInfo: { hasNextPage: false, endCursor: null } },
+      }] } }),
+    });
+
+    await expect(fetchPpbStorefrontProducts({
+      shop: "shop.myshopify.com",
+      apiVersion: "2026-07",
+      accessToken: "public-token",
+      productIds: ["gid://shopify/Product/1"],
+      fetchImpl: fetchMock,
+    })).rejects.toThrow("Incomplete Shopify product hydration");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    [{ amount: "not-a-price", currencyCode: "USD" }, "non-decimal amount"],
+    [{ amount: "10.00", currencyCode: "US" }, "invalid currency code"],
+  ])("fails closed for malformed Shopify money: %s (%s)", async (price) => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: { nodes: [{
+        id: "gid://shopify/Product/1",
+        title: "Product",
+        handle: "product",
+        variants: { nodes: [{
+          id: "gid://shopify/ProductVariant/11",
+          title: "Default Title",
+          availableForSale: true,
+          quantityAvailable: 1,
+          currentlyNotInStock: false,
+          price,
+          compareAtPrice: null,
+          selectedOptions: [],
+        }], pageInfo: { hasNextPage: false, endCursor: null } },
+      }] } }),
+    });
+
+    await expect(fetchPpbStorefrontProducts({
+      shop: "shop.myshopify.com",
+      apiVersion: "2026-07",
+      accessToken: "public-token",
+      productIds: ["gid://shopify/Product/1"],
+      fetchImpl: fetchMock,
+    })).rejects.toThrow("Incomplete Shopify product hydration");
+  });
+
+  it("merges bundle_details through the direct Storefront cart metafield mutation", async () => {
+    let value = JSON.stringify([{ key: 'existing', displayProperties: { Box: '1' }, runtimeToken: 'old-token' }]);
+    const fetchMock = jest.fn(async (_url, options) => {
+      const { variables } = JSON.parse(options.body);
+      if (variables.metafields) {
+        value = variables.metafields[0].value;
+        return { ok: true, json: async () => ({ data: { cartMetafieldsSet: { metafields: [{ key: 'bundle_details', value }], userErrors: [] } } }) };
+      }
+      return { ok: true, json: async () => ({ data: { cart: { id: 'cart', metafields: [{ value }], lines: { nodes: [{ offer: { value: 'existing_1' } }], pageInfo: { hasNextPage: false } } } } }) };
+    });
+
+    await expect(setPpbBundleDetailsCartMetafield({ pendingLineCount: 1,
       shop: "shop.myshopify.com",
       apiVersion: "2026-07",
       accessToken: "public-token",
       cartToken: "cart-token?key=secret",
       bundleDetailsKey: "MIX-bundle_SESSION",
       displayProperties: { Box: "2" },
+      runtimeToken: "signed-runtime-token",
       fetchImpl: fetchMock,
     })).resolves.toBe(true);
 
     const mutationBody = JSON.parse(fetchMock.mock.calls[1][1].body);
     expect(mutationBody.query).toContain("[CartMetafieldsSetInput!]!");
-    const value = JSON.parse(mutationBody.variables.metafields[0].value);
-    expect(value).toEqual({
-      existing: { displayProperties: { Box: "1" } },
-      "MIX-bundle_SESSION": { displayProperties: { Box: "2" } },
-    });
+    const saved = JSON.parse(mutationBody.variables.metafields[0].value);
+    expect(saved).toEqual([
+      { key: "existing", displayProperties: { Box: "1" }, runtimeToken: "old-token" },
+      {
+        key: "MIX-bundle_SESSION",
+        displayProperties: { Box: "2" },
+        runtimeToken: "signed-runtime-token",
+      },
+    ]);
   });
 });

@@ -1,7 +1,11 @@
 import { DefaultProductDiscountTipBanner } from "../_shared/bundle-configure/DefaultProductDiscountTipBanner";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import { buildDefaultProductEntryFromPicker } from "../../../lib/bundle-config/default-products";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
 type DefaultProductSelection = {
   graphqlId?: string;
@@ -13,18 +17,23 @@ function isString(value: string | undefined): value is string {
   return typeof value === "string" && value.length > 0;
 }
 
-export function PpbDefaultProductsSettings() {
-  const {
-    buildDefaultProductEntryFromPicker,
-    defaultProductsData,
-    markAsDirty,
-    productPageBundleStyles,
-    QuestionHelpTooltip,
-    setDefaultProductsData,
-    shopify,
-    validationErrors = {},
-    clearValidationError,
-  } = usePpbConfigureContext();
+export type PpbDefaultProductsSettingsProps = Pick<
+  PpbConfigureFlow,
+  | "clearValidationError"
+  | "defaultProductsData"
+  | "markAsDirty"
+  | "setDefaultProductsData"
+  | "validationErrors"
+>;
+
+export function PpbDefaultProductsSettings({
+  clearValidationError,
+  defaultProductsData,
+  markAsDirty,
+  setDefaultProductsData,
+  validationErrors,
+}: PpbDefaultProductsSettingsProps) {
+  const shopify = useAppBridge();
 
   const selectedDefaultProducts = defaultProductsData.products ?? [];
   const defaultProductsEnabled =
@@ -39,7 +48,7 @@ export function PpbDefaultProductsSettings() {
     .map((id: string) => ({ id }));
 
   const handleDefaultProductPicker = async () => {
-    const picked = await (shopify as any).resourcePicker({
+    const picked = await shopify.resourcePicker({
       type: "product",
       multiple: true,
       action: "select",
@@ -74,24 +83,22 @@ export function PpbDefaultProductsSettings() {
             {translateAdmin("tooltips.preselectedProducts.title")}
             <QuestionHelpTooltip tooltipKey="preselectedProducts" />
           </h3>
-          <span className={productPageBundleStyles.settingInlineSwitch}>
-            <s-switch
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.enablePreSelectedProduct"
-              )}
-              checked={defaultProductsEnabled || undefined}
-              onChange={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setDefaultProductsData((prev) => ({
-                  ...prev,
-                  isDefaultProductsEnabled: checked,
-                  defaultProductsTitle: prev.defaultProductsTitle ?? "",
-                  products: prev.products ?? [],
-                }));
-                markAsDirty();
-              }}
-            />
-          </span>
+          <s-switch
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.enablePreSelectedProduct"
+            )}
+            checked={defaultProductsEnabled || undefined}
+            onChange={(e) => {
+              const checked = (e.target as HTMLInputElement).checked;
+              setDefaultProductsData((prev) => ({
+                ...prev,
+                isDefaultProductsEnabled: checked,
+                defaultProductsTitle: prev.defaultProductsTitle ?? "",
+                products: prev.products ?? [],
+              }));
+              markAsDirty();
+            }}
+          />
         </div>
         <DisabledConfigurationRegion disabled={!defaultProductsEnabled}>
           <s-stack direction="block" gap="small">

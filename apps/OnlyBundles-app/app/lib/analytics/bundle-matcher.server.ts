@@ -25,31 +25,9 @@ export interface LineItemInput {
 }
 
 const PRODUCT_GID_PREFIX = "gid://shopify/Product/";
-const ORDER_GID_PREFIX = "gid://shopify/Order/";
 
 function normalizeToProductGid(id: string): string {
   return id.includes("/") ? id : `${PRODUCT_GID_PREFIX}${id}`;
-}
-
-/**
- * Normalize a Shopify order id to canonical GID form. Both the pixel and the
- * backfill service must write this form so that dedup between the two paths
- * works — Shopify's web-pixel sandbox has historically been unclear about
- * whether `checkout.order.id` returns a GID or a numeric string.
- */
-export function normalizeToOrderGid(id: string): string {
-  return id.includes("/") ? id : `${ORDER_GID_PREFIX}${id}`;
-}
-
-/**
- * Given a possibly-numeric or possibly-GID order id, return both forms so a
- * dedup lookup can catch legacy rows written before normalization landed.
- */
-export function orderIdMatchForms(id: string): string[] {
-  if (id.includes("/")) {
-    return [id, id.split("/").pop() ?? id];
-  }
-  return [id, `${ORDER_GID_PREFIX}${id}`];
 }
 
 export async function matchLineItemsToBundles(

@@ -1,8 +1,12 @@
+import { buildBundleAuthorizationPolicy, readPublishedBundlePolicy } from '../../services/bundle-authorization-policy.server';
+import { buildFullPageBundleMetafieldConfig } from '../app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server';
+import { buildSyncBundleConfiguration } from '../app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server';
+import { getBundleProductVariantId } from '../../utils/variant-lookup.server';
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import prisma from "../../db.server";
 import { BundleStatus } from "../../constants/bundle";
 import { AppLogger } from "../../lib/logger";
-import { authenticate } from "../../shopify.server";
+import { authenticate, unauthenticated } from "../../shopify.server";
 import {
   buildCheckoutOfferRuntime,
   calculateCheckoutOfferSelectionAmount,
@@ -10,10 +14,10 @@ import {
 } from "../../services/checkout-bundle-offers.server";
 import {
   generateCartTransformRuntimeTokenSecret,
-  normalizeProductVariantGid,
   signRuntimeCartToken,
   verifyRuntimeCartToken,
 } from "../../services/cart-transform-runtime-token.server";
+import { normalizeProductVariantGid } from "../../lib/shopify-product-gid";
 
 function shopDomainFromDestination(destination: unknown) {
   if (typeof destination !== "string") return null;
@@ -84,7 +88,7 @@ export async function action({ request }: ActionFunctionArgs) {
     where: {
       id: parentPayload.bundleId,
       shopId: shop,
-      status: BundleStatus.ACTIVE,
+      status: { in: [BundleStatus.ACTIVE, BundleStatus.UNLISTED] },
       bundleType: parentPayload.bundleType,
     },
     include: {
@@ -96,9 +100,20 @@ export async function action({ request }: ActionFunctionArgs) {
         orderBy: { position: "asc" },
       },
       pricing: true,
+      offerPolicy: true,
     },
   });
   if (!bundle) return errorResponse(cors);
+  try {
+    const { admin } = await unauthenticated.admin(shop);
+    const parentVariantId = await getBundleProductVariantId(admin as never, bundle.shopifyProductId);
+    const canonical = bundle.bundleType === 'full_page' ? buildFullPageBundleMetafieldConfig(bundle) : buildSyncBundleConfiguration(bundle, bundle.shopifyProductId);
+    const current = buildBundleAuthorizationPolicy({ bundle: canonical, shop, parentVariantId: parentVariantId ?? '' });
+    const published = await readPublishedBundlePolicy(admin, bundle.id);
+    if (parentPayload.revision !== current.revision || published?.revision !== current.revision || published.pricingMode !== current.pricingMode) return errorResponse(cors);
+  } catch {
+    return errorResponse(cors);
+  }
 
   const runtime = buildCheckoutOfferRuntime(bundle);
   const offer = resolveActiveCheckoutOffer(

@@ -5,7 +5,7 @@ title: Subscription Implementation Report
 type: implementation-report
 status: local-qa-complete-prod-gates-pending
 summary: Reports the locally verified Free and Growth implementation, completed SIT pricing setup, and remaining production release gates.
-last_audited: 2026-08-29
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -67,6 +67,9 @@ keywords:
   an actual 390x844 browser window: the Free/Growth pricing content, usage
   quota, feature comparison, responsive layout, and Growth confirmation modal
   rendered and behaved correctly. No subscription purchase was initiated.
+- A fresh Agent-store Billing check on 2026-09-14 resolved the canonical
+  Shopify App Pricing entitlement as `Growth Plan`, `Active`, `$9.99/month`,
+  with unlimited public bundle usage. No duplicate subscription was created.
 
 ## Deliberately Free
 
@@ -92,12 +95,14 @@ compatibility remain Free.
   Partner Dashboard App Pricing switch only when production cutover is approved.
 - Manual SIT deployment when a deployed extension build is required; this
   change was verified against the active Shopify dev tunnel and was not deployed.
-- Complete no-charge SIT monthly and annual subscription activation, interval
-  switch, downgrade, cancellation, frozen-state, trial-reuse, concurrent
-  publication, and CDN-served storefront evidence before production cutover.
+- Complete the remaining no-charge SIT annual interval switch, downgrade,
+  cancellation, frozen-state, trial-reuse, concurrent publication, and
+  CDN-served storefront evidence before production cutover. The Agent-store
+  monthly Growth entitlement is verified active.
 - Complete the final Admin accessibility review for the managed-plan lifecycle.
 
-Pricing of `$19.99/month` and `$199/year` was approved by the product owner on
-2026-08-28. SIT Partner Dashboard pricing was configured before this QA pass.
-No deployment, production mutation, or completed purchase-flow claim is made
-by this report.
+The original pricing configuration approved on 2026-08-28 was used for this
+historical QA pass. On 2026-09-11 the product owner replaced those amounts with
+`$9.99/month` and `$99.90/year`. The Shopify listing was reported as already
+aligned with the revised monthly amount. No deployment, production mutation,
+or completed purchase-flow claim is made by this report.

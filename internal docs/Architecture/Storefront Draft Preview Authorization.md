@@ -4,8 +4,8 @@ id: storefront-draft-preview-authorization
 title: Storefront Draft Preview Authorization
 type: architecture-decision
 status: accepted
-summary: Draft FPB and PPB storefront previews use one short-lived stateless token bound to the shop and bundle.
-last_audited: 2026-09-04
+summary: Draft FPB and PPB storefront previews use one 1-hour stateless token bound to the shop and bundle.
+last_audited: 2026-09-15
 owners:
   - engineering
 domains:
@@ -39,7 +39,7 @@ keywords:
 
 ## Decision
 
-Draft FPB and PPB previews use the same 15-minute stateless `wpb_preview` token. The token is HMAC-signed from `SHOPIFY_API_SECRET` and binds version, shop domain, bundle ID, and expiry. It is minted only after an authenticated Admin preview preparation successfully performs the normal storefront sync.
+Draft FPB and PPB previews use the same 1-hour (60-minute) stateless `wpb_preview` token (`BUNDLE_PREVIEW_TOKEN_TTL_MS = 60 * 60 * 1000`). The token is HMAC-signed from `SHOPIFY_API_SECRET` and binds version, shop domain, bundle ID, and expiry. It is minted only after an authenticated Admin preview preparation successfully performs the normal storefront sync.
 
 Active and unlisted bundles remain public. Draft bundles require a valid token. Archived, missing, cross-shop, expired, tampered, and cross-bundle requests return `404` so callers cannot distinguish private state from absence.
 

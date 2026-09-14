@@ -6,8 +6,8 @@ import type { StorefrontApiContext } from "@shopify/shopify-app-remix/server";
 import { normalizeStorefrontQuantityAvailable } from "../../lib/storefront-variant-inventory";
 
 /**
- * Public API endpoint to fetch products using Storefront API
- * This endpoint can be called from the widget without authentication
+ * Signed app-proxy endpoint to fetch products using Storefront API.
+ * Shopify authenticates the widget request before the verified shop session is used.
  * Route: /api/storefront-products?ids=gid://shopify/Product/123,gid://shopify/Product/456
  */
 
@@ -39,7 +39,9 @@ function mapStorefrontVariant(edge: any) {
     id: edge.node.id,
     title: edge.node.title,
     price: edge.node.price?.amount || '0',
+    currencyCode: edge.node.price?.currencyCode || null,
     compareAtPrice: edge.node.compareAtPrice?.amount || null,
+    compareAtCurrencyCode: edge.node.compareAtPrice?.currencyCode || null,
     available: edge.node.availableForSale,
     quantityAvailable: normalizeStorefrontQuantityAvailable(edge.node),
     currentlyNotInStock: edge.node.currentlyNotInStock === true,

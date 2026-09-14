@@ -83,9 +83,6 @@ async renderFullPageLayout() {
     if (categoryTabs) contentSection.appendChild(categoryTabs);
   }
 
-  const stepBanner = this.createStepBannerImage(this.currentStepIndex);
-  if (stepBanner) contentSection.appendChild(stepBanner);
-
   if (this.shouldRenderFullPageSearch()) {
     contentSection.appendChild(this.createSearchInput());
   }
@@ -133,7 +130,6 @@ async renderFullPageLayout() {
     productGridContainer.appendChild(productGrid);
     this.renderSidePanel(sidePanel);
     this.hideLoadingOverlay();
-    this.preloadNextStep();
     this._renderMobileSummaryTray();
   } catch (error: any) {
     this.hideLoadingOverlay();

@@ -11,13 +11,17 @@ function createTarget() {
 }
 
 const originalDocument = global.document;
+const originalWindow = global.window;
 
 beforeEach(() => {
-  global.document = new JSDOM('<!doctype html><html><body></body></html>').window.document;
+  const domWindow = new JSDOM('<!doctype html><html><body></body></html>').window;
+  global.document = domWindow.document;
+  global.window = domWindow as unknown as Window & typeof globalThis;
 });
 
 afterEach(() => {
   global.document = originalDocument;
+  global.window = originalWindow;
 });
 
 function createBaseContext(overrides: Record<string, unknown> = {}) {
@@ -50,6 +54,30 @@ function createBaseContext(overrides: Record<string, unknown> = {}) {
 }
 
 describe('PPB card control setting parsing', () => {
+  it('reads the shared loading screen from the Shopify-hosted runtime', () => {
+    const context = {
+      ...ProductPageConfigLifecycleMethods,
+      container: { dataset: {} },
+      config: {},
+    } as any;
+    const runtimeWindow = global.window as Window & typeof globalThis & {
+      __WOLFPACK_PPB_STOREFRONT_RUNTIME__?: unknown;
+    };
+    runtimeWindow.__WOLFPACK_PPB_STOREFRONT_RUNTIME__ = {
+      loadingScreen: {
+        gifUrl: 'https://cdn.shopify.com/loading.gif',
+        backgroundColor: '#123456',
+      },
+    };
+
+    context.parseConfiguration();
+
+    expect(context.config.loadingScreen).toEqual({
+      gifUrl: 'https://cdn.shopify.com/loading.gif',
+      backgroundColor: '#123456',
+    });
+  });
+
   it('reads canonical controls for quantity-input visibility and defaults to dataset when absent', () => {
     const context = {
       ...ProductPageConfigLifecycleMethods,
@@ -493,5 +521,170 @@ describe('PPB modal product-card description wiring', () => {
 
     expect(productGrid.innerHTML).not.toContain('bw-product-card__description');
     expect(productGrid.innerHTML).not.toContain('&lt;p&gt;&lt;/p&gt;');
+  });
+
+  it('preserves both selected dimensions while rebuilding a modal product card', () => {
+    const modal = document.createElement('div');
+    const productGrid = document.createElement('div');
+    productGrid.className = 'product-grid';
+    modal.append(productGrid);
+    document.body.append(modal);
+
+    const sizes = ['S', 'M'];
+    const colors = ['Black', 'Navy'];
+    const variants = sizes.flatMap((size) => colors.map((color) => ({
+      id: `${size}-${color}`,
+      title: `${size} / ${color}`,
+      selectedOptions: [
+        { name: 'Size', value: size },
+        { name: 'Color', value: color },
+      ],
+      price: '30.00',
+      available: true,
+    })));
+    const product = {
+      id: 'product-1',
+      selectionId: 'S-Black',
+      variantId: 'S-Black',
+      title: 'Two-dimensional product',
+      price: 3000,
+      imageUrl: '/two-dimensional-product.png',
+      options: [
+        { name: 'Size', optionValues: sizes.map((name) => ({ name })) },
+        { name: 'Color', optionValues: colors.map((name) => ({ name })) },
+      ],
+      variants,
+    };
+    const context = {
+      ...ProductPageModalMethods,
+      config: {},
+      selectedBundle: {
+        steps: [{ categories: [{ variantSelectorMode: 'dropdown' }] }],
+        validateQuantityPerProduct: null,
+      },
+      stepProductData: [[product]],
+      selectedProducts: [{}],
+      activeInpageCategoryIndexes: {},
+      elements: { modal },
+      _filterProductsForInpageCategory: (_step: unknown, products: unknown[]) => products,
+      expandProductsByVariant: (products: unknown[]) => products,
+      getSelectedQuantity: () => 0,
+      getVariantAvailable: () => ({ available: null, outOfStock: false }),
+      isInventoryTrackingOnAddToCartEnabled: () => false,
+      _shouldShowProductComparedAtPrice: () => false,
+      _resolveText: (_key: string, fallback: string) => fallback,
+      findProductBySelectionKey: (products: any[], key: string) => products.find((candidate) => (
+        candidate.id === key
+        || candidate.selectionId === key
+        || candidate.variants.some((variant: any) => variant.id === key)
+      )),
+      updateModalNavigation: jest.fn(),
+      updateModalFooterMessaging: jest.fn(),
+    } as any;
+
+    ProductPageModalMethods.renderModalProducts.call(context, 0);
+    let renderedGrid = modal.querySelector<HTMLElement>('.product-grid')!;
+    let size = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="0"] select')!;
+    size.value = 'M-Black';
+    size.dispatchEvent(new window.Event('change', { bubbles: true }));
+
+    renderedGrid = modal.querySelector<HTMLElement>('.product-grid')!;
+    let color = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="1"] select')!;
+    color.value = 'M-Navy';
+    color.dispatchEvent(new window.Event('change', { bubbles: true }));
+
+    renderedGrid = modal.querySelector<HTMLElement>('.product-grid')!;
+    size = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="0"] select')!;
+    color = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="1"] select')!;
+    expect(product.variantId).toBe('M-Navy');
+    expect(size.selectedOptions[0].dataset.optionValue).toBe('M');
+    expect(color.selectedOptions[0].dataset.optionValue).toBe('Navy');
+    expect(renderedGrid.querySelector('.product-variant-row')?.textContent).toBe('M / Navy');
+  });
+
+  it('preserves both selected dimensions while rebuilding an in-page product card', () => {
+    const host = document.createElement('div');
+    const target = document.createElement('div');
+    host.append(target);
+    document.body.append(host);
+
+    const sizes = ['S', 'M'];
+    const colors = ['Black', 'Navy'];
+    const variants = sizes.flatMap((size) => colors.map((color) => ({
+      id: `${size}-${color}`,
+      title: `${size} / ${color}`,
+      selectedOptions: [
+        { name: 'Size', value: size },
+        { name: 'Color', value: color },
+      ],
+      price: '30.00',
+      available: true,
+    })));
+    const product = {
+      id: 'product-1',
+      selectionId: 'S-Black',
+      variantId: 'S-Black',
+      title: 'Two-dimensional product',
+      price: 3000,
+      imageUrl: '/two-dimensional-product.png',
+      options: [
+        { name: 'Size', optionValues: sizes.map((name) => ({ name })) },
+        { name: 'Color', optionValues: colors.map((name) => ({ name })) },
+      ],
+      variants,
+    };
+    const context = {
+      ...ProductPageInpageRenderMethods,
+      ...ProductPageModalMethods,
+      config: {},
+      selectedBundle: {
+        variantSelectorEnabled: true,
+        steps: [{ categories: [{ variantSelectorMode: 'dropdown' }] }],
+        validateQuantityPerProduct: null,
+      },
+      stepProductData: [[product]],
+      selectedProducts: [{}],
+      selectedProductCategoryIndexes: {},
+      activeInpageCategoryIndexes: {},
+      _inpageStepProductsLoaded: { 0: true },
+      normalizeSelectionKey: (value: unknown) => String(value || ''),
+      _filterProductsForInpageCategory: (_step: unknown, products: unknown[]) => products,
+      expandProductsByVariant: (products: unknown[]) => products,
+      getSelectedQuantity: () => 0,
+      getVariantAvailable: () => ({ available: null, outOfStock: false }),
+      isInventoryTrackingOnAddToCartEnabled: () => false,
+      _isProductPageCascadeTemplate: () => false,
+      _isProductPageGridTemplate: () => true,
+      _shouldShowProductComparedAtPrice: () => false,
+      _resolveText: (_key: string, fallback: string) => fallback,
+      resolveProductPageStepText: (_step: unknown, fallback: string) => fallback,
+      findProductBySelectionKey: (products: any[], key: string) => products.find((candidate) => (
+        candidate.id === key
+        || candidate.selectionId === key
+        || candidate.variants.some((variant: any) => variant.id === key)
+      )),
+      renderModalProducts: jest.fn(),
+      updateModalNavigation: jest.fn(),
+      updateModalFooterMessaging: jest.fn(),
+    } as any;
+
+    ProductPageInpageRenderMethods._renderInpageStepProducts.call(context, 0, target);
+    let renderedGrid = host.querySelector<HTMLElement>('.bw-ppb-grid-product-grid')!;
+    let size = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="0"] select')!;
+    size.value = 'M-Black';
+    size.dispatchEvent(new window.Event('change', { bubbles: true }));
+
+    renderedGrid = host.querySelector<HTMLElement>('.bw-ppb-grid-product-grid')!;
+    let color = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="1"] select')!;
+    color.value = 'M-Navy';
+    color.dispatchEvent(new window.Event('change', { bubbles: true }));
+
+    renderedGrid = host.querySelector<HTMLElement>('.bw-ppb-grid-product-grid')!;
+    size = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="0"] select')!;
+    color = renderedGrid.querySelector<HTMLSelectElement>('[data-option-index="1"] select')!;
+    expect(product.variantId).toBe('M-Navy');
+    expect(size.selectedOptions[0].dataset.optionValue).toBe('M');
+    expect(color.selectedOptions[0].dataset.optionValue).toBe('Navy');
+    expect(renderedGrid.querySelector('.product-variant-row')?.textContent).toBe('M / Navy');
   });
 });

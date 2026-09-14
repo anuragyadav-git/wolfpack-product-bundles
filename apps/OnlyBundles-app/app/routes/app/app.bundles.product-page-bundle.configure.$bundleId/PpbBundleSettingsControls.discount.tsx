@@ -1,7 +1,9 @@
 import { useNavigate } from "@remix-run/react";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { navigateToProductPageDefaults } from "../../../lib/bundle-config/product-page-admin-sections";
 import { translateAdmin } from "~/i18n/config";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
 const CART_DISCOUNT_DISPLAY_OPTIONS = [
   {
@@ -18,15 +20,18 @@ const CART_DISCOUNT_DISPLAY_OPTIONS = [
   },
 ];
 
-export function PpbCartDiscountDisplaySettings() {
+export type PpbCartDiscountDisplaySettingsProps = Pick<
+  PpbConfigureFlow,
+  "markAsDirty" | "setTextOverrides" | "textOverrides"
+>;
+
+export function PpbCartDiscountDisplaySettings({
+  markAsDirty,
+  setTextOverrides,
+  textOverrides,
+}: PpbCartDiscountDisplaySettingsProps) {
   const navigate = useNavigate();
-  const {
-    markAsDirty,
-    QuestionHelpTooltip,
-    setTextOverrides,
-    shopify,
-    textOverrides,
-  } = usePpbConfigureContext();
+  const shopify = useAppBridge();
 
   return (
     <s-section>
@@ -45,81 +50,48 @@ export function PpbCartDiscountDisplaySettings() {
             )}
           </h3>
           <QuestionHelpTooltip tooltipKey="cartLineItemDiscountDisplay" />
-          <button
-            type="button"
+          <s-button
+            variant="secondary"
             onClick={() => {
               void navigateToProductPageDefaults(
                 () => shopify.saveBar.leaveConfirmation(),
                 navigate
               );
             }}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              minHeight: 32,
-              padding: "0 12px",
-              borderRadius: 8,
-              border: "1px solid #c9cccf",
-              color: "#202223",
-              fontSize: 13,
-              fontWeight: 600,
-              textDecoration: "none",
-              background: "#ffffff",
-              cursor: "pointer",
-            }}
           >
             {translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.editDefaults"
             )}
-          </button>
+          </s-button>
         </s-stack>
         <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.showsHowMuchTheCustomerIsSavingOnTheBundleInCart"
           )}
         </p>
-        {CART_DISCOUNT_DISPLAY_OPTIONS.map(
-          ({ value, label, description }: any) => (
-            <label
-              key={value}
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 8,
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="radio"
-                name="cartDiscountDisplay"
-                value={value}
-                checked={
-                  (textOverrides.cartDiscountDisplay ?? "defaults") === value
-                }
-                onChange={() => {
-                  setTextOverrides((prev) => ({
-                    ...prev,
-                    cartDiscountDisplay: value,
-                  }));
-                  markAsDirty();
-                }}
-                style={{ marginTop: 3 }}
-              />
-              <span>
-                <span style={{ display: "block", fontSize: 14 }}>{label}</span>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: 13,
-                    color: "#6d7175",
-                  }}
-                >
-                  {description}
-                </span>
-              </span>
-            </label>
-          )
-        )}
+        <s-choice-list
+          name="cartDiscountDisplay"
+          label={translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.cartLineItemDiscountDisplay"
+          )}
+          labelAccessibilityVisibility="exclusive"
+          values={[textOverrides.cartDiscountDisplay ?? "defaults"]}
+          onChange={(event: Event) => {
+            const value = (event.currentTarget as any).values?.[0];
+            if (!value) return;
+            setTextOverrides((prev) => ({
+              ...prev,
+              cartDiscountDisplay: value,
+            }));
+            markAsDirty();
+          }}
+        >
+          {CART_DISCOUNT_DISPLAY_OPTIONS.map(({ value, label, description }) => (
+            <s-choice key={value} value={value}>
+              {`${label}. ${description}`}
+            </s-choice>
+          ))}
+        </s-choice-list>
       </s-stack>
     </s-section>
   );

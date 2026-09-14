@@ -5,7 +5,7 @@ title: Built for Shopify Admin Compliance
 type: test-spec
 status: active
 summary: Verifies canonical parent navigation, mobile containment, and simultaneous desktop Design editor and preview behavior.
-last_audited: 2026-09-01
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -33,7 +33,7 @@ keywords:
 
 # Test Spec: Built for Shopify Admin Compliance
 
-**Spec ID:** bfs-admin-compliance  **Created:** 2026-09-01
+**Spec ID:** bfs-admin-compliance **Created:** 2026-09-01
 
 ## Purpose
 
@@ -45,23 +45,23 @@ the simultaneous desktop Design editor and preview.
 
 ### AdminNavigationAndRoutes
 
-| # | Scenario | Input | Expected Output | Notes |
-| --- | --- | --- | --- | --- |
-| 1 | Authenticated app shell renders navigation | Any app route | One `s-app-nav` with one `s-link` home and canonical primary links | App Bridge owns selection state |
-| 2 | Merchant opens Controls | Settings Controls card | Navigate to `/app/settings/controls` | Settings remains the URL parent |
-| 3 | Merchant directly loads Controls | `/app/settings/controls` with query state | Existing controls workspace and Redux provider render | Preserve deep links and save behavior |
-| 4 | Merchant opens Billing | Main navigation | Navigate to `/app/billing` | Billing is the parent route |
-| 5 | Free merchant chooses Upgrade | Billing page | Navigate to `/app/billing/plans` | Plan comparison is a Billing child URL |
-| 6 | Merchant selects Growth | Billing Plans action | Return Shopify-hosted plan URL | Shopify owns plan purchase |
-| 7 | Shopify returns after plan selection | `/app/billing/return` | Force verification and embedded redirect to Billing | Query hints never grant access |
+| #   | Scenario                                   | Input                                     | Expected Output                                                                                     | Notes                                                          |
+| --- | ------------------------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| 1   | Authenticated app shell renders navigation | Any app route                             | One `s-app-nav` with one `s-link` home and canonical primary links                                  | App Bridge owns selection state                                |
+| 2   | Merchant opens Controls                    | Settings Controls card                    | Navigate to `/app/settings/controls`                                                                | Settings remains the URL parent                                |
+| 3   | Merchant directly loads Controls           | `/app/settings/controls` with query state | Existing controls workspace renders from the authenticated Remix route with route-local React state | Preserve deep links and save behavior without a Redux provider |
+| 4   | Merchant opens Billing                     | Main navigation                           | Navigate to `/app/billing`                                                                          | Billing is the parent route                                    |
+| 5   | Free merchant chooses Upgrade              | Billing page                              | Navigate to `/app/billing/plans`                                                                    | Plan comparison is a Billing child URL                         |
+| 6   | Merchant selects Growth                    | Billing Plans action                      | Return Shopify-hosted plan URL                                                                      | Shopify owns plan purchase                                     |
+| 7   | Shopify returns after plan selection       | `/app/billing/return`                     | Force verification and embedded redirect to Billing                                                 | Query hints never grant access                                 |
 
 ### ResponsiveAcceptance
 
-| # | Scenario | Input | Expected Output | Notes |
-| --- | --- | --- | --- | --- |
-| 1 | Merchant opens any Admin workflow on mobile | Actual 390 x 844 Chrome window | Page does not scroll horizontally and all actions remain reachable | Internal labelled data scrollers are allowed |
-| 2 | Merchant opens Create Bundle on mobile | Long heading and both bundle cards | Header and card actions stack without clipping or hidden overflow | Visual Chrome verification only |
-| 3 | Merchant opens Settings Design on desktop | Actual 1280 x 800 Chrome window | Editor controls and corresponding live preview are visible together | No toggle or page scroll between panes |
+| #   | Scenario                                    | Input                              | Expected Output                                                     | Notes                                        |
+| --- | ------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------- | -------------------------------------------- |
+| 1   | Merchant opens any Admin workflow on mobile | Actual 390 x 844 Chrome window     | Page does not scroll horizontally and all actions remain reachable  | Internal labelled data scrollers are allowed |
+| 2   | Merchant opens Create Bundle on mobile      | Long heading and both bundle cards | Header and card actions stack without clipping or hidden overflow   | Visual Chrome verification only              |
+| 3   | Merchant opens Settings Design on desktop   | Actual 1280 x 800 Chrome window    | Editor controls and corresponding live preview are visible together | No toggle or page scroll between panes       |
 
 ## Acceptance Criteria
 

@@ -8,10 +8,10 @@ import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server"
 import { parseFpbPublicNumber } from "../../lib/fpb-storefront-url";
 import {
   renderFpbLoadingScreen,
-  resolveFpbLoadingScreenSettings,
-} from "../../lib/fpb-loading-screen";
+  resolveBundleLoadingScreenSettings,
+} from "../../lib/bundle-loading-screen";
 import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
-import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer";
 import { buildOfferCountryLiquidGuard } from "../../lib/offer-country-liquid-guard.server";
 
 function escapeHtmlAttribute(value: string): string {
@@ -117,12 +117,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   const isPublic = bundle.status === BundleStatus.ACTIVE
     || bundle.status === BundleStatus.UNLISTED;
+  const hasValidPreviewToken = verifyBundlePreviewToken({
+    token: url.searchParams.get("wpb_preview"),
+    shop: shopDomain,
+    bundleId: bundle.id,
+  });
   const hasValidDraftPreview = bundle.status === BundleStatus.DRAFT
-    && verifyBundlePreviewToken({
-      token: url.searchParams.get("wpb_preview"),
-      shop: shopDomain,
-      bundleId: bundle.id,
-    });
+    && hasValidPreviewToken;
 
   if (!isPublic && !hasValidDraftPreview) {
     AppLogger.info("FPB proxy page hidden by status", {
@@ -140,7 +141,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
   }
 
-  const offerDecision = hasValidDraftPreview
+  const offerDecision = hasValidPreviewToken
     ? { eligible: true, reasonCode: "not_required" as const }
     : resolveSpecificLinkOfferEligibility({
       policy: bundle.offerPolicy,
@@ -170,13 +171,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     ? ` data-fpb-design-preset="${escapeHtmlAttribute(formattedBundle.bundleDesignPresetId)}"`
     : "";
   const config = escapeHtmlAttribute(JSON.stringify(formattedBundle));
-  const loadingScreen = resolveFpbLoadingScreenSettings(designSettings?.generalSettings);
+  const loadingScreen = resolveBundleLoadingScreenSettings(designSettings?.generalSettings);
   const loadingScreenMarkup = renderFpbLoadingScreen(loadingScreen);
   const loadingGifAttr = loadingScreen.gifUrl
     ? ` data-fpb-loading-gif="${escapeHtmlAttribute(loadingScreen.gifUrl)}"`
     : "";
   const marker = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-country-code="{{ localization.country.iso_code }}" data-fpb-loading-background="${escapeHtmlAttribute(loadingScreen.backgroundColor)}"${loadingGifAttr}${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${loadingScreenMarkup}</div>`;
-  const liquid = hasValidDraftPreview
+  const liquid = hasValidPreviewToken
     ? marker
     : buildOfferCountryLiquidGuard(marker, bundle.offerPolicy);
 

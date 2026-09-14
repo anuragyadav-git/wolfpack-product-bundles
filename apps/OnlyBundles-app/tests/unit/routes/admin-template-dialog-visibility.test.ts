@@ -1,5 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import type { PpbSelectTemplateDialogProps } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbSelectTemplateDialog";
 
 jest.mock("@shopify/app-bridge-react", () => ({
   Modal: ({ children, open }: { children: React.ReactNode; open?: boolean }) =>
@@ -37,11 +38,6 @@ const ppbContext = {
   themeEditorUrl: null,
 };
 
-jest.mock(
-  "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({ usePpbConfigureContext: () => ppbContext })
-);
-
 describe("Admin template save loading", () => {
   it("keeps the PPB template step visible with a loading Next action while saving", async () => {
     const { PpbSelectTemplateDialog } = await import(
@@ -54,7 +50,10 @@ describe("Admin template save loading", () => {
     ppbContext.templateFetcher.state = "submitting";
 
     const view = renderToStaticMarkup(
-      React.createElement(PpbSelectTemplateDialog)
+      React.createElement(
+        PpbSelectTemplateDialog,
+        ppbContext as unknown as PpbSelectTemplateDialogProps,
+      )
     );
 
     expect(view).toMatch(/<s-button[^>]*loading="true"[^>]*>Next<\/s-button>/);
@@ -67,10 +66,9 @@ describe("Admin template save loading", () => {
     const { FpbTemplateDialog } = await import(
       "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureTemplateDialog"
     );
-    const flow = {
+    const template = {
       closeSelectTemplateModal: jest.fn(),
       fullPageBundleStyles: {},
-      fullPageTemplateOptions: [],
       handleTemplateNext: jest.fn(),
       handleTemplatePreview: jest.fn(),
       isPreviewBundleLoading: false,
@@ -87,10 +85,126 @@ describe("Admin template save loading", () => {
     };
 
     const view = renderToStaticMarkup(
-      React.createElement(FpbTemplateDialog, { flow: flow as any })
+      React.createElement(FpbTemplateDialog, { template: template as never })
     );
 
     expect(view).toMatch(/<s-button[^>]*loading="true"[^>]*>Next<\/s-button>/);
     expect(view).toContain("Customize your bundle");
+  });
+
+  describe("Free Plan Template Gating & Banner", () => {
+    it("renders upsell banner and Growth badges for gated templates on PPB when on Free plan", async () => {
+      const { PpbSelectTemplateDialog } = await import(
+        "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbSelectTemplateDialog"
+      );
+
+      const view = renderToStaticMarkup(
+        React.createElement(
+          PpbSelectTemplateDialog,
+          {
+            ...ppbContext,
+            isSelectTemplateModalOpen: true,
+            isFreePlan: true,
+          } as unknown as PpbSelectTemplateDialogProps,
+        )
+      );
+
+      expect(view).toContain(
+        "Upgrade to the Growth plan for more templates that will help in increasing conversions."
+      );
+      // 3 gated templates should have Growth badges
+      const growthBadges = view.match(/<s-badge[^>]*tone="warning"[^>]*>Growth<\/s-badge>/g);
+      expect(growthBadges?.length).toBe(3);
+    });
+
+    it("does not render upsell banner or Growth badges on PPB when on Growth plan", async () => {
+      const { PpbSelectTemplateDialog } = await import(
+        "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbSelectTemplateDialog"
+      );
+
+      const view = renderToStaticMarkup(
+        React.createElement(
+          PpbSelectTemplateDialog,
+          {
+            ...ppbContext,
+            isSelectTemplateModalOpen: true,
+            isFreePlan: false,
+          } as unknown as PpbSelectTemplateDialogProps,
+        )
+      );
+
+      expect(view).not.toContain(
+        "Upgrade to the Growth plan for more templates that will help in increasing conversions."
+      );
+      expect(view).not.toContain("Growth");
+    });
+
+    it("renders upsell banner and Growth badges for gated templates on FPB when on Free plan", async () => {
+      const { FpbTemplateDialog } = await import(
+        "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureTemplateDialog"
+      );
+      const template = {
+        closeSelectTemplateModal: jest.fn(),
+        fullPageBundleStyles: {},
+        handleTemplateNext: jest.fn(),
+        handleTemplatePreview: jest.fn(),
+        isPreviewBundleLoading: false,
+        isSelectTemplateModalOpen: true,
+        pendingDesignPresetId: "STANDARD",
+        pendingDesignTemplate: "FBP_SIDE_FOOTER",
+        setPendingDesignPresetId: jest.fn(),
+        setPendingDesignTemplate: jest.fn(),
+        setTemplateModalStep: jest.fn(),
+        templateFetcher: { state: "idle" },
+        templateModalStep: "templates",
+        templateSaveError: null,
+        themeEditorUrl: null,
+        isFreePlan: true,
+      };
+
+      const view = renderToStaticMarkup(
+        React.createElement(FpbTemplateDialog, { template: template as never })
+      );
+
+      expect(view).toContain(
+        "Upgrade to the Growth plan for more templates that will help in increasing conversions."
+      );
+      // 3 gated templates should have Growth badges
+      const growthBadges = view.match(/<s-badge[^>]*tone="warning"[^>]*>Growth<\/s-badge>/g);
+      expect(growthBadges?.length).toBe(3);
+    });
+
+    it("does not render upsell banner or Growth badges on FPB when on Growth plan", async () => {
+      const { FpbTemplateDialog } = await import(
+        "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/sections/ConfigureTemplateDialog"
+      );
+      const template = {
+        closeSelectTemplateModal: jest.fn(),
+        fullPageBundleStyles: {},
+        handleTemplateNext: jest.fn(),
+        handleTemplatePreview: jest.fn(),
+        isPreviewBundleLoading: false,
+        isSelectTemplateModalOpen: true,
+        pendingDesignPresetId: "STANDARD",
+        pendingDesignTemplate: "FBP_SIDE_FOOTER",
+        setPendingDesignPresetId: jest.fn(),
+        setPendingDesignTemplate: jest.fn(),
+        setTemplateModalStep: jest.fn(),
+        templateFetcher: { state: "idle" },
+        templateModalStep: "templates",
+        templateSaveError: null,
+        themeEditorUrl: null,
+        isFreePlan: false,
+      };
+
+      const view = renderToStaticMarkup(
+        React.createElement(FpbTemplateDialog, { template: template as never })
+      );
+
+      expect(view).not.toContain(
+        "Upgrade to the Growth plan for more templates that will help in increasing conversions."
+      );
+      expect(view).not.toContain("Growth");
+    });
   });
 });

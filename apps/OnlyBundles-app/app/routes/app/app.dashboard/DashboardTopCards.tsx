@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { OptimisedImage } from "../../../components/OptimisedImage";
 import dashboardStyles from "./dashboard.module.css";
 
 type DashboardTopCardsProps = {
@@ -24,14 +23,12 @@ export function DashboardTopCards({
           </div>
           <div className={dashboardStyles.supportCardBody}>
             <div className={dashboardStyles.supportAvatarWrap}>
-              <OptimisedImage
-                src="/Parth.jpeg"
+              <s-image
+                src="/Parth.avif"
                 alt={t("dashboard.support.imageAlt")}
-                className={dashboardStyles.supportAvatarImage}
-                width={120}
-                height={120}
+                aspectRatio="1/1"
+                objectFit="cover"
                 loading="eager"
-                fetchPriority="high"
               />
             </div>
             <div className={dashboardStyles.supportContent}>
@@ -49,13 +46,24 @@ export function DashboardTopCards({
               </s-stack>
             </div>
             <div className={dashboardStyles.supportCta}>
-              <s-button
-                variant="primary"
-                inlineSize="fill"
+              <s-clickable
+                inlineSize="100%"
+                background="strong"
+                borderRadius="base"
+                padding="small"
+                accessibilityLabel={t("dashboard.support.cta")}
                 onClick={handleDirectChat}
               >
-                {t("dashboard.support.cta")}
-              </s-button>
+                <s-stack
+                  direction="inline"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <s-text type="strong" color="base">
+                    {t("dashboard.support.cta")}
+                  </s-text>
+                </s-stack>
+              </s-clickable>
             </div>
           </div>
         </div>
@@ -90,15 +98,27 @@ export function DashboardTopCards({
             </s-stack>
           </s-stack>
           <div className={dashboardStyles.supportIssuesCta}>
-            <s-button icon="chat" inlineSize="fill" onClick={handleDirectChat}>
-              {t("dashboard.supportIssues.cta")}
-            </s-button>
-            <span
-              className={dashboardStyles.supportIssuesExternalIcon}
-              aria-hidden="true"
+            <s-clickable
+              inlineSize="100%"
+              border="base"
+              borderRadius="base"
+              padding="small"
+              accessibilityLabel={t("dashboard.supportIssues.cta")}
+              onClick={handleDirectChat}
             >
-              <s-icon type="external" color="subdued" />
-            </span>
+              <s-stack
+                direction="inline"
+                alignItems="center"
+                justifyContent="space-between"
+                gap="small"
+              >
+                <s-stack direction="inline" alignItems="center" gap="small">
+                  <s-icon type="chat" />
+                  <s-text>{t("dashboard.supportIssues.cta")}</s-text>
+                </s-stack>
+                <s-icon type="external" color="subdued" />
+              </s-stack>
+            </s-clickable>
           </div>
         </div>
       </div>

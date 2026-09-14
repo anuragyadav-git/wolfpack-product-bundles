@@ -54,11 +54,11 @@ describe('FPB Horizontal grouped variant selector', () => {
     expect(view.dataset.vsMobileMode).toBe('inline');
     expect(view.querySelector('[data-variant-id="variant-cherry"]')).not.toBeNull();
     expect(view.querySelector('[data-variant-id="variant-vanilla"]')).not.toBeNull();
-    expect(view.querySelector('[data-variant-id="variant-peach"]')).toBeNull();
+    expect(view.querySelector('[data-variant-id="variant-peach"]')?.getAttribute('aria-disabled')).toBe('true');
   });
 
   it.each(['STANDARD', 'CLASSIC', 'COMPACT', 'HORIZONTAL'])(
-    'omits unavailable grouped variants from %s cards',
+    'retains unavailable grouped variants as disabled in %s cards',
     (designPreset) => {
       const originalDocument = (global as { document?: unknown }).document;
       const runtimeDocument = new JSDOM('<!doctype html><html><body></body></html>').window.document;
@@ -86,11 +86,11 @@ describe('FPB Horizontal grouped variant selector', () => {
         ) as HTMLElement;
 
         if (designPreset === 'COMPACT') {
-          expect(card.querySelector('[data-primary-value="Cherry"]')).not.toBeNull();
-          expect(card.querySelector('[data-primary-value="Peach"]')).toBeNull();
+          expect(card.querySelector('input[value="Cherry"]')).not.toBeNull();
+          expect(card.querySelector('input[value="Peach"]')?.hasAttribute('disabled')).toBe(true);
         } else {
           expect(card.querySelector('[data-variant-id="variant-cherry"]')).not.toBeNull();
-          expect(card.querySelector('[data-variant-id="variant-peach"]')).toBeNull();
+          expect(card.querySelector('[data-variant-id="variant-peach"]')?.getAttribute('aria-disabled')).toBe('true');
         }
       } finally {
         (global as { document?: unknown }).document = originalDocument;

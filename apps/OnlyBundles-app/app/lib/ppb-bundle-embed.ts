@@ -1,4 +1,4 @@
-export type PpbBundleEmbedDisplayConfiguration = {
+type PpbBundleEmbedDisplayConfiguration = {
   showOnAllBundleProducts: boolean;
   selectedProducts: unknown[];
   showOnSpecificProductPages: unknown[];
@@ -6,7 +6,7 @@ export type PpbBundleEmbedDisplayConfiguration = {
   showOnSpecificCollectionPages: unknown[];
 };
 
-export type PpbBundleEmbedConfig = {
+type PpbBundleEmbedConfig = {
   upsellConfiguration: {
     isEnabled: boolean;
     title: string;
@@ -20,18 +20,10 @@ export type PpbBundleEmbedConfig = {
   >;
 };
 
-export type PpbBundleEmbedValidationIssue = {
+type PpbBundleEmbedValidationIssue = {
   path: "embed.title" | "embed.products" | "embed.collections";
   message: string;
 };
-
-const LEGACY_EMBED_OVERRIDE_KEYS = new Set([
-  "bundleEmbedEnabled",
-  "embedTitle",
-  "embedSubTitle",
-  "embedDisplayOn",
-  "embedAddBrowsedProduct",
-]);
 
 const EMPTY_DISPLAY_CONFIGURATION: PpbBundleEmbedDisplayConfiguration = {
   showOnAllBundleProducts: true,
@@ -103,16 +95,6 @@ export function normalizePpbBundleEmbedConfig(
   };
 }
 
-export function removeLegacyPpbEmbedTextOverrides<T>(
-  overrides: Record<string, T>,
-): Record<string, T> {
-  return Object.fromEntries(
-    Object.entries(overrides).filter(
-      ([key]: any) => !LEGACY_EMBED_OVERRIDE_KEYS.has(key),
-    ),
-  );
-}
-
 export function serializePpbBundleEmbedConfig(
   config: PpbBundleEmbedConfig,
 ): PpbBundleEmbedConfig {
@@ -169,7 +151,7 @@ export function mergePpbBundleEmbedTranslations(
   );
 }
 
-export type PpbBundleWidgetTranslation = {
+type PpbBundleWidgetTranslation = {
   widgetTitle?: string;
   widgetDescription?: string;
   widgetButtonText?: string;

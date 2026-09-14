@@ -36,6 +36,7 @@ export function ConfigureHelpPopover({
               <s-image
                 src={tooltip.imageSrc}
                 alt={imageAlt}
+                aspectRatio={tooltip.aspectRatio}
                 objectFit="contain"
                 loading="lazy"
               />

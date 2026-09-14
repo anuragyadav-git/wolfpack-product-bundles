@@ -4,7 +4,8 @@ import {
   type LoaderFunctionArgs,
 } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import type { ComponentRef } from "react";
 import { useTranslation } from "react-i18next";
 import { authenticate } from "../../shopify.server";
 import { downloadOfferPolicyCsv } from "../../lib/offer-policy-csv-download.client";
@@ -50,6 +51,8 @@ type ImportResult = {
   error?: string;
 };
 
+type CsvDropZoneElement = ComponentRef<"s-drop-zone">;
+
 export default function OfferOperationsRoute() {
   const { t } = useTranslation();
   const fetcher = useFetcher<typeof action>();
@@ -58,15 +61,14 @@ export default function OfferOperationsRoute() {
   const [fileError, setFileError] = useState("");
   const [exportBusy, setExportBusy] = useState(false);
   const [exportError, setExportError] = useState(false);
-  const dropZoneRef = useRef<any>(null);
+  const dropZoneRef = useRef<CsvDropZoneElement | null>(null);
+  const dropZoneName = `offer-policy-csv-${useId().replace(/:/g, "")}`;
   const result = fetcher.data as ImportResult | undefined;
   const busy = fetcher.state !== "idle";
 
   const handleFile = async (event: Event) => {
-    const target = event.currentTarget as HTMLElement & {
-      files?: FileList | File[];
-    };
-    const file = target.files ? Array.from(target.files)[0] : undefined;
+    const target = event.currentTarget as CsvDropZoneElement;
+    const file = target.files[0];
     if (!file) return;
     if (file.size > 1024 * 1024) {
       setCsv("");
@@ -149,6 +151,7 @@ export default function OfferOperationsRoute() {
               </s-banner>
               <s-drop-zone
                 ref={dropZoneRef}
+                name={dropZoneName}
                 accept=".csv,text/csv"
                 label={t("offerPolicyCsv.import.dropLabel")}
                 accessibilityLabel={t(

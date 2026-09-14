@@ -184,6 +184,7 @@ describe("FPB product modal read-only quick view", () => {
       "<p>Soft <strong>cotton</strong> product description.</p>",
     );
     expect(elements["modal-product-description"].textContent).toContain("Soft cotton product description.");
+    expect(elements["modal-product-description"].hidden).toBe(false);
   });
 
   it("renders plain product descriptions as text when descriptionHtml is missing", async () => {
@@ -199,6 +200,23 @@ describe("FPB product modal read-only quick view", () => {
 
     expect(elements["modal-product-description"].textContent).toContain("Plain <strong>text</strong> fallback.",);
     expect(elements["modal-product-description"].querySelector('strong')).toBeNull();
+    expect(elements["modal-product-description"].hidden).toBe(false);
+  });
+
+  it("hides a modal description whose sanitized markup has no meaningful content", async () => {
+    const widget = buildWidget();
+    const { modal, elements } = await createModalForPopulate(widget);
+
+    modal.currentProduct = {
+      ...product,
+      description: "",
+      descriptionHtml: "<p>   </p>",
+    };
+    modal.selectedQuantity = 1;
+    modal.populateModal();
+
+    expect(elements["modal-product-description"].textContent?.trim()).toBe("");
+    expect(elements["modal-product-description"].hidden).toBe(true);
   });
 
   it("shows and cycles carousel navigation for multiple distinct product images", async () => {
@@ -285,5 +303,20 @@ describe("FPB product modal read-only quick view", () => {
     expect(elements["modal-selection-text"].textContent).toBe("");
     expect(modal.selectedOptions).toEqual({});
     expect(modal.selectedVariant).toEqual({ id: "variant-2", title: "Default Title" });
+  });
+
+  it("formats modal prices with the hydrated Shopify currency", async () => {
+    const { BundleModalVariantMethods } = await import("../../../app/assets/widgets/full-page/modal/variant-methods.js");
+    const modal: any = {
+      selectedVariant: { currencyCode: "EUR" },
+      currentProduct: { currencyCode: "USD" },
+      ...BundleModalVariantMethods,
+    };
+    const expected = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "EUR",
+    }).format(12.99);
+
+    expect(modal.formatPrice(1299)).toBe(expected);
   });
 });

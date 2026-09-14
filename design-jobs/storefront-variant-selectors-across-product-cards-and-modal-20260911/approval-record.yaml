@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 5,
+  "status": "complete",
+  "design": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-09-11T13:23:17Z",
+    "evidence": [
+      "direction-comparison.md",
+      "visual-audit.md",
+      "screenshot-inventory.yaml"
+    ],
+    "waivers": []
+  },
+  "handoff": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-09-11T13:57:54Z",
+    "evidence": [
+      "implementation-handoff.md",
+      "codex-task.md",
+      "acceptance-criteria.md",
+      "browser-test-plan.yaml"
+    ],
+    "waivers": []
+  },
+  "implementation": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-09-11T13:57:54Z",
+    "evidence": [
+      "implementation-handoff.md"
+    ],
+    "waivers": []
+  },
+  "final": {
+    "status": "approved",
+    "approver": "user",
+    "at": "2026-09-14T07:35:00Z",
+    "evidence": [
+      "qa/browser-artifact-summary.json",
+      "browser-test-report.md",
+      "visual-qa-report.md",
+      "remediation-list.md"
+    ],
+    "waivers": [
+      {
+        "id": "ppb-exact-390-host-minimum",
+        "scope": "Exact 390px PPB screenshot only",
+        "reason": "The connected Chrome host clamps programmatic resize to a genuine 500px minimum; the same mobile breakpoint and content-driven PPB layout passed at 500x844, while FPB passed at an actual 390px width."
+      }
+    ]
+  },
+  "superseded_approvals": []
+}

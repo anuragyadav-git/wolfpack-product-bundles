@@ -19,8 +19,8 @@ describe("buildBundleMetricTrendSeries", () => {
 
   it("aggregates bundle revenue, views, orders, conversion, and AOV per day", () => {
     const attributions: OrderAttributionRow[] = [
-      { bundleId: "bundle-1", revenue: 2_000, createdAt: D("2026-08-01T09:00:00Z") },
-      { bundleId: "bundle-1", revenue: 4_000, createdAt: D("2026-08-01T10:00:00Z") },
+      { orderId: "gid://shopify/Order/1", bundleId: "bundle-1", revenue: 2_000, createdAt: D("2026-08-01T09:00:00Z") },
+      { orderId: "gid://shopify/Order/2", bundleId: "bundle-1", revenue: 4_000, createdAt: D("2026-08-01T10:00:00Z") },
     ];
     const views: BundleViewRow[] = Array.from({ length: 8 }, (_, index) => ({
       bundleId: "bundle-1",
@@ -43,7 +43,7 @@ describe("buildBundleMetricTrendSeries", () => {
 
   it("excludes attribution rows that are not connected to a bundle", () => {
     const attributions: OrderAttributionRow[] = [
-      { bundleId: null, revenue: 9_999, createdAt: D("2026-08-01T09:00:00Z") },
+      { orderId: "gid://shopify/Order/1", bundleId: null, revenue: 9_999, createdAt: D("2026-08-01T09:00:00Z") },
     ];
 
     const [point] = buildBundleMetricTrendSeries(

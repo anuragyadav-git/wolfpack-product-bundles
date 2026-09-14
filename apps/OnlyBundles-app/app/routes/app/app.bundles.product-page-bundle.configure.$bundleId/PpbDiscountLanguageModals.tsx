@@ -1,46 +1,112 @@
 import { PricingTranslationModals } from "../_shared/bundle-configure/PricingTranslationModals";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbDiscountLanguageModals() {
-  const flow = usePpbConfigureContext();
-  const rules = flow.pricingState.discountRules.map(
-    (rule: any, index: number) => ({
+export type PpbDiscountLanguageModalsProps = Pick<
+  PpbConfigureFlow,
+  | "activeBundleQuantityLocale"
+  | "activeProgressBarLocale"
+  | "isBundleQuantityMultiLangModalOpen"
+  | "isProgressBarMultiLangModalOpen"
+  | "markAsDirty"
+  | "pricingState"
+  | "qtyRuleLabels"
+  | "qtyRuleSubtexts"
+  | "qtyRuleTextsByLocaleByRuleId"
+  | "setActiveBundleQuantityLocale"
+  | "setActiveProgressBarLocale"
+  | "setIsBundleQuantityMultiLangModalOpen"
+  | "setIsProgressBarMultiLangModalOpen"
+  | "setQtyRuleTextsByLocaleByRuleId"
+  | "setTierTextByLocaleByRuleId"
+  | "shopLocales"
+  | "tierTextByLocaleByRuleId"
+  | "tierTextByRuleId"
+>;
+
+export function PpbDiscountLanguageModals({
+  activeBundleQuantityLocale,
+  activeProgressBarLocale,
+  isBundleQuantityMultiLangModalOpen,
+  isProgressBarMultiLangModalOpen,
+  markAsDirty,
+  pricingState,
+  qtyRuleLabels,
+  qtyRuleSubtexts,
+  qtyRuleTextsByLocaleByRuleId,
+  setActiveBundleQuantityLocale,
+  setActiveProgressBarLocale,
+  setIsBundleQuantityMultiLangModalOpen,
+  setIsProgressBarMultiLangModalOpen,
+  setQtyRuleTextsByLocaleByRuleId,
+  setTierTextByLocaleByRuleId,
+  shopLocales,
+  tierTextByLocaleByRuleId,
+  tierTextByRuleId,
+}: PpbDiscountLanguageModalsProps) {
+  const rules = pricingState.discountRules.map(
+    (rule, index) => ({
       id: rule.id,
       heading: `Rule #${index + 1}`,
       quantityFallback: {
-        label:
-          flow.qtyRuleLabels[rule.id] ?? `Box of ${rule.conditionValue ?? ""}`,
-        subtext: flow.qtyRuleSubtexts[rule.id] ?? "",
+        label: qtyRuleLabels[rule.id] ?? `Box of ${rule.conditionValue ?? ""}`,
+        subtext: qtyRuleSubtexts[rule.id] ?? "",
       },
-      tierFallback: flow.tierTextByRuleId[rule.id] ?? {},
+      tierFallback: tierTextByRuleId[rule.id] ?? {},
     })
   );
 
   return (
     <PricingTranslationModals
-      locales={flow.shopLocales}
+      locales={shopLocales}
       rules={rules}
       quantity={{
-        open: flow.isBundleQuantityMultiLangModalOpen,
-        activeLocale: flow.activeBundleQuantityLocale,
-        values: flow.qtyRuleTextsByLocaleByRuleId,
-        onActiveLocaleChange: flow.setActiveBundleQuantityLocale,
+        open: isBundleQuantityMultiLangModalOpen,
+        activeLocale: activeBundleQuantityLocale,
+        values: qtyRuleTextsByLocaleByRuleId,
+        onActiveLocaleChange: setActiveBundleQuantityLocale,
         onApply: (values) => {
-          flow.setQtyRuleTextsByLocaleByRuleId(values as any);
-          flow.markAsDirty();
+          setQtyRuleTextsByLocaleByRuleId(
+            Object.fromEntries(
+              Object.entries(values).map(([locale, valuesByRuleId]) => [
+                locale,
+                Object.fromEntries(
+                  Object.entries(valuesByRuleId).map(([ruleId, value]) => [
+                    ruleId,
+                    { label: value.label ?? "", subtext: value.subtext ?? "" },
+                  ]),
+                ),
+              ]),
+            ),
+          );
+          markAsDirty();
         },
-        onClose: () => flow.setIsBundleQuantityMultiLangModalOpen(false),
+        onClose: () => setIsBundleQuantityMultiLangModalOpen(false),
       }}
       progress={{
-        open: flow.isProgressBarMultiLangModalOpen,
-        activeLocale: flow.activeProgressBarLocale,
-        values: flow.tierTextByLocaleByRuleId,
-        onActiveLocaleChange: flow.setActiveProgressBarLocale,
+        open: isProgressBarMultiLangModalOpen,
+        activeLocale: activeProgressBarLocale,
+        values: tierTextByLocaleByRuleId,
+        onActiveLocaleChange: setActiveProgressBarLocale,
         onApply: (values) => {
-          flow.setTierTextByLocaleByRuleId(values as any);
-          flow.markAsDirty();
+          setTierTextByLocaleByRuleId(
+            Object.fromEntries(
+              Object.entries(values).map(([locale, valuesByRuleId]) => [
+                locale,
+                Object.fromEntries(
+                  Object.entries(valuesByRuleId).map(([ruleId, value]) => [
+                    ruleId,
+                    {
+                      tierText: value.tierText ?? "",
+                      tierSubtext: value.tierSubtext ?? "",
+                    },
+                  ]),
+                ),
+              ]),
+            ),
+          );
+          markAsDirty();
         },
-        onClose: () => flow.setIsProgressBarMultiLangModalOpen(false),
+        onClose: () => setIsProgressBarMultiLangModalOpen(false),
       }}
     />
   );

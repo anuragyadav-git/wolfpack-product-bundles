@@ -4,8 +4,8 @@ id: discount-tier-pill-feedback
 title: Discount Tier Pill Feedback
 type: test-spec
 status: active
-summary: Defines behavioral coverage for reusable FPB, PPB, SDK, and Design-preview discount-tier feedback.
-last_audited: 2026-08-21
+summary: Defines behavioral coverage for canonical FPB, PPB, SDK, and Design-preview discount-tier feedback.
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -54,6 +54,8 @@ and drive localized Cart / Summary preview actions.
 | 6 | Disabled pricing | saved rules with `enabled: false` | no detail | excludes non-pricing feedback |
 | 7 | Failed mutation | validator rejects selection | no detail | selection state unchanged |
 | 8 | Event order | successful selection and rerender | selection event, rerender, tier event | public detail is exact |
+| 9 | Canonical runtime contract | `selectedBundle.pricing.rules` with flat conditions and `id` | tier state is calculated | one current owner |
+| 10 | Retired runtime aliases | `bundleData`, `discountConfiguration`, nested `condition`, or `ruleId` | no tier is calculated | Sync Bundle is the upgrade path |
 
 ### MountedPillFeedback
 
@@ -85,3 +87,4 @@ and drive localized Cart / Summary preview actions.
 - [x] Reduced motion holds colors statically and restores the normal appearance.
 - [x] Four Design colors persist and generate four CSS variables.
 - [x] Cart / Summary preview exposes localized Tier hit and All tiers complete actions.
+- [x] Tier calculation consumes only `selectedBundle.pricing.rules` with flat canonical rule fields.

@@ -61,10 +61,6 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
-}));
-
 const CTX = { title: "Test Product", stepName: "Step 1" };
 
 describe("normaliseShopifyProductId", () => {

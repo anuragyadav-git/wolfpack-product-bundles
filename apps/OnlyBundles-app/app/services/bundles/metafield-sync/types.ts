@@ -1,6 +1,7 @@
 import type { CheckoutOffer } from "../../checkout-bundle-offers.server";
 import type { BundleSubscriptionConfigV1 } from "../../../lib/bundle-subscriptions";
 import type { CountdownRuntimeConfig } from "../../../lib/bundle-countdown";
+import type { PricingRule } from "../../../types/pricing";
 
 /**
  * Metafield Sync Types
@@ -55,7 +56,6 @@ export interface PriceAdjustment {
 export interface BundleUiConfig {
   schemaVersion?: 3;
   id: string;
-  bundleId: string;
   name: string;
   description: string;
   status: string;
@@ -98,8 +98,7 @@ export interface BundleUiConfig {
   bundleBannerDesktopUrl?: string | null;
   bundleBannerMobileUrl?: string | null;
   loadingGif?: string | null;
-  /** Widget style for product-page bundle.
-   *  Absent = 'classic' — backward-compatible default. */
+  /** Widget style for product-page bundle. */
   widgetStyle?: 'classic' | 'bottom-sheet';
   /** Show fixed-position floating promo badge on storefront (bottom-left). */
   floatingBadgeEnabled?: boolean;
@@ -187,21 +186,9 @@ export interface BundleUiStep {
 export interface BundleUiPricing {
   enabled: boolean;
   method: string;
-  rules: BundleUiPricingRule[];
+  rules: PricingRule[];
   messages?: Record<string, unknown>;
   displayOptions?: Record<string, unknown> | null;
-}
-
-export interface BundleUiPricingRule {
-  condition: {
-    type: string;
-    operator: string;
-    value: number;
-  } | null;
-  discount: {
-    method: string;
-    value: number;
-  };
 }
 
 export interface BundleUiMessaging {

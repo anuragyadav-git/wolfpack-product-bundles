@@ -59,7 +59,6 @@
   min-width: 0;
   max-width: 950px;
   margin: 0 auto;
-  padding: 0 0 88px;
   box-sizing: border-box;
 }
 
@@ -80,26 +79,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.canvasBackButton {
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #202223;
-  font: inherit;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.canvasBackButton:hover {
-  color: #000000;
 }
 
 .canvasTitle {
@@ -123,32 +102,7 @@
 }
 
 .readinessButton {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  height: 28px;
-  min-height: 28px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: #ffffff;
-  transition: filter 120ms ease;
-}
-
-.readinessButton:hover {
-  filter: brightness(0.9);
-}
-
-.readinessScore {
-  margin-right: 8px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.readinessLabel {
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
+  display: none;
 }
 
 .editGrid {
@@ -157,6 +111,7 @@
   gap: 16px;
   inline-size: 100%;
   min-inline-size: 0;
+  padding-block-end: 88px;
 }
 
 .leftRail {
@@ -164,8 +119,6 @@
   min-inline-size: 0;
   position: sticky;
   top: 0;
-  max-height: 100vh;
-  overflow-y: auto;
   align-self: flex-start;
 }
 
@@ -258,12 +211,6 @@
   color: #8c9196;
 }
 
-.settingInlineSwitch {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-}
-
 .defaultProductsPickerGroup {
   display: flex;
   flex-direction: column;
@@ -353,10 +300,9 @@
   font-weight: 700;
 }
 
-.bundleProductIconImage {
+.bundleProductIconTile s-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   border-radius: 6px;
 }
 
@@ -368,28 +314,6 @@
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.bundleProductEditButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 28px;
-  width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 5px;
-  background: #ffffff;
-  color: #202223;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.bundleProductEditButton:hover {
-  border-color: #9ca3af;
-  background: #fafafa;
 }
 
 .parentProductStatus {
@@ -618,28 +542,6 @@
   line-height: 1;
 }
 
-.addStepBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 38px;
-  padding: 6px 14px;
-  border: 1px solid #1f2937;
-  border-radius: 8px;
-  background: #2f2f31;
-  color: white;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 650;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.addStepBtn:hover {
-  border-color: #111827;
-  background: #1f1f21;
-}
-
 /* ── Slide animations ────────────────────────────────────────── */
 @keyframes slideInFromRight {
   from {
@@ -818,7 +720,7 @@
       1.25fr
     );
   gap: 8px;
-  align-items: end;
+  align-items: start;
 }
 
 .bxyRewardGrid > * {
@@ -839,10 +741,6 @@
 
 .categoryRuleAccordion {
   composes: categoryRuleAccordion from "./bundle-configure-shared.module.css";
-}
-
-.categoryRuleHeader {
-  composes: categoryRuleHeader from "./bundle-configure-shared.module.css";
 }
 
 .categoryRuleBody {
@@ -1438,21 +1336,22 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 calc(100% / 6) 24px;
+  padding: 24px calc(100% / 6);
+  box-sizing: border-box;
 }
 
 .templateDialogIntro {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   display: flex;
+  flex-shrink: 0;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 0;
-  padding: 24px 0;
+  padding: 24px calc(100% / 6);
   border-bottom: 1px solid #e1e3e5;
   background: #ffffff;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .templateDialogIntro > div {
@@ -1557,7 +1456,7 @@
 
 .templateOptionCardSelected {
   border-color: #1a1a1a;
-  box-shadow: 0 0 0 1px #1a1a1a;
+  box-shadow: inset 0 0 0 1px #1a1a1a;
   cursor: default;
 }
 
@@ -1566,13 +1465,6 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-}
-
-.templateOptionImage {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 .templateOptionFooter {
@@ -1692,22 +1584,6 @@
   composes: categoryActions from "./bundle-configure-shared.module.css";
 }
 
-.categoryIconButton {
-  composes: categoryIconButton from "./bundle-configure-shared.module.css";
-}
-
-.categoryTextButton {
-  composes: categoryTextButton from "./bundle-configure-shared.module.css";
-}
-
-.categoryDangerButton {
-  composes: categoryDangerButton from "./bundle-configure-shared.module.css";
-}
-
-.categoryDeleteIconButton {
-  composes: categoryIconButton categoryDeleteIconButton from "./bundle-configure-shared.module.css";
-}
-
 .categoryAccordion {
   composes: categoryAccordion from "./bundle-configure-shared.module.css";
 }
@@ -1726,27 +1602,6 @@
 
 .categoryDragOver {
   composes: categoryDragOver from "./bundle-configure-shared.module.css";
-}
-
-.categoryChevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: #303030;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.12s, color 0.12s;
-}
-
-.categoryChevron:hover {
-  background: #f1f2f4;
-  color: #202223;
 }
 
 .catNameRow {
@@ -1813,22 +1668,6 @@
   composes: selectedItemName from "./bundle-configure-shared.module.css";
 }
 
-.categorySelectedItemsChip {
-  border: 0;
-  background: transparent;
-  color: #005bd3;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.categorySelectedItemsChip:hover,
-.categorySelectedItemsChip:focus-visible {
-  color: #004299;
-  text-decoration: underline;
-}
-
 .categorySelectedItemRow {
   display: flex;
   align-items: center;
@@ -1836,22 +1675,6 @@
   min-height: 62px;
   padding: 8px 0;
   border-bottom: 1px solid #ebebeb;
-}
-
-.categorySelectedItemRemove {
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #d72c0d;
-  font: inherit;
-  font-size: 13px;
-  line-height: 28px;
-  text-align: center;
-  cursor: pointer;
 }
 
 .categorySelectedItemDrag {
@@ -1874,7 +1697,7 @@
   width: 24px;
   height: 24px;
   border-radius: 6px;
-  object-fit: cover;
+  overflow: hidden;
   background: #f1f1f1;
 }
 
@@ -1888,16 +1711,6 @@
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.categorySelectedItemRemove s-icon {
-  color: inherit;
-}
-
-.categorySelectedItemRemove:hover,
-.categorySelectedItemRemove:focus-visible {
-  background: #f1f2f3;
-  color: #8e1f0b;
 }
 
 .categoryNameInput {
@@ -2005,35 +1818,6 @@
   background: #e3e3e3;
 }
 
-.addSectionButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  min-height: 28px;
-  padding: 4px 12px;
-  border: 1px solid #c9cccf;
-  border-radius: 7px;
-  background: #ffffff;
-  color: #202223;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-  margin-top: 8px;
-}
-
-.addSectionButton:hover {
-  background: #f6f6f7;
-  border-color: #8c9196;
-}
-
-.addSectionButton:active {
-  background: #edeeef;
-}
-
 /* ── Take your bundle live card ── */
 .bundleLivePanel {
   display: flex;
@@ -2054,65 +1838,6 @@
 /* ── Bundle Product ⋮ menu ── */
 .productMenuWrapper {
   position: relative;
-}
-
-.productMenuBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: #6d7175;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-
-.productMenuBtn:hover {
-  background: #f1f1f1;
-}
-
-.productMenuBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-}
-
-.productMenuDropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  min-width: 150px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  padding: 4px;
-  z-index: 100;
-}
-
-.productMenuDropdownItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 7px 10px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: #202223;
-  font: inherit;
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-
-.productMenuDropdownItem:hover {
-  background: #f6f6f7;
 }
 
 /* ── Help Tooltips ── */
@@ -2271,7 +1996,7 @@
   background: #3f3f46;
 }
 
-.loadingAnimationPreview img {
+.loadingAnimationPreview s-image {
   max-width: 150px;
   max-height: 150px;
   border-radius: 8px;
@@ -2299,7 +2024,7 @@
 @container bundle-configure (inline-size <= 980px) {
   .editCanvas {
     max-width: none;
-    padding: 0 12px 88px;
+    padding-inline: 12px;
   }
 
   .editGrid {
@@ -2333,17 +2058,13 @@
     order: 1;
     width: 100%;
   }
-  .canvasBackButton,
   .readinessButton,
-  .productMenuBtn,
-  .productMenuDropdownItem,
-  .bundleProductEditButton,
   .setupNavItem,
   .subNavItem,
   .linkButton,
   .stepChip,
   .stepChipActive,
-  .addStepBtn,
+  .stepNav > s-button,
   .canvasActions s-button,
   .mainColumn s-button {
     min-block-size: 44px;
@@ -2368,8 +2089,17 @@
 }
 
 @media (max-width: 767px) {
+  .canvasHeader {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .canvasActions {
+    inline-size: 100%;
+    flex-wrap: nowrap;
+  }
+
   .readinessButton {
-    display: none;
+    display: contents;
   }
 
   .templateDialogContent {
@@ -2377,12 +2107,12 @@
   }
 
   .templateDialogBody {
-    padding: 0 16px 16px;
+    padding: 16px;
   }
 
   .templateDialogIntro {
     flex-direction: column;
-    padding: 16px 0;
+    padding: 16px;
   }
 
   .templateDialogGrid,

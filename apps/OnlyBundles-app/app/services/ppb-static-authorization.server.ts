@@ -1,16 +1,21 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { buildPriceAdjustmentConfig } from "./bundles/metafield-sync/utils/price-adjustment";
-import { buildPublicBundleSubscriptionConfig } from "../lib/bundle-subscriptions";
-import { normalizeProductVariantGid } from "./cart-transform-runtime-token.server";
+import {
+  buildPublicBundleSubscriptionConfig,
+  type BundleSubscriptionConfigV1,
+} from "../lib/bundle-subscriptions";
+import { normalizeProductVariantGid } from "../lib/shopify-product-gid";
+import type { OfferPolicyTiming } from "../lib/offer-policy-decision";
 import {
   buildOfferCountryTargetingRule,
   encodeOfferCountryTargetingRule,
+  type OfferCountryEligibilityPolicy,
   type OfferCountryTargetingRule,
 } from "../lib/offer-country-eligibility";
 
-export type PpbLineRole = "component" | "default" | "free_gift" | "addon";
+type PpbLineRole = "component" | "default" | "free_gift" | "addon";
 
-export type PpbRuntimePolicyV2 = {
+type PpbRuntimePolicyV2 = {
   version: 2;
   active: boolean;
   shop: string;
@@ -22,7 +27,7 @@ export type PpbRuntimePolicyV2 = {
   countryTargeting: OfferCountryTargetingRule;
 };
 
-export type PpbRuntimeAuthorizationV2 = {
+type PpbRuntimeAuthorizationV2 = {
   version: 2;
   revision: string;
   bundleToken: string;
@@ -61,16 +66,6 @@ type StaticTokenPayload = {
   subscription?: ReturnType<typeof buildPublicBundleSubscriptionConfig>;
   countryRule?: string;
 };
-
-function stable(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map((value) => stable(value));
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([key, child]) => [key, stable(child)]),
-  );
-}
 
 function sign(payload: StaticTokenPayload, secret: string) {
   const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
@@ -126,7 +121,7 @@ function roleForStep(step: any): PpbLineRole {
   return "component";
 }
 
-function maxAddonDiscount(step: any, role: PpbLineRole) {
+export function maxAddonDiscount(step: any, role: PpbLineRole) {
   if (role === "free_gift") return 100;
   if (role !== "addon") return 0;
   return Math.min(100, Math.max(0, ...(Array.isArray(step?.addonTiers) ? step.addonTiers : []).map(
@@ -143,12 +138,7 @@ function collectAuthorization(bundle: any) {
     const minQuantity = Math.max(0, Number(step?.minQuantity) || 0);
     const maxQuantity = Math.max(1, Number(step?.maxQuantity) || minQuantity || 1);
     groups.push({ id: groupId, role, minQuantity, maxQuantity });
-    const products = [
-      ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
-      ...(Array.isArray(step?.products) ? step.products : []),
-      ...(Array.isArray(step?.StepCategory) ? step.StepCategory.flatMap((category: any) => category?.products ?? []) : []),
-      ...(Array.isArray(step?.categories) ? step.categories.flatMap((category: any) => category?.products ?? []) : []),
-    ];
+    const products = Array.isArray(step?.products) ? step.products : [];
     for (const product of products) {
       const resolvedProductId = productId(product);
       const resolvedVariantIds = variantIds(product);
@@ -217,10 +207,13 @@ export function buildPpbStaticAuthorization(input: {
   shop: string;
   parentVariantId: string;
   secret: string;
+  revision: string;
+  subscription?: BundleSubscriptionConfigV1 | null;
+  offerPolicy?: (OfferCountryEligibilityPolicy & OfferPolicyTiming) | null;
 }): { policy: PpbRuntimePolicyV2; authorization: PpbRuntimeAuthorizationV2 } {
   const parentVariantId = normalizeProductVariantGid(input.parentVariantId);
   if (!parentVariantId) throw new Error("PPB parent variant is required for static authorization");
-  const bundleId = String(input.bundle?.id ?? input.bundle?.bundleId ?? "").trim();
+  const bundleId = String(input.bundle?.id ?? "").trim();
   if (!bundleId) throw new Error("PPB bundle ID is required for static authorization");
   const { groups, lines: linePolicies } = collectAuthorization(input.bundle);
   if (linePolicies.length === 0) throw new Error("PPB static authorization requires cached variant IDs");
@@ -232,15 +225,13 @@ export function buildPpbStaticAuthorization(input: {
     bundleId,
     parentVariantId,
     priceAdjustment: buildPriceAdjustmentConfig(input.bundle?.pricing),
-    subscription: buildPublicBundleSubscriptionConfig(input.bundle?.bundleSubscriptionConfig),
-    countryTargeting: buildOfferCountryTargetingRule(input.bundle?.offerPolicy),
+    subscription: buildPublicBundleSubscriptionConfig(input.subscription),
+    countryTargeting: buildOfferCountryTargetingRule(input.offerPolicy),
     lines: linePolicies,
     groups,
   };
-  const revision = createHash("sha256")
-    .update(JSON.stringify(stable(policyMaterial)))
-    .digest("hex")
-    .slice(0, 24);
+  const revision = input.revision;
+  if (!revision) throw new Error("Published authorization revision is required");
   const policy: PpbRuntimePolicyV2 = {
     version: 2,
     active: policyMaterial.active,
@@ -274,52 +265,5 @@ export function buildPpbStaticAuthorization(input: {
         token: sign({ ...base, kind: "line", ...line }, input.secret),
       })),
     },
-  };
-}
-
-function parsePolicyMap(value: unknown): Record<string, string> {
-  if (typeof value !== "string" || !value) return {};
-  try {
-    const parsed = JSON.parse(value);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
-    return Object.fromEntries(Object.entries(parsed).flatMap(([key, revision]) => (
-      typeof revision === "string" ? [[key, revision]] : []
-    )));
-  } catch {
-    return {};
-  }
-}
-
-export async function buildPpbPolicyRevisionMetafield(input: {
-  admin: { graphql: (query: string, options?: any) => Promise<{ json: () => Promise<any> }> };
-  bundleId: string;
-  revision: string;
-  active: boolean;
-}) {
-  const response = await input.admin.graphql(`
-    query PpbPolicyRevisions {
-      shop {
-        id
-        policy: metafield(namespace: "$app", key: "ppb_policy_revisions") { value }
-      }
-    }
-  `);
-  const data = await response.json();
-  if (data.errors?.length) throw new Error(`Unable to read PPB policy revisions: ${data.errors[0].message}`);
-  const shop = data.data?.shop;
-  if (!shop?.id) throw new Error("Unable to resolve Shopify Shop ID for PPB policy revision");
-  const policies = parsePolicyMap(shop.policy?.value);
-  if (input.active) policies[input.bundleId] = input.revision;
-  else delete policies[input.bundleId];
-  const value = JSON.stringify(policies);
-  if (Buffer.byteLength(value, "utf8") > 10_000) {
-    throw new Error("PPB policy revision map exceeds the Shopify Function 10KB input limit");
-  }
-  return {
-    ownerId: shop.id,
-    namespace: "$app",
-    key: "ppb_policy_revisions",
-    type: "json",
-    value,
   };
 }

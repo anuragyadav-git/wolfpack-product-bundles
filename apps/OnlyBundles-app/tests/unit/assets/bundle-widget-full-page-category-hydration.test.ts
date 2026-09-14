@@ -9,6 +9,7 @@ const {
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   fullPageProductGridMethods,
+  resolveVariantSelectorCategory,
 } = require('../../../app/assets/widgets/full-page/methods/product-grid-methods.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
@@ -77,6 +78,8 @@ describe('Full Page widget category hydration behavior', () => {
           title: 'Manual',
           products: [{ selectionId: 'gid://shopify/Product/1' }],
           collections: [],
+          variantSelectorMode: 'color_swatch',
+          swatchTooltipEnabled: true,
         },
         {
           id: 'cat-collection',
@@ -94,6 +97,8 @@ describe('Full Page widget category hydration behavior', () => {
         handles: [],
         productIds: ['gid://shopify/Product/1'],
         displayVariantsAsIndividualProducts: false,
+        variantSelectorMode: 'color_swatch',
+        swatchTooltipEnabled: true,
       },
       {
         id: 'cat-collection',
@@ -101,6 +106,8 @@ describe('Full Page widget category hydration behavior', () => {
         handles: ['automated-collection'],
         productIds: [],
         displayVariantsAsIndividualProducts: false,
+        variantSelectorMode: 'dropdown',
+        swatchTooltipEnabled: false,
       },
     ]);
   });
@@ -124,8 +131,30 @@ describe('Full Page widget category hydration behavior', () => {
         handles: [],
         productIds: [],
         displayVariantsAsIndividualProducts: false,
+        variantSelectorMode: 'dropdown',
+        swatchTooltipEnabled: false,
       },
     ]);
+  });
+
+  it('uses an unnamed sole category as the product-card variant selector owner', () => {
+    const category = {
+      id: 'cat-default',
+      title: '',
+      variantSelectorMode: 'pill',
+      swatchTooltipEnabled: false,
+    };
+
+    expect(resolveVariantSelectorCategory({ categories: [category] }, null)).toBe(category);
+  });
+
+  it('does not guess a selector owner when multiple categories have no active tab', () => {
+    expect(resolveVariantSelectorCategory({
+      categories: [
+        { id: 'cat-one', variantSelectorMode: 'pill' },
+        { id: 'cat-two', variantSelectorMode: 'color_swatch' },
+      ],
+    }, null)).toBeNull();
   });
 
   it('uses the saved FPB step-level variant display flag for category tabs', () => {
@@ -503,6 +532,91 @@ describe('Full Page widget category hydration behavior', () => {
         expect.stringContaining('gid%3A%2F%2Fshopify%2FProduct%2F1'),
       );
       expect(context.stepProductData[0][0].images).toHaveLength(4);
+    } finally {
+      (global as any).window = previousWindow;
+      (global as any).fetch = previousFetch;
+    }
+  });
+
+  it('replaces complete cached base-currency prices with Shopify market prices', async () => {
+    const previousWindow = (global as any).window;
+    const previousFetch = (global as any).fetch;
+    (global as any).window = {
+      Shopify: { shop: 'test.myshopify.com', country: 'IN' },
+      location: { host: 'test.myshopify.com' },
+    };
+    (global as any).fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        products: [{
+          id: 'gid://shopify/Product/1',
+          title: 'Headband',
+          images: [
+            { url: 'https://cdn.example.test/primary.jpg' },
+            { url: 'https://cdn.example.test/detail.jpg' },
+          ],
+          price: '1400.00',
+          currencyCode: 'INR',
+          variants: [{
+            id: 'gid://shopify/ProductVariant/11',
+            title: 'Black',
+            price: '1400.00',
+            currencyCode: 'INR',
+            available: true,
+          }],
+        }],
+      }),
+    });
+
+    const context: any = {
+      selectedBundle: {
+        steps: [{
+          products: [{
+            id: 'gid://shopify/Product/1',
+            title: 'Headband',
+            images: [
+              { url: 'https://cdn.example.test/primary.jpg' },
+              { url: 'https://cdn.example.test/detail.jpg' },
+            ],
+            price: 2000,
+            variants: [{
+              id: 'gid://shopify/ProductVariant/11',
+              selectionId: 'gid://shopify/ProductVariant/11',
+              title: 'Black',
+              price: 2000,
+              available: true,
+            }],
+          }],
+        }],
+      },
+      stepProductData: [[]],
+      stepCollectionProductIds: {},
+      selectedProducts: [{}],
+      resolveStorefrontApiBase: () => '/apps/product-bundles',
+      collectStepProductIds: fullPageSearchCategoryMethods.collectStepProductIds,
+      collectStepCollectionHandles: () => [],
+      shouldExpandStepProductsDuringLoad: () => false,
+      extractId: (id: string) => String(id || '').split('/').pop(),
+      isVariantSelectableForInventory: () => true,
+      isInventoryTrackingOnAddToCartEnabled: () => false,
+      getFirstAvailableVariant: fullPageProductProcessingMethods.getFirstAvailableVariant,
+      processProductsForStep: fullPageProductProcessingMethods.processProductsForStep,
+      enrichMissingProductDescriptions: async (products: any[]) => products,
+      mergeCategoryProductVariantAvailability:
+        fullPageProductProcessingMethods.mergeCategoryProductVariantAvailability,
+      _mergeDirectDefaultProductsIntoStep: (_stepIndex: number, products: any[]) => products,
+    };
+
+    try {
+      await fullPageProductProcessingMethods.loadStepProducts.call(context, 0);
+
+      expect((global as any).fetch).toHaveBeenCalledWith(
+        expect.stringContaining('country=IN'),
+      );
+      expect(context.stepProductData[0][0]).toEqual(expect.objectContaining({
+        price: 140000,
+        currencyCode: 'INR',
+      }));
     } finally {
       (global as any).window = previousWindow;
       (global as any).fetch = previousFetch;

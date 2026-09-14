@@ -12,7 +12,7 @@ import { bindDrawerSwipeDismissal } from '../../shared/drawer-layer-manager.js';
 const MIN_LOADING_OVERLAY_VISIBLE_MS = 180;
 
 export const ProductPageWidgetMiscMethods: Record<string, any> & ThisType<any> = {
-showLoadingOverlay(gifUrl: string, options: any = {}) {
+showLoadingOverlay(gifUrl: string | null, options: any = {}) {
   if (!this.container) return;
   if (options.bootstrap === true) {
     this.container.dataset.wpbBootstrapLoading = 'true';
@@ -29,6 +29,10 @@ showLoadingOverlay(gifUrl: string, options: any = {}) {
   overlay.className = 'bundle-loading-overlay';
   overlay.style.minHeight = 'var(--bundle-ppb-loading-overlay-min-height, 180px)';
   overlay.style.minWidth = 'var(--bundle-ppb-loading-overlay-min-width, 180px)';
+  overlay.style.setProperty(
+    '--wpb-loading-screen-bg',
+    this.config?.loadingScreen?.backgroundColor || '#ffffff',
+  );
 
   if (gifUrl) {
     const img = document.createElement('img');
@@ -224,9 +228,6 @@ async navigateModal(direction: number) {
         await this.loadStepProducts(newStepIndex);
         this.renderModalProducts(this.currentStepIndex);
         this.updateModalFooterMessaging();
-
-        // PRELOAD NEXT STEP
-        this.preloadNextStep();
       } else {
         const currentStep = this.selectedBundle?.steps?.[this.currentStepIndex];
         const message = formatProductPageStepValidationToast(currentStep, this._resolveText?.bind(this))

@@ -1,3 +1,5 @@
+import transformModulesCommonjs from '@babel/plugin-transform-modules-commonjs';
+
 const storefrontTypeScriptMapper = {
   '^(\\.{1,2}/.*)\\.js$': '$1',
   '^(.*app/assets/(?:widgets|sdk)/.*)\\.js$': '$1.ts',
@@ -25,8 +27,6 @@ export default {
       },
       diagnostics: false,
     }],
-    // Transform ES-module .js widget files (pricing-calculator, constants, etc.)
-    '^.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
   },
   // Use V8 (Node built-in) coverage provider to avoid minimatch v9 incompatibility
   // with babel-plugin-istanbul / test-exclude v6 (which calls minimatch as a function,
@@ -65,7 +65,9 @@ export default {
           },
           diagnostics: false,
         }],
-        '^.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
+        '^.+/extensions/sidekick-bundle-data/src/.+\\.js$': ['babel-jest', {
+          plugins: [transformModulesCommonjs],
+        }],
       },
       moduleNameMapper: {
         ...storefrontTypeScriptMapper,
@@ -90,7 +92,6 @@ export default {
           },
           diagnostics: false,
         }],
-        '^.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
       },
       moduleNameMapper: {
         ...storefrontTypeScriptMapper,
@@ -115,7 +116,6 @@ export default {
           },
           diagnostics: false,
         }],
-        '^.+\\.js$': ['babel-jest', { plugins: ['@babel/plugin-transform-modules-commonjs'] }],
       },
       moduleNameMapper: {
         ...storefrontTypeScriptMapper,

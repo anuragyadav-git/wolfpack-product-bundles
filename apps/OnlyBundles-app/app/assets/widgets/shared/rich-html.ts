@@ -1,6 +1,6 @@
 import createDOMPurify from 'dompurify';
 
-export type RichHtmlProfile = 'product-description' | 'review-badge';
+type RichHtmlProfile = 'product-description' | 'review-badge';
 
 const PRODUCT_DESCRIPTION_TAGS = [
   'a', 'b', 'blockquote', 'br', 'code', 'del', 'div', 'em', 'figcaption',

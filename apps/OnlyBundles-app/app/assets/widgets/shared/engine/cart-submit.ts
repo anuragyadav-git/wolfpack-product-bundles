@@ -56,7 +56,7 @@ export function extractBundleDetailsSourceProperties(cartItems: any[] = []) {
   return firstItem?.properties || {};
 }
 
-export function normalizeSellingPlanIdForCart(value = '') {
+function normalizeSellingPlanIdForCart(value = '') {
   const raw = String(value).trim();
   const match = raw.match(/^gid:\/\/shopify\/SellingPlan\/(\d+)$/);
   return match ? match[1] : raw;
@@ -96,6 +96,7 @@ export function buildProductPageCartFormData(cartItems: any[] = [], {
 
     Object.entries(item.properties || {}).forEach(([key, value]: any) => {
       if (value === undefined || value === null) return;
+      if (key === '_bundle_display_properties' || key === '_wolfpack_bundle_runtime') return;
       formData.append(`items[${index}][properties][${key}]`, String(value));
     });
     if (!sellingPlanId) {
@@ -104,7 +105,12 @@ export function buildProductPageCartFormData(cartItems: any[] = [], {
     formData.append(`items[${index}][properties][_bundleName]`, bundleName);
     formData.append(`items[${index}][properties][_wolfpackProductBundle:OfferId]`, `${offerId}_${sessionKey}_${itemNumber}`);
     formData.append(`items[${index}][properties][_wolfpackProductBundle:prodQty]`, String(item.quantity));
-    if (runtimeToken) {
+    const requiresLineRuntimeAuthorization = Boolean(
+      sellingPlanId
+      || item?.properties?._wolfpack_line_auth
+      || String(item?.properties?._bundle_step_type || '').startsWith('addon'),
+    );
+    if (runtimeToken && requiresLineRuntimeAuthorization) {
       formData.append(`items[${index}][properties][_wolfpack_bundle_runtime]`, runtimeToken);
     }
   });

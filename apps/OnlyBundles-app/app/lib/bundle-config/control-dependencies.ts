@@ -1,9 +1,9 @@
-export type RuleMode = "step" | "category";
-export type DiscountMode = "percentage" | "fixed_amount" | "fixed_bundle_price" | "buy_x_get_y";
-export type RuleBasis = "quantity" | "amount";
-export type ProgressType = "simple" | "step_based";
+type RuleMode = "step" | "category";
+type DiscountMode = "percentage" | "fixed_amount" | "fixed_bundle_price" | "buy_x_get_y";
+type RuleBasis = "quantity" | "amount";
+type ProgressType = "simple" | "step_based";
 
-export interface ControlDependencyInput {
+interface ControlDependencyInput {
   categoryCount?: number;
   ruleMode?: RuleMode;
   discountEnabled?: boolean;
@@ -15,7 +15,7 @@ export interface ControlDependencyInput {
   discountDisplayEnabled?: boolean;
 }
 
-export interface ControlDependencyState {
+interface ControlDependencyState {
   categoryRulesVisible: boolean;
   stepRulesDisabled: boolean;
   categoryRulesDisabled: boolean;

@@ -374,6 +374,7 @@
 .bundle-modal-variant-btn {
   padding: 10px 16px;
   min-width: 44px;
+  min-height: 44px;
   border: 2px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
@@ -382,8 +383,6 @@
   background: #fff;
   color: #333;
   cursor: pointer;
-  transition: all 0.15s ease;
-  text-align: center;
 }
 
 .bundle-modal-variant-btn:hover:not(.unavailable) {
@@ -398,7 +397,7 @@
   position: relative;
 }
 
-.bundle-modal-variant-btn.selected:not(.color-swatch)::after {
+.bundle-modal-variant-btn.selected:not(.color-swatch):not(.image-swatch)::after {
   content: "";
   position: absolute;
   top: -6px;
@@ -423,20 +422,32 @@
   border-color: #ddd;
 }
 
-.bundle-modal-variant-options.color-options {
-  gap: 10px;
-}
-
 .bundle-modal-variant-btn.color-swatch {
   background: var(
     --bundle-modal-swatch-color,
     linear-gradient(135deg, #f0f0f0, #e0e0e0)
   );
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   padding: 0;
   border-radius: 50%;
   border: 3px solid transparent;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.bundle-modal-variant-btn.image-swatch {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.bundle-modal-variant-btn.image-swatch img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px;
 }

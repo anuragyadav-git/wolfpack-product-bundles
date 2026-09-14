@@ -25,16 +25,20 @@ jest.mock("@shopify/app-bridge-react", () => ({
   }),
 }));
 
-jest.mock("../../../app/components/analytics", () => ({
+jest.mock("../../../app/components/analytics/BundlePerformanceMatrix", () => ({
   BundlePerformanceMatrix: () => null,
-  FunnelHero: () => null,
-  LiveActivityFeed: () => null,
-  TopCampaigns: () => null,
 }));
-
-jest.mock("../../../app/components/analytics/lazy", () => ({
-  LazyEngagementPulse: () => null,
-  LazyRevenueAttribution: () => null,
+jest.mock("../../../app/components/analytics/BundleConversionFunnel", () => ({
+  BundleConversionFunnel: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleKeyStatistics", () => ({
+  BundleKeyStatistics: () => null,
+}));
+jest.mock("../../../app/components/analytics/BundleSalesTrends", () => ({
+  BundleSalesTrends: () => null,
+}));
+jest.mock("../../../app/components/analytics/TopCampaigns", () => ({
+  TopCampaigns: () => null,
 }));
 
 describe("CustomUtmTrackingCard", () => {
@@ -79,8 +83,10 @@ describe("CustomUtmTrackingCard", () => {
     expect(view).toContain("Currently tracking");
     expect(view).toContain("utm_influencer");
     expect(view).toContain("partner_id");
-    expect(view).toContain('aria-label="Remove utm_influencer"');
-    expect(view).toContain('aria-label="Remove partner_id"');
+    expect(view).toContain("<s-clickable-chip");
+    expect(view).toContain('accessibilityLabel="Remove utm_influencer"');
+    expect(view).toContain('accessibilityLabel="Remove partner_id"');
+    expect(view).toContain("removable");
   });
 
   it("disables contextual save actions while saving", async () => {
@@ -95,8 +101,8 @@ describe("CustomUtmTrackingCard", () => {
       }),
     );
 
-    expect(view).toContain('<button variant="primary" disabled="">Save</button>');
-    expect(view).toContain('<button disabled="">Discard</button>');
+    expect(view).toContain('<button type="button" variant="primary" disabled="" loading="true">Save</button>');
+    expect(view).toContain('<button type="button" disabled="">Discard</button>');
   });
 
   it("removes a saved custom attribute from the submitted parameter list", async () => {

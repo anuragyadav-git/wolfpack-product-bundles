@@ -94,6 +94,25 @@ beforeEach(() => {
   process.env.SHOPIFY_APP_URL = "https://app.example.com";
 });
 
+describe("action — Shopify authentication", () => {
+  it("propagates authentication failures before parsing or mutating", async () => {
+    const authResponse = new Response(null, { status: 401 });
+    mockRequireAdminSession.mockRejectedValueOnce(authResponse);
+
+    await expect(
+      action({
+        request: makeRequest("enable"),
+        params: {},
+        context: {},
+      })
+    ).rejects.toBe(authResponse);
+
+    expect(mockActivate).not.toHaveBeenCalled();
+    expect(mockResolveShopEntitlements).not.toHaveBeenCalled();
+    expect(getDb().shop.findUnique).not.toHaveBeenCalled();
+  });
+});
+
 // ── enable intent ─────────────────────────────────────────────
 
 describe("action — enable intent", () => {

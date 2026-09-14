@@ -46,10 +46,8 @@ export interface CommonConfigureSidebarAdapter {
     discountType: string;
   };
   productImageUrl?: string | null;
-  productMenuOpen: boolean;
   productTitle?: string | null;
   selectTemplateOpenButtonRef?: Ref<HTMLButtonElement>;
-  setProductMenuOpen: (updater: boolean | ((open: boolean) => boolean)) => void;
   stepSetupChildItems?: ConfigureChildItem[];
   styles: Record<string, string>;
   VisibilityBadge: (props: { isOptimised: boolean }) => JSX.Element;
@@ -199,10 +197,8 @@ export function CommonConfigureSidebar({
     openSelectTemplateModal,
     parentProductStatusUi,
     productImageUrl,
-    productMenuOpen,
     productTitle,
     selectTemplateOpenButtonRef,
-    setProductMenuOpen,
     stepSetupChildItems = [],
     styles,
     VisibilityBadge,
@@ -336,66 +332,57 @@ export function CommonConfigureSidebar({
                 )}
               </h3>
               <div className={styles.productMenuWrapper}>
-                <button
-                  type="button"
-                  className={styles.productMenuBtn}
-                  aria-label={translateAdmin(
+                <s-button
+                  commandFor="configure-bundle-product-actions"
+                  icon="menu-vertical"
+                  variant="tertiary"
+                  accessibilityLabel={translateAdmin(
                     "adminAttributes.bundleProductOptions"
                   )}
-                  onClick={() => setProductMenuOpen((open) => !open)}
+                />
+                <s-menu
+                  id="configure-bundle-product-actions"
+                  accessibilityLabel={translateAdmin(
+                    "adminAttributes.bundleProductOptions"
+                  )}
                 >
-                  <s-icon type="menu-vertical" />
-                </button>
-                {productMenuOpen && (
-                  <>
-                    <div
-                      className={styles.productMenuBackdrop}
-                      onClick={() => setProductMenuOpen(false)}
-                    />
-                    <div className={styles.productMenuDropdown}>
-                      <button
-                        type="button"
-                        className={styles.productMenuDropdownItem}
-                        onClick={() => {
-                          setProductMenuOpen(false);
-                          void handleBundleProductSelect();
-                        }}
-                      >
-                        <s-icon type="edit" />
-                        <span>
-                          {translateAdmin(
-                            "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.replaceProduct"
-                          )}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.productMenuDropdownItem}
-                        onClick={() => {
-                          setProductMenuOpen(false);
-                          handleSyncProduct();
-                        }}
-                      >
-                        <s-icon type="duplicate" />
-                        <span>
-                          {translateAdmin(
-                            "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.syncProduct"
-                          )}
-                        </span>
-                      </button>
-                    </div>
-                  </>
-                )}
+                  <s-button
+                    variant="tertiary"
+                    icon="edit"
+                    accessibilityLabel={translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.replaceProduct"
+                    )}
+                    onClick={() => void handleBundleProductSelect()}
+                  >
+                    {translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.replaceProduct"
+                    )}
+                  </s-button>
+                  <s-button
+                    variant="tertiary"
+                    icon="duplicate"
+                    accessibilityLabel={translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.syncProduct"
+                    )}
+                    onClick={handleSyncProduct}
+                  >
+                    {translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.syncProduct"
+                    )}
+                  </s-button>
+                </s-menu>
               </div>
             </div>
             <div className={styles.bundleProductPanel}>
               <div className={styles.bundleProductSummary}>
                 <div className={styles.bundleProductIconTile}>
                   {productImageUrl ? (
-                    <img
+                    <s-image
                       src={productImageUrl}
                       alt=""
-                      className={styles.bundleProductIconImage}
+                      accessibilityRole="presentation"
+                      aspectRatio="1/1"
+                      objectFit="cover"
                     />
                   ) : (
                     <s-icon type="product" />
@@ -410,9 +397,14 @@ export function CommonConfigureSidebar({
                     )}
                 </span>
               </div>
-              <button
-                type="button"
-                className={styles.bundleProductEditButton}
+              <s-clickable
+                inlineSize="100%"
+                border="base"
+                borderRadius="small"
+                padding="small"
+                accessibilityLabel={translateAdmin(
+                  "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.editProduct"
+                )}
                 onClick={() => {
                   const productId = getProductId(adapter);
                   if (!productId) {
@@ -422,13 +414,20 @@ export function CommonConfigureSidebar({
                   openProductInAdmin(productId);
                 }}
               >
-                <s-icon type="edit" />{" "}
-                <span>
-                  {translateAdmin(
-                    "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.editProduct"
-                  )}
-                </span>
-              </button>
+                <s-stack
+                  direction="inline"
+                  gap="small"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <s-icon type="edit" />
+                  <s-text>
+                    {translateAdmin(
+                      "adminExtracted.shared.bundleConfigure.commonconfiguresidebar.editProduct"
+                    )}
+                  </s-text>
+                </s-stack>
+              </s-clickable>
             </div>
             <div className={styles.parentProductStatus}>
               <span>
@@ -523,6 +522,7 @@ export function CommonConfigureSupplement({
           <s-button
             variant="secondary"
             icon={getConfigureActionIcon("place")}
+            accessibilityLabel={translateAdminCopy(liveCard.actionLabel)}
             loading={liveCard.loading || undefined}
             disabled={liveCard.disabled || undefined}
             onClick={liveCard.onAction}

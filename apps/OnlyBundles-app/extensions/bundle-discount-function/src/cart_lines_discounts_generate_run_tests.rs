@@ -17,7 +17,7 @@ fn run_discount(input: &str) -> schema::CartLinesDiscountsGenerateRunResult {
 
 fn addon_runtime_payload() -> String {
     serde_json::json!({
-        "version": 1,
+        "version": 1, "revision": "rev-1",
         "shop": "test-shop.myshopify.com",
         "bundleId": "bundle-1",
         "bundleType": "full_page",
@@ -41,7 +41,7 @@ fn addon_runtime_payload() -> String {
 
 fn addon_runtime_payload_for(addons: serde_json::Value) -> String {
     serde_json::json!({
-        "version": 1,
+        "version": 1, "revision": "rev-1",
         "shop": "test-shop.myshopify.com",
         "bundleId": "bundle-1",
         "bundleType": "full_page",
@@ -97,7 +97,7 @@ fn run_automatic_addon_lines(
             .map(|code| serde_json::json!({ "code": code }))
             .collect::<Vec<_>>(),
         "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     })
     .to_string();
 
@@ -135,7 +135,7 @@ fn run_subscription_lines_with_role(
 ) -> schema::CartLinesDiscountsGenerateRunResult {
     let runtime_secret = test_runtime_secret();
     let payload = serde_json::json!({
-        "version": 1,
+        "version": 1, "revision": "rev-1",
         "shop": "test-shop.myshopify.com",
         "bundleId": "bundle-1",
         "bundleType": "product_page",
@@ -180,7 +180,7 @@ fn run_subscription_lines_with_role(
         },
         "enteredDiscountCodes": [],
         "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     }).to_string();
     run_discount(&input)
 }
@@ -336,7 +336,7 @@ fn ignores_partial_and_full_addon_discount_candidates_without_runtime_token() {
         },
         "enteredDiscountCodes": [],
         "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     }"#;
 
     let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
@@ -374,7 +374,7 @@ fn emits_addon_discount_only_when_runtime_token_authorizes_line() {
         }},
         "enteredDiscountCodes": [],
         "triggeringDiscountCode": null,
-        "shop":{{"ppbPolicyRevisions":{{"value":"{{\"bundle-1\":\"rev-1\"}}"}}}},"presentmentCurrencyRate": "1.0"
+        "shop":{{"ppbPolicyRevisions":{{"value":{{"bundle-1":{{"revision":"rev-1","pricingMode":"standard"}}}}}}}},"presentmentCurrencyRate": "1.0"
     }}"#
     );
 
@@ -388,7 +388,7 @@ fn emits_addon_discount_only_when_runtime_token_authorizes_line() {
     assert_eq!(add_operation.candidates.len(), 1);
     assert_eq!(
         add_operation.candidates[0].message.as_deref(),
-        Some(ADDON_DISCOUNT_MESSAGE)
+        Some("Add On")
     );
     let percentage = match &add_operation.candidates[0].value {
         schema::ProductDiscountCandidateValue::Percentage(percentage) => {
@@ -434,7 +434,7 @@ fn emits_ppb_v2_addon_discount_only_for_current_shopify_policy() {
             "sellingPlanAllocation": null,
             "merchandise": {
                 "__typename": "ProductVariant", "id": "gid://shopify/ProductVariant/201",
-                "product": { "id": "gid://shopify/Product/2", "ppbComponentPolicies": { "value": "{\"bundle-1\":\"rev-1\"}" } },
+                "product": { "id": "gid://shopify/Product/2", "ppbComponentPolicies": { "value": "{\"bundle-1\":{\"revision\":\"rev-1\",\"pricingMode\":\"standard\"}}" } },
                 "component_parents": null
             },
             "cost": { "amountPerQuantity": { "amount": "10.00" } }
@@ -445,7 +445,7 @@ fn emits_ppb_v2_addon_discount_only_for_current_shopify_policy() {
             "discountRole": null, "checkoutIntegrationConfig": null
         },
         "enteredDiscountCodes": [], "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     });
     let output = run_discount(&input.to_string());
     assert_eq!(output.operations.len(), 1);
@@ -486,7 +486,7 @@ fn rejects_ppb_v2_addon_lines_split_beyond_signed_quantity() {
             "sellingPlanAllocation": null,
             "merchandise": {
                 "__typename": "ProductVariant", "id": "gid://shopify/ProductVariant/201",
-                "product": { "id": "gid://shopify/Product/2", "ppbComponentPolicies": { "value": "{\"bundle-1\":\"rev-1\"}" } },
+                "product": { "id": "gid://shopify/Product/2", "ppbComponentPolicies": { "value": "{\"bundle-1\":{\"revision\":\"rev-1\",\"pricingMode\":\"standard\"}}" } },
                 "component_parents": null
             },
             "cost": { "amountPerQuantity": { "amount": "10.00" } }
@@ -500,7 +500,7 @@ fn rejects_ppb_v2_addon_lines_split_beyond_signed_quantity() {
             "discountRole": null, "checkoutIntegrationConfig": null
         },
         "enteredDiscountCodes": [], "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     });
     let output = run_discount(&input.to_string());
     assert!(output.operations.is_empty());
@@ -536,7 +536,7 @@ fn emits_one_hundred_percent_addon_candidate_with_native_message() {
     assert_eq!(add_operation.candidates.len(), 1);
     assert_eq!(
         add_operation.candidates[0].message.as_deref(),
-        Some(ADDON_DISCOUNT_MESSAGE)
+        Some("Add On")
     );
     let percentage = match &add_operation.candidates[0].value {
         schema::ProductDiscountCandidateValue::Percentage(percentage) => {
@@ -592,7 +592,7 @@ fn emits_independent_candidates_for_multiple_authorized_addons() {
     assert!(add_operation
         .candidates
         .iter()
-        .all(|candidate| candidate.message.as_deref() == Some(ADDON_DISCOUNT_MESSAGE)));
+        .all(|candidate| candidate.message.as_deref() == Some("Add On")));
 }
 
 #[test]
@@ -694,7 +694,7 @@ fn ignores_unsigned_addon_discount_markers() {
         },
         "enteredDiscountCodes": [],
         "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     }"#
     .replace("__RUNTIME_SECRET__", &runtime_secret);
 
@@ -728,7 +728,7 @@ fn ignores_addon_lines_when_product_discount_class_is_unavailable() {
         },
         "enteredDiscountCodes": [],
         "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     }"#;
 
     let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
@@ -761,7 +761,7 @@ fn automatic_addon_branch_skips_when_generated_checkout_code_is_entered() {
         },
         "enteredDiscountCodes": [{ "code": "WPB-GOKWIK-12345678" }],
         "triggeringDiscountCode": null,
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     }"#;
 
     let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
@@ -770,7 +770,7 @@ fn automatic_addon_branch_skips_when_generated_checkout_code_is_entered() {
 }
 
 #[test]
-fn code_mode_emits_bundle_discount_candidate_from_component_parent_pricing() {
+fn code_mode_rejects_unsigned_component_parent_pricing() {
     let input = r#"{
         "cart": {
             "lines": [
@@ -813,47 +813,52 @@ fn code_mode_emits_bundle_discount_candidate_from_component_parent_pricing() {
         },
         "enteredDiscountCodes": [{ "code": "WPB-GOKWIK-12345678" }],
         "triggeringDiscountCode": "WPB-GOKWIK-12345678",
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
+        "shop":{"ppbPolicyRevisions":{"value":{"bundle-1":{"revision":"rev-1","pricingMode":"standard"}}}},"presentmentCurrencyRate": "1.0"
     }"#;
 
     let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
 
-    assert_eq!(output.operations.len(), 1);
-    let add_operation = match &output.operations[0] {
-        schema::CartOperation::ProductDiscountsAdd(operation) => operation,
-        unexpected => panic!("expected product discounts add operation, got {unexpected:?}"),
-    };
-    assert_eq!(add_operation.candidates.len(), 1);
-    assert_eq!(
-        add_operation.candidates[0].message.as_deref(),
-        Some("Bundle Discount")
-    );
-    assert_eq!(add_operation.candidates[0].targets.len(), 2);
-    let percentage = match &add_operation.candidates[0].value {
-        schema::ProductDiscountCandidateValue::Percentage(percentage) => {
-            percentage.value.to_string()
-        }
-        unexpected => panic!("expected percentage discount value, got {unexpected:?}"),
-    };
-    assert_eq!(percentage, "20.0");
+    assert!(output.operations.is_empty());
 }
 
 #[test]
 fn code_mode_emits_buy_x_get_y_bundle_discount_candidate() {
-    let input = r#"{
+    let runtime_secret = test_runtime_secret();
+    let payload = serde_json::json!({
+        "version": 1, "revision": "rev-1",
+        "shop": "test-shop.myshopify.com",
+        "bundleId": "bundle-1",
+        "bundleType": "full_page",
+        "offerGroupId": "FBP-1_BXY",
+        "parentVariantId": "gid://shopify/ProductVariant/999",
+        "bundleName": "BXY Bundle",
+        "components": [
+            { "variantId": "gid://shopify/ProductVariant/1", "quantity": 1 },
+            { "variantId": "gid://shopify/ProductVariant/2", "quantity": 1 }
+        ],
+        "addons": [],
+        "priceAdjustment": {
+            "method": "buy_x_get_y",
+            "value": 100,
+            "customerBuys": 1,
+            "customerGets": 1,
+            "discountType": "percentage"
+        }
+    })
+    .to_string();
+    let runtime_token = sign_runtime_token_for_test(&payload, &runtime_secret);
+    let input = serde_json::json!({
         "cart": {
             "lines": [
                 {
                     "id": "gid://shopify/CartLine/paid-1",
                     "quantity": 1,
                     "wolfpackProductBundleOfferId": { "value": "FBP-1_BXY_1" },
+                    "runtimeToken": { "value": runtime_token },
                     "stepType": null,
                     "merchandise": {
                         "__typename": "ProductVariant",
-                        "id": "gid://shopify/ProductVariant/1",
-                        "component_parents": {
-                            "value": "[{\"id\":\"gid://shopify/ProductVariant/999\",\"price_adjustment\":{\"method\":\"buy_x_get_y\",\"value\":100,\"customerBuys\":1,\"customerGets\":1,\"discountType\":\"percentage\"}}]"
-                        }
+                        "id": "gid://shopify/ProductVariant/1"
                     },
                     "cost": { "amountPerQuantity": { "amount": "50.00" } }
                 },
@@ -861,11 +866,11 @@ fn code_mode_emits_buy_x_get_y_bundle_discount_candidate() {
                     "id": "gid://shopify/CartLine/paid-2",
                     "quantity": 1,
                     "wolfpackProductBundleOfferId": { "value": "FBP-1_BXY_2" },
+                    "runtimeToken": { "value": runtime_token },
                     "stepType": null,
                     "merchandise": {
                         "__typename": "ProductVariant",
-                        "id": "gid://shopify/ProductVariant/2",
-                        "component_parents": null
+                        "id": "gid://shopify/ProductVariant/2"
                     },
                     "cost": { "amountPerQuantity": { "amount": "50.00" } }
                 }
@@ -873,14 +878,17 @@ fn code_mode_emits_buy_x_get_y_bundle_discount_candidate() {
         },
         "discount": {
             "discountClasses": ["PRODUCT"],
+            "runtimeTokenSecret": { "value": runtime_secret },
             "checkoutIntegrationConfig": null
         },
         "enteredDiscountCodes": [{ "code": "WPB-GOKWIK-12345678" }],
         "triggeringDiscountCode": "WPB-GOKWIK-12345678",
-        "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0"
-    }"#;
+        "shop": { "ppbPolicyRevisions": { "value": {"bundle-1":{"revision":"rev-1","pricingMode":"standard"}} } },
+        "presentmentCurrencyRate": "1.0"
+    })
+    .to_string();
 
-    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(input);
+    let output: schema::CartLinesDiscountsGenerateRunResult = run_discount(&input);
 
     let add_operation = match &output.operations[0] {
         schema::CartOperation::ProductDiscountsAdd(operation) => operation,
@@ -893,4 +901,16 @@ fn code_mode_emits_buy_x_get_y_bundle_discount_candidate() {
         unexpected => panic!("expected percentage discount value, got {unexpected:?}"),
     };
     assert_eq!(percentage, "50.0");
+}
+
+#[test]
+fn caps_total_authorized_discount_lines_before_verification() {
+    let secret = test_runtime_secret();
+    let token = sign_runtime_token_for_test(&addon_runtime_payload(), &secret);
+    let line = serde_json::json!({"id":"line", "quantity":1, "runtimeToken":{"value":token}, "lineAuthorization":null,
+        "stepType":{"value":"addon:PERCENTAGE:10"},"sellingPlanAllocation":null,
+        "merchandise":{"__typename":"ProductVariant","id":"gid://shopify/ProductVariant/201","product":{"id":"gid://shopify/Product/2"}},
+        "cost":{"amountPerQuantity":{"amount":"10.0"}}});
+    assert!(run_automatic_addon_lines(vec![line.clone(); 11], &secret, vec![]).operations.is_empty());
+    assert!(!run_automatic_addon_lines(vec![line; 10], &secret, vec![]).operations.is_empty());
 }

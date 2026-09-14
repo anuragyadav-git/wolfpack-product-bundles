@@ -5,11 +5,11 @@
  * Issue: [edit-bundle-flow-tests-1]
  */
 
-import { handleSaveBundle } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/handlers.server";
+import { handleSaveBundle } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server";
 import { AddOnDiscountFunctionService } from "../../../app/services/addon-discount-function-service.server";
 import {
   updateBundleProductMetafields,
-} from "../../../app/services/bundles/metafield-sync.server";
+} from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 import { syncBundleStorefrontNow } from "../../../app/services/bundles/storefront-sync.server";
 
 jest.mock("../../../app/db.server", () => ({
@@ -59,7 +59,7 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn().mockResolvedValue(undefined),
   updateComponentProductMetafields: jest.fn().mockResolvedValue(undefined),
 }));
@@ -143,14 +143,10 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../../app/services/widget-installation.server", () => ({
+jest.mock("../../../app/services/widget-installation/widget-installation-core.server", () => ({
   WidgetInstallationService: {
     validateProductBundleWidgetSetup: jest.fn(),
   },
-}));
-
-jest.mock("../../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
 }));
 
 const getDb = () => require("../../../app/db.server").default;
@@ -180,6 +176,8 @@ function makeStepsData(
     maxQuantity: number | string | null;
     enabled: boolean;
     stepImage: string | null;
+    imageUrl: string | null;
+    bannerImageUrl: string | null;
     multiLangData: Record<string, Record<string, string>>;
     products: any[];
     StepProduct: any[];
@@ -194,9 +192,11 @@ function makeStepsData(
       minQuantity: 1,
       maxQuantity: 5,
       enabled: true,
-      products: [{ id: "validation-product" }],
+      products: [],
       collections: [],
-      StepProduct: [],
+      StepProduct: [
+        { id: "gid://shopify/Product/1", title: "Validation product", variants: [] },
+      ],
       StepCategory: [],
       ...overrides,
     },
@@ -476,6 +476,26 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
 
     const savedSteps = getDb().bundle.update.mock.calls[0][0].data.steps.create;
     expect(savedSteps.map((step: any) => step.enabled)).toEqual([true, false]);
+  });
+
+  it("persists only the canonical Step Config image", async () => {
+    await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({
+        stepsData: JSON.stringify(makeStepsData({
+          stepImage: "https://cdn.shopify.com/step-icon.png",
+          imageUrl: "https://cdn.shopify.com/retired-tab-icon.png",
+          bannerImageUrl: "https://cdn.shopify.com/retired-step-banner.png",
+        })),
+      }),
+    );
+
+    const [savedStep] = getDb().bundle.update.mock.calls[0][0].data.steps.create;
+    expect(savedStep.timelineIconUrl).toBe("https://cdn.shopify.com/step-icon.png");
+    expect(savedStep).not.toHaveProperty("imageUrl");
+    expect(savedStep).not.toHaveProperty("bannerImageUrl");
   });
 
   it("allows exact step rules and bundle-total discount tiers without hidden quantity bounds", async () => {
@@ -952,13 +972,17 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     );
   });
 
-  it("does NOT auto-activate when steps have no products or collections", async () => {
-    await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", makeFormData());
-    expect(getDb().bundle.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ status: "draft" }),
-      })
+  it("rejects a step with no canonical products or collections", async () => {
+    const stepsData = makeStepsData({ products: [], StepProduct: [], collections: [] });
+    const response = await handleSaveBundle(
+      MOCK_ADMIN,
+      MOCK_SESSION,
+      "bundle-1",
+      makeFormData({ stepsData: JSON.stringify(stepsData) }),
     );
+
+    expect(response.status).toBe(400);
+    expect(getDb().bundle.update).not.toHaveBeenCalled();
   });
 
   it("preserves an explicit draft when a step has collections", async () => {
@@ -1087,6 +1111,13 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
       autoNextStepOnConditionMet: true,
       multiLangData: { en: { title: "Category A" } },
     });
+    expect(stepCreate.StepProduct.create).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        productId: "gid://shopify/Product/222",
+        title: "P",
+        position: 2,
+      }),
+    ]));
   });
 
   it("persists the canonical step-level variants-as-individual selector", async () => {
@@ -1114,7 +1145,7 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     });
   });
 
-  it("stores fixedBundlePrice on rule when discountType is fixed_bundle_price", async () => {
+  it("stores fixed bundle targets only in canonical discountValue", async () => {
     const discountData = makeDiscountData({
       discountEnabled: true,
       discountType: "fixed_bundle_price",
@@ -1124,7 +1155,8 @@ describe("FPB handleSaveBundle — no shopifyProductId (skips metafields)", () =
     await handleSaveBundle(MOCK_ADMIN, MOCK_SESSION, "bundle-1", fd);
     const updateCall = getDb().bundle.update.mock.calls[0][0];
     const pricingRules = updateCall.data.pricing.upsert.create.rules;
-    expect(pricingRules[0].fixedBundlePrice).toBe(4999);
+    expect(pricingRules[0].discountValue).toBe(4999);
+    expect(pricingRules[0]).not.toHaveProperty("fixedBundlePrice");
   });
 
   it("returns 500 when a product ID is a UUID (corrupted browser state)", async () => {

@@ -24,7 +24,7 @@ jest.mock("../../../app/services/cart-transform-service.server", () => ({
   },
 }));
 
-jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn().mockResolvedValue(undefined),
 }));
 

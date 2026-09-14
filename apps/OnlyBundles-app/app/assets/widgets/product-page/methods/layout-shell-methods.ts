@@ -5,8 +5,6 @@ import { getDiscountProgressData } from '../../shared/engine/bundle-selectors.js
 import { formatProductPageStepValidationToast } from './modal-state-methods.js';
 import { resolveProductPageStepText } from './step-text-methods.js';
 
-export { resolveProductPageStepText } from './step-text-methods.js';
-
 export function shouldHideInpageStepChrome({ isCascade = false, steps = [], step = null }: any = {}) {
   if (!isCascade) return false;
 
@@ -88,16 +86,11 @@ renderSteps() {
     return;
   }
 
-  // Check bundle type and render accordingly
-  const bundleType = this.selectedBundle.bundleType || BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE;
-
-  if (bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE) {
-    // Full-page bundle: Render with tabs layout
-    this.renderFullPageLayout();
-  } else {
-    // Product-page bundle: Render with step boxes (current implementation)
-    this.renderProductPageLayout();
+  if (this.selectedBundle.bundleType !== BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE) {
+    return;
   }
+
+  this.renderProductPageLayout();
 },
 
 _renderDirectDefaultProducts() {
@@ -169,7 +162,7 @@ _renderDirectDefaultProducts() {
 
 // Returns a full-width banner image element for a step, or null if not configured
 _createStepBannerImage(step: any) {
-  const imageUrl = step?.stepImage || step?.bannerImageUrl || null;
+  const imageUrl = step?.stepImage || null;
   if (!imageUrl) return null;
   const wrapper = document.createElement('div');
   wrapper.className = 'step-banner-image';

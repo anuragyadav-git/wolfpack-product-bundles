@@ -1,37 +1,48 @@
-import type { ConfigureBundleFlowContext } from "./useConfigureBundleFlow";
+import type { BundleProductData } from "../../../types/bundle-configure";
+import type { ParentProductStatusUi } from "../../../lib/parent-product-status-ui";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
 import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
-import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
+import { AppEmbedBanner } from "../../../components/AppEmbedBanner";
+import { UnlistedBundleBanner } from "../../../components/UnlistedBundleBanner";
 import { useTranslation } from "react-i18next";
 import { translateAdmin } from "~/i18n/config";
 
+interface ConfigureCanvasHeaderProps {
+  appEmbedEnabled: boolean;
+  bundleProduct: BundleProductData | null;
+  bundleProductId: string | null;
+  fetcherState: "idle" | "loading" | "submitting";
+  fullPageBundleStyles: Record<string, string>;
+  handleBackClick: () => void;
+  handlePreviewBundle: () => Promise<unknown>;
+  isPreviewBundleLoading: boolean;
+  openThemeEditorForAppEmbed: () => void;
+  openProductInAdmin: (productId: string) => void;
+  parentProductStatusUi: ParentProductStatusUi;
+  readinessScore: number;
+  shop: string;
+  themeEditorUrl: string | null;
+}
+
 export function ConfigureCanvasHeader({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
+  appEmbedEnabled,
+  bundleProduct,
+  bundleProductId,
+  fetcherState,
+  fullPageBundleStyles,
+  handleBackClick,
+  handlePreviewBundle,
+  isPreviewBundleLoading,
+  openThemeEditorForAppEmbed,
+  openProductInAdmin,
+  parentProductStatusUi,
+  readinessScore,
+  shop,
+  themeEditorUrl,
+}: ConfigureCanvasHeaderProps) {
   const { t } = useTranslation();
-  const {
-    AppEmbedBanner,
-    appEmbedEnabled,
-    bundle,
-    bundleProduct,
-    fetcher,
-    fullPageBundleStyles,
-    handleBackClick,
-    handlePreviewBundle,
-    isPreviewBundleLoading,
-    openThemeEditorForAppEmbed,
-    openProductInAdmin,
-    parentProductStatusUi,
-    readinessScore,
-    setReadinessOpen,
-    shop,
-    themeEditorUrl,
-    UnlistedBundleBanner,
-  } = flow;
-  const bundleProductId = bundleProduct?.id ?? bundle.shopifyProductId ?? null;
-  const numericProductId = bundleProductId?.split("/").pop() || null;
+  const resolvedBundleProductId = bundleProduct?.id ?? bundleProductId;
+  const numericProductId = resolvedBundleProductId?.split("/").pop() || null;
   const hasUnlistedWarning =
     parentProductStatusUi.showUnlistedBanner && Boolean(numericProductId);
   const hasMultiplePublishWarnings =
@@ -49,14 +60,15 @@ export function ConfigureCanvasHeader({
       <div className={fullPageBundleStyles.canvasHeader}>
         <div className={fullPageBundleStyles.canvasTitleGroup}>
           <div className={fullPageBundleStyles.canvasTitleRow}>
-            <button
-              type="button"
-              className={fullPageBundleStyles.canvasBackButton}
+            <s-button
+              variant="tertiary"
+              tone="neutral"
+              icon="arrow-left"
               onClick={handleBackClick}
-              aria-label={translateAdmin("adminAttributes.backToDashboard")}
-            >
-              ←
-            </button>
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.backToDashboard"
+              )}
+            />
             <h1 className={fullPageBundleStyles.canvasTitle}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.configureBundleFlow"
@@ -65,26 +77,15 @@ export function ConfigureCanvasHeader({
           </div>
         </div>
         <div className={fullPageBundleStyles.canvasActions}>
-          <span
-            className={fullPageBundleStyles.readinessButton}
-            style={{
-              backgroundColor: getReadinessScoreColor(readinessScore),
-              borderColor: getReadinessScoreColor(readinessScore),
-            }}
-          >
-            <s-press-button
-              variant="tertiary"
-              tone="neutral"
+          <span className={fullPageBundleStyles.readinessButton}>
+            <s-button
+              variant="secondary"
               accessibilityLabel={`${readinessScore} Readiness Score`}
-              onClick={() => setReadinessOpen(true)}
+              commandFor="bundle-readiness-popover"
+              command="--show"
             >
-              <span className={fullPageBundleStyles.readinessScore}>
-                {readinessScore}
-              </span>
-              <span className={fullPageBundleStyles.readinessLabel}>
-                {translateAdmin("common.readiness.title")}
-              </span>
-            </s-press-button>
+              {readinessScore} {translateAdmin("common.readiness.title")}
+            </s-button>
           </span>
           <s-button
             variant="secondary"
@@ -96,7 +97,7 @@ export function ConfigureCanvasHeader({
               void handlePreviewBundle();
             }}
             loading={isPreviewBundleLoading || undefined}
-            disabled={fetcher.state !== "idle"}
+            disabled={fetcherState !== "idle"}
           >
             {translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.previewBundle"
@@ -139,7 +140,7 @@ export function ConfigureCanvasHeader({
             <div className={fullPageBundleStyles.unlistedBannerGap}>
               <UnlistedBundleBanner
                 shop={shop}
-                bundleProductId={bundleProductId}
+                bundleProductId={resolvedBundleProductId}
                 loading={parentProductStatusUi.isLoading}
                 onManage={() => {
                   if (numericProductId) openProductInAdmin(numericProductId);

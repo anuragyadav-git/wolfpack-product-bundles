@@ -85,4 +85,25 @@ describe('CountryTargetingSection', () => {
     expect(selectedCountry?.textContent).toBe('India');
     expect(ownershipBanner?.hasAttribute('dismissible')).toBe(true);
   });
+
+  it('gives a country-selection validation error only to the search field', () => {
+    const validationError = 'Select at least one country.';
+    flushSync(() => {
+      root.render(React.createElement(CountryTargetingSection, {
+        active: true,
+        state: { ...state, countryCodes: [] },
+        validationErrors: {
+          'offerDelivery.countryCodes': validationError,
+        },
+        onEnabledChange: jest.fn(),
+        onModeChange: jest.fn(),
+        onCountryCodesChange: jest.fn(),
+      }));
+    });
+
+    expect(
+      container.querySelector('s-search-field')?.getAttribute('error'),
+    ).toBe(validationError);
+    expect(container.querySelector('s-text[tone="critical"]')).toBeNull();
+  });
 });

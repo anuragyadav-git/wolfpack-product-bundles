@@ -1,3 +1,4 @@
+import { withBundleCartLock } from "../../../../lib/bundle-cart-lock.js";
 import { BUNDLE_WIDGET } from '../../shared/constants.js';
 import { CurrencyManager } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
@@ -338,7 +339,6 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       tierId: captureDiscountTierState(this).tierId,
     });
     items.forEach(item => {
-      Object.assign(item.properties, sourceProperties);
       if (hasSelectedAddonLine && hasAddonStepConfigured) {
         item.properties._addon_offer_id = item.properties._addon_offer_id || baseOfferId;
       }
@@ -359,17 +359,31 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       });
       items = mergeDuplicateCartLines(itemsForRuntimeToken);
       items.forEach(item => {
-        item.properties._wolfpack_bundle_runtime = runtimeToken;
+        if (
+          this.selectedSellingPlanId
+          || String(item?.properties?._bundle_step_type || '').startsWith('addon')
+        ) {
+          item.properties._wolfpack_bundle_runtime = runtimeToken;
+        }
         delete item._runtimeProductId;
       });
 
+      const response = await withBundleCartLock(async () => {
+      await this.syncBundleDetailsCartMetafield(
+        `${offerId}_${sessionKey}`,
+        sourceProperties,
+        runtimeToken,
+        items.length,
+      );
+
       // Add to Shopify cart
-      const response = await fetch('/cart/add.js', {
+      return fetch('/cart/add.js', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ items })
+      });
       });
 
       if (!response.ok) {
@@ -387,8 +401,6 @@ export const fullPageStepFooterMethods: Record<string, any> & ThisType<any> = {
       }
 
       await response.json();
-
-      await this.syncBundleDetailsCartMetafield(`${offerId}_${sessionKey}`, sourceProperties);
 
       // Storefront analytics: bundle successfully added to cart.
       this._sendEngagementBeacon?.('bundle-add-to-cart-success');
@@ -625,7 +637,7 @@ getDiscountProgressState(totalPrice = 0, totalQuantity = 0) {
       const tierText = tierTextByRuleId?.[ruleId] || {};
       const boxRule = boxRules.find((box: any)  => box.ruleId === ruleId);
       const discountMethod = pricing?.method || BUNDLE_WIDGET.DISCOUNT_METHODS.PERCENTAGE_OFF;
-      const discountValue = Number(rule.discountValue ?? rule.discount?.value ?? 0) || 0;
+      const discountValue = Number(rule.discountValue ?? 0) || 0;
       const fallbackTitle = rule.conditionType === 'quantity' && threshold > 0
         ? `${threshold} Pack`
         : String(threshold);

@@ -146,7 +146,7 @@ function createInpageProductLoadingElement(rowCount = 3) {
   return root;
 }
 
-export function shouldDisplayVariantsAsIndividualForInpageCategory(step: any, stepIndex: string|number, activeCategoryIndexes: any = {}) {
+function shouldDisplayVariantsAsIndividualForInpageCategory(step: any, stepIndex: string|number, activeCategoryIndexes: any = {}) {
   const categories = Array.isArray(step?.categories) ? step.categories : [];
   if (categories.length > 0) {
     const activeIndex = typeof activeCategoryIndexes?.[stepIndex] === 'number'

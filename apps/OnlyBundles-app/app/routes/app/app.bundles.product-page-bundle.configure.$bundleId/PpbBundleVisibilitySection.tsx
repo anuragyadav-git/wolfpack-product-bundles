@@ -2,37 +2,108 @@ import {
   buildBundleLinkModel,
   buildEmbedStatusModel,
 } from "../../../lib/bundle-config/common-configure-page-model";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { CommonBundleVisibilityOverview } from "../_shared/bundle-configure/CommonBundleVisibilityOverview";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { SpecificLinkOfferSection } from "../shared/SpecificLinkOfferSection";
 import { OfferOperationsSection } from "../shared/OfferOperationsSection";
 import { CountryTargetingSection } from "../shared/CountryTargetingSection";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbBundleVisibilitySection() {
-  const flow = usePpbConfigureContext();
+type PpbBundleVisibilityFlowProps = Pick<
+  PpbConfigureFlow,
+  | "activeSection"
+  | "appEmbedEnabled"
+  | "copySpecificLinkOffer"
+  | "generatedSpecificLink"
+  | "generateSpecificLinkOffer"
+  | "handleSectionChange"
+  | "offerDeliveryState"
+  | "openThemeEditorForAppEmbed"
+  | "revokeSpecificLinkOffer"
+  | "setCountryCodes"
+  | "setCountryTargetingEnabled"
+  | "setCountryTargetingMode"
+  | "setOfferEndsAt"
+  | "setOfferPriority"
+  | "setOfferRecurrenceAnchorDate"
+  | "setOfferRecurrenceEndsOn"
+  | "setOfferRecurrenceFrequency"
+  | "setOfferRecurrenceRunCount"
+  | "setOfferRecurrenceTermination"
+  | "setOfferRecurrenceWindowEnd"
+  | "setOfferRecurrenceWindowStart"
+  | "setOfferScheduleMode"
+  | "setOfferStartsAt"
+  | "setOfferStopLowerPriority"
+  | "setSpecificLinkOfferEnabled"
+  | "shop"
+  | "specificLinkOfferBusy"
+  | "themeEditorUrl"
+> & {
+  validationErrors?: Record<string, string>;
+};
+
+export type PpbBundleVisibilitySectionProps =
+  PpbBundleVisibilityFlowProps & {
+    bundle: Pick<PpbConfigureFlow["bundle"], "shopifyProductHandle">;
+  };
+
+export function PpbBundleVisibilitySection({
+  activeSection,
+  appEmbedEnabled,
+  bundle,
+  copySpecificLinkOffer,
+  generatedSpecificLink,
+  generateSpecificLinkOffer,
+  handleSectionChange,
+  offerDeliveryState,
+  openThemeEditorForAppEmbed,
+  revokeSpecificLinkOffer,
+  setCountryCodes,
+  setCountryTargetingEnabled,
+  setCountryTargetingMode,
+  setOfferEndsAt,
+  setOfferPriority,
+  setOfferRecurrenceAnchorDate,
+  setOfferRecurrenceEndsOn,
+  setOfferRecurrenceFrequency,
+  setOfferRecurrenceRunCount,
+  setOfferRecurrenceTermination,
+  setOfferRecurrenceWindowEnd,
+  setOfferRecurrenceWindowStart,
+  setOfferScheduleMode,
+  setOfferStartsAt,
+  setOfferStopLowerPriority,
+  setSpecificLinkOfferEnabled,
+  shop,
+  specificLinkOfferBusy,
+  themeEditorUrl,
+  validationErrors,
+}: PpbBundleVisibilitySectionProps) {
+  const shopify = useAppBridge();
   const link = buildBundleLinkModel({
     bundleType: "product_page",
-    shop: flow.shop,
-    productHandle: flow.bundle.shopifyProductHandle,
+    shop,
+    productHandle: bundle.shopifyProductHandle,
   });
 
   return (
     <div data-tour-target="ppb-bundle-visibility">
       <s-stack direction="block" gap="base">
         {CommonBundleVisibilityOverview({
-          active: flow.activeSection === "bundle_visibility",
+          active: activeSection === "bundle_visibility",
           embedStatus: buildEmbedStatusModel(
             "product_page",
-            flow.appEmbedEnabled
+            appEmbedEnabled
           ),
           link,
           onCopyLink: () => {
             void navigator.clipboard?.writeText(link.url);
-            flow.shopify.toast.show("Bundle link copied", {
+            shopify.toast.show("Bundle link copied", {
               isError: false,
             });
           },
-          onEnableEmbed: flow.openThemeEditorForAppEmbed,
+          onEnableEmbed: openThemeEditorForAppEmbed,
           placementOptions: [
             {
               title: "Bundle Widget",
@@ -40,7 +111,7 @@ export function PpbBundleVisibilitySection() {
                 "Show an upsell button or block on selected product pages.",
               actionLabel: "Set up Bundle Widget",
               variant: "primary",
-              onAction: () => flow.handleSectionChange("bundle_widget"),
+              onAction: () => handleSectionChange("bundle_widget"),
             },
             {
               title: "Bundle Embed",
@@ -48,43 +119,45 @@ export function PpbBundleVisibilitySection() {
                 "Place the bundle builder directly on selected product pages.",
               actionLabel: "Set up Bundle Embed",
               variant: "secondary",
-              onAction: () => flow.handleSectionChange("bundle_embed"),
+              onAction: () => handleSectionChange("bundle_embed"),
             },
           ],
-          themeEditorUrl: flow.themeEditorUrl,
+          themeEditorUrl,
         })}
         <SpecificLinkOfferSection
-          active={flow.activeSection === "bundle_visibility"}
-          busy={flow.specificLinkOfferBusy}
-          generatedLink={flow.generatedSpecificLink}
-          state={flow.offerDeliveryState}
-          onEnabledChange={flow.setSpecificLinkOfferEnabled}
-          onGenerate={flow.generateSpecificLinkOffer}
-          onCopy={flow.copySpecificLinkOffer}
-          onRevoke={flow.revokeSpecificLinkOffer}
+          active={activeSection === "bundle_visibility"}
+          busy={specificLinkOfferBusy}
+          generatedLink={generatedSpecificLink}
+          state={offerDeliveryState}
+          onEnabledChange={setSpecificLinkOfferEnabled}
+          onGenerate={generateSpecificLinkOffer}
+          onCopy={copySpecificLinkOffer}
+          onRevoke={revokeSpecificLinkOffer}
         />
         <OfferOperationsSection
-          active={flow.activeSection === "bundle_visibility"}
-          state={flow.offerDeliveryState}
-          onPriorityChange={flow.setOfferPriority}
-          onStopLowerPriorityChange={flow.setOfferStopLowerPriority}
-          onScheduleModeChange={flow.setOfferScheduleMode}
-          onStartsAtChange={flow.setOfferStartsAt}
-          onEndsAtChange={flow.setOfferEndsAt}
-          onRecurrenceFrequencyChange={flow.setOfferRecurrenceFrequency}
-          onRecurrenceAnchorDateChange={flow.setOfferRecurrenceAnchorDate}
-          onRecurrenceWindowStartChange={flow.setOfferRecurrenceWindowStart}
-          onRecurrenceWindowEndChange={flow.setOfferRecurrenceWindowEnd}
-          onRecurrenceTerminationChange={flow.setOfferRecurrenceTermination}
-          onRecurrenceEndsOnChange={flow.setOfferRecurrenceEndsOn}
-          onRecurrenceRunCountChange={flow.setOfferRecurrenceRunCount}
+          active={activeSection === "bundle_visibility"}
+          state={offerDeliveryState}
+          onPriorityChange={setOfferPriority}
+          onStopLowerPriorityChange={setOfferStopLowerPriority}
+          onScheduleModeChange={setOfferScheduleMode}
+          onStartsAtChange={setOfferStartsAt}
+          onEndsAtChange={setOfferEndsAt}
+          onRecurrenceFrequencyChange={setOfferRecurrenceFrequency}
+          onRecurrenceAnchorDateChange={setOfferRecurrenceAnchorDate}
+          onRecurrenceWindowStartChange={setOfferRecurrenceWindowStart}
+          onRecurrenceWindowEndChange={setOfferRecurrenceWindowEnd}
+          onRecurrenceTerminationChange={setOfferRecurrenceTermination}
+          onRecurrenceEndsOnChange={setOfferRecurrenceEndsOn}
+          onRecurrenceRunCountChange={setOfferRecurrenceRunCount}
+          validationErrors={validationErrors}
         />
         <CountryTargetingSection
-          active={flow.activeSection === "bundle_visibility"}
-          state={flow.offerDeliveryState}
-          onEnabledChange={flow.setCountryTargetingEnabled}
-          onModeChange={flow.setCountryTargetingMode}
-          onCountryCodesChange={flow.setCountryCodes}
+          active={activeSection === "bundle_visibility"}
+          state={offerDeliveryState}
+          onEnabledChange={setCountryTargetingEnabled}
+          onModeChange={setCountryTargetingMode}
+          onCountryCodesChange={setCountryCodes}
+          validationErrors={validationErrors}
         />
       </s-stack>
     </div>

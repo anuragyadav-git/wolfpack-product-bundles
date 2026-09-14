@@ -4,8 +4,8 @@ id: database-schema
 title: Database Schema
 type: architecture
 status: authoritative
-summary: Documents the canonical Prisma models, enums, ownership boundaries, and migration rules for Wolfpack persistence.
-last_audited: 2026-09-01
+summary: Documents the canonical Prisma models, removed legacy residue, ownership boundaries, and forward-only migration rules.
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -15,8 +15,9 @@ systems:
   - prisma
   - postgresql
 source_paths:
-  - prisma/schema.prisma
-  - prisma/migrations/
+  - apps/OnlyBundles-app/prisma/schema.prisma
+  - apps/OnlyBundles-app/prisma/migrations/
+  - prisma.config.ts
 related_docs:
   - internal docs/Architecture/System Overview.md
   - docs/competitor-analysis/22-bogos-bundlex-wolfpack-feasibility.md
@@ -31,7 +32,9 @@ keywords:
 
 # Database Schema
 
-Authoritative summary derived from `prisma/schema.prisma`. The `APPLICATION_ARCHITECTURE.md` in `docs/` is significantly outdated — this note supersedes it for schema questions.
+Authoritative summary derived from `apps/OnlyBundles-app/prisma/schema.prisma`.
+The `APPLICATION_ARCHITECTURE.md` in `docs/` is significantly outdated — this
+note supersedes it for schema questions.
 
 ---
 
@@ -40,8 +43,10 @@ Authoritative summary derived from `prisma/schema.prisma`. The `APPLICATION_ARCH
 ### Bundle
 
 Core model. Key fields beyond basics:
-- `status`: `BundleStatus` enum — `active`, `inactive`, `draft`, **`unlisted`** (not in old doc)
-- `fullPageLayout`: `FullPageLayout` enum — `CLASSIC`, `EDITORIAL`, `GRID`
+- `status`: `BundleStatus` enum — `draft`, `active`, `archived`, `unlisted`
+- `bundleDesignTemplate` and `bundleDesignPresetId`: nullable canonical design
+  identifiers for FPB and PPB templates; the schema has no separate
+  `FullPageLayout` field or enum
 - `promoBannerBgImage`: promotional banner image URL
 - Promo banner crop data is not part of the schema. The pruned `promoBannerBgImageCrop` column was removed; banners render with the configured image and standard cover/center behavior.
 - `tierConfig`: JSON — tiered pricing configuration
@@ -51,6 +56,13 @@ Core model. Key fields beyond basics:
   `countdownEnabled`, `countdownLayout`, `countdownPosition`,
   `countdownTitle`, `countdownExpiryAction`, and
   `countdownExpiredMessage`. These fields do not own a deadline.
+
+The Shopify Page-era columns `shopifyPageId`, `shopifyPreviewPageId`,
+`shopifyPageHandle`, and `shopifyPreviewPageHandle` have no schema owner. The
+forward-only `20260906090000_remove_legacy_shopify_page_fields` migration drops
+them and the obsolete handle index. Bundle deletion and status changes no
+longer run Shopify Page cleanup branches; FPB public documents are signed
+app-proxy URLs.
 
 ### BundleStep
 
@@ -76,6 +88,21 @@ keys, so deleting or replacing an offer policy does not rewrite completed
 analytics. Both models index `(shopId, offerPolicyId, createdAt)` for the
 offer-filtered dashboard and CSV paths. Bundle-only rows keep all four values
 null.
+
+`revenue` stores Shopify's whole-order value. `bundleRevenue` stores the
+discounted value of the specific bundle represented by that row. Keeping the
+two values separate is required because one Shopify order can contain multiple
+bundles: order revenue and order count are deduplicated by `orderId`, while
+bundle revenue and unique bundle purchases are deduplicated by
+`(orderId, bundleId)`. New checkout rows use the Web Pixel checkout line value;
+the manual Analytics backfill refreshes it from Admin GraphQL
+`LineItem.discountedTotalSet(withCodeDiscounts: true)` when a verified runtime
+bundle token identifies the line. Lines without authoritative bundle identity
+remain at zero rather than guessing allocation.
+
+`orderId` is always the canonical Shopify Order GID. Web Pixel ingestion rejects
+missing and numeric-only IDs, and Admin GraphQL backfill writes its returned GID
+directly. There is no numeric-to-GID compatibility read or `unknown` order key.
 
 ### Shop
 
@@ -151,29 +178,33 @@ that historical drift is reconciled separately.
 
 Shopify session storage (standard Remix adapter pattern).
 
+Legacy non-expiring offline rows are not a supported runtime source. Admin API
+callers use Shopify's authenticated session helpers and expiring offline token
+metadata; the removed one-time cutover helper is not a fallback path.
+
 ---
 
 ## Enums
 
 ### BundleStatus
 ```
-active | inactive | draft | unlisted
+draft | active | archived | unlisted
 ```
-`unlisted` = bundle exists but is not shown in merchant list (used for archived/template bundles).
-
-### FullPageLayout
-```
-CLASSIC | EDITORIAL | GRID
-```
-Controls FPB widget layout rendering mode.
+`unlisted` keeps the bundle product out of Shopify discovery while preserving
+the bundle for configuration and preview. `archived` is a distinct terminal
+application status; it is not an `inactive` alias.
 
 ---
 
 ## Prisma Location
 
-- Schema: `prisma/schema.prisma`
-- Dev DB env: `prisma/.env` (not project root — contains SIT credentials)
-- Dev DB file: `prisma/dev.db` (SQLite, gitignored)
+- Schema: `apps/OnlyBundles-app/prisma/schema.prisma`
+- Database provider: PostgreSQL in every environment
+- Connection variables: `DATABASE_URL` and `DIRECT_URL`
+- Root Prisma commands resolve the app-owned schema through
+  `prisma.config.ts`. When `apps/OnlyBundles-app/.env` exists, that config loads
+  it with Node's environment-file loader; already-supplied process variables
+  remain authoritative.
 
 ---
 
@@ -181,4 +212,31 @@ Controls FPB widget layout rendering mode.
 
 - New settings fields should be added as **direct Prisma columns** with sensible defaults, never as JSON blob sub-fields
 - The "Sync Bundle" feature lets merchants re-sync to pick up new defaults — no backwards-compat shims needed
-- See `CLAUDE.md` → "No Backwards Compatibility Rule" for enforcement details
+- See `AGENTS.md` → "No Backwards Compatibility Rule" for enforcement details
+- Before releasing a destructive residue migration, repeat zero-count checks in
+  every target environment for legacy offline sessions, Page-field bundles,
+  numeric order IDs, PPB legacy embed rows, and steps with JSON products but no
+  `StepProduct`. The membership query must inspect both `BundleStep.products`
+  and every related `StepCategory.products`; checking only the step JSON misses
+  products selected through the current FPB and PPB category editors.
+- On 2026-09-09 the configured database was reverified with the corrected
+  step-and-category membership query. It had no legacy Page columns and returned
+  zero legacy offline sessions, numeric order IDs, and PPB legacy embed rows.
+  A signed PPB preview exposed category JSON products without a canonical
+  `StepProduct` row; the corrected global query found an additional FPB draft
+  with the same shape. Both Agent-store fixtures were repaired through their
+  normal Admin save flows after the save boundary was corrected. The full
+  step-and-category query returned zero offenders for the configured database.
+  That result is not evidence for another release environment.
+- On 2026-09-14 the release-environment session gate was run read-only against
+  both configured databases. SIT had one offline session and zero legacy
+  offline sessions. Production had 162 offline sessions, of which 57 lacked
+  `expires`, `refreshToken`, and `refreshTokenExpires`; all 57 belonged to
+  currently installed shops. Do not delete those rows or uninstall those apps.
+  Shopify's app-template migration cycles a perpetual token when that merchant
+  next opens the app after `expiringOfflineAccessTokens` is deployed. Stores
+  that do not reopen require Shopify's documented offline-token exchange. That
+  exchange is irreversible and must persist the returned access token, refresh
+  token, and expiry metadata before marking the store complete, so it remains
+  a separately approved production operation rather than a deploy-time
+  fallback. The production zero-count release gate therefore remains open.

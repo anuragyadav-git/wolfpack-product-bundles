@@ -1,34 +1,80 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
-import type { PricingRule } from "../../../types/pricing";
+import type {
+  PricingRule,
+  PricingRuleTierText,
+} from "../../../types/pricing";
 import { ConfigureContextualSaveBar } from "../_shared/bundle-configure/ConfigureContextualSaveBar";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbSaveForm() {
-  const {
-    bundleProduct,
-    conditionsState,
-    discountMessagingMultiLanguageEnabled,
-    fetcher,
-    formState,
-    handleSave,
-    isDirty,
-    pricingState,
-    progressBarEnabled,
-    progressBarProgressText,
-    progressBarSuccessText,
-    progressBarType,
-    qtyOptionsDefaultRuleId,
-    qtyOptionsEnabled,
-    qtyRuleLabels,
-    qtyRuleSubtexts,
-    qtyRuleTextsByLocaleByRuleId,
-    ruleMessages,
-    ruleMessagesByLocale,
-    saveBarRef,
-    setShowDiscardModal,
-    stepsState,
-    tierTextByLocaleByRuleId,
-    tierTextByRuleId,
-  } = usePpbConfigureContext();
+type PpbSaveFormFlowProps = Pick<
+  PpbConfigureFlow,
+  | "bundleProduct"
+  | "discountMessagingMultiLanguageEnabled"
+  | "handleSave"
+  | "isDirty"
+  | "progressBarEnabled"
+  | "progressBarProgressText"
+  | "progressBarSuccessText"
+  | "progressBarType"
+  | "qtyOptionsDefaultRuleId"
+  | "qtyOptionsEnabled"
+  | "qtyRuleLabels"
+  | "qtyRuleSubtexts"
+  | "qtyRuleTextsByLocaleByRuleId"
+  | "ruleMessages"
+  | "ruleMessagesByLocale"
+  | "saveBarRef"
+  | "setShowDiscardModal"
+>;
+
+export type PpbSaveFormProps = PpbSaveFormFlowProps & {
+  conditionsState: Pick<PpbConfigureFlow["conditionsState"], "stepConditions">;
+  fetcher: Pick<PpbConfigureFlow["fetcher"], "state">;
+  formState: Pick<
+    PpbConfigureFlow["formState"],
+    "bundleName" | "bundleDescription" | "templateName" | "bundleStatus"
+  >;
+  pricingState: Pick<
+    PpbConfigureFlow["pricingState"],
+    | "discountEnabled"
+    | "discountType"
+    | "discountRules"
+    | "showFooter"
+    | "discountMessagingEnabled"
+  >;
+  stepsState: Pick<PpbConfigureFlow["stepsState"], "steps">;
+  tierTextByLocaleByRuleId: Record<
+    string,
+    Record<string, PricingRuleTierText>
+  >;
+  tierTextByRuleId: Record<string, PricingRuleTierText>;
+};
+
+export function PpbSaveForm({
+  bundleProduct,
+  conditionsState,
+  discountMessagingMultiLanguageEnabled,
+  fetcher,
+  formState,
+  handleSave,
+  isDirty,
+  pricingState,
+  progressBarEnabled,
+  progressBarProgressText,
+  progressBarSuccessText,
+  progressBarType,
+  qtyOptionsDefaultRuleId,
+  qtyOptionsEnabled,
+  qtyRuleLabels,
+  qtyRuleSubtexts,
+  qtyRuleTextsByLocaleByRuleId,
+  ruleMessages,
+  ruleMessagesByLocale,
+  saveBarRef,
+  setShowDiscardModal,
+  stepsState,
+  tierTextByLocaleByRuleId,
+  tierTextByRuleId,
+}: PpbSaveFormProps) {
 
   return (
     <>

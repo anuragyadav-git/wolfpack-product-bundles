@@ -5,7 +5,7 @@ title: Shopify Bundle App Test Suite
 type: testing-guide
 status: active
 summary: Commands, layout, and conventions for the Wolfpack automated test suite.
-last_audited: 2026-08-27
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -45,7 +45,6 @@ tests/
 │   └── assets/                 # Frontend widget tests
 │       └── bundle-widget.test.ts
 ├── integration/                # Integration tests for cross-module contracts
-│   ├── admin-route-file-boundaries.test.ts
 │   └── admin-configure-action-dispatch.test.ts
 └── e2e/                       # End-to-end application tests
     └── complete-bundle-flow.test.ts
@@ -94,8 +93,7 @@ Tests individual components in isolation with mocked dependencies.
 ### Integration Tests
 Tests cross-module contracts that protect refactors and route wiring.
 
-**Admin Route Refactor Tests:**
-- `admin-route-file-boundaries.test.ts`: scans Admin route/component source files and blocks new files above the hard line-count cap while the active refactor backlog is burned down.
+**Admin Configure Integration Tests:**
 - `admin-configure-action-dispatch.test.ts`: calls real FPB/PPB configure route actions with mocked handlers to verify intent dispatch and unknown-intent responses.
 
 ### End-to-End Tests

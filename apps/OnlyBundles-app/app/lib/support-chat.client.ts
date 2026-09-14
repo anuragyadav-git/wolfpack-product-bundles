@@ -5,11 +5,6 @@ interface CrispCommandQueue extends Array<unknown> {
 export interface SupportChatWindow {
   __wpbLoadSupportChat?: () => void;
   $crisp?: CrispCommandQueue;
-  matchMedia?: (query: string) => {
-    matches: boolean;
-    addEventListener: (name: "change", listener: (event: { matches: boolean }) => void) => void;
-    removeEventListener: (name: "change", listener: (event: { matches: boolean }) => void) => void;
-  };
   requestIdleCallback?: (
     callback: IdleRequestCallback,
     options?: IdleRequestOptions,
@@ -20,42 +15,18 @@ export interface SupportChatWindow {
 }
 
 const CRISP_FALLBACK_DELAY_MS = 8_000;
-const NARROW_SUPPORT_CHAT_QUERY = "(max-width: 767px)";
 
 function queueCrispCommand(win: SupportChatWindow, command: unknown[]) {
   win.$crisp = win.$crisp ?? [];
   win.$crisp.push(command);
 }
 
-export function installSupportChatPresentation({
+export function showSupportChatLauncher({
   win,
 }: {
   win: SupportChatWindow;
 }) {
-  const mediaQuery = win.matchMedia?.(NARROW_SUPPORT_CHAT_QUERY);
-  if (!mediaQuery) return () => {};
-
-  const syncVisibility = () => {
-    queueCrispCommand(win, [
-      "do",
-      mediaQuery.matches ? "chat:hide" : "chat:show",
-    ]);
-  };
-  const handleViewportChange = () => syncVisibility();
-  const handleChatClosed = () => {
-    if (mediaQuery.matches) {
-      queueCrispCommand(win, ["do", "chat:hide"]);
-    }
-  };
-
-  syncVisibility();
-  mediaQuery.addEventListener("change", handleViewportChange);
-  queueCrispCommand(win, ["on", "chat:closed", handleChatClosed]);
-
-  return () => {
-    mediaQuery.removeEventListener("change", handleViewportChange);
-    queueCrispCommand(win, ["off", "chat:closed"]);
-  };
+  queueCrispCommand(win, ["do", "chat:show"]);
 }
 
 export function installSupportChatLoader({

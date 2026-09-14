@@ -5,7 +5,7 @@ title: Deployment General Sync
 type: operations
 status: active
 summary: Post-deploy replay of the current persisted bundle storefront contract behind one true or false flag.
-last_audited: 2026-08-31
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -46,10 +46,15 @@ When enabled, it:
 3. Ensures the current variant metafield definitions.
 4. Ensures the shop-level PPB Storefront token, environment-correct app-proxy
    root, controls/language runtime, and generated Design CSS metafields.
-5. Calls `syncBundleStorefrontNow(... reason: "sync_bundle")`, which reloads
-   each complete bundle graph from Prisma, activates the Cart Transform, and
-   writes the current app-owned product/variant metafield values.
-6. Remediates invalid saved variant references through the current persistence contract.
+5. Checks saved variant references with Admin GraphQL `nodes`, in batches of
+   at most 250 IDs, then removes confirmed missing or malformed references
+   through the existing persistence contract. Storefront availability is not
+   evidence that a variant has been deleted. Access errors, incomplete responses,
+   unexpected node identities, and persistence failures stop that bundle's sync.
+6. Calls `syncBundleStorefrontNow(... reason: "sync_bundle")` after remediation.
+   It reloads the complete bundle graph from Prisma, activates the Cart Transform,
+   and writes current app-owned product/variant metafield values. Publishing
+   before remediation would leave Shopify using the stale composition.
 7. Ensures the automatic add-on discount once for every shop with an enabled
    saved FPB add-on configuration.
 8. Ensures the role-tagged subscription initial-order automatic discount once
@@ -66,3 +71,23 @@ deployment sync workflow and `WPB_DEPLOYMENT_GENERAL_SYNC` is its only flag.
 Update the general-sync script, service, and tests only when the Prisma schema
 or metafield definition or value contract changes. Do not add placeholder
 metaobject or compatibility hooks without a persisted contract and a caller.
+
+Variant existence uses Shopify’s [Admin nodes query](https://shopify.dev/docs/api/admin-graphql/latest/queries/nodes), through the shop’s existing authenticated Admin client.
+
+## Coordinated authorization cutover
+
+The canonical parent writer now reconciles Shopify-owned scheduled automatic
+discounts before publishing the current `{revision, pricingMode}` policy record
+for either bundle type. `scheduled_initial` owns the first billing cycle;
+`scheduled_recurring` owns recurring subscription cycles when configured. Shopify
+owns dates, combinations and automatic-discount capacity. No discount IDs are
+mirrored into new database columns, and native API/readback failures fail sync.
+
+Deploy the matching Functions and server writer together, then use normal Bundle
+Sync or this existing general-sync workflow. The new Function requires
+`componentQuantities` inside `price_adjustment` and current authorization records;
+it does not read legacy values as a fallback. Public component quantities and
+large display pricing remain separate published metafields. An unsynchronized
+existing bundle can lose authorization until sync succeeds. Newly onboarded stores
+use this same canonical writer; capacity, access and invalid configuration failures
+must surface instead of marking the bundle synchronized.

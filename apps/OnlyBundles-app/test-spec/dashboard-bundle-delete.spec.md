@@ -4,15 +4,15 @@ id: dashboard-bundle-delete
 title: Dashboard Bundle Delete
 type: test-spec
 status: active
-summary: Defines safe Shopify Page cleanup behavior when deleting full-page bundles from the dashboard.
-last_audited: 2026-08-11
+summary: Defines shared parent-product cleanup and database deletion behavior for dashboard bundle deletion.
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
   - bundles
 systems:
   - dashboard
-  - shopify-pages
+  - bundle-parent-product
 source_paths:
   - app/routes/app/app.dashboard/handlers/handlers.server.ts
   - app/routes/app/app.dashboard/DashboardPage.tsx
@@ -22,8 +22,9 @@ related_docs:
 tags:
   - deletion
   - fpb
+  - ppb
 keywords:
-  - pageDelete
+  - productDelete
   - bundle deletion
 ---
 
@@ -33,9 +34,9 @@ keywords:
 
 ## Purpose
 
-Ensure dashboard deletion removes legacy Shopify Pages before deleting an FPB
-database record, without changing PPB behavior or losing references after a
-Shopify cleanup failure.
+Ensure dashboard deletion uses the shared Shopify parent-product lifecycle for
+FPB and PPB bundles, never calls a legacy Shopify Page mutation, and retains the
+database row when current resource cleanup fails.
 
 ## Test Cases
 
@@ -43,17 +44,20 @@ Shopify cleanup failure.
 
 | # | Scenario | Input | Expected Output | Notes |
 | --- | --- | --- | --- | --- |
-| 1 | Delete FPB with public and preview Pages | Two distinct Page GIDs | Both Pages are deleted before the bundle row | Preserves cleanup ordering |
-| 2 | Delete FPB whose Page is already gone | `NOT_FOUND` Page error | Bundle deletion continues | Idempotent retry |
-| 3 | Shopify rejects Page deletion | GraphQL or user error | Returns an error and retains bundle row | References remain recoverable |
-| 4 | Delete PPB | Product-page bundle | No Page mutation; existing deletion continues | FPB-only behavior |
-| 5 | Successful dashboard deletion | Action returns success while loader revalidation is settling | Deleted row is removed immediately and remaining rows stay interactive | Prevents stale deleted records until hard reload |
+| 1 | Delete bundle without a stored parent-product ID | FPB or PPB with `shopifyProductId: null` | No Shopify mutation; bundle row is deleted | Supports a missing or already-cleared parent reference |
+| 2 | Delete FPB with a stored parent product | FPB plus a Product GID | Shopify Product is deleted before the bundle row | Uses the shared parent-product contract |
+| 3 | Delete PPB with a stored parent product | PPB plus a Product GID | Shopify Product is deleted before the bundle row | Same lifecycle as FPB |
+| 4 | Parent product is already gone | Product deletion returns a missing-product user error | Bundle deletion continues | Idempotent retry |
+| 5 | Shopify rejects parent-product deletion | GraphQL or non-missing user error | Returns an error and retains bundle row | References remain recoverable |
+| 6 | Bundle does not exist in the authenticated shop | Unknown bundle ID | Returns not found and performs no cleanup | Preserves tenant scope |
+| 7 | Successful dashboard deletion | Action returns success while loader revalidation is settling | Deleted row is removed immediately and remaining rows stay interactive | Prevents stale deleted records until hard reload |
 
 ## Acceptance Criteria
 
-- [x] FPB Page cleanup runs before database deletion.
-- [x] Duplicate Page GIDs are deleted once.
-- [x] Already-missing Pages do not block deletion.
-- [x] Other Page deletion failures preserve the bundle row.
-- [x] PPB deletion makes no Page API call.
+- [x] No dashboard deletion path calls a Shopify Page API.
+- [x] FPB and PPB parent products use the same Shopify Product deletion path.
+- [x] A missing stored parent-product ID skips Shopify cleanup.
+- [x] An already-missing parent product does not block bundle deletion.
+- [x] Other parent-product deletion failures preserve the bundle row.
+- [x] Missing or cross-shop bundles return not found without cleanup.
 - [x] A successful deletion immediately removes the row from the current dashboard.

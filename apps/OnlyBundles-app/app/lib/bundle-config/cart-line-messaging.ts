@@ -1,4 +1,4 @@
-export interface CartLineMessagingSettings {
+interface CartLineMessagingSettings {
   isEnabled: boolean;
   showBundleContains: boolean;
   showOriginalPrice: boolean;
@@ -8,14 +8,14 @@ export interface CartLineMessagingSettings {
   };
 }
 
-export interface CartLineMessagingValues {
+interface CartLineMessagingValues {
   box?: string;
   items: string;
   retailPrice: string;
   youSave: string;
 }
 
-export type CartLineDisplayProperties = Record<string, string>;
+type CartLineDisplayProperties = Record<string, string>;
 
 export function serializeCartLineDisplayProperties(
   settings: CartLineMessagingSettings,

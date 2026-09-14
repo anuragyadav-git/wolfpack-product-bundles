@@ -5,7 +5,7 @@ title: Admin Performance
 type: operations
 status: authoritative
 summary: Embedded Admin Web Vitals instrumentation, route-level LCP findings, and critical-path constraints.
-last_audited: 2026-09-02
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -36,7 +36,9 @@ source_paths:
   - app/lib/bundle-configure-loader.server.ts
   - app/routes/app/app._index.tsx
   - app/routes/app/app.attribution/AttributionRouteShell.tsx
+  - app/routes/auth/auth.login/route.tsx
   - app/routes/app/app.attribution/AttributionDashboard.tsx
+  - app/components/analytics/BundleConversionFunnel.tsx
 related_docs:
   - internal docs/Operations/LCP and CLS Playbook.md
 tags:
@@ -57,6 +59,11 @@ Shopify App Bridge is the source of embedded Admin Web Vitals used for Built for
 - `<script src="https://cdn.shopify.com/shopifycloud/app-bridge.js">`
 
 The App Bridge script should be the first script in `<head>` and should not be pinned to a versioned URL.
+
+Shopify's Dev Dashboard is the field-data authority for BFS: it shows daily and
+28-day p75 rollups using the same data as the App Store assessment. LCP passes
+at `2500` ms or less and requires at least 100 recorded LCP calls in the last 28
+days before Shopify assesses it.
 
 Wolfpack does not ship an Admin Web Vitals collector or endpoint. Shopify Web Vitals remains the field-data source. For a major Admin UI change, temporarily recreate the documented Chrome-only LCP bridge in dev/SIT, measure the exact embedded route and candidate, and remove the bridge before commit. Never restore app-owned persistence or `/api/web-vitals`.
 
@@ -89,7 +96,7 @@ Measured in the Shopify Admin chrome on `agent-5sfidg3m` / SIT using
 | `/app/bundles/cart-transform` | Source audit: no first-viewport owned image | No image preload fix |
 | `/app/attribution` | Measured: critical funnel heading | Render the title and critical funnel heading before deferred data. Keep pixel status and the dashboard behind one inline Polaris loading boundary, with dashboard JavaScript and CSS resolving atomically. |
 | `/app/settings` | Measured: landing text | Paint the landing cards without awaiting deferred workspace data. The complete Settings workspace, including Design, remains lazy-loaded through one post-click boundary. Do not add speculative preloads. |
-| `/app/store-files` / `/app/upload-store-file` | Source audit: images are picker/file content, not initial route hero content | No route preload |
+| `/app/upload-store-file` | Source audit: asset uploads are merchant-initiated and not initial route hero content | No route preload |
 | Configure routes | Measured: text paragraph in the initial configure canvas | Render the loaded configure canvas immediately, fetch product/currency/locales in one Admin GraphQL request, and split inactive sections and closed overlays from the initial production chunk. The App Embed lookup remains a live guard before Preview; it must not gate the editor. |
 
 Pages without first-viewport owned media should be treated as text/bootstrap-bound
@@ -314,18 +321,17 @@ the destination commits or the effect cleans up. The existing route stays
 rendered during that transition. Same-screen revalidation and form submission
 do not start the Admin header indicator.
 
-Redux Toolkit, React Redux, Redux, Reselect, and Immer are isolated in
-`vendor-state`. Chart-only dependencies remain in `vendor-charts`. Production
-manifest verification must show that the app layout and every non-analytics
-route avoid `vendor-charts`; only the lazy attribution dashboard and its chart
-helpers may reference that chunk.
+Route-local React state and Remix fetchers avoid a separate Admin state vendor
+chunk. The Analytics route uses its local accessible SVG funnel and must not
+reach `vendor-charts`. Production manifest verification must show that the app
+layout and every embedded Admin route avoid both `vendor-state` and
+`vendor-charts`.
 
 Merchant workflow roots should use descriptive `s-query-container` names when
 their responsive behavior depends on embedded app width. Current shared roots
 include `dashboard-bundles`, `settings-landing`, `design-settings`,
 `pricing-page`, `billing-page`, `events-page`, `storefront-setup-card`,
-`integrations-page`, `analytics-page`, `file-picker`, and
-`bundle-configure`. Page shells remain shrinkable, use responsive inline
+`integrations-page`, `analytics-page`, and `bundle-configure`. Page shells remain shrinkable, use responsive inline
 padding, and keep horizontal scrolling inside labelled data regions rather than
 on the document.
 
@@ -335,7 +341,7 @@ CSS module behind a lazy React component produced a visible unstyled interval
 in the Vite-served embedded app, including after hot reloads.
 The pixel status promise resolves independently into a native top banner, while
 the title and critical funnel heading remain immediately available and the
-dashboard data/chart boundary uses the shared CSS-free Polaris loading state.
+dashboard data boundary uses the shared CSS-free Polaris loading state.
 Analytics has one page-level banner owner: UTM pixel status. Zero-value metric
 surfaces communicate the no-data state without a second banner, and backfill
 action results use Shopify toast feedback. Informational banners inside the
@@ -348,16 +354,23 @@ components. `app/root.tsx` loads the unversioned `polaris.js` script immediately
 after the required unversioned App Bridge script. The shared `/app` route no
 longer loads the React Polaris provider, Polaris translation JSON, the 444KB
 legacy stylesheet, or a global Redux provider. The standalone auth login route
-retains its route-local React Polaris styling.
+uses the same globally registered Polaris web components around its standard
+Remix form, so it does not require a React Polaris provider, translation bundle,
+or stylesheet either.
 
-The production chunk graph keeps legacy React Polaris in
-`vendor-polaris-react`, App Bridge React hooks in
-`vendor-app-bridge-react`, Redux in `vendor-state`, and charts in
-`vendor-charts`. The 2026-07-30 production manifest showed no shared shell CSS
-and no Admin route violations: non-state routes avoided `vendor-state`,
-non-Analytics routes avoided `vendor-charts`, and embedded Admin routes avoided
-the legacy Polaris chunk and stylesheet. Analytics continued to request its
-lazy dashboard JavaScript and CSS in the same import boundary.
+The 2026-07-30 production chunk graph kept legacy React Polaris in
+`vendor-polaris-react`, App Bridge React hooks in `vendor-app-bridge-react`,
+Redux in `vendor-state`, and charts in `vendor-charts`. The later Shopify-native
+cutover removed the React Polaris, Redux, and chart dependencies and their
+manual chunks. App Bridge React remains because authenticated Admin routes use
+Shopify's hooks. Analytics continues to request its lazy dashboard JavaScript
+and CSS in the same import boundary.
+
+The 2026-09-07 Shopify-native remediation removed Redux, RTK Query, Recharts,
+and their manual Vite chunks from the deployable Admin. Configure and Dashboard
+state is route-local React state or reducers; server interactions use Remix
+loaders, actions, and fetchers. `vendor-app-bridge-react` remains because the
+Admin uses Shopify's App Bridge React hooks.
 
 The standalone onboarding route has been removed. Authenticated `/app` entries
 always continue to the dashboard, so the shared layout no longer queries
@@ -389,7 +402,9 @@ briefly after shell mount so chart and analytics chunks do not compete with the
 Admin shell title paint. Support chat auto-load also uses the delayed fallback
 instead of `requestIdleCallback`, because Chrome can run idle callbacks before
 LCP on quiet traces; explicit support-click loading still opens chat
-immediately.
+immediately. Delayed SDK loading does not hide the launcher: the app queues
+`chat:show` for every viewport and has no phone-only media-query or close-event
+suppression.
 
 If attribution remains above target in field data, keep optimizing the route
 shell and parent Admin boot path first. Do not add attribution image preloads:
@@ -519,3 +534,44 @@ Design lazy boundary and cannot account for Settings landing LCP. Treat this as
 local dev-tunnel evidence requiring a focused route-response and candidate
 follow-up, not Shopify field p75. The temporary observer and parent bridge were
 removed before commit.
+
+## 2026-09-05 Analytics conversion-funnel dependency removal
+
+`/app/attribution` replaces the funnel bars, Bundle Split area chart, and
+campaign-row revenue meters with a dependency-free accessible SVG conversion
+funnel. The BOGOS-style bundle commerce extension adds six text KPI cards and
+two small dependency-free SVG sales trends; it does not restore Recharts or the
+route-specific chart chunk.
+The visualization consumes the existing `views.totalViews`,
+`funnelSnapshot.addedToCart`, and `funnelSnapshot.checkedOut` values. Commerce
+metrics separate the Shopify whole-order value from the discounted bundle-line
+value so multi-bundle orders do not duplicate order revenue or order counts.
+The attribution pixel now preserves Shopify Web Pixel `finalLinePrice`, while
+manual backfill reads Admin GraphQL `currentTotalPriceSet` and
+`discountedTotalSet(withCodeDiscounts: true)`; the app stores that verified
+bundle-line value separately from whole-order revenue.
+
+The route shell continues to render `h2#wpb-critical-funnel-hero-title` before
+the deferred Analytics payload. The resolved SVG remains inside the dashboard
+boundary, uses a labelled horizontal overflow region at narrow widths, and
+does not add work to the critical shell. The 2026-09-05 production build emitted
+no `vendor-charts` asset, and the Analytics manifest entry contains no chart
+dependency import. A cache-bypassed embedded SIT measurement on
+`agent-5sfidg3m` retained `h2#wpb-critical-funnel-hero-title` as the app-owned
+LCP candidate at 1784ms. This is a dev-tunnel spot check, not Shopify field p75
+evidence. The temporary cross-origin observer and parent bridge were removed
+immediately after the measurement.
+
+## 2026-09-07 Configure loader request alignment
+
+The shared FPB/PPB configure loader again fetches the bundle product, shop
+currency/timezone, and published locales through one Shopify Admin GraphQL
+request. A source drift had restored three separate requests even though the
+route contract and test spec required one.
+
+Optional product and locale field errors retain their merchant-safe behavior:
+the editor still opens with a null product or empty locale list when Shopify
+returns usable partial shop data. Currency and timezone remain required and the
+loader does not fabricate fallbacks or start a second request chain. This
+reduces route-blocking Admin API work without replacing useful configure
+content, delaying editor readiness, or weakening Preview and save safeguards.

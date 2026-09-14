@@ -34,7 +34,6 @@ import { CartTransformService } from "../../services/cart-transform-service.serv
 import { syncPpbStorefrontRuntime } from "../../services/ppb-storefront-runtime.server";
 import { buildFpbStorefrontUrl } from "../../lib/fpb-storefront-url";
 import { navigateBackOrFallback } from "../../lib/navigation";
-import { ReduxProvider } from "../../store/ReduxProvider";
 import {
   SettingsLandingShell,
   SettingsWorkspaceError,
@@ -575,14 +574,12 @@ export default function SettingsRouteDefault() {
       >
         {([resolvedSettingsPage, resolvedPreviewBundles]: any) => {
           return (
-            <ReduxProvider>
-              <SettingsWorkspace
-                initialView={workspaceView}
-                onExit={() => setWorkspaceView(null)}
-                settingsPage={resolvedSettingsPage}
-                previewBundles={resolvedPreviewBundles}
-              />
-            </ReduxProvider>
+            <SettingsWorkspace
+              initialView={workspaceView}
+              onExit={() => setWorkspaceView(null)}
+              settingsPage={resolvedSettingsPage}
+              previewBundles={resolvedPreviewBundles}
+            />
           );
         }}
       </Await>

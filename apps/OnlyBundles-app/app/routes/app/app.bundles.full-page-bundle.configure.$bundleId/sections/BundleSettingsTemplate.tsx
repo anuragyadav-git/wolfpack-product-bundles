@@ -1,18 +1,21 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { translateAdmin } from "~/i18n/config";
+import { QuestionHelpTooltip } from "../SmallComponents";
+
+export interface FpbBundleTemplateSettingsProps {
+  handleSectionChange: (section: string) => void;
+  markAsDirty: () => void;
+  setTextOverrides: (
+    update: (previous: Record<string, string>) => Record<string, string>,
+  ) => void;
+  textOverrides: Record<string, string>;
+}
 
 export function FpbBundleTemplateSettings({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    handleSectionChange,
-    markAsDirty,
-    QuestionHelpTooltip,
-    setTextOverrides,
-    textOverrides,
-  } = flow;
+  handleSectionChange,
+  markAsDirty,
+  setTextOverrides,
+  textOverrides,
+}: FpbBundleTemplateSettingsProps) {
 
   return (
     <>
@@ -47,6 +50,23 @@ export function FpbBundleTemplateSettings({
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.showsHowMuchTheCustomerIsSavingOnTheBundleInCart"
             )}
           </p>
+          <s-choice-list
+            name="cartDiscountDisplay"
+            label={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstemplate.cartLineItemDiscountDisplay"
+            )}
+            labelAccessibilityVisibility="exclusive"
+            values={[textOverrides.cartDiscountDisplay ?? "defaults"]}
+            onChange={(event: Event) => {
+              const value = (event.currentTarget as any).values?.[0];
+              if (!value) return;
+              setTextOverrides((prev) => ({
+                ...prev,
+                cartDiscountDisplay: value,
+              }));
+              markAsDirty();
+            }}
+          >
           {[
             {
               value: "defaults",
@@ -60,46 +80,12 @@ export function FpbBundleTemplateSettings({
               description:
                 "Set a different discount format or label for this bundle only.",
             },
-          ].map(({ value, label, description }: any) => (
-            <label
-              key={value}
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 8,
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="radio"
-                name="cartDiscountDisplay"
-                value={value}
-                checked={
-                  (textOverrides.cartDiscountDisplay ?? "defaults") === value
-                }
-                onChange={() => {
-                  setTextOverrides((prev) => ({
-                    ...prev,
-                    cartDiscountDisplay: value,
-                  }));
-                  markAsDirty();
-                }}
-                style={{ marginTop: 3 }}
-              />
-              <span>
-                <span style={{ display: "block", fontSize: 14 }}>{label}</span>
-                <span
-                  style={{
-                    display: "block",
-                    fontSize: 13,
-                    color: "#6d7175",
-                  }}
-                >
-                  {description}
-                </span>
-              </span>
-            </label>
+          ].map(({ value, label, description }) => (
+            <s-choice key={value} value={value}>
+              {`${label}. ${description}`}
+            </s-choice>
           ))}
+          </s-choice-list>
         </s-stack>
       </s-section>
       {/* Bundle Banner — 2-column side-by-side layout */}

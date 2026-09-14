@@ -8,19 +8,14 @@
  */
 
 import { json } from "@remix-run/node";
-import type { ShopifyAdmin } from "../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../shopify.server";
 import type { Session } from "@shopify/shopify-api";
 import { AppLogger } from "../../lib/logger";
 import db from "../../db.server";
-import { ThemeTemplateService } from "../theme-template.server";
 import { BundleStatus } from "../../constants/bundle";
-import { buildBundleProductDescriptionHtml } from "../../lib/bundle-product-description.server";
 import { resolveShopEntitlements } from "../subscriptions/subscription-service.server";
 import { shopUsesAdvancedDesign } from "../subscriptions/design-entitlement-state.server";
 import { updateBundleWithPublicationGate } from "../subscriptions/bundle-entitlement-gate.server";
-
-// Re-export so route handlers can import it from this barrel file.
-export { buildBundleProductDescriptionHtml };
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
@@ -392,115 +387,5 @@ export async function handleGetCurrentTheme(admin: ShopifyAdmin, _session: Sessi
       success: false,
       error: "Failed to fetch current theme"
     });
-  }
-}
-
-/**
- * Handle ensuring bundle templates exist
- */
-export async function handleEnsureBundleTemplates(admin: ShopifyAdmin, session: Session) {
-  try {
-    AppLogger.debug("[TEMPLATE_HANDLER] Ensuring bundle templates exist");
-
-    const templateService = new ThemeTemplateService(admin, session);
-
-    // Get all active bundles with container products
-    const activeBundles = await db.bundle.findMany({
-      where: {
-        shopId: session.shop,
-        status: BundleStatus.ACTIVE
-      },
-      select: {
-        id: true,
-        name: true,
-        shopifyProductId: true
-      }
-    });
-
-    AppLogger.debug(`[TEMPLATE_HANDLER] Found ${activeBundles.length} active bundles`);
-
-    if (activeBundles.length === 0) {
-      return json({
-        success: true,
-        message: "No active bundles found - no templates to create",
-        results: []
-      });
-    }
-
-    // Get product handles from Shopify
-    const productIds = activeBundles
-      .filter(bundle => bundle.shopifyProductId)
-      .map(bundle => bundle.shopifyProductId);
-
-    if (productIds.length === 0) {
-      return json({
-        success: true,
-        message: "No bundle container products found",
-        results: []
-      });
-    }
-
-    const GET_BUNDLE_PRODUCTS = `
-      query getBundleContainerProducts($ids: [ID!]!) {
-        nodes(ids: $ids) {
-          ... on Product {
-            id
-            handle
-            title
-          }
-        }
-      }
-    `;
-
-    const response = await admin.graphql(GET_BUNDLE_PRODUCTS, {
-      variables: { ids: productIds }
-    });
-    const data = await response.json();
-    const products = data.data?.nodes?.filter((node: any) => node) || [];
-
-    AppLogger.debug(`[TEMPLATE_HANDLER] Found ${products.length} bundle container products`);
-
-    // Create templates for each bundle container product
-    const results = [];
-    for (const product of products) {
-      AppLogger.debug(`[TEMPLATE_HANDLER] Processing product: ${product.title} (${product.handle})`);
-
-      const result = await templateService.ensureProductTemplate(product.handle);
-      results.push({
-        productId: product.id,
-        productHandle: product.handle,
-        productTitle: product.title,
-        templatePath: result.templatePath,
-        created: result.created || false,
-        success: result.success,
-        error: result.error
-      });
-
-      AppLogger.debug(`[TEMPLATE_HANDLER] Product ${product.handle}: ${result.success ? 'SUCCESS' : 'FAILED'} ${result.created ? '(CREATED)' : '(EXISTS)'}`);
-    }
-
-    const successCount = results.filter(r => r.success).length;
-    const createdCount = results.filter(r => r.created).length;
-
-    AppLogger.debug(`[TEMPLATE_HANDLER] Template creation completed: ${successCount}/${results.length} successful, ${createdCount} created`);
-
-    return json({
-      success: true,
-      message: `Template creation completed: ${successCount}/${results.length} successful, ${createdCount} new templates created`,
-      results,
-      summary: {
-        totalProducts: products.length,
-        successCount,
-        createdCount,
-        failedCount: results.length - successCount
-      }
-    });
-
-  } catch (error: any) {
-    AppLogger.error("[TEMPLATE_HANDLER] Error during template creation:", {}, error as any);
-    return json({
-      success: false,
-      error: (error as Error).message || "Template creation failed"
-    }, { status: 500 });
   }
 }

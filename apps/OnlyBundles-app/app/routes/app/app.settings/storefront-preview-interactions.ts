@@ -13,12 +13,13 @@ type StorefrontPreviewRendererState = {
 };
 
 type LoadingPreviewController = {
-  showLoadingOverlay?: (gifUrl: null, options: { bootstrap: true }) => unknown;
+  showLoadingOverlay?: (gifUrl: string | null, options: { bootstrap: true }) => unknown;
   hideLoadingOverlay?: (...args: unknown[]) => unknown;
 };
 
 type LoadingPreviewState = {
   persistent: boolean;
+  gifUrl: string | null;
   hide: ((...args: unknown[]) => unknown) | undefined;
 };
 
@@ -34,11 +35,13 @@ export function getStorefrontPreviewRendererKey(
 export function setStorefrontPreviewLoadingPersistent(
   controller: LoadingPreviewController,
   persistent: boolean,
+  gifUrl: string | null = null,
 ) {
   let previewState = loadingPreviewStates.get(controller);
   if (!previewState) {
     previewState = {
       persistent: false,
+      gifUrl: null,
       hide: controller.hideLoadingOverlay?.bind(controller),
     };
     loadingPreviewStates.set(controller, previewState);
@@ -49,9 +52,13 @@ export function setStorefrontPreviewLoadingPersistent(
   }
 
   const wasPersistent = previewState.persistent;
+  const previousGifUrl = previewState.gifUrl;
   previewState.persistent = persistent;
+  previewState.gifUrl = gifUrl;
   if (persistent) {
-    if (!wasPersistent) controller.showLoadingOverlay?.(null, { bootstrap: true });
+    if (!wasPersistent || previousGifUrl !== gifUrl) {
+      controller.showLoadingOverlay?.(gifUrl, { bootstrap: true });
+    }
     return;
   }
   previewState.hide?.();

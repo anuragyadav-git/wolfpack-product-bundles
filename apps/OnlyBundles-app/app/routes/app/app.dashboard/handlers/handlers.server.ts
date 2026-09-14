@@ -1,3 +1,5 @@
+import { removePublishedBundlePolicy } from "../../../../services/bundle-authorization-policy.server";
+import { removeScheduledBundleDiscounts } from "../../../../services/scheduled-bundle-discount.server";
 /**
  * Dashboard Action Handlers
  *
@@ -7,10 +9,10 @@
 
 import { json } from "@remix-run/node";
 import db from "../../../../db.server";
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import { AppLogger } from "../../../../lib/logger";
 import { MetafieldCleanupService } from "../../../../services/metafield-cleanup.server";
-import { WidgetInstallationService } from "../../../../services/widget-installation.server";
+import { WidgetInstallationService } from "../../../../services/widget-installation/widget-installation-core.server";
 import { BundleStatus, BundleType } from "../../../../constants/bundle";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { getBundleEditPath } from "../../../../lib/bundle-navigation";
@@ -40,52 +42,6 @@ const DELETE_PRODUCT = `#graphql
     }
   }
 `;
-
-const DELETE_PAGE = `#graphql
-  mutation DeleteBundlePage($id: ID!) {
-    pageDelete(id: $id) {
-      deletedPageId
-      userErrors { code field message }
-    }
-  }
-`;
-
-type DeletePageResponse = {
-  errors?: Array<{ message?: string }>;
-  data?: {
-    pageDelete?: {
-      deletedPageId?: string | null;
-      userErrors?: Array<{ code?: string; message?: string }>;
-    } | null;
-  };
-};
-
-async function deleteBundlePage(admin: ShopifyAdmin, pageId: string) {
-  const response = await admin.graphql(DELETE_PAGE, {
-    variables: { id: pageId },
-  });
-  const data = await response.json() as DeletePageResponse;
-  if (data.errors?.length) {
-    throw new Error(
-      `Failed to delete Shopify Page ${pageId}: ${data.errors[0]?.message ?? "unknown error"}`,
-    );
-  }
-
-  const payload = data.data?.pageDelete;
-  const errors = payload?.userErrors ?? [];
-  const alreadyDeleted = errors.length > 0 && errors.every(
-    (error: { code?: string; message?: string }) =>
-      error.code === "NOT_FOUND" || /not found|does not exist/i.test(error.message ?? ""),
-  );
-  if (errors.length > 0 && !alreadyDeleted) {
-    throw new Error(
-      `Failed to delete Shopify Page ${pageId}: ${errors[0]?.message ?? "unknown error"}`,
-    );
-  }
-  if (!payload?.deletedPageId && !alreadyDeleted) {
-    throw new Error(`Failed to delete Shopify Page ${pageId}: Shopify returned no deleted Page ID`);
-  }
-}
 
 async function deleteBundleParentProduct(admin: ShopifyAdmin, productId: string) {
   const response = await admin.graphql(DELETE_PRODUCT, {
@@ -274,16 +230,8 @@ export async function handleDeleteBundle(
       return json({ success: false, error: ERROR_MESSAGES.BUNDLE_NOT_FOUND }, { status: 404 });
     }
 
-    if (bundle.bundleType === BundleType.FULL_PAGE) {
-      const pageIds = new Set(
-        [bundle.shopifyPageId, bundle.shopifyPreviewPageId].filter(
-          (pageId): pageId is string => Boolean(pageId),
-        ),
-      );
-      for (const pageId of pageIds) {
-        await deleteBundlePage(admin, pageId);
-      }
-    }
+    await removePublishedBundlePolicy(admin, bundleId);
+    await removeScheduledBundleDiscounts(admin, session.shop, bundleId);
 
     // Clean up app references and the app-owned generated parent product.
     if (bundle.shopifyProductId) {

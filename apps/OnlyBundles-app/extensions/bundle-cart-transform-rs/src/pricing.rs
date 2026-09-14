@@ -42,7 +42,9 @@ fn condition_is_met(
             ConditionType::Quantity => (paid_quantity as f64, condition.value),
         };
 
-        let operator = normalize_operator(&condition.operator);
+        let Some(operator) = normalize_operator(&condition.operator) else {
+            return false;
+        };
         match operator {
             Operator::Gte => actual_value >= condition_value,
             Operator::Gt => actual_value > condition_value,

@@ -1,8 +1,11 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { DesignLivePreview } from "../../../app/routes/app/app.settings/DesignLivePreview";
 import {
   DESIGN_PREVIEW_TEMPLATES,
-  DesignLivePreview,
+  buildDesignPreviewTheme,
+} from "../../../app/routes/app/app.settings/design-preview-model";
+import {
   createDesignPreviewState,
   getDefaultTemplateKey,
   isDesignPreviewAreaSupported,
@@ -20,8 +23,7 @@ import {
   clearPreviewDiscountFeedback,
   triggerPreviewDiscountFeedback,
   togglePreviewMobileSummary,
-} from "../../../app/routes/app/app.settings/DesignLivePreview";
-import { buildDesignPreviewTheme } from "../../../app/routes/app/app.settings/design-preview-model";
+} from "../../../app/routes/app/app.settings/design-preview-state";
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),

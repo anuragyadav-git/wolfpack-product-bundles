@@ -6,7 +6,7 @@
  */
 
 import { generateCSSFromSettings } from "../../../app/lib/css-generators";
-import type { ShopBrandColors } from "../../../app/services/theme-colors.server";
+import type { ShopBrandColors } from "../../../app/lib/shop-brand-colors";
 
 const THEME_COLORS: ShopBrandColors = {
   primary: { background: "#1A56DB", foreground: "#FFFFFF" },

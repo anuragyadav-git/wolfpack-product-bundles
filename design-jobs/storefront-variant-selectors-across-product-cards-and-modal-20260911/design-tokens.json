@@ -1,0 +1,431 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 2,
+  "status": "complete",
+  "groups": {
+    "color": [
+      {
+        "name": "selector-border",
+        "value": "var(--bundle-variant-selector-border-color, rgba(0, 0, 0, 0.3))",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing bundle variant-selector design variables",
+        "notes": "Shared border; do not replace with a new hard-coded template color."
+      },
+      {
+        "name": "selector-background",
+        "value": "var(--bundle-variant-selector-bg-color, #fff)",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing bundle variant-selector design variables",
+        "notes": "Card and modal controls inherit this owner."
+      },
+      {
+        "name": "selector-text",
+        "value": "var(--bundle-variant-selector-text-color, currentColor)",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing bundle variant-selector design variables",
+        "notes": "Labels and values must not create a parallel color source."
+      },
+      {
+        "name": "selector-selected",
+        "value": "var(--bundle-global-primary-button, #111)",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing global primary-button design variable",
+        "notes": "Selected border/ring only; checked semantics and text remain independent of color."
+      },
+      {
+        "name": "shopify-swatch",
+        "value": "ProductOptionValue.swatch.color or swatch.image",
+        "unit": "Shopify-data",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "Shopify product option swatch",
+        "notes": "Only permitted runtime visual value. Missing data uses the existing neutral labeled state."
+      },
+      {
+        "name": "selector-tooltip-surface",
+        "value": "#1f1f1f",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB selector tooltip",
+        "notes": "Retain only if contrast passes; tooltip is supplemental."
+      },
+      {
+        "name": "selector-tooltip-text",
+        "value": "#fff",
+        "unit": "css-color",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB selector tooltip",
+        "notes": "Retain only if contrast passes."
+      }
+    ],
+    "typography": [
+      {
+        "name": "selector-font",
+        "value": "inherit",
+        "unit": "font",
+        "source": "recommendation",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "owning widget/template typography",
+        "notes": "Do not hard-code Assistant or create selector-only branding."
+      },
+      {
+        "name": "selected-label-size",
+        "value": 0.75,
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB shared selector presentation",
+        "notes": "Compact supporting value beside the option label for swatch groups; it shares the control row instead of adding a third vertical row."
+      },
+      {
+        "name": "selector-line-height",
+        "value": 1.35,
+        "unit": "unitless",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared selector presentation",
+        "notes": "Allows wrapped labels without a clipped line box."
+      }
+    ],
+    "spacing": [
+      {
+        "name": "selector-group-gap",
+        "value": "clamp(0.25rem, 1cqi, 0.5rem)",
+        "unit": "css-length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB shared selector presentation",
+        "notes": "Reduced only between multiple option dimensions. Control hit targets and focus clearance remain unchanged."
+      },
+      {
+        "name": "pill-inline-padding",
+        "value": "clamp(0.75rem, 2cqi, 1rem)",
+        "unit": "css-length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB pill presentation",
+        "notes": "Must yield to max-inline-size 100% for long labels."
+      },
+      {
+        "name": "neutral-swatch-inline-padding",
+        "value": "clamp(0.6rem, 2cqi, 0.85rem)",
+        "unit": "css-length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB missing-color presentation",
+        "notes": "Preserves label legibility when no canonical color exists."
+      }
+    ],
+    "size": [
+      {
+        "name": "control-hit-target",
+        "value": 2.75,
+        "unit": "rem",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "--bundle-control-hit-target",
+        "notes": "44px at the default root size; minimum for every pill/swatch/radio visual."
+      },
+      {
+        "name": "selector-inline-size",
+        "value": 100,
+        "unit": "%",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "owning card/modal content region",
+        "notes": "Selector cannot borrow width from price, quantity, Add, or sticky footer regions."
+      },
+      {
+        "name": "option-max-inline-size",
+        "value": 100,
+        "unit": "%",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared family selector presentation",
+        "notes": "Long labels wrap inside the containing selector region."
+      },
+      {
+        "name": "image-swatch-size",
+        "value": "clamp(2rem, 10cqi, 2.5rem)",
+        "unit": "css-length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB image-swatch presentation",
+        "notes": "Visible 1:1 image inside a separate 2.75rem hit target. The visual can be compact without reducing the interactive target."
+      },
+      {
+        "name": "multi-dimension-row-minimum",
+        "value": 2.75,
+        "unit": "rem",
+        "source": "user-approved-recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB shared selector presentation",
+        "notes": "Each option dimension occupies one compact control row when its values fit; wrapping remains normal flow when they do not."
+      },
+      {
+        "name": "selector-height",
+        "value": "auto",
+        "unit": "intrinsic",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "owning card/modal normal flow",
+        "notes": "Replaces FPB Standard fixed selector-row assumptions."
+      },
+      {
+        "name": "interaction-layout-shift",
+        "value": 0,
+        "unit": "CSS-px delta",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "all selector states",
+        "notes": "Selected, focus, hover, pressed, unavailable, and tooltip states may not change selector/card dimensions."
+      }
+    ],
+    "radius": [
+      {
+        "name": "selector-radius",
+        "value": "var(--bundle-variant-selector-border-radius, 0.5rem)",
+        "unit": "css-length",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "existing bundle variant-selector design variable",
+        "notes": "Pills, dropdowns, image swatches, and neutral swatches reuse this owner."
+      },
+      {
+        "name": "mapped-color-swatch-radius",
+        "value": 50,
+        "unit": "%",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB mapped color-swatch presentation",
+        "notes": "Shape does not encode selected state alone."
+      }
+    ],
+    "border": [
+      {
+        "name": "selector-border-width",
+        "value": 1,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared selector presentation",
+        "notes": "Use box sizing so state changes do not change dimensions."
+      },
+      {
+        "name": "focus-outline-width",
+        "value": 2,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB shared selector presentation",
+        "notes": "Must remain visible and unclipped against every surface."
+      },
+      {
+        "name": "focus-outline-offset",
+        "value": 3,
+        "unit": "px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB shared selector presentation",
+        "notes": "Verify card-edge containment in Chrome."
+      }
+    ],
+    "shadow": [
+      {
+        "name": "selected-ring",
+        "value": "0 0 0 2px var(--bundle-variant-selector-bg-color, #fff), 0 0 0 4px var(--bundle-global-primary-button, #111)",
+        "unit": "box-shadow",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": true,
+        "owner": "shared PPB selected state",
+        "notes": "May be normalized across FPB only if it fits existing merchant tokens and passes clipping QA."
+      }
+    ],
+    "z_index": [
+      {
+        "name": "ppb-tooltip-layer",
+        "value": 20,
+        "unit": "integer",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB selector tooltip",
+        "notes": "Must stay below modal/sheet owners and above its card surface."
+      },
+      {
+        "name": "fpb-classic-open-selector-layer",
+        "value": 60,
+        "unit": "integer",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "FPB Classic selector overlay",
+        "notes": "Relevant only while the existing dropdown/list presentation remains; intrinsic matrices need no elevated card layer."
+      }
+    ],
+    "motion": [
+      {
+        "name": "selector-state-duration",
+        "value": 120,
+        "unit": "ms",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB selector visual",
+        "notes": "Border and ring only; no geometry property transitions."
+      },
+      {
+        "name": "tooltip-duration",
+        "value": 100,
+        "unit": "ms",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB tooltip",
+        "notes": "Supplemental only."
+      },
+      {
+        "name": "reduced-motion-duration",
+        "value": 0,
+        "unit": "ms",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "prefers-reduced-motion",
+        "notes": "State feedback remains visible without transition."
+      }
+    ],
+    "breakpoint": [
+      {
+        "name": "fpb-shell-wide",
+        "value": 800,
+        "unit": "container-px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "FPB template container queries",
+        "notes": "Verify 799/800/801."
+      },
+      {
+        "name": "ppb-picker-wide",
+        "value": 768,
+        "unit": "viewport-px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB mobile drawer/modal styles",
+        "notes": "Verify 767/768/769."
+      },
+      {
+        "name": "ppb-grid-narrow",
+        "value": 480,
+        "unit": "viewport-px",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB Grid template",
+        "notes": "Verify 479/480/481."
+      }
+    ],
+    "component_alias": [
+      {
+        "name": "option-track-sizing",
+        "value": "intrinsic minmax using 100% container cap and control-hit-target floor",
+        "unit": "layout-contract",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "shared family selector presentation",
+        "notes": "Exact implementation may use grid or wrapping flex after fixture measurement; it may not hide values or create a horizontal rail."
+      },
+      {
+        "name": "multi-dimension-control-strategy",
+        "value": "In color_swatch or image_swatch mode, any dimension with no canonical Shopify swatch of that requested kind uses one native select; mapped dimensions retain their requested swatches.",
+        "unit": "layout-contract",
+        "source": "user-approved-recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB variant selector mode resolver",
+        "notes": "Keeps Size x Color cards compact without guessing visuals, hiding values, or changing Shopify combination resolution. Explicit dropdown and pill modes remain unchanged."
+      },
+      {
+        "name": "multi-dimension-group-layout",
+        "value": "label and selected swatch value share the first column; the select, pills, or swatches occupy the second column and wrap only when required",
+        "unit": "layout-contract",
+        "source": "user-approved-recommendation",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "PPB shared selector presentation",
+        "notes": "At narrow card containers the group returns to a stacked label-plus-controls layout; the selector never adds its own scrolling region."
+      },
+      {
+        "name": "card-row-equalization",
+        "value": "stretch to tallest initial card",
+        "unit": "layout-contract",
+        "source": "repository-existing",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "template product collection",
+        "notes": "State changes produce zero height delta."
+      },
+      {
+        "name": "selector-scroll-policy",
+        "value": "none",
+        "unit": "layout-contract",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "selector region",
+        "notes": "Modal/sheet may keep its existing vertical scroll owner; selector adds no nested scroller."
+      },
+      {
+        "name": "geometry-tolerance",
+        "value": 1,
+        "unit": "CSS-px",
+        "source": "user-defined",
+        "confidence": "high",
+        "merchant_configurable": false,
+        "owner": "post-change non-regression comparison",
+        "notes": "No unintended shell/card/footer placement change beyond one CSS pixel; content-driven selector height itself is intentional."
+      }
+    ]
+  },
+  "token_shape": null
+}

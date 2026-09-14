@@ -11,7 +11,7 @@ const statusOptions = [...BUNDLE_STATUS_OPTIONS];
  * Uses the imperative ref pattern to keep the web component in sync.
  */
 const BundleStatusSection = memo(
-  ({ status, onChange, showHeading = true }: BundleStatusSectionProps) => {
+  ({ status, onChange }: BundleStatusSectionProps) => {
     const selectRef = useRef<any>(null);
     const { t } = useTranslation();
     const handleChange = (event: Event) => {
@@ -31,15 +31,12 @@ const BundleStatusSection = memo(
 
     return (
       <s-stack direction="block" gap="small-100">
-        {showHeading && (
-          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
-            {t("common.bundleStatus.title")}
-          </h3>
-        )}
+        <s-heading>{t("common.bundleStatus.title")}</s-heading>
         <s-select
           ref={selectRef}
           value={status}
           label={t("common.bundleStatus.title")}
+          labelAccessibilityVisibility="exclusive"
           onChange={handleChange}
         >
           {statusOptions.map((opt) => (

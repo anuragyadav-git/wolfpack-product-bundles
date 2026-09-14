@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 2,
+  "status": "complete",
+  "items": [
+    {
+      "id": "current-fpb-standard-card-single-variant-desktop-r1",
+      "original_filename": "storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-standard-card__single-variant__1280x800__r1.png",
+      "artifact_path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-standard-card__single-variant__1280x800__r1.png",
+      "roles": [
+        "CURRENT",
+        "CONTEXT",
+        "DESKTOP"
+      ],
+      "component": "FPB Standard product card and bundle shell",
+      "state": "single variant, unselected",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "Direct Chrome DevTools capture from an Agent-store signed SIT preview after Cache Storage clearing and hard reload",
+      "provenance": "First-party current implementation on agent-5sfidg3m.myshopify.com",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "The fixture product has one variant, so no selector is rendered"
+      ],
+      "comparable_counterparts": [
+        "current-fpb-standard-card-single-variant-narrow-r1",
+        "current-fpb-product-modal-single-variant-desktop-r1"
+      ],
+      "permissions_or_usage_notes": "Internal first-party QA evidence; do not commit the PNG",
+      "approval_status": "unreviewed"
+    },
+    {
+      "id": "current-fpb-product-modal-single-variant-desktop-r1",
+      "original_filename": "storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-product-modal__single-variant__1280x800__r1.png",
+      "artifact_path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-product-modal__single-variant__1280x800__r1.png",
+      "roles": [
+        "CURRENT",
+        "CONTEXT",
+        "STATE",
+        "DESKTOP"
+      ],
+      "component": "FPB product-details modal",
+      "state": "open, single variant, quantity one",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "Direct Chrome DevTools capture from an Agent-store signed SIT preview",
+      "provenance": "First-party current implementation on agent-5sfidg3m.myshopify.com",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "The fixture product has one variant, so no selector is rendered"
+      ],
+      "comparable_counterparts": [
+        "current-fpb-product-modal-single-variant-narrow-r1",
+        "current-fpb-standard-card-single-variant-desktop-r1"
+      ],
+      "permissions_or_usage_notes": "Internal first-party QA evidence; do not commit the PNG",
+      "approval_status": "unreviewed"
+    },
+    {
+      "id": "current-ppb-grid-card-single-variant-desktop-r1",
+      "original_filename": "storefront-variant-selectors-across-product-cards-and-modal-20260911__current__ppb-grid-card__single-variant__1280x800__r1.png",
+      "artifact_path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__ppb-grid-card__single-variant__1280x800__r1.png",
+      "roles": [
+        "CURRENT",
+        "CONTEXT",
+        "DESKTOP"
+      ],
+      "component": "PPB Grid product card and product-page context",
+      "state": "single variant, unselected",
+      "viewport": {
+        "width": 1280,
+        "height": 800,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 1280,
+        "height": 800
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "Direct Chrome DevTools capture from a freshly generated Agent-store signed SIT preview after Cache Storage clearing and hard reload",
+      "provenance": "First-party current implementation on agent-5sfidg3m.myshopify.com",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "The persisted fixture contains one single-variant product, so no selector is rendered",
+        "The configure flow reported Bundle not saved and did not persist the two additional picker selections"
+      ],
+      "comparable_counterparts": [
+        "current-ppb-grid-card-single-variant-narrow-r1"
+      ],
+      "permissions_or_usage_notes": "Internal first-party QA evidence; do not commit the PNG",
+      "approval_status": "unreviewed"
+    },
+    {
+      "id": "current-fpb-standard-card-single-variant-narrow-r1",
+      "original_filename": "storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-standard-card__single-variant__580x844__r1.png",
+      "artifact_path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-standard-card__single-variant__580x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "CONTEXT",
+        "MOBILE"
+      ],
+      "component": "FPB Standard product card and sticky mobile bundle summary",
+      "state": "single variant, unselected",
+      "viewport": {
+        "width": 580,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 580,
+        "height": 844
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "Direct Chrome DevTools capture from an Agent-store signed SIT preview after requesting an actual 390x844 window, clearing Cache Storage, and hard reloading",
+      "provenance": "First-party current implementation on agent-5sfidg3m.myshopify.com",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Chrome enforced a 580px inner-width minimum instead of the requested 390px",
+        "The fixture product has one variant, so no selector is rendered"
+      ],
+      "comparable_counterparts": [
+        "current-fpb-standard-card-single-variant-desktop-r1",
+        "current-fpb-product-modal-single-variant-narrow-r1"
+      ],
+      "permissions_or_usage_notes": "Internal first-party QA evidence; do not treat this as the required 390x844 acceptance capture and do not commit the PNG",
+      "approval_status": "unreviewed"
+    },
+    {
+      "id": "current-fpb-product-modal-single-variant-narrow-r1",
+      "original_filename": "storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-product-modal__single-variant__580x844__r1.png",
+      "artifact_path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__fpb-product-modal__single-variant__580x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "CONTEXT",
+        "STATE",
+        "MOBILE"
+      ],
+      "component": "FPB product-details mobile sheet",
+      "state": "open, single variant, quantity one",
+      "viewport": {
+        "width": 580,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 580,
+        "height": 844
+      },
+      "crop_status": "viewport capture; sheet continues below the viewport",
+      "surrounding_context_included": true,
+      "source": "Direct Chrome DevTools capture from an Agent-store signed SIT preview after requesting an actual 390x844 window",
+      "provenance": "First-party current implementation on agent-5sfidg3m.myshopify.com",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Chrome enforced a 580px inner-width minimum instead of the requested 390px",
+        "The fixture product has one variant, so no selector is rendered",
+        "The full scrollable sheet is not visible in one viewport"
+      ],
+      "comparable_counterparts": [
+        "current-fpb-product-modal-single-variant-desktop-r1",
+        "current-fpb-standard-card-single-variant-narrow-r1"
+      ],
+      "permissions_or_usage_notes": "Internal first-party QA evidence; do not treat this as the required 390x844 acceptance capture and do not commit the PNG",
+      "approval_status": "unreviewed"
+    },
+    {
+      "id": "current-ppb-grid-card-single-variant-narrow-r1",
+      "original_filename": "storefront-variant-selectors-across-product-cards-and-modal-20260911__current__ppb-grid-card__single-variant__580x844__r1.png",
+      "artifact_path": "qa/screenshots/storefront-variant-selectors-across-product-cards-and-modal-20260911__current__ppb-grid-card__single-variant__580x844__r1.png",
+      "roles": [
+        "CURRENT",
+        "CONTEXT",
+        "MOBILE"
+      ],
+      "component": "PPB Grid product card and sticky mobile bundle actions",
+      "state": "single variant, unselected",
+      "viewport": {
+        "width": 580,
+        "height": 844,
+        "status": "known"
+      },
+      "browser_zoom": 100,
+      "pixel_dimensions": {
+        "width": 580,
+        "height": 844
+      },
+      "crop_status": "viewport capture",
+      "surrounding_context_included": true,
+      "source": "Direct Chrome DevTools capture from a freshly generated Agent-store signed SIT preview after requesting an actual 390x844 window, clearing Cache Storage, and hard reloading",
+      "provenance": "First-party current implementation on agent-5sfidg3m.myshopify.com",
+      "intended_use": "structural reference",
+      "quality_issues": [
+        "Chrome enforced a 580px inner-width minimum instead of the requested 390px",
+        "The persisted fixture contains one single-variant product, so no selector is rendered",
+        "The configure flow reported Bundle not saved and did not persist the two additional picker selections"
+      ],
+      "comparable_counterparts": [
+        "current-ppb-grid-card-single-variant-desktop-r1"
+      ],
+      "permissions_or_usage_notes": "Internal first-party QA evidence; do not treat this as the required 390x844 acceptance capture and do not commit the PNG",
+      "approval_status": "unreviewed"
+    }
+  ],
+  "validation": {
+    "decision": "sufficient-with-limitations-for-structural-analysis",
+    "safe_inferences": [
+      "Available horizontal and vertical space around FPB Standard card content at 1280x800 and 580x844",
+      "Available placement zones in the FPB desktop dialog and narrow mobile sheet",
+      "Available horizontal and vertical space around the PPB Grid card at 1280x800 and 580x844",
+      "Relationship between current cards and sticky bundle actions"
+    ],
+    "unsafe_inferences": [
+      "Current selector geometry, wrapping, selected state, unavailable state, or multi-option behavior",
+      "Pill, color-swatch, image-swatch, or dropdown fit in any captured card",
+      "PPB Horizontal Slots or Vertical Slots picker-modal fit",
+      "Any 390px-wide geometry or acceptance result",
+      "Exact target styling because no approved target reference was supplied"
+    ],
+    "recapture_requests": [
+      "Persist at least one available multi-option product with long values and at least one unavailable value in an FPB fixture",
+      "Persist Shopify ProductOptionValue swatch data and a multi-option product in a PPB fixture for all four selector modes",
+      "Capture PPB Grid, List, Horizontal Slots, and Vertical Slots including picker-modal states",
+      "Capture FPB Standard, Classic, Compact, and Horizontal card and product-details states",
+      "Use a Chrome session that can produce an actual 390x844 inner viewport for final mobile evidence"
+    ],
+    "blocking_effect": "Does not block visual analysis or direction exploration. Blocks exact current-selector diagnosis, implementation acceptance, and final Chrome QA until corrected fixtures and viewports exist."
+  }
+}

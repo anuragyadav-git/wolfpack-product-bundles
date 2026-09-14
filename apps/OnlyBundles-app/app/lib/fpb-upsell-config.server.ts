@@ -1,5 +1,5 @@
-export type FpbUpsellDisplayMode = "button" | "block";
-export type FpbUpsellDisplayOn = "all" | "specific_products" | "specific_collections";
+type FpbUpsellDisplayMode = "button" | "block";
+type FpbUpsellDisplayOn = "all" | "specific_products" | "specific_collections";
 
 export class FpbUpsellValidationError extends Error {}
 

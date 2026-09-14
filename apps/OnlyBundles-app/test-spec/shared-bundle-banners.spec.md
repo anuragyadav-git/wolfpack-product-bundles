@@ -10,7 +10,6 @@ Extract FPB bundle banner DOM creation into a shared component module so the ful
 |---|---|---|---|---|
 | 1 | No URLs | Empty banner config | Returns `null` | Preserves current no-banner behavior |
 | 2 | Desktop and mobile URLs | Banner config with both URLs | Wrapper and images use existing stable classes | CSS contract remains unchanged |
-| 3 | Step banner image | Step with `bannerImageUrl` | Returns `.step-banner-image` wrapper with escaped image alt text | Reuses banner module for FPB step media |
 
 ### BuildInclusion
 | # | Scenario | Input | Expected Output | Notes |

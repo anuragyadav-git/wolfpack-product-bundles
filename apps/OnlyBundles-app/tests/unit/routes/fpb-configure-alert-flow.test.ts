@@ -27,10 +27,6 @@ jest.mock("../../../app/hooks/useBundleConfigurationState", () => ({
   useBundleConfigurationState: jest.fn(),
 }));
 
-jest.mock("../../../app/store/api/adminApi", () => ({
-  useEnsureProductTemplateMutation: () => [jest.fn()],
-}));
-
 describe("FPB configure alert flow", () => {
   it("propagates the shared operation alert controls through the bundle controller", () => {
     const clearOperationAlert = jest.fn();

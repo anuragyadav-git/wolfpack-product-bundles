@@ -5,7 +5,7 @@ title: Admin Configure Disabled Feature Surfaces
 type: test-spec
 status: implemented
 summary: Behavioral coverage for visible, value-preserving, inert feature configuration across FPB and PPB configure pages.
-last_audited: 2026-08-21
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -43,13 +43,13 @@ settings when re-enabled.
 | 1   | Feature enabled  | `enabled=true`  | Region is interactive and not marked disabled  | Parent switch remains outside |
 | 2   | Feature disabled | `enabled=false` | Region is inert and exposes disabled semantics | Settings remain rendered      |
 
-### FilePickerDisabledState
+### AssetUploadDisabledState
 
 | #   | Scenario                  | Input                              | Expected Output                                                       | Notes                 |
 | --- | ------------------------- | ---------------------------------- | --------------------------------------------------------------------- | --------------------- |
-| 1   | Empty disabled picker     | `disabled=true`                    | Trigger is unfocusable and click/keyboard/upload callbacks do not run | No modal opens        |
-| 2   | Populated disabled picker | Existing image and `disabled=true` | Change and remove actions are disabled                                | Value remains visible |
-| 3   | Re-enabled picker         | Same value and `disabled=false`    | Normal callbacks run                                                  | No value reset        |
+| 1   | Empty disabled upload     | `disabled=true`                    | Drop zone is disabled and no upload request runs | No modal exists       |
+| 2   | Populated disabled upload | Existing image and `disabled=true` | Drop zone and remove action are disabled         | Value remains visible |
+| 3   | Re-enabled upload         | Same value and `disabled=false`    | Upload and remove callbacks run                  | No value reset        |
 
 ### ConfigureFeatureGates
 

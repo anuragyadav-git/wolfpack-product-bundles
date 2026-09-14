@@ -5,7 +5,7 @@ title: Product Card Layout Contract
 type: architecture
 status: authoritative
 summary: Defines stable and display-safe storefront product-card layout and content boundaries.
-last_audited: 2026-08-28
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -19,6 +19,7 @@ source_paths:
   - app/assets/widgets/full-page-css/templates/standard/overrides.css
   - app/assets/widgets/full-page-css/base/product-modal-shell.css
   - app/assets/widgets/shared/variant-selector.ts
+  - app/assets/widgets/product-page/variant-selector-modes.ts
   - app/assets/bundle-modal-component.ts
   - app/storefront/app-embed.ts
   - app/assets/widgets/product-page
@@ -75,8 +76,23 @@ This is a hard requirement:
   quantity, and variant controls.
 - Replace a product card's Add To Box button with its inline quantity selector immediately; do not animate width, radius, opacity, or geometry during that state swap.
 - Product Grid is the sole PPB exception when per-product quantity validation is enabled with a maximum of one: its selected action remains the compact quantity-aware button. When validation is disabled or its maximum exceeds one, Product Grid uses the shared inline selector and disables increment at the configured maximum.
-- Standard FPB cards use the same card, media, title, price, and sizing rules in text and icon CTA modes. Icon mode may override only the compact action geometry and place that action beside the price.
-- Reserve the Standard FPB variant-selector row only when the runtime renders `.vs-wrapper--standard`. The runtime renders that wrapper only when Bundle Settings enables variant selectors and the grouped product has more than one variant.
+- Standard FPB cards use the same card, media, title, selector, price, and sizing rules in text and icon CTA modes. Icon mode may override only the compact action geometry; it must not move the action ahead of the selector.
+- Every FPB card owns independent media, identity, price, selector, and action regions. When any card in an FPB product-grid row renders a configured selector, sibling cards reserve the same selector region so a no-variant card beside a two-dimensional card keeps its title, price, and action positions.
+- Product cards use one canonical content hierarchy in both rendered DOM and visual layout: identity, variant selectors, price, then the Add or quantity action. Pricing and primary actions never precede variant selection because the shopper must understand or choose the purchasable variant before evaluating and committing to its price.
+- Standard, Classic, and Compact use one shared vertical-card track contract for those mixed rows: a bounded two-line identity track, followed by selector, pricing, and action tracks. Horizontal keeps its native media/content split but uses the same stable region ownership and ordering inside the content track.
+- Variant selectors use the Direction A adaptive intrinsic matrix contract. Every Shopify option value remains directly present in source order; inline groups wrap in normal flow and never hide values behind `+N`, use a horizontal rail, or own a nested scroller.
+- Every dimension presented as a non-dropdown control is a separately labeled native radio group. Repeated cards, details surfaces, and picker copies receive instance-scoped control IDs and group names so selecting one copy cannot affect another.
+- Unavailable values remain visible with native disabled semantics and unchanged target geometry. They are not filtered to make a card fit, and they cannot invoke the existing variant-change owner.
+- Selector targets retain a minimum `2.75rem` interaction size. Long labels wrap within their intrinsic control, while dropdowns fill the available details width. Selection, focus, and unavailable treatments may not change control geometry.
+- FPB and PPB use the same persisted category modes: Dropdown, Pills, Color swatches, and Image swatches. In a two-dimensional FPB pill mode, an explicitly configured primary dimension remains the visible radio group; when the merchant has not configured one, the dimension with the fewest distinct values becomes visible and ties retain Shopify option order. Swatch modes keep the canonically mapped Shopify dimension visible. Every additional dimension uses a labeled native select. Dropdown mode remains one complete-variant selector. This bounds selector height without hiding Shopify values or adding another state engine.
+- Across all FPB templates, each configured option dimension owns a separate full-width row. Pill dimensions distribute their controls across that row and wrap only when the card can no longer preserve the minimum interaction target; a secondary select must never compete with the primary pill or swatch group in a parallel column.
+- On mobile FPB cards, every option group fills the shared selector region and begins at the same inline edge. Compact secondary selects must not add an indent relative to the primary pill or swatch group.
+- A configured selector spans the card's complete price/action grid before pricing begins. Do not size it as a percentage of the first price column; let CSS Grid stretch the spanning region so option values receive all available card width.
+- FPB product-card actions use the merchant-owned button background and text tokens at every viewport. Template and breakpoint CSS may alter action geometry, but must not replace those colors with template-specific constants.
+- The FPB bundle-level primary action uses the merchant-owned sidebar button background and text tokens in both the desktop summary and mobile tray. Responsive CSS changes its geometry and placement only; it does not introduce a second mobile color.
+- PPB retains Dropdown, Pills, Color swatches, and Image swatches. Multi-option products render one labeled group per Shopify option dimension; choosing a value resolves the available variant that best preserves the other current option values, then delegates the one existing variant update. Dropdown mode keeps one native select per dimension. For Pills, Color swatches, and Image swatches, the compactest eligible dimension retains the configured visual controls while every additional dimension uses a labeled native select. The groups share an intrinsic row when the card can accommodate them and collapse only when their minimum usable widths no longer fit. This bounds Size × Color card height without hiding choices, guessing swatches, substituting variant images, or changing the PPB template shell.
+- PPB in-page Product Grid and Product List cards rebuild through their canonical step renderer after each option change. This is required because the delegated update replaces the product grid; retaining selector listeners from the replaced grid leaves a sibling dimension bound to stale option state and can revert the preceding choice. Every rebuild must preserve the exact combined variant, selected option defaults, image, price, and accessible selected state.
+- PPB card tracks remain stable whether or not a product has selectors. Variant selectors own the region immediately before price and action; sibling cards reserve the same price and action baselines. In modal cards, narrow content may collapse the intrinsic selector row, but selector growth must consume only its reserved region and must not move price or the primary action relative to adjacent cards.
 - Prefer fixed row contracts (`min-height`, `height`, flex stretch, consistent padding/line-clamp) so selected/unselected variants stay layout-stable.
 - Keep PPB/inpage and PPB/modal states non-expanding on `selected` and hover-expanded transitions.
 - Keep merchant product descriptions out of compact FPB and PPB product cards. Preserve `description` and `descriptionHtml` in runtime product data for the FPB product-details modal and existing product payload consumers.

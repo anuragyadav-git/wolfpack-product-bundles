@@ -11,28 +11,26 @@ describe("Admin Step Config default icon", () => {
     [{ isFreeGift: true }, 'points="20 12 20 22 4 22 4 12"'],
   ])("matches the storefront fallback for %p", (step, expectedPath) => {
     const view = renderToStaticMarkup(
-      React.createElement(DefaultStepTimelineIcon, { step }),
+      React.createElement(DefaultStepTimelineIcon, { step })
     );
 
     expect(view).toContain(expectedPath);
   });
 
-  it("labels the picker action Replace when no image is uploaded", () => {
+  it("uses the icon tile as the only native upload target", () => {
     const view = renderToStaticMarkup(
       React.createElement(FpbStepConfigCard, {
-        flow: {
-          FilePicker: () => null,
-          fullPageBundleStyles: {},
-          markAsDirty: jest.fn(),
-          setShowIconPickerForStep: jest.fn(),
-          showIconPickerForStep: null,
-          stepsState: { updateStepField: jest.fn() },
-        } as any,
+        styles: {},
         step: { id: "step-1", stepImage: null },
-      }),
+        onImageChange: jest.fn(),
+        onRemoveImage: jest.fn(),
+        onTitleChange: jest.fn(),
+      })
     );
 
-    expect(view).toContain(">Replace</s-button>");
-    expect(view).not.toContain("Upload file");
+    expect(view.match(/<s-drop-zone/g)).toHaveLength(1);
+    expect(view).toContain('labelAccessibilityVisibility="exclusive"');
+    expect(view).toContain('d="M6 2L3 6');
+    expect(view).not.toContain(">Replace</s-button>");
   });
 });

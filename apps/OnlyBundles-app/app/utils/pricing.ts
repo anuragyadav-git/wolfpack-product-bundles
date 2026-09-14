@@ -8,12 +8,12 @@
 /**
  * Progress bar tone types from Polaris
  */
-export type ProgressBarTone = "success" | "highlight" | "critical";
+type ProgressBarTone = "success" | "highlight" | "critical";
 
 /**
  * Badge tone types from Polaris
  */
-export type BadgeTone = "success" | "warning" | "critical" | "info";
+type BadgeTone = "success" | "warning" | "critical" | "info";
 
 /**
  * Calculate usage percentage from current count and limit

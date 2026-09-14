@@ -215,7 +215,6 @@ function createContext({
     loadStepProducts: jest.fn().mockResolvedValue(undefined),
     updateModalNavigation: jest.fn(),
     updateModalFooterMessaging: jest.fn(),
-    preloadNextStep: jest.fn(),
     config: { showDiscountMessaging: true },
     validateStep: jest.fn(() => true),
     _isConditionValidationEnabled: () => true,
@@ -233,6 +232,21 @@ function createContext({
 }
 
 describe('PPB modal accessibility keyboard and focus management', () => {
+  it('hydrates only the step opened by the shopper', async () => {
+    jest.spyOn(ToastManager, 'show').mockImplementation(() => {});
+
+    const { context, fakeDocument } = createContext();
+    context.selectedBundle.steps = [{ name: 'Step 1' }, { name: 'Step 2' }];
+    (globalThis as any).document = fakeDocument;
+    (globalThis as any).requestAnimationFrame = (callback: () => void) => callback();
+
+    context.openModal(0);
+    await Promise.resolve();
+
+    expect(context.loadStepProducts).toHaveBeenCalledTimes(1);
+    expect(context.loadStepProducts).toHaveBeenCalledWith(0);
+  });
+
   it('keeps the Next or Done accessible name equal to its visible label', () => {
     const attributes = new Map<string, string>();
     const nextButton = {

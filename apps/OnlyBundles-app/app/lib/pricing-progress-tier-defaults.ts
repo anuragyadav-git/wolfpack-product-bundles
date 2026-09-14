@@ -4,13 +4,13 @@ import {
   type PricingRuleTierText,
 } from "../types/pricing";
 
-export const DEFAULT_PROGRESS_TIER_TEXT_TEMPLATES = {
+const DEFAULT_PROGRESS_TIER_TEXT_TEMPLATES = {
   quantity: "{conditionValue} Pack",
   amount: "Spend {currencySymbol}{conditionValue}",
   buyXGetY: "Add {totalQuantity}",
 } as const;
 
-export const DEFAULT_PROGRESS_TIER_SUBTEXT_TEMPLATES = {
+const DEFAULT_PROGRESS_TIER_SUBTEXT_TEMPLATES = {
   percentage: "Save {discountValue}%",
   fixedAmount: "Save {currencySymbol}{discountValue}",
   fixedBundlePrice: "Save {currencySymbol}{discountValue}",

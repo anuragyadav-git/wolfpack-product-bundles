@@ -3,7 +3,7 @@ import { useAppBridge } from "@shopify/app-bridge-react";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
 import { showAdminTransientErrorToast } from "../../../lib/admin-alert-feedback";
 import { getSlotIconRecommendation } from "../../../lib/settings-design-runtime";
-import { FilePicker } from "../../../components/shared/FilePicker";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
 import styles from "../../../styles/routes/admin-configuration-surfaces.module.css";
 import {
   SettingsPreviewError,
@@ -226,7 +226,7 @@ export function DesignFields({
                 ) {
                   const isGif = field.kind === "loadingGif";
                   return (
-                    <FilePicker
+                    <AssetUpload
                       key={`${group.title}:${field.label}`}
                       label={translateAdminCopy(field.label)}
                       hint={
@@ -236,8 +236,7 @@ export function DesignFields({
                             )
                           : translateAdmin("adminDynamic.clickToUploadImage")
                       }
-                      showUploadButton={false}
-                      acceptedTypes={isGif ? "image/gif" : "image/*"}
+                      accept={isGif ? "image/gif" : "image/*"}
                       invalidTypeErrorMessage={
                         isGif
                           ? translateAdmin("adminDynamic.chooseGifFile")

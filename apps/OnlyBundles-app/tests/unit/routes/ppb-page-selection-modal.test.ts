@@ -3,14 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   dismissPpbPageSelectionModal,
   PpbPageSelectionModal,
+  type PpbPageSelectionModalProps,
 } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbPageSelectionModal";
-
-const usePpbConfigureContext = jest.fn();
-
-jest.mock(
-  "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({ usePpbConfigureContext: () => usePpbConfigureContext() }),
-);
 
 describe("PpbPageSelectionModal", () => {
   it("imperatively hides before clearing state for template selection", () => {
@@ -24,14 +18,16 @@ describe("PpbPageSelectionModal", () => {
   });
 
   it("uses the native Polaris hide command for the projected Cancel action", () => {
-    usePpbConfigureContext.mockReturnValue({
+    const props = {
       availablePages: [{ id: "product", title: "product" }],
       closePageSelectionModal: jest.fn(),
       handlePageSelection: jest.fn(),
       isPageSelectionModalOpen: true,
-    });
+    } as unknown as PpbPageSelectionModalProps;
 
-    const view = renderToStaticMarkup(React.createElement(PpbPageSelectionModal));
+    const view = renderToStaticMarkup(
+      React.createElement(PpbPageSelectionModal, props),
+    );
 
     expect(view).toContain('id="ppb-page-selection-modal"');
     expect(view.match(/commandFor="ppb-page-selection-modal"/g)).toHaveLength(1);

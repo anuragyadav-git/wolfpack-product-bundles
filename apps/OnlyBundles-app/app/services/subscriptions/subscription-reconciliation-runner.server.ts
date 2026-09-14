@@ -7,7 +7,7 @@ import { applyFreePlanBundlePolicy } from "./free-plan-bundle-policy.server";
 import { reconcileSubscriptionShops } from "./subscription-reconciliation.server";
 import { resolveShopEntitlements } from "./subscription-service.server";
 
-export interface SubscriptionReconciliationRunnerDependencies {
+interface SubscriptionReconciliationRunnerDependencies {
   listInstalledShops: () => Promise<Array<{
     shopDomain: string;
     shopifyShopGid: string | null;

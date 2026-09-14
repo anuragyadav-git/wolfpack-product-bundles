@@ -18,19 +18,12 @@ import { openThemeEditorInNewTab } from "../../../lib/theme-editor-navigation.cl
 import { getThemeExtensionStatusFromAppBridge } from "../../../lib/app-embed-status-check.client";
 import { buildThemeAppEmbedEditorUrl } from "../../../lib/theme-extension-status";
 import { useBundleConfigurationState } from "../../../hooks/useBundleConfigurationState";
-import { useEnsureProductTemplateMutation } from "../../../store/api/adminApi";
 import type { LoaderData } from "./types";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { useSpecificLinkOfferAdmin } from "../shared/useSpecificLinkOfferAdmin";
 
-export function useConfigureBundleController(): ConfigureBundleFlowDraft {
+export function useConfigureBundleController() {
   const loaderData = useLoaderData<LoaderData>();
-  const bundle =
-    loaderData.bundle as unknown as import("../../../hooks/useBundleConfigurationState").BundleData & {
-      promoBannerBgImage?: string | null;
-      loadingGif?: string | null;
-      shopifyProductHandle?: string;
-    };
+  const bundle = loaderData.bundle;
   const {
     bundleProduct: loadedBundleProduct,
     availableBundles,
@@ -39,7 +32,8 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     storefrontProxyRoot,
     shopLocales = [],
     shopCurrencyCode,
-  } = loaderData as any;
+    isFreePlan = true,
+  } = loaderData;
   const themeEditorUrl = buildThemeAppEmbedEditorUrl(shop, apiKey, "bundle-app-embed");
   const navigate = useNavigate();
   const shopify = useAppBridge();
@@ -53,12 +47,11 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     useState(themeEditorUrl);
   const [appEmbedBannerFeedbackTrigger, setAppEmbedBannerFeedbackTrigger] =
     useState(0);
-  const [ensureProductTemplate] = useEnsureProductTemplateMutation();
   const isSaveInFlight = fetcher.state !== "idle";
   const saveBarRef = useRef<UISaveBarElement | null>(null);
   const triggerSaveBarIrritation = useCallback(() => {
-    void saveBarRef.current?.show?.();
-  }, []);
+    void shopify.saveBar.leaveConfirmation();
+  }, [shopify]);
   const blockConfigurationChangeWhileSaving = useCallback(
     (event: SyntheticEvent) => {
       handleAdminSaveLockedEvent(
@@ -116,6 +109,9 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     operationAlert,
     setOperationAlert,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
     originalValuesRef,
   } = configState;
   const parentProductStatusUi = getParentProductStatusUi(
@@ -206,7 +202,6 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     conditionsState,
     configState,
     currentModalStepId,
-    ensureProductTemplate,
     fetcher,
     forceNavigation,
     formState,
@@ -260,6 +255,10 @@ export function useConfigureBundleController(): ConfigureBundleFlowDraft {
     triggerAppEmbedBannerFeedback,
     triggerSaveBarIrritation,
     clearOperationAlert,
+    entitlementFailure,
+    setEntitlementFailure,
+    clearEntitlementFailure,
+    isFreePlan,
     ...specificLinkOffer,
   };
 }

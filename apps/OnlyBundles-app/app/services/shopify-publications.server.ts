@@ -1,4 +1,4 @@
-import type { ShopifyAdmin } from "../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../shopify.server";
 import { AppLogger } from "../lib/logger";
 
 const GET_PUBLICATIONS = `
@@ -37,7 +37,7 @@ type PublicationEdge = {
   };
 };
 
-export type SalesChannelPublication = {
+type SalesChannelPublication = {
   id: string;
   name: string;
 };

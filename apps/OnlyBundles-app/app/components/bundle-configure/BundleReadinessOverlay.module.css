@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 100px;
+  width: 64px;
   overflow: hidden;
   border: 1px solid #e1e3e5;
   border-radius: 12px;
@@ -16,48 +16,11 @@
 }
 
 .containerCollapsed {
-  width: 100px;
+  width: 64px;
 }
 
 .containerIntro {
   width: min(320px, calc(100vw - 32px));
-}
-
-.dialog {
-  position: fixed;
-  inset: auto auto 16px 16px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  width: min(320px, calc(100vw - 32px));
-  max-width: none;
-  max-height: min(80dvh, 560px);
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid #e1e3e5;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-  color: inherit;
-}
-
-.dialog:not([open]) {
-  display: none;
-}
-
-.dialog::backdrop {
-  background: rgba(0, 0, 0, 0.18);
-  animation: fadeInOverlay 0.2s ease forwards;
-}
-
-@keyframes fadeInOverlay {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 /* Collapsed trigger — gauge, score label, and chevron */
@@ -92,6 +55,9 @@
 
 .collapsedMinimal {
   width: 100%;
+  height: 64px;
+  gap: 0;
+  padding: 8px;
 }
 
 .collapsed:hover {
@@ -102,6 +68,11 @@
   width: 48px;
   height: 48px;
   flex-shrink: 0;
+}
+
+.containerCollapsed .arc {
+  width: 48px;
+  height: 48px;
 }
 
 .arcProgress {
@@ -193,15 +164,22 @@
   flex-direction: column;
   gap: 8px;
   margin-bottom: 8px;
-  max-height: none;
+  max-height: min(45dvh, 360px);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #e0e0e0 transparent;
 }
 
+.panelItems > s-clickable {
+  display: block;
+  flex: none;
+  width: 100%;
+}
+
 .panelItem {
   appearance: none;
   font: inherit;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -213,6 +191,7 @@
   color: inherit;
   text-align: left;
   text-decoration: none;
+  width: 100%;
 }
 
 .panelItemDone {
@@ -308,89 +287,17 @@
   color: #008060;
 }
 
-.expandedScore {
-  appearance: none;
-  box-sizing: border-box;
-  display: flex;
-  width: 100%;
-  min-height: 78px;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px max(8px, env(safe-area-inset-bottom));
-  border: 0;
-  background: #ffffff;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.expandedScore:hover {
-  background: #f7f7f7;
-}
-
-.expandedScore:focus-visible {
-  outline: 2px solid #005bd3;
-  outline-offset: -2px;
-}
-
-.expandedScoreCopy {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.expandedScoreTitle {
-  color: #202223;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.expandedScoreHelper {
-  color: #5c5f62;
-  font-size: 12px;
-  line-height: 1.3;
-}
-
-.expandedScoreChevron {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  padding: 8px 0 8px 4px;
-}
-
 @media (max-width: 767px) {
   .container {
-    left: 12px;
-    bottom: 12px;
-  }
-
-  .containerIntro {
-    width: min(320px, calc(100vw - 24px));
-  }
-
-  .dialog {
-    inset: auto 0 0;
-    width: 100%;
-    max-height: min(78dvh, 680px);
-    border-width: 1px 0 0;
-    border-radius: 16px 16px 0 0;
+    display: none;
   }
 
   .panelItems {
-    max-height: min(58dvh, 520px);
-  }
-
-  .expandedScore {
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    max-height: min(42dvh, 340px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dialog::backdrop,
   .collapsed,
   .arcProgress,
   .scoreLabel,

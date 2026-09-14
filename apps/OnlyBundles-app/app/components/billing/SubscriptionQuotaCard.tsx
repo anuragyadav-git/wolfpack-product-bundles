@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import brandStyles from "../../styles/billing/subscription-brand.module.css";
 
-export interface SubscriptionQuotaCardProps {
+interface SubscriptionQuotaCardProps {
   currentBundleCount: number;
   bundleLimit: number;
   isFreePlan: boolean;

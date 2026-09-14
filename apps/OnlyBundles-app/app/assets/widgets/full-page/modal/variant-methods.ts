@@ -1,25 +1,10 @@
 'use strict';
 
-function isRgbColorValue(value: string) {
-  const lowerValue = value.toLowerCase();
-  const isRgba = lowerValue.startsWith('rgba(');
-  const isRgb = lowerValue.startsWith('rgb(');
-  if ((!isRgb && !isRgba) || !lowerValue.endsWith(')')) return false;
+import { CurrencyManager } from '../../shared/currency-manager.js';
+import { resolveCanonicalOptionValueSwatch } from '../../shared/variant-selector.js';
 
-  const prefixLength = isRgba ? 5 : 4;
-  const components = lowerValue.slice(prefixLength, -1).split(',');
-  if (components.length !== (isRgba ? 4 : 3)) return false;
-
-  return components.every((component: string, index: number) => {
-    const trimmed = component.trim();
-    const isPercent = trimmed.endsWith('%');
-    const rawNumber = isPercent ? trimmed.slice(0, -1) : trimmed;
-    if (!rawNumber || rawNumber.includes(' ')) return false;
-    const number = Number(rawNumber);
-    if (!Number.isFinite(number) || number < 0) return false;
-    if (index === 3) return isPercent ? number <= 100 : number <= 1;
-    return isPercent ? number <= 100 : number <= 255;
-  });
+function resolveSwatchImageUrl(image: any) {
+  return image?.previewImage?.url || image?.url || image?.src || null;
 }
 
 export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
@@ -92,13 +77,13 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
       const preSelectedValue = currentVariant?.[`option${optionIndex + 1}`] || optionValues[0];
       this.selectedOptions[optionIndex] = preSelectedValue;
 
-      // Detect if this is likely a color option
-      const isColorOption = this.isColorOption(optionName, optionValues);
-
       const group = document.createElement('div');
       group.className = 'bundle-modal-variant-group';
+      group.setAttribute('role', 'radiogroup');
       const label = document.createElement('label');
       label.className = 'bundle-modal-variant-label';
+      label.id = `bundle-modal-variant-label-${optionIndex}`;
+      group.setAttribute('aria-labelledby', label.id);
       label.append(document.createTextNode(`${String(optionName)}: `));
       const selectedValue = document.createElement('span');
       selectedValue.className = 'bundle-modal-variant-selected-value';
@@ -107,19 +92,39 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
       label.appendChild(selectedValue);
 
       const options = document.createElement('div');
-      options.className = `bundle-modal-variant-options${isColorOption ? ' color-options' : ''}`;
+      options.className = 'bundle-modal-variant-options';
       options.dataset.optionIndex = String(optionIndex);
       optionValues.forEach((value) => {
         const valueText = String(value);
+        const swatch = resolveCanonicalOptionValueSwatch(
+          this.currentProduct,
+          optionName,
+          valueText,
+        );
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = `bundle-modal-variant-btn${value === preSelectedValue ? ' selected' : ''}${isColorOption ? ' color-swatch' : ''}`;
+        button.className = `bundle-modal-variant-btn${value === preSelectedValue ? ' selected' : ''}`;
         button.dataset.optionIndex = String(optionIndex);
         button.dataset.value = valueText;
         button.title = valueText;
-        if (!isColorOption) button.textContent = valueText;
-        const colorValue = isColorOption ? this.getColorValue(valueText) : '';
-        if (colorValue) button.style.setProperty('--bundle-modal-swatch-color', colorValue);
+        button.setAttribute('role', 'radio');
+        button.setAttribute('aria-label', valueText);
+        button.setAttribute('aria-checked', value === preSelectedValue ? 'true' : 'false');
+        if (swatch?.color) {
+          button.classList.add('color-swatch');
+          button.style.setProperty('--bundle-modal-swatch-color', swatch.color);
+        } else {
+          const imageUrl = resolveSwatchImageUrl(swatch?.image);
+          if (imageUrl) {
+            button.classList.add('image-swatch');
+            const image = document.createElement('img');
+            image.src = imageUrl;
+            image.alt = '';
+            button.append(image);
+          } else {
+            button.textContent = valueText;
+          }
+        }
         options.appendChild(button);
       });
       group.append(label, options);
@@ -142,53 +147,6 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
   },
 
   /**
-   * Check if option is likely a color option
-   * @param {string} optionName - Option name
-   * @param {string[]} values - Option values
-   * @returns {boolean}
-   */
-  isColorOption(optionName: string, values: any[]) {
-    const colorKeywords: any[] = ['color', 'colour', 'colors', 'colours'];
-    if (colorKeywords.some(keyword => optionName.toLowerCase().includes(keyword))) {
-      return true;
-    }
-    // Check if values look like color names
-    const commonColors: any[] = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'pink', 'purple', 'orange', 'brown', 'grey', 'gray', 'navy', 'beige', 'cream'];
-    const colorMatches = values.filter((v: string)  => commonColors.some(c => v.toLowerCase().includes(c)));
-    return colorMatches.length > values.length / 2;
-  },
-
-  /**
-   * Get a validated CSS color value for a swatch custom property.
-   * @param {string} colorName - Color name
-   * @returns {string} CSS style string
-   */
-  getColorValue(colorName: string) {
-    // Map common color names to CSS colors
-    const colorMap: any = {
-      'red': '#DC2626', 'blue': '#2563EB', 'green': '#16A34A', 'black': '#000000',
-      'white': '#FFFFFF', 'yellow': '#EAB308', 'pink': '#EC4899', 'purple': '#9333EA',
-      'orange': '#EA580C', 'brown': '#92400E', 'grey': '#6B7280', 'gray': '#6B7280',
-      'navy': '#1E3A8A', 'beige': '#D4C4A8', 'cream': '#FFFDD0', 'gold': '#D4AF37',
-      'silver': '#C0C0C0', 'teal': '#0D9488', 'coral': '#F87171', 'mint': '#A7F3D0'
-    };
-
-    const lowerName = colorName.toLowerCase();
-    for (const [key, value] of Object.entries(colorMap)) {
-      if (lowerName.includes(key)) {
-        return value;
-      }
-    }
-
-    // If no match, try to use the value directly as a color
-    if (/^#[0-9a-f]{3,8}$/i.test(colorName) || isRgbColorValue(colorName)) {
-      return colorName;
-    }
-
-    return '';
-  },
-
-  /**
    * Select a variant option
    * @param {number} optionIndex - Index of the option (0, 1, or 2)
    * @param {string} value - Selected value
@@ -201,7 +159,9 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
     const optionsContainer = document.querySelector(`.bundle-modal-variant-options[data-option-index="${optionIndex}"]`);
     if (optionsContainer) {
       optionsContainer.querySelectorAll<HTMLElement>('.bundle-modal-variant-btn').forEach((btn) => {
-        btn.classList.toggle('selected', btn.dataset.value === value);
+        const selected = btn.dataset.value === value;
+        btn.classList.toggle('selected', selected);
+        btn.setAttribute('aria-checked', selected ? 'true' : 'false');
       });
     }
 
@@ -317,6 +277,7 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
 
         btn.classList.toggle('unavailable', !hasAvailableVariant);
         btn.disabled = !hasAvailableVariant;
+        btn.setAttribute('aria-disabled', hasAvailableVariant ? 'false' : 'true');
       });
     });
   },
@@ -389,14 +350,9 @@ export const BundleModalVariantMethods: Record<string, any> & ThisType<any> = {
    * @returns {string} Formatted price
    */
   formatPrice(price: number) {
-    // Use widget's currency formatting if available
-    if (this.widget && this.widget.formatPrice) {
-      return this.widget.formatPrice(price);
-    }
-
-    // Fallback formatting
-    const dollars = (price / 100).toFixed(2);
-    return `$${dollars}`;
+    const variant = this.selectedVariant || this.currentProduct;
+    const currencyCode = variant?.currencyCode || this.currentProduct?.currencyCode || '';
+    return CurrencyManager.formatMoney(price, currencyCode);
   },
 
   /**

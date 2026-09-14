@@ -5,7 +5,7 @@ title: EB Settings Design Reference
 type: reference
 status: authoritative
 summary: Live EB Settings Design request, state, and storefront-mapping contract used to implement Wolfpack Design settings.
-last_audited: 2026-08-28
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -104,9 +104,16 @@ receive one store-level state.
 Settings Design uses one programmatic App Bridge `ui-save-bar`; it does not
 combine the Save Bar API with automatic `data-save-bar` form tracking. Dirty
 state shows the bar, programmatic Discard immediately restores the confirmed
-snapshot, and both actions are disabled while the Design request is in flight. Back and
-cross-Settings navigation call `shopify.saveBar.leaveConfirmation()` before
-changing views. After both Design rows commit, a downstream PPB runtime-sync
+snapshot, and both actions are disabled while a Design, Language, or Controls
+request is in flight. The primary Save action retains the `loading` attribute
+until the matching request completes so App Bridge owns its native spinner.
+The route owner hides its programmatic bar when the editor unmounts so an error
+boundary or completed route transition cannot leave a stale busy bar in Admin.
+Controls does not optimistically mark a submitted draft as saved; the bar stays
+visible until the server confirms the submitted snapshot. Back, cross-Settings,
+and Controls section navigation call `shopify.saveBar.leaveConfirmation()`
+before changing views; confirming Leave restores the last confirmed snapshot,
+while staying preserves the draft. After both Design rows commit, a downstream PPB runtime-sync
 failure is a persisted partial success: the response returns the confirmed
 Design snapshot with `persisted: true` and `runtimeSynced: false`, so the Save
 Bar clears without misrepresenting the database state while the sync error
@@ -216,7 +223,7 @@ Summary, Loading, Validation, and Upsell only where the selected template owns
 that component. There is no synthetic whole-builder surface. A template change
 preserves a valid component and otherwise selects Product cards, or Product
 slots for a slot template. The Images & GIFs section owns
-the store-level FPB loading GIF and background controls; either control selects
+the store-level FPB/PPB loading GIF and background controls; either control selects
 the pure Loading surface, which renders the merchant GIF or the default spinner
 without provisional bundle content. While Loading is selected, Image Fit is
 disabled. The empty GIF control is one clickable drop zone with the instruction
@@ -353,7 +360,7 @@ body[gbb-mix-consolidated-design="true"][gbbmix-template-type="PDP_INPAGE"] {
 | Bundle Buttons Corner Style + Base | `productCard.buttonBorderRadius`, `productCard.quantitySelectorButtonBorderRadius`, `cartFooter.cartFooterButtonsBorderRadius`, `navigationBanner.tabsCornerRadius`, `mixAndMatchConfig.productCard.productCardButtonBorderRadius`, `mixAndMatchConfig.productCard.productCardQuantityButtonBorderRadius`, `mixAndMatchConfig.footer.footerButtonsBorderRadius`, `mixAndMatchConfig.addBundleBtn.addBundleBtnBorderRadius`, `mixAndMatchConfig.tabs.tabsBorderRadius` |
 | Product Card & Cart Corner Style + Base | `productCard.cardBorderRadius`, `cartFooter.cartFooterBorderRadius`, `mixAndMatchConfig.productCard.productCardBorderRadius`, `mixAndMatchConfig.footer.footerBorderRadius`; derived image radii at `productCard.cardImageBorderRadius`, `cartFooter.cartFooterProductImageBorderRadius`, `mixAndMatchConfig.productCard.productCardImageBorderRadius` |
 | Image Fit | `productCard.productImageFit`, `mixAndMatchConfig.productCard.productCardImageFit` |
-| FPB Loading GIF | `generalSettings.loadingGifUrl`; normalized runtime at `generalSettings.loadingScreen.gifUrl` |
+| Loading GIF | `generalSettings.loadingGifUrl`; normalized runtime at `generalSettings.loadingScreen.gifUrl` for both bundle types |
 | Loading Screen Background Color | `generalSettings.loadingBgColor`; normalized runtime at `generalSettings.loadingScreen.backgroundColor` |
 
 The app-proxy route renders before the FPB controller can fetch or normalize
@@ -362,7 +369,9 @@ store-level `full_page` DesignSettings record and embedded into the proxy marker
 server-side. Deferring this value to widget initialization would flash the
 default screen before applying the merchant setting. The same embedded values
 are transferred to the controller for later product-grid and step-transition
-loading states.
+loading states. PPB receives the same normalized object through the
+Shopify-hosted `ppb_storefront_runtime` metafield and does not persist a
+per-bundle loading GIF.
 
 ## Expert Controls Mapping
 

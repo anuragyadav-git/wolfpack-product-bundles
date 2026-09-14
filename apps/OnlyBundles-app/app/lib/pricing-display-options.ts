@@ -5,7 +5,7 @@ import {
   type PricingRule,
 } from "../types/pricing";
 
-export interface PricingDisplayStep {
+interface PricingDisplayStep {
   id: string;
   enabled?: boolean;
   conditionType?: string | null;
@@ -51,7 +51,7 @@ export interface NormalizedPricingDisplayOptions {
   };
 }
 
-export interface SerializedBoxSelection {
+interface SerializedBoxSelection {
   isEnabled: true;
   validateBoxSelectionQuantity: false;
   rules: Array<{
@@ -63,7 +63,7 @@ export interface SerializedBoxSelection {
   }>;
 }
 
-export interface NormalizedRuleMessageInput {
+interface NormalizedRuleMessageInput {
   rules?: PricingRule[] | null;
   messages?: any;
   method?: DiscountMethod | string;
@@ -111,9 +111,14 @@ export function getDefaultDiscountRuleSuccessMessage(method?: DiscountMethod | s
   ).success;
 }
 
+interface PricingDisplayOptionsInput {
+  bundleQuantityOptions?: Partial<PricingDisplayOptions["bundleQuantityOptions"]> | null;
+  progressBar?: Partial<PricingDisplayOptions["progressBar"]> | null;
+}
+
 interface NormalizeInput {
   rules?: PricingRule[] | null;
-  messages?: any;
+  displayOptions?: PricingDisplayOptionsInput | null;
   showProgressBar?: boolean;
   steps?: PricingDisplayStep[];
   currencySymbol?: string;
@@ -121,7 +126,6 @@ interface NormalizeInput {
 }
 
 interface SerializeInput {
-  existingMessages?: Record<string, unknown> | null;
   options: NormalizedPricingDisplayOptions;
 }
 
@@ -131,12 +135,6 @@ function isQuantityRule(rule: PricingRule): boolean {
 
 function isAmountRule(rule: PricingRule): boolean {
   return rule.conditionType === "amount";
-}
-
-function getDisplayOptions(messages: any): Partial<PricingDisplayOptions> {
-  return messages && typeof messages === "object" && messages.displayOptions
-    ? messages.displayOptions
-    : {};
 }
 
 function formatDiscountText(rule: PricingRule, method: DiscountMethod | string, currencySymbol: string): string {
@@ -272,15 +270,14 @@ export function normalizePricingRuleMessages({
 
 export function normalizePricingDisplayOptions({
   rules = [],
-  messages = {},
+  displayOptions = {},
   showProgressBar,
   steps,
   currencySymbol = "$",
   method = "percentage_off",
 }: NormalizeInput): NormalizedPricingDisplayOptions {
   const safeRules = Array.isArray(rules) ? rules : [];
-  const displayOptions = getDisplayOptions(messages);
-  const savedQuantityOptions = displayOptions.bundleQuantityOptions;
+  const savedQuantityOptions = displayOptions?.bundleQuantityOptions;
   const savedOptionsByRuleId = savedQuantityOptions?.optionsByRuleId || {};
   const savedOptionsByLocaleByRuleId = savedQuantityOptions?.optionsByLocaleByRuleId || {};
   const quantityRules = safeRules
@@ -308,7 +305,7 @@ export function normalizePricingDisplayOptions({
     };
   });
 
-  const progressOptions = displayOptions.progressBar;
+  const progressOptions = displayOptions?.progressBar;
   const milestones = safeRules
     .filter((rule) => isQuantityRule(rule) || isAmountRule(rule))
     .sort((a, b) => (Number(a.conditionValue ?? 0) || 0) - (Number(b.conditionValue ?? 0) || 0))
@@ -339,9 +336,8 @@ export function normalizePricingDisplayOptions({
 }
 
 export function serializePricingDisplayOptions({
-  existingMessages = {},
   options,
-}: SerializeInput): Record<string, unknown> {
+}: SerializeInput): PricingDisplayOptions {
   const optionsByRuleId = options.bundleQuantityOptions.options.reduce<Record<string, { label: string; subtext: string }>>(
     (acc, option) => {
       acc[option.ruleId] = {
@@ -354,20 +350,17 @@ export function serializePricingDisplayOptions({
   );
 
   return {
-    ...(existingMessages || {}),
-    displayOptions: {
-      bundleQuantityOptions: {
-        enabled: options.bundleQuantityOptions.enabled,
-        defaultRuleId: options.bundleQuantityOptions.defaultRuleId,
-        optionsByRuleId,
-        optionsByLocaleByRuleId: options.bundleQuantityOptions.optionsByLocaleByRuleId,
-      },
-      progressBar: {
-        enabled: options.progressBar.enabled,
-        type: options.progressBar.type,
-        progressText: options.progressBar.progressText,
-        successText: options.progressBar.successText,
-      },
+    bundleQuantityOptions: {
+      enabled: options.bundleQuantityOptions.enabled,
+      defaultRuleId: options.bundleQuantityOptions.defaultRuleId,
+      optionsByRuleId,
+      optionsByLocaleByRuleId: options.bundleQuantityOptions.optionsByLocaleByRuleId,
+    },
+    progressBar: {
+      enabled: options.progressBar.enabled,
+      type: options.progressBar.type,
+      progressText: options.progressBar.progressText,
+      successText: options.progressBar.successText,
     },
   };
 }

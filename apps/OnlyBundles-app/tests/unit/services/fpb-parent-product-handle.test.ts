@@ -58,16 +58,6 @@ function makeAdmin(returnedHandle: string) {
           },
         });
       }
-      if (query.includes("RemoveLegacyBundleParentTags")) {
-        return response({
-          data: {
-            tagsRemove: {
-              node: { id: "gid://shopify/Product/10" },
-              userErrors: [],
-            },
-          },
-        });
-      }
       if (query.includes("AddRebuySmartCartTag")) {
         return response({
           data: {
@@ -128,16 +118,6 @@ function makeExistingAdmin(bundleType: "full_page" | "product_page") {
         return response({
           data: {
             tagsAdd: {
-              node: { id: "gid://shopify/Product/10" },
-              userErrors: [],
-            },
-          },
-        });
-      }
-      if (query.includes("RemoveLegacyBundleParentTags")) {
-        return response({
-          data: {
-            tagsRemove: {
               node: { id: "gid://shopify/Product/10" },
               userErrors: [],
             },
