@@ -3,18 +3,18 @@
   "job": {
     "id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
     "title": "Storefront variant selectors across product cards and modal",
-    "status": "active",
-    "stage": "VISUAL_REMEDIATION",
+    "status": "blocked",
+    "stage": "BLOCKED",
     "revision": 5,
     "created_at": "2026-09-11T12:25:40Z",
-    "updated_at": "2026-09-13T19:32:58Z",
+    "updated_at": "2026-09-14T05:37:01Z",
     "owner": "engineering",
     "product": "Only Bundles storefront widgets",
     "repository": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
     "branch": "feature/26.05-UI-changes",
     "commit": "bc954fc5c022e81c75f0b6835e8e0d7cac7412b8",
     "artifact_root": "/Users/adityaawasthi/Developer/wolfpack-product-bundles/design-jobs",
-    "resume_stage": null
+    "resume_stage": "VISUAL_REMEDIATION"
   },
   "scope": {
     "product_family": "FPB and PPB",
@@ -1375,6 +1375,18 @@
       "affected_artifacts": [
         "browser-test-plan.yaml"
       ]
+    },
+    {
+      "sequence": 55,
+      "at": "2026-09-14T05:37:01Z",
+      "from": "VISUAL_REMEDIATION",
+      "to": "BLOCKED",
+      "revision": 5,
+      "reason": "Direct Chrome DevTools cannot connect because the default-profile DevToolsActivePort still points to inactive port 9222; enable remote debugging in the existing default Chrome profile, then resume VISUAL_REMEDIATION and hard-reload a fresh SIT Preview Bundle URL.",
+      "evidence": [
+        "chrome-preflight-result.yaml"
+      ],
+      "affected_artifacts": []
     }
   ]
 }
