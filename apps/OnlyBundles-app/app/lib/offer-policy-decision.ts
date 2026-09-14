@@ -2,7 +2,7 @@ import { Temporal } from 'temporal-polyfill';
 
 import type { OfferEligibilitySource } from './analytics/offer-dimensions';
 
-export type OfferScheduleState = 'active' | 'scheduled' | 'expired' | 'invalid';
+type OfferScheduleState = 'active' | 'scheduled' | 'expired' | 'invalid';
 export type OfferScheduleMode = 'always' | 'one_time' | 'recurring';
 export type OfferRecurrenceFrequency = 'weekly' | 'monthly';
 export type OfferRecurrenceTermination = 'never' | 'on_date' | 'after_runs';
@@ -21,7 +21,7 @@ export type OfferPolicyTiming = {
   recurrenceRunCount?: number | null;
 };
 
-export type OfferScheduleDecision = {
+type OfferScheduleDecision = {
   effective: boolean;
   state: OfferScheduleState;
   nextTransitionAt: string | null;
@@ -48,7 +48,7 @@ type OfferDecisionPolicy = OfferPolicyTiming & {
   countryCodes?: readonly string[] | null;
 };
 
-export type OfferDecisionMarker = {
+type OfferDecisionMarker = {
   decisionRequired: boolean;
   serverDecisionRequired: boolean;
   specificLinkRequired: boolean;

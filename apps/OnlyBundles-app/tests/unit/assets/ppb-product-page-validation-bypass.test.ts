@@ -89,9 +89,37 @@ describe('PPB validation control disables step validation in Product Page CTA', 
 
     expect(context.elements.addToCartButton.disabled).toBe(false);
   });
+
+  it('keeps the CTA disabled when Shopify product hydration failed', () => {
+    const context = createFooterContext({
+      _isConditionValidationEnabled: () => false,
+      _stepFetchFailed: { 0: true },
+    });
+    Object.assign(context, ProductPageFooterModalStateMethods);
+
+    ProductPageFooterModalStateMethods.updateAddToCartButton.call(context);
+
+    expect(context.elements.addToCartButton.disabled).toBe(true);
+  });
 });
 
 describe('PPB validation control disables cart gating when disabled', () => {
+  it('stops before cart work when Shopify product hydration failed', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch' as any).mockImplementation(jest.fn());
+
+    try {
+      await ProductPageCartMethods.addToCart.call({
+        _stepFetchFailed: { 0: true },
+        hideLoadingOverlay: jest.fn(),
+        updateAddToCartButton: jest.fn(),
+      });
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      fetchSpy.mockRestore();
+    }
+  });
+
   it('continues to /cart/add when control is disabled and step validation fails', async () => {
     const toastSpy = jest.spyOn(ToastManager, 'show').mockImplementation(() => {});
     const fetchSpy = jest.spyOn(global, 'fetch' as any).mockResolvedValue({
@@ -276,9 +304,9 @@ describe('PPB validation control affects modal step progression', () => {
       ...ProductPageModalStateMethods,
       ...ProductPageWidgetMiscMethods,
       selectedBundle: {
-        steps: [{}, {}],
+        steps: [{}, {}, {}],
       },
-      selectedProducts: [{ '111': 1 }, {}],
+      selectedProducts: [{ '111': 1 }, {}, {}],
       currentStepIndex: 0,
       elements: {
         modal: {
@@ -295,7 +323,6 @@ describe('PPB validation control affects modal step progression', () => {
       renderModalProducts: jest.fn(),
       updateModalNavigation: jest.fn(),
       updateModalFooterMessaging: jest.fn(),
-      preloadNextStep: jest.fn(),
       loadStepProducts: jest.fn().mockResolvedValue(undefined),
       getFormattedHeaderText: () => 'Step 1',
     } as any;
@@ -305,7 +332,8 @@ describe('PPB validation control affects modal step progression', () => {
     await ProductPageWidgetMiscMethods.navigateModal.call(context, 1);
 
     expect(context.currentStepIndex).toBe(1);
-    expect(context.preloadNextStep).toHaveBeenCalled();
+    expect(context.loadStepProducts).toHaveBeenCalledTimes(1);
+    expect(context.loadStepProducts).toHaveBeenCalledWith(1);
     expect(formatSpy).not.toHaveBeenCalled();
 
     formatSpy.mockRestore();
@@ -335,7 +363,6 @@ describe('PPB validation control affects modal step progression', () => {
       renderModalProducts: jest.fn(),
       updateModalNavigation: jest.fn(),
       updateModalFooterMessaging: jest.fn(),
-      preloadNextStep: jest.fn(),
       loadStepProducts: jest.fn().mockResolvedValue(undefined),
       getFormattedHeaderText: () => 'Step 1',
     } as any;

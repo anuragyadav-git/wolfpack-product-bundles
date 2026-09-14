@@ -1,7 +1,7 @@
 import { applyOfferPriority } from "../lib/offer-policy-decision";
 import { resolveOfferCountryEligibility } from "../lib/offer-country-eligibility";
 
-export type FpbUpsellOfferDto = {
+type FpbUpsellOfferDto = {
   bundleId: string;
   publicNumber: number;
   bundleName: string;
@@ -31,11 +31,10 @@ function resources(value: unknown): unknown[] {
 
 function stepContainsContext(step: AnyRecord, productId: string, collectionIds: Set<string>) {
   if (step.enabled === false || step.isFreeGift === true) return false;
-  const productSources = [step.StepProduct, step.products];
+  const productSources = [step.StepProduct];
   const collectionSources = [step.collections];
-  for (const category of resources(step.StepCategory ?? step.categories) as AnyRecord[]) {
-    productSources.push(category.products);
-    collectionSources.push(category.collections ?? category.collectionsSelectedData);
+  for (const category of resources(step.StepCategory) as AnyRecord[]) {
+    collectionSources.push(category.collections);
   }
   if (productSources.some((source) => resources(source).some((item) => resourceId(item, "product") === productId))) return true;
   return collectionSources.some((source) => resources(source).some((item) => collectionIds.has(resourceId(item, "collection"))));

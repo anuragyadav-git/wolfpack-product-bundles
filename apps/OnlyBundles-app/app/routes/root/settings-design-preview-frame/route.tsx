@@ -20,7 +20,7 @@ import {
 import type {
   DesignPreviewArea,
   DesignPreviewScenario,
-} from "../../app/app.settings/design-preview-model";
+} from "../../app/app.settings/design-preview-contract";
 import {
   createStorefrontPreviewOverlayHost,
   getStorefrontPreviewRendererKey,
@@ -89,9 +89,41 @@ const STYLESHEET_URLS: Record<StorefrontPreviewStylesheetId, string> = {
 };
 
 type PreviewController = Record<string, any>;
+type StorefrontPreviewWindow = {
+  Shopify?: {
+    shop?: string;
+    locale?: string;
+    country?: string;
+    designMode?: boolean;
+    currency?: { active: string; rate: string };
+    [key: string]: unknown;
+  };
+  shopCurrency?: string;
+  shopifyMultiCurrency?: {
+    shopBaseCurrency: string;
+    customerCurrency: string;
+  };
+  __WOLFPACK_PRESENTMENT_CURRENCY__?: string;
+};
 
 function postFrameEvent(event: StorefrontPreviewEvent) {
   window.parent.postMessage(event, window.location.origin);
+}
+
+export function configureStorefrontPreviewCurrencyContext(
+  previewWindow: StorefrontPreviewWindow,
+  currency: string,
+) {
+  previewWindow.Shopify = {
+    ...(previewWindow.Shopify ?? {}),
+    currency: { active: currency, rate: "1.0" },
+  };
+  previewWindow.shopCurrency = currency;
+  previewWindow.shopifyMultiCurrency = {
+    shopBaseCurrency: currency,
+    customerCurrency: currency,
+  };
+  previewWindow.__WOLFPACK_PRESENTMENT_CURRENCY__ = currency;
 }
 
 async function syncStylesheets(templateKey: TemplateKey) {
@@ -171,38 +203,36 @@ async function initializeController(controller: PreviewController, templateKey: 
   return controller;
 }
 
-async function createPreviewController(
+export async function createPreviewController(
   bundleType: StorefrontPreviewInitializePayload["bundleType"],
   widgetRoot: HTMLElement,
 ) {
   if (bundleType === "full_page") {
     const { BundleWidgetFullPage } = await import("../../../assets/bundle-widget-full-page");
+    let previewReady: Promise<PreviewController> | undefined;
     class SettingsPreviewFullPageWidget extends BundleWidgetFullPage {
-      __previewReady?: Promise<PreviewController>;
-
       override init() {
         const templateKey = this.container.getAttribute("data-preview-template") as TemplateKey;
-        this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
-        return this.__previewReady.then(() => undefined);
+        previewReady = initializeController(this as unknown as PreviewController, templateKey);
+        return previewReady.then(() => undefined);
       }
     }
     const controller = new SettingsPreviewFullPageWidget(widgetRoot);
-    await controller.__previewReady;
+    await previewReady;
     return controller as unknown as PreviewController;
   }
 
   const { BundleWidgetProductPage } = await import("../../../assets/bundle-widget-product-page");
+  let previewReady: Promise<PreviewController> | undefined;
   class SettingsPreviewProductPageWidget extends BundleWidgetProductPage {
-    __previewReady?: Promise<PreviewController>;
-
     override init() {
       const templateKey = this.container.getAttribute("data-preview-template") as TemplateKey;
-      this.__previewReady = initializeController(this as unknown as PreviewController, templateKey);
-      return this.__previewReady.then(() => undefined);
+      previewReady = initializeController(this as unknown as PreviewController, templateKey);
+      return previewReady.then(() => undefined);
     }
   }
   const controller = new SettingsPreviewProductPageWidget(widgetRoot);
-  await controller.__previewReady;
+  await previewReady;
   return controller as unknown as PreviewController;
 }
 
@@ -292,10 +322,19 @@ function applyPreviewContext(
   widgetRoot: HTMLElement | null,
   upsellAnchor: HTMLElement | null,
   focusLabel: HTMLElement | null,
+  loadingScreen: StorefrontPreviewInitializePayload["loadingScreen"],
 ) {
   if (!controller || !widgetRoot) return;
+  controller.config = {
+    ...(controller.config ?? {}),
+    loadingScreen,
+  };
   clearAreaFocus(focusLabel);
-  setStorefrontPreviewLoadingPersistent(controller, scenario === "loading");
+  setStorefrontPreviewLoadingPersistent(
+    controller,
+    scenario === "loading",
+    loadingScreen.gifUrl,
+  );
   document.getElementById("bundle-toast")?.remove();
   const modal = document.getElementById("bundle-builder-modal");
   if (modal) modal.style.removeProperty("display");
@@ -359,16 +398,17 @@ export default function SettingsDesignPreviewFrame() {
   }, []);
 
   useEffect(() => {
-    const previewWindow = window as any;
+    if (!state) return;
+    const previewWindow = window as unknown as StorefrontPreviewWindow;
+    configureStorefrontPreviewCurrencyContext(previewWindow, state.currency);
     previewWindow.Shopify = {
       ...(previewWindow.Shopify ?? {}),
       shop: "settings-design-preview.myshopify.com",
-      locale: state?.locale ?? "en",
+      locale: state.locale,
       country: "US",
-      currency: { active: state?.currency ?? "USD", rate: "1.0" },
       designMode: true,
     };
-  }, [state?.currency, state?.locale]);
+  }, [state]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
@@ -382,7 +422,7 @@ export default function SettingsDesignPreviewFrame() {
       setState((current) => {
         if (command.type === "INITIALIZE") return command.payload;
         if (!current) return current;
-        if (command.type === "UPDATE_DESIGN") return { ...current, designCss: command.payload.designCss };
+        if (command.type === "UPDATE_DESIGN") return { ...current, ...command.payload };
         if (command.type === "SET_TEMPLATE") return { ...current, ...command.payload };
         if (command.type === "SET_VIEWPORT") return { ...current, viewport: command.payload.viewport };
         if (command.type === "SET_AREA") return { ...current, ...command.payload };
@@ -437,6 +477,7 @@ export default function SettingsDesignPreviewFrame() {
           widgetRoot,
           upsellRef.current,
           focusLabelRef.current,
+          latestState.loadingScreen,
         );
         postFrameEvent({
           version: PREVIEW_PROTOCOL_VERSION,
@@ -487,13 +528,14 @@ export default function SettingsDesignPreviewFrame() {
       widgetRef.current,
       upsellRef.current,
       focusLabelRef.current,
+      activeState.loadingScreen,
     );
     postFrameEvent({
       version: PREVIEW_PROTOCOL_VERSION,
       type: "INTERACTION_CHANGED",
       payload: { selectedQuantity: selectedQuantity(controllerRef.current) },
     });
-  }, [state?.area, state?.areaLabel, state?.scenario, state?.viewport]);
+  }, [state?.area, state?.areaLabel, state?.loadingScreen, state?.scenario, state?.viewport]);
 
   useEffect(() => {
     if (state?.scenario !== "product-picker") return;

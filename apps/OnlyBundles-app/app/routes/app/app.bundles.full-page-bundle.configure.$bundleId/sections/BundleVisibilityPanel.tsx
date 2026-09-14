@@ -1,31 +1,44 @@
+import { useAppBridge } from "@shopify/app-bridge-react";
 import {
   buildBundleLinkModel,
   buildEmbedStatusModel,
 } from "../../../../lib/bundle-config/common-configure-page-model";
 import { CommonBundleVisibilityOverview } from "../../_shared/bundle-configure/CommonBundleVisibilityOverview";
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+
+export interface FpbBundleVisibilityPanelProps {
+  activeSection: string;
+  appEmbedEnabled: boolean;
+  bundlePageUrl: string;
+  handleSectionChange: (section: string) => void;
+  openThemeEditorForAppEmbed: () => void;
+  themeEditorUrl: string | null;
+}
 
 export function FpbBundleVisibilityPanel({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
+  activeSection,
+  appEmbedEnabled,
+  bundlePageUrl,
+  handleSectionChange,
+  openThemeEditorForAppEmbed,
+  themeEditorUrl,
+}: FpbBundleVisibilityPanelProps) {
+  const shopify = useAppBridge();
   const link = buildBundleLinkModel({
     bundleType: "full_page",
-    fullPageUrl: flow.bundlePageUrl,
+    fullPageUrl: bundlePageUrl,
   });
 
   return CommonBundleVisibilityOverview({
-    active: flow.activeSection === "bundle_visibility",
-    embedStatus: buildEmbedStatusModel("full_page", flow.appEmbedEnabled),
+    active: activeSection === "bundle_visibility",
+    embedStatus: buildEmbedStatusModel("full_page", appEmbedEnabled),
     link,
     onCopyLink: () => {
       void navigator.clipboard?.writeText(link.url);
-      flow.shopify.toast.show("Bundle link copied", {
+      shopify.toast.show("Bundle link copied", {
         isError: false,
       });
     },
-    onEnableEmbed: flow.openThemeEditorForAppEmbed,
+    onEnableEmbed: openThemeEditorForAppEmbed,
     placementOptions: [
       {
         title: "Bundle Widget",
@@ -33,9 +46,9 @@ export function FpbBundleVisibilityPanel({
           "Show an upsell button or block on selected product pages.",
         actionLabel: "Set up Bundle Widget",
         variant: "primary",
-        onAction: () => flow.handleSectionChange("bundle_widget"),
+        onAction: () => handleSectionChange("bundle_widget"),
       },
     ],
-    themeEditorUrl: flow.themeEditorUrl,
+    themeEditorUrl,
   });
 }

@@ -4,8 +4,8 @@ id: attribution-lcp-funnel
 title: Attribution LCP Funnel
 type: test-spec
 status: active
-summary: Verifies Analytics funnel loading behavior and persisted event calculations.
-last_audited: 2026-08-27
+summary: Verifies Analytics conversion-funnel loading behavior and persisted event calculations.
+last_audited: 2026-09-05
 owners:
   - engineering
 domains:
@@ -41,7 +41,7 @@ Keep the analytics route LCP path fast while preserving merchant feedback during
 ### AttributionDashboard
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
-| 1 | Chart code chunk is still loading | Resolved Analytics data and a pending chart module | Bundle results remain rendered behind a chart-local suspense boundary | Prevents the chart from replacing or mis-hydrating the whole resolved dashboard |
+| 1 | Analytics data resolves | Resolved Analytics data | The dependency-free conversion funnel, key statistics, sales trends, and bundle results render in the same dashboard boundary | No chart-local suspense or `vendor-charts` request remains |
 
 ### computeBundleFunnel
 | # | Scenario | Input | Expected Output | Notes |
@@ -60,7 +60,7 @@ Keep the analytics route LCP path fast while preserving merchant feedback during
 | 1 | Same session emits engagement and ATC | Two valid payloads with different event names | Both can persist idempotently by event | DB unique key includes `eventName` |
 
 ## Acceptance Criteria
-- [ ] All listed test cases pass
+- [x] All listed test cases pass
 - [ ] `tsc` passes
 - [ ] Integration tests pass
-- [ ] Analytics reveals the critical heading immediately and defers data-dependent content until the route is ready.
+- [x] Analytics reveals the critical heading immediately and defers data-dependent content until the route is ready.

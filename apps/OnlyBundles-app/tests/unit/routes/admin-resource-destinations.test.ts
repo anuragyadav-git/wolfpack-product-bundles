@@ -1,4 +1,7 @@
 import React from "react";
+import { flushSync } from "react-dom";
+import { createRoot, type Root } from "react-dom/client";
+import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
 import { APP_BRAND } from "../../../app/lib/app-brand";
 import { DashboardResourcesCard } from "../../../app/routes/app/app.dashboard/DashboardResourcesCard";
@@ -15,6 +18,29 @@ jest.mock("react-i18next", () => ({
 }));
 
 describe("Admin resource destinations", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    const dom = new JSDOM("<!doctype html><html><body></body></html>");
+    Object.assign(globalThis, {
+      window: dom.window,
+      document: dom.window.document,
+      Event: dom.window.Event,
+      MouseEvent: dom.window.MouseEvent,
+      HTMLElement: dom.window.HTMLElement,
+      IS_REACT_ACT_ENVIRONMENT: true,
+    });
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    flushSync(() => root.unmount());
+    container.remove();
+  });
+
   it("uses verified Shopify App Store destinations instead of the expired company domain", () => {
     expect(JSON.stringify(APP_BRAND.links)).not.toContain("wolfpackapps.com");
     expect(APP_BRAND.links.company).toBe("https://apps.shopify.com/partners/wolfpack6");
@@ -51,5 +77,39 @@ describe("Admin resource destinations", () => {
     expect(view).not.toContain("wolfpackapps.com");
     expect(view).not.toContain('target="_blank"');
     expect(view).not.toContain('href="http');
+  });
+
+  it("delegates Dashboard resource actions to their existing owners", () => {
+    const setActiveResource = jest.fn();
+    const handleDirectChat = jest.fn();
+
+    flushSync(() => {
+      root.render(
+        React.createElement(DashboardResourcesCard as any, {
+          activeResource: "bundle-inspirations",
+          setActiveResource,
+          handleDirectChat,
+        }),
+      );
+    });
+
+    const actions = Array.from(
+      container.querySelectorAll<HTMLElement>("button, s-clickable"),
+    );
+    const inspiration = actions.find((action) =>
+      action.textContent?.includes("dashboard.resources.bundleInspiration"),
+    );
+    const support = actions.find((action) =>
+      action.textContent?.includes("dashboard.resources.support"),
+    );
+
+    flushSync(() => {
+      inspiration?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      support?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(setActiveResource).toHaveBeenCalledTimes(1);
+    expect(setActiveResource).toHaveBeenCalledWith("bundle-inspirations");
+    expect(handleDirectChat).toHaveBeenCalledTimes(1);
   });
 });

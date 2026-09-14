@@ -1,103 +1,167 @@
 import { CommonBundleWidgetSection } from "../_shared/bundle-configure/CommonBundleWidgetSection";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
+import { getVisibilityResourceId } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbBundleWidgetSection() {
-  const flow = usePpbConfigureContext();
-  if (flow.activeSection !== "bundle_widget") return null;
+export type PpbBundleWidgetSectionProps = Pick<
+  PpbConfigureFlow,
+  | "activeSection"
+  | "autoSelectBrowsedProduct"
+  | "clearValidationError"
+  | "handlePlaceWidget"
+  | "markAsDirty"
+  | "openMultiLanguageModal"
+  | "openVisibilityCollectionPicker"
+  | "openVisibilityProductPicker"
+  | "removeVisibilityCollectionTarget"
+  | "removeVisibilityProductTarget"
+  | "setAutoSelectBrowsedProduct"
+  | "setUpsellWidgetButtonText"
+  | "setUpsellWidgetDescription"
+  | "setUpsellWidgetDisplayMode"
+  | "setUpsellWidgetDisplayOn"
+  | "setUpsellWidgetEnabled"
+  | "setUpsellWidgetImageUrl"
+  | "setUpsellWidgetTitle"
+  | "shopLocales"
+  | "upsellWidgetButtonText"
+  | "upsellWidgetCollectionsSelectedData"
+  | "upsellWidgetDescription"
+  | "upsellWidgetDisplayMode"
+  | "upsellWidgetDisplayOn"
+  | "upsellWidgetEnabled"
+  | "upsellWidgetImageUrl"
+  | "upsellWidgetSelectedProducts"
+  | "upsellWidgetTitle"
+  | "validationErrors"
+>;
+
+export function PpbBundleWidgetSection({
+  activeSection,
+  autoSelectBrowsedProduct,
+  clearValidationError,
+  handlePlaceWidget,
+  markAsDirty,
+  openMultiLanguageModal,
+  openVisibilityCollectionPicker,
+  openVisibilityProductPicker,
+  removeVisibilityCollectionTarget,
+  removeVisibilityProductTarget,
+  setAutoSelectBrowsedProduct,
+  setUpsellWidgetButtonText,
+  setUpsellWidgetDescription,
+  setUpsellWidgetDisplayMode,
+  setUpsellWidgetDisplayOn,
+  setUpsellWidgetEnabled,
+  setUpsellWidgetImageUrl,
+  setUpsellWidgetTitle,
+  shopLocales,
+  upsellWidgetButtonText,
+  upsellWidgetCollectionsSelectedData,
+  upsellWidgetDescription,
+  upsellWidgetDisplayMode,
+  upsellWidgetDisplayOn,
+  upsellWidgetEnabled,
+  upsellWidgetImageUrl,
+  upsellWidgetSelectedProducts,
+  upsellWidgetTitle,
+  validationErrors,
+}: PpbBundleWidgetSectionProps) {
+  if (activeSection !== "bundle_widget") return null;
 
   return (
     <div data-tour-target="ppb-bundle-widget">
       <CommonBundleWidgetSection
-        addBrowsedProduct={flow.autoSelectBrowsedProduct}
-        buttonText={flow.upsellWidgetButtonText}
-        collections={flow.upsellWidgetCollectionsSelectedData}
-        description={flow.upsellWidgetDescription}
-        disabled={!flow.upsellWidgetEnabled}
-        displayMode={flow.upsellWidgetDisplayMode}
-        displayOn={flow.upsellWidgetDisplayOn}
-        enabled={flow.upsellWidgetEnabled}
-        FilePicker={flow.FilePicker}
-        getResourceId={flow.getVisibilityResourceId}
-        imageUrl={flow.upsellWidgetImageUrl}
+        addBrowsedProduct={autoSelectBrowsedProduct}
+        buttonText={upsellWidgetButtonText}
+        collections={upsellWidgetCollectionsSelectedData}
+        description={upsellWidgetDescription}
+        disabled={!upsellWidgetEnabled}
+        displayMode={upsellWidgetDisplayMode}
+        displayOn={upsellWidgetDisplayOn}
+        enabled={upsellWidgetEnabled}
+        AssetUpload={AssetUpload}
+        getResourceId={getVisibilityResourceId}
+        imageUrl={upsellWidgetImageUrl}
         multiLanguageDisabled={
-          !flow.upsellWidgetEnabled || (flow.shopLocales?.length ?? 0) === 0
+          !upsellWidgetEnabled || (shopLocales?.length ?? 0) === 0
         }
         onAddBrowsedProductChange={(checked) => {
-          flow.setAutoSelectBrowsedProduct(checked);
-          flow.markAsDirty();
+          setAutoSelectBrowsedProduct(checked);
+          markAsDirty();
         }}
         onButtonTextChange={(value) => {
-          flow.setUpsellWidgetButtonText(value);
-          flow.clearValidationError("widget.buttonText");
-          flow.markAsDirty();
+          setUpsellWidgetButtonText(value);
+          clearValidationError("widget.buttonText");
+          markAsDirty();
         }}
         onDescriptionChange={(value) => {
-          flow.setUpsellWidgetDescription(value);
-          flow.markAsDirty();
+          setUpsellWidgetDescription(value);
+          markAsDirty();
         }}
         onDisplayModeChange={(value) => {
-          flow.setUpsellWidgetDisplayMode(value);
-          flow.markAsDirty();
+          setUpsellWidgetDisplayMode(value);
+          markAsDirty();
         }}
         onDisplayOnChange={(value) => {
-          flow.setUpsellWidgetDisplayOn(value);
-          flow.markAsDirty();
+          setUpsellWidgetDisplayOn(value);
+          markAsDirty();
         }}
         onEnabledChange={(checked) => {
-          flow.setUpsellWidgetEnabled(checked);
-          flow.markAsDirty();
+          setUpsellWidgetEnabled(checked);
+          markAsDirty();
         }}
         onImageUrlChange={(value) => {
-          flow.setUpsellWidgetImageUrl(value);
-          flow.markAsDirty();
+          setUpsellWidgetImageUrl(value);
+          markAsDirty();
         }}
         onOpenCollectionPicker={async () => {
-          await flow.openVisibilityCollectionPicker("widget");
-          flow.clearValidationError("widget.collections");
+          await openVisibilityCollectionPicker("widget");
+          clearValidationError("widget.collections");
         }}
         onOpenMultiLanguage={() =>
-          flow.openMultiLanguageModal(
+          openMultiLanguageModal(
             "Bundle Widget",
             [
               {
                 key: "widgetTitle",
                 label: "Widget Title",
-                fallback: flow.upsellWidgetTitle,
+                fallback: upsellWidgetTitle,
               },
               {
                 key: "widgetDescription",
                 label: "Widget Description",
-                fallback: flow.upsellWidgetDescription,
+                fallback: upsellWidgetDescription,
                 multiline: true,
               },
               {
                 key: "widgetButtonText",
                 label: "Widget Button Text",
-                fallback: flow.upsellWidgetButtonText,
+                fallback: upsellWidgetButtonText,
               },
             ],
             "widget"
           )
         }
         onOpenProductPicker={async () => {
-          await flow.openVisibilityProductPicker("widget");
-          flow.clearValidationError("widget.products");
+          await openVisibilityProductPicker("widget");
+          clearValidationError("widget.products");
         }}
-        onPlaceWidget={flow.handlePlaceWidget}
+        onPlaceWidget={handlePlaceWidget}
         onRemoveCollection={(index) =>
-          flow.removeVisibilityCollectionTarget("widget", index)
+          removeVisibilityCollectionTarget("widget", index)
         }
         onRemoveProduct={(index) =>
-          flow.removeVisibilityProductTarget("widget", index)
+          removeVisibilityProductTarget("widget", index)
         }
         onTitleChange={(value) => {
-          flow.setUpsellWidgetTitle(value);
-          flow.clearValidationError("widget.title");
-          flow.markAsDirty();
+          setUpsellWidgetTitle(value);
+          clearValidationError("widget.title");
+          markAsDirty();
         }}
-        products={flow.upsellWidgetSelectedProducts}
-        title={flow.upsellWidgetTitle}
-        validationErrors={flow.validationErrors}
+        products={upsellWidgetSelectedProducts}
+        title={upsellWidgetTitle}
+        validationErrors={validationErrors}
       />
     </div>
   );

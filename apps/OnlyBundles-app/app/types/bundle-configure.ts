@@ -13,9 +13,25 @@ export interface StepProduct {
   title: string;
 }
 
+export interface BundleProductData {
+  id: string;
+  title?: string;
+  handle?: string;
+  status?: string;
+  onlineStorePreviewUrl?: string;
+  onlineStoreUrl?: string;
+  featuredImage?: { url: string };
+  featuredMedia?: { image?: { url?: string | null } | null } | null;
+  media?: {
+    nodes?: Array<{ image?: { url?: string | null } | null } | null>;
+  } | null;
+  images?: { originalSrc: string }[];
+}
+
 export interface BundleStep {
   id: string;
   name: string;
+  isFreeGift?: boolean | null;
   collections?: any;
   StepProduct?: StepProduct[];
 }
@@ -23,7 +39,6 @@ export interface BundleStep {
 export interface BundleStatusSectionProps {
   status: BundleStatus;
   onChange: (status: BundleStatus) => void;
-  showHeading?: boolean;
 }
 
 export interface ActionResponse {
@@ -33,12 +48,12 @@ export interface ActionResponse {
   data?: any;
 }
 
-export interface SyncProductResponse extends ActionResponse {
+interface SyncProductResponse extends ActionResponse {
   product?: any;
   metafieldsUpdated?: boolean;
 }
 
-export interface PagesResponse extends ActionResponse {
+interface PagesResponse extends ActionResponse {
   pages?: Array<{
     id: string;
     title: string;
@@ -46,7 +61,7 @@ export interface PagesResponse extends ActionResponse {
   }>;
 }
 
-export interface ThemeTemplatesResponse extends ActionResponse {
+interface ThemeTemplatesResponse extends ActionResponse {
   templates?: Array<{
     id: string;
     name: string;
@@ -58,7 +73,7 @@ export interface ThemeTemplatesResponse extends ActionResponse {
   };
 }
 
-export interface WidgetValidationResponse extends ActionResponse {
+interface WidgetValidationResponse extends ActionResponse {
   widgetInstalled?: boolean;
   bundleConfigured?: boolean;
   recommendedAction?: string;

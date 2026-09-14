@@ -5,7 +5,7 @@ title: Settings Design Storefront Defaults
 type: test-spec
 status: active
 summary: Verifies shared Admin and storefront color resolution across explicit overrides, Shop Brand pairs, and template defaults.
-last_audited: 2026-08-23
+last_audited: 2026-09-10
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -14,10 +14,11 @@ systems:
   - product-page-bundle-widget
   - settings-design
 source_paths:
-  - app/routes/api/api.design-settings.$shopDomain.tsx
   - app/lib/shop-brand-colors.ts
   - app/lib/settings-design-runtime.ts
   - app/services/theme-colors.server.ts
+  - app/services/ppb-storefront-runtime.server.ts
+  - extensions/bundle-builder/blocks/bundle-app-embed.liquid
 related_docs:
   - internal docs/EB Settings Design Reference.md
   - internal docs/Shopify Integration/Storefront API.md
@@ -37,12 +38,12 @@ keywords:
 ## Purpose
 
 Pin the shared Design color resolver and Storefront API Brand query so Admin
-previews and storefront widgets use the same explicit override, Shop Brand, and
-canonical template-default precedence without stale cache fallback.
+previews and Shopify-hosted storefront CSS use the same explicit override, Shop
+Brand, and canonical template-default precedence without a runtime CSS endpoint.
 
 ## Test Cases
 
-### DesignSettingsApiFallback
+### DesignSettingsResolution
 
 | # | Scenario | Input | Expected Output | Notes |
 |---|---|---|---|---|
@@ -55,10 +56,10 @@ canonical template-default precedence without stale cache fallback.
 | 7 | Resolution precedence | Explicit value, Brand pair, template default | First available source wins in that order | Shared pure resolver |
 | 8 | Semantic mapping | FPB and PPB runtime output | Primary pair owns actions/active/completed/filled roles; secondary pair owns shells/empty/inactive roles | Foregrounds follow their background pair |
 | 9 | Save inheritance | Payload contains inherited keys | Both DesignSettings rows retain the inheritance metadata and resolved runtime | No Prisma migration |
-| 10 | Storefront CSS | Cached pair shape and saved inheritance metadata | CSS is generated from the shared resolved runtime | Old flat cache shape is ignored |
+| 10 | Shopify-hosted storefront CSS | Brand pair and saved inheritance metadata | CSS is generated from the shared resolved runtime and synchronized to the app-owned metafield | No runtime database-backed stylesheet request |
 
 ## Acceptance Criteria
 
-- [ ] Test fails before the fallback default change.
-- [ ] Test passes after implementation.
-- [ ] CSS-only deploy is not run; hard reload verifies any storefront behavior change.
+- [x] Test fails before the fallback default change.
+- [x] Test passes after implementation.
+- [x] Storefront verification hard reloads the Shopify-hosted extension asset and does not request the retired design-settings endpoint.

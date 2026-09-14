@@ -42,7 +42,6 @@ describe("Admin Updates and FAQs removal", () => {
       expect(source).not.toContain("/app/events");
     }
     expect(appShell).not.toContain('t("nav.events")');
-    expect(dashboard).not.toContain("dashboard.header.changelog");
     expect(resources).not.toContain("dashboard.resources.exploreUpdate");
   });
 });

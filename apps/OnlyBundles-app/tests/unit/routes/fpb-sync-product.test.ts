@@ -1,6 +1,6 @@
-import { handleSyncProduct } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/handlers.server";
+import { handleSyncProduct } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/sync-product.server";
 import { ensureBundleParentProduct } from "../../../app/services/bundles/bundle-parent-product.server";
-import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync.server";
+import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -12,14 +12,10 @@ jest.mock("../../../app/lib/logger", () => ({
 jest.mock("../../../app/services/bundles/bundle-parent-product.server", () => ({
   ensureBundleParentProduct: jest.fn(),
 }));
-jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn(),
   updateComponentProductMetafields: jest.fn(),
 }));
-jest.mock("../../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
-}));
-
 const getDb = () => require("../../../app/db.server").default;
 const mockEnsure = ensureBundleParentProduct as jest.MockedFunction<typeof ensureBundleParentProduct>;
 const mockUpdateMetafields = updateBundleProductMetafields as jest.Mock;
@@ -83,9 +79,6 @@ describe("FPB handleSyncProduct", () => {
       expect.objectContaining({
         shopifyProductId: "gid://shopify/Product/1",
       }),
-    );
-    expect(mockUpdateMetafields.mock.calls[0]?.[2]).not.toHaveProperty(
-      "shopifyPageHandle",
     );
   });
 

@@ -1,90 +1,70 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbBundleBannerSettings() {
-  const {
-    bundleBannerDesktopUrl,
-    bundleBannerMobileUrl,
-    FilePicker,
-    markAsDirty,
-    setBundleBannerDesktopUrl,
-    setBundleBannerMobileUrl,
-  } = usePpbConfigureContext();
+export type PpbBundleBannerSettingsProps = Pick<
+  PpbConfigureFlow,
+  | "bundleBannerDesktopUrl"
+  | "bundleBannerMobileUrl"
+  | "markAsDirty"
+  | "setBundleBannerDesktopUrl"
+  | "setBundleBannerMobileUrl"
+>;
 
+export function PpbBundleBannerSettings({
+  bundleBannerDesktopUrl,
+  bundleBannerMobileUrl,
+  markAsDirty,
+  setBundleBannerDesktopUrl,
+  setBundleBannerMobileUrl,
+}: PpbBundleBannerSettingsProps) {
   return (
     <s-section>
       <s-stack direction="block" gap="small">
-        <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+        <s-text type="strong">
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bundleBanner"
           )}
-        </p>
-        <p style={{ margin: 0, fontSize: 13, color: "#6d7175" }}>
+        </s-text>
+        <s-text color="subdued">
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.uploadBannerImagesForDesktopAndMobileViewsThatWillBeDisplayedAtT"
           )}
-        </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-          }}
-        >
-          <div>
-            <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 500 }}>
-              {translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageDesktop"
-              )}
-            </p>
-            <FilePicker
-              value={bundleBannerDesktopUrl || null}
-              uploadButtonAction="openPicker"
-              fitPreviewToTrigger
-              onChange={(url) => {
-                setBundleBannerDesktopUrl(url ?? "");
-                markAsDirty();
-              }}
-            />
-            <p style={{ margin: "6px 0 0", fontSize: 12, color: "#6d7175" }}>
-              {translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
-              )}
-              <span style={{ color: "#202223" }}>
-                {translateAdmin(
-                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1900x230"
-                )}
-              </span>
-            </p>
-          </div>
-          <div>
-            <p style={{ margin: "0 0 8px", fontSize: 13, fontWeight: 500 }}>
-              {translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageMobile"
-              )}
-            </p>
-            <FilePicker
-              value={bundleBannerMobileUrl || null}
-              triggerIcon="mobile"
-              uploadButtonAction="openPicker"
-              fitPreviewToTrigger
-              onChange={(url) => {
-                setBundleBannerMobileUrl(url ?? "");
-                markAsDirty();
-              }}
-            />
-            <p style={{ margin: "6px 0 0", fontSize: 12, color: "#6d7175" }}>
-              {translateAdmin(
-                "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
-              )}
-              <span style={{ color: "#202223" }}>
-                {translateAdmin(
-                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1100x500"
-                )}
-              </span>
-            </p>
-          </div>
-        </div>
+        </s-text>
+        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+          <AssetUpload
+            label={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageDesktop"
+            )}
+            hint={`${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+            )} ${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1900x230"
+            )}`}
+            value={bundleBannerDesktopUrl || null}
+            dropZoneContent={<s-icon type="desktop" size="base" />}
+            onChange={(url) => {
+              setBundleBannerDesktopUrl(url ?? "");
+              markAsDirty();
+            }}
+          />
+          <AssetUpload
+            label={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.bannerImageMobile"
+            )}
+            hint={`${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.recommendedSize"
+            )} ${translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.bundlesettingstimeline.1100x500"
+            )}`}
+            value={bundleBannerMobileUrl || null}
+            dropZoneContent={<s-icon type="mobile" size="base" />}
+            onChange={(url) => {
+              setBundleBannerMobileUrl(url ?? "");
+              markAsDirty();
+            }}
+          />
+        </s-grid>
       </s-stack>
     </s-section>
   );

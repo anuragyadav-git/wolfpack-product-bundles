@@ -5,7 +5,7 @@ title: Admin Configure Page
 type: architecture
 status: authoritative
 summary: Defines the shared FPB and PPB configure-page boundary and direct create, clone, edit, and save flows.
-last_audited: 2026-09-01
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
@@ -13,16 +13,19 @@ domains:
 systems:
   - bundle-configure
 source_paths:
+  - app/components/shared/AssetUpload.tsx
   - app/components/AdminWarningGroup.tsx
   - app/components/bundle-configure/TemplatePreviewFeedbackModal.tsx
+  - app/components/bundle-configure/BundleReadinessOverlay.tsx
   - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/
+  - app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/addon-draft.types.ts
   - app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/
   - app/routes/app/_shared/bundle-configure/
   - app/constants/help-tooltips.ts
   - public/tooltip-*.png
   - app/lib/bundle-configure-loader.server.ts
   - app/hooks/useBundleConfigurationState.ts
-  - app/store/slices/configureRouteStateSlice.ts
+  - app/hooks/configure-route-state.ts
 related_docs:
   - docs/app-nav-map/APP_NAVIGATION_MAP.md
 tags:
@@ -37,9 +40,75 @@ keywords:
 
 The FPB configure page is the canonical Admin configure design. FPB and PPB keep separate route URLs, loaders, actions, save handlers, and storefront sync contracts, but shared visual primitives live under `app/routes/app/_shared/bundle-configure/`.
 
+The shared desktop left rail is sticky within `editGrid`. The existing bottom
+safe area belongs to that grid rather than the outer `editCanvas`, ensuring the
+rail's sticky boundary does not move when Bundle Level CSS or another main-column
+disclosure expands near the end of the page. FPB and PPB use the same ownership;
+neither route adds disclosure-specific scroll compensation.
+
 The only bundle configuration routes are the type-specific FPB and PPB configure pages. Bundle creation, cloning, and editing navigate directly to the appropriate configure route. The retired `/app/bundles/create/configure/:bundleId` configuration wizard and its route-specific state, actions, preview helper, and modal controllers are not part of the supported architecture.
 
-Shared configure primitives should accept adapter props for route-owned state and actions. FPB continues to use `useConfigureBundleFlow()`, and PPB continues to use `usePpbConfigureFlow()`. Shared components must not read route loaders or submit forms directly.
+Shared configure primitives accept adapter props for route-owned state and
+actions. FPB continues to use `useConfigureBundleFlow()`, and PPB continues to
+use `usePpbConfigureFlow()` as route-level composition owners, but their
+aggregate controller results must stop at the route composition boundary.
+Feature and leaf components receive explicit values and callbacks for their own
+responsibility; they do not receive the whole configure flow. Shared components
+must not read route loaders or submit forms directly.
+
+Configure modules are split by cohesion rather than line count. A module may
+remain long when it owns one lifecycle or business transaction. Extraction is
+warranted when a responsibility has an independent owner or variation point and
+the resulting boundary reduces dependencies. File-length guards, oversized-file
+allowlists, pass-through flow bags, and generic save engines are not part of the
+architecture. FPB and PPB save handlers remain separate because their
+persistence and storefront synchronization semantics differ.
+
+The FPB composition hook calls action and save controllers with explicit,
+type-checked dependency objects containing only the fields each controller
+reads. Intermediate hook results are not spread into progressively larger flow
+bags; all cohesive owner results are merged once, solely for the route render
+contract returned by `useConfigureBundleFlow()`.
+
+The PPB composition hook follows the same boundary without combining PPB and
+FPB into a generic engine. Save, fetcher-effect, preview, placement, and modal
+hooks receive explicit, type-checked projections from their cohesive state
+owners. The complete PPB flow is merged only for the route render contract; it
+is not placed in React context or forwarded as an internal service locator.
+`ConfigureBundleFlow` renders the canvas directly, and `PpbMainSections` is the
+single feature-projection owner. The route shell projects
+header, contextual-save-form, sidebar, and storefront-placement supplement
+contracts explicitly, including nested state objects narrowed to the fields the
+shell owner actually reads. Bundle Visibility similarly owns only its link,
+App Embed, offer-operation, and country-targeting contract and imports App
+Bridge directly for merchant feedback. Bundle Settings leaves receive only
+their status, media, countdown, default-product, cart-display, quantity, custom
+CSS, category-step, or sticky-cart state and callbacks. PPB Bundle Widget and
+Bundle Embed likewise receive explicit copy, targeting, localization,
+validation, and placement contracts; neither placement surface reads the
+aggregate configure context. PPB Free Gifts and Add-ons stays one
+cohesive active-step feature but receives only its add-on, localization,
+message, picker, and modal inputs. The PPB subscriptions adapter is one such leaf
+boundary: route composition passes the shared subscription component only its
+bundle compatibility inputs, discovery fetcher, localized configuration,
+validation state, and owned callbacks.
+
+PPB Discount and Pricing is split into named rule-editor and display-option
+contracts. Quantity, progress, and messaging owners receive only their own
+pricing state and callbacks. Step Setup follows the same rule: its composer
+receives named Step Flow, details, categories, rules, and Step Config contracts,
+then adds only the active step and first-step flag required by each leaf. There
+is no PPB configure provider or aggregate configure context.
+
+Deferred PPB overlays are composed from the route flow at one explicit overlay
+boundary. Page selection, selected resources, template selection, sync and
+variable utilities, discount translations, guided tour,
+multi-language text, and preview gating each receive only their owned inputs.
+The lightweight readiness trigger and popover render eagerly outside that lazy
+boundary so the control cannot disappear while the browser waits for idle time.
+No overlay reads the aggregate configure context. Localized pricing values are
+normalized to the persisted required-string shape before returning to their
+state owners.
 
 Rich visual help is owned by the shared `ConfigureHelpPopover` Polaris surface.
 Its non-submitting `s-button` opens an `s-popover`, allowing an optimized image,
@@ -50,6 +119,59 @@ The catalog in `help-tooltips.ts` is the single key-to-asset source; canonical
 source images are committed as `public/tooltip-*.png`, with AVIF and WebP
 derivatives generated by the existing image optimizer. Opening help never
 participates in route dirty state or the configure SaveBar.
+
+Tooltip artwork is evidence, not illustration. A depicted storefront state must
+be cropped from either the Settings Design production renderer or a
+hard-reloaded Agent-store storefront. Generated UI, conceptual diagrams, fake
+product cards, and hand-composed approximations are not accepted as storefront
+evidence. Image generation may help with a neutral, non-UI presentation frame,
+but it must never generate or alter the depicted widget surface. When a setting
+has no single visible storefront treatment, or Shopify theme ownership makes a
+single depiction misleading, the popover remains text-only rather than showing
+invented artwork.
+
+The Configure tooltip catalog was audited trigger by trigger on 2026-09-11:
+
+| Help key | Configure surfaces | Result | Verified depiction |
+| --- | --- | --- | --- |
+| `stepFlow` | FPB, PPB | Visual | Production-rendered step timeline |
+| `category` | FPB, PPB | Visual | Production-rendered category tabs and product cards |
+| `rulesConfiguration` | FPB, PPB | Visual | Production-rendered unmet-rule message |
+| `bundleQuantityOptions` | FPB, PPB | Visual | Production-rendered quantity offers, progress, and tier badges |
+| `productSlots` | FPB | Visual | Production-rendered product-slot step |
+| `discountProgressBar` | FPB, PPB | Visual | Production-rendered pricing progress |
+| `discountMessaging` | FPB, PPB | Visual | Production-rendered pricing message and progress |
+| `variantSelector` | FPB, PPB | Visual | Production-rendered product-card swatches |
+| `showTextOnAddButton` | PPB | Visual | Production-rendered product-card Add action |
+| `cartLineItemDiscountDisplay` | FPB, PPB | Text only | Cart rendering and discount presentation are Shopify-theme owned; the Agent-store row did not show the promised discount state |
+| `swatchTooltip` | PPB | Visual | Production-rendered swatch hover label |
+| `tierBadge` | PPB | Visual | Production-rendered pricing tier badges |
+| `freeGiftAddons` | FPB, PPB | Visual | Production-rendered free-gift step |
+| `specificLinkAccess` | PPB | Text only | Eligibility rule has no distinct widget surface |
+| `offerOperations` | FPB | Text only | Scheduling changes availability rather than rendering a distinct component |
+| `countryTargeting` | FPB | Text only | Market eligibility has no distinct widget surface |
+| `bundleWidget` | PPB | Visual | Production-rendered product-page upsell widget |
+| `bundleEmbed` | PPB | Visual | Production-rendered embedded product-page builder |
+| `preselectedProducts` | FPB, PPB | Visual | Production-rendered selected product card |
+| `quantityValidation` | FPB, PPB | Visual | Production-rendered product quantity control at its configured limit |
+| `lowStockAlert` | FPB, PPB | Visual | Production-rendered remaining-inventory badge |
+| `stickyAddToCart` | PPB | Visual | Production-rendered sticky next/add-to-cart action |
+| `countdownTimer` | PPB | Visual | Production-rendered offer countdown |
+| `bundleSubscriptions` | PPB | Visual | Production-rendered purchase-option selector |
+| `floatingPromoBadge` | FPB | Visual | Hard-reloaded Agent-store floating badge |
+
+Every visual entry records its renderer provenance in `HELP_TOOLTIPS`. The 21
+canonical PNGs are the review sources and their AVIF/WebP derivatives are
+generated together. Each catalog entry also gives Polaris `s-image` the exact
+capture aspect ratio so wide evidence is not letterboxed inside a square media
+box; this uses the documented component property rather than custom sizing CSS.
+Four settings remain intentionally text-only. The orphaned
+`loadingAnimation` and `bundleVisibilityPending` catalog entries are removed;
+their non-popover UI copy remains owned by the surfaces that render it.
+The FPB Add-Ons with Bundles header follows the same ownership: its dedicated
+info trigger opens the `freeGiftAddons` visual popover, while the separate
+`How to setup?` link opens the configured external guide. Informational content
+and setup navigation are never combined into one action.
 
 Discount and Pricing rule cards share `PricingTierBadgeFields`. Each rule owns
 an optional `tierBadge` object inside the canonical `BundlePricing.rules` JSON,
@@ -66,7 +188,7 @@ Feature switches follow one shared disabled-configuration contract across FPB
 and PPB. The master switch remains interactive, while every dependent setting
 stays rendered with its saved value, is visually subdued, and sits inside an
 `aria-disabled` and native `inert` region. Native controls also receive their
-own `disabled` state, including shared `FilePicker` triggers. Turning a feature
+own `disabled` state, including shared `AssetUpload` drop zones. Turning a feature
 off must not clear its draft configuration; turning it back on restores the
 same values. Mutually exclusive mode branches and prerequisite acquisition
 flows may remain conditional because they do not represent disabled saved
@@ -79,6 +201,38 @@ route-owned Polaris web-component surfaces. Their master switches sit outside
 the disabled region, and their preview, localized copy, targeting, selected
 resources, browsed-product behavior, and Theme Editor placement actions remain
 visible but inert while disabled.
+
+Images & GIFs is an FPB-only configure navigation section because its
+route-owned editors persist the bundle-level responsive promo banner and
+floating promo badge. The native desktop and mobile drop zones communicate
+their own accepted file types, so the section does not repeat a FORMAT summary.
+FPB does not maintain a second per-step media editor there: Step Setup → Step
+Config is the sole owner of canonical `stepImage`, and a separate step banner
+is not part of the supported storefront contract. PPB has no separate Images &
+GIFs section: Step Config owns its canonical per-step `stepImage`, and Settings
+Design owns the store-level loading screen used by both bundle types.
+The FPB promo banner uses the canonical desktop and mobile bundle-banner URLs;
+its two native drop zones share one row at every configure width. Bundle
+Settings does not duplicate those media controls.
+The Floating Promo Badge header uses the shared `ConfigureHelpPopover`; its
+canonical image is captured from the real storefront badge renderer and CSS so
+the popover shows the fixed bottom-left pill, merchant text, and dismiss action
+instead of an independently styled approximation.
+FPB Promo Banner and PPB Bundle Banner use the Polaris `desktop` and `mobile`
+icons inside their matching responsive drop zones. FPB media-card context badges
+occupy the top-right auto column of the same native grid row as the title and
+description; they do not wrap beneath the copy or use custom positioning CSS.
+The store-level FPB/PPB loading screen and shared slot icon remain owned by
+Settings Design; configure sections do not recreate those store-level controls.
+Media previews use Polaris `s-image`, and product/list media use `s-thumbnail`;
+the app does not maintain a custom responsive-picture wrapper for Admin media.
+Generic empty upload surfaces provide a Shopify upload icon as `s-drop-zone`
+content; responsive banner pairs use their matching device icon. Neither form
+nests a second Polaris button inside the native drop zone.
+In FPB and PPB Step Config, the compact icon tile is itself the one native drop
+zone; neither surface keeps picker-open state or reveals a second large upload
+surface. A saved image remains replaceable through that same drop zone, and its
+remove action stays outside the drop zone so interactive controls are not nested.
 
 Step Setup uses the same section rhythm for both bundle types:
 
@@ -93,6 +247,61 @@ existing horizontal rule beneath the step-chip navigation separates the two
 sections; their headings, help actions, step controls, and field content remain
 independently owned. Category, Rules Configuration, and Step Config continue as
 separate cards below.
+
+Compact configure commands such as Add Step, Add Category, Add Rule, clone,
+delete, selected-resource removal, and reset use Polaris `s-button`;
+their layout parents must not add a second button-like border, background,
+hover state, or hit target. Selected-resource counts use `s-clickable-chip`. A
+row-sized action that must
+own the full available width, such as Edit Product or adding an add-on tier or
+tier rule, uses `s-clickable` with `inlineSize="100%"`. The clickable owns its
+handler directly and must not wrap an `s-button`. Bundle-product Replace and Sync
+live in an `s-menu`; Shopify owns its open state, focus, keyboard behavior, and
+dismissal, so neither configure route keeps a parallel menu-state flag. Custom
+HTML buttons remain limited to
+interaction shapes without a Polaris equivalent: step, category, and tab
+navigation chips; drag handles; the inline FPB/PPB rule-mode radio group; the guided-tour
+overlay; and controls projected into App Bridge title bars, save bars, or the
+maximum-size template modal. Those exceptions keep only their local interaction
+role and must not duplicate Shopify-owned dialog, focus, or form behavior.
+An accordion row with compact actions uses sibling interaction owners: one
+`s-clickable` owns only the label-and-chevron expansion target, while clone,
+delete, or other `s-button` commands remain outside it. A custom `role="button"`
+container must never contain Polaris buttons. Category-rule accordion headers
+in both configure flows are full-width `s-clickable` surfaces with a
+Shopify-owned chevron and divider; they do not retain a parallel HTML button or
+custom hover state.
+
+FPB and PPB Bundle Level CSS share the same disclosure contract. One padded,
+full-width `s-clickable` header owns the complete label-and-chevron row,
+including its whitespace. The heading is the only visible section label; the
+expanded `s-text-area` keeps its associated label exclusive to assistive
+technology. Neither bundle type adds a second click owner or custom hit area.
+
+Mutually exclusive modes normally use one Shopify-owned `s-choice-list` per
+question, with every valid `s-choice` as a direct child and the current value
+supplied through the list's `values` property. Widget presentation, progress
+presentation, and subscription purchase scope must not be split into
+independent one-item choice lists. Rule-mode selection is the narrow exception:
+the current App Home choice-list API forces its shadow-DOM fieldset into a column
+and exposes no horizontal direction. FPB and PPB therefore share one semantic
+native radio group inside an inline `s-stack`; unsupported attributes and
+shadow-DOM manipulation are prohibited. Icon-bearing actions provide a localized
+`accessibilityLabel` even when their visible label is expected to render; this
+keeps their accessible name stable during Polaris custom-element registration
+and route transitions without adding a wrapper-owned click target.
+
+As verified on 2026-09-11, Shopify's latest Choice List documentation describes
+an `inline` variant, but the `polaris.js` runtime then served from Shopify's
+canonical CDN (`5ff803d5f82b5b8a4238acb189bfebec198906dc`) hard-codes the choice
+list as a vertical flex column, and `@shopify/polaris-types@1.0.7` omits the
+property from the public React element type. FPB and PPB rule modes therefore
+use one semantic native `radiogroup` inside Polaris `s-stack`, without custom
+radio styling or independent one-item groups. Replace this narrow exception
+with `s-choice-list variant="inline"` only after both the served runtime and
+published React type support it. The Learn More link occupies the top-right
+auto column of the same native grid row as the Rules Configuration heading and
+help tooltip; no custom positioning CSS or secondary click owner is used.
 
 Step 1 is the required storefront entry step, so its enable switch remains on
 and cannot be changed. Later steps may be disabled without deleting their saved
@@ -150,11 +359,16 @@ controls remain visible but disabled, and the Admin save payload forces
 `productSlotsEnabled=false` while the configuration is incompatible.
 
 Step Config uses the shared square step-image control beside the Step Title
-fields, with an explicit gap between those columns. Its Upload file and Replace
-actions mount `FilePicker` in auto-open mode. Auto-open pickers begin in the open
-state and use the shared Polaris modal utilities (`showOverlay()` plus native
-hide listeners); React custom-element `onHide` props and `show()` alone are not
-the supported lifecycle contract inside the embedded Admin iframe.
+fields, with an explicit gap between those columns. The compact tile always
+renders the shared `AssetUpload` surface, which delegates selection and
+drag-and-drop to one named Polaris `s-drop-zone`. The app does not maintain a
+file-library modal, search, pagination, faux drop target, separate Replace
+button, or second expanded upload surface.
+The selected file is posted through the App Bridge-authenticated
+`/app/upload-store-file` resource route, staged as Shopify image media, created
+through the Admin Files API, and polled until Shopify returns its READY CDN URL.
+Type and size validation, active-attempt disabling, explicit removal, and the
+owning configure draft update remain app responsibilities.
 
 SaveBar semantics remain route-owned. Shared configure UI should mark drafts dirty through the adapter but must not introduce autosave, wrap the canvas in a broad form, or make Enter keypresses submit the configure page.
 
@@ -243,28 +457,49 @@ configure-state hydration.
 `CommonConfigureShell` owns the named `bundle-configure` query container. FPB
 remains the canonical visual source while PPB supplies route-owned state and
 controls through adapters and slots. Narrow containers stack the editor into one
-column, keep fields shrinkable with `min-width: 0`, expose 44px action targets,
-and reserve bottom space for Shopify's contextual save bar.
+column, keep fields shrinkable with `min-width: 0`, and expose 44px action
+targets. On wide containers, the sticky left rail participates in the page's
+vertical scroll; it must not cap itself to the viewport or create a nested
+scrollbar when a navigation section expands. Shopify owns the contextual save
+bar at the top of the Admin surface on both desktop and mobile.
 
-The existing compact `BundleReadinessOverlay` trigger and external props remain
-unchanged. Its checklist is a native modal dialog: desktop uses a bounded
-floating panel and phone containers use a full-width bottom sheet above the safe
-area. Escape, safe backdrop dismissal, focus trapping, internal scrolling, and
-focus restoration are shared behavior. `LocalAppModal` applies the same native
-dialog contract to app-owned discard workflows. Configure multi-language
-workflows use the shared Polaris `s-modal` lifecycle and route-owned open state.
+`BundleReadinessOverlay` is secondary, contextual information, so its checklist
+uses an anchored Polaris `s-popover` instead of a blocking modal. Wide
+viewports expose only the floating 64px score control; mobile viewports hide
+that control and expose a native `s-button` beside Preview Bundle. Both use
+`commandFor` to open the same eagerly rendered popover, which is never opened
+programmatically on page load. Shopify owns placement, Escape and outside
+dismissal, keyboard activation, and trigger-focus restoration. The checklist
+owns its bounded internal scroll region and does not repeat the score gauge
+inside the open surface. Each incomplete checklist `s-clickable` owns its
+action through its click handler while `commandFor` only asks Shopify to hide
+the popover. Never dispatch checklist actions from the popover's `command`
+event: light dismissal can participate in the same command lifecycle and must
+not open an unrelated Shopify intent. The app listens to the popover's `show`
+and `hide` events once to synchronize route-owned open state; `afterhide` is a
+later phase of the same close and must not repeat cleanup. `LocalAppModal` and
+configure multi-language workflows remain modal because they are blocking
+tasks. Polaris popovers are intentionally non-modal: a deliberate click on an
+underlying Admin action can dismiss the popover and activate that action in the
+same sequence. The readiness component does not install document-level pointer
+or click interception. Its checklist actions are isolated by their own
+`onClick` handlers, so light dismissal cannot be mistaken for a checklist
+action or open an unrelated intent.
 
 ## Admin Warning Presentation Contract
 
 An Admin surface must not stack warning banners when multiple warnings are
 simultaneously actionable. `AdminWarningGroup` renders one warning directly,
-but two or more warnings collapse into one warning banner with the copy
-`Few actions are needed to publish the bundle.` and a `View` action. The action
+but two or more warnings collapse into one `Some items need your attention`
+warning banner with the copy `Few actions are needed to publish the bundle.`
+and a `Manage` action. The action
 opens a Polaris modal containing every warning, its explanatory copy, and its
 existing remediation action. Selecting a remediation closes the modal before
 running the action. FPB and PPB configure headers use this contract for the app
-embed and unlisted-product warnings; the shared subscriptions section uses the
-same contract when compatibility and validation warnings coexist.
+embed and unlisted-product warnings. PPB widget-placement feedback is also a
+warning in this group and is never rendered through the standalone critical
+operation-alert banner. The shared subscriptions section uses the same contract
+when compatibility and validation warnings coexist.
 
 The FPB and PPB Select Template workflows use the App Bridge React `Modal`
 with `variant="max"`. The current App Home `s-modal` API stops at
@@ -295,8 +530,8 @@ preview URL. Failed preview preparation does not open the feedback modal.
 
 ## First-Create Tour and State Boundary
 
-Both type-specific configure routes mount `ReduxProvider` locally; the shared
-`/app` layout does not. Hidden save inputs and route-owned configure controllers
+Both type-specific configure routes own their React reducer and local state;
+there is no configure Redux provider. Hidden save inputs and route-owned configure controllers
 remain mounted for the full route lifetime, so section changes and deferred
 overlays must not discard unsaved values.
 
@@ -306,8 +541,17 @@ before looking up its target, retries while a lazy target arrives, and falls
 back to a centered dialog when the target is unavailable. Completion,
 dismissal, and Escape persist the existing shop-keyed local-storage value,
 restore the previously focused control, and release the body scroll lock.
+The custom spotlight and positioned dialog remain the deliberate overlay
+exception, while their ordinary Dismiss, Next, and Got it actions use Polaris
+`s-button` controls. A step transition is notified once per actual step even
+when a parent callback receives a new identity during rerender. Step 2 targets
+the box-owning desktop readiness container, not either mobile header action.
+Step 4 navigates to Bundle Settings and targets only the bundle-status card in
+both FPB and PPB, never the broader settings panel.
 The dialog measures its rendered height before choosing an above-target,
 below-target, or viewport-contained position. It recomputes that position after
 viewport changes and uses a bounded internal scroll region for long copy on
-short desktop and mobile viewports. Guided transitions keep the readiness modal
-closed so it cannot cover the tour while the readiness trigger is highlighted.
+short desktop viewports. The guided tour does not start or remain visible below
+768px, where its spotlight and dialog would compete with the mobile configure
+surface. Guided transitions keep the readiness popover closed so it cannot
+cover the tour while the readiness trigger is highlighted.

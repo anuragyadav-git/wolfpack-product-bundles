@@ -40,7 +40,6 @@ function makeBundle(stepFilters?: { label: string; collectionHandle: string }[] 
     status: "active",
     bundleType: BundleType.FULL_PAGE,
     shopifyProductId: "gid://shopify/Product/999",
-    shopifyPageHandle: "test-bundle",
     steps: [
       {
         id: "step-1",

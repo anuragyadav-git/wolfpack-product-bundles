@@ -10,7 +10,7 @@ import {
   normalizePpbBundleEmbedConfig,
 } from "../../../lib/ppb-bundle-embed";
 
-type VisibilityResource = {
+export type VisibilityResource = {
   id?: string;
   title?: string;
   [key: string]: unknown;
@@ -175,12 +175,14 @@ export function usePpbVisibilityState({
       (bundle as any).upsellWidgetEnabled ??
       false,
   );
-  const originalUpsellWidgetDisplayModeRef = useRef<string>(
-    (bundle as any).upsellWidgetDisplayMode ?? "block",
+  const originalUpsellWidgetDisplayModeRef = useRef<UpsellWidgetDisplayMode>(
+    normalizeUpsellWidgetDisplayMode((bundle as any).upsellWidgetDisplayMode),
   );
-  const originalUpsellWidgetDisplayOnRef = useRef<string>(
-    (bundle as any).upsellWidgetDisplayOn ??
-      getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all"),
+  const originalUpsellWidgetDisplayOnRef = useRef<UpsellWidgetDisplayOn>(
+    normalizeWidgetDisplayOn(
+      (bundle as any).upsellWidgetDisplayOn ??
+        getVisibilityDisplayTarget(savedWidgetDisplayConfiguration, "all"),
+    ),
   );
   const originalUpsellWidgetTitleRef = useRef<string>(
     savedWidgetConfiguration?.title ?? "Bundle & Save",
@@ -217,14 +219,18 @@ export function usePpbVisibilityState({
   const originalBundleEmbedAddBrowsedProductRef = useRef<boolean>(
     canonicalEmbedConfiguration.useLinkProductAsDefaultProduct,
   );
-  const originalBundleEmbedSelectedProductsRef = useRef(
-    canonicalEmbedConfiguration.displayConfiguration.selectedProducts,
+  const originalBundleEmbedSelectedProductsRef = useRef<VisibilityResource[]>(
+    asVisibilityResources(
+      canonicalEmbedConfiguration.displayConfiguration.selectedProducts,
+    ),
   );
   const originalBundleEmbedSpecificProductPagesRef = useRef(
     canonicalEmbedConfiguration.displayConfiguration.showOnSpecificProductPages,
   );
-  const originalBundleEmbedCollectionsSelectedDataRef = useRef(
-    canonicalEmbedConfiguration.displayConfiguration.collectionsSelectedData,
+  const originalBundleEmbedCollectionsSelectedDataRef = useRef<VisibilityResource[]>(
+    asVisibilityResources(
+      canonicalEmbedConfiguration.displayConfiguration.collectionsSelectedData,
+    ),
   );
   const originalBundleEmbedSpecificCollectionPagesRef = useRef(
     canonicalEmbedConfiguration.displayConfiguration.showOnSpecificCollectionPages,

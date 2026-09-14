@@ -3,7 +3,7 @@ use shopify_function::scalars::Decimal;
 use crate::helpers::{decimal_to_f64, parse_json_or_default};
 use crate::pricing::calculate_discount_percentage;
 use crate::schema;
-use crate::types::{CartLineDisplayProperties, ComponentPricingItem, PriceAdjustmentConfig};
+use crate::types::{ComponentPricingItem, PriceAdjustmentConfig};
 
 /// Process all EXPAND operations for one cart pass.
 ///
@@ -138,15 +138,7 @@ pub fn process_expand_operations(
 
         let components_json = serde_json::to_string(&component_details).unwrap_or_default();
 
-        let display_properties: CartLineDisplayProperties = parse_json_or_default(
-            line.bundle_display_properties()
-                .and_then(|attribute| attribute.value())
-                .map(|value| value.as_str()),
-        );
-        let bundle_name = display_properties
-            .bundle_name
-            .filter(|value| !value.trim().is_empty())
-            .unwrap_or_else(|| "Bundle".to_string());
+        let bundle_name = variant.product().title().to_string();
 
         let merchandise_id = variant.id().to_string();
 
@@ -196,7 +188,7 @@ pub fn process_expand_operations(
             },
         ];
 
-        let expand_op = schema::LineExpandOperation {
+        let expand_op = schema::ExpandOperation {
             cart_line_id: line.id().to_string(),
             expanded_cart_items: vec![schema::ExpandedItem {
                 merchandise_id,
@@ -209,7 +201,7 @@ pub fn process_expand_operations(
             image: None,
         };
 
-        operations.push(schema::CartOperation::LineExpand(expand_op));
+        operations.push(schema::CartOperation::Expand(expand_op));
     }
 
     operations

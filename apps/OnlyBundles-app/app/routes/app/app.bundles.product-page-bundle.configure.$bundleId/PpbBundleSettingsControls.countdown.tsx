@@ -1,25 +1,60 @@
 import { CountdownSettingsSection } from "../_shared/bundle-configure/CountdownSettingsSection";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbCountdownSettings() {
-  const flow = usePpbConfigureContext();
+type PpbCountdownFlowProps = Pick<
+  PpbConfigureFlow,
+  | "countdownEnabled"
+  | "countdownLayout"
+  | "countdownPosition"
+  | "countdownTitle"
+  | "countdownExpiryAction"
+  | "countdownExpiredMessage"
+  | "markAsDirty"
+  | "setCountdownEnabled"
+  | "setCountdownLayout"
+  | "setCountdownPosition"
+  | "setCountdownTitle"
+  | "setCountdownExpiryAction"
+  | "setCountdownExpiredMessage"
+>;
+
+export type PpbCountdownSettingsProps = PpbCountdownFlowProps & {
+  scheduledEndsAt: PpbConfigureFlow["offerDeliveryState"]["endsAt"];
+};
+
+export function PpbCountdownSettings({
+  countdownEnabled,
+  countdownLayout,
+  countdownPosition,
+  countdownTitle,
+  countdownExpiryAction,
+  countdownExpiredMessage,
+  scheduledEndsAt,
+  markAsDirty,
+  setCountdownEnabled,
+  setCountdownLayout,
+  setCountdownPosition,
+  setCountdownTitle,
+  setCountdownExpiryAction,
+  setCountdownExpiredMessage,
+}: PpbCountdownSettingsProps) {
 
   return (
     <CountdownSettingsSection
-      enabled={flow.countdownEnabled}
-      layout={flow.countdownLayout}
-      position={flow.countdownPosition}
-      title={flow.countdownTitle}
-      expiryAction={flow.countdownExpiryAction}
-      expiredMessage={flow.countdownExpiredMessage}
-      scheduledEndsAt={flow.offerDeliveryState.endsAt}
-      markAsDirty={flow.markAsDirty}
-      setEnabled={flow.setCountdownEnabled}
-      setLayout={flow.setCountdownLayout}
-      setPosition={flow.setCountdownPosition}
-      setTitle={flow.setCountdownTitle}
-      setExpiryAction={flow.setCountdownExpiryAction}
-      setExpiredMessage={flow.setCountdownExpiredMessage}
+      enabled={countdownEnabled}
+      layout={countdownLayout}
+      position={countdownPosition}
+      title={countdownTitle}
+      expiryAction={countdownExpiryAction}
+      expiredMessage={countdownExpiredMessage}
+      scheduledEndsAt={scheduledEndsAt}
+      markAsDirty={markAsDirty}
+      setEnabled={setCountdownEnabled}
+      setLayout={setCountdownLayout}
+      setPosition={setCountdownPosition}
+      setTitle={setCountdownTitle}
+      setExpiryAction={setCountdownExpiryAction}
+      setExpiredMessage={setCountdownExpiredMessage}
     />
   );
 }

@@ -4,8 +4,8 @@ id: create-bundle-entry
 title: Create Bundle Entry Test Spec
 type: test-spec
 status: active
-summary: Verifies bundle creation redirects directly to the selected bundle type's configure page.
-last_audited: 2026-07-23
+summary: Verifies normal bundle creation redirects and Sidekick-confirmed creation responses from the shared entry route.
+last_audited: 2026-09-06
 owners:
   - engineering
 domains:
@@ -22,6 +22,7 @@ tags:
 keywords:
   - bundle-entry
   - configure-redirect
+  - sidekick-product-import
 ---
 
 # Test Spec: Create Bundle Entry
@@ -30,7 +31,7 @@ keywords:
 
 ## Purpose
 
-Document the create bundle entry action behavior, including the first-load guided tour redirect signal after a merchant creates a bundle. Successful creation redirects directly into the selected bundle type's configure screen.
+Document the create bundle entry action behavior, including the first-load guided tour redirect signal for normal creation and the Shopify Product GID response for merchant-confirmed Sidekick creation.
 
 ## Test Cases
 
@@ -43,8 +44,13 @@ Document the create bundle entry action behavior, including the first-load guide
 | 3 | Missing bundle name | Empty `bundleName` | 400 JSON error | Existing validation path |
 | 4 | Subscription limit | Guard returns limit error | 403 JSON error | Existing guard path |
 | 5 | Form forwarding | Valid full-page bundle form with stale `description` | `handleCreateBundle` receives `bundleName` and `bundleType`, but no `description` | Description is removed from create payload |
+| 6 | Sidekick-confirmed creation | Valid form with `submissionMode=sidekick` | 200 JSON with Shopify Product GID and configure URL | Sidekick resolves its product import intent without duplicating creation logic |
+| 7 | Sidekick creation failure | Failed handler response with promotional copy | Sanitized error code only | Sidekick never receives plan-upgrade copy |
+| 8 | Authenticated loader | Embedded Admin GET | Authenticated empty response | Covers the loader auth guard |
 
 ## Acceptance Criteria
 
 - [x] All listed test cases pass.
 - [x] Redirect includes `first_load=true` only when the create handler marks the shop eligible.
+- [x] Sidekick success returns the created Shopify Product GID without changing normal redirects.
+- [x] Sidekick failures expose only a factual error code.

@@ -1,4 +1,3 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import {
   getBogoDiscountInputValue,
   getBogoDiscountStoredValue,
@@ -7,17 +6,33 @@ import { DiscountPricingTipBanner } from "../_shared/bundle-configure/DiscountPr
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { PricingTierBadgeFields } from "../_shared/bundle-configure/PricingTierBadgeFields";
 import { translateAdmin } from "~/i18n/config";
+import {
+  DiscountMethod,
+  amountToCents,
+  centsToAmount,
+} from "../../../types/pricing";
+import { DISCOUNT_METHOD_OPTIONS } from "../../../constants/bundle";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbDiscountRulesPanel() {
-  const {
-    DISCOUNT_METHOD_OPTIONS,
-    DiscountMethod,
-    pricingState,
-    setGlobalSuccessMessage,
-    setRuleMessages,
-    setRuleMessagesByLocale,
-    setSuccessMessageByLocale,
-  } = usePpbConfigureContext();
+export type PpbDiscountRulesPanelProps = Pick<
+  PpbConfigureFlow,
+  | "pricingState"
+  | "setGlobalSuccessMessage"
+  | "setRuleMessages"
+  | "setRuleMessagesByLocale"
+  | "setSuccessMessageByLocale"
+  | "validationErrors"
+>;
+
+export function PpbDiscountRulesPanel({
+  pricingState,
+  setGlobalSuccessMessage,
+  setRuleMessages,
+  setRuleMessagesByLocale,
+  setSuccessMessageByLocale,
+  validationErrors,
+}: PpbDiscountRulesPanelProps) {
 
   return (
     <s-section>
@@ -57,35 +72,42 @@ export function PpbDiscountRulesPanel() {
         <DiscountPricingTipBanner />
         <DisabledConfigurationRegion disabled={!pricingState.discountEnabled}>
           <s-stack direction="block" gap="base">
-            <div>
-              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 600 }}>
-                {translateAdmin(
-                  "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountrulespanel.discountType"
-                )}
-              </p>
-              <s-select
-                value={pricingState.discountType}
-                onChange={(e) => {
-                  const nextDiscountType = (e.target as HTMLSelectElement)
-                    .value as typeof pricingState.discountType;
-                  pricingState.replaceDiscountMethod(nextDiscountType);
-                  setRuleMessages({});
-                  setRuleMessagesByLocale({});
-                  setGlobalSuccessMessage("");
-                  setSuccessMessageByLocale({});
-                }}
-              >
-                {[...DISCOUNT_METHOD_OPTIONS].map((opt) => (
-                  <s-option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </s-option>
-                ))}
-              </s-select>
-            </div>
+            <s-select
+              label={translateAdmin(
+                "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountrulespanel.discountType"
+              )}
+              value={pricingState.discountType}
+              onChange={(e) => {
+                const nextDiscountType = (e.target as HTMLSelectElement)
+                  .value as typeof pricingState.discountType;
+                pricingState.replaceDiscountMethod(nextDiscountType);
+                setRuleMessages({});
+                setRuleMessagesByLocale({});
+                setGlobalSuccessMessage("");
+                setSuccessMessageByLocale({});
+              }}
+            >
+              {[...DISCOUNT_METHOD_OPTIONS].map((opt) => (
+                <s-option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </s-option>
+              ))}
+            </s-select>
             {pricingState.discountType === DiscountMethod.BUY_X_GET_Y ? (
-              <PpbBuyXGetYRules />
+              <PpbBuyXGetYRules
+                pricingState={pricingState}
+                validationErrors={validationErrors}
+              />
             ) : (
-              <PpbStandardDiscountRules />
+              <PpbStandardDiscountRules
+                pricingState={pricingState}
+                validationErrors={validationErrors}
+              />
+            )}
+            {validationErrors?.["discount.rules"] && (
+              <s-text id="configure-discount-rules" tone="critical">
+                {validationErrors["discount.rules"]}
+              </s-text>
             )}
           </s-stack>
         </DisabledConfigurationRegion>
@@ -94,12 +116,15 @@ export function PpbDiscountRulesPanel() {
   );
 }
 
-function PpbBuyXGetYRules() {
-  const {
-    pricingState,
-    productPageBundleStyles,
-    validationErrors = {},
-  } = usePpbConfigureContext();
+type PpbDiscountRuleListProps = Pick<
+  PpbDiscountRulesPanelProps,
+  "pricingState" | "validationErrors"
+>;
+
+function PpbBuyXGetYRules({
+  pricingState,
+  validationErrors = {},
+}: PpbDiscountRuleListProps) {
 
   return (
     <s-stack direction="block" gap="small">
@@ -107,7 +132,14 @@ function PpbBuyXGetYRules() {
         <div key={rule.id} className={productPageBundleStyles.discountRuleCard}>
           <s-stack direction="block" gap="small">
             <div className={productPageBundleStyles.discountRuleHeader}>
-              <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+              <h4
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  flex: 1,
+                }}
+              >
                 {translateAdmin("adminDynamic.ruleNumber", {
                   number: index + 1,
                 })}
@@ -193,7 +225,7 @@ function PpbBuyXGetYRules() {
                           Number((e.target as HTMLInputElement).value) || 0;
                         return (rule.bxyDiscountType ?? "percentage") ===
                           "percentage"
-                          ? Math.min(100, Math.max(0, nextValue))
+                          ? nextValue
                           : getBogoDiscountStoredValue(
                               Math.max(0, nextValue),
                               "fixed_amount"
@@ -217,6 +249,16 @@ function PpbBuyXGetYRules() {
                       ? 100
                       : undefined
                   }
+                  step={
+                    (rule.bxyDiscountType ?? "percentage") === "percentage"
+                      ? 1
+                      : undefined
+                  }
+                  inputMode={
+                    (rule.bxyDiscountType ?? "percentage") === "percentage"
+                      ? "numeric"
+                      : "decimal"
+                  }
                 />
                 <s-select
                   label={translateAdmin("adminAttributes.discountType")}
@@ -232,7 +274,7 @@ function PpbBuyXGetYRules() {
                       bxyDiscountType,
                       discountValue:
                         bxyDiscountType === "percentage"
-                          ? Math.min(100, Math.max(0, currentValue))
+                          ? currentValue
                           : getBogoDiscountStoredValue(
                               Math.max(0, currentValue),
                               "fixed_amount"
@@ -285,20 +327,15 @@ function PpbBuyXGetYRules() {
           </s-stack>
         </div>
       ))}
-      <PpbAddDiscountRuleButton />
+      <PpbAddDiscountRuleButton pricingState={pricingState} />
     </s-stack>
   );
 }
 
-function PpbStandardDiscountRules() {
-  const {
-    amountToCents,
-    centsToAmount,
-    DiscountMethod,
-    pricingState,
-    productPageBundleStyles,
-    validationErrors = {},
-  } = usePpbConfigureContext();
+function PpbStandardDiscountRules({
+  pricingState,
+  validationErrors = {},
+}: PpbDiscountRuleListProps) {
 
   return (
     <s-stack direction="block" gap="small">
@@ -306,7 +343,14 @@ function PpbStandardDiscountRules() {
         <div key={rule.id} className={productPageBundleStyles.discountRuleCard}>
           <s-stack direction="block" gap="small">
             <div className={productPageBundleStyles.discountRuleHeader}>
-              <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+              <h4
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  flex: 1,
+                }}
+              >
                 {translateAdmin("adminDynamic.ruleNumber", {
                   number: index + 1,
                 })}
@@ -441,13 +485,8 @@ function PpbStandardDiscountRules() {
                       DiscountMethod.PERCENTAGE_OFF
                         ? numValue
                         : amountToCents(Math.max(0, numValue));
-                    const safeValue =
-                      pricingState.discountType ===
-                      DiscountMethod.PERCENTAGE_OFF
-                        ? Math.min(100, Math.max(0, finalValue))
-                        : finalValue;
                     pricingState.updateDiscountRule(rule.id, {
-                      discountValue: safeValue,
+                      discountValue: finalValue,
                     });
                   }}
                   min={0}
@@ -460,6 +499,16 @@ function PpbStandardDiscountRules() {
                     pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
                       ? "%"
                       : undefined
+                  }
+                  step={
+                    pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
+                      ? 1
+                      : undefined
+                  }
+                  inputMode={
+                    pricingState.discountType === DiscountMethod.PERCENTAGE_OFF
+                      ? "numeric"
+                      : "decimal"
                   }
                   prefix={
                     pricingState.discountType !== DiscountMethod.PERCENTAGE_OFF
@@ -479,20 +528,20 @@ function PpbStandardDiscountRules() {
           </s-stack>
         </div>
       ))}
-      <PpbAddDiscountRuleButton />
+      <PpbAddDiscountRuleButton pricingState={pricingState} />
     </s-stack>
   );
 }
 
-function PpbAddDiscountRuleButton() {
-  const { pricingState } = usePpbConfigureContext();
+function PpbAddDiscountRuleButton({
+  pricingState,
+}: Pick<PpbDiscountRulesPanelProps, "pricingState">) {
 
   if (pricingState.discountRules.length < 4) {
     return (
       <s-button
         variant="secondary"
         icon="plus"
-        inlineSize="fill"
         onClick={pricingState.addDiscountRule}
       >
         {translateAdmin(

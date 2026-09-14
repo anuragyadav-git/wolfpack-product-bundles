@@ -30,7 +30,7 @@ export type LocalizedSubscriptionCopy = Partial<SubscriptionCopy> & {
   planCopy?: Record<string, Partial<SubscriptionPlanCopy>>;
 };
 
-export type ResolvedSubscriptionCopy = SubscriptionCopy & {
+type ResolvedSubscriptionCopy = SubscriptionCopy & {
   oneTimePurchaseTitle: string;
   planCopy: Record<string, SubscriptionPlanCopy>;
 };
@@ -63,12 +63,12 @@ export type BundleSubscriptionConfigV1 = {
   translations: Record<string, Partial<LocalizedSubscriptionCopy>>;
 };
 
-export type BundleSubscriptionValidationIssue = { path: string; message: string };
-export type BundleSubscriptionCompatibilityIssue = BundleSubscriptionValidationIssue & {
+type BundleSubscriptionValidationIssue = { path: string; message: string };
+type BundleSubscriptionCompatibilityIssue = BundleSubscriptionValidationIssue & {
   code: "buy_x_get_y" | "free_gift_or_addon" | "personalization";
 };
 
-export type BundlePurchaseOptionPresentation = {
+type BundlePurchaseOptionPresentation = {
   groupName: string;
   planId: string;
   displayName: string;
@@ -78,7 +78,7 @@ export type BundlePurchaseOptionPresentation = {
   perDeliveryPrice: number;
 };
 
-export interface SellingPlanValidationSources {
+interface SellingPlanValidationSources {
   productIds: string[];
   collectionIds: string[];
   variantIdsByProductId: Record<string, string[]>;
@@ -161,13 +161,11 @@ export function extractSellingPlanValidationSources(bundle: any): SellingPlanVal
     addProduct(product);
   }
   for (const step of Array.isArray(bundle?.steps) ? bundle.steps : []) {
-    for (const product of Array.isArray(step?.products) ? step.products : []) addProduct(product);
     for (const product of Array.isArray(step?.StepProduct) ? step.StepProduct : []) addProduct(product);
     for (const collection of Array.isArray(step?.collections) ? step.collections : []) {
       addUnique(collectionIds, normalizeCollectionId(collection?.id ?? collection?.collectionGid));
     }
     for (const category of Array.isArray(step?.StepCategory) ? step.StepCategory : []) {
-      for (const product of Array.isArray(category?.products) ? category.products : []) addProduct(product);
       for (const collection of Array.isArray(category?.collections) ? category.collections : []) {
         addUnique(collectionIds, normalizeCollectionId(collection?.id ?? collection?.collectionGid));
       }

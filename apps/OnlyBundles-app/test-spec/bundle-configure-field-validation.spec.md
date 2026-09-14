@@ -5,7 +5,7 @@ title: Bundle Configure Field Validation
 type: test-spec
 status: active
 summary: Defines required-field validation for persisted FPB and PPB Admin configure flows.
-last_audited: 2026-08-14
+last_audited: 2026-09-12
 owners:
   - engineering
 domains:
@@ -32,7 +32,7 @@ keywords:
 
 ## Purpose
 
-Ensure FPB and PPB reject invalid persisted configuration before saving and expose actionable field errors to the Admin UI.
+Ensure FPB and PPB reject invalid persisted configuration before saving and expose each actionable field error through its owning Polaris control without duplicate or detached validation feedback.
 
 ## Test Cases
 
@@ -63,6 +63,15 @@ Ensure FPB and PPB reject invalid persisted configuration before saving and expo
 | 2 | Correcting a failed field | Edit then blur | Error clears while editing and is rechecked on blur | No validation toast |
 | 3 | Discard or successful save | Existing errors | Validation state clears | Dirty-state behavior preserved |
 
+### Inline error ownership
+
+| # | Scenario | Input | Expected Output | Notes |
+|---|---|---|---|---|
+| 1 | Dashboard rename is invalid | Empty or overlong bundle name | The rename text field owns the error | No duplicate banner |
+| 2 | Subscription field is invalid | Invalid subscription copy, plan, or purchase option | The affected Polaris field or choice control owns the error | No generic validation summary |
+| 3 | Resource selection is missing | Empty required product or collection selection | One error is associated with the closest resource-selection control group | No remote page-level validation |
+| 4 | Non-field operation fails | Network, authentication, or persistence failure | Existing operation banner or toast remains available | Not classified as field validation |
+
 ## Acceptance Criteria
 
 - [ ] All listed test cases pass.
@@ -70,4 +79,6 @@ Ensure FPB and PPB reject invalid persisted configuration before saving and expo
 - [ ] Polaris renders required errors inline in red near the affected control.
 - [ ] The first invalid section opens and receives focus.
 - [ ] Disabled features and inactive branches do not block Save.
+- [ ] Every field validation message has one owning Polaris field or choice control.
+- [ ] Field validation is not duplicated in banners, toasts, or detached summaries.
 - [ ] No CSS, class-name, placement, or source-grep unit tests are added.

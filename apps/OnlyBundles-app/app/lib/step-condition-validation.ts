@@ -1,13 +1,13 @@
-export const SUPPORTED_STEP_CONDITION_OPERATORS = [
+const SUPPORTED_STEP_CONDITION_OPERATORS = [
   "equal_to",
   "greater_than_or_equal_to",
   "less_than_or_equal_to",
 ] as const;
 
-export type SupportedStepConditionOperator =
+type SupportedStepConditionOperator =
   (typeof SUPPORTED_STEP_CONDITION_OPERATORS)[number];
 
-export interface StepConditionValidationContext {
+interface StepConditionValidationContext {
   stepId: string;
   stepName?: string | null;
   conditionType: string | null;
@@ -17,7 +17,7 @@ export interface StepConditionValidationContext {
   conditionValue2: number | null;
 }
 
-export interface StepConditionValidationResult {
+interface StepConditionValidationResult {
   stepId: string;
   message: string;
 }

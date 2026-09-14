@@ -4,7 +4,7 @@
  * Type definitions for widget installation service.
  */
 
-export interface WidgetInstallationStatus {
+interface WidgetInstallationStatus {
   installed: boolean;
   themeId?: string;
   themeName?: string;

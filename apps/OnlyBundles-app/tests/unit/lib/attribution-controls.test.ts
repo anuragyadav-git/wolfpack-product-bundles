@@ -1,8 +1,10 @@
 import {
   analyzeCustomUtmInput,
+  buildAttributionRangePath,
   formatCustomUtmParameters,
   normalizeAttributionWindow,
   parseCustomUtmInput,
+  validateAttributionDateRange,
 } from "../../../app/lib/analytics/attribution-controls";
 
 describe("attribution controls", () => {
@@ -54,6 +56,38 @@ describe("attribution controls", () => {
     expect(window.days).toBe(7);
     expect(window.from).toBeUndefined();
     expect(window.to).toBeUndefined();
+  });
+
+  it("validates complete attribution date ranges against order and today", () => {
+    expect(
+      validateAttributionDateRange("2026-06-01", "2026-06-07", "2026-07-11")
+    ).toBe(true);
+    expect(
+      validateAttributionDateRange("2026-06-07", "2026-06-01", "2026-07-11")
+    ).toBe(false);
+    expect(
+      validateAttributionDateRange("2026-06-01", "2026-07-12", "2026-07-11")
+    ).toBe(false);
+    expect(validateAttributionDateRange("", "2026-06-07", "2026-07-11")).toBe(
+      false
+    );
+  });
+
+  it("builds preset and custom range paths without dropping unrelated query state", () => {
+    const currentUrl =
+      "https://admin.test/app/attribution?days=30&utm_source=shopify&from=old&to=old";
+
+    expect(buildAttributionRangePath(currentUrl, { days: 7 })).toBe(
+      "/app/attribution?utm_source=shopify&days=7",
+    );
+    expect(
+      buildAttributionRangePath(currentUrl, {
+        from: "2026-06-01",
+        to: "2026-06-07",
+      }),
+    ).toBe(
+      "/app/attribution?utm_source=shopify&from=2026-06-01&to=2026-06-07",
+    );
   });
 
   it("sanitizes merchant-entered custom UTM parameter names", () => {

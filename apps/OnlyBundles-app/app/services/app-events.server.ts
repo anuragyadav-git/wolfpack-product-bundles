@@ -12,7 +12,7 @@ const IDENTIFYING_KEY_PATTERN = /(email|phone|address|customer|buyer|merchant|to
 type ScalarAttribute = string | number | boolean | null;
 type AttributeInput = Record<string, unknown>;
 
-export type BusinessEventInput = {
+type BusinessEventInput = {
   eventHandle: string;
   shopDomain: string;
   shopifyShopGid?: string | null;
@@ -30,7 +30,7 @@ export type BusinessEventInput = {
   sendToShopify?: boolean;
 };
 
-export type ShopifyAppEventInput = {
+type ShopifyAppEventInput = {
   eventHandle: string;
   shopifyShopGid: string;
   idempotencyKey: string;
@@ -38,7 +38,7 @@ export type ShopifyAppEventInput = {
   attributes?: AttributeInput;
 };
 
-export type ShopifyDeliveryResult = {
+type ShopifyDeliveryResult = {
   status: "delivered" | "failed" | "skipped";
   retryCount: number;
   error?: string;
@@ -46,7 +46,7 @@ export type ShopifyDeliveryResult = {
 
 let tokenCache: { token: string; expiresAt: number } | null = null;
 
-export function sanitizeAppEventAttributes(attributes: AttributeInput = {}): Record<string, ScalarAttribute> {
+function sanitizeAppEventAttributes(attributes: AttributeInput = {}): Record<string, ScalarAttribute> {
   const sanitized: Record<string, ScalarAttribute> = { schema_version: 1 };
 
   for (const [key, value] of Object.entries(attributes)) {

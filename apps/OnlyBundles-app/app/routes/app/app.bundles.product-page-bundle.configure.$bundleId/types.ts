@@ -1,28 +1,18 @@
 /**
  * Type definitions for Product Page Bundle Configuration.
  *
- * Shared types (StepProduct, BundleStep, ActionResponse, etc.) live in
- * app/types/bundle-configure.ts and are re-exported here for convenience.
+ * Shared types live in app/types/bundle-configure.ts; this module owns only
+ * Product Page Bundle route contracts.
  */
 
 import type { PricingRule } from "../../../types/pricing";
 import type { BundleStatus } from "../../../constants/bundle";
 import type {
   ActionResponse,
+  BundleProductData,
   BundleStep,
 } from "../../../types/bundle-configure";
 import type { SpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
-
-export type {
-  StepProduct,
-  BundleStep,
-  BundleStatusSectionProps,
-  ActionResponse,
-  SyncProductResponse,
-  PagesResponse,
-  ThemeTemplatesResponse,
-  WidgetValidationResponse,
-} from "../../../types/bundle-configure";
 
 export interface BundlePricing {
   id: string;
@@ -43,7 +33,7 @@ export interface BundleData {
   bundleType: string;
   status: BundleStatus;
   templateName?: string;
-  loadingGif?: string | null;
+  personalizationData?: unknown;
   steps: BundleStep[];
   pricing?: BundlePricing;
   bundleSubscriptionConfig?: unknown;
@@ -51,7 +41,7 @@ export interface BundleData {
 
 export interface LoaderData {
   bundle: BundleData;
-  bundleProduct?: any;
+  bundleProduct?: BundleProductData | null;
   shop: string;
   apiKey: string;
   blockHandle: string;
@@ -60,6 +50,8 @@ export interface LoaderData {
   shopCurrencyCode: string;
   shopLocales: { locale: string; name: string; primary: boolean }[];
   offerDelivery: SpecificLinkOfferAdminState;
+  isFreePlan?: boolean;
+  previewToken?: string;
 }
 
 export interface BundleProductCardProps {

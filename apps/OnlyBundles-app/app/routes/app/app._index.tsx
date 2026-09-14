@@ -117,7 +117,12 @@ export default function AppIndex() {
         <div className={styles.heroInner}>
           <div className={styles.brandRow}>
             <div className={styles.wolfIcon}>
-              <img src={APP_BRAND.markPath} alt="" />
+              <s-image
+                src={APP_BRAND.markPath}
+                alt=""
+                accessibilityRole="presentation"
+                objectFit="contain"
+              />
             </div>
             <span className={styles.brandName}>{APP_BRAND.publisher}</span>
           </div>
@@ -134,14 +139,14 @@ export default function AppIndex() {
           </p>
 
           <div className={styles.ctaRow}>
-            <button
-              className={styles.btnPrimary}
+            <s-button
+              variant="primary"
               onClick={() => navigate("/app/bundles/create")}
             >
               {translateAdmin("adminExtracted.appIndex.getStarted")}
-            </button>
-            <button
-              className={styles.btnSecondary}
+            </s-button>
+            <s-button
+              variant="secondary"
               onClick={() =>
                 navigateBackOrFallback(navigate, "/app/dashboard", {
                   replaceFallback: true,
@@ -149,7 +154,7 @@ export default function AppIndex() {
               }
             >
               {translateAdmin("adminExtracted.appIndex.goToDashboard")}
-            </button>
+            </s-button>
           </div>
         </div>
       </div>
@@ -174,24 +179,13 @@ export default function AppIndex() {
 
       {/* ── Footer strip ── */}
       <div className={styles.footerStrip}>
-        <button
-          className={styles.footerLink}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
-          }}
-          onClick={() => openSupportChat()}
-        >
+        <s-button variant="tertiary" onClick={() => openSupportChat()}>
           {translateAdmin("billing.actions.contactSupport")}
-        </button>
+        </s-button>
         <span className={styles.footerDot} />
-        <span className={styles.footerLink}>
-          <s-link href={TUTORIAL_LIBRARY_URL} target="_blank">
-            {translateAdmin("adminExtracted.appIndex.documentation")}
-          </s-link>
-        </span>
+        <s-link href={TUTORIAL_LIBRARY_URL} target="_blank">
+          {translateAdmin("adminExtracted.appIndex.documentation")}
+        </s-link>
       </div>
     </div>
   );

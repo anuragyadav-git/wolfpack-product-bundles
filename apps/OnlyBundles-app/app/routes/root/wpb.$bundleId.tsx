@@ -8,10 +8,10 @@ import { verifyBundlePreviewToken } from "../../lib/bundle-preview-token.server"
 import { parseFpbPublicNumber } from "../../lib/fpb-storefront-url";
 import {
   renderFpbLoadingScreen,
-  resolveFpbLoadingScreenSettings,
-} from "../../lib/fpb-loading-screen";
+  resolveBundleLoadingScreenSettings,
+} from "../../lib/bundle-loading-screen";
 import { resolveSpecificLinkOfferEligibility } from "../../lib/specific-link-offer-eligibility.server";
-import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer-token.server";
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from "../../lib/specific-link-offer";
 import { buildOfferCountryLiquidGuard } from "../../lib/offer-country-liquid-guard.server";
 
 function escapeHtmlAttribute(value: string): string {
@@ -170,7 +170,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     ? ` data-fpb-design-preset="${escapeHtmlAttribute(formattedBundle.bundleDesignPresetId)}"`
     : "";
   const config = escapeHtmlAttribute(JSON.stringify(formattedBundle));
-  const loadingScreen = resolveFpbLoadingScreenSettings(designSettings?.generalSettings);
+  const loadingScreen = resolveBundleLoadingScreenSettings(designSettings?.generalSettings);
   const loadingScreenMarkup = renderFpbLoadingScreen(loadingScreen);
   const loadingGifAttr = loadingScreen.gifUrl
     ? ` data-fpb-loading-gif="${escapeHtmlAttribute(loadingScreen.gifUrl)}"`

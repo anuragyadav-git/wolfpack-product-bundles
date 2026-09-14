@@ -206,11 +206,12 @@
 }
 
 /* Product Row Card */
-.bw-ppb-cascade-product-row {
+.bw-ppb-cascade-product-list .bw-ppb-cascade-product-row {
   display: grid;
-  grid-template-columns: 70px minmax(0, 1fr);
+  flex: 0 0 auto;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: 10px;
-  align-items: center;
+  align-items: start;
   width: 100%;
   height: auto;
   min-height: 70px;
@@ -251,7 +252,7 @@
 }
 
 .bw-ppb-cascade-product-row--has-variant-selector .product-content-wrapper {
-  grid-template-rows: auto 18px 28px;
+  grid-template-rows: auto auto auto auto;
   align-content: start;
   height: auto;
   min-height: 70px;
@@ -299,6 +300,10 @@
   white-space: nowrap;
 }
 
+.bw-ppb-cascade-product-row--has-variant-selector .product-variant-row {
+  grid-row: 2;
+}
+
 .bw-ppb-cascade-product-row .product-price-row {
   grid-column: 1;
   grid-row: 2;
@@ -313,6 +318,7 @@
 }
 
 .bw-ppb-cascade-product-row--has-variant-selector .product-price-row {
+  grid-row: 4;
   height: 18px;
   align-items: center;
 }
@@ -326,19 +332,31 @@
 }
 
 .bw-ppb-cascade-product-row .variant-selector-wrapper {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: start;
+  width: 100%;
+  min-width: 0;
   text-align: left;
   color: #1e1e1e;
 }
 
-.bw-ppb-cascade-product-row .variant-selector {
-  grid-column: 1;
+.bw-ppb-cascade-product-row--has-variant-selector .bw-product-card__selector {
+  grid-column: 1 / -1;
   grid-row: 3;
-  align-self: start;
-  width: 80%;
+  min-width: 0;
+}
+
+.bw-ppb-cascade-product-row--has-variant-selector .variant-selector-wrapper {
+  width: 100%;
+}
+
+.bw-ppb-cascade-product-row .variant-selector {
+  width: 100%;
   max-width: 100%;
-  height: 27.5px;
+  min-height: var(--bundle-control-hit-target, 2.75rem);
   margin: 0;
-  padding: 2px;
+  padding: 0.45rem 0.625rem;
   border: 1.5px solid #c0c0c0;
   border-radius: 5px;
   color: #1e1e1e;
@@ -358,8 +376,14 @@
   margin: 0;
 }
 
-.bw-ppb-cascade-product-row--has-variant-selector .product-card-action,
-.bw-ppb-cascade-product-row.bw-product-card--has-variant .product-card-action {
+.bw-ppb-cascade-product-row--has-variant-selector .product-card-action {
+  grid-row: 4;
+}
+
+.bw-ppb-cascade-product-row.bw-product-card--has-variant:not(
+    .bw-ppb-cascade-product-row--has-variant-selector
+  )
+  .product-card-action {
   grid-row: 1 / span 3;
 }
 

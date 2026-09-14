@@ -1,7 +1,7 @@
 export const UTM_PIXEL_PRIVACY_MESSAGE =
   "Only Bundles uses Shopify's pixel privacy controls and only records campaign details when Shopify allows tracking. Your store data stays in your app, and privacy requests are handled through Shopify's required compliance process.";
 
-export type UtmPixelStatusBannerModel = {
+type UtmPixelStatusBannerModel = {
   description: string;
   actionLabel: "Learn more" | null;
 };

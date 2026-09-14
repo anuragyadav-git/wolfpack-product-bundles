@@ -110,6 +110,7 @@ describe("shared storefront selling-plan presentation", () => {
       context,
       [{ "gid://shopify/ProductVariant/1": 2 }],
       [[{ selectionId: "gid://shopify/ProductVariant/1", price: 5000 }]],
+      [{ isFreeGift: false }],
     )).toEqual({
       totalQuantity: 2,
       totalPrice: 7000,

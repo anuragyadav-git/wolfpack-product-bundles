@@ -1,4 +1,4 @@
-export type DashboardPreviewInput = {
+type DashboardPreviewInput = {
   bundleType: "full_page" | "product_page";
   bundleId: string;
   shopifyProductHandle: string | null;
@@ -9,7 +9,7 @@ export type DashboardPreviewInput = {
   previewToken?: string | null;
 };
 
-export type DashboardPreviewAction =
+type DashboardPreviewAction =
   | { kind: "open_url"; url: string }
   | { kind: "create_fpb_preview" }
   | { kind: "error"; message: string };

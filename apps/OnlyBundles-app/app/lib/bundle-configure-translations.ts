@@ -1,12 +1,12 @@
 import type { LocalizedSubscriptionCopy } from "./bundle-subscriptions";
 
-export interface BundleConfigureLocale {
+interface BundleConfigureLocale {
   locale: string;
   name: string;
   primary: boolean;
 }
 
-export type TranslationValuesByLocale = Record<
+type TranslationValuesByLocale = Record<
   string,
   Record<string, string>
 >;
@@ -27,8 +27,9 @@ type PpbAddonStep = {
   freeGiftName?: string | null;
 };
 
-type RuleMessage = { discountText?: string; successMessage?: string };
-type RuleMessagesByLocale = Record<string, Record<string, RuleMessage>>;
+export type RuleMessage = { discountText?: string; successMessage?: string };
+export type RuleMessages = Record<string, RuleMessage>;
+export type RuleMessagesByLocale = Record<string, RuleMessages>;
 type SubscriptionTranslations = Record<string, Partial<LocalizedSubscriptionCopy>>;
 
 export function selectDefaultTranslationLocale(

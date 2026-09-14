@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "Neuigkeiten",
+    "unavailable": "Neuigkeiten und Feedback sind vorübergehend nicht verfügbar.",
+    "loading": "Funktionswünsche werden geladen",
+    "retry": "Erneut versuchen",
+    "retryHelp": "Versuchen Sie es erneut oder öffnen Sie das Feedbackportal in einem neuen Tab.",
+    "openPortal": "Feedbackportal öffnen",
+    "feedbackIntro": "Schlagen Sie Verbesserungen vor, stimmen Sie für Ideen ab und verfolgen Sie deren Fortschritt. Anfragen und Stimmen werden von allen Mitgliedern Ihres Shops geteilt."
+  },
   "nav": {
+    "featureRequests": "Funktionswünsche",
     "dashboard": "Dashboard",
     "designControlPanel": "Design-Kontrollzentrum",
     "settings": "Einstellungen",
@@ -88,6 +98,8 @@
       "deleteBundle": "Bundle löschen",
       "cloneSuccess": "Bundle erfolgreich dupliziert",
       "deleteSuccess": "Bundle gelöscht",
+      "renameBundle": "Bundle umbenennen",
+      "renameSuccess": "Bundle erfolgreich umbenannt",
       "themeEditorUnavailable": "Der Theme-Editor-Link ist für diesen Shop nicht verfügbar."
     },
     "deleteModal": {
@@ -95,6 +107,15 @@
       "delete": "Löschen",
       "cancel": "Abbrechen",
       "body": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Bundle-Konfigurationen, Schritte und Rabattregeln werden dauerhaft gelöscht."
+    },
+    "renameModal": {
+      "heading": "Bundle umbenennen",
+      "nameLabel": "Bundle-Name",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "errorEmpty": "Der Bundle-Name darf nicht leer sein.",
+      "errorTooLong": "Der Bundle-Name darf höchstens 255 Zeichen lang sein.",
+      "errorFailed": "Das Bundle konnte nicht umbenannt werden."
     },
     "resources": {
       "bundleInspiration": "Bundle-Inspiration",
@@ -437,6 +458,11 @@
       "title": "Paketabonnements",
       "description": "Lassen Sie die Käufer aus kompatiblen Shopify Verkaufsplänen wählen, die von den Bundle-Produkten geteilt werden.",
       "imageAlt": "Einmal- und Abonnement-Kaufoptionen für ein Bundle"
+    },
+    "floatingPromoBadge": {
+      "title": "Schwebendes Promo-Abzeichen",
+      "description": "Zeigt ein schließbares Promo-Abzeichen unten links im Ganzseiten-Bundle. Es verwendet den konfigurierten Text und die Farbe der primären Bundle-Schaltfläche.",
+      "imageAlt": "Ein abgerundetes Promo-Abzeichen unten links im Storefront mit Händlertext und einer Schließen-Schaltfläche"
     }
   },
   "specificLinkOffer": {
@@ -609,7 +635,7 @@
       "body": "Stelle den Status des Bundle-Produkts in Shopify Produkte auf Aktiv, damit es gefunden werden kann."
     },
     "warningGroup": {
-      "heading": "Aktion erforderlich",
+      "heading": "Einige Punkte benötigen Ihre Aufmerksamkeit",
       "summary": "Einige Aktionen sind erforderlich, um das Bundle zu veröffentlichen.",
       "modalTitle": "Erforderliche Aktionen"
     },
@@ -696,7 +722,22 @@
       "tryAgain": "Erneut versuchen",
       "contactSupport": "Support kontaktieren",
       "cancel": "Abbrechen",
-      "back": "Zur vorherigen Seite"
+      "back": "Zur vorherigen Seite",
+      "viewPlans": "Tarife anzeigen",
+      "saveAsDraft": "Als Entwurf speichern",
+      "keepEditing": "Weiter bearbeiten"
+    },
+    "entitlements": {
+      "publicLimitHeading": "Limit für öffentliche Bundles erreicht",
+      "publicLimitDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth für unbegrenzte öffentliche Bundles oder speichere dieses Bundle als Entwurf, um deine Änderungen zu behalten.",
+      "premiumTemplateHeading": "Vorlage des Growth-Tarifs",
+      "premiumTemplateDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth, um mit dieser Vorlage zu veröffentlichen, oder speichere als Entwurf, um deine Änderungen zu behalten.",
+      "advancedDesignHeading": "Growth-Designfunktionen",
+      "advancedDesignDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth, um mit benutzerdefiniertem Styling zu veröffentlichen, oder speichere als Entwurf.",
+      "stepsLimitHeading": "Schrittlimit erreicht",
+      "stepsLimitDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth für unbegrenzte Schritte oder speichere als Entwurf.",
+      "growthRequiredHeading": "Growth-Tarif erforderlich",
+      "growthRequiredDescription": "Der Free-Tarif enthält nur 1 öffentlich veröffentlichtes Bundle und Standardvorlagen. Wechsle zu Growth, um mit dieser Funktion zu veröffentlichen, oder speichere dieses Bundle als Entwurf."
     },
     "error": {
       "heading": "Abonnementproblem",
@@ -834,6 +875,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "Wichtige Kennzahlen",
+      "sales": "Verkäufe",
+      "totalOrderRevenue": "Gesamter Bestellumsatz",
+      "totalOrderRevenueDefinition": "Gesamtwert der Bestellungen mit mindestens einem Bundle.",
+      "totalBundleRevenue": "Gesamter Bundle-Umsatz",
+      "totalBundleRevenueDefinition": "Gesamtwert der Bundle-Artikel in abgeschlossenen Bestellungen.",
+      "ordersWithBundles": "Bestellungen mit Bundles",
+      "ordersWithBundlesDefinition": "Abgeschlossene Bestellungen mit mindestens einem Bundle.",
+      "averageOrderValue": "Durchschnittlicher Bestellwert",
+      "averageOrderValueDefinition": "Gesamter Bestellumsatz geteilt durch Bestellungen mit Bundles.",
+      "addToCartValue": "Wert pro Warenkorbzugabe",
+      "addToCartValueDefinition": "Gesamter Bundle-Umsatz geteilt durch erfolgreiche Warenkorb-Sitzungen.",
+      "totalBundlesPurchased": "Gekaufte Bundles insgesamt",
+      "totalBundlesPurchasedDefinition": "Eindeutige Bundles pro Bestellung; wiederholte Mengen zählen einmal.",
+      "bundleRevenue": "Bundle-Umsatz"
+    },
     "offers": {
       "title": "Angebotsleistung",
       "description": "Vergleichen Sie die Entscheidungen im Bereich des privatwirtschaftlichen Angebots mit Bündelung und Aktivität, ausgefüllten Aufträgen und Einnahmen.",
@@ -958,7 +1016,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "Bündel-Trichter",
-          "howShoppersMoveThroughYourBundles": "Wie sich Käufer durch deine Bundles bewegen"
+          "howShoppersMoveThroughYourBundles": "Wie sich Käufer durch deine Bundles bewegen",
+          "bundleViews": "Bundle-Ansichten",
+          "conversion": "Konvertierung"
         },
         "liveactivityfeed": {
           "liveActivity": "Live-Aktivität",
@@ -1075,9 +1135,6 @@
         "configurecontextualsavebar": {
           "discard": "Verwerfen"
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "Beheben Sie die folgenden Felder vor dem Speichern:"
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "Tipp: Rabatte basieren auf allen Artikeln in Ihrem Warenkorb. Don't vergisst es, bei der Einrichtung von Rabatten die vorgewählte Produktmenge's oder den Betrag einzubeziehen."
         },
@@ -1110,7 +1167,7 @@
         "apply": "Anwenden",
         "backfillSelectedWindow": "Ausgewähltes Fenster Backfill",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "Matches order line items to bundles and import available revenue, landing-page and UTM details.",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Bestehende Attribute werden übersprungen, so dass das erneute Ausführen des gleichen Fensters keine Duplikate erzeugt.",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "Bestehende Bundle-Zeilen werden nach Möglichkeit aus Shopify aktualisiert; es werden keine Duplikate erstellt.",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "Shopify Bestellungen und Storefront Tracking werden nicht geändert.",
         "customUtmAttributes": "Eigene UTM-Attribute",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "Geben Sie die durch Kommas oder neue Zeilen getrennten Parameternamen ein. Only Bundles erfasst die URL-Werte bei zukünftigen Besuchen und speichert diese mit Kassenattribution.",
@@ -1194,6 +1251,7 @@
           "syncBundle": "Sync-Paket"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "Upgraden Sie auf den Growth-Plan für mehr Vorlagen, die Ihnen helfen, Ihre Conversions zu steigern.",
           "customizeYourBundle": "Passen Sie Ihr Paket an",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "Wählen Sie ein Design aus, das Ihren Bedürfnissen und Ihrer Marke entspricht",
           "customizeColorsAmpLanguage": "Farben & Sprache anpassen",
@@ -1269,21 +1327,9 @@
           "addAddOnsTier": "Neue Ons Stufe hinzufügen"
         },
         "imagesgifspanel": {
-          "mediaAssets": "Medienvermögen",
-          "addVisualMediaToEnhanceTheBundleExperienceForShoppers": "Fügen Sie visuelle Medien hinzu, um das Bündelerlebnis für Käufer zu verbessern.",
           "promoBanner": "Werbebanner",
           "wideBannerDisplayedAtTheTopOfTheFullPageBundle": "Weites Banner am oberen Rand des Bündels",
           "pageHeader": "Seitenkopf",
-          "jpgPngWebpGifSvgAvif": "JPG, PNG, WebP, GIF, SVG, AVIF",
-          "recommendedSize": "EMPFOHLEN SIZE",
-          "1600400Px41Ratio": "1600 × 400 px · 4:1 Verhältnis",
-          "stepImages": "Schrittbilder",
-          "tabIconAndBannerImagePerStepShownInTheWidget": "Tab-Symbol und Banner-Bild pro Schritt — wird im Widget angezeigt",
-          "perStep": "Pro Schritt",
-          "tabIcon": "Tab Icon",
-          "circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1": "Kreissymbol im Schritt-Tab ersetzt. Ersetzt die Schrittnummer wenn gesetzt. Empfohlen: 100 × 100 px quadratisch.",
-          "stepBannerImage": "Schritt-Banner-Bild",
-          "fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended": "Bild in voller Breite über dem Produkt-Raster, wenn dieser Schritt aktiv ist. Empfohlen: 1600 × 400 px.",
           "floatingPromoBadge": "Schwebendes Promo-Abzeichen",
           "fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks": "Festes Abzeichen unten links auf der Seite — Session verworfen, wenn der Käufer auf X klickt",
           "storefront": "Schaufenster"
@@ -1470,6 +1516,8 @@
     "uploadFailed": "Upload fehlgeschlagen",
     "searchFiles": "Dateien suchen",
     "searchFiles2": "Dateien durchsuchen…",
+    "noFilesMatchSearch": "Keine Dateien entsprechen Ihrer Suche.",
+    "noImageFilesFound": "In Ihrem Shop wurden keine Bilddateien gefunden.",
     "uploadProcessing": "Upload-Verarbeitung",
     "loadingFiles": "Lade Dateien",
     "uploading": "Hochladen",
@@ -1574,8 +1622,6 @@
     "bundleCartSubtitle": "Bundle Warenkorb Untertitel",
     "reviewYourBundle": "Bundle überprüfen",
     "addCustomCSSForThisBundle": "/* Add custom CSS for this bundle */",
-    "chooseTabIcon": "Wähle Tab-Symbol",
-    "chooseBannerImage": "Bannerbild auswählen",
     "showFloatingPromoBadge": "Schwebendes Promo-Abzeichen anzeigen",
     "eGSave20TodayOnly": "z.B. sparen Sie 20% heute nur!",
     "enableMultiLanguage": "Mehrsprachige aktivieren",
@@ -1658,6 +1704,8 @@
     "clickToUploadImage": "Klicken, um ein Bild oder Icon hochzuladen",
     "chooseGifFile": "GIF-Datei auswählen.",
     "chooseSupportedImageFile": "Wählen Sie eine unterstützte Bilddatei.",
+    "fileMustBeUnder20Mb": "Die Datei muss kleiner als 20 MB sein.",
+    "fileMustBeSmallerThan50Kb": "Bitte laden Sie eine Datei hoch, die kleiner als 50 KB ist.",
     "integrationLogo": "{{name}} Logo",
     "guidedTourProgress": "Führungspunkt {{current}} von {{total}}",
     "guidedTourStep": "Schritt {{current}} von {{total}}",

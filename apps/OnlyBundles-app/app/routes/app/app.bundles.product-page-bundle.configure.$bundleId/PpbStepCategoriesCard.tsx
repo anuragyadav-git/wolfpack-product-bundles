@@ -1,16 +1,32 @@
-import { PpbCategoryAccordion } from "./PpbCategoryAccordion";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import {
+  PpbCategoryAccordion,
+  type PpbCategoryAccordionProps,
+  type PpbCategoryAdapter,
+} from "./PpbCategoryAccordion";
 import { getStepCategories } from "./PpbStepSetupShared";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbStepCategoriesCard({ step }: { step: any }) {
-  const {
-    markAsDirty,
-    productPageBundleStyles,
-    QuestionHelpTooltip,
-    stepsState,
-  } = usePpbConfigureContext();
+export type PpbStepCategoriesCardProps = Pick<
+  PpbConfigureFlow,
+  "markAsDirty" | "stepsState"
+> & {
+  categoryAdapter: PpbCategoryAdapter;
+  step: PpbCategoryAccordionProps["step"];
+  validationErrors?: Record<string, string>;
+};
+
+export function PpbStepCategoriesCard({
+  categoryAdapter,
+  markAsDirty,
+  step,
+  stepsState,
+  validationErrors,
+}: PpbStepCategoriesCardProps) {
   const stepCategories = getStepCategories(step);
+  const resourceError = validationErrors?.[`steps.${step.id}.resources`];
 
   return (
     <div className={productPageBundleStyles.card}>
@@ -45,22 +61,26 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
           )}
         </div>
       )}
-      {stepCategories.map((cat: any, catIndex: number) => (
+      {stepCategories.map((cat, catIndex) => (
         <PpbCategoryAccordion
+          adapter={categoryAdapter}
           key={cat.id ?? catIndex}
           step={step}
           cat={cat}
           catIndex={catIndex}
         />
       ))}
-      <button
-        type="button"
-        className={productPageBundleStyles.addSectionButton}
+      <s-button
+        variant="secondary"
+        icon="plus"
+        accessibilityLabel={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
+        )}
         onClick={() => {
           const displayVariantsForAllCategories =
             stepCategories.length > 0 &&
             stepCategories.every(
-              (category: any) =>
+              (category) =>
                 category.displayVariantsAsIndividualProducts === true
             );
           stepsState.updateStepField(step.id, "StepCategory", [
@@ -81,13 +101,17 @@ export function PpbStepCategoriesCard({ step }: { step: any }) {
           markAsDirty();
         }}
       >
-        <span aria-hidden="true">
-          <s-icon type="plus" />
-        </span>
         {translateAdmin(
           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupcategoryfooter.addCategory"
         )}
-      </button>
+      </s-button>
+      {resourceError && (
+        <div style={{ marginTop: 12 }}>
+          <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
+            {resourceError}
+          </s-text>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import type { Session } from "@shopify/shopify-api";
-import type { ShopifyAdmin } from "../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../shopify.server";
 import db from "../../../db.server";
 import {
   syncBundleStorefrontNow,

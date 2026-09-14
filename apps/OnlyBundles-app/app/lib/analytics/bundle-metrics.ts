@@ -5,7 +5,7 @@ export interface BundleViewRow {
   createdAt: Date;
 }
 
-export interface BundleMetricTrendPoint {
+interface BundleMetricTrendPoint {
   date: string;
   revenueCents: number;
   views: number;

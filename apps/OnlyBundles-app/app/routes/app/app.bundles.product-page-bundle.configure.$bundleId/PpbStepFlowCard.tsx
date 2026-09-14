@@ -1,18 +1,22 @@
 import type { ReactNode } from "react";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { QuestionHelpTooltip } from "./ConfigureBundleFlow.helpers";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbStepFlowCard({ children }: { children: ReactNode }) {
-  const {
-    activeTabIndex,
-    handleAddNewStep,
-    navigateToStep,
-    productPageBundleStyles,
-    QuestionHelpTooltip,
-    stepsState,
-  } = usePpbConfigureContext();
+export type PpbStepFlowCardProps = Pick<
+  PpbConfigureFlow,
+  "activeTabIndex" | "handleAddNewStep" | "navigateToStep" | "stepsState"
+> & { children: ReactNode };
 
+export function PpbStepFlowCard({
+  activeTabIndex,
+  children,
+  handleAddNewStep,
+  navigateToStep,
+  stepsState,
+}: PpbStepFlowCardProps) {
   return (
     <div
       className={`${productPageBundleStyles.card} ${productPageBundleStyles.stepFlowCard}`}
@@ -71,19 +75,18 @@ export function PpbStepFlowCard({ children }: { children: ReactNode }) {
             <span className={productPageBundleStyles.stepChipChevron}>›</span>
           </button>
         ))}
-        <button
-          className={productPageBundleStyles.addStepBtn}
+        <s-button
+          variant="primary"
+          icon="plus"
+          accessibilityLabel={translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
+          )}
           onClick={handleAddNewStep}
         >
-          <span aria-hidden="true">
-            <s-icon type="plus" />
-          </span>{" "}
-          <span>
-            {translateAdmin(
-              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
-            )}
-          </span>
-        </button>
+          {translateAdmin(
+            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupsection.addStep"
+          )}
+        </s-button>
       </div>
       {children}
     </div>

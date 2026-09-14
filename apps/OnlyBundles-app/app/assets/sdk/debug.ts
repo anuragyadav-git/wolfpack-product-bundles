@@ -2,7 +2,7 @@
 
 var _debugEnabled = false;
 
-export function isDebugMode() {
+function isDebugMode() {
   try {
     return window.location.search.indexOf('wbp_debug=true') !== -1;
   } catch (_: any) {

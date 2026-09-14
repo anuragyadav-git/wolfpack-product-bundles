@@ -1,4 +1,4 @@
-import { CurrencyManager } from '../../shared/currency-manager.js';
+import { CurrencyManager, type CurrencyInfo } from '../../shared/currency-manager.js';
 import { PricingCalculator } from '../../shared/pricing-calculator.js';
 import { calculateBundleTotalForPurchaseOption } from '../../shared/subscription-storefront-methods.js';
 import { ConditionValidator } from '../../shared/condition-validator.js';
@@ -33,10 +33,23 @@ function getAddonTierCandidatesWithState(step: any, totalPrice: number, totalQua
     const condition = tier?.eligibilityCondition || {};
     const conditionType = String(condition.type || 'QUANTITY').toUpperCase();
     const conditionValue = Number(condition.value || 0);
-    const threshold = conditionType === 'AMOUNT' ? Math.round(conditionValue * 100) : conditionValue;
+    const threshold = getAddonConditionThreshold(conditionType, conditionValue);
     const currentValue = conditionType === 'AMOUNT' ? totalPrice : totalQuantity;
     return { tier, index, conditionType, threshold, currentValue, isEligible: currentValue >= threshold };
   });
+}
+
+function getAddonConditionThreshold(
+  conditionType: string,
+  conditionValue: number,
+  currencyInfo?: CurrencyInfo,
+) {
+  if (conditionType !== 'AMOUNT') return conditionValue;
+  const resolvedCurrencyInfo = currencyInfo ?? CurrencyManager.getCurrencyInfo();
+  return CurrencyManager.convertMerchantAmountToPresentment(
+    Math.round(conditionValue * 100),
+    resolvedCurrencyInfo,
+  );
 }
 
 function normalizeAddonPercentageDiscount(...sources: any[]) {
@@ -116,7 +129,7 @@ async _sidebarAdvanceToNextStep() {
       existingTabs.remove();
     } else if (!existingTabs && newTabs) {
       const firstCatalogControl = contentSection.querySelector(
-        '.step-banner-image, .step-search-container, .fpb-category-section-rows, .fpb-step-category-title, .full-page-product-grid-container'
+        '.step-search-container, .fpb-category-section-rows, .fpb-step-category-title, .full-page-product-grid-container'
       );
       if (firstCatalogControl) contentSection.insertBefore(newTabs, firstCatalogControl);
     }
@@ -181,7 +194,6 @@ async _sidebarAdvanceToNextStep() {
     productGridContainer.appendChild(productGrid);
     if (sidePanel) this.renderSidePanel(sidePanel);
     this.hideLoadingOverlay();
-    this.preloadNextStep();
     this._renderMobileSummaryTray();
   } catch (error: any) {
     this.hideLoadingOverlay();
@@ -399,14 +411,24 @@ getAddonEligibilityState(step: any, evaluationOverride: any = null) {
   const conditionType = String(condition.type || 'QUANTITY').toUpperCase();
   const conditionValue = Number(condition.value || 0);
   const currencyInfo = CurrencyManager.getCurrencyInfo();
-  const thresholdCents = conditionType === 'AMOUNT' ? Math.round(conditionValue * 100) : conditionValue;
+  const thresholdCents = getAddonConditionThreshold(
+    conditionType,
+    conditionValue,
+    currencyInfo,
+  );
   const currentValue = evaluation.currentValue;
   const remainingRaw = Math.max(0, thresholdCents - currentValue);
   const remainingQuantity = conditionType === 'AMOUNT' ? 0 : remainingRaw;
   const remainingAmount = conditionType === 'AMOUNT' ? remainingRaw : 0;
-  const displayedRemainingAmount = Math.ceil(remainingAmount / 100);
+  const formattedRemainingAmount = conditionType === 'AMOUNT'
+    ? CurrencyManager.formatMoney(
+        remainingAmount,
+        currencyInfo.display.code,
+        currencyInfo.locale,
+      )
+    : '0';
   const discountValue = Number(discount.value || 0);
-  const discountUnit = discount.type === 'PERCENTAGE' ? '%' : currencyInfo.display.symbol;
+  const discountUnit = '%';
 
   const tierIndex = Number.isInteger(evaluation.tierIndex) ? evaluation.tierIndex : -1;
   const isEligible = evaluation.isEligible === true || remainingRaw <= 0;
@@ -420,13 +442,13 @@ getAddonEligibilityState(step: any, evaluationOverride: any = null) {
     remainingAmount,
     variables: {
       addonsConditionDiff: conditionType === 'AMOUNT'
-        ? String(displayedRemainingAmount)
+        ? formattedRemainingAmount
         : String(remainingQuantity),
-      currencyUnit: currencyInfo.display.symbol,
+      currencyUnit: '',
       addonsDiscountValue: String(discountValue),
       addonsDiscountValueUnit: discountUnit,
       remainingQuantity: String(remainingQuantity),
-      remainingAmount: String(displayedRemainingAmount),
+      remainingAmount: formattedRemainingAmount,
       discountValue: String(discountValue),
       discountValueUnit: discountUnit,
     },
@@ -460,10 +482,7 @@ getAddonProductSelectionKeys(step: any) {
     if (!selectionId) return;
     keys.add(selectionId);
   };
-  const products: any[] = [
-    ...(Array.isArray(step?.StepProduct) ? step.StepProduct : []),
-    ...(Array.isArray(step?.products) ? step.products : []),
-  ];
+  const products: any[] = Array.isArray(step?.products) ? step.products : [];
 
   products.forEach(product => {
     addKey(product);
@@ -547,7 +566,7 @@ getDefaultAddonTierMessage(eligibilityState: any) {
     return 'Congrats you are eligible for ##addonsDiscountValue####addonsDiscountValueUnit## off on Add ons';
   }
   if (eligibilityState.conditionType === 'AMOUNT') {
-    return 'Add product(s) worth at least ##addonsConditionDiff## ##currencyUnit## more to claim ##addonsDiscountValue####addonsDiscountValueUnit## off on Add ons';
+    return 'Add product(s) worth at least ##addonsConditionDiff## more to claim ##addonsDiscountValue####addonsDiscountValueUnit## off on Add ons';
   }
   return 'Add ##addonsConditionDiff## more product(s) to claim ##addonsDiscountValue####addonsDiscountValueUnit## off on Add ons';
 },
@@ -606,7 +625,7 @@ _initDefaultProducts() {
     if (!step.isDefault || !step.defaultVariantId) return;
     const targetId = normalizeId(step.defaultVariantId);
     if (!targetId) return;
-    const allProducts: any[] = [...(step.products || []), ...(step.StepProduct || [])];
+    const allProducts: any[] = Array.isArray(step.products) ? step.products : [];
     const isMatchingDefault = (candidate: any) => normalizeSelectionId(candidate) === targetId;
     const product = allProducts.find((product) => {
       if (isMatchingDefault(product)) return true;

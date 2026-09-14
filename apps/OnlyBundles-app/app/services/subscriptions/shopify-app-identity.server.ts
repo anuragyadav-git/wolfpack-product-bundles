@@ -1,8 +1,8 @@
-export interface ShopifyAdminGraphqlClient {
+interface ShopifyAdminGraphqlClient {
   graphql: (query: string) => Promise<Response>;
 }
 
-export interface ShopifyAppIdentity {
+interface ShopifyAppIdentity {
   id: string;
   handle: string;
 }

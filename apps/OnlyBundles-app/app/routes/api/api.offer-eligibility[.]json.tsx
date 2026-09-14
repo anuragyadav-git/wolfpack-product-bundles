@@ -4,7 +4,7 @@ import { AppLogger } from '../../lib/logger';
 import {
   resolveSpecificLinkOfferEligibility,
 } from '../../lib/specific-link-offer-eligibility.server';
-import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from '../../lib/specific-link-offer-token.server';
+import { SPECIFIC_LINK_OFFER_QUERY_PARAM } from '../../lib/specific-link-offer';
 import { authenticate } from '../../shopify.server';
 
 const NO_STORE_HEADERS = {

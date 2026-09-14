@@ -7,7 +7,7 @@ export const ACTIVE_WEBHOOK_TOPICS = [
   "shop/redact",
 ] as const;
 
-export type ActiveWebhookTopic = (typeof ACTIVE_WEBHOOK_TOPICS)[number];
+type ActiveWebhookTopic = (typeof ACTIVE_WEBHOOK_TOPICS)[number];
 
 const ACTIVE_WEBHOOK_TOPIC_SET = new Set<string>(ACTIVE_WEBHOOK_TOPICS);
 

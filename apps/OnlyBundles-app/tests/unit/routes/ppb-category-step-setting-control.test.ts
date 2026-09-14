@@ -3,15 +3,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { PpbCategoryStepSettings } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbBundleSettingsControls.categorySteps";
 
-const mockUsePpbConfigureContext = jest.fn();
-
-jest.mock(
-  "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/PpbConfigureContext",
-  () => ({
-    usePpbConfigureContext: () => mockUsePpbConfigureContext(),
-  }),
-);
-
 describe("PPB category step setting control", () => {
   it.each([
     [true, true],
@@ -19,18 +10,18 @@ describe("PPB category step setting control", () => {
   ])(
     "renders the persisted %s state",
     (useSingleStepCategoriesAsBundleSteps, expectedChecked) => {
-      mockUsePpbConfigureContext.mockReturnValue({
+      const props = {
         markAsDirty: jest.fn(),
         setUseSingleStepCategoriesAsBundleSteps: jest.fn(),
         useSingleStepCategoriesAsBundleSteps,
-      });
+      };
 
-      const markup = renderToStaticMarkup(
-        createElement(PpbCategoryStepSettings),
+      const view = renderToStaticMarkup(
+        createElement(PpbCategoryStepSettings, props),
       );
 
-      expect(markup).toContain("Use categories as bundle steps");
-      expect(markup.includes('checked="true"')).toBe(expectedChecked);
+      expect(view).toContain("Use categories as bundle steps");
+      expect(view.includes('checked="true"')).toBe(expectedChecked);
     },
   );
 });

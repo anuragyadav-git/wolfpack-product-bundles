@@ -1,6 +1,18 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { translateAdmin } from "~/i18n/config";
+
+export function useLatestCallback<Args extends unknown[], Result>(
+  callback: (...args: Args) => Result,
+) {
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
+
+  return useCallback(
+    (...args: Args) => callbackRef.current(...args),
+    [],
+  );
+}
 
 export function ConfigureContextualSaveBar({
   isOpen,
@@ -17,6 +29,8 @@ export function ConfigureContextualSaveBar({
 }) {
   const shopify = useAppBridge();
   const isSaveBarShown = useRef(false);
+  const handleSave = useLatestCallback(onSave);
+  const handleDiscard = useLatestCallback(onDiscard);
 
   useEffect(() => {
     if (isOpen) {
@@ -28,17 +42,36 @@ export function ConfigureContextualSaveBar({
     }
   }, [isOpen, shopify]);
 
+  useEffect(() => {
+    if (isSaving) {
+      shopify.loading?.(true);
+    } else {
+      shopify.loading?.(false);
+    }
+  }, [isSaving, shopify]);
+
+  useEffect(
+    () => () => {
+      shopify.loading?.(false);
+      if (!isSaveBarShown.current) return;
+      isSaveBarShown.current = false;
+      void shopify.saveBar.hide("bundle-save-bar");
+    },
+    [shopify],
+  );
+
   return (
     <ui-save-bar ref={saveBarRef} id="bundle-save-bar">
       <button
         type="button"
         variant="primary"
         disabled={isSaving}
-        onClick={onSave}
+        loading={isSaving ? "true" : undefined}
+        onClick={handleSave}
       >
         {translateAdmin("dashboard.language.save")}
       </button>
-      <button type="button" disabled={isSaving} onClick={onDiscard}>
+      <button type="button" disabled={isSaving} onClick={handleDiscard}>
         {translateAdmin(
           "adminExtracted.shared.bundleConfigure.configurecontextualsavebar.discard"
         )}

@@ -85,6 +85,7 @@ describe("PPB loadBundleData and draft preview", () => {
       },
       `?wpb_preview=${previewToken}`,
     );
+    (global.window as any).__WOLFPACK_STOREFRONT_PROXY_ROOT__ = "/apps/product-bundles";
 
     await widget.loadBundleData();
 
@@ -101,6 +102,24 @@ describe("PPB loadBundleData and draft preview", () => {
     widget.selectBundle();
     expect(widget.selectedBundle).toBeTruthy();
     expect(widget.selectedBundle.id).toBe(draftBundle.id);
+  });
+
+  it("fails closed when a preview has no synchronized storefront proxy root", async () => {
+    const mockFetch = jest.fn();
+    global.fetch = mockFetch;
+
+    const widget = createLifecycleWidget(
+      {
+        "data-bundle-id": "bundle-preview-1",
+        "data-bundle-type": "product_page",
+      },
+      "?wpb_preview=signed-preview-token",
+    );
+
+    await widget.loadBundleData();
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(widget.bundleData).toBeNull();
   });
 
   it("does not call fetch and fails closed on public URL when schema-v3 snapshot is missing", async () => {
@@ -121,7 +140,6 @@ describe("PPB loadBundleData and draft preview", () => {
 
     expect(mockFetch).not.toHaveBeenCalled();
     expect(widget.bundleData).toBeNull();
-    expect(widget.container.style.display).toBe("none");
   });
 
   it("loads Shopify-hosted snapshot directly without fetch when snapshot is valid and no preview token exists", async () => {

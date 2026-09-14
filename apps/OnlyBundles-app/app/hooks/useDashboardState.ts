@@ -1,33 +1,27 @@
-import { useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import {
-  closeDashboardDeleteModal,
-  openDashboardDeleteModal,
-} from "../store/slices/adminRouteStateSlice";
-import { closeModal, openModal } from "../store/slices/uiSlice";
+import { useCallback, useState } from "react";
 
-export interface DeleteModalState {
+interface DeleteModalState {
   isOpen: boolean;
   bundleId: string | null;
 }
 
 export function useDashboardState() {
-  const dispatch = useAppDispatch();
-  const { deleteModalOpen, bundleToDelete } = useAppSelector((state) => state.adminRouteState.dashboard);
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
+    isOpen: false,
+    bundleId: null,
+  });
 
   const openDeleteModal = useCallback((bundleId: string) => {
-    dispatch(openDashboardDeleteModal(bundleId));
-    dispatch(openModal("dashboard_deleteConfirm"));
-  }, [dispatch]);
+    setDeleteModal({ isOpen: true, bundleId });
+  }, []);
 
   const closeDeleteModal = useCallback(() => {
-    dispatch(closeDashboardDeleteModal());
-    dispatch(closeModal("dashboard_deleteConfirm"));
-  }, [dispatch]);
+    setDeleteModal({ isOpen: false, bundleId: null });
+  }, []);
 
   return {
-    deleteModalOpen,
-    bundleToDelete,
+    deleteModalOpen: deleteModal.isOpen,
+    bundleToDelete: deleteModal.bundleId,
     openDeleteModal,
     closeDeleteModal,
   };

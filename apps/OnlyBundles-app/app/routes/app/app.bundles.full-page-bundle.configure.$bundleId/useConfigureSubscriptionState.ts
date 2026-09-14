@@ -4,7 +4,7 @@ import {
   normalizeBundleSubscriptionConfig,
   type BundleSubscriptionConfigV1,
 } from "../../../lib/bundle-subscriptions";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
 
 type SubscriptionValidationResponse = {
   success: boolean;
@@ -15,29 +15,37 @@ type SubscriptionValidationResponse = {
   error?: string;
 };
 
-export function useConfigureSubscriptionState(flow: ConfigureBundleFlowDraft) {
+export function useConfigureSubscriptionState(dependencies: {
+  bundle: ReturnType<typeof useConfigureBundleController>["bundle"];
+  markAsDirty: () => void;
+}) {
+  const { bundle, markAsDirty } = dependencies;
   const subscriptionFetcher = useFetcher<SubscriptionValidationResponse>();
   const [showSubscriptionSetupGuide, setShowSubscriptionSetupGuide] =
     useState(false);
   const [subscriptionConfigState, setSubscriptionConfigState] =
     useState<BundleSubscriptionConfigV1>(() =>
-      normalizeBundleSubscriptionConfig(flow.bundle.bundleSubscriptionConfig),
+      normalizeBundleSubscriptionConfig(bundle.bundleSubscriptionConfig)
     );
   const originalSubscriptionConfigRef = useRef(subscriptionConfigState);
   const setSubscriptionConfig = useCallback(
-    (updater: (current: BundleSubscriptionConfigV1) => BundleSubscriptionConfigV1) => {
+    (
+      updater: (
+        current: BundleSubscriptionConfigV1
+      ) => BundleSubscriptionConfigV1
+    ) => {
       setSubscriptionConfigState((current) =>
-        normalizeBundleSubscriptionConfig(updater(current)),
+        normalizeBundleSubscriptionConfig(updater(current))
       );
-      flow.markAsDirty();
+      markAsDirty();
     },
-    [flow],
+    [markAsDirty]
   );
   const resetSubscriptionConfig = useCallback((value: unknown) => {
     setSubscriptionConfigState(normalizeBundleSubscriptionConfig(value));
   }, []);
 
-  Object.assign(flow, {
+  return {
     originalSubscriptionConfigRef,
     resetSubscriptionConfig,
     setShowSubscriptionSetupGuide,
@@ -45,5 +53,5 @@ export function useConfigureSubscriptionState(flow: ConfigureBundleFlowDraft) {
     showSubscriptionSetupGuide,
     subscriptionConfig: subscriptionConfigState,
     subscriptionFetcher,
-  });
+  };
 }

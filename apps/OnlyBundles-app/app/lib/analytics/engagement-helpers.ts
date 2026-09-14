@@ -21,7 +21,7 @@ export interface BundleEngagementRow {
   presetId?: string | null;
 }
 
-export interface FunnelSnapshot {
+interface FunnelSnapshot {
   // Each step is a unique-count (sessions for engaged/atc, orders for revenue).
   // `impressions` is optional and only populated when the storefront also forwards
   // wpb:bundle-ready beacons; for now it defaults to engagements (so the funnel
@@ -37,7 +37,7 @@ export interface FunnelSnapshot {
   dropOffAtcToCheckout: number;
 }
 
-export interface EngagementTrendPoint {
+interface EngagementTrendPoint {
   date: string; // YYYY-MM-DD
   engagements: number;
   uniqueBundles: number;
@@ -57,6 +57,8 @@ export interface BundleMatrixRow {
   overallConversionRate: number; // 0..100, orders divided by views
 }
 
+const SHOPIFY_ORDER_GID = /^gid:\/\/shopify\/Order\/\d+$/;
+
 // ─── computeBundleFunnel ───────────────────────────────────────────────────────
 
 /**
@@ -64,7 +66,7 @@ export interface BundleMatrixRow {
  *
  * Engagement = distinct sessionIds with a session-engaged event.
  * AddedToCart = distinct sessionIds with a bundle-add-to-cart-success event.
- * CheckedOut = bundle-attributed completed checkout rows.
+ * CheckedOut = distinct Shopify orders containing a bundle.
  */
 export function computeBundleFunnel(
   engagementRows: BundleEngagementRow[],
@@ -84,14 +86,25 @@ export function computeBundleFunnel(
   const engaged = engagedSessionIds.size;
   const addedToCart = addedToCartSessionIds.size;
 
-  let checkedOut = 0;
+  const checkedOutOrderIds = new Set<string>();
+  const revenuePurchaseKeys = new Set<string>();
   let revenueCents = 0;
   for (const r of attributionRows) {
-    if (r.bundleId !== null) {
-      checkedOut += 1;
-      revenueCents += r.revenue;
+    if (
+      r.bundleId !== null &&
+      typeof r.orderId === "string" &&
+      SHOPIFY_ORDER_GID.test(r.orderId)
+    ) {
+      const orderKey = r.orderId;
+      checkedOutOrderIds.add(orderKey);
+      const purchaseKey = `${orderKey}\u0000${r.bundleId}`;
+      if (!revenuePurchaseKeys.has(purchaseKey)) {
+        revenuePurchaseKeys.add(purchaseKey);
+        revenueCents += r.bundleRevenue ?? r.revenue;
+      }
     }
   }
+  const checkedOut = checkedOutOrderIds.size;
 
   const dropOffEngagedToAtc =
     engaged > 0 ? Math.max(0, Math.min(100, 100 - Math.round((addedToCart / engaged) * 100))) : 0;
@@ -240,6 +253,3 @@ export function buildBundlePerformanceMatrix(
 
   return rows;
 }
-
-// Re-export helper for any callers wanting the existing trend type.
-export type { TrendPoint };

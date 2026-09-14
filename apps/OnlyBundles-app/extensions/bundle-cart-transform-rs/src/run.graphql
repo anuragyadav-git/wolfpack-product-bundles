@@ -10,13 +10,13 @@ query Input {
     }
   }
   cart {
+    bundleDetails: metafield(namespace: "$app", key: "bundle_details") {
+      value
+    }
     lines {
       id
       quantity
       wolfpackProductBundleOfferId: attribute(key: "_wolfpackProductBundle:OfferId") {
-        value
-      }
-      runtimeToken: attribute(key: "_wolfpack_bundle_runtime") {
         value
       }
       lineAuthorization: attribute(key: "_wolfpack_line_auth") {
@@ -25,15 +25,12 @@ query Input {
       stepType: attribute(key: "_bundle_step_type") {
         value
       }
-      bundleDisplayProperties: attribute(key: "_bundle_display_properties") {
-        value
-      }
       sellingPlanAllocation { __typename }
       merchandise {
         __typename
         ... on ProductVariant {
           id
-          product { id }
+          product { id title }
           # For EXPAND: Check if this variant is a bundle parent
           component_reference: metafield(namespace: "$app", key: "component_reference") {
             value

@@ -1,39 +1,73 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { Dispatch, SetStateAction } from "react";
+import type { useBundlePricing } from "../../../../hooks/useBundlePricing";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import { DiscountMethod } from "../../../../types/pricing";
+import {
+  getDefaultDiscountRuleSuccessMessage,
+  getDefaultDiscountRuleText,
+} from "../../../../lib/pricing-display-options";
+import { QuestionHelpTooltip } from "../SmallComponents";
 
 export function FpbDiscountMessagingOptions({
-  flow,
+  pricingState,
+  localization,
+  markAsDirty,
+  normalizedRuleMessages,
+  styles,
+  validationErrors,
+  onShowVariables,
 }: {
-  flow: ConfigureBundleFlowContext;
+  pricingState: ReturnType<typeof useBundlePricing>;
+  localization: {
+    activeLocale: string;
+    enabled: boolean;
+    globalSuccessMessage: string;
+    locales: Array<{ locale: string; name: string; primary: boolean }>;
+    ruleMessagesByLocale: Record<
+      string,
+      Record<string, { discountText: string; successMessage: string }>
+    >;
+    setActiveLocale: (locale: string) => void;
+    setEnabled: (enabled: boolean) => void;
+    setGlobalSuccessMessage: (message: string) => void;
+    setRuleMessagesByLocale: Dispatch<
+      SetStateAction<
+        Record<
+          string,
+          Record<string, { discountText: string; successMessage: string }>
+        >
+      >
+    >;
+    setSuccessMessageByLocale: Dispatch<SetStateAction<Record<string, string>>>;
+    successMessageByLocale: Record<string, string>;
+  };
+  markAsDirty: () => void;
+  normalizedRuleMessages: Record<
+    string,
+    { discountText: string; successMessage: string }
+  >;
+  styles: Record<string, string>;
+  validationErrors?: Record<string, string>;
+  onShowVariables: () => void;
 }) {
   const {
-    activeDiscountLocale,
-    discountMessagingMultiLanguageEnabled,
-    DiscountMethod,
-    fullPageBundleStyles,
-    getDefaultDiscountRuleSuccessMessage,
-    getDefaultDiscountRuleText,
+    activeLocale,
+    enabled,
     globalSuccessMessage,
-    markAsDirty,
-    normalizedRuleMessages,
-    pricingState,
-    QuestionHelpTooltip,
+    locales,
     ruleMessagesByLocale,
-    setActiveDiscountLocale,
-    setDiscountMessagingMultiLanguageEnabled,
+    setActiveLocale,
+    setEnabled,
     setGlobalSuccessMessage,
-    setIsDiscountVariablesModalOpen,
     setRuleMessagesByLocale,
     setSuccessMessageByLocale,
-    shopLocales,
     successMessageByLocale,
-    updateRuleMessage,
-  } = flow;
+  } = localization;
 
   return (
     <>
-      <div className={fullPageBundleStyles.displayOptionRow}>
+      <div className={styles.displayOptionRow}>
         <s-stack
           direction="inline"
           gap="small"
@@ -41,11 +75,11 @@ export function FpbDiscountMessagingOptions({
           justifyContent="space-between"
         >
           <s-stack direction="inline" gap="small" alignItems="center">
-            <div className={fullPageBundleStyles.displayOptionText}>
-              <p className={fullPageBundleStyles.displayOptionTitle}>
+            <div className={styles.displayOptionText}>
+              <p className={styles.displayOptionTitle}>
                 {translateAdmin("tooltips.discountMessaging.title")}
               </p>
-              <p className={fullPageBundleStyles.displayOptionDescription}>
+              <p className={styles.displayOptionDescription}>
                 {translateAdmin(
                   "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.editHowDiscountMessagesAppearAboveTheSubtotal"
                 )}
@@ -61,15 +95,13 @@ export function FpbDiscountMessagingOptions({
               }
             />
           </s-stack>
-          {shopLocales.length > 0 && (
+          {locales.length > 0 && (
             <s-checkbox
               label={translateAdmin("adminAttributes.enableMultiLanguage")}
-              checked={discountMessagingMultiLanguageEnabled || undefined}
+              checked={enabled || undefined}
               disabled={!pricingState.discountMessagingEnabled || undefined}
               onChange={(e) => {
-                setDiscountMessagingMultiLanguageEnabled(
-                  (e.target as HTMLInputElement).checked
-                );
+                setEnabled((e.target as HTMLInputElement).checked);
                 markAsDirty();
               }}
             />
@@ -85,27 +117,25 @@ export function FpbDiscountMessagingOptions({
         <DisabledConfigurationRegion
           disabled={!pricingState.discountMessagingEnabled}
         >
-          <div className={fullPageBundleStyles.nestedDisplayOptions}>
+          <div className={styles.nestedDisplayOptions}>
             <s-stack direction="block" gap="small">
-              {shopLocales.length > 0 && (
-                <DisabledConfigurationRegion
-                  disabled={!discountMessagingMultiLanguageEnabled}
-                >
+              {locales.length > 0 && (
+                <DisabledConfigurationRegion disabled={!enabled}>
                   <s-stack direction="block" gap="small-100">
                     <s-select
                       label={translateAdmin("dashboard.language.label")}
-                      value={activeDiscountLocale}
+                      value={activeLocale}
                       onChange={(e) => {
                         const locale = (e.target as HTMLSelectElement).value;
-                        setActiveDiscountLocale(locale);
+                        setActiveLocale(locale);
                         const primaryLocale =
-                          shopLocales.find((l: any) => l.primary)?.locale ??
-                          "en";
+                          locales.find((localeOption) => localeOption.primary)
+                            ?.locale ?? "en";
                         if (
                           locale !== primaryLocale &&
                           !ruleMessagesByLocale[locale]
                         ) {
-                          setRuleMessagesByLocale((prev: any) => ({
+                          setRuleMessagesByLocale((prev) => ({
                             ...prev,
                             [locale]: normalizedRuleMessages,
                           }));
@@ -113,18 +143,12 @@ export function FpbDiscountMessagingOptions({
                         }
                       }}
                     >
-                      {shopLocales.map(
-                        (loc: {
-                          locale: string;
-                          name: string;
-                          primary: boolean;
-                        }) => (
-                          <s-option key={loc.locale} value={loc.locale}>
-                            {loc.name}
-                            {loc.primary ? " (default)" : ""}
-                          </s-option>
-                        )
-                      )}
+                      {locales.map((loc) => (
+                        <s-option key={loc.locale} value={loc.locale}>
+                          {loc.name}
+                          {loc.primary ? " (default)" : ""}
+                        </s-option>
+                      ))}
                     </s-select>
                     <p
                       style={{
@@ -138,22 +162,27 @@ export function FpbDiscountMessagingOptions({
                       )}
                     </p>
                     <s-stack direction="inline" gap="small-100">
-                      {shopLocales
-                        .filter((l: any) => l.primary)
-                        .map((l: any) => (
-                          <s-chip key={l.locale}>{l.name}</s-chip>
+                      {locales
+                        .filter((localeOption) => localeOption.primary)
+                        .map((localeOption) => (
+                          <s-chip key={localeOption.locale}>
+                            {localeOption.name}
+                          </s-chip>
                         ))}
                       {Object.keys(ruleMessagesByLocale)
                         .filter(
                           (locale) =>
-                            !shopLocales.find(
-                              (l: any) => l.locale === locale && l.primary
+                            !locales.find(
+                              (localeOption) =>
+                                localeOption.locale === locale &&
+                                localeOption.primary
                             )
                         )
                         .map((locale) => {
                           const locName =
-                            shopLocales.find((l: any) => l.locale === locale)
-                              ?.name ?? locale;
+                            locales.find(
+                              (localeOption) => localeOption.locale === locale
+                            )?.name ?? locale;
                           return <s-chip key={locale}>{locName}</s-chip>;
                         })}
                     </s-stack>
@@ -164,7 +193,7 @@ export function FpbDiscountMessagingOptions({
                 <s-button
                   variant="tertiary"
                   icon="code"
-                  onClick={() => setIsDiscountVariablesModalOpen(true)}
+                  onClick={onShowVariables}
                 >
                   {translateAdmin(
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountmessagingoptions.showVariables"
@@ -173,99 +202,101 @@ export function FpbDiscountMessagingOptions({
               </div>
               {pricingState.discountRules.length > 0 ? (
                 <s-stack direction="block" gap="small">
-                  {pricingState.discountRules.map(
-                    (rule: any, index: number) => {
-                      const localeMessages =
-                        discountMessagingMultiLanguageEnabled
-                          ? ruleMessagesByLocale[activeDiscountLocale]?.[
-                              rule.id
-                            ] ?? normalizedRuleMessages[rule.id]
-                          : normalizedRuleMessages[rule.id];
-                      const defaultDiscountText = getDefaultDiscountRuleText(
-                        pricingState.discountType,
-                        index
-                      );
-                      return (
-                        <div
-                          key={rule.id}
-                          className={fullPageBundleStyles.discountRuleCard}
-                        >
-                          <s-stack direction="block" gap="small">
-                            <h5
-                              style={{
-                                margin: 0,
-                                fontSize: 13,
-                                fontWeight: 600,
-                              }}
-                            >
-                              {translateAdmin("adminDynamic.ruleNumber", {
-                                number: index + 1,
-                              })}
-                            </h5>
-                            <s-text-field
-                              label={translateAdmin(
-                                "adminAttributes.discountText"
-                              )}
-                              value={
-                                localeMessages?.discountText ||
-                                defaultDiscountText
-                              }
-                              onInput={(e) => {
-                                const val = (e.target as HTMLInputElement)
-                                  .value;
-                                if (discountMessagingMultiLanguageEnabled) {
-                                  setRuleMessagesByLocale((prev: any) => ({
-                                    ...prev,
-                                    [activeDiscountLocale]: {
-                                      ...(prev[activeDiscountLocale] || {}),
-                                      [rule.id]: {
-                                        ...(prev[activeDiscountLocale]?.[
-                                          rule.id
-                                        ] || {}),
-                                        discountText: val,
-                                      },
+                  {pricingState.discountRules.map((rule, index) => {
+                    const localeMessages = enabled
+                      ? ruleMessagesByLocale[activeLocale]?.[rule.id] ??
+                        normalizedRuleMessages[rule.id]
+                      : normalizedRuleMessages[rule.id];
+                    const defaultDiscountText = getDefaultDiscountRuleText(
+                      pricingState.discountType,
+                      index
+                    );
+                    return (
+                      <div key={rule.id} className={styles.discountRuleCard}>
+                        <s-stack direction="block" gap="small">
+                          <h5
+                            style={{
+                              margin: 0,
+                              fontSize: 13,
+                              fontWeight: 600,
+                            }}
+                          >
+                            {translateAdmin("adminDynamic.ruleNumber", {
+                              number: index + 1,
+                            })}
+                          </h5>
+                          <s-text-field
+                            id={`configure-discount-messages-${rule.id}-discountText`}
+                            label={translateAdmin(
+                              "adminAttributes.discountText"
+                            )}
+                            value={
+                              localeMessages?.discountText ||
+                              defaultDiscountText
+                            }
+                            error={
+                              validationErrors?.[
+                                `discount.messages.${rule.id}.discountText`
+                              ]
+                            }
+                            onInput={(e) => {
+                              const val = (e.target as HTMLInputElement).value;
+                              if (enabled) {
+                                setRuleMessagesByLocale((prev) => ({
+                                  ...prev,
+                                  [activeLocale]: {
+                                    ...(prev[activeLocale] || {}),
+                                    [rule.id]: {
+                                      ...(prev[activeLocale]?.[rule.id] || {}),
+                                      discountText: val,
                                     },
-                                  }));
-                                  markAsDirty();
-                                } else {
-                                  updateRuleMessage(
-                                    rule.id,
-                                    "discountText",
-                                    val
-                                  );
-                                }
-                              }}
-                              autocomplete="off"
-                            />
-                          </s-stack>
-                        </div>
-                      );
-                    }
-                  )}
+                                  },
+                                }));
+                                markAsDirty();
+                              } else {
+                                pricingState.updateRuleMessage(
+                                  rule.id,
+                                  "discountText",
+                                  val
+                                );
+                              }
+                            }}
+                            autocomplete="off"
+                          />
+                        </s-stack>
+                      </div>
+                    );
+                  })}
                   <s-section>
                     <s-stack direction="block" gap="small">
                       <s-text-field
+                        id="configure-discount-messages-successMessage"
                         label={translateAdmin(
                           "adminExtracted.appBundlesProductPageBundleConfigure.ppbdiscountmessagerulefields.successMessage"
                         )}
+                        error={
+                          validationErrors?.[
+                            "discount.messages.successMessage"
+                          ]
+                        }
                         value={(() => {
                           const defaultMsg =
                             getDefaultDiscountRuleSuccessMessage(
                               pricingState.discountType
                             );
-                          const val = discountMessagingMultiLanguageEnabled
-                            ? successMessageByLocale[activeDiscountLocale] ??
+                          const val = enabled
+                            ? successMessageByLocale[activeLocale] ??
                               globalSuccessMessage
                             : globalSuccessMessage;
                           return val || defaultMsg;
                         })()}
                         onInput={(e) => {
                           const val = (e.target as HTMLInputElement).value;
-                          if (discountMessagingMultiLanguageEnabled) {
+                          if (enabled) {
                             setSuccessMessageByLocale(
                               (prev: Record<string, string>) => ({
                                 ...prev,
-                                [activeDiscountLocale]: val,
+                                [activeLocale]: val,
                               })
                             );
                           } else {

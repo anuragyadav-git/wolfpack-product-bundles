@@ -152,4 +152,4 @@ function discoverDesignConfigurationFields(sourceText) {
   return items;
 }
 
-module.exports = { ALL_TEMPLATES, discoverDesignConfigurationFields, kebabCase };
+module.exports = { discoverDesignConfigurationFields };

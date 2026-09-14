@@ -1,52 +1,22 @@
 import type { PriceAdjustment } from "../types";
+import { parsePricingRule } from "../../../../lib/pricing-rule-parser";
+import type { PricingRule } from "../../../../types/pricing";
 
 const BXY_METHOD = "buy_x_get_y";
-const FIXED_BUNDLE_PRICE_METHOD = "fixed_bundle_price";
-
-function toPositiveNumber(...values: unknown[]): number {
-  for (const value of values) {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return parsed;
-    }
-  }
-  return 0;
-}
 
 function toNumber(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function getRuleValue(method: string, rule: any): number {
-  if (method === FIXED_BUNDLE_PRICE_METHOD) {
-    return toPositiveNumber(
-      rule.fixedBundlePrice,
-      rule.price,
-      rule.discountValue,
-      rule.discount?.value,
-    );
-  }
-
-  return toNumber(rule.discountValue ?? rule.discount?.value);
-}
-
-function buildPriceAdjustmentRule(method: string, rule: any): PriceAdjustment {
+function buildPriceAdjustmentRule(method: string, rule: PricingRule): PriceAdjustment {
   const priceAdjustment: PriceAdjustment = {
-    method: method || rule.discount?.method || "percentage_off",
-    value: getRuleValue(method, rule),
+    method,
+    value: toNumber(rule.discountValue),
   };
 
-  const customerBuys = toPositiveNumber(
-    rule.customerBuys,
-    rule.value,
-    rule.conditionValue,
-    rule.condition?.value,
-  );
-  const customerGets = toPositiveNumber(
-    rule.customerGets,
-    rule.getsQuantity,
-  );
+  const customerBuys = toNumber(rule.customerBuys);
+  const customerGets = toNumber(rule.customerGets);
   const isBxy = priceAdjustment.method === BXY_METHOD;
 
   if (isBxy) {
@@ -57,25 +27,21 @@ function buildPriceAdjustmentRule(method: string, rule: any): PriceAdjustment {
       priceAdjustment.customerGets = customerGets;
     }
 
-    priceAdjustment.discountType = String(
-      rule.discountType ?? rule.bxyDiscountType ?? "percentage",
-    );
-    priceAdjustment.applyDiscountTo = String(
-      rule.applyDiscountTo ?? rule.bxyApplyMode ?? "lowest_priced",
-    );
+    priceAdjustment.discountType = rule.bxyDiscountType ?? "percentage";
+    priceAdjustment.applyDiscountTo = rule.bxyApplyMode ?? "lowest_priced";
   }
 
   const condType = isBxy && customerBuys > 0 && customerGets > 0
     ? "quantity"
-    : (rule.conditionType || rule.condition?.type);
+    : rule.conditionType;
   const condValue = isBxy && customerBuys > 0 && customerGets > 0
     ? customerBuys + customerGets
-    : toPositiveNumber(rule.conditionValue, rule.condition?.value);
+    : toNumber(rule.conditionValue);
 
   if (condType && condValue > 0) {
     priceAdjustment.conditions = {
       type: condType,
-      operator: "gte",
+      operator: rule.conditionOperator ?? "gte",
       value: condValue,
     };
   }
@@ -94,13 +60,14 @@ export function buildPriceAdjustmentConfig(pricing: any): PriceAdjustment {
     return priceAdjustment;
   }
 
-  const rule = pricing.rules[0] ?? {};
-  const normalizedRules = pricing.rules.map((pricingRule: any) =>
-    buildPriceAdjustmentRule(pricing.method || pricingRule.discount?.method || method, pricingRule)
+  const rules = pricing.rules.map((pricingRule: unknown) => parsePricingRule(pricingRule));
+  const rule = rules[0];
+  const normalizedRules = rules.map((pricingRule: PricingRule) =>
+    buildPriceAdjustmentRule(method, pricingRule)
   );
   Object.assign(
     priceAdjustment,
-    buildPriceAdjustmentRule(pricing.method || rule.discount?.method || method, rule),
+    buildPriceAdjustmentRule(method, rule),
   );
 
   if (normalizedRules.length > 0) {

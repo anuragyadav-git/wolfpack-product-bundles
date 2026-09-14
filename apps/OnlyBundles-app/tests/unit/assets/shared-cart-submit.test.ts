@@ -1,4 +1,3 @@
-import { readProductPageWidgetSources } from './widget-source-helpers';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
   applySellingPlanToJsonCartItems,
@@ -54,7 +53,7 @@ describe('shared cart-submit helpers', () => {
     });
   });
 
-  it('builds EB-compatible product-page multipart cart form data', () => {
+  it('keeps large runtime and display metadata off ordinary component lines', () => {
     const context = buildProductPageCartFormData([
       {
         id: 123,
@@ -80,13 +79,11 @@ describe('shared cart-submit helpers', () => {
     expect(Array.from(context.formData.entries())).toEqual([
       ['items[0][id]', '123'],
       ['items[0][quantity]', '2'],
-      ['items[0][properties][_bundle_display_properties]', '{"box":"1"}'],
       ['items[0][properties][_custom]', 'value'],
       ['items[0][properties][Box]', '1'],
       ['items[0][properties][_bundleName]', 'Gift Box'],
       ['items[0][properties][_wolfpackProductBundle:OfferId]', 'offer-1_session-1_1'],
       ['items[0][properties][_wolfpackProductBundle:prodQty]', '2'],
-      ['items[0][properties][_wolfpack_bundle_runtime]', 'signed-runtime-token'],
     ]);
   });
 
@@ -118,6 +115,21 @@ describe('shared cart-submit helpers', () => {
     expect(formData.get('items[0][properties][_wolfpack_bundle_runtime]')).toBe('signed-token');
   });
 
+  it('retains runtime authorization only on add-on lines that the Discount Function evaluates directly', () => {
+    const { formData } = buildProductPageCartFormData([
+      { id: 101, quantity: 1, properties: {} },
+      { id: 202, quantity: 1, properties: { _bundle_step_type: 'addon:PERCENTAGE:25' } },
+    ], {
+      bundleName: 'Bundle',
+      offerId: 'offer',
+      sessionKey: 'session',
+      runtimeToken: 'signed-token',
+    });
+
+    expect(formData.has('items[0][properties][_wolfpack_bundle_runtime]')).toBe(false);
+    expect(formData.get('items[1][properties][_wolfpack_bundle_runtime]')).toBe('signed-token');
+  });
+
   it('adds one selling plan to every full-page JSON component and omits public Box metadata', () => {
     const original = [
       { id: '101', quantity: 1, properties: { Box: '1', _private: 'keep' } },
@@ -132,12 +144,5 @@ describe('shared cart-submit helpers', () => {
       { id: '202', quantity: 2, selling_plan: '55', properties: {} },
     ]);
     expect(original[0].properties.Box).toBe('1');
-  });
-
-  it('is used by the product-page widget controller', () => {
-    const source = readProductPageWidgetSources();
-
-    expect(source).toContain('buildProductPageCartFormData,');
-    expect(source).toContain('return buildProductPageCartFormData(cartItems, {');
   });
 });

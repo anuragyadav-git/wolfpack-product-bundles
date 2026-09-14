@@ -8,18 +8,19 @@ import { ERROR_MESSAGES } from "../../../constants/errors";
 import { authenticate } from "../../../shopify.server";
 import db from "../../../db.server";
 import {
-  handleSaveBundle,
   handleUpdateBundleStatus,
-  handleSyncProduct,
   handleUpdateBundleProduct,
   handleGetPages,
   handleGetThemeTemplates,
   handleGetCurrentTheme,
-  handleEnsureBundleTemplates,
-  handleValidateWidgetPlacement,
-  handleUpdateBundleDesignTemplate,
+} from "../../../services/bundles/bundle-configure-handlers.server";
+import { handleSaveBundle } from "./handlers/save-bundle.server";
+import { handleSyncProduct } from "./handlers/sync-product.server";
+import { handleUpdateBundleDesignTemplate } from "./handlers/design-template.server";
+import {
   handleAssignProductTemplate,
-} from "./handlers";
+  handleValidateWidgetPlacement,
+} from "./handlers/widget-placement.server";
 import { handleValidateSellingPlanGroups } from "../../../services/bundle-subscription-discovery.server";
 import { fetchBundleConfigureShopifyData } from "../../../lib/bundle-configure-loader.server";
 import { handleRecordBundlePreview } from "../shared/bundle-preview-action.server";
@@ -29,12 +30,12 @@ import {
 } from "../shared/storefront-sync-action.server";
 import { createBundlePreviewToken } from "../../../lib/bundle-preview-token.server";
 import ConfigureBundleFlow from "./ConfigureBundleFlow";
-import { ReduxProvider } from "../../../store/ReduxProvider";
 import { buildSpecificLinkOfferAdminState } from "../../../lib/specific-link-offer-admin";
 import {
   handleGenerateSpecificLinkOffer,
   handleRevokeSpecificLinkOffer,
 } from "../shared/specific-link-offer-action.server";
+import { resolveShopEntitlements } from "../../../services/subscriptions/subscription-service.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -107,11 +108,16 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // File: extensions/bundle-builder/blocks/bundle-product-page.liquid
   const blockHandle = "bundle-product-page";
 
-  const shopifyData = await fetchBundleConfigureShopifyData(
-    admin,
-    bundle.shopifyProductId,
-    bundleId
-  );
+  const [shopifyData, entitlementContext] = await Promise.all([
+    fetchBundleConfigureShopifyData(
+      admin,
+      bundle.shopifyProductId,
+      bundleId
+    ),
+    resolveShopEntitlements({ shopDomain: session.shop }),
+  ]);
+
+  const isFreePlan = entitlementContext?.entitlements?.planCode !== "GROWTH";
 
   const { offerPolicy, ...safeBundle } = bundle;
   return json({
@@ -121,6 +127,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       shopifyData.shopIanaTimezone
     ),
     bundleProduct: shopifyData.bundleProduct,
+    isFreePlan,
     shop: session.shop,
     configureMode,
     showFirstLoadTour,
@@ -136,8 +143,9 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+  const { session, admin } = await authenticate.admin(request);
+
   try {
-    const { session, admin } = await authenticate.admin(request);
     const { bundleId } = params;
 
     if (!session?.shop) {
@@ -182,8 +190,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
         return await handleGetThemeTemplates(admin, session);
       case "getCurrentTheme":
         return await handleGetCurrentTheme(admin, session);
-      case "ensureBundleTemplates":
-        return await handleEnsureBundleTemplates(admin, session);
       case "validateWidgetPlacement":
         return await handleValidateWidgetPlacement(admin, session, bundleId);
       case "syncBundle":
@@ -263,9 +269,5 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 };
 
 export default function ProductPageBundleConfigureRoute() {
-  return (
-    <ReduxProvider>
-      <ConfigureBundleFlow />
-    </ReduxProvider>
-  );
+  return <ConfigureBundleFlow />;
 }

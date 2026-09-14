@@ -1,19 +1,28 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { MultiLanguageField } from "../../../../components/bundle-configure/MultiLanguageTextModal";
 import { translateAdmin } from "~/i18n/config";
 
+export interface FpbBundleCartSettingsProps {
+  fullPageBundleStyles: Record<string, string>;
+  markAsDirty: () => void;
+  openMultiLanguageModal: (
+    title: string,
+    fields: MultiLanguageField[],
+  ) => void;
+  setTextOverrides: (
+    update: (previous: Record<string, string>) => Record<string, string>,
+  ) => void;
+  shopLocales: Array<{locale: string; name: string; primary: boolean}>;
+  textOverrides: Record<string, string>;
+}
+
 export function FpbBundleCartSettings({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const {
-    fullPageBundleStyles,
-    markAsDirty,
-    openMultiLanguageModal,
-    setTextOverrides,
-    shopLocales,
-    textOverrides,
-  } = flow;
+  fullPageBundleStyles,
+  markAsDirty,
+  openMultiLanguageModal,
+  setTextOverrides,
+  shopLocales,
+  textOverrides,
+}: FpbBundleCartSettingsProps) {
 
   return (
     <>

@@ -8,6 +8,7 @@ import {
   reconcileFpbUpsellPlacement,
 } from './fpb-product-page-upsell.js';
 import {
+  exposeStorefrontContext,
   initializePpbBundleEmbed,
   reconcilePpbBundleEmbedPlacement,
 } from './ppb-bundle-embed.js';
@@ -18,12 +19,21 @@ import {
 } from './page-builder-embed.js';
 import { loadAndApplyGlobalSettingsControls } from './settings-controls.js';
 import { setStorefrontProxyRoot } from '../config/storefront-proxy-routes.js';
+import { resolveAppEmbedOwnership } from './app-embed-marker.js';
 
-const embed = document.querySelector<HTMLElement>('[data-wpb-app-embed]');
+const ownership = resolveAppEmbedOwnership();
+const embed = ownership.status === 'owned' ? ownership.marker : null;
+if (ownership.status === 'conflict') {
+  console.error(
+    '[Only Bundles] Multiple app embeds are active on this theme. Disable the dormant environment before testing.',
+    { proxyRoots: ownership.proxyRoots },
+  );
+}
 if (embed?.dataset.storefrontProxyRoot) {
   setStorefrontProxyRoot(embed.dataset.storefrontProxyRoot);
 }
 if (embed) {
+  exposeStorefrontContext(embed);
   (window as Window & { currentCountryCode?: string }).currentCountryCode =
     embed.dataset.countryCode ?? '';
 }
@@ -118,23 +128,25 @@ function hydrateGlobalSettingsControls(): void {
   void loadAndApplyGlobalSettingsControls(embed.dataset.controlsSettingsEndpoint || '');
 }
 
-(window as Window & { __WOLFPACK_BUNDLE_EMBED_ACTIVE__?: boolean }).__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (embed) {
+  (window as Window & { __WOLFPACK_BUNDLE_EMBED_ACTIVE__?: boolean }).__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      hydrateMarker();
+      hydratePageBuilderEmbed();
+      hydrateProductPageUpsells();
+      hydratePpbBundleEmbed();
+      hydrateGlobalSettingsControls();
+    }, { once: true });
+  } else {
     hydrateMarker();
     hydratePageBuilderEmbed();
     hydrateProductPageUpsells();
     hydratePpbBundleEmbed();
     hydrateGlobalSettingsControls();
-  }, { once: true });
-} else {
-  hydrateMarker();
-  hydratePageBuilderEmbed();
-  hydrateProductPageUpsells();
-  hydratePpbBundleEmbed();
-  hydrateGlobalSettingsControls();
+  }
+  document.addEventListener('shopify:section:load', hydrateMarker);
+  document.addEventListener('shopify:section:load', hydratePageBuilderEmbed);
+  document.addEventListener('shopify:section:load', hydrateProductPageUpsells);
+  document.addEventListener('shopify:section:load', hydratePpbBundleEmbed);
 }
-document.addEventListener('shopify:section:load', hydrateMarker);
-document.addEventListener('shopify:section:load', hydratePageBuilderEmbed);
-document.addEventListener('shopify:section:load', hydrateProductPageUpsells);
-document.addEventListener('shopify:section:load', hydratePpbBundleEmbed);

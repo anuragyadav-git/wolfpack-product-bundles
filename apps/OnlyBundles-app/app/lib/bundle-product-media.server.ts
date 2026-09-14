@@ -1,6 +1,6 @@
 // Prefer AVIF for lower transfer size; keep filename-level compatibility via a stable
 // `bundle-product-placeholder` prefix for cleanup/duplication detection.
-export const BUNDLE_PRODUCT_PLACEHOLDER_IMAGE_PATH = "/bundle-product-placeholder.avif";
+const BUNDLE_PRODUCT_PLACEHOLDER_IMAGE_PATH = "/bundle-product-placeholder.avif";
 const BUNDLE_PRODUCT_PLACEHOLDER_IMAGE_FILENAME = "bundle-product-placeholder.";
 
 type ProductMediaInput = {
@@ -9,7 +9,7 @@ type ProductMediaInput = {
   mediaContentType: "IMAGE";
 };
 
-export type BundleProductMediaNode = {
+type BundleProductMediaNode = {
   id?: string | null;
   alt?: string | null;
   image?: {
@@ -60,7 +60,7 @@ function isBundleProductPlaceholderMedia(
   return Boolean(expectedAlt) && altText === expectedAlt;
 }
 
-export function hasBundleProductPlaceholderMedia(
+function hasBundleProductPlaceholderMedia(
   mediaNodes: BundleProductMediaNode[] | undefined,
   bundleName: string,
 ): boolean {

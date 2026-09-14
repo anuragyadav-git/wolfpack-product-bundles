@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 
+import type { AssetUploadProps } from "../../../../components/shared/AssetUpload";
 import { getConfigureActionIcon } from "../../../../lib/bundle-config/configure-action-icons";
 import { DisabledConfigurationRegion } from "./DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "./ConfigureHelpPopover";
@@ -15,7 +16,7 @@ interface WidgetResource {
   [key: string]: unknown;
 }
 
-interface CommonBundleWidgetSectionProps {
+export interface CommonBundleWidgetSectionProps {
   addBrowsedProduct: boolean;
   buttonText: string;
   collections: WidgetResource[];
@@ -24,7 +25,7 @@ interface CommonBundleWidgetSectionProps {
   displayMode: WidgetDisplayMode;
   displayOn: WidgetDisplayOn;
   enabled: boolean;
-  FilePicker: ComponentType<any>;
+  AssetUpload: ComponentType<AssetUploadProps>;
   getResourceId?: (resource: WidgetResource) => string | null;
   imageUrl: string;
   multiLanguageDisabled: boolean;
@@ -65,7 +66,7 @@ export function CommonBundleWidgetSection(
     displayMode,
     displayOn,
     enabled,
-    FilePicker,
+    AssetUpload,
     getResourceId,
     imageUrl,
     multiLanguageDisabled,
@@ -142,25 +143,25 @@ export function CommonBundleWidgetSection(
                     <s-choice-list
                       label={translateAdmin("adminAttributes.widgetType")}
                       labelAccessibilityVisibility="exclusive"
-                      name="sharedUpsellWidgetTypeBlock"
-                      values={displayMode === "block" ? ["block"] : []}
+                      name="sharedUpsellWidgetType"
+                      values={[displayMode]}
                       disabled={disabled || undefined}
-                      onChange={() => onDisplayModeChange("block")}
+                      onChange={(event) => {
+                        const nextMode = (
+                          event.currentTarget as HTMLElement & {
+                            values?: string[];
+                          }
+                        ).values?.[0];
+                        if (nextMode === "block" || nextMode === "button") {
+                          onDisplayModeChange(nextMode);
+                        }
+                      }}
                     >
                       <s-choice value="block">
                         {translateAdmin(
                           "adminExtracted.shared.bundleConfigure.commonbundlewidgetsection.offerUpsellBlock"
                         )}
                       </s-choice>
-                    </s-choice-list>
-                    <s-choice-list
-                      label={translateAdmin("adminAttributes.widgetType")}
-                      labelAccessibilityVisibility="exclusive"
-                      name="sharedUpsellWidgetTypeButton"
-                      values={displayMode === "button" ? ["button"] : []}
-                      disabled={disabled || undefined}
-                      onChange={() => onDisplayModeChange("button")}
-                    >
                       <s-choice value="button">
                         {translateAdmin(
                           "adminExtracted.shared.bundleConfigure.commonbundlewidgetsection.offerUpsellButton"
@@ -191,6 +192,9 @@ export function CommonBundleWidgetSection(
                 <s-button
                   variant="secondary"
                   icon={getConfigureActionIcon("translate")}
+                  accessibilityLabel={translateAdmin(
+                    "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+                  )}
                   disabled={multiLanguageDisabled || undefined}
                   onClick={onOpenMultiLanguage}
                 >
@@ -200,64 +204,74 @@ export function CommonBundleWidgetSection(
                 </s-button>
               </s-stack>
 
-              <div className={styles.widgetSettingsGrid}>
-                {displayMode === "block" && (
-                  <FilePicker
-                    label={translateAdmin("adminAttributes.uploadImage")}
-                    value={imageUrl || null}
-                    disabled={disabled}
-                    fitPreviewToTrigger
-                    onChange={(url: string | null) =>
-                      onImageUrlChange(url ?? "")
-                    }
-                  />
-                )}
-                <s-stack direction="block" gap="base">
+              <s-query-container>
+                <s-grid
+                  gridTemplateColumns={
+                    displayMode === "block"
+                      ? "@container (inline-size > 500px) 2fr 3fr, 1fr"
+                      : "1fr"
+                  }
+                  gap="base"
+                  alignItems="stretch"
+                >
                   {displayMode === "block" && (
-                    <>
-                      <s-text-field
-                        id="configure-widget-title"
-                        label={translateAdmin("adminAttributes.widgetTitle")}
-                        value={title}
-                        required
-                        disabled={disabled || undefined}
-                        error={validationErrors["widget.title"]}
-                        onInput={(event: Event) =>
-                          onTitleChange(
-                            (event.target as HTMLInputElement).value
-                          )
-                        }
-                      />
-                      <s-text-area
-                        label={translateAdmin(
-                          "adminAttributes.widgetDescription"
-                        )}
-                        value={description}
-                        rows={3}
-                        disabled={disabled || undefined}
-                        onInput={(event: Event) =>
-                          onDescriptionChange(
-                            (event.target as HTMLTextAreaElement).value
-                          )
-                        }
-                      />
-                    </>
+                    <AssetUpload
+                      label={translateAdmin("adminAttributes.uploadImage")}
+                      value={imageUrl || null}
+                      disabled={disabled}
+                      dropZoneContentMinBlockSize="152px"
+                      onChange={(url: string | null) =>
+                        onImageUrlChange(url ?? "")
+                      }
+                    />
                   )}
-                  <s-text-field
-                    id="configure-widget-buttonText"
-                    label={translateAdmin("adminAttributes.widgetButtonText")}
-                    value={buttonText}
-                    required
-                    disabled={disabled || undefined}
-                    error={validationErrors["widget.buttonText"]}
-                    onInput={(event: Event) =>
-                      onButtonTextChange(
-                        (event.target as HTMLInputElement).value
-                      )
-                    }
-                  />
-                </s-stack>
-              </div>
+                  <s-stack direction="block" gap="base">
+                    {displayMode === "block" && (
+                      <>
+                        <s-text-field
+                          id="configure-widget-title"
+                          label={translateAdmin("adminAttributes.widgetTitle")}
+                          value={title}
+                          required
+                          disabled={disabled || undefined}
+                          error={validationErrors["widget.title"]}
+                          onInput={(event: Event) =>
+                            onTitleChange(
+                              (event.target as HTMLInputElement).value
+                            )
+                          }
+                        />
+                        <s-text-area
+                          label={translateAdmin(
+                            "adminAttributes.widgetDescription"
+                          )}
+                          value={description}
+                          rows={3}
+                          disabled={disabled || undefined}
+                          onInput={(event: Event) =>
+                            onDescriptionChange(
+                              (event.target as HTMLTextAreaElement).value
+                            )
+                          }
+                        />
+                      </>
+                    )}
+                    <s-text-field
+                      id="configure-widget-buttonText"
+                      label={translateAdmin("adminAttributes.widgetButtonText")}
+                      value={buttonText}
+                      required
+                      disabled={disabled || undefined}
+                      error={validationErrors["widget.buttonText"]}
+                      onInput={(event: Event) =>
+                        onButtonTextChange(
+                          (event.target as HTMLInputElement).value
+                        )
+                      }
+                    />
+                  </s-stack>
+                </s-grid>
+              </s-query-container>
 
               <s-heading>
                 {translateAdmin(
@@ -353,6 +367,9 @@ export function CommonBundleWidgetSection(
             <s-button
               variant="secondary"
               icon={getConfigureActionIcon("place")}
+              accessibilityLabel={translateAdmin("adminDynamic.embedUpsell", {
+                placement: placementNoun,
+              })}
               disabled={disabled || undefined}
               onClick={onPlaceWidget}
             >
@@ -393,6 +410,7 @@ function ResourcePickerList({
       <s-button
         variant="secondary"
         icon={icon as any}
+        accessibilityLabel={buttonLabel}
         disabled={disabled || undefined}
         onClick={onOpen}
       >

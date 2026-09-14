@@ -1,39 +1,44 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
+import { BundleGuidedTour } from "../../../components/bundle-configure/BundleGuidedTour";
+import { EnablePreviewModal } from "../../../components/EnablePreviewModal";
+import { MultiLanguageTextModal } from "../../../components/bundle-configure/MultiLanguageTextModal";
+import { PPB_TOUR_STEPS } from "../../../components/bundle-configure/tourSteps";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbOverlayModals() {
-  const {
-    BundleGuidedTour,
-    BundleReadinessOverlay,
-    EnablePreviewModal,
-    MultiLanguageTextModal,
-    PPB_TOUR_STEPS,
-    activeMultiLanguageValues,
-    enablePreviewGate,
-    handleGuidedTourStepChange,
-    handleReadinessItemClick,
-    isMultiLanguageModalOpen,
-    loaderData,
-    multiLanguageFields,
-    multiLanguageTitle,
-    readinessItems,
-    readinessOpen,
-    saveStepSetupMultiLanguageValues,
-    setIsMultiLanguageModalOpen,
-    setReadinessOpen,
-    setTextOverridesLocale,
-    shop,
-    shopLocales,
-    textOverridesLocale,
-  } = usePpbConfigureContext();
+export type PpbOverlayModalsProps = Pick<
+  PpbConfigureFlow,
+  | "activeMultiLanguageValues"
+  | "enablePreviewGate"
+  | "handleGuidedTourStepChange"
+  | "isMultiLanguageModalOpen"
+  | "loaderData"
+  | "multiLanguageFields"
+  | "multiLanguageTitle"
+  | "saveStepSetupMultiLanguageValues"
+  | "setIsMultiLanguageModalOpen"
+  | "setTextOverridesLocale"
+  | "shop"
+  | "shopLocales"
+  | "textOverridesLocale"
+>;
+
+export function PpbOverlayModals({
+  activeMultiLanguageValues,
+  enablePreviewGate,
+  handleGuidedTourStepChange,
+  isMultiLanguageModalOpen,
+  loaderData,
+  multiLanguageFields,
+  multiLanguageTitle,
+  saveStepSetupMultiLanguageValues,
+  setIsMultiLanguageModalOpen,
+  setTextOverridesLocale,
+  shop,
+  shopLocales,
+  textOverridesLocale,
+}: PpbOverlayModalsProps) {
 
   return (
     <>
-      <BundleReadinessOverlay
-        items={readinessItems}
-        open={readinessOpen}
-        onOpenChange={setReadinessOpen}
-        onItemClick={handleReadinessItemClick}
-      />
       <BundleGuidedTour
         steps={PPB_TOUR_STEPS}
         shop={shop}

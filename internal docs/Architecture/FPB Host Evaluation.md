@@ -5,7 +5,7 @@ title: FPB App Proxy Host
 type: architecture-decision
 status: accepted
 summary: Full Page Bundles use the signed app proxy as their sole storefront document host.
-last_audited: 2026-09-01
+last_audited: 2026-09-10
 owners:
   - engineering
 domains:
@@ -138,12 +138,11 @@ fresh signed app-proxy URL in the same authenticated response. Product-page
 upsell placement opens the matching product-template Theme Editor block
 directly; it does not select a Shopify Page.
 
-The legacy Page columns remain temporarily in Prisma only so dashboard deletion
-can clean the public and preview Page GIDs stored by older bundles. No current
-save, sync, preview, placement, slug, or runtime DTO writes those columns.
-
-Dashboard deletion is also a Page cleanup boundary while legacy Page columns
-remain. Deleting an FPB deletes its distinct stored public and preview Page GIDs
-before deleting the bundle row. An already-missing Page is accepted for retry;
-any other Shopify Page deletion error preserves the bundle row and its Page
-references. PPB deletion does not call the Page API.
+The forward-only `20260906090000_remove_legacy_shopify_page_fields` migration
+drops the obsolete Page IDs, handles, and handle index. Dashboard deletion now
+owns only the canonical bundle row and the shared FPB/PPB parent-product
+lifecycle; it has no Shopify Page cleanup branch. The configured database
+returned zero bundles with legacy Page fields before migration and had no Page
+columns on 2026-09-08.
+Every release environment must independently pass the same zero-count gate
+before this migration is applied.

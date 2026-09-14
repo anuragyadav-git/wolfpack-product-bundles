@@ -1,31 +1,3 @@
-.dashboardShell {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 1384px;
-  margin: 0 auto;
-  padding: 0 clamp(16px, 3vw, 32px) 88px;
-}
-
-.dashboardStack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.dashboardChartGrid,
-.dashboardActivityGrid {
-  display: grid;
-  gap: 16px;
-}
-
-.dashboardChartGrid {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-}
-
-.dashboardActivityGrid {
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-}
-
 .criticalHeroShell {
   box-sizing: border-box;
   width: 100%;
@@ -83,12 +55,11 @@
     sans-serif;
 }
 
-.analyticsQueryContainer {
+.analyticsPageGrid {
   display: grid;
   width: 100%;
   min-width: 0;
   grid-template-columns: minmax(0, 1fr);
-  container-name: analytics-page;
 }
 
 .pixelStatusBoundary {
@@ -102,19 +73,14 @@
   line-height: 1.5;
 }
 
-@container analytics-page (max-width: 720px) {
-  .dashboardChartGrid,
-  .dashboardActivityGrid {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 720px) {
   .criticalHeroCard {
     padding: 24px;
   }
 
 }
 
-@container analytics-page (max-width: 520px) {
+@media (max-width: 520px) {
   .dashboardShell {
     padding-inline: 16px;
   }

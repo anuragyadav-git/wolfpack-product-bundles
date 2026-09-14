@@ -1,16 +1,18 @@
-export interface ProductPageSetupItem {
+import { navigateWithSaveBarConfirmation } from "../admin-unsaved-navigation";
+
+interface ProductPageSetupItem {
   id: string;
   label: string;
   iconType: string;
 }
 
-export interface ProductPageThemeTemplateOption {
+interface ProductPageThemeTemplateOption {
   handle?: string | null;
   fullKey?: string | null;
   isBundleContainer?: boolean | null;
 }
 
-export interface ProductPageThemeEditorDeepLinkInput {
+interface ProductPageThemeEditorDeepLinkInput {
   shop: string;
   apiKey: string;
   blockHandle: string;
@@ -25,9 +27,10 @@ export const PRODUCT_PAGE_EDIT_DEFAULTS_HREF = "/app/settings";
 export async function navigateToProductPageDefaults(
   leaveConfirmation: () => Promise<void> | void,
   navigate: (href: string) => void,
-): Promise<void> {
-  await leaveConfirmation();
-  navigate(PRODUCT_PAGE_EDIT_DEFAULTS_HREF);
+): Promise<boolean> {
+  return navigateWithSaveBarConfirmation(leaveConfirmation, () => {
+    navigate(PRODUCT_PAGE_EDIT_DEFAULTS_HREF);
+  });
 }
 
 export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
@@ -39,7 +42,7 @@ export const PRODUCT_PAGE_SETUP_ITEMS: ProductPageSetupItem[] = [
   { id: "select_template",    label: "Select Template",    iconType: "paint-brush-flat" },
 ];
 
-export interface SellingPlanGroupSummary {
+interface SellingPlanGroupSummary {
   id: string;
   name: string;
 }

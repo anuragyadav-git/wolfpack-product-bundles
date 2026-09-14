@@ -35,15 +35,17 @@ describe("Cart Transform input query", () => {
     expect(normalizedQuery).toContain("localization { country { isoCode } }");
   });
 
-  it("reuses bundle display properties instead of adding offer-analytics query leaves", () => {
-    expect(normalizedQuery).toContain('bundleDisplayProperties: attribute(key: "_bundle_display_properties")');
+  it("reads runtime and display metadata from the app-reserved cart metafield", () => {
+    expect(normalizedQuery).toContain('bundleDetails: metafield(namespace: "$app", key: "bundle_details")');
+    expect(normalizedQuery).not.toContain('attribute(key: "_bundle_display_properties")');
+    expect(normalizedQuery).not.toContain('attribute(key: "_wolfpack_bundle_runtime")');
     expect(normalizedQuery).not.toContain('attribute(key: "_wpb_');
   });
 
   it("groups merge lines from EB public cart attributes instead of private bundle IDs", () => {
     expect(normalizedQuery).toContain('wolfpackProductBundleOfferId: attribute(key: "_wolfpackProductBundle:OfferId")');
     expect(normalizedQuery).not.toContain('attribute(key: "_bundleName")');
-    expect(normalizedQuery).toContain('runtimeToken: attribute(key: "_wolfpack_bundle_runtime")');
+    expect(normalizedQuery).toContain('lineAuthorization: attribute(key: "_wolfpack_line_auth")');
     expect(normalizedQuery).not.toContain('attribute(key: "_addon_offer_id")');
     expect(normalizedQuery).not.toContain('metafield(namespace: "$app", key: "component_parents")');
     expect(normalizedQuery).not.toContain('attribute(key: "_bundle_id")');

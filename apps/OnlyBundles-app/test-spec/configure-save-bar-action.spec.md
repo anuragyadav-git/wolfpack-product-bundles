@@ -5,7 +5,7 @@ title: Configure Save Bar Action
 type: test-spec
 status: active
 summary: Verifies programmatic configure Save Bar visibility and route-owned save actions in embedded Shopify Admin.
-last_audited: 2026-08-30
+last_audited: 2026-09-11
 owners:
   - Wolfpack Engineering
 domains:
@@ -43,9 +43,11 @@ Ensure configure routes use Shopify's programmatic Save Bar API, invoke the rout
 |---|---|---|---|---|
 | 1 | Dirty configure draft | Render with `isDirty: true` and activate Save | Shopify Save Bar is shown and `handleSave` is called once | Reproduces the embedded Admin failure where no save request was sent |
 | 2 | Saved configure draft | Render dirty, then rerender clean | Shopify Save Bar is hidden after previously being shown | Avoids initial-load and unmount hide races |
+| 3 | Hosted Save action retained by App Bridge | Rerender with a newer save callback, then invoke the originally hosted action | The action identity stays stable and invokes the latest callback | Prevents stale configure state from being submitted after resource-picker changes |
 
 ## Acceptance Criteria
 
 - [x] A dirty draft shows the programmatic Shopify Save Bar.
 - [x] Save calls the route-owned handler directly.
 - [x] A previously shown Save Bar hides when the draft becomes clean.
+- [x] A hosted Save action always invokes the latest route-owned handler.

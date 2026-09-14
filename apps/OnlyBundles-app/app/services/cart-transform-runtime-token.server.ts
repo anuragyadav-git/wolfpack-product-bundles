@@ -9,11 +9,12 @@ import {
   buildOfferCountryTargetingRule,
   encodeOfferCountryTargetingRule,
 } from "../lib/offer-country-eligibility";
+import { normalizeProductVariantGid } from "../lib/shopify-product-gid";
 
 const RUNTIME_TOKEN_VERSION = 1;
 const RUNTIME_TOKEN_SECRET_CONTEXT = "wpb-runtime-token:";
 
-export type RuntimeTokenDiscount = {
+type RuntimeTokenDiscount = {
   type: "PERCENTAGE";
   value: number;
 };
@@ -77,15 +78,6 @@ function normalizeSubscriptionSelection(bundle: any, value: SelectionInput["subs
   };
 }
 
-export function normalizeProductVariantGid(value: unknown): string | null {
-  if (typeof value !== "string" && typeof value !== "number") return null;
-  const raw = String(value).trim();
-  if (!raw) return null;
-  if (raw.startsWith("gid://shopify/ProductVariant/")) return raw;
-  if (/^\d+$/.test(raw)) return `gid://shopify/ProductVariant/${raw}`;
-  return null;
-}
-
 function normalizeProductGid(value: unknown): string | null {
   if (typeof value !== "string" && typeof value !== "number") return null;
   const raw = String(value).trim();
@@ -140,16 +132,6 @@ function collectAllowedSelectionIds(bundle: any): { variantIds: Set<string>; pro
   for (const step of Array.isArray(bundle?.steps) ? bundle.steps : []) {
     for (const stepProduct of Array.isArray(step?.StepProduct) ? step.StepProduct : []) {
       addProduct(stepProduct);
-    }
-    for (const product of Array.isArray(step?.products) ? step.products : []) {
-      addProduct(product);
-    }
-    const categories = Array.isArray(step?.StepCategory) ? step.StepCategory : [];
-    for (const category of categories) {
-      const categoryProducts = Array.isArray(category?.products) ? category.products : [];
-      for (const product of categoryProducts) {
-        addProduct(product);
-      }
     }
   }
 

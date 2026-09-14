@@ -10,6 +10,7 @@ const tutorialIds = [
   "create-your-first-bundle",
   "build-a-full-page-bundle",
   "build-a-product-page-bundle",
+  "set-up-product-variant-swatches",
   "configure-discounts-and-pricing",
   "place-bundles-on-your-storefront",
   "customize-design-and-language",
@@ -85,6 +86,26 @@ test("all production-audited tutorials build with substantial content and metada
     assert.match(html, /Troubleshooting/i, `${id} should include troubleshooting`);
     assertPublicMetadata(html, `/blogs/${id}/`);
     assert.match(html, /<script[^>]+type=["']application\/ld\+json["']/i);
+  }
+});
+
+test("the product swatch tutorial teaches Shopify-native setup through bundle verification", async () => {
+  const html = await readOutput("blogs", "set-up-product-variant-swatches", "index.html");
+  assert.match(html, /product category/i);
+  assert.match(html, /category metafield/i);
+  assert.match(html, /Color swatches/i);
+  assert.match(html, /Image swatches/i);
+  assert.match(html, /ProductOptionValue\.swatch/i);
+  assert.match(html, /Size/i);
+  assert.match(html, /Color/i);
+
+  const expectedImages = [
+    "/tutorial-swatches-category.png",
+    "/tutorial-swatches-product-option.png",
+    "/tutorial-swatches-bundle-setting.png",
+  ];
+  for (const image of expectedImages) {
+    assert.match(html, new RegExp(`<img[^>]+src=["']${image.replaceAll("/", "\\/")}["'][^>]+alt=["'][^"']+["']`, "i"));
   }
 });
 

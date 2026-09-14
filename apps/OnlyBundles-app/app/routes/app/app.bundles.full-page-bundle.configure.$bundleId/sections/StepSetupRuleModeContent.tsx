@@ -1,35 +1,82 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { Dispatch, SetStateAction } from "react";
 import { translateAdmin } from "~/i18n/config";
+import {
+  CATEGORY_CONDITION_OPERATOR_OPTIONS,
+  STEP_CONDITION_OPERATOR_OPTIONS,
+  STEP_CONDITION_TYPE_OPTIONS,
+} from "../../../../constants/bundle";
+import { deriveControlDependencies } from "../../../../lib/bundle-config/control-dependencies";
 
 export function FpbStepRuleModeContent({
-  flow,
+  rules,
   step,
 }: {
-  flow: ConfigureBundleFlowContext;
+  rules: {
+    addCategoryConditionRule: (stepId: string, categoryIndex: number) => void;
+    addStepConditionRule: (stepId: string) => void;
+    categoryRulesOpen: Record<string, boolean>;
+    clearCategoryConditionRules: (stepId: string) => void;
+    clearStepConditions: (stepId: string) => void;
+    removeCategoryConditionRule: (
+      stepId: string,
+      categoryIndex: number,
+      ruleId: string
+    ) => void;
+    removeStepConditionRule: (stepId: string, ruleId: string) => void;
+    setCategoryRulesOpen: Dispatch<SetStateAction<Record<string, boolean>>>;
+    stepConditions: Record<
+      string,
+      Array<{
+        id: string;
+        type: string;
+        operator: string;
+        value: string;
+        autoNext?: boolean | string;
+      }>
+    >;
+    styles: Record<string, string>;
+    updateCategoryAutoNextRule: (
+      stepId: string,
+      categoryIndex: number,
+      enabled: boolean
+    ) => void;
+    updateCategoryConditionRule: (
+      stepId: string,
+      categoryIndex: number,
+      ruleId: string,
+      field: string,
+      value: string
+    ) => void;
+    updateStepConditionRule: (
+      stepId: string,
+      ruleId: string,
+      field: string,
+      value: string
+    ) => void;
+  };
   step: any;
 }) {
   const {
     addCategoryConditionRule,
-    CATEGORY_CONDITION_OPERATOR_OPTIONS,
+    addStepConditionRule,
     categoryRulesOpen,
     clearCategoryConditionRules,
-    conditionsState,
-    deriveControlDependencies,
-    fullPageBundleStyles,
+    clearStepConditions,
     removeCategoryConditionRule,
+    removeStepConditionRule,
     setCategoryRulesOpen,
-    STEP_CONDITION_OPERATOR_OPTIONS,
-    STEP_CONDITION_TYPE_OPTIONS,
+    stepConditions,
+    styles,
     updateCategoryAutoNextRule,
     updateCategoryConditionRule,
-  } = flow;
+    updateStepConditionRule,
+  } = rules;
   const stepCategories =
     ((step as any).StepCategory as any[] | undefined) ?? [];
   const categoryRulesAvailable = deriveControlDependencies({
     categoryCount: stepCategories.length,
   }).categoryRulesVisible;
-  const hasStepRules =
-    (conditionsState.stepConditions[step.id] || []).length > 0;
+  const hasStepRules = (stepConditions[step.id] || []).length > 0;
   const hasCategoryRules = stepCategories.some(
     (category: any) => (category.conditions || []).length > 0
   );
@@ -40,19 +87,19 @@ export function FpbStepRuleModeContent({
     : "none";
   const handleRuleModeChange = (nextMode: string) => {
     if (nextMode === "none") {
-      conditionsState.clearStepConditions(step.id);
+      clearStepConditions(step.id);
       clearCategoryConditionRules(step.id);
       return;
     }
     if (nextMode === "step") {
       clearCategoryConditionRules(step.id);
-      if ((conditionsState.stepConditions[step.id] || []).length === 0) {
-        conditionsState.addConditionRule(step.id);
+      if ((stepConditions[step.id] || []).length === 0) {
+        addStepConditionRule(step.id);
       }
       return;
     }
     if (nextMode === "category" && categoryRulesAvailable) {
-      conditionsState.clearStepConditions(step.id);
+      clearStepConditions(step.id);
       if (!hasCategoryRules) {
         addCategoryConditionRule(step.id, 0);
       }
@@ -70,27 +117,28 @@ export function FpbStepRuleModeContent({
   return (
     <>
       <div
-        style={{
-          display: "flex",
-          gap: 20,
-          marginBottom: 12,
-        }}
+        role="radiogroup"
+        aria-label={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulescard.rulesConfiguration"
+        )}
       >
-        {ruleModeOptions.map((opt) => (
-          <s-choice-list
-            key={opt.value}
-            label={`${opt.label} rule mode`}
-            labelAccessibilityVisibility="exclusive"
-            name={`step-rule-mode-${step.id}`}
-            values={activeRuleMode === opt.value ? [opt.value] : []}
-            onChange={() => handleRuleModeChange(opt.value)}
-          >
-            <s-choice value={opt.value}>{opt.label}</s-choice>
-          </s-choice-list>
-        ))}
+        <s-stack direction="inline" gap="base">
+          {ruleModeOptions.map((opt) => (
+            <label key={opt.value}>
+              <input
+                type="radio"
+                name={`step-rule-mode-${step.id}`}
+                value={opt.value}
+                checked={activeRuleMode === opt.value}
+                onChange={() => handleRuleModeChange(opt.value)}
+              />{" "}
+              {opt.label}
+            </label>
+          ))}
+        </s-stack>
       </div>
       {activeRuleMode === "category" ? (
-        <div className={fullPageBundleStyles.categoryRulesList}>
+        <div className={styles.categoryRulesList}>
           {stepCategories.map((cat: any, catIndex: number) => {
             const catKey = `${step.id}__${cat.id ?? catIndex}`;
             const rules = Array.isArray(cat.conditions) ? cat.conditions : [];
@@ -100,11 +148,11 @@ export function FpbStepRuleModeContent({
             return (
               <div
                 key={cat.id ?? catIndex}
-                className={fullPageBundleStyles.categoryRuleAccordion}
+                className={styles.categoryRuleAccordion}
               >
-                <button
-                  type="button"
-                  className={fullPageBundleStyles.categoryRuleHeader}
+                <s-clickable
+                  inlineSize="100%"
+                  padding="base"
                   aria-expanded={isRulesOpen}
                   onClick={() =>
                     setCategoryRulesOpen((prev: Record<string, boolean>) => ({
@@ -113,16 +161,26 @@ export function FpbStepRuleModeContent({
                     }))
                   }
                 >
-                  <span>
+                  <s-stack
+                    direction="inline"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap="small"
+                  >
+                    <s-text type="strong">
                     {translateAdmin("adminDynamic.categoryRules", {
                       category: categoryLabel,
                     })}
-                  </span>
-                  <span aria-hidden="true">{isRulesOpen ? "⌃" : "⌄"}</span>
-                </button>
+                    </s-text>
+                    <s-icon
+                      type={isRulesOpen ? "chevron-up" : "chevron-down"}
+                    />
+                  </s-stack>
+                </s-clickable>
+                {isRulesOpen ? <s-divider /> : null}
                 {isRulesOpen && (
-                  <div className={fullPageBundleStyles.categoryRuleBody}>
-                    <p className={fullPageBundleStyles.categoryRuleHelp}>
+                  <div className={styles.categoryRuleBody}>
+                    <p className={styles.categoryRuleHelp}>
                       {translateAdmin(
                         "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.createRulesBasedOnAmountOrQuantityOfProductsAddedOnThisCategory"
                       )}{" "}
@@ -131,15 +189,15 @@ export function FpbStepRuleModeContent({
                         "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.noteRulesAreOnlyValidOnThisCategory"
                       )}
                     </p>
-                    <div className={fullPageBundleStyles.rulesList}>
+                    <div className={styles.rulesList}>
                       {rules.map((rule: any, ruleIndex: number) => {
                         const ruleId = String(rule.id ?? ruleIndex);
                         return (
                           <div
                             key={ruleId}
-                            className={fullPageBundleStyles.categoryRuleBlock}
+                            className={styles.categoryRuleBlock}
                           >
-                            <div className={fullPageBundleStyles.ruleHeader}>
+                            <div className={styles.ruleHeader}>
                               <h4
                                 style={{
                                   margin: 0,
@@ -155,6 +213,9 @@ export function FpbStepRuleModeContent({
                                 variant="tertiary"
                                 tone="critical"
                                 icon="delete"
+                                accessibilityLabel={translateAdmin(
+                                  "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                                )}
                                 onClick={() =>
                                   removeCategoryConditionRule(
                                     step.id,
@@ -168,85 +229,70 @@ export function FpbStepRuleModeContent({
                                 )}
                               </s-button>
                             </div>
-                            <div
-                              className={
-                                fullPageBundleStyles.categoryRuleFields
-                              }
-                            >
-                              <select
-                                className={
-                                  fullPageBundleStyles.ruleInlineSelect
-                                }
+                            <div className={styles.categoryRuleFields}>
+                              <s-select
+                                label={translateAdmin("dashboard.table.type")}
+                                labelAccessibilityVisibility="exclusive"
                                 value={rule.type ?? "quantity"}
-                                onChange={(e) =>
+                                onChange={(e: Event) =>
                                   updateCategoryConditionRule(
                                     step.id,
                                     catIndex,
                                     ruleId,
                                     "type",
-                                    (e.target as HTMLSelectElement).value
+                                    (e.currentTarget as HTMLSelectElement).value
                                   )
                                 }
-                                aria-label={translateAdmin(
-                                  "dashboard.table.type"
-                                )}
                               >
                                 {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
-                                  <option key={opt.value} value={opt.value}>
+                                  <s-option key={opt.value} value={opt.value}>
                                     {opt.label}
-                                  </option>
+                                  </s-option>
                                 ))}
-                              </select>
-                              <select
-                                className={
-                                  fullPageBundleStyles.ruleInlineSelect
-                                }
+                              </s-select>
+                              <s-select
+                                label={translateAdmin(
+                                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                                )}
+                                labelAccessibilityVisibility="exclusive"
                                 value={
                                   rule.condition ??
                                   rule.operator ??
                                   "greaterThanOrEqualTo"
                                 }
-                                onChange={(e) =>
+                                onChange={(e: Event) =>
                                   updateCategoryConditionRule(
                                     step.id,
                                     catIndex,
                                     ruleId,
                                     "condition",
-                                    (e.target as HTMLSelectElement).value
+                                    (e.currentTarget as HTMLSelectElement).value
                                   )
                                 }
-                                aria-label={translateAdmin(
-                                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                                )}
                               >
                                 {[...CATEGORY_CONDITION_OPERATOR_OPTIONS].map(
                                   (opt) => (
-                                    <option key={opt.value} value={opt.value}>
+                                    <s-option key={opt.value} value={opt.value}>
                                       {opt.label}
-                                    </option>
+                                    </s-option>
                                   )
                                 )}
-                              </select>
-                              <input
-                                type="number"
-                                className={
-                                  fullPageBundleStyles.ruleInlineNumber
-                                }
+                              </s-select>
+                              <s-number-field
+                                label={translateAdmin("adminAttributes.value")}
+                                labelAccessibilityVisibility="exclusive"
                                 min={0}
-                                value={rule.value ?? ""}
-                                onChange={(e) =>
+                                value={String(rule.value ?? "")}
+                                onInput={(e: Event) =>
                                   updateCategoryConditionRule(
                                     step.id,
                                     catIndex,
                                     ruleId,
                                     "value",
-                                    (e.target as HTMLInputElement).value
+                                    (e.currentTarget as HTMLInputElement).value
                                   )
                                 }
-                                autoComplete="off"
-                                aria-label={translateAdmin(
-                                  "adminAttributes.value"
-                                )}
+                                autocomplete="off"
                               />
                             </div>
                           </div>
@@ -270,31 +316,20 @@ export function FpbStepRuleModeContent({
                         }
                       />
                     )}
-                    <button
-                      type="button"
-                      className={fullPageBundleStyles.addSectionButton}
+                    <s-button
+                      variant="secondary"
+                      icon="plus"
+                      accessibilityLabel={translateAdmin(
+                        "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+                      )}
                       onClick={() =>
                         addCategoryConditionRule(step.id, catIndex)
                       }
                     >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M7 1v12M1 7h12"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                        />
-                      </svg>
                       {translateAdmin(
                         "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
                       )}
-                    </button>
+                    </s-button>
                   </div>
                 )}
               </div>
@@ -303,18 +338,18 @@ export function FpbStepRuleModeContent({
         </div>
       ) : (
         <>
-          {(conditionsState.stepConditions[step.id] || []).length === 0 ? (
-            <div className={fullPageBundleStyles.emptyState}>
+          {(stepConditions[step.id] || []).length === 0 ? (
+            <div className={styles.emptyState}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.noRulesDefinedYet"
               )}
             </div>
           ) : (
-            <div className={fullPageBundleStyles.rulesList}>
-              {(conditionsState.stepConditions[step.id] || []).map(
+            <div className={styles.rulesList}>
+              {(stepConditions[step.id] || []).map(
                 (rule: any, ruleIndex: number) => (
-                  <div key={rule.id} className={fullPageBundleStyles.ruleCard}>
-                    <div className={fullPageBundleStyles.ruleHeader}>
+                  <div key={rule.id} className={styles.ruleCard}>
+                    <div className={styles.ruleHeader}>
                       <h4
                         style={{
                           margin: 0,
@@ -330,8 +365,11 @@ export function FpbStepRuleModeContent({
                         variant="tertiary"
                         tone="critical"
                         icon="delete"
+                        accessibilityLabel={translateAdmin(
+                          "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                        )}
                         onClick={() =>
-                          conditionsState.removeConditionRule(step.id, rule.id)
+                          removeStepConditionRule(step.id, rule.id)
                         }
                       >
                         {translateAdmin(
@@ -339,75 +377,69 @@ export function FpbStepRuleModeContent({
                         )}
                       </s-button>
                     </div>
-                    <div className={fullPageBundleStyles.ruleFields}>
-                      <select
-                        className={fullPageBundleStyles.ruleInlineSelect}
-                        value={rule.type ?? ""}
-                        onChange={(e) =>
-                          conditionsState.updateConditionRule(
+                    <div className={styles.ruleFields}>
+                      <s-select
+                        label={translateAdmin("dashboard.table.type")}
+                        labelAccessibilityVisibility="exclusive"
+                        placeholder={translateAdmin("dashboard.table.type")}
+                        value={rule.type || undefined}
+                        onChange={(e: Event) =>
+                          updateStepConditionRule(
                             step.id,
                             rule.id,
                             "type",
-                            (e.target as HTMLSelectElement).value
+                            (e.currentTarget as HTMLSelectElement).value
                           )
                         }
-                        aria-label={translateAdmin("dashboard.table.type")}
                       >
-                        <option value="" disabled>
-                          {translateAdmin("dashboard.table.type")}
-                        </option>
                         {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
-                          <option key={opt.value} value={opt.value}>
+                          <s-option key={opt.value} value={opt.value}>
                             {opt.label}
-                          </option>
+                          </s-option>
                         ))}
-                      </select>
-                      <select
-                        className={fullPageBundleStyles.ruleInlineSelect}
-                        value={rule.operator ?? ""}
-                        onChange={(e) =>
-                          conditionsState.updateConditionRule(
+                      </s-select>
+                      <s-select
+                        label={translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                        )}
+                        labelAccessibilityVisibility="exclusive"
+                        placeholder={translateAdmin(
+                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                        )}
+                        value={rule.operator || undefined}
+                        onChange={(e: Event) =>
+                          updateStepConditionRule(
                             step.id,
                             rule.id,
                             "operator",
-                            (e.target as HTMLSelectElement).value
+                            (e.currentTarget as HTMLSelectElement).value
                           )
                         }
-                        aria-label={translateAdmin(
-                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                        )}
                       >
-                        <option value="" disabled>
-                          {translateAdmin(
-                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                          )}
-                        </option>
                         {[...STEP_CONDITION_OPERATOR_OPTIONS].map((opt) => (
-                          <option key={opt.value} value={opt.value}>
+                          <s-option key={opt.value} value={opt.value}>
                             {opt.label}
-                          </option>
+                          </s-option>
                         ))}
-                      </select>
-                      <input
-                        type="number"
-                        className={fullPageBundleStyles.ruleInlineNumber}
+                      </s-select>
+                      <s-number-field
+                        label={translateAdmin("adminAttributes.value")}
+                        labelAccessibilityVisibility="exclusive"
                         min={0}
                         placeholder="0"
-                        value={rule.value ?? ""}
-                        onInput={(e) =>
-                          conditionsState.updateConditionRule(
+                        value={String(rule.value ?? "")}
+                        onInput={(e: Event) =>
+                          updateStepConditionRule(
                             step.id,
                             rule.id,
                             "value",
-                            (e.target as HTMLInputElement).value
+                            (e.currentTarget as HTMLInputElement).value
                           )
                         }
-                        autoComplete="off"
-                        aria-label={translateAdmin("adminAttributes.value")}
+                        autocomplete="off"
                       />
                     </div>
-                    {(conditionsState.stepConditions[step.id] || []).length ===
-                      1 && (
+                    {(stepConditions[step.id] || []).length === 1 && (
                       <s-checkbox
                         label={translateAdmin(
                           "adminAttributes.autoNextWhenRuleIsMet"
@@ -418,7 +450,7 @@ export function FpbStepRuleModeContent({
                           undefined
                         }
                         onChange={(e) => {
-                          conditionsState.updateConditionRule(
+                          updateStepConditionRule(
                             step.id,
                             rule.id,
                             "autoNext",
@@ -434,33 +466,20 @@ export function FpbStepRuleModeContent({
               )}
             </div>
           )}
-          <button
-            type="button"
-            className={fullPageBundleStyles.addSectionButton}
-            disabled={
-              (conditionsState.stepConditions[step.id] || []).length >= 2
-            }
-            onClick={() => conditionsState.addConditionRule(step.id)}
+          <s-button
+            variant="secondary"
+            icon="plus"
+            accessibilityLabel={translateAdmin(
+              "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+            )}
+            disabled={(stepConditions[step.id] || []).length >= 2 || undefined}
+            onClick={() => addStepConditionRule(step.id)}
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M7 1v12M1 7h12"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
             {translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
             )}
-          </button>
-          {(conditionsState.stepConditions[step.id] || []).length >= 2 ? (
+          </s-button>
+          {(stepConditions[step.id] || []).length >= 2 ? (
             <s-stack direction="inline" alignItems="center" gap="small">
               <s-icon type="alert-triangle" tone="caution" />
               <s-text>

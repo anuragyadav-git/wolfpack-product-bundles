@@ -2,7 +2,7 @@ export type CountdownLayout = "compact" | "full";
 export type CountdownPosition = "above" | "below";
 export type CountdownExpiryAction = "hide" | "show_zeros" | "show_message";
 
-export interface CountdownSettings {
+interface CountdownSettings {
   countdownEnabled: boolean;
   countdownLayout: CountdownLayout;
   countdownPosition: CountdownPosition;

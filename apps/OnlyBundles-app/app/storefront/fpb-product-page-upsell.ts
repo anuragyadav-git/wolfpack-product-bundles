@@ -39,7 +39,7 @@ function isVisible(element: HTMLElement) {
   return style.display !== "none" && style.visibility !== "hidden";
 }
 
-export function findFpbUpsellAnchor(root: ParentNode = document) {
+function findFpbUpsellAnchor(root: ParentNode = document) {
   const custom = Array.from(root.querySelectorAll<HTMLElement>("[data-wpb-fpb-upsell-anchor]"));
   return custom.find((value) => isVisible(value)) ?? null;
 }

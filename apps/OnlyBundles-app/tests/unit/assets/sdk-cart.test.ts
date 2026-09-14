@@ -62,9 +62,9 @@ describe('buildCartItems', () => {
         },
       },
     });
-    const { items } = buildCartItems(state);
+    const { sourceProperties } = buildCartItems(state);
 
-    expect(JSON.parse(items[0].properties._bundle_display_properties).offerAnalytics).toEqual({
+    expect(JSON.parse(sourceProperties._bundle_display_properties).offerAnalytics).toEqual({
       bundleId: 'bundle_1',
       offerPolicyId: 'policy-1',
       offerRuleVersion: 4,
@@ -118,7 +118,7 @@ describe('buildCartItems', () => {
       discountAmount: 500,
       discountPercentage: 25,
     });
-    const { items } = buildCartItems(state);
+    const { items, sourceProperties } = buildCartItems(state);
 
     expect(items[0].properties).not.toHaveProperty('_bundle_box');
     expect(items[0].properties).not.toHaveProperty('_bundle_items');
@@ -127,7 +127,8 @@ describe('buildCartItems', () => {
     expect(items[0].properties).not.toHaveProperty('_bundle_you_save_amount');
     expect(items[0].properties).not.toHaveProperty('_bundle_you_save_percentage');
 
-    const displayProperties = JSON.parse(items[0].properties['_bundle_display_properties']);
+    expect(items[0].properties).not.toHaveProperty('_bundle_display_properties');
+    const displayProperties = JSON.parse(sourceProperties['_bundle_display_properties']);
     expect(displayProperties).toEqual({
       box: '1',
       bundleName: 'Test Bundle',
@@ -165,7 +166,7 @@ describe('addBundleToCart', () => {
     jest.restoreAllMocks();
   });
 
-  it('requests a Cart Transform runtime token before submitting the Shopify cart form', async () => {
+  it('stores Cart Transform authorization before submitting clean Shopify component lines', async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = [];
     global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
@@ -173,11 +174,14 @@ describe('addBundleToCart', () => {
       if (url.includes('cart-transform-runtime-token')) {
         return { ok: true, json: async () => ({ token: 'signed-runtime-token' }) } as Response;
       }
+      if (url === '/cart.js') {
+        return { ok: true, json: async () => ({ token: 'cart-token' }) } as Response;
+      }
+      if (url.includes('cart-bundle-details')) {
+        return { ok: true, json: async () => ({ ok: true }) } as Response;
+      }
       if (url === '/cart/add') {
         return { ok: true, text: async () => '{}' } as Response;
-      }
-      if (url === '/cart.js') {
-        return { ok: false, json: async () => null } as Response;
       }
       throw new Error(`Unexpected request: ${url}`);
     }) as jest.Mock;
@@ -186,9 +190,16 @@ describe('addBundleToCart', () => {
     await addBundleToCart(makeState(), () => ({ valid: true, errors: {} }), emit);
 
     expect(calls[0].url).toContain('cart-transform-runtime-token');
-    expect(calls[1].url).toBe('/cart/add');
-    expect(calls[1].init?.body).toBeInstanceOf(FormData);
-    expect((calls[1].init?.body as FormData).get('items[0][properties][_wolfpack_bundle_runtime]')).toBe('signed-runtime-token');
+    expect(calls[1].url).toBe('/cart.js');
+    expect(calls[2].url).toContain('cart-bundle-details');
+    expect(JSON.parse(String(calls[2].init?.body))).toMatchObject({
+      bundleDetailsKey: expect.any(String),
+      runtimeToken: 'signed-runtime-token',
+    });
+    expect(calls[3].url).toBe('/cart/add');
+    expect(calls[3].init?.body).toBeInstanceOf(FormData);
+    expect((calls[3].init?.body as FormData).has('items[0][properties][_wolfpack_bundle_runtime]')).toBe(false);
+    expect((calls[3].init?.body as FormData).has('items[0][properties][_bundle_display_properties]')).toBe(false);
     expect(emit).toHaveBeenCalledWith('wbp:cart-success', { bundleId: 'bundle_1' });
   });
 

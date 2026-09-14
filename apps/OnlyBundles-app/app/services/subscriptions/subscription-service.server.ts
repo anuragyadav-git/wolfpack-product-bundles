@@ -27,12 +27,12 @@ class UnavailableManagedPricingProvider implements ManagedSubscriptionProvider {
   }
 }
 
-export interface CreateSubscriptionServiceOptions {
+interface CreateSubscriptionServiceOptions {
   repository?: SubscriptionStateRepository;
   managedProvider?: ManagedSubscriptionProvider;
 }
 
-export function createSubscriptionEntitlementService(
+function createSubscriptionEntitlementService(
   options: CreateSubscriptionServiceOptions = {},
 ): SubscriptionEntitlementService {
   const partnerApiAccessToken = getPartnerApiAccessToken();

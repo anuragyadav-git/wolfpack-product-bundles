@@ -3,45 +3,49 @@ import {
   getNextAddonTierAccordionIndex,
   normalizeAddonTierAccordionIndex,
 } from "../../../../lib/addon-tier-accordion";
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { translateAdmin } from "~/i18n/config";
+import {
+  createDefaultAddonDraftTier,
+  createDefaultAddonTierCondition,
+} from "../addon-helpers";
+import type { AddonTierDraft } from "../addon-draft.types";
+import { FpbAddonTierRules } from "./FpbAddonTierRules";
 
 export function FpbAddonTierEditor({
-  flow,
+  activeTierIndex,
+  tiers,
+  styles,
+  validationErrors = {},
+  onActiveTierIndexChange,
+  onAddProducts,
+  onOpenSelectedProducts,
+  onTiersChange,
 }: {
-  flow: ConfigureBundleFlowContext;
+  activeTierIndex: number | null;
+  tiers: AddonTierDraft[];
+  styles: Record<string, string>;
+  validationErrors?: Record<string, string>;
+  onActiveTierIndexChange: (
+    updater: (currentIndex: number | null) => number | null
+  ) => void;
+  onAddProducts: (tierIndex: number) => void;
+  onOpenSelectedProducts: (tierIndex: number) => void;
+  onTiersChange: (tiers: AddonTierDraft[]) => void;
 }) {
-  const {
-    activeAddonTierIndex,
-    addonDraft,
-    CATEGORY_CONDITION_OPERATOR_OPTIONS,
-    createDefaultAddonDraftTier,
-    createDefaultAddonTierCondition,
-    fullPageBundleStyles,
-    handleAddonSelectedProductAdd,
-    openAddonSelectedProductsModal,
-    setActiveAddonTierIndex,
-    updateAddonDraft,
-  } = flow;
-
   return (
     <>
       {(() => {
-        const addonTiers: any[] = Array.isArray(addonDraft.addonTiers)
-          ? (addonDraft.addonTiers as any[])
-          : [];
-        const updateAddonTiers = (updated: any[]) => {
-          updateAddonDraft({ addonTiers: updated });
-        };
+        const addonTiers = tiers;
+        const updateAddonTiers = onTiersChange;
         const deleteAddonTier = (tierIndex: number) => {
           const updated = deleteAddonTierAtIndex(addonTiers, tierIndex);
           if (updated === addonTiers) return;
           updateAddonTiers(updated);
-          setActiveAddonTierIndex((currentIndex: number | null) =>
+          onActiveTierIndexChange((currentIndex) =>
             normalizeAddonTierAccordionIndex(currentIndex, updated.length)
           );
         };
-        const getAddonConditions = (tier: any) =>
+        const getAddonConditions = (tier: AddonTierDraft) =>
           Array.isArray(tier?.conditions) ? tier.conditions : [];
         const addAddonTierCondition = (tierIndex: number) => {
           const updated = addonTiers.map((tier, i) => {
@@ -67,7 +71,7 @@ export function FpbAddonTierEditor({
             return {
               ...tier,
               conditions: conditions.filter(
-                (rule: any, idx: number) => String(rule.id ?? idx) !== ruleId
+                (rule, idx) => String(rule.id ?? idx) !== ruleId
               ),
             };
           });
@@ -84,7 +88,7 @@ export function FpbAddonTierEditor({
             const conditions = getAddonConditions(tier);
             return {
               ...tier,
-              conditions: conditions.map((rule: any, idx: number) =>
+              conditions: conditions.map((rule, idx) =>
                 String(rule.id ?? idx) === ruleId
                   ? { ...rule, [field]: value }
                   : rule
@@ -96,125 +100,86 @@ export function FpbAddonTierEditor({
         return (
           <>
             {addonTiers.map((tier, idx) => {
-              const isActiveTier = activeAddonTierIndex === idx;
+              const isActiveTier = activeTierIndex === idx;
+              const tierId = String(tier.tierId ?? `tier-${idx + 1}`);
               return (
                 <div
                   key={idx}
-                  className={`${fullPageBundleStyles.addonsTierCard} ${
-                    isActiveTier
-                      ? fullPageBundleStyles.addonsTierCardActive
-                      : ""
+                  className={`${styles.addonsTierCard} ${
+                    isActiveTier ? styles.addonsTierCardActive : ""
                   }`}
                 >
                   <div
-                    className={`${fullPageBundleStyles.addonsTierHeader} ${
-                      isActiveTier
-                        ? fullPageBundleStyles.addonsTierHeaderActive
-                        : ""
+                    className={`${styles.addonsTierHeader} ${
+                      isActiveTier ? styles.addonsTierHeaderActive : ""
                     }`}
-                    role="button"
-                    tabIndex={0}
-                    aria-expanded={isActiveTier}
-                    onClick={() =>
-                      setActiveAddonTierIndex((currentIndex: number | null) =>
-                        getNextAddonTierAccordionIndex(currentIndex, idx)
-                      )
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setActiveAddonTierIndex((currentIndex: number | null) =>
-                          getNextAddonTierAccordionIndex(currentIndex, idx)
-                        );
-                      }
-                    }}
                   >
-                    <span
-                      className={fullPageBundleStyles.addonsTierDragPlaceholder}
-                      aria-hidden="true"
-                    />
-                    <h4 className={fullPageBundleStyles.addonsTierTitle}>
-                      {translateAdmin("adminDynamic.tierNumber", {
-                        number: idx + 1,
-                      })}
-                    </h4>
+                    <s-clickable
+                      inlineSize="100%"
+                      aria-expanded={isActiveTier}
+                      onClick={() =>
+                        onActiveTierIndexChange((currentIndex) =>
+                          getNextAddonTierAccordionIndex(currentIndex, idx)
+                        )
+                      }
+                    >
+                      <s-stack
+                        direction="inline"
+                        gap="small"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <s-stack
+                          direction="inline"
+                          gap="small"
+                          alignItems="center"
+                        >
+                          <span
+                            className={styles.addonsTierDragPlaceholder}
+                            aria-hidden="true"
+                          />
+                          <s-text type="strong">
+                            {translateAdmin("adminDynamic.tierNumber", {
+                              number: idx + 1,
+                            })}
+                          </s-text>
+                        </s-stack>
+                        <s-icon
+                          type={isActiveTier ? "chevron-up" : "chevron-down"}
+                        />
+                      </s-stack>
+                    </s-clickable>
                     <div
-                      className={fullPageBundleStyles.categoryActions}
+                      className={styles.categoryActions}
                       onMouseDown={(event) => event.stopPropagation()}
                       onClick={(event) => event.stopPropagation()}
                       onKeyDown={(event) => event.stopPropagation()}
                     >
-                      <button
-                        type="button"
-                        className={
-                          fullPageBundleStyles.categoryDeleteIconButton
-                        }
-                        title={`Delete Tier ${idx + 1}`}
-                        aria-label={`Delete Tier ${idx + 1}`}
+                      <s-button
+                        variant="tertiary"
+                        tone="critical"
+                        icon="delete"
+                        accessibilityLabel={`Delete Tier ${idx + 1}`}
                         onClick={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
                           deleteAddonTier(idx);
                         }}
-                      >
-                        <s-icon type="delete" />
-                      </button>
+                      />
                     </div>
-                    <button
-                      type="button"
-                      className={fullPageBundleStyles.categoryChevron}
-                      aria-label={
-                        isActiveTier ? "Collapse tier" : "Expand tier"
-                      }
-                      onMouseDown={(event) => event.stopPropagation()}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setActiveAddonTierIndex((currentIndex: number | null) =>
-                          getNextAddonTierAccordionIndex(currentIndex, idx)
-                        );
-                      }}
-                    >
-                      {isActiveTier ? (
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 14 14"
-                          fill="none"
-                          aria-hidden="true"
-                        >
-                          <path
-                            d="M3 9L7 5L11 9"
-                            stroke="currentColor"
-                            strokeWidth="1.75"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 14 14"
-                          fill="none"
-                          aria-hidden="true"
-                        >
-                          <path
-                            d="M3 5L7 9L11 5"
-                            stroke="currentColor"
-                            strokeWidth="1.75"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </button>
                   </div>
                   {isActiveTier && (
-                    <div className={fullPageBundleStyles.addonsTierBody}>
+                    <div className={styles.addonsTierBody}>
                       <s-stack direction="block" gap="small">
                         <s-text-field
+                          id={`configure-addons-products-tiers-${tierId}-title`}
                           label={translateAdmin("adminAttributes.tierTitle")}
                           value={tier.title ?? `Tier ${idx + 1}`}
+                          error={
+                            validationErrors[
+                              `addons.products.tiers.${tierId}.title`
+                            ]
+                          }
                           onInput={(e) => {
                             const updated = addonTiers.map((t, i) =>
                               i === idx
@@ -228,15 +193,11 @@ export function FpbAddonTierEditor({
                           }}
                           autocomplete="off"
                         />
-                        <div
-                          className={
-                            fullPageBundleStyles.addonsProductSelectionRow
-                          }
-                        >
+                        <div className={styles.addonsProductSelectionRow}>
                           <s-button
                             variant="primary"
                             icon="product-add"
-                            onClick={() => handleAddonSelectedProductAdd(idx)}
+                            onClick={() => onAddProducts(idx)}
                           >
                             {translateAdmin(
                               "adminExtracted.shared.bundleConfigure.commonstepcategoryaccordion.addProducts"
@@ -244,19 +205,30 @@ export function FpbAddonTierEditor({
                           </s-button>
                           {Array.isArray(tier.selectedAddonProducts) &&
                             tier.selectedAddonProducts.length > 0 && (
-                              <button
-                                type="button"
-                                className={`${fullPageBundleStyles.addonsSelectedCount} ${fullPageBundleStyles.addonsSelectedButton}`}
-                                onClick={() =>
-                                  openAddonSelectedProductsModal(idx)
-                                }
+                              <s-button
+                                variant="tertiary"
+                                onClick={() => onOpenSelectedProducts(idx)}
                               >
                                 {translateAdmin("adminDynamic.selectedCount", {
                                   count: tier.selectedAddonProducts.length,
                                 })}
-                              </button>
+                              </s-button>
                             )}
                         </div>
+                        {validationErrors[
+                          `addons.products.tiers.${tierId}.products`
+                        ] && (
+                          <s-text
+                            id={`configure-addons-products-tiers-${tierId}-products`}
+                            tone="critical"
+                          >
+                            {
+                              validationErrors[
+                                `addons.products.tiers.${tierId}.products`
+                              ]
+                            }
+                          </s-text>
+                        )}
                         <s-checkbox
                           label={translateAdmin(
                             "adminAttributes.displayVariantsAsIndividualProducts"
@@ -278,9 +250,7 @@ export function FpbAddonTierEditor({
                             updateAddonTiers(updated);
                           }}
                         />
-                        <div
-                          className={fullPageBundleStyles.addonsDiscountGrid}
-                        >
+                        <div className={styles.addonsDiscountGrid}>
                           <s-select
                             label={translateAdmin(
                               "adminAttributes.discountBasedOn"
@@ -346,9 +316,15 @@ export function FpbAddonTierEditor({
                             min={1}
                           />
                           <s-number-field
+                            id={`configure-addons-products-tiers-${tierId}-discount`}
                             label={translateAdmin(
                               "adminAttributes.discountOnAddOns"
                             )}
+                            error={
+                              validationErrors[
+                                `addons.products.tiers.${tierId}.discount`
+                              ]
+                            }
                             value={String(
                               tier.discountValue ?? tier.discount?.value ?? 0
                             )}
@@ -369,189 +345,83 @@ export function FpbAddonTierEditor({
                             }}
                             min={0}
                             max={100}
+                            step={1}
+                            inputMode="numeric"
                             suffix="%"
                           />
                         </div>
-                        <div className={fullPageBundleStyles.addonsTierRules}>
-                          <h5>
-                            {translateAdmin(
-                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.tierRules"
-                            )}
-                          </h5>
-                          <p>
-                            {translateAdmin(
-                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.createRulesBasedOnQuantityOfProductsAddedOnThisTier"
-                            )}
-                          </p>
-                          <p>
-                            {translateAdmin(
-                              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.noteRulesAreOnlyValidOnThisTier"
-                            )}
-                          </p>
-                          {getAddonConditions(tier).length > 0 && (
-                            <div className={fullPageBundleStyles.rulesList}>
-                              {getAddonConditions(tier).map(
-                                (rule: any, ruleIndex: number) => (
-                                  <div
-                                    key={rule.id || ruleIndex}
-                                    className={fullPageBundleStyles.ruleCard}
-                                  >
-                                    <div
-                                      className={
-                                        fullPageBundleStyles.ruleHeader
-                                      }
-                                    >
-                                      <h4
-                                        style={{
-                                          margin: 0,
-                                          fontSize: 14,
-                                          fontWeight: 650,
-                                        }}
-                                      >
-                                        {translateAdmin(
-                                          "adminDynamic.ruleNumber",
-                                          { number: ruleIndex + 1 }
-                                        )}
-                                      </h4>
-                                      <s-button
-                                        variant="tertiary"
-                                        tone="critical"
-                                        icon="delete"
-                                        onClick={() =>
-                                          removeAddonTierCondition(
-                                            idx,
-                                            String(rule.id ?? ruleIndex)
-                                          )
-                                        }
-                                      >
-                                        {translateAdmin(
-                                          "adminExtracted.shared.filePicker.filepickertrigger.remove"
-                                        )}
-                                      </s-button>
-                                    </div>
-                                    <div
-                                      className={
-                                        fullPageBundleStyles.ruleFields
-                                      }
-                                    >
-                                      <s-select
-                                        label={translateAdmin(
-                                          "dashboard.table.type"
-                                        )}
-                                        value={rule.type || "quantity"}
-                                        onChange={(e) =>
-                                          updateAddonTierCondition(
-                                            idx,
-                                            String(rule.id ?? ruleIndex),
-                                            "type",
-                                            (e.target as HTMLSelectElement)
-                                              .value
-                                          )
-                                        }
-                                      >
-                                        <s-option value="quantity">
-                                          {translateAdmin(
-                                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.quantity"
-                                          )}
-                                        </s-option>
-                                        <s-option value="amount">
-                                          {translateAdmin(
-                                            "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountpricingrules.amount"
-                                          )}
-                                        </s-option>
-                                      </s-select>
-                                      <s-select
-                                        label={translateAdmin(
-                                          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                                        )}
-                                        value={
-                                          rule.condition || "lessThanOrEqualTo"
-                                        }
-                                        onChange={(e) =>
-                                          updateAddonTierCondition(
-                                            idx,
-                                            String(rule.id ?? ruleIndex),
-                                            "condition",
-                                            (e.target as HTMLSelectElement)
-                                              .value
-                                          )
-                                        }
-                                      >
-                                        {[
-                                          ...CATEGORY_CONDITION_OPERATOR_OPTIONS,
-                                        ].map((opt) => (
-                                          <s-option
-                                            key={opt.value}
-                                            value={opt.value}
-                                          >
-                                            {opt.label}
-                                          </s-option>
-                                        ))}
-                                      </s-select>
-                                      <s-number-field
-                                        label={translateAdmin(
-                                          "adminAttributes.value"
-                                        )}
-                                        value={rule.value ?? ""}
-                                        onInput={(e) => {
-                                          updateAddonTierCondition(
-                                            idx,
-                                            String(rule.id ?? ruleIndex),
-                                            "value",
-                                            (e.target as HTMLInputElement).value
-                                          );
-                                        }}
-                                        autocomplete="off"
-                                      />
-                                    </div>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          )}
-                          <div
-                            className={
-                              fullPageBundleStyles.addonsTierRuleAction
-                            }
+                        {validationErrors[
+                          `addons.products.tiers.${tierId}.eligibility`
+                        ] && (
+                          <s-text
+                            id={`configure-addons-products-tiers-${tierId}-eligibility`}
+                            tone="critical"
                           >
-                            <button
-                              type="button"
-                              className={
-                                fullPageBundleStyles.addonsTierFullWidthButton
-                              }
-                              onClick={() => addAddonTierCondition(idx)}
-                            >
-                              {translateAdmin(
-                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addTierRule"
-                              )}
-                            </button>
-                          </div>
-                        </div>
+                            {
+                              validationErrors[
+                                `addons.products.tiers.${tierId}.eligibility`
+                              ]
+                            }
+                          </s-text>
+                        )}
+                        <FpbAddonTierRules
+                          actionClassName={styles.addonsTierRuleAction}
+                          ruleCardClassName={styles.ruleCard}
+                          ruleFieldsClassName={styles.ruleFields}
+                          ruleHeaderClassName={styles.ruleHeader}
+                          rules={getAddonConditions(tier)}
+                          rulesListClassName={styles.rulesList}
+                          tierIndex={idx}
+                          tierRulesClassName={styles.addonsTierRules}
+                          onAdd={addAddonTierCondition}
+                          onRemove={removeAddonTierCondition}
+                          onUpdate={updateAddonTierCondition}
+                        />
                       </s-stack>
                     </div>
                   )}
                 </div>
               );
             })}
-            <div className={fullPageBundleStyles.addonsTierAddAction}>
-              <button
-                type="button"
-                className={fullPageBundleStyles.addonsTierFullWidthButton}
-                onClick={() => {
-                  updateAddonTiers([
-                    ...addonTiers,
-                    {
-                      ...createDefaultAddonDraftTier(addonTiers.length),
-                    },
-                  ]);
-                  setActiveAddonTierIndex(addonTiers.length);
-                }}
+            <s-clickable
+              inlineSize="100%"
+              border="base"
+              borderRadius="small"
+              padding="small"
+              accessibilityLabel={translateAdmin(
+                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+              )}
+              onClick={() => {
+                updateAddonTiers([
+                  ...addonTiers,
+                  {
+                    ...createDefaultAddonDraftTier(addonTiers.length),
+                  },
+                ]);
+                onActiveTierIndexChange(() => addonTiers.length);
+              }}
+            >
+              <s-stack
+                direction="inline"
+                gap="small"
+                alignItems="center"
+                justifyContent="center"
               >
-                {translateAdmin(
-                  "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
-                )}
-              </button>
-            </div>
+                <s-icon type="plus" />
+                <s-text>
+                  {translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                  )}
+                </s-text>
+              </s-stack>
+            </s-clickable>
+            {validationErrors["addons.products.tiers"] && (
+              <div style={{ marginTop: 8 }}>
+                <s-text id="configure-addons-products-tiers" tone="critical">
+                  {validationErrors["addons.products.tiers"]}
+                </s-text>
+              </div>
+            )}
           </>
         );
       })()}

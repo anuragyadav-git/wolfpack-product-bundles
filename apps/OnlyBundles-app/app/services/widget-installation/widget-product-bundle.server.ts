@@ -6,7 +6,7 @@
  */
 
 import { AppLogger } from "../../lib/logger";
-import type { ShopifyAdmin } from "../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../shopify.server";
 import {
   generateProductBundleConfigurationLink,
   generateThemeEditorDeepLink,

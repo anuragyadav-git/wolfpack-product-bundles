@@ -45,6 +45,12 @@ function unique(files) {
   return [...new Set(files.map(normalizePath).filter(Boolean))].sort();
 }
 
+function toAppWorkspacePaths(files) {
+  return files.map(normalizePath).map((file) => (
+    file.startsWith(APP_PREFIX) ? file.slice(APP_PREFIX.length) : file
+  ));
+}
+
 function isGeneratedPath(file) {
   const normalized = normalizePath(file);
   return GENERATED_FILES.has(normalized)
@@ -247,7 +253,6 @@ module.exports = {
   createCheckPlan,
   excludeExactRenameDestinations,
   findBannedTestPatterns,
-  isGeneratedPath,
   isGraphifyConfigurationFailure,
-  normalizePath,
+  toAppWorkspacePaths,
 };

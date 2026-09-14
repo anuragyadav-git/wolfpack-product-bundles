@@ -6,26 +6,13 @@ import {
   mergePpbBundleEmbedTranslations,
   mergePpbBundleWidgetTranslations,
   normalizePpbBundleEmbedConfig,
-  removeLegacyPpbEmbedTextOverrides,
   serializePpbBundleEmbedConfig,
   validatePpbBundleEmbedConfig,
 } from "../../../app/lib/ppb-bundle-embed";
 
 describe("PPB bundle embed configuration", () => {
-  it("normalizes missing and legacy-only values to disabled canonical defaults", () => {
+  it("normalizes missing values to disabled canonical defaults", () => {
     expect(normalizePpbBundleEmbedConfig(null)).toEqual(PPB_BUNDLE_EMBED_DEFAULT);
-    expect(normalizePpbBundleEmbedConfig({ textOverrides: { bundleEmbedEnabled: "true", embedTitle: "Legacy" } })).toEqual(PPB_BUNDLE_EMBED_DEFAULT);
-  });
-
-  it("removes legacy embed override keys while preserving unrelated copy", () => {
-    expect(removeLegacyPpbEmbedTextOverrides({
-      addToCartButton: "Add",
-      bundleEmbedEnabled: "true",
-      embedTitle: "Legacy",
-      embedSubTitle: "Legacy sub",
-      embedDisplayOn: "all_products",
-      embedAddBrowsedProduct: "true",
-    })).toEqual({ addToCartButton: "Add" });
   });
 
   it("normalizes and serializes only the canonical configuration", () => {

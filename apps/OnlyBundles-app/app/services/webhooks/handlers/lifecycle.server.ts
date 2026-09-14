@@ -1,7 +1,7 @@
 /**
  * Lifecycle Webhook Handlers
  *
- * Handles app lifecycle webhooks delivered through the direct worker and Inngest:
+ * Handles app lifecycle webhooks delivered through Remix ingress and Inngest:
  * - app/uninstalled
  * - app/scopes_update
  *

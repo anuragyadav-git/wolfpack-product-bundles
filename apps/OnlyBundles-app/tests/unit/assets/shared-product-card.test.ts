@@ -5,6 +5,14 @@ const {
   getProductImageUrls,
   createSharedProductCardElement,
 } = require('../../../app/assets/widgets/shared/components/product-card.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const {
+  fullPageProductCardFooterMethods,
+} = require('../../../app/assets/widgets/full-page/methods/product-card-footer-methods.js');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const {
+  CurrencyManager,
+} = require('../../../app/assets/widgets/shared/currency-manager.js');
 
 export {};
 
@@ -26,6 +34,91 @@ describe('shared product card data helpers', () => {
       'https://cdn.example.test/third.jpg',
     ]);
   });
+
+  it('formats product and compare-at money with the presentment currency code', () => {
+    const document = new JSDOM('<!doctype html>').window.document;
+    const card = createSharedProductCardElement(
+      {
+        selectionId: 'variant-1',
+        title: 'Euro product',
+        price: 1299,
+        currencyCode: 'EUR',
+        compareAtPrice: 1599,
+        compareAtCurrencyCode: 'EUR',
+      },
+      0,
+      { display: { code: 'USD' } },
+      { document },
+    );
+    const formatter = new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'EUR',
+    });
+
+    expect(card.textContent).toContain(formatter.format(12.99));
+    expect(card.textContent).toContain(formatter.format(15.99));
+    expect(card.textContent).not.toContain('$');
+  });
+
+  it.each(['USD', 'CAD', 'AUD', 'NZD', 'SGD'])(
+    'uses the compact native symbol for %s product-card prices',
+    (currencyCode) => {
+      const document = new JSDOM('<!doctype html>').window.document;
+      const card = createSharedProductCardElement(
+        {
+          selectionId: `variant-${currencyCode}`,
+          title: `${currencyCode} product`,
+          price: 1299,
+          currencyCode,
+          compareAtPrice: 1599,
+          compareAtCurrencyCode: currencyCode,
+        },
+        0,
+        { display: { code: currencyCode }, locale: 'en-GB' },
+        { document },
+      );
+
+      expect(card.textContent).toContain('$12.99');
+      expect(card.textContent).toContain('$15.99');
+      expect(card.textContent).not.toMatch(/(?:US|CA|A|NZ|SG)\$/);
+    },
+  );
+
+  it('keeps the compact native currency symbol after an FPB variant change', () => {
+    const document = new JSDOM('<!doctype html>').window.document;
+    const card = createSharedProductCardElement(
+      {
+        selectionId: 'variant-black',
+        title: 'T-Shirt',
+        price: 3000,
+        currencyCode: 'USD',
+      },
+      0,
+      { display: { code: 'USD' }, locale: 'en-CA' },
+      { document },
+    );
+    const currencySpy = jest.spyOn(CurrencyManager, 'getCurrencyInfo').mockReturnValue({
+      calculation: { code: 'USD', rate: 1 },
+      display: { code: 'USD', symbol: '$', rate: 1 },
+      isMultiCurrency: false,
+      locale: 'en-CA',
+    });
+
+    fullPageProductCardFooterMethods.updateProductCardVariantDisplay.call({
+      buildPaidAddonProductDisplayData: (product: any) => product,
+      selectedBundle: null,
+      selectedSellingPlanId: null,
+    }, card, {
+      selectionId: 'variant-navy',
+      title: 'T-Shirt',
+      price: 3000,
+      currencyCode: 'USD',
+    }, {});
+
+    expect(card.querySelector('.product-price')?.textContent).toBe('$30.00');
+    expect(card.querySelector('.product-price')?.textContent).not.toBe('US$30.00');
+    currencySpy.mockRestore();
+  });
 });
 
 describe('shared product card magnifier', () => {
@@ -34,7 +127,7 @@ describe('shared product card magnifier', () => {
     return createSharedProductCardElement(
       { selectionId: 'variant-1', title: 'Test product', price: 1000 },
       0,
-      { display: { format: '${{amount}}' } },
+      { display: { code: 'USD' } },
       {
         ...options,
         document: dom.window.document,
@@ -57,5 +150,41 @@ describe('shared product card magnifier', () => {
     const card = createCard({ productDetailsEnabled: false });
     expect(card.querySelector('.bw-product-card__image-overlay')).toBeNull();
     expect(card.querySelector('.bw-product-card__magnifier')).toBeNull();
+  });
+});
+
+describe('shared product card reading order', () => {
+  it('places variant controls before price and Add controls', () => {
+    const dom = new JSDOM('<!doctype html><html><body></body></html>');
+    const selector = dom.window.document.createElement('select');
+    selector.setAttribute('aria-label', 'Color');
+    selector.append(new dom.window.Option('Black', 'black'));
+
+    const card = createSharedProductCardElement(
+      {
+        selectionId: 'variant-black',
+        title: 'T-Shirt',
+        price: 3000,
+        currencyCode: 'USD',
+      },
+      0,
+      { display: { code: 'USD' } },
+      {
+        document: dom.window.document,
+        variantSelectorElement: selector,
+        addButtonText: 'Add',
+      },
+    );
+
+    const selectorRegion = card.querySelector('[data-bw-product-selector="true"]');
+    const priceRegion = card.querySelector('[data-bw-card-price="true"]');
+    const actionRegion = card.querySelector('[data-bw-card-action="true"]');
+    const follows = dom.window.Node.DOCUMENT_POSITION_FOLLOWING;
+
+    expect(selectorRegion).not.toBeNull();
+    expect(priceRegion).not.toBeNull();
+    expect(actionRegion).not.toBeNull();
+    expect(selectorRegion!.compareDocumentPosition(priceRegion!) & follows).toBe(follows);
+    expect(priceRegion!.compareDocumentPosition(actionRegion!) & follows).toBe(follows);
   });
 });

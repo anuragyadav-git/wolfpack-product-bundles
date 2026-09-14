@@ -38,8 +38,8 @@ describe("subscription pricing content", () => {
   });
 
   it("uses the approved browser-safe Growth prices", () => {
-    expect(PLANS.growth.price).toBe(19.99);
-    expect(PLANS.growth.annualPrice).toBe(199);
+    expect(PLANS.growth.price).toBe(9.99);
+    expect(PLANS.growth.annualPrice).toBe(99.9);
   });
 
   it("offers one Shopify-managed 14-day Growth trial", () => {

@@ -48,6 +48,14 @@ describe('offer operations route', () => {
     );
   });
 
+  it('renders one named native CSV drop zone with the accepted formats', () => {
+    const view = renderToStaticMarkup(React.createElement(OfferOperationsRoute));
+
+    expect(view).toMatch(/<s-drop-zone[^>]*name="offer-policy-csv-/);
+    expect(view).toContain('accept=".csv,text/csv"');
+    expect(view).toContain('label="offerPolicyCsv.import.dropLabel"');
+  });
+
   it('renders the authenticated operations surface without serving file bytes', async () => {
     const response = await loader({
       request: new Request('https://app.test/app/offer-operations?download=1'),

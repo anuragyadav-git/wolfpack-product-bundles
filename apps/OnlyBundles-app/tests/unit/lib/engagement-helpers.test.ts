@@ -49,6 +49,7 @@ describe("computeBundleFunnel", () => {
       { bundleId: "b1", sessionId: "s3", eventName: "wpb:bundle-add-to-cart-success", createdAt: D("2026-06-01T00:13Z") },
     );
     const attr: OrderAttributionRow[] = Array.from({ length: 4 }, (_, i) => ({
+      orderId: `gid://shopify/Order/${i + 1}`,
       bundleId: "b1",
       revenue: 5000,
       createdAt: D("2026-06-01T00:00Z"),
@@ -74,10 +75,53 @@ describe("computeBundleFunnel", () => {
 
   it("ignores attribution rows with null bundleId", () => {
     const snap = computeBundleFunnel([], [
-      { bundleId: null, revenue: 9999, createdAt: D("2026-06-01T00:00Z") },
+      { orderId: "gid://shopify/Order/1", bundleId: null, revenue: 9999, createdAt: D("2026-06-01T00:00Z") },
     ]);
     expect(snap.addedToCart).toBe(0);
     expect(snap.revenueCents).toBe(0);
+  });
+
+  it("counts one completed order when the order contains multiple bundles", () => {
+    const snap = computeBundleFunnel([], [
+      {
+        orderId: "gid://shopify/Order/1",
+        bundleId: "bundle-a",
+        revenue: 10_000,
+        bundleRevenue: 3_000,
+        createdAt: D("2026-06-01T00:00Z"),
+      },
+      {
+        orderId: "gid://shopify/Order/1",
+        bundleId: "bundle-b",
+        revenue: 10_000,
+        bundleRevenue: 2_000,
+        createdAt: D("2026-06-01T00:00Z"),
+      },
+    ]);
+
+    expect(snap.checkedOut).toBe(1);
+    expect(snap.revenueCents).toBe(5_000);
+  });
+
+  it("ignores malformed attribution rows without a canonical order id", () => {
+    const snap = computeBundleFunnel([], [
+      {
+        orderId: "gid://shopify/Order/1",
+        bundleId: "bundle-a",
+        revenue: 10_000,
+        bundleRevenue: 3_000,
+        createdAt: D("2026-06-01T00:00Z"),
+      },
+      {
+        bundleId: "bundle-b",
+        revenue: 8_000,
+        bundleRevenue: 2_000,
+        createdAt: D("2026-06-01T00:00Z"),
+      } as OrderAttributionRow,
+    ]);
+
+    expect(snap.checkedOut).toBe(1);
+    expect(snap.revenueCents).toBe(3_000);
   });
 });
 
@@ -89,9 +133,9 @@ describe("computeOfferFunnel", () => {
     { bundleId: "b3", offerPolicyId: null, sessionId: "s3", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
   ];
   const attributionRows: OrderAttributionRow[] = [
-    { bundleId: "b1", offerPolicyId: "p1", revenue: 1200, createdAt: D("2026-06-01") },
-    { bundleId: "b2", offerPolicyId: "p2", revenue: 800, createdAt: D("2026-06-01") },
-    { bundleId: "b3", offerPolicyId: null, revenue: 500, createdAt: D("2026-06-01") },
+    { orderId: "gid://shopify/Order/1", bundleId: "b1", offerPolicyId: "p1", revenue: 1200, createdAt: D("2026-06-01") },
+    { orderId: "gid://shopify/Order/2", bundleId: "b2", offerPolicyId: "p2", revenue: 800, createdAt: D("2026-06-01") },
+    { orderId: "gid://shopify/Order/3", bundleId: "b3", offerPolicyId: null, revenue: 500, createdAt: D("2026-06-01") },
   ];
 
   it("filters one policy before computing the decision-to-revenue funnel", () => {
@@ -156,8 +200,8 @@ describe("buildBundlePerformanceMatrix", () => {
       { bundleId: "b2", sessionId: "s3", eventName: "wpb:session-engaged", createdAt: D("2026-06-01") },
     ];
     const attr: OrderAttributionRow[] = [
-      { bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
-      { bundleId: "b2", revenue: 25_000, createdAt: D("2026-06-01") },
+      { orderId: "gid://shopify/Order/1", bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
+      { orderId: "gid://shopify/Order/2", bundleId: "b2", revenue: 25_000, createdAt: D("2026-06-01") },
     ];
     const rows = buildBundlePerformanceMatrix(bundles, eng, attr, []);
     expect(rows.map(r => r.bundleId)).toEqual(["b2", "b1"]);
@@ -170,7 +214,7 @@ describe("buildBundlePerformanceMatrix", () => {
 
   it("keeps view-only bundles and computes overall conversion from orders divided by views", () => {
     const attr: OrderAttributionRow[] = [
-      { bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
+      { orderId: "gid://shopify/Order/1", bundleId: "b1", revenue: 10_000, createdAt: D("2026-06-01") },
     ];
     const views = Array.from({ length: 4 }, () => ({
       bundleId: "b1",

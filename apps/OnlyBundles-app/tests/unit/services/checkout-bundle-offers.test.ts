@@ -76,6 +76,28 @@ describe("checkout bundle offer runtime contract", () => {
     });
   });
 
+  it("ignores legacy step JSON products when building PPB offers and amounts", () => {
+    const staleVariant = variant("399");
+    const bundle = {
+      status: "ACTIVE",
+      bundleType: "product_page",
+      steps: [{
+        id: "step-gift",
+        isFreeGift: true,
+        StepProduct: [],
+        StepCategory: [{
+          products: [{ variants: [{ ...staleVariant, price: "99.00" }] }],
+        }],
+        products: [{ variants: [{ ...staleVariant, price: "99.00" }] }],
+      }],
+    };
+
+    expect(buildCheckoutOfferRuntime(bundle).offers).toEqual([]);
+    expect(calculateCheckoutOfferSelectionAmount(bundle, {
+      components: [{ variantId: staleVariant.id, quantity: 1 }],
+    })).toBe(0);
+  });
+
   it("keeps gifts single-quantity unless configuration explicitly permits more", () => {
     const baseStep = {
       id: "step-gift",

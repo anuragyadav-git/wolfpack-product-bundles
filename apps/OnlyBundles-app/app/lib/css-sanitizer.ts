@@ -18,7 +18,7 @@
  * - Event handlers (onclick, onerror, etc.)
  */
 
-export interface CssSanitizeResult {
+interface CssSanitizeResult {
   sanitizedCss: string;
   isValid: boolean;
   warnings: string[];
@@ -169,7 +169,7 @@ export function sanitizeCss(css: string): CssSanitizeResult {
  * @param css - CSS string to validate
  * @returns Object with validation result and error messages
  */
-export function validateCssSyntax(css: string): { isValid: boolean; errors: string[] } {
+function validateCssSyntax(css: string): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   if (!css || css.trim() === "") {

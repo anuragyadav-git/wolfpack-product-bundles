@@ -5,8 +5,15 @@ import { markBundlePreviewComplete } from "../../../lib/bundle-preview-readiness
 import { pickPpbPreviewUrl } from "../../../lib/ppb-preview-url";
 import { appendBundlePreviewToken } from "../../../lib/bundle-preview-url";
 import { prepareStorefrontPreviewForOpen } from "../../../lib/storefront-sync-preview.client";
-import { validatePpbWidgetPlacementBeforePreview } from "../../../lib/ppb-widget-placement.client";
-import { blockUnsavedAdminNavigation } from "../../../lib/admin-unsaved-navigation";
+import {
+  resolvePpbWidgetPlacementAction,
+  validatePpbWidgetPlacementFromAppBridge,
+} from "../../../lib/ppb-widget-placement.client";
+import { buildProductPageThemeEditorDeepLink } from "../../../lib/bundle-config/product-page-admin-sections";
+import {
+  blockUnsavedAdminNavigation,
+  navigateWithSaveBarConfirmation,
+} from "../../../lib/admin-unsaved-navigation";
 import {
   openPendingDashboardPreview,
   navigatePendingDashboardPreview,
@@ -19,6 +26,9 @@ import {
   getGuidedTourTransition,
   type TourStep,
 } from "../../../components/bundle-configure/tourSteps";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type { usePpbVisibilityState } from "./usePpbVisibilityState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
 
 function recordBundlePreview(bundleLink: string) {
   const formData = new FormData();
@@ -33,9 +43,21 @@ export function usePpbPreviewReadinessHandlers({
   visibility,
   templateState,
 }: {
-  base: any;
-  visibility: any;
-  templateState: any;
+  base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
+    | "apiKey" | "appEmbedEnabled" | "blockHandle" | "bundle" | "bundleProduct"
+    | "clearOperationAlert" | "forceNavigation" | "formState" | "isDirty"
+    | "loadedBundleProduct" | "loaderData" | "navigate" | "openThemeEditorForAppEmbed"
+    | "pricingState" | "productStatus" | "refreshParentProductStatusFromShopify"
+    | "setActiveSection" | "setOperationAlert" | "shop" | "shopify" | "stepsState"
+    | "themeEditorUrl" | "triggerSaveBarIrritation"
+  >;
+  visibility: Pick<ReturnType<typeof usePpbVisibilityState>,
+    "bundleEmbedEnabled" | "upsellWidgetEnabled"
+  >;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>,
+    | "hasPreview" | "setActiveTabIndex" | "setHasPreview" | "setReadinessOpen"
+    | "setSlideDir" | "setSlideKey"
+  >;
 }) {
   const [isPreviewBundleLoading, setIsPreviewBundleLoading] = useState(false);
   const closeDisabledPreviewModal = useCallback(() => undefined, []);
@@ -71,7 +93,7 @@ export function usePpbPreviewReadinessHandlers({
       let productUrl = pickPpbPreviewUrl({
         appEmbedEnabled: true,
         bundleStatus: bundleStatusForPreview,
-        productHandle: base.bundle.shopifyProductHandle,
+        productHandle: base.bundle.shopifyProductHandle ?? null,
         bundleProduct: base.bundleProduct,
         shop: base.shop,
       });
@@ -122,19 +144,47 @@ export function usePpbPreviewReadinessHandlers({
         }
       }
       if (isStorefrontUrl) {
-        try {
-          const placement = await validatePpbWidgetPlacementBeforePreview(
-            window.location.href,
-          );
-          if (!placement.ready && placement.message) {
-            base.setOperationAlert({
-              id: "widget-placement",
-              heading: "Widget placement needed",
-              message: placement.message,
-            });
+        const templateSuffix = (base.formState.templateName || "").trim();
+        const installationLink = buildProductPageThemeEditorDeepLink({
+          shop: base.shop,
+          apiKey: base.apiKey,
+          blockHandle: base.blockHandle || "bundle-product-page",
+          bundleId: base.bundle.id,
+          productHandle: base.bundle.shopifyProductHandle,
+          productPreviewUrl: productUrl,
+          template: {
+            handle: templateSuffix ? `product.${templateSuffix}` : "product",
+          },
+        });
+        const placement = await validatePpbWidgetPlacementFromAppBridge({
+          shopify: base.shopify,
+          templateSuffix,
+          installationLink,
+        });
+        const placementAction = resolvePpbWidgetPlacementAction(placement);
+        if (placementAction.type !== "preview") {
+          if (placementAction.type === "setup") {
+            if (
+              !navigatePendingDashboardPreview(
+                pendingPreviewWindow,
+                placementAction.installationLink,
+              )
+            ) {
+              window.open(
+                placementAction.installationLink,
+                "_blank",
+                "noopener,noreferrer",
+              );
+            }
+          } else {
+            closePendingDashboardPreview(pendingPreviewWindow);
           }
-        } catch {
-          // Non-blocking placement validation
+          base.setOperationAlert({
+            id: "widget-placement",
+            heading: "Widget placement needed",
+            message: placementAction.message,
+          });
+          return false;
         }
       }
       const tokenToUse = preview?.previewToken || base.loaderData?.previewToken;
@@ -172,7 +222,7 @@ export function usePpbPreviewReadinessHandlers({
   const readinessItems = useMemo<BundleReadinessItem[]>(() => {
     const hasProducts =
       base.stepsState.steps.reduce((totalProducts: number, step: any) => {
-        const legacyProducts = Array.isArray(step.StepProduct)
+        const stepProductCount = Array.isArray(step.StepProduct)
           ? step.StepProduct.length
           : 0;
         const categoryProductCount = Array.isArray((step as any).StepCategory)
@@ -185,7 +235,7 @@ export function usePpbPreviewReadinessHandlers({
               0,
             )
           : 0;
-        return totalProducts + legacyProducts + categoryProductCount;
+        return totalProducts + stepProductCount + categoryProductCount;
       }, 0) >= 3;
     const widgetPlaced =
       visibility.upsellWidgetEnabled || visibility.bundleEmbedEnabled;
@@ -253,82 +303,75 @@ export function usePpbPreviewReadinessHandlers({
   );
   const handleSectionChange = useCallback(
     (section: string) => {
-      if (
-        blockUnsavedAdminNavigation(
-          base.isDirty,
-          base.triggerSaveBarIrritation,
-        )
-      ) {
-        return;
-      }
-      base.setActiveSection(section);
+      void navigateWithSaveBarConfirmation(
+        () => base.shopify.saveBar.leaveConfirmation(),
+        () => {
+          base.setActiveSection(section);
+        },
+      );
     },
     [base],
   );
   const openProductInAdmin = useCallback(
     (productId: string) => {
-      const numericProductId = productId.startsWith("gid://")
-        ? (productId.split("/").pop() ?? productId)
-        : productId;
-      const productGid = productId.startsWith("gid://")
-        ? productId
-        : `gid://shopify/Product/${productId}`;
-      const storeHandle = base.shop?.replace(".myshopify.com", "");
-      const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
-      const openFallback = () => {
-        try {
-          base.shopify.navigate(adminProductUrl);
-        } catch (error: any) {
-          AppLogger.warn(
-            "Falling back to a new tab for Admin product navigation",
-            { productId },
-            error as any,
-          );
-          window.open(adminProductUrl, "_blank");
-        }
-        base.refreshParentProductStatusFromShopify();
-      };
-      const intentsApi = (base.shopify as any).intents;
-      if (typeof intentsApi?.invoke === "function") {
-        try {
-          const intentResult = intentsApi.invoke("edit:shopify/Product", {
-            type: "shopify/Product",
-            value: productGid,
-          });
-          base.refreshParentProductStatusFromShopify();
-          if (typeof intentResult?.catch === "function") {
-            void intentResult.catch((error: unknown) => {
-              AppLogger.warn(
-                "Falling back after Product editor intent failed",
-                { productId },
-                error as any,
-              );
+      void navigateWithSaveBarConfirmation(
+        () => base.shopify.saveBar.leaveConfirmation(),
+        () => {
+          const numericProductId = productId.startsWith("gid://")
+            ? (productId.split("/").pop() ?? productId)
+            : productId;
+          const productGid = productId.startsWith("gid://")
+            ? productId
+            : `gid://shopify/Product/${productId}`;
+          const storeHandle = base.shop?.replace(".myshopify.com", "");
+          const adminProductUrl = `https://admin.shopify.com/store/${storeHandle}/products/${numericProductId}`;
+          const openFallback = () => {
+            window.open(adminProductUrl, "_blank", "noopener,noreferrer");
+            base.refreshParentProductStatusFromShopify();
+          };
+          const intentsApi = (base.shopify as any).intents;
+          if (typeof intentsApi?.invoke === "function") {
+            try {
+              const intentResult = intentsApi.invoke("edit:shopify/Product", {
+                type: "shopify/Product",
+                value: productGid,
+              });
+              if (intentResult && typeof intentResult.then === "function") {
+                intentResult
+                  .then(() => {
+                    base.refreshParentProductStatusFromShopify();
+                  })
+                  .catch(() => {
+                    openFallback();
+                  });
+              } else {
+                base.refreshParentProductStatusFromShopify();
+              }
+            } catch {
               openFallback();
-            });
+            }
+          } else {
+            openFallback();
           }
-          return;
-        } catch (error: any) {
-          AppLogger.warn(
-            "Falling back after Product editor intent failed",
-            { productId },
-            error as any,
-          );
-        }
-      }
-      openFallback();
+        },
+      );
     },
     [base],
   );
   const handleBackClick = useCallback(() => {
-    if (
-      blockUnsavedAdminNavigation(
-        base.isDirty && !base.forceNavigation,
-        base.triggerSaveBarIrritation,
-      )
-    ) {
+    if (base.forceNavigation) {
+      navigateBackOrFallback(base.navigate, "/app/dashboard", {
+        replaceFallback: true,
+      });
       return;
     }
-    navigateBackOrFallback(base.navigate, "/app/dashboard", { replaceFallback: true });
+    void navigateWithSaveBarConfirmation(
+      () => base.shopify.saveBar.leaveConfirmation(),
+      () =>
+        navigateBackOrFallback(base.navigate, "/app/dashboard", {
+          replaceFallback: true,
+        }),
+    );
   }, [base]);
   const handleReadinessItemClick = useCallback(
     (key: string) => {

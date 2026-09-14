@@ -2,8 +2,8 @@
  * Unit tests -- PPB Select Template metafield sync
  */
 
-import { handleUpdateBundleDesignTemplate } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/handlers.server";
-import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync.server";
+import { handleUpdateBundleDesignTemplate } from "../../../app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/design-template.server";
+import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 
 jest.mock("../../../app/db.server", () => ({
   __esModule: true,
@@ -34,6 +34,7 @@ jest.mock("../../../app/services/subscriptions/design-entitlement-state.server",
 }));
 
 jest.mock("../../../app/services/subscriptions/bundle-entitlement-gate.server", () => ({
+  assertTemplateSelectionAllowed: jest.fn(),
   updateBundleWithPublicationGate: jest.fn((input) => input.database.bundle.update({
     where: { id: input.bundleId, shopId: input.shopDomain },
     data: input.data,
@@ -51,7 +52,7 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/bundles/metafield-sync.server", () => ({
+jest.mock("../../../app/services/bundles/metafield-sync/operations/bundle-product.server", () => ({
   updateBundleProductMetafields: jest.fn().mockResolvedValue(undefined),
   updateComponentProductMetafields: jest.fn().mockResolvedValue(undefined),
 }));
@@ -60,14 +61,10 @@ jest.mock("../../../app/services/theme-colors.server", () => ({
   syncThemeColors: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../../app/services/widget-installation.server", () => ({
+jest.mock("../../../app/services/widget-installation/widget-installation-core.server", () => ({
   WidgetInstallationService: {
     validateProductBundleWidgetSetup: jest.fn(),
   },
-}));
-
-jest.mock("../../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
 }));
 
 jest.mock("../../../app/lib/css-sanitizer", () => ({
@@ -138,7 +135,14 @@ describe("PPB Select Template metafield sync", () => {
       pricing: {
         enabled: true,
         method: "buy_x_get_y",
-        rules: [{ id: "rule-1", customerBuys: 2, customerGets: 1, discountValue: 100 }],
+        rules: [{
+          id: "rule-1",
+          conditionType: "quantity",
+          conditionValue: 2,
+          customerBuys: 2,
+          customerGets: 1,
+          discountValue: 100,
+        }],
         messages: {},
       },
     });

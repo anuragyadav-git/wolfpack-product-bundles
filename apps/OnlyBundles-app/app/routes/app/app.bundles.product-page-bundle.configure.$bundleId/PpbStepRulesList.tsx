@@ -1,14 +1,20 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
-import { PlusIcon } from "./PpbStepSetupShared";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import {
+  STEP_CONDITION_OPERATOR_OPTIONS,
+  STEP_CONDITION_TYPE_OPTIONS,
+} from "../../../constants/bundle";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbStepRulesList({ step }: { step: any }) {
-  const {
-    conditionsState,
-    productPageBundleStyles,
-    STEP_CONDITION_OPERATOR_OPTIONS,
-    STEP_CONDITION_TYPE_OPTIONS,
-  } = usePpbConfigureContext();
+export type PpbStepRulesListProps = Pick<
+  PpbConfigureFlow,
+  "conditionsState"
+> & { step: { id: string } };
+
+export function PpbStepRulesList({
+  conditionsState,
+  step,
+}: PpbStepRulesListProps) {
   const rules = conditionsState.stepConditions[step.id] || [];
 
   return (
@@ -21,7 +27,7 @@ export function PpbStepRulesList({ step }: { step: any }) {
         </div>
       ) : (
         <div className={productPageBundleStyles.rulesList}>
-          {rules.map((rule: any, ruleIndex: number) => (
+          {rules.map((rule, ruleIndex) => (
             <div key={rule.id} className={productPageBundleStyles.ruleCard}>
               <div className={productPageBundleStyles.ruleHeader}>
                 <h4 style={{ margin: 0, fontSize: 14, fontWeight: 650 }}>
@@ -33,6 +39,9 @@ export function PpbStepRulesList({ step }: { step: any }) {
                   variant="tertiary"
                   tone="critical"
                   icon="delete"
+                  accessibilityLabel={translateAdmin(
+                    "adminExtracted.shared.filePicker.filepickertrigger.remove"
+                  )}
                   onClick={() =>
                     conditionsState.removeConditionRule(step.id, rule.id)
                   }
@@ -43,70 +52,65 @@ export function PpbStepRulesList({ step }: { step: any }) {
                 </s-button>
               </div>
               <div className={productPageBundleStyles.ruleFields}>
-                <select
-                  className={productPageBundleStyles.ruleInlineSelect}
-                  value={rule.type ?? ""}
-                  onChange={(e) =>
+                <s-select
+                  label={translateAdmin("dashboard.table.type")}
+                  labelAccessibilityVisibility="exclusive"
+                  placeholder={translateAdmin("dashboard.table.type")}
+                  value={rule.type || undefined}
+                  onChange={(e: Event) =>
                     conditionsState.updateConditionRule(
                       step.id,
                       rule.id,
                       "type",
-                      (e.target as HTMLSelectElement).value
+                      (e.currentTarget as HTMLSelectElement).value
                     )
                   }
-                  aria-label={translateAdmin("dashboard.table.type")}
                 >
-                  <option value="" disabled>
-                    {translateAdmin("dashboard.table.type")}
-                  </option>
                   {[...STEP_CONDITION_TYPE_OPTIONS].map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                    <s-option key={opt.value} value={opt.value}>
                       {opt.label}
-                    </option>
+                    </s-option>
                   ))}
-                </select>
-                <select
-                  className={productPageBundleStyles.ruleInlineSelect}
-                  value={rule.operator ?? ""}
-                  onChange={(e) =>
+                </s-select>
+                <s-select
+                  label={translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                  )}
+                  labelAccessibilityVisibility="exclusive"
+                  placeholder={translateAdmin(
+                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
+                  )}
+                  value={rule.operator || undefined}
+                  onChange={(e: Event) =>
                     conditionsState.updateConditionRule(
                       step.id,
                       rule.id,
                       "operator",
-                      (e.target as HTMLSelectElement).value
+                      (e.currentTarget as HTMLSelectElement).value
                     )
                   }
-                  aria-label={translateAdmin(
-                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                  )}
                 >
-                  <option value="" disabled>
-                    {translateAdmin(
-                      "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.condition"
-                    )}
-                  </option>
                   {[...STEP_CONDITION_OPERATOR_OPTIONS].map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                    <s-option key={opt.value} value={opt.value}>
                       {opt.label}
-                    </option>
+                    </s-option>
                   ))}
-                </select>
-                <input
-                  type="number"
-                  className={productPageBundleStyles.ruleInlineNumber}
+                </s-select>
+                <s-number-field
+                  label={translateAdmin("adminAttributes.value")}
+                  labelAccessibilityVisibility="exclusive"
                   min={0}
                   placeholder="0"
-                  value={rule.value ?? ""}
-                  onInput={(e) =>
+                  value={String(rule.value ?? "")}
+                  onInput={(e: Event) =>
                     conditionsState.updateConditionRule(
                       step.id,
                       rule.id,
                       "value",
-                      (e.target as HTMLInputElement).value
+                      (e.currentTarget as HTMLInputElement).value
                     )
                   }
-                  autoComplete="off"
-                  aria-label={translateAdmin("adminAttributes.value")}
+                  autocomplete="off"
                 />
               </div>
               {rules.length === 1 && (
@@ -133,17 +137,19 @@ export function PpbStepRulesList({ step }: { step: any }) {
           ))}
         </div>
       )}
-      <button
-        type="button"
-        className={productPageBundleStyles.addSectionButton}
-        disabled={rules.length >= 2}
+      <s-button
+        variant="secondary"
+        icon="plus"
+        accessibilityLabel={translateAdmin(
+          "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
+        )}
+        disabled={rules.length >= 2 || undefined}
         onClick={() => conditionsState.addConditionRule(step.id)}
       >
-        <PlusIcon />
         {translateAdmin(
           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetuprulemodecontent.addRule"
         )}
-      </button>
+      </s-button>
       {rules.length >= 2 ? (
         <s-stack direction="inline" alignItems="center" gap="small">
           <s-icon type="alert-triangle" tone="caution" />

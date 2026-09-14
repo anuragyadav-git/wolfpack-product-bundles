@@ -5,7 +5,7 @@ title: Storefront Proxy Runtime
 type: test-spec
 status: active
 summary: Verifies that Shopify-hosted storefront runtime data selects the installed app proxy root for the active environment.
-last_audited: 2026-08-31
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -57,6 +57,9 @@ root.
 | 1 | Build hosted runtime | Storefront token, settings, installed proxy root | Snapshot includes `storefrontProxyRoot` | Reuses the existing `$app.ppb_storefront_runtime` metafield |
 | 2 | Sync hosted runtime | SIT root | `metafieldsSet` persists the SIT root | Shopify-hosted value is the storefront source |
 | 3 | Invalid configured root | Malformed path | Sync fails before Shopify mutation | No PROD fallback for malformed SIT configuration |
+| 4 | Reuse a current public token | Titled token includes product listings, product inventory, checkouts, and metaobjects scopes | Existing token is returned | Native Shopify option swatches can resolve their category-metaobject values |
+| 5 | Replace a stale-scope token | Titled token omits `unauthenticated_read_metaobjects` | A newly created token is returned | The serving token is not deleted during rotation; the synchronized runtime switches only after the new token exists |
+| 6 | Missing installation grant | Current app installation omits a required PPB Storefront scope | Fail before creating or synchronizing a token | Avoid accumulating unusable tokens while Shopify still requires reauthorization |
 
 ## Acceptance Criteria
 
@@ -65,3 +68,5 @@ root.
 - [x] Direct PPB, SDK, and app-embed entrypoints initialize the same runtime root.
 - [x] Malformed configured roots fail before storefront traffic is emitted.
 - [x] The eligibility request uses `/apps/product-bundles-sit` in SIT Chrome QA.
+- [x] Both Shopify app configs request `unauthenticated_read_metaobjects`.
+- [x] PPB runtime reuse requires every Storefront scope needed by products, inventory, cart metafields, and Shopify category-metaobject swatches.

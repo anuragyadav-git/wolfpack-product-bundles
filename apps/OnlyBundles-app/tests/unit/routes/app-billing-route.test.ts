@@ -1,5 +1,7 @@
 import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { flushSync } from "react-dom";
+import { createRoot } from "react-dom/client";
+import { JSDOM } from "jsdom";
 import BillingPage, { action, loader } from "../../../app/routes/app/app.billing";
 import { authenticate } from "../../../app/shopify.server";
 import { BundleAnalyticsService } from "../../../app/services/bundle-analytics.server";
@@ -32,10 +34,12 @@ jest.mock("../../../app/db.server", () => ({
   default: { bundle: { count: jest.fn() } },
 }));
 
+const mockNavigate = jest.fn();
+
 jest.mock("@remix-run/react", () => ({
   useLoaderData: jest.fn(),
   useFetcher: jest.fn(),
-  useNavigate: () => jest.fn(),
+  useNavigate: () => mockNavigate,
 }));
 
 jest.mock("react-i18next", () => ({
@@ -174,7 +178,7 @@ describe("app billing route", () => {
     expect(response.status).toBe(500);
   });
 
-  it("links a verified Free merchant to the Billing Plans child route", () => {
+  it("navigates a verified Free merchant to the Billing Plans child route", () => {
     remixHooks().useLoaderData.mockReturnValue({
       subscription: {
         plan: "free",
@@ -196,9 +200,35 @@ describe("app billing route", () => {
       submit: jest.fn(),
     });
 
-    const view = renderToStaticMarkup(React.createElement(BillingPage));
+    const dom = new JSDOM("<!doctype html><html><body></body></html>");
+    Object.assign(globalThis, {
+      window: dom.window,
+      document: dom.window.document,
+      Event: dom.window.Event,
+      MouseEvent: dom.window.MouseEvent,
+      HTMLElement: dom.window.HTMLElement,
+      IS_REACT_ACT_ENVIRONMENT: true,
+    });
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
 
-    expect(view).toContain("common.actions.upgradeNow");
-    expect(view).toContain('href="/app/billing/plans"');
+    flushSync(() => root.render(React.createElement(BillingPage)));
+
+    const upgradeAction = Array.from(
+      container.querySelectorAll<HTMLElement>("s-button"),
+    ).find((element) =>
+      element.textContent?.includes("common.actions.upgradeNow"),
+    );
+
+    expect(upgradeAction).toBeDefined();
+    flushSync(() => {
+      upgradeAction?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(mockNavigate).toHaveBeenCalledWith("/app/billing/plans");
+
+    flushSync(() => root.unmount());
+    container.remove();
   });
 });

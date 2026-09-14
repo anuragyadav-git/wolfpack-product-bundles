@@ -72,7 +72,7 @@ describe("signed storefront products loader", () => {
               availableForSale: true,
               quantityAvailable: 0,
               currentlyNotInStock: false,
-              price: { amount: "10.00" },
+              price: { amount: "10.00", currencyCode: "CAD" },
               compareAtPrice: null,
               weight: 0,
               weightUnit: "GRAMS",
@@ -100,6 +100,7 @@ describe("signed storefront products loader", () => {
       available: true,
       quantityAvailable: null,
       currentlyNotInStock: false,
+      currencyCode: "CAD",
     });
     expect(mockGraphql.mock.calls[0][0]).toContain("optionValues");
     expect(mockGraphql.mock.calls[0][0]).toContain("swatch");

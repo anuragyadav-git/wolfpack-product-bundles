@@ -44,7 +44,7 @@ export function shouldDisableProductPageVariantOption(variant: any, trackInvento
     && variant?.currentlyNotInStock !== true;
 }
 
-export function shouldDisplayVariantsAsIndividualForModalCategory(
+function shouldDisplayVariantsAsIndividualForModalCategory(
   step: any,
   stepIndex: string|number,
   activeCategoryIndexes: any = {},
@@ -136,6 +136,11 @@ export function applyProductPageVariantSelection({
   const priceEl = productCard.querySelector?.('.product-price');
   if (priceEl && Number.isFinite(product.price) && typeof formatPrice === 'function') {
     priceEl.textContent = formatPrice(product.price);
+  }
+
+  const variantEl = productCard.querySelector?.('.product-variant-row');
+  if (variantEl) {
+    variantEl.textContent = nextVariantTitle;
   }
 
   const compareEl = productCard.querySelector?.('.product-price-strike');
@@ -244,7 +249,7 @@ renderModalTabs() {
       }
 
       // Load products for this step if not already loaded
-      this.showLoadingOverlay(this.selectedBundle?.loadingGif || null);
+      this.showLoadingOverlay(this.config?.loadingScreen?.gifUrl || null);
       try {
         await this.loadStepProducts(index);
       } finally {
@@ -510,7 +515,7 @@ renderModalProductsLoading(_stepIndex?: any) {
   const productGrid = this.elements?.modal?.querySelector('.product-grid');
   if (!productGrid) return;
 
-  const gifUrl = this.selectedBundle?.loadingGif || this.config?.loadingGif || null;
+  const gifUrl = this.config?.loadingScreen?.gifUrl || null;
 
   if (gifUrl) {
     const loading = document.createElement('div');
@@ -535,30 +540,6 @@ renderModalProductsLoading(_stepIndex?: any) {
     loading.append(spinner);
     productGrid.replaceChildren(loading);
   }
-},
-
-// Preload next step's products in the background
-preloadNextStep() {
-  const nextStepIndex = this.currentStepIndex + 1;
-
-  // Check if there is a next step
-  if (nextStepIndex >= this.selectedBundle.steps.length) {
-    return;
-  }
-
-  // Check if next step products are already loaded
-  if (this.stepProductData[nextStepIndex]?.length > 0) {
-    return;
-  }
-
-
-  // Load in background (don't await)
-  this.loadStepProducts(nextStepIndex)
-    .then(() => {
-    })
-    .catch((error: any)  => {
-      // Don't show error to user - preloading is optimization only
-    });
 },
 
 attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
@@ -626,7 +607,7 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
       || e.target.classList.contains('ppb-variant-selector-input')
     ) {
       e.stopPropagation();
-      const newVariantId = e.target.value;
+      const newVariantId = e.target.dataset.resolvedVariantId || e.target.value;
       const baseProductId = e.target.dataset.baseProductId;
 
       // Find the product and update its variant
@@ -652,7 +633,14 @@ attachProductEventHandlers(productGrid: any, stepIndex: string|number) {
             ),
           });
 
-          // Re-render the active card context without mutating the bundle selection.
+          const isInpageProductGrid = newProductGrid.classList.contains('bw-ppb-grid-product-grid')
+            || newProductGrid.classList.contains('bw-ppb-cascade-product-list');
+          if (isInpageProductGrid && typeof this._renderInpageStepProducts === 'function') {
+            this._renderInpageStepProducts(stepIndex, newProductGrid);
+            return;
+          }
+
+          // Re-render the active modal card context without mutating the bundle selection.
           this.renderModalProducts(stepIndex);
           const replacementInputs = this.elements?.modal?.querySelectorAll?.(
             '.ppb-variant-selector-input',

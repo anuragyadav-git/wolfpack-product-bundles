@@ -37,6 +37,9 @@ const getAddonLineDiscount =
   fullPageValidationAddonsMethods.getAddonLineDiscount;
 const calculateSelectedAddonDiscountAmount =
   fullPageValidationAddonsMethods.calculateSelectedAddonDiscountAmount;
+const getAddonProductSelectionKeys =
+  fullPageValidationAddonsMethods.getAddonProductSelectionKeys;
+const initDefaultProducts = fullPageValidationAddonsMethods._initDefaultProducts;
 const renderAddonEligibilityMessage =
   fullPageValidationAddonsMethods.renderAddonEligibilityMessage;
 const getAddonMessageEligibilityState =
@@ -58,6 +61,8 @@ if (
   typeof getAddonTierEvaluation !== "function" ||
   typeof getAddonLineDiscount !== "function" ||
   typeof calculateSelectedAddonDiscountAmount !== "function" ||
+  typeof getAddonProductSelectionKeys !== "function" ||
+  typeof initDefaultProducts !== "function" ||
   typeof renderAddonEligibilityMessage !== "function" ||
   typeof buildPaidAddonProductDisplayData !== "function" ||
   typeof createProductCard !== "function" ||
@@ -143,11 +148,38 @@ describe("FPB add-ons / gifting step separation", () => {
       addonDisplayFree: false,
       addonProductsEnabled: false,
     });
-    expect(step.StepProduct).toEqual([]);
+    expect(step).not.toHaveProperty("StepProduct");
     expect(step.products).toEqual([]);
     expect(step.addonTiers).toBeUndefined();
     expect(step.addonEligibilityCondition).toBeNull();
     expect(step.addonDiscount).toBeNull();
+  });
+
+  it("uses only canonical runtime products for add-on keys and defaults", () => {
+    expect([...getAddonProductSelectionKeys({
+      products: [{ selectionId: "canonical" }],
+      StepProduct: [{ selectionId: "persistence-alias" }],
+    })]).toEqual(["canonical"]);
+
+    const context = {
+      selectedBundle: {
+        steps: [{
+          isDefault: true,
+          defaultVariantId: "gid://shopify/ProductVariant/789",
+          products: [],
+          StepProduct: [{
+            selectionId: "789",
+            variants: [{ selectionId: "789", available: true }],
+          }],
+        }],
+      },
+      selectedProducts: [],
+      extractId: (value: unknown) => String(value ?? "").split("/").pop(),
+      isVariantSelectableForInventory: () => true,
+    };
+
+    initDefaultProducts.call(context);
+    expect(context.selectedProducts).toEqual([]);
   });
 
   it("does not render free gift eligibility messaging for a gifting-only step", () => {
@@ -269,6 +301,44 @@ describe("FPB add-ons / gifting step separation", () => {
 
     expect(state.isEligible).toBe(true);
     expect(state.variables.addonsDiscountValue).toBe("100");
+  });
+
+  it("converts add-on amount thresholds once before presentment qualification", () => {
+    (globalThis as any).Shopify.currency = { active: "CAD", rate: 1.35 };
+    (globalThis as any).window = {
+      Shopify: { currency: { active: "CAD", rate: 1.35 } },
+    };
+    (globalThis as any).shopifyMultiCurrency = {
+      shopBaseCurrency: "USD",
+      customerCurrency: "CAD",
+    };
+    const step = {
+      isFreeGift: true,
+      addonTiers: [
+        {
+          eligibilityCondition: { type: "AMOUNT", value: 10 },
+          discount: { type: "PERCENTAGE", value: 20 },
+          selectedAddonProducts: [makeProduct()],
+        },
+      ],
+    };
+    const state = getAddonEligibilityState.call(
+      {
+        selectedProducts: [{ paidVariant: 1 }],
+        stepProductData: [[{ selectionId: "paidVariant", price: 1100 }]],
+        selectedBundle: { steps: [{ id: "paid" }, step] },
+      },
+      step,
+    );
+    const formattedGap = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "CAD",
+    }).format(2.5);
+
+    expect(state.isEligible).toBe(false);
+    expect(state.remainingAmount).toBe(250);
+    expect(state.variables.addonsConditionDiff).toBe(formattedGap);
+    expect(state.variables.currencyUnit).toBe("");
   });
 
   it("uses the active tier-specific message when multiple tiers are configured", () => {

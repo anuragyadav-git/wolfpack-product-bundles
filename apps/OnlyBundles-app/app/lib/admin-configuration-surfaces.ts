@@ -218,14 +218,50 @@ export const DESIGN_CONFIGURATION: SettingsTab[] = [
   },
   {
     title: "Images & GIFs",
-    description: "Image-fit, slot icon, and full-page bundle loading screen controls.",
+    description: "Image-fit, slot icon, and bundle loading screen controls.",
     fields: [
       { label: "Image Fit", value: "Cover", kind: "select", options: ["Cover", "Contain", "Fill"] },
       { key: "stylePresets.images.slotIconUrl", group: "Product Slot Icon", label: "Slot Icon", value: "", kind: "image", description: "Optional image displayed in empty FPB and PPB product slots." },
       { key: "stylePresets.images.slotIconFit", group: "Product Slot Icon", label: "Slot Icon Presentation", value: "Centered badge", kind: "select", options: ["Centered badge", "Cover", "Fit"], description: "Choose whether the image replaces the centered plus icon or scales relative to the full slot." },
-      { key: "generalSettings.loadingGifUrl", label: "FPB Loading GIF", value: "", kind: "loadingGif", description: "Optional GIF displayed instead of the default spinner on the full-page bundle loading screen." },
-      { key: "generalSettings.loadingBgColor", label: "Loading Screen Background Color", value: "#ffffff", kind: "color", description: "Background color of the full-page bundle loading screen." },
+      { key: "generalSettings.loadingGifUrl", label: "Loading GIF", value: "", kind: "loadingGif", description: "Optional GIF displayed instead of the default spinner while either bundle type is loading." },
+      { key: "generalSettings.loadingBgColor", label: "Loading Screen Background Color", value: "#ffffff", kind: "color", description: "Background color shown while either bundle type is loading." },
       { label: "Checkout GIF", value: "Default spinner", kind: "loadingSpinner", description: "Displayed during checkout loading unless a merchant GIF is configured." },
+    ],
+  },
+  {
+    title: "Tier Badge",
+    description: "Shape, visibility, and color styling for discount tier badges.",
+    fields: [
+      {
+        key: "stylePresets.tierBadge.shape",
+        label: "Shape",
+        value: "Pill",
+        kind: "select",
+        options: ["Pill", "Folded", "Banner Rounded"],
+        description: "Badge shape displayed on discounted bundle tiers",
+      },
+      {
+        key: "stylePresets.tierBadge.visibility",
+        label: "Visibility",
+        value: "Always",
+        kind: "select",
+        options: ["Always", "Selected tier only"],
+        description: "Display badge on all tiers or only when the tier is selected",
+      },
+      {
+        key: "stylePresets.tierBadge.textColor",
+        label: "Text Color",
+        value: "#ffffff",
+        kind: "color",
+        description: "Text color for the tier badge",
+      },
+      {
+        key: "stylePresets.tierBadge.backgroundColor",
+        label: "Background Color",
+        value: "#1f2937",
+        kind: "color",
+        description: "Background color for the tier badge",
+      },
     ],
   },
 ];

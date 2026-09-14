@@ -1,32 +1,47 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { translateAdmin } from "~/i18n/config";
 
 export function FpbStepSetupDetailsCard({
-  flow,
+  styles,
   step,
   isFirstStep,
+  stepCount,
+  translationsDisabled,
+  validationErrors = {},
+  onClearValidationError,
+  onClone,
+  onDelete,
+  onEnabledChange,
+  onNameChange,
+  onOpenTranslations,
 }: {
-  flow: ConfigureBundleFlowContext;
+  styles: Record<string, string>;
   step: any;
   isFirstStep: boolean;
+  stepCount: number;
+  translationsDisabled: boolean;
+  validationErrors?: Record<string, string>;
+  onClearValidationError: (path: string) => void;
+  onClone: () => void;
+  onDelete: () => void;
+  onEnabledChange: (enabled: boolean) => void;
+  onNameChange: (name: string) => void;
+  onOpenTranslations: () => void;
 }) {
-  const {
-    cloneStep,
-    deleteStep,
-    fullPageBundleStyles,
-    markAsDirty,
-    openStepMultiLanguageModal,
-    shopLocales,
-    stepsState,
-    validationErrors = {},
-    clearValidationError,
-  } = flow;
+  const translationsTooltipId = `fpb-step-${step.id}-translations-tooltip`;
+  const cloneTooltipId = `fpb-step-${step.id}-clone-tooltip`;
+  const deleteTooltipId = `fpb-step-${step.id}-delete-tooltip`;
+  const translationsLabel = translateAdmin(
+    "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+  );
+  const cloneLabel = translateAdmin("adminAttributes.cloneCurrentStep");
+  const deleteLabel =
+    stepCount <= 1 ? "At least one step is required" : "Delete current step";
 
   return (
-    <div className={fullPageBundleStyles.stepSetupDetails}>
-      <div className={fullPageBundleStyles.stepSetupHeader}>
-        <div className={fullPageBundleStyles.stepSetupTitleGroup}>
-          <h3 className={fullPageBundleStyles.stepSetupTitle}>
+    <div className={styles.stepSetupDetails}>
+      <div className={styles.stepSetupHeader}>
+        <div className={styles.stepSetupTitleGroup}>
+          <h3 className={styles.stepSetupTitle}>
             {translateAdmin(
               "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupdetailscard.stepSetup"
             )}
@@ -36,70 +51,51 @@ export function FpbStepSetupDetailsCard({
             checked={isFirstStep || step.enabled !== false || undefined}
             disabled={isFirstStep || undefined}
             onChange={(e) => {
-              stepsState.updateStepField(
-                step.id,
-                "enabled",
-                (e.target as HTMLInputElement).checked
-              );
-              markAsDirty();
+              onEnabledChange((e.target as HTMLInputElement).checked);
             }}
           />
         </div>
-        <div className={fullPageBundleStyles.stepSetupActions}>
-          <span
-            title={translateAdmin(
-              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+        <div className={styles.stepSetupActions}>
+          <s-tooltip id={translationsTooltipId}>{translationsLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="language-translate"
+            accessibilityLabel={translationsLabel}
+            interestFor={translationsTooltipId}
+            disabled={translationsDisabled || undefined}
+            onClick={onOpenTranslations}
+          />
+          <s-tooltip id={cloneTooltipId}>{cloneLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="duplicate"
+            accessibilityLabel={cloneLabel}
+            interestFor={cloneTooltipId}
+            onClick={onClone}
+          />
+          <s-tooltip id={deleteTooltipId}>{deleteLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="delete"
+            tone="critical"
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.deleteCurrentStep"
             )}
-          >
-            <s-button
-              variant="tertiary"
-              icon="language-translate"
-              accessibilityLabel={translateAdmin(
-                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
-              )}
-              disabled={shopLocales.length === 0 || undefined}
-              onClick={() => openStepMultiLanguageModal(step.id)}
-            />
-          </span>
-          <span title={translateAdmin("adminAttributes.cloneCurrentStep")}>
-            <s-button
-              variant="tertiary"
-              icon="duplicate"
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.cloneCurrentStep"
-              )}
-              onClick={() => cloneStep(step.id)}
-            />
-          </span>
-          <span
-            title={
-              stepsState.steps.length <= 1
-                ? "At least one step is required"
-                : "Delete current step"
-            }
-          >
-            <s-button
-              variant="tertiary"
-              icon="delete"
-              tone="critical"
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.deleteCurrentStep"
-              )}
-              disabled={stepsState.steps.length <= 1 || undefined}
-              onClick={() => deleteStep(step.id)}
-            />
-          </span>
+            interestFor={deleteTooltipId}
+            disabled={stepCount <= 1 || undefined}
+            onClick={onDelete}
+          />
         </div>
       </div>
       <div
         className={
           step.enabled === false && !isFirstStep
-            ? fullPageBundleStyles.stepDisabledContent
+            ? styles.stepDisabledContent
             : undefined
         }
         inert={step.enabled === false && !isFirstStep ? "" : undefined}
       >
-        <p className={fullPageBundleStyles.stepSetupDescription}>
+        <p className={styles.stepSetupDescription}>
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupdetailscard.editYourStepNameOnlyVisibleIfMoreThanOneStepIsPresent"
           )}
@@ -113,21 +109,11 @@ export function FpbStepSetupDetailsCard({
             placeholder={translateAdmin("adminAttributes.egAddProduct")}
             value={step.name ?? ""}
             onInput={(e) => {
-              stepsState.updateStepField(
-                step.id,
-                "name",
-                (e.target as HTMLInputElement).value
-              );
-              markAsDirty();
-              clearValidationError(`steps.${step.id}.name`);
+              onNameChange((e.target as HTMLInputElement).value);
+              onClearValidationError(`steps.${step.id}.name`);
             }}
             autocomplete="off"
           />
-          {validationErrors[`steps.${step.id}.resources`] && (
-            <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
-              {validationErrors[`steps.${step.id}.resources`]}
-            </s-text>
-          )}
         </s-stack>
       </div>
     </div>

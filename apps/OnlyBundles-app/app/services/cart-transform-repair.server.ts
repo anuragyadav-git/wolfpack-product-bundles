@@ -1,11 +1,11 @@
 type RepairMode = "disabled" | "dry-run" | "apply";
 
-export interface CartTransformRepairOptions {
+interface CartTransformRepairOptions {
   dryRun: boolean;
   apply: boolean;
 }
 
-export interface CartTransformRepairSummary {
+interface CartTransformRepairSummary {
   mode: RepairMode;
   scannedShops: number;
   succeededShops: number;
@@ -29,7 +29,7 @@ interface CompleteSetupResult {
   error?: string;
 }
 
-export interface CartTransformRepairDependencies {
+interface CartTransformRepairDependencies {
   prisma: PrismaRepairClient;
   getAdmin: (shopDomain: string) => Promise<unknown>;
   completeSetup: (admin: unknown, shopDomain: string) => Promise<CompleteSetupResult>;

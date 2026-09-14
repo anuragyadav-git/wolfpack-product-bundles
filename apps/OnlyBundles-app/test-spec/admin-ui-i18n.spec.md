@@ -5,7 +5,7 @@ title: Embedded Admin UI Internationalisation
 type: test-spec
 status: active
 summary: Verifies Shopify-native locale resolution and complete translation-catalog coverage across the embedded Admin UI.
-last_audited: 2026-09-02
+last_audited: 2026-09-08
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -71,7 +71,7 @@ Verify that the embedded Admin follows each staff member's Shopify Admin locale,
 | --- | ------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | 14  | Catalog key validation          | Admin translation catalogs                            | every supported catalog contains every English key                                                | Required after each extraction batch         |
 | 15  | Storefront exclusion            | widget sources                                        | unchanged                                                                                         | Admin-only feature                           |
-| 16  | Shared Admin copy extraction    | shared Admin banners and configure modals             | merchant-facing copy resolves through translation keys                                            | Shared component batch                       |
+| 16  | Shared Admin copy behavior      | rendered Admin banners and configure modals            | merchant-facing copy resolves through the active locale or translated props                        | Verify output and interactions, not source text |
 | 17  | Create-bundle wizard extraction | `/app/bundles/create`                                 | wizard chrome, fields, validation, and actions resolve through translation keys                   | Top-level route batch                        |
 | 18  | Billing feedback extraction     | billing feedback banners and upgrade modal            | feedback copy resolves through translation keys                                                   | Billing leaf batch                           |
 | 19  | Billing plan-card extraction    | Free/Grow cards and upgrade CTA                       | plan-card chrome resolves through translation keys                                                | Billing card batch                           |

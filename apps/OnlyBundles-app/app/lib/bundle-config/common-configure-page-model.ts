@@ -1,6 +1,6 @@
-export type ConfigureBundleType = "full_page" | "product_page";
+type ConfigureBundleType = "full_page" | "product_page";
 
-export interface ConfigureSetupItem {
+interface ConfigureSetupItem {
   id: string;
   label: string;
   iconType: string;
@@ -12,11 +12,11 @@ export interface ConfigureChildItem {
   label: string;
 }
 
-export interface ConfigureSectionModelItem extends ConfigureChildItem {
+interface ConfigureSectionModelItem extends ConfigureChildItem {
   slots: string[];
 }
 
-export interface BundleSettingsSlotModel {
+interface BundleSettingsSlotModel {
   shared: string[];
   fullPageOnly: string[];
   productPageOnly: string[];
@@ -26,6 +26,7 @@ const COMMON_SETUP_ITEMS: ConfigureSetupItem[] = [
   { id: "step_setup", label: "Step Setup", iconType: "note" },
   { id: "discount_pricing", label: "Discount & Pricing", iconType: "discount" },
   { id: "bundle_visibility", label: "Bundle Visibility", iconType: "view" },
+  { id: "images_gifs", label: "Images & GIFs", iconType: "image" },
   { id: "bundle_settings", label: "Bundle Settings", iconType: "settings" },
 ];
 
@@ -44,7 +45,9 @@ const SUBSCRIPTIONS_ITEM: ConfigureSetupItem = {
 export function buildConfigureSetupItems(
   bundleType: ConfigureBundleType,
 ): ConfigureSetupItem[] {
-  const items = [...COMMON_SETUP_ITEMS];
+  const items = COMMON_SETUP_ITEMS.filter(
+    (item) => bundleType === "full_page" || item.id !== "images_gifs",
+  );
   items.push(SUBSCRIPTIONS_ITEM);
   items.push(SELECT_TEMPLATE_ITEM);
   return items.map((item) => ({

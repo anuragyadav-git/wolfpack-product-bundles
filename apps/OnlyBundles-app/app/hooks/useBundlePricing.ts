@@ -55,14 +55,13 @@ interface UseBundlePricingProps {
 function createInitialPricingDisplayOptions(initialPricing: UseBundlePricingProps["initialPricing"]): PricingDisplayOptions {
   const normalized = normalizePricingDisplayOptions({
     rules: Array.isArray(initialPricing?.rules) ? initialPricing?.rules : [],
-    messages: { displayOptions: initialPricing?.displayOptions || null },
+    displayOptions: initialPricing?.displayOptions || null,
     showProgressBar: initialPricing?.showDiscountProgressBar === true,
   });
 
   return serializePricingDisplayOptions({
-    existingMessages: {},
     options: normalized,
-  }).displayOptions as PricingDisplayOptions;
+  });
 }
 
 export function useBundlePricing({

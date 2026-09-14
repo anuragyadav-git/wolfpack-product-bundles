@@ -7,42 +7,42 @@ function renderSection(
   overrides: Record<string, unknown> = {},
 ) {
   const noop = () => undefined;
-  const flow = {
-    activeSection: "bundle_widget",
-    autoSelectBrowsedProduct: true,
-    FilePicker: () => React.createElement("div"),
-    fullPageBundleStyles: new Proxy({}, { get: (_, key) => String(key) }),
-    handlePlaceWidget: noop,
-    markAsDirty: noop,
-    openMultiLanguageModal: noop,
-    openVisibilityCollectionPicker: noop,
-    openVisibilityProductPicker: noop,
-    removeVisibilityCollectionTarget: noop,
-    removeVisibilityProductTarget: noop,
-    setAutoSelectBrowsedProduct: noop,
-    setTextOverrides: noop,
-    setUpsellWidgetButtonText: noop,
-    setUpsellWidgetDescription: noop,
-    setUpsellWidgetDisplayMode: noop,
-    setUpsellWidgetDisplayOn: noop,
-    setUpsellWidgetEnabled: noop,
-    setUpsellWidgetImageUrl: noop,
-    setUpsellWidgetTitle: noop,
-    shopLocales: [{ locale: "en" }],
-    upsellWidgetButtonText: "Build bundle",
-    upsellWidgetCollectionsSelectedData: [],
-    upsellWidgetDescription: "Save with a bundle",
-    upsellWidgetDisplayMode: mode,
-    upsellWidgetDisplayOn: "all",
-    upsellWidgetEnabled: true,
-    upsellWidgetImageUrl: "",
-    upsellWidgetSelectedProducts: [],
-    upsellWidgetTitle: "Bundle and save",
+  const widget = {
+    addBrowsedProduct: true,
+    buttonText: "Build bundle",
+    collections: [],
+    description: "Save with a bundle",
+    disabled: false,
+    displayMode: mode,
+    displayOn: "all" as const,
+    enabled: true,
+    imageUrl: "",
+    multiLanguageDisabled: false,
+    onAddBrowsedProductChange: noop,
+    onButtonTextChange: noop,
+    onDescriptionChange: noop,
+    onDisplayModeChange: noop,
+    onDisplayOnChange: noop,
+    onEnabledChange: noop,
+    onImageUrlChange: noop,
+    onOpenCollectionPicker: noop,
+    onOpenMultiLanguage: noop,
+    onOpenProductPicker: noop,
+    onPlaceWidget: noop,
+    onRemoveCollection: noop,
+    onRemoveProduct: noop,
+    onTitleChange: noop,
+    products: [],
+    title: "Bundle and save",
+    validationErrors: {},
     ...overrides,
   };
 
   return renderToStaticMarkup(
-    React.createElement(BundleWidgetSection, { flow: flow as never }),
+    React.createElement(BundleWidgetSection, {
+      activeSection: "bundle_widget",
+      widget: widget as never,
+    }),
   );
 }
 
@@ -64,8 +64,8 @@ describe("FPB Bundle Widget Admin controls", () => {
 
   it("renders a selected product without requiring an injected identity helper", () => {
     const markup = renderSection("button", {
-      upsellWidgetDisplayOn: "specific_products",
-      upsellWidgetSelectedProducts: [
+      displayOn: "specific_products",
+      products: [
         { graphqlId: "gid://shopify/Product/1", title: "Selected product" },
       ],
     });
@@ -75,8 +75,8 @@ describe("FPB Bundle Widget Admin controls", () => {
 
   it("renders a selected collection without requiring an injected identity helper", () => {
     const markup = renderSection("button", {
-      upsellWidgetDisplayOn: "specific_collections",
-      upsellWidgetCollectionsSelectedData: [
+      displayOn: "specific_collections",
+      collections: [
         { graphqlId: "gid://shopify/Collection/1", title: "Selected collection" },
       ],
     });

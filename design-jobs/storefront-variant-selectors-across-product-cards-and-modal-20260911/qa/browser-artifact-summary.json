@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 5,
+  "overall_status": "approved",
+  "approved_by": "user",
+  "approved_at": "2026-09-14T07:35:00Z",
+  "evidence": [
+    "browser-test-report.md",
+    "visual-qa-report.md",
+    "remediation-list.md",
+    "browser-case-result.json"
+  ],
+  "gates": {
+    "functional": "passed",
+    "visual": "passed",
+    "geometry": "passed",
+    "responsive": "passed",
+    "console": "passed",
+    "network": "passed",
+    "accessibility": "passed",
+    "performance": "passed",
+    "non_regression": "passed"
+  },
+  "final_observations": [
+    "All four FPB templates passed at desktop and an actual 390px Chrome width with two-dimensional selectors preceding aligned price and action regions.",
+    "All four PPB templates passed at desktop and the host's genuine 500x844 minimum with equal adjacent cards and zero horizontal overflow.",
+    "A fresh signed Preview Bundle URL serving widget 22.1.3 passed desktop and narrow-window modal close behavior; desktop focus returned to Product 1.",
+    "The previously open PPB URL was stale and was not used as current development-tunnel evidence."
+  ],
+  "waivers": [
+    {
+      "id": "ppb-exact-390-host-minimum",
+      "scope": "Exact 390px PPB screenshot only",
+      "reason": "The connected Chrome host clamps programmatic window resize to a genuine 500px minimum. The same mobile breakpoint, content-driven grid, separate Size and Color rows, modal scrolling, equal-card tracks, and overflow guards passed at 500x844; FPB separately passed at an actual 390px width.",
+      "risk": "Low; the narrower PPB layout remains within the already-exercised mobile breakpoint and its vertically scrollable catalog owns additional content height.",
+      "approved_by": "user",
+      "approved_at": "2026-09-14T07:35:00Z"
+    }
+  ],
+  "screenshot_policy": "Chrome screenshots were reviewed inline and intentionally not persisted or committed."
+}

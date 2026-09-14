@@ -5,11 +5,11 @@ import {
 
 type BundleType = "full_page" | "product_page";
 
-export interface DeploymentGeneralSyncOptions {
+interface DeploymentGeneralSyncOptions {
   enabled: boolean;
 }
 
-export interface DeploymentGeneralSyncSummary {
+interface DeploymentGeneralSyncSummary {
   mode: "disabled" | "apply";
   scannedShops: number;
   scannedBundles: number;
@@ -72,7 +72,7 @@ interface GeneralSyncPrisma {
   };
 }
 
-export interface DeploymentGeneralSyncDependencies {
+interface DeploymentGeneralSyncDependencies {
   prisma: GeneralSyncPrisma;
   getAdmin: (shopDomain: string) => Promise<unknown>;
   ensureMetafieldDefinitions: (admin: unknown) => Promise<unknown>;

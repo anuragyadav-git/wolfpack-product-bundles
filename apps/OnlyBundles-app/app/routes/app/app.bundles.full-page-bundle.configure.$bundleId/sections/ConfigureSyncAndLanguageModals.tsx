@@ -1,38 +1,29 @@
 import { EnablePreviewModal } from "../../../../components/EnablePreviewModal";
 import { PricingTranslationModals } from "../../_shared/bundle-configure/PricingTranslationModals";
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
 import { translateAdmin } from "~/i18n/config";
+import type { ComponentProps, ComponentPropsWithRef } from "react";
+
+export interface FpbSyncAndLanguageModalsProps {
+  sync: {
+    modalRef: ComponentPropsWithRef<"s-modal">["ref"];
+    submitting: boolean;
+    onConfirm: () => void;
+    onCancel: () => void;
+  };
+  pricingTranslations: ComponentProps<typeof PricingTranslationModals>;
+  preview: ComponentProps<typeof EnablePreviewModal>;
+}
 
 export function FpbSyncAndLanguageModals({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const rules = flow.pricingState.discountRules.map(
-    (rule: any, index: number) => {
-      const quantityOption =
-        flow.normalizedPricingDisplayOptions.bundleQuantityOptions.options.find(
-          (option: any) => option.ruleId === rule.id
-        );
-      return {
-        id: rule.id,
-        heading: `Rule #${index + 1}`,
-        quantityFallback: {
-          label: quantityOption?.label ?? "",
-          subtext: quantityOption?.subtext ?? "",
-        },
-        tierFallback: flow.tierTextByRuleId[rule.id] ?? {},
-      };
-    }
-  );
-  const quantityValues =
-    flow.pricingState.pricingDisplayOptions.bundleQuantityOptions
-      .optionsByLocaleByRuleId ?? {};
+  sync,
+  pricingTranslations,
+  preview,
+}: FpbSyncAndLanguageModalsProps) {
 
   return (
     <>
       <s-modal
-        ref={flow.syncModalRef}
+        ref={sync.modalRef}
         heading={translateAdmin("adminAttributes.syncBundleWithOnlyBundles")}
       >
         <s-stack direction="block" gap="small">
@@ -61,8 +52,8 @@ export function FpbSyncAndLanguageModals({
           slot="primary-action"
           variant="primary"
           icon="refresh"
-          loading={flow.fetcher.state === "submitting" || undefined}
-          onClick={flow.handleSyncBundleConfirm}
+          loading={sync.submitting || undefined}
+          onClick={sync.onConfirm}
         >
           {translateAdmin(
             "adminExtracted.appBundlesFullPageBundleConfigure.sections.configuresyncandlanguagemodals.syncBundle"
@@ -70,44 +61,13 @@ export function FpbSyncAndLanguageModals({
         </s-button>
         <s-button
           slot="secondary-actions"
-          onClick={() => flow.setIsSyncModalOpen(false)}
+          onClick={sync.onCancel}
         >
           {translateAdmin("dashboard.deleteModal.cancel")}
         </s-button>
       </s-modal>
-      <PricingTranslationModals
-        locales={flow.shopLocales}
-        rules={rules}
-        quantity={{
-          open: flow.isBundleQuantityMultiLangModalOpen,
-          activeLocale: flow.activeBundleQuantityLocale,
-          values: quantityValues,
-          onActiveLocaleChange: flow.setActiveBundleQuantityLocale,
-          onApply: (values) => {
-            flow.pricingState.setPricingDisplayOptions((current: any) => ({
-              ...current,
-              bundleQuantityOptions: {
-                ...current.bundleQuantityOptions,
-                optionsByLocaleByRuleId: values,
-              },
-            }));
-            flow.markAsDirty();
-          },
-          onClose: () => flow.setIsBundleQuantityMultiLangModalOpen(false),
-        }}
-        progress={{
-          open: flow.isProgressBarMultiLangModalOpen,
-          activeLocale: flow.activeProgressBarLocale,
-          values: flow.tierTextByLocaleByRuleId,
-          onActiveLocaleChange: flow.setActiveProgressBarLocale,
-          onApply: (values) => {
-            flow.setTierTextByLocaleByRuleId(values as any);
-            flow.markAsDirty();
-          },
-          onClose: () => flow.setIsProgressBarMultiLangModalOpen(false),
-        }}
-      />
-      <EnablePreviewModal {...flow.enablePreviewGate.modalProps} />
+      <PricingTranslationModals {...pricingTranslations} />
+      <EnablePreviewModal {...preview} />
     </>
   );
 }

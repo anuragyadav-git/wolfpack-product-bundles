@@ -36,8 +36,9 @@ const renderOverview = (active = true) =>
           onAction: jest.fn(),
         },
       ],
-      themeEditorUrl: "https://admin.shopify.com/store/shop/themes/current/editor",
-    }),
+      themeEditorUrl:
+        "https://admin.shopify.com/store/shop/themes/current/editor",
+    })
   );
 
 describe("compact shared Bundle Visibility cards", () => {
@@ -60,6 +61,7 @@ describe("compact shared Bundle Visibility cards", () => {
 
     expect(view).not.toContain("<s-icon");
     expect(view).toContain('icon="theme-edit"');
+    expect(view).toContain('accessibilityLabel="Enable Here"');
     expect(view).toContain('icon="duplicate"');
     expect(view.match(/icon="arrow-right"/g)).toHaveLength(2);
   });

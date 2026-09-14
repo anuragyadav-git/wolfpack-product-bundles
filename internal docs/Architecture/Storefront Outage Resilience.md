@@ -5,7 +5,7 @@ title: Storefront Outage Resilience
 type: architecture
 status: authoritative
 summary: Defines the Shopify-hosted PPB snapshot, direct Storefront API hydration, and fail-closed purchase authorization used when Wolfpack services are unavailable.
-last_audited: 2026-08-25
+last_audited: 2026-09-08
 owners:
   - engineering
 domains:
@@ -47,9 +47,12 @@ and inventory data directly from Shopify Storefront API `2026-07` with the
 shop's public Storefront access token.
 
 This does not assume Shopify caches an app-proxy response. The resilient path
-removes the app proxy from PPB initialization, product hydration, settings
-hydration, cart attribution, and purchase authorization. FPB and automatic PPB
-embed/page-builder surfaces retain their documented app-proxy contracts.
+removes the app proxy from parent-product PPB initialization, product hydration,
+settings hydration, cart attribution, and purchase authorization. Automatic and
+page-builder PPB surfaces still use their signed app-proxy lookup to select a
+bundle, but the app-embed marker supplies Shopify-hosted runtime, Design CSS,
+and currency context before their shared PPB widget starts. FPB retains its
+documented app-proxy contracts.
 
 ## Synchronized Shopify State
 
@@ -77,6 +80,12 @@ percentage. Cart Transform and Discount Functions validate signatures and the
 current shop policy revision. They reject stale, altered, mismatched, or
 split-line over-quantity submissions. Cart Transform remains
 `blockOnFailure=true`.
+
+The authorization signer consumes only the canonical public runtime product
+shape (`steps[].products` and `steps[].categories`). The sync owner passes the
+normalized public subscription config and persisted offer country policy as
+explicit inputs, so those policy fields are included in the signed bundle token
+without guessing between Prisma relation names and storefront DTO names.
 
 The public Storefront token is intentionally browser-visible and grants only
 Storefront API access. It is not the HMAC secret. The signing secret remains on

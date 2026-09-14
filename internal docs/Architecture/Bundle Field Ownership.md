@@ -5,7 +5,7 @@ title: Bundle Field Ownership
 type: architecture
 status: authoritative
 summary: Canonical ownership ledger for persisted bundle fields, public runtime fields, Shopify custom data, and retired aliases.
-last_audited: 2026-09-01
+last_audited: 2026-09-11
 owners:
   - engineering
 domains:
@@ -14,11 +14,21 @@ systems:
   - bundle-persistence
   - storefront-runtime
 source_paths:
-  - prisma/schema.prisma
-  - app/lib/bundle-formatter.server.ts
-  - app/lib/bundle-config/category-persistence.ts
-  - app/lib/bundle-config/category-runtime.ts
-  - app/routes/api/api.bundle.$bundleId[.]json.tsx
+  - apps/OnlyBundles-app/prisma/schema.prisma
+  - apps/OnlyBundles-app/app/lib/bundle-formatter.server.ts
+  - apps/OnlyBundles-app/app/lib/pricing-display-options.ts
+  - apps/OnlyBundles-app/app/assets/widgets/shared/localized-bundle-config.ts
+  - apps/OnlyBundles-app/app/lib/bundle-config/category-persistence.ts
+  - apps/OnlyBundles-app/app/lib/bundle-config/category-runtime.ts
+  - apps/OnlyBundles-app/app/routes/api/api.bundle.$bundleId[.]json.tsx
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/save-bundle.server.ts
+  - apps/OnlyBundles-app/app/routes/app/app.bundles.product-page-bundle.configure.$bundleId/handlers/runtime-config.server.ts
+  - apps/OnlyBundles-app/app/services/bundles/metafield-sync/operations/bundle-product.server.ts
+  - apps/OnlyBundles-app/app/services/fpb-upsells.server.ts
+  - apps/OnlyBundles-app/app/services/ppb-bundle-embed.server.ts
+  - apps/OnlyBundles-app/app/assets/widgets/product-page/methods/layout-shell-methods.ts
 related_docs:
   - Shopify Integration/Metafields.md
   - Operations/Deployment General Sync.md
@@ -44,6 +54,13 @@ semantics differ. They share only explicit persistence/runtime helpers.
 Do not restore a removed alias, sparse API projection, compatibility read, or
 second persisted owner. The app's Sync Bundle action is the upgrade path.
 
+`bundleType` is mandatory at every public-config writer and renderer boundary.
+The shared Shopify metafield writer accepts only exact `full_page` or
+`product_page` values before it performs any Shopify lookup or mutation. The
+FPB and PPB sync builders accept only `full_page` and `product_page`
+respectively, and the Product Page renderer does not reinterpret a missing or
+Full Page type through a PPB layout fallback.
+
 ## Ledger
 
 | Classification | Fields or contract | Owner and reason |
@@ -51,9 +68,9 @@ second persisted owner. The app's Sync Bundle action is the upgrade path.
 | `KEEP_USED` | Bundle identity, status, type, Shopify parent linkage, FPB design template/preset, steps, `StepProduct`, canonical `StepCategory` including PPB `variantSelectorMode` and `swatchTooltipEnabled`, pricing rules, direct `BundlePricing.displayOptions`, low-stock alert settings, PPB sticky add-to-cart settings, box selection, defaults, text, media, add-ons, visibility | Current Admin save, storefront formatter, widget, Cart Transform, or Shopify sync reads the field. |
 | `KEEP_PLATFORM` | Shopify product/variant IDs and handles, publication state, inventory settings, analytics/event identifiers | Required to address Shopify resources or provide an explicit platform capability. |
 | `KEEP_FOR_IMPLEMENTATION` | `showProductPrices`, `cartRedirectToCheckout`, `allowQuantityChanges`, `discountDisplayOverride`, and other merchant-visible controls whose runtime wiring is incomplete | The contract is approved or merchant-visible and its Admin/storefront wiring is incomplete. It must be wired or removed as a product decision; it must not be silently deleted as database debris. |
-| `DERIVED` | Public `bundle_ui_config`, runtime `messaging`, compact product/category records, component references/quantities/pricing, signed runtime token payload | Generated at the server/Shopify boundary. Never write these shapes back as a second bundle source. |
+| `DERIVED` | Public `bundle_ui_config`, runtime `messaging`, compact product/category records, component references/quantities/pricing, signed runtime token payload | Generated at the server/Shopify boundary. `bundle_ui_config` uses canonical `id`, exact `bundleType`, and no duplicate `bundleId`. Never write these shapes back as a second bundle source. |
 | `CONSOLIDATE_DUPLICATE` | Pricing display options | `BundlePricing.displayOptions` is the only persisted owner. `messages.displayOptions` is removed; runtime `messaging.displayOptions` is derived from the direct field. |
-| `REMOVE_LEGACY` | `Bundle.fullPageLayout`; `StepCategory.categoryRank`, `selectedProducts`, `collectionsData`, `collectionsSelectedData`, `variantColorMap`; sparse `fields=bootstrap`; response timestamp; `$app.component_parents`; duplicate standard/camel-case metafield writers | Superseded aliases, duplicate platform data, or abandoned contracts with no current owner. They are migrated once and removed, not read through fallbacks. |
+| `REMOVE_LEGACY` | `Bundle.fullPageLayout`; Shopify Page IDs/handles and handle index; `StepCategory.categoryRank`, `selectedProducts`, `collectionsData`, `collectionsSelectedData`, `variantColorMap`; sparse `fields=bootstrap`; response timestamp; `$app.component_parents`; duplicate standard/camel-case metafield writers | Superseded aliases, duplicate platform data, or abandoned contracts with no current owner. They are migrated once and removed, not read through fallbacks. |
 | `REMOVE_DEAD` | Storefront sync status/attempt/timestamp/error columns; `BundleCustomField`; `DesignSettings.productPriceVisibility`, `loadingOverlayBgColor`, `loadingOverlayTextColor`, `emptySlotBorderColor`; `Bundle.individualSellingPlanSelection`; empty metaobject replay hook | No current merchant, runtime, platform, or operational reader. |
 
 ## Removed Pre-order and Subscription Integration Contract
@@ -111,9 +128,41 @@ Errors propagate to the caller. The database does not persist a second queue or
 attempt-state model. Deployment general sync replays this same writer; it does
 not own a parallel bundle serializer.
 
+The FPB and PPB live sync builders carry one bundle identity, `id`. They do not
+create a `bundleId` alias, a response timestamp, or sync-only transport fields.
+The superseded save-time configuration builders and Shopify Page redirect
+helper have no current owner and are removed.
+
 Variant custom data consists of component references, component quantities,
 price adjustment, bundle UI config, and component pricing. The retired
 `component_parents` definition and writer are not part of the contract.
+
+`StepProduct` is the only persisted product-membership owner during
+serialization, configure validation, checkout-offer construction,
+runtime-token authorization, subscription discovery, FPB upsell discovery,
+and PPB embed selection. A missing relation is not recovered from the legacy
+`BundleStep.products` JSON field. Public runtime
+DTOs then expose the normalized membership as `steps[].products`; the FPB
+widget does not read a `StepProduct` input or synthesize product JSON from it.
+Current FPB and PPB category selections are form input, not a second
+persistence owner: both save boundaries materialize the final union of direct
+and category product selections into deduplicated `StepProduct` rows.
+`StepCategory.products` is retained only to preserve merchant-authored
+grouping. Strict readers never recover missing membership from either step or
+category JSON. Those storefront selectors also read category collections only
+from `StepCategory[].collections`; they do not accept a `categories` relation
+alias or category-level `collectionsSelectedData` compatibility field.
+Pricing's
+derived operator vocabulary is exactly `gte`, `gt`, `lte`, `lt`, and `eq`;
+step-condition operators retain their separate long-form contract.
+
+Pricing display-option normalization, serialization, and locale projection all
+accept the direct `BundlePricing.displayOptions` value. They do not wrap it in
+or recover it from `messages.displayOptions`; pricing messages contain text and
+message toggles only. A read-only check on 2026-09-10 found zero configured
+database rows whose `BundlePricing.messages` JSON still contained a
+`displayOptions` key. Repeat that zero-count check in every release environment
+before releasing the strict storefront reader.
 
 Low-stock merchandising has exactly three direct Bundle owners:
 `lowStockAlertEnabled`, `lowStockAlertThreshold`, and
@@ -129,6 +178,11 @@ The action is presentation state, not a second cart contract: direct add
 delegates to the canonical PPB CTA and incomplete selections return to that
 existing validation surface.
 
+PPB bundle-embed configuration is owned only by `bundleUpsellConfig`'s
+`upsellConfiguration` and `multiLangText` objects. The normalizer does not read
+or scrub embed fields from `textOverrides`; deployment zero-state verification
+is the cutover gate for stale rows.
+
 Countdown presentation has exactly six direct Bundle owners:
 `countdownEnabled`, `countdownLayout`, `countdownPosition`, `countdownTitle`,
 `countdownExpiryAction`, and `countdownExpiredMessage`. The nullable runtime
@@ -140,9 +194,9 @@ on `Bundle`.
 
 The app-proxy document is the canonical FPB host. Current Admin and storefront
 flows do not create, publish, select, rename, or write metafields to Shopify
-Pages. The four legacy Page columns remain temporarily in Prisma only for
-dashboard deletion: it removes distinct stored public and preview Page GIDs
-before deleting the database row, and an unexpected Shopify deletion error
-preserves the row and references. FPB parent-product synchronization owns
-canonical internal handles and redirects from prior merchant-facing product
-handles. There is no bulk Page migration or preflight command.
+Pages. The four legacy Page columns and their handle index are absent from the
+current Prisma schema and are dropped by the forward-only residue migration.
+Dashboard deletion has no Shopify Page cleanup branch. FPB parent-product
+synchronization owns canonical internal handles and redirects from prior
+merchant-facing product handles. There is no bulk Page migration or preflight
+command.

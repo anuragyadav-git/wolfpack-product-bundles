@@ -4,7 +4,7 @@ import {
   getTimelineEntryState,
   shouldShowTimelineCompletedState,
 } from '../../shared/engine/bundle-selectors.js';
-import { createBundleBannerElement, createStepBannerImageElement } from '../../shared/components/bundle-banners.js';
+import { createBundleBannerElement } from '../../shared/components/bundle-banners.js';
 import { createStepTimelineEntryElement } from '../../shared/components/step-timeline.js';
 
 export const fullPageTimelineBannerMethods: Record<string, any> & ThisType<any> = {
@@ -351,12 +351,6 @@ createStandardStepTimeline() {
 
   timeline.appendChild(itemsContainer);
   return timeline;
-},
-
-// Returns a full-width banner image element for the active step, or null if not configured
-createStepBannerImage(stepIndex: string|number) {
-  const step = (this.selectedBundle?.steps || [])[stepIndex];
-  return createStepBannerImageElement(step, value => this._escapeHTML(value), document);
 },
 
 createBundleBanners() {

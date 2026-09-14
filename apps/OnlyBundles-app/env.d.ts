@@ -12,7 +12,6 @@ declare global {
   interface Window {
     Shopify: any;
     Shopflo: any;
-    __BUNDLE_APP_URL__: string;
     __WPB_BUNDLE_BUTTON_SELECTORS__: {
       addToCartButtons: string;
       buyNowButton: string;

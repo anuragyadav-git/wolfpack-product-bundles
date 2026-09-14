@@ -1,28 +1,44 @@
 import React from "react";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DisabledConfigurationRegion } from "../_shared/bundle-configure/DisabledConfigurationRegion";
 import { ConfigureHelpPopover } from "../_shared/bundle-configure/ConfigureHelpPopover";
 import { translateAdmin } from "~/i18n/config";
 import { TUTORIAL_LINKS } from "../../../lib/tutorial-links";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import { showPolarisModal } from "../_shared/bundle-configure/modal-utils";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbFreeGiftAddonsSection() {
-  const {
-    activeSection,
-    activeTabIndex,
-    FilePicker,
-    markAsDirty,
-    openAddonMultiLanguageModal,
-    productPageBundleStyles,
-    ruleMessages,
-    setRuleMessages,
-    setShowIconPickerForStep,
-    shopLocales = [],
-    showIconPickerForStep,
-    showPolarisModal,
-    stepsState,
-    templateVariablesModalRef,
-  } = usePpbConfigureContext();
+export type PpbFreeGiftAddonsSectionProps = Pick<
+  PpbConfigureFlow,
+  | "activeSection"
+  | "activeTabIndex"
+  | "markAsDirty"
+  | "openAddonMultiLanguageModal"
+  | "ruleMessages"
+  | "setRuleMessages"
+  | "setShowIconPickerForStep"
+  | "shopLocales"
+  | "showIconPickerForStep"
+  | "stepsState"
+  | "templateVariablesModalRef"
+> & {
+  validationErrors?: Record<string, string>;
+};
 
+export function PpbFreeGiftAddonsSection({
+  activeSection,
+  activeTabIndex,
+  markAsDirty,
+  openAddonMultiLanguageModal,
+  ruleMessages,
+  setRuleMessages,
+  setShowIconPickerForStep,
+  shopLocales = [],
+  showIconPickerForStep,
+  stepsState,
+  templateVariablesModalRef,
+  validationErrors,
+}: PpbFreeGiftAddonsSectionProps) {
   return (
     <>
       {activeSection === "free_gift_addons" &&
@@ -86,13 +102,16 @@ export function PpbFreeGiftAddonsSection() {
                       <div className={productPageBundleStyles.iconColumn}>
                         <div className={productPageBundleStyles.iconBox}>
                           {step.addonIconUrl ? (
-                            <img
-                              src={step.addonIconUrl}
-                              alt={translateAdmin(
-                                "adminAttributes.addOnsStepIcon"
-                              )}
-                              className={productPageBundleStyles.iconImg}
-                            />
+                            <div className={productPageBundleStyles.iconImg}>
+                              <s-image
+                                src={step.addonIconUrl}
+                                alt={translateAdmin(
+                                  "adminAttributes.addOnsStepIcon"
+                                )}
+                                aspectRatio="1/1"
+                                objectFit="contain"
+                              />
+                            </div>
                           ) : (
                             <div
                               className={
@@ -106,12 +125,13 @@ export function PpbFreeGiftAddonsSection() {
                           )}
                         </div>
                         {showIconPickerForStep === `addon-${step.id}` && (
-                          <FilePicker
-                            autoOpen
+                          <AssetUpload
                             disabled={!step.isFreeGift}
                             value={step.addonIconUrl ?? null}
                             maxUploadBytes={50 * 1024}
-                            maxUploadErrorMessage="Please upload a file smaller than 50KB"
+                            maxUploadErrorMessage={translateAdmin(
+                              "adminDynamic.fileMustBeSmallerThan50Kb"
+                            )}
                             onChange={(url: string | null) => {
                               stepsState.updateStepField(
                                 step.id,
@@ -121,8 +141,7 @@ export function PpbFreeGiftAddonsSection() {
                               setShowIconPickerForStep(null);
                               markAsDirty();
                             }}
-                            onClose={() => setShowIconPickerForStep(null)}
-                            label=""
+                            label={translateAdmin("adminAttributes.uploadImage")}
                           />
                         )}
                         <s-button
@@ -160,10 +179,12 @@ export function PpbFreeGiftAddonsSection() {
                           )}
                         </s-button>
                         <s-text-field
+                          id="configure-addons-gifting-stepName"
                           label={translateAdmin("adminAttributes.stepName")}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonLabel ?? step.freeGiftName ?? ""}
                           placeholder={translateAdmin("adminAttributes.addOn")}
+                          error={validationErrors?.["addons.gifting.stepName"]}
                           onInput={(e) => {
                             const value = (e.target as HTMLInputElement).value;
                             stepsState.updateStepField(
@@ -198,9 +219,11 @@ export function PpbFreeGiftAddonsSection() {
                           autocomplete="off"
                         />
                         <s-text-field
+                          id="configure-addons-gifting-stepTitle"
                           label={translateAdmin("adminAttributes.stepTitle")}
                           disabled={!step.isFreeGift || undefined}
                           value={step.addonTitle ?? ""}
+                          error={validationErrors?.["addons.gifting.stepTitle"]}
                           onInput={(e) => {
                             stepsState.updateStepField(
                               step.id,
@@ -308,10 +331,12 @@ export function PpbFreeGiftAddonsSection() {
                         </s-button>
                       </s-stack>
                       <s-text-field
+                        id="configure-addons-products-title"
                         label={translateAdmin(
                           "adminAttributes.addOnSectionTitle"
                         )}
                         value={step.freeGiftName ?? ""}
+                        error={validationErrors?.["addons.products.title"]}
                         onInput={(e) => {
                           stepsState.updateStepField(
                             step.id,
@@ -393,9 +418,14 @@ export function PpbFreeGiftAddonsSection() {
                                 />
                               </div>
                             ))}
-                            <s-button
-                              variant="secondary"
-                              icon="plus"
+                            <s-clickable
+                              inlineSize="100%"
+                              border="base"
+                              borderRadius="small"
+                              padding="small"
+                              accessibilityLabel={translateAdmin(
+                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                              )}
                               onClick={() =>
                                 updateAddonTiers([
                                   ...addonTiers,
@@ -403,10 +433,20 @@ export function PpbFreeGiftAddonsSection() {
                                 ])
                               }
                             >
-                              {translateAdmin(
-                                "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
-                              )}
-                            </s-button>
+                              <s-stack
+                                direction="inline"
+                                gap="small"
+                                alignItems="center"
+                                justifyContent="center"
+                              >
+                                <s-icon type="plus" />
+                                <s-text>
+                                  {translateAdmin(
+                                    "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddontiereditor.addAddOnsTier"
+                                  )}
+                                </s-text>
+                              </s-stack>
+                            </s-clickable>
                           </>
                         );
                       })()}

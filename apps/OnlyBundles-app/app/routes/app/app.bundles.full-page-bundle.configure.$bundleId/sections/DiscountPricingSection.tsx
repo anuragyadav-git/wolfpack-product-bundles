@@ -1,21 +1,23 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { ComponentProps } from "react";
 import { FpbDiscountDisplayOptions } from "./DiscountDisplayOptions";
 import { FpbDiscountRulesSection } from "./DiscountPricingRules";
 
 export function DiscountPricingSection({
-  flow,
+  activeSection,
+  rules,
+  displayOptions,
 }: {
-  flow: ConfigureBundleFlowContext;
+  activeSection: string;
+  rules: ComponentProps<typeof FpbDiscountRulesSection>;
+  displayOptions: ComponentProps<typeof FpbDiscountDisplayOptions>;
 }) {
-  const { activeSection } = flow;
-
   if (activeSection !== "discount_pricing") return null;
 
   return (
     <div data-tour-target="fpb-discount-pricing">
       <s-stack direction="block" gap="base">
-        <FpbDiscountRulesSection flow={flow} />
-        <FpbDiscountDisplayOptions flow={flow} />
+        <FpbDiscountRulesSection {...rules} />
+        <FpbDiscountDisplayOptions {...displayOptions} />
       </s-stack>
     </div>
   );

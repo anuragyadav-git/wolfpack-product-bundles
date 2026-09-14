@@ -1,107 +1,114 @@
 import { useMemo, useRef, useState } from "react";
 import {
-  buildDefaultProductEntryFromPicker,
   normalizeDefaultProductsData,
   type DefaultProductsData,
 } from "../../../lib/bundle-config/default-products";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
 import { buildFpbStorefrontUrl } from "../../../lib/fpb-storefront-url";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
 import type {
   CountdownExpiryAction,
   CountdownLayout,
   CountdownPosition,
 } from "../../../lib/bundle-countdown";
 
-export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
-  const { bundle, shop } = flow;
+type ConfigureContentStateDependencies = {
+  bundle: ReturnType<typeof useConfigureBundleController>["bundle"];
+  shop: string;
+  storefrontProxyRoot: string;
+};
+
+export function useConfigureContentState(
+  dependencies: ConfigureContentStateDependencies
+) {
+  const { bundle, shop, storefrontProxyRoot } = dependencies;
   const shopDomain = useMemo(
     () =>
       shop.includes(".myshopify.com")
         ? shop.replace(".myshopify.com", "")
         : shop,
-    [shop],
+    [shop]
   );
   const bundlePageUrl = useMemo(
-    () => typeof bundle.publicNumber !== "number"
-      ? ""
-      : buildFpbStorefrontUrl(
-          `${shopDomain}.myshopify.com`,
-          bundle.publicNumber,
-          flow.storefrontProxyRoot,
-        ),
-    [shopDomain, bundle.publicNumber, flow.storefrontProxyRoot],
+    () =>
+      typeof bundle.publicNumber !== "number"
+        ? ""
+        : buildFpbStorefrontUrl(
+            `${shopDomain}.myshopify.com`,
+            bundle.publicNumber,
+            storefrontProxyRoot
+          ),
+    [shopDomain, bundle.publicNumber, storefrontProxyRoot]
   );
 
   const [promoBannerBgImage, setPromoBannerBgImage] = useState<string | null>(
-    bundle.promoBannerBgImage ?? null,
+    bundle.promoBannerBgImage ?? null
   );
   const originalPromoBannerBgImageRef = useRef<string | null>(
-    bundle.promoBannerBgImage ?? null,
+    bundle.promoBannerBgImage ?? null
   );
   const [loadingGif, setLoadingGif] = useState<string | null>(
-    bundle.loadingGif ?? null,
+    bundle.loadingGif ?? null
   );
   const originalLoadingGifRef = useRef<string | null>(
-    bundle.loadingGif ?? null,
+    bundle.loadingGif ?? null
   );
   const [showStepTimeline, setShowStepTimeline] = useState<boolean>(
-    bundle.showStepTimeline !== false,
+    bundle.showStepTimeline !== false
   );
   const originalShowStepTimelineRef = useRef<boolean>(
-    bundle.showStepTimeline !== false,
+    bundle.showStepTimeline !== false
   );
   const [floatingBadgeEnabled, setFloatingBadgeEnabled] = useState<boolean>(
-    (bundle as any).floatingBadgeEnabled ?? false,
+    (bundle as any).floatingBadgeEnabled ?? false
   );
   const [floatingBadgeText, setFloatingBadgeText] = useState<string>(
-    (bundle as any).floatingBadgeText ?? "",
+    (bundle as any).floatingBadgeText ?? ""
   );
   const originalFloatingBadgeEnabledRef = useRef<boolean>(
-    (bundle as any).floatingBadgeEnabled ?? false,
+    (bundle as any).floatingBadgeEnabled ?? false
   );
   const originalFloatingBadgeTextRef = useRef<string>(
-    (bundle as any).floatingBadgeText ?? "",
+    (bundle as any).floatingBadgeText ?? ""
   );
   const [showProductPrices, setShowProductPrices] = useState<boolean>(
-    (bundle as any).showProductPrices ?? true,
+    (bundle as any).showProductPrices ?? true
   );
   const [cartRedirectToCheckout, setCartRedirectToCheckout] = useState<boolean>(
-    (bundle as any).cartRedirectToCheckout ?? false,
+    (bundle as any).cartRedirectToCheckout ?? false
   );
   const [allowQuantityChanges, setAllowQuantityChanges] = useState<boolean>(
-    (bundle as any).allowQuantityChanges ?? true,
+    (bundle as any).allowQuantityChanges ?? true
   );
   const [lowStockAlertEnabled, setLowStockAlertEnabled] = useState<boolean>(
-    (bundle as any).lowStockAlertEnabled ?? false,
+    (bundle as any).lowStockAlertEnabled ?? false
   );
   const [lowStockAlertThreshold, setLowStockAlertThreshold] = useState<string>(
-    String((bundle as any).lowStockAlertThreshold ?? 5),
+    String((bundle as any).lowStockAlertThreshold ?? 5)
   );
   const [lowStockAlertMessage, setLowStockAlertMessage] = useState<string>(
-    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left"
   );
   const [countdownEnabled, setCountdownEnabled] = useState<boolean>(
-    (bundle as any).countdownEnabled ?? false,
+    (bundle as any).countdownEnabled ?? false
   );
   const [countdownLayout, setCountdownLayout] = useState<CountdownLayout>(
-    (bundle as any).countdownLayout === "full" ? "full" : "compact",
+    (bundle as any).countdownLayout === "full" ? "full" : "compact"
   );
   const [countdownPosition, setCountdownPosition] = useState<CountdownPosition>(
-    (bundle as any).countdownPosition === "below" ? "below" : "above",
+    (bundle as any).countdownPosition === "below" ? "below" : "above"
   );
   const [countdownTitle, setCountdownTitle] = useState<string>(
-    (bundle as any).countdownTitle ?? "",
+    (bundle as any).countdownTitle ?? ""
   );
   const [countdownExpiryAction, setCountdownExpiryAction] =
     useState<CountdownExpiryAction>(
       (bundle as any).countdownExpiryAction === "show_zeros" ||
         (bundle as any).countdownExpiryAction === "show_message"
         ? (bundle as any).countdownExpiryAction
-        : "hide",
+        : "hide"
     );
-  const [countdownExpiredMessage, setCountdownExpiredMessage] = useState<string>(
-    (bundle as any).countdownExpiredMessage ?? "",
-  );
+  const [countdownExpiredMessage, setCountdownExpiredMessage] =
+    useState<string>((bundle as any).countdownExpiredMessage ?? "");
   const initialValidateQuantityPerProduct =
     ((bundle as any).validateQuantityPerProduct as {
       isEnabled?: boolean;
@@ -110,53 +117,53 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const [quantityValidationEnabled, setQuantityValidationEnabled] =
     useState<boolean>(initialValidateQuantityPerProduct?.isEnabled === true);
   const [productSlotsEnabled, setProductSlotsEnabled] = useState<boolean>(
-    (bundle as any).productSlotsEnabled ?? false,
+    (bundle as any).productSlotsEnabled ?? false
   );
   const [variantSelectorEnabled, setVariantSelectorEnabled] = useState<boolean>(
-    (bundle as any).variantSelectorEnabled ?? true,
+    (bundle as any).variantSelectorEnabled ?? true
   );
   const [maxQtyPerProduct, setMaxQtyPerProduct] = useState<string>(
     (
       initialValidateQuantityPerProduct?.allowedQuantity ??
       (bundle as any).maxQtyPerProduct ??
       1
-    ).toString(),
+    ).toString()
   );
   const [productSlotIconUrl, setProductSlotIconUrl] = useState<string>(
-    (bundle as any).productSlotIconUrl ?? "",
+    (bundle as any).productSlotIconUrl ?? ""
   );
   const [showSlotIconPicker, setShowSlotIconPicker] = useState(false);
   const [bundleLevelCssExpanded, setBundleLevelCssExpanded] = useState(false);
   const initialDefaultProductsData = useMemo(
     () => normalizeDefaultProductsData((bundle as any).defaultProductsData),
-    [bundle],
+    [bundle]
   );
   const [defaultProductsData, setDefaultProductsData] =
     useState<DefaultProductsData>(initialDefaultProductsData);
   const originalDefaultProductsDataRef = useRef<DefaultProductsData>(
-    initialDefaultProductsData,
+    initialDefaultProductsData
   );
   const [showTextOnAddButton, setShowTextOnAddButton] = useState<boolean>(
     ((bundle as any).showTextOnAddButton ?? false) === true ||
-      !!(bundle as any).textOverrides?.addToCartButton,
+      !!(bundle as any).textOverrides?.addToCartButton
   );
   const originalShowProductPricesRef = useRef<boolean>(
-    (bundle as any).showProductPrices ?? true,
+    (bundle as any).showProductPrices ?? true
   );
   const originalCartRedirectToCheckoutRef = useRef<boolean>(
-    (bundle as any).cartRedirectToCheckout ?? false,
+    (bundle as any).cartRedirectToCheckout ?? false
   );
   const originalAllowQuantityChangesRef = useRef<boolean>(
-    (bundle as any).allowQuantityChanges ?? true,
+    (bundle as any).allowQuantityChanges ?? true
   );
   const originalLowStockAlertEnabledRef = useRef<boolean>(
-    (bundle as any).lowStockAlertEnabled ?? false,
+    (bundle as any).lowStockAlertEnabled ?? false
   );
   const originalLowStockAlertThresholdRef = useRef<string>(
-    String((bundle as any).lowStockAlertThreshold ?? 5),
+    String((bundle as any).lowStockAlertThreshold ?? 5)
   );
   const originalLowStockAlertMessageRef = useRef<string>(
-    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left",
+    (bundle as any).lowStockAlertMessage ?? "Only {{stock}} left"
   );
   const originalCountdownEnabledRef = useRef(countdownEnabled);
   const originalCountdownLayoutRef = useRef(countdownLayout);
@@ -178,9 +185,11 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   const [textOverrides, setTextOverrides] =
     useState<Record<string, string>>(initialTextOverrides);
   const savedUpsellMultiLangText =
-    (((bundle as any).bundleUpsellConfig as {
-      multiLangText?: Record<string, Record<string, string>>;
-    } | null)?.multiLangText ?? {});
+    (
+      (bundle as any).bundleUpsellConfig as {
+        multiLangText?: Record<string, Record<string, string>>;
+      } | null
+    )?.multiLangText ?? {};
   const initialTextOverridesByLocale = Object.fromEntries(
     Array.from(
       new Set([
@@ -188,20 +197,22 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
           ((bundle as any).textOverridesByLocale as Record<
             string,
             Record<string, string>
-          >) ?? {},
+          >) ?? {}
         ),
         ...Object.keys(savedUpsellMultiLangText),
-      ]),
+      ])
     ).map((locale) => [
       locale,
       {
         ...(savedUpsellMultiLangText[locale] ?? {}),
-        ...(((bundle as any).textOverridesByLocale as Record<
-          string,
-          Record<string, string>
-        >)?.[locale] ?? {}),
+        ...((
+          (bundle as any).textOverridesByLocale as Record<
+            string,
+            Record<string, string>
+          >
+        )?.[locale] ?? {}),
       },
-    ]),
+    ])
   );
   const [textOverridesByLocale, setTextOverridesByLocale] = useState<
     Record<string, Record<string, string>>
@@ -213,9 +224,8 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
   >(initialTextOverridesByLocale);
   const [textOverridesLocale, setTextOverridesLocale] = useState<string>("");
 
-  Object.assign(flow, {
+  return {
     allowQuantityChanges,
-    buildDefaultProductEntryFromPicker,
     bundleLevelCssExpanded,
     bundlePageUrl,
     cartRedirectToCheckout,
@@ -300,5 +310,5 @@ export function useConfigureContentState(flow: ConfigureBundleFlowDraft) {
     textOverridesByLocale,
     textOverridesLocale,
     variantSelectorEnabled,
-  });
+  };
 }

@@ -1,7 +1,4 @@
-import {
-  buildFpbBaseConfig,
-  buildFullPageBundleMetafieldConfig,
-} from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server";
+import { buildFullPageBundleMetafieldConfig } from "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server";
 
 describe("FPB runtime metafield config", () => {
   const product = {
@@ -26,6 +23,38 @@ describe("FPB runtime metafield config", () => {
       },
     ],
   };
+
+  it("preserves the canonical Full Page type", () => {
+    const config = buildFullPageBundleMetafieldConfig({
+      id: "bundle-1",
+      name: "Bundle",
+      status: "active",
+      bundleType: "full_page",
+      publicNumber: 1,
+      steps: [],
+    });
+
+    expect(config.id).toBe("bundle-1");
+    expect(config).not.toHaveProperty("bundleId");
+    expect(config).not.toHaveProperty("updatedAt");
+    expect(config.bundleType).toBe("full_page");
+  });
+
+  it.each([undefined, "product_page"])(
+    "rejects non-FPB bundle type %s",
+    (bundleType) => {
+      expect(() =>
+        buildFullPageBundleMetafieldConfig({
+          id: "bundle-1",
+          name: "Bundle",
+          status: "active",
+          bundleType,
+          publicNumber: 1,
+          steps: [],
+        })
+      ).toThrow("FPB metafield config requires bundleType full_page");
+    }
+  );
 
   it("preserves enriched products in the full-page metafield config", () => {
     const config = buildFullPageBundleMetafieldConfig({
@@ -59,59 +88,53 @@ describe("FPB runtime metafield config", () => {
       selectionId: "gid://shopify/Product/123",
       price: 1999,
       variants: expect.arrayContaining([
-        expect.objectContaining({ selectionId: "gid://shopify/ProductVariant/111", price: 1999 }),
+        expect.objectContaining({
+          selectionId: "gid://shopify/ProductVariant/111",
+          price: 1999,
+        }),
       ]),
     });
   });
 
-  it("preserves fixedBundlePrice in base config pricing rules", () => {
-    const config = buildFpbBaseConfig(
-      {
-        id: "bundle-1",
-        name: "Bundle",
-        description: "",
-        status: "active",
-        bundleType: "full_page",
-        fullPageLayout: null,
-        templateName: null,
-        shopifyProductId: "gid://shopify/Product/999",
-      } as any,
-      [
+  it("serializes fixed bundle price through canonical discountValue only", () => {
+    const config = buildFullPageBundleMetafieldConfig({
+      id: "bundle-1",
+      name: "Bundle",
+      description: "",
+      status: "active",
+      bundleType: "full_page",
+      fullPageLayout: null,
+      templateName: null,
+      shopifyProductId: "gid://shopify/Product/999",
+      steps: [
         {
           id: "step-1",
           name: "Step 1",
           StepProduct: [product],
         },
       ],
-      {},
-      {
-        discountEnabled: true,
-        discountType: "fixed_bundle_price",
-        discountRules: [
+      pricing: {
+        enabled: true,
+        method: "fixed_bundle_price",
+        rules: [
           {
             id: "rule-1",
             conditionType: "quantity",
+            conditionOperator: "lt",
             conditionValue: 2,
-            discountValue: 770,
-            fixedBundlePrice: 4999,
+            discountValue: 4999,
+            fixedBundlePrice: 9999,
           },
         ],
+        messages: {},
       },
-      "gid://shopify/ProductVariant/999",
-    ) as any;
+    } as any) as any;
 
-    expect(config.steps[0].products[0]).toMatchObject({
-      selectionId: "gid://shopify/Product/123",
-      price: 1999,
-      variants: expect.arrayContaining([
-        expect.objectContaining({ selectionId: "gid://shopify/ProductVariant/111", price: 1999 }),
-      ]),
-    });
     expect(config.pricing.rules[0]).toMatchObject({
-      discountValue: 770,
-      fixedBundlePrice: 4999,
+      conditionOperator: "lt",
+      discountValue: 4999,
     });
+    expect(config.pricing.rules[0]).not.toHaveProperty("fixedBundlePrice");
     expect(config).not.toHaveProperty("fullPageLayout");
-    expect(config).not.toHaveProperty("shopifyPageHandle");
   });
 });

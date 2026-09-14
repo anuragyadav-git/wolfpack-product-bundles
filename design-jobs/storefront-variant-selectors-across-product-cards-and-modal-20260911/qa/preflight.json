@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "job_id": "storefront-variant-selectors-across-product-cards-and-modal-20260911",
+  "revision": 4,
+  "status": "complete",
+  "checked_at": "2026-09-11T20:43:08Z",
+  "environment": "Agent store SIT signed FPB preview",
+  "selected_page": {
+    "page_id": 172,
+    "url": "https://agent-5sfidg3m.myshopify.com/apps/product-bundles-sit/wpb/8?wpb_preview=[redacted]",
+    "title": "agent"
+  },
+  "checks": {
+    "chrome_mcp_connected": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Direct Chrome DevTools listed and inspected page 141.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "supported_chrome_available": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Chrome 152.0.0.0 on macOS.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "intended_page_selected": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Signed Agent-store FPB preview for bundle cmtmv15r10001v0rp8j79t9bx.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "app_server_reachable": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Preview document, app-proxy settings, storefront products, and current extension assets returned HTTP 200.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "environment_confirmed": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Host is agent-5sfidg3m.myshopify.com and app-proxy path is product-bundles-sit.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "fixture_route_exists": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "FPB preview hydrated an adjacent no-variant product and seven Size by four Color product.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "authentication_intentional": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "User-provided default-profile Agent-store session and Admin-generated signed preview.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "sensitive_tabs_avoided": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Inspection was limited to relevant Shopify Admin, storefront preview, and public Shopify documentation surfaces.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "viewport_resize_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "User-resized real Chrome windows exposed a 390px inner width. All four FPB templates were exercised at desktop and 390px mobile widths without emulation.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "accessibility_snapshot_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Snapshots exposed seven named Size radios and a labeled Color combobox.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "screenshot_write_supported": {
+      "mandatory": true,
+      "status": "passed-inline-only",
+      "evidence": "Direct Chrome viewport screenshots succeeded and were reviewed inline for every FPB template. They were intentionally not persisted or committed under the repository screenshot rule.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "console_inspection_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Console listing completed; no widget exception or hydration error was present.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "network_inspection_supported": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Network listing confirmed required widget and hydration requests returned HTTP 200.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "repository_identity_recorded": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "feature/26.05-UI-changes at baseline bc954fc5c022e81c75f0b6835e8e0d7cac7412b8.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "job_revision_recorded": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Design job revision 4.",
+      "blocker": "",
+      "recovery_action": ""
+    },
+    "baseline_identified": {
+      "mandatory": true,
+      "status": "passed",
+      "evidence": "Revision-3 implementation handoff and pre-remediation mixed-card geometry, with the revision-4 ordering decision verified in Chrome.",
+      "blocker": "",
+      "recovery_action": ""
+    }
+  },
+  "tool_inventory": [
+    "mcp__chrome_devtools__list_pages",
+    "mcp__chrome_devtools__resize_page",
+    "mcp__chrome_devtools__navigate_page",
+    "mcp__chrome_devtools__take_snapshot",
+    "mcp__chrome_devtools__take_screenshot",
+    "mcp__chrome_devtools__evaluate_script",
+    "mcp__chrome_devtools__list_console_messages",
+    "mcp__chrome_devtools__list_network_requests"
+  ],
+  "browser": {
+    "product": "Google Chrome",
+    "version": "152.0.0.0",
+    "profile_policy": "default-profile-only",
+    "isolated_context_used": false
+  },
+  "repository": {
+    "path": "/Users/adityaawasthi/Developer/wolfpack-product-bundles",
+    "branch": "feature/26.05-UI-changes",
+    "commit": "bc954fc5c022e81c75f0b6835e8e0d7cac7412b8"
+  },
+  "baseline": {
+    "id": "revision-4-live-fpb-ordering-slice",
+    "revision": 4,
+    "path": "implementation-handoff.md"
+  },
+  "artifact_directory": "qa",
+  "blockers": []
+}

@@ -1,11 +1,11 @@
 import { json } from "@remix-run/node";
 import type { Session } from "@shopify/shopify-api";
-import type { ShopifyAdmin } from "../../../../lib/auth-guards.server";
+import type { ShopifyAdmin } from "../../../../shopify.server";
 import { AppLogger } from "../../../../lib/logger";
 import db from "../../../../db.server";
 import { ERROR_MESSAGES } from "../../../../constants/errors";
 import { ensureBundleParentProduct } from "../../../../services/bundles/bundle-parent-product.server";
-import { updateBundleProductMetafields } from "../../../../services/bundles/metafield-sync.server";
+import { updateBundleProductMetafields } from "../../../../services/bundles/metafield-sync/operations/bundle-product.server";
 import { buildFullPageBundleMetafieldConfig } from "./shared.server";
 
 export async function handleSyncProduct(

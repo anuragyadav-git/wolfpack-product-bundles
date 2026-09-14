@@ -5,7 +5,7 @@ title: Shared Component - Quantity Control
 type: component-contract
 status: active
 summary: Shared quantity increment/decrement control contract for selected products.
-last_audited: 2026-08-06
+last_audited: 2026-09-08
 owners:
   - Wolfpack Product Bundles
 domains:
@@ -15,7 +15,6 @@ systems:
   - product-page-widget
 source_paths:
   - app/assets/widgets/shared/components/quantity-control.js
-  - app/assets/widgets/shared/engine/create-bundle-state.js
 related_docs:
   - design-system/01-foundations/spacing-and-density.md
   - design-system/01-foundations/accessibility-foundations.md

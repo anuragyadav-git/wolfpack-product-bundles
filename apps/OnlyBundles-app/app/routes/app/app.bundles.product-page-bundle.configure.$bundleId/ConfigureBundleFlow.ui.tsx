@@ -43,15 +43,10 @@ export const BundleProductCard = memo(
         {bundleProduct ? (
           <s-stack direction="block" gap="small">
             <s-stack direction="inline" gap="small" alignItems="center">
-              <img
+              <s-thumbnail
                 src={productImageUrl || "/bundle.avif"}
                 alt={productTitle || "Bundle Product"}
-                style={{
-                  width: 40,
-                  height: 40,
-                  objectFit: "cover",
-                  borderRadius: 4,
-                }}
+                size="small"
               />
               <s-stack direction="inline" gap="small-100" alignItems="center">
                 <s-button

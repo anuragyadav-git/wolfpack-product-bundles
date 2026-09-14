@@ -1,16 +1,33 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
-import { FpbBundleVisibilityPanel } from "./BundleVisibilityPanel";
-import { FpbImagesGifsPanel } from "./ImagesGifsPanel";
+import type { ComponentProps } from "react";
+import {
+  FpbBundleVisibilityPanel,
+  type FpbBundleVisibilityPanelProps,
+} from "./BundleVisibilityPanel";
+import {
+  FpbImagesGifsPanel,
+  type FpbImagesGifsPanelProps,
+} from "./ImagesGifsPanel";
 import { SpecificLinkOfferSection } from "../../shared/SpecificLinkOfferSection";
 import { OfferOperationsSection } from "../../shared/OfferOperationsSection";
 import { CountryTargetingSection } from "../../shared/CountryTargetingSection";
 
+interface ImagesVisibilitySectionProps {
+  activeSection: string;
+  countryTargeting: ComponentProps<typeof CountryTargetingSection>;
+  media: FpbImagesGifsPanelProps;
+  offerOperations: ComponentProps<typeof OfferOperationsSection>;
+  specificLinkOffer: ComponentProps<typeof SpecificLinkOfferSection>;
+  visibility: FpbBundleVisibilityPanelProps;
+}
+
 export function ImagesVisibilitySection({
-  flow,
-}: {
-  flow: ConfigureBundleFlowContext;
-}) {
-  const { activeSection } = flow;
+  activeSection,
+  countryTargeting,
+  media,
+  offerOperations,
+  specificLinkOffer,
+  visibility,
+}: ImagesVisibilitySectionProps) {
 
   if (
     activeSection !== "images_gifs" &&
@@ -22,41 +39,11 @@ export function ImagesVisibilitySection({
   return (
     <div data-tour-target="fpb-design-settings">
       <s-stack direction="block" gap="base">
-        <FpbBundleVisibilityPanel flow={flow} />
-        <SpecificLinkOfferSection
-          active={activeSection === "bundle_visibility"}
-          busy={flow.specificLinkOfferBusy}
-          generatedLink={flow.generatedSpecificLink}
-          state={flow.offerDeliveryState}
-          onEnabledChange={flow.setSpecificLinkOfferEnabled}
-          onGenerate={flow.generateSpecificLinkOffer}
-          onCopy={flow.copySpecificLinkOffer}
-          onRevoke={flow.revokeSpecificLinkOffer}
-        />
-        <OfferOperationsSection
-          active={activeSection === "bundle_visibility"}
-          state={flow.offerDeliveryState}
-          onPriorityChange={flow.setOfferPriority}
-          onStopLowerPriorityChange={flow.setOfferStopLowerPriority}
-          onScheduleModeChange={flow.setOfferScheduleMode}
-          onStartsAtChange={flow.setOfferStartsAt}
-          onEndsAtChange={flow.setOfferEndsAt}
-          onRecurrenceFrequencyChange={flow.setOfferRecurrenceFrequency}
-          onRecurrenceAnchorDateChange={flow.setOfferRecurrenceAnchorDate}
-          onRecurrenceWindowStartChange={flow.setOfferRecurrenceWindowStart}
-          onRecurrenceWindowEndChange={flow.setOfferRecurrenceWindowEnd}
-          onRecurrenceTerminationChange={flow.setOfferRecurrenceTermination}
-          onRecurrenceEndsOnChange={flow.setOfferRecurrenceEndsOn}
-          onRecurrenceRunCountChange={flow.setOfferRecurrenceRunCount}
-        />
-        <CountryTargetingSection
-          active={activeSection === "bundle_visibility"}
-          state={flow.offerDeliveryState}
-          onEnabledChange={flow.setCountryTargetingEnabled}
-          onModeChange={flow.setCountryTargetingMode}
-          onCountryCodesChange={flow.setCountryCodes}
-        />
-        <FpbImagesGifsPanel flow={flow} />
+        <FpbBundleVisibilityPanel {...visibility} />
+        <SpecificLinkOfferSection {...specificLinkOffer} />
+        <OfferOperationsSection {...offerOperations} />
+        <CountryTargetingSection {...countryTargeting} />
+        <FpbImagesGifsPanel {...media} />
       </s-stack>
     </div>
   );

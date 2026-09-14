@@ -1,10 +1,34 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { type MultiLanguageField } from "../../../components/bundle-configure/MultiLanguageTextModal";
 import { ADDON_MESSAGE_KEY } from "./configure-constants";
-import type { ConfigureBundleFlowDraft } from "./configure-flow-types";
+import type { useConfigureBundleController } from "./useConfigureBundleController";
+import type { useConfigureAddonState } from "./useConfigureAddonState";
+import type { useConfigureContentState } from "./useConfigureContentState";
 import type { StepSetupMultiLanguageTarget } from "./visibility-helpers";
 
-export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
+type ConfigureLocalizationDependencies = Pick<
+  ReturnType<typeof useConfigureBundleController>,
+  | "bundle"
+  | "markAsDirty"
+  | "pricingState"
+  | "ruleMessages"
+  | "shopLocales"
+  | "stepsState"
+> &
+  Pick<
+    ReturnType<typeof useConfigureAddonState>,
+    "addonDraft" | "updateAddonDraft"
+  > &
+  Pick<
+    ReturnType<typeof useConfigureContentState>,
+    | "setTextOverridesByLocale"
+    | "setTextOverridesLocale"
+    | "textOverridesByLocale"
+  >;
+
+export function useConfigureLocalizationState(
+  dependencies: ConfigureLocalizationDependencies
+) {
   const {
     addonDraft,
     bundle,
@@ -17,7 +41,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     stepsState,
     textOverridesByLocale,
     updateAddonDraft,
-  } = flow;
+  } = dependencies;
   const {
     setTierTextByLocaleByRuleId,
     setTierTextByRuleId,
@@ -41,7 +65,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     setDiscountMessagingMultiLanguageEnabled,
   ] = useState<boolean>(!!(bundle as any).pricing?.ruleMessagesByLocale);
   const originalDiscountMessagingMultiLanguageEnabledRef = useRef<boolean>(
-    !!(bundle as any).pricing?.ruleMessagesByLocale,
+    !!(bundle as any).pricing?.ruleMessagesByLocale
   );
   const [ruleMessagesByLocale, setRuleMessagesByLocale] = useState<
     Record<
@@ -52,7 +76,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     ((bundle as any).pricing?.ruleMessagesByLocale as Record<
       string,
       Record<string, { discountText: string; successMessage: string }>
-    >) ?? {},
+    >) ?? {}
   );
   const originalRuleMessagesByLocaleRef = useRef<
     Record<
@@ -63,15 +87,15 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     ((bundle as any).pricing?.ruleMessagesByLocale as Record<
       string,
       Record<string, { discountText: string; successMessage: string }>
-    >) ?? {},
+    >) ?? {}
   );
   const [activeDiscountLocale, setActiveDiscountLocale] = useState<string>(
     shopLocales.find((l: { primary: boolean }) => l.primary)?.locale ??
       shopLocales[0]?.locale ??
-      "",
+      ""
   );
   const [globalSuccessMessage, setGlobalSuccessMessage] = useState<string>(
-    (bundle as any).pricing?.messages?.successMessage ?? "",
+    (bundle as any).pricing?.messages?.successMessage ?? ""
   );
   const [successMessageByLocale, setSuccessMessageByLocale] = useState<
     Record<string, string>
@@ -79,7 +103,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     ((bundle as any).pricing?.messages?.successMessageByLocale as Record<
       string,
       string
-    >) ?? {},
+    >) ?? {}
   );
   const [isProgressBarMultiLangModalOpen, setIsProgressBarMultiLangModalOpen] =
     useState(false);
@@ -87,7 +111,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     useState<string>(
       shopLocales.find((l: { primary: boolean }) => l.primary)?.locale ??
         shopLocales[0]?.locale ??
-        "",
+        ""
     );
   const [
     isBundleQuantityMultiLangModalOpen,
@@ -97,7 +121,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     useState<string>(
       shopLocales.find((l: { primary: boolean }) => l.primary)?.locale ??
         shopLocales[0]?.locale ??
-        "",
+        ""
     );
   const defaultMultiLanguageLocale = useCallback(
     () =>
@@ -105,7 +129,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
         ?.locale ??
       shopLocales[0]?.locale ??
       "",
-    [shopLocales],
+    [shopLocales]
   );
   const openMultiLanguageModal = useCallback(
     (title: string, fields: MultiLanguageField[]) => {
@@ -115,12 +139,12 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
       setTextOverridesLocale(defaultMultiLanguageLocale());
       setIsMultiLanguageModalOpen(true);
     },
-    [defaultMultiLanguageLocale, setTextOverridesLocale],
+    [defaultMultiLanguageLocale, setTextOverridesLocale]
   );
   const openStepMultiLanguageModal = useCallback(
     (stepId: string) => {
       const step = stepsState.steps.find(
-        (candidate: any) => candidate.id === stepId,
+        (candidate: any) => candidate.id === stepId
       ) as any;
       if (!step) return;
       setMultiLanguageTarget({ type: "step", stepId });
@@ -141,12 +165,12 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
       setTextOverridesLocale(defaultMultiLanguageLocale());
       setIsMultiLanguageModalOpen(true);
     },
-    [defaultMultiLanguageLocale, setTextOverridesLocale, stepsState.steps],
+    [defaultMultiLanguageLocale, setTextOverridesLocale, stepsState.steps]
   );
   const openStepCategoryMultiLanguageModal = useCallback(
     (stepId: string, categoryIndex: number) => {
       const step = stepsState.steps.find(
-        (candidate: any) => candidate.id === stepId,
+        (candidate: any) => candidate.id === stepId
       ) as any;
       const category = ((step?.StepCategory as any[] | undefined) ?? [])[
         categoryIndex
@@ -170,7 +194,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
       setTextOverridesLocale(defaultMultiLanguageLocale());
       setIsMultiLanguageModalOpen(true);
     },
-    [defaultMultiLanguageLocale, setTextOverridesLocale, stepsState.steps],
+    [defaultMultiLanguageLocale, setTextOverridesLocale, stepsState.steps]
   );
   const openAddonStepMultiLanguageModal = useCallback(() => {
     setMultiLanguageTarget({ type: "addon-step" });
@@ -241,7 +265,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
           label: "Success Message",
           fallback: addonMessages.successMessage || "",
         },
-      ]),
+      ])
     );
     setTextOverridesLocale(defaultMultiLanguageLocale());
     setIsMultiLanguageModalOpen(true);
@@ -255,7 +279,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
   const activeMultiLanguageValues = useMemo(() => {
     if (multiLanguageTarget?.type === "step") {
       const step = stepsState.steps.find(
-        (candidate: any) => candidate.id === multiLanguageTarget.stepId,
+        (candidate: any) => candidate.id === multiLanguageTarget.stepId
       ) as any;
       return (step?.multiLangData ?? {}) as Record<
         string,
@@ -264,7 +288,7 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     }
     if (multiLanguageTarget?.type === "step-category") {
       const step = stepsState.steps.find(
-        (candidate: any) => candidate.id === multiLanguageTarget.stepId,
+        (candidate: any) => candidate.id === multiLanguageTarget.stepId
       ) as any;
       const category = ((step?.StepCategory as any[] | undefined) ?? [])[
         multiLanguageTarget.categoryIndex
@@ -297,14 +321,14 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
         stepsState.updateStepField(
           multiLanguageTarget.stepId,
           "multiLangData",
-          nextValues,
+          nextValues
         );
         markAsDirty();
         return;
       }
       if (multiLanguageTarget?.type === "step-category") {
         const step = stepsState.steps.find(
-          (candidate: any) => candidate.id === multiLanguageTarget.stepId,
+          (candidate: any) => candidate.id === multiLanguageTarget.stepId
         ) as any;
         const categories = (step?.StepCategory as any[] | undefined) ?? [];
         const updatedCategories = categories.map((category, index) =>
@@ -313,12 +337,12 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
                 ...category,
                 multiLangData: nextValues,
               }
-            : category,
+            : category
         );
         stepsState.updateStepField(
           multiLanguageTarget.stepId,
           "StepCategory",
-          updatedCategories,
+          updatedCategories
         );
         markAsDirty();
         return;
@@ -340,10 +364,10 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
       setTextOverridesByLocale,
       stepsState,
       updateAddonDraft,
-    ],
+    ]
   );
 
-  Object.assign(flow, {
+  return {
     activeBundleQuantityLocale,
     activeDiscountLocale,
     activeMultiLanguageValues,
@@ -386,5 +410,5 @@ export function useConfigureLocalizationState(flow: ConfigureBundleFlowDraft) {
     successMessageByLocale,
     tierTextByLocaleByRuleId,
     tierTextByRuleId,
-  });
+  };
 }

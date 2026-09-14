@@ -2,7 +2,6 @@
  * Bundle Widget - Bundle Data Manager
  *
  * Handles validation, filtering, and selection of bundle data.
- * Provides utilities for extracting step and product data.
  *
  * @version 4.0.0
  */
@@ -12,39 +11,6 @@
 import { BUNDLE_WIDGET } from './constants.js';
 
 export class BundleDataManager {
-  static validateBundleData(bundles: any[]) {
-    if (!Array.isArray(bundles) || bundles.length === 0) {
-      throw new Error('No bundles available');
-    }
-
-    const required: any[] = ['id', 'name', 'status', 'bundleType', 'steps'];
-    bundles.forEach((bundle, index) => {
-      required.forEach(field => {
-        if (!bundle[field]) {
-          throw new Error(`Bundle ${index} missing required field: ${field}`);
-        }
-      });
-
-      // Validate bundle type
-      if (
-        bundle.bundleType !== BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE &&
-        bundle.bundleType !== BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE
-      ) {
-        throw new Error(
-          `Bundle ${bundle.id} has invalid bundleType: "${bundle.bundleType}". ` +
-          `Expected "${BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE}" or "${BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE}".`
-        );
-      }
-
-      // Validate steps
-      if (!Array.isArray(bundle.steps) || bundle.steps.length === 0) {
-        throw new Error(`Bundle ${bundle.id} has no steps`);
-      }
-    });
-
-    return bundles;
-  }
-
   static validateSingleBundle(bundle: any) {
     if (!bundle || typeof bundle !== 'object') {
       return false;
@@ -62,11 +28,6 @@ export class BundleDataManager {
     }
 
     return true;
-  }
-
-  static filterActiveBundles(bundles: any[]) {
-    // BundleStatus enum: draft | active | archived — 'published' is not a valid status
-    return bundles.filter((bundle: any)  => bundle.status === 'active');
   }
 
   static _normalizeId(value: any) {
@@ -205,69 +166,6 @@ export class BundleDataManager {
     const currentCollectionSet = this._buildCurrentCollectionIdentifierSet(config.currentProductCollections || []);
 
     return [...collectionTargetSet].some((value) => currentCollectionSet.has(value));
-  }
-
-  static getProductPageBundles(bundles: any[]) {
-    return bundles.filter((bundle: any)  =>
-      bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.PRODUCT_PAGE
-    );
-  }
-
-  static getFullPageBundles(bundles: any[]) {
-    return bundles.filter((bundle: any)  =>
-      bundle.bundleType === BUNDLE_WIDGET.BUNDLE_TYPES.FULL_PAGE
-    );
-  }
-
-  static getBundleById(bundles: any[], bundleId: any) {
-    return bundles.find((bundle: any)  => bundle.id === bundleId);
-  }
-
-  static getContainerBundle(bundles: any[], productId: any) {
-    return bundles.find((bundle: any)  =>
-      bundle.containerProductId &&
-      bundle.containerProductId.toString() === productId?.toString()
-    );
-  }
-
-  static _resolveCompareAtPrice(productData: any) {
-    const rawCompareAtPrice = productData?.compareAtPrice ?? productData?.compare_at_price;
-    if (rawCompareAtPrice == null) return null;
-    if (
-      typeof rawCompareAtPrice === 'object' &&
-      rawCompareAtPrice !== null &&
-      typeof rawCompareAtPrice.amount !== 'undefined'
-    ) {
-      return rawCompareAtPrice.amount;
-    }
-    return rawCompareAtPrice;
-  }
-
-  static extractStepData(steps: any[]) {
-    return steps.map((step: any)  => ({
-      id: step.id,
-      name: step.name || 'Unnamed Step',
-      required: step.required || false,
-      allowMultiple: step.allowMultiple || false,
-      products: step.StepProduct || [],
-      conditions: step.StepCondition || []
-    }));
-  }
-
-  static extractProductData(stepProducts: any[]) {
-    return stepProducts.map((sp: any)  => ({
-      id: sp.product?.id || sp.productId,
-      shopifyProductId: sp.product?.shopifyProductId || sp.shopifyProductId,
-      title: sp.product?.title || 'Untitled Product',
-      // AVIF is preferred for new widget payloads; old /bundle-product-placeholder.png kept as a compatibility fallback by
-      // component-level onerror handling.
-      imageUrl: sp.product?.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE,
-      price: sp.product?.price || 0,
-      compareAtPrice: BundleDataManager._resolveCompareAtPrice(sp.product),
-      variants: sp.product?.variants || [],
-      variantId: sp.variantId || null,
-      quantity: Number.isFinite(Number(sp.quantity)) ? Number(sp.quantity) : 0,
-    }));
   }
 
   static selectBundle(bundlesData: any, config: any) {

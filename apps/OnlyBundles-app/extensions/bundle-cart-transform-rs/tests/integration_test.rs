@@ -39,7 +39,7 @@ mod tests {
 
     fn merge_attributes(output: &schema::FunctionRunResult) -> HashMap<String, String> {
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
 
@@ -54,7 +54,7 @@ mod tests {
 
     fn merge_discount_percentage(output: &schema::FunctionRunResult) -> Option<String> {
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
 
@@ -138,6 +138,42 @@ mod tests {
             .max_by_key(|parent| parent_match_count(parent, &variant_ids))
     }
 
+    fn copy_line_runtime_tokens_to_cart(root: &mut Value) {
+        let mut entries = Vec::new();
+        if let Some(lines) = root
+            .get("cart")
+            .and_then(|cart| cart.get("lines"))
+            .and_then(|lines| lines.as_array())
+        {
+            for line in lines {
+                let Some(group_id) =
+                    attr_value(line, "wolfpackProductBundleOfferId").and_then(offer_group_id)
+                else {
+                    continue;
+                };
+                if entries.iter().any(|entry: &Value| entry["key"] == group_id) {
+                    continue;
+                }
+                let Some(runtime_token) = attr_value(line, "runtimeToken") else {
+                    continue;
+                };
+                let display_properties = attr_value(line, "bundleDisplayProperties")
+                    .and_then(|value| serde_json::from_str::<Value>(value).ok())
+                    .unwrap_or_else(|| serde_json::json!({}));
+                entries.push(serde_json::json!({
+                    "key": group_id,
+                    "runtimeToken": runtime_token,
+                    "displayProperties": display_properties,
+                }));
+            }
+        }
+        if !entries.is_empty() {
+            root["cart"]["bundleDetails"] = serde_json::json!({
+                "value": Value::Array(entries).to_string(),
+            });
+        }
+    }
+
     fn with_runtime_tokens(input: &str) -> String {
         let mut root: Value = serde_json::from_str(input).expect("test input should be valid JSON");
         root["localization"] = serde_json::json!({ "country": { "isoCode": "CA" } });
@@ -189,6 +225,7 @@ mod tests {
             root["cartTransform"] = serde_json::json!({
                 "runtimeConfiguration": { "value": configuration.to_string() },
             });
+            copy_line_runtime_tokens_to_cart(&mut root);
             return root.to_string();
         }
 
@@ -276,6 +313,7 @@ mod tests {
         root["cartTransform"] = serde_json::json!({
             "runtimeConfiguration": { "value": configuration.to_string() },
         });
+        copy_line_runtime_tokens_to_cart(&mut root);
         root.to_string()
     }
 
@@ -286,7 +324,7 @@ mod tests {
 
     fn expand_discount_percentage(output: &schema::FunctionRunResult) -> Option<String> {
         let expand = match &output.operations[0] {
-            schema::CartOperation::LineExpand(e) => e,
+            schema::CartOperation::Expand(e) => e,
             _ => panic!("expected Expand operation"),
         };
 
@@ -416,15 +454,20 @@ mod tests {
     fn test_runtime_token_merge_without_component_parents() {
         let runtime_secret = test_runtime_secret();
         let runtime_token = sign_runtime_token_for_test(&runtime_merge_payload(), &runtime_secret);
-        let offer_analytics_display = serde_json::json!({
-            "offerAnalytics": {
+        let bundle_details = serde_json::json!([{
+              "key": "FBP-bundle-1_ABC",
+              "runtimeToken": runtime_token,
+              "displayProperties": {
+                "bundleName": "Runtime Bundle",
+                "offerAnalytics": {
                 "bundleId": "bundle-1",
                 "offerPolicyId": "policy-1",
                 "offerRuleVersion": 8,
                 "offerTierId": "tier-3",
                 "offerEligibilitySource": "schedule"
-            }
-        })
+                }
+              }
+        }])
         .to_string();
         let input = format!(
             r#"{{
@@ -434,14 +477,15 @@ mod tests {
                 "runtimeTokenSecret": {{ "value": "{runtime_secret}" }}
             }},
             "cart": {{
+                "bundleDetails": {{ "value": {bundle_details:?} }},
                 "lines": [
                     {{
                         "id": "line1", "quantity": 1,
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_1" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
-                        "runtimeToken": {{ "value": "{runtime_token}" }},
+                        "runtimeToken": null,
                         "stepType": null,
-                        "bundleDisplayProperties": {{ "value": {offer_analytics_display:?} }},
+                        "bundleDisplayProperties": null,
                         "merchandise": {{
                             "__typename": "ProductVariant",
                             "id": "gid://shopify/ProductVariant/101",
@@ -456,9 +500,9 @@ mod tests {
                         "id": "line2", "quantity": 1,
                         "wolfpackProductBundleOfferId": {{ "value": "FBP-bundle-1_ABC_2" }},
                         "wolfpackProductBundleName": {{ "value": "Runtime Bundle" }},
-                        "runtimeToken": {{ "value": "{runtime_token}" }},
+                        "runtimeToken": null,
                         "stepType": null,
-                        "bundleDisplayProperties": {{ "value": {offer_analytics_display:?} }},
+                        "bundleDisplayProperties": null,
                         "merchandise": {{
                             "__typename": "ProductVariant",
                             "id": "gid://shopify/ProductVariant/102",
@@ -601,7 +645,13 @@ mod tests {
             "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
                 "runtimeTokenSecret": runtime_secret
             }).to_string() } },
-            "cart": { "lines": [{
+            "cart": {
+              "bundleDetails": { "value": serde_json::json!([{
+                "key": "MIX-bundle-1_ABC",
+                "runtimeToken": bundle_token,
+                "displayProperties": { "bundleName": "Runtime Bundle" }
+              }]).to_string() },
+              "lines": [{
                 "id": "line1", "quantity": 1,
                 "wolfpackProductBundleOfferId": { "value": "MIX-bundle-1_ABC_1" },
                 "wolfpackProductBundleName": { "value": "Runtime Bundle" },
@@ -646,8 +696,16 @@ mod tests {
         let input = serde_json::json!({
             "localization": { "country": { "isoCode": "CA" } },
             "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
-            "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
-            "cart": { "lines": [{
+            "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
+                "runtimeTokenSecret": runtime_secret
+            }).to_string() } },
+            "cart": {
+              "bundleDetails": { "value": serde_json::json!([{
+                "key": "MIX-bundle-1_ABC",
+                "runtimeToken": bundle_token,
+                "displayProperties": { "bundleName": "Runtime Bundle" }
+              }]).to_string() },
+              "lines": [{
                 "id": "line1", "quantity": 1,
                 "wolfpackProductBundleOfferId": { "value": "MIX-bundle-1_ABC_1" },
                 "wolfpackProductBundleName": { "value": "Runtime Bundle" },
@@ -708,8 +766,17 @@ mod tests {
         let input = serde_json::json!({
             "localization": { "country": { "isoCode": "CA" } },
             "shop":{"ppbPolicyRevisions":{"value":"{\"bundle-1\":\"rev-1\"}"}},"presentmentCurrencyRate": "1.0",
-            "cartTransform": { "bundleCartLineMessaging": null, "runtimeTokenSecret": { "value": runtime_secret } },
-            "cart": { "lines": [line("line1"), line("line2")] }
+            "cartTransform": { "runtimeConfiguration": { "value": serde_json::json!({
+                "runtimeTokenSecret": runtime_secret
+            }).to_string() } },
+            "cart": {
+              "bundleDetails": { "value": serde_json::json!([{
+                "key": "MIX-bundle-1_ABC",
+                "runtimeToken": bundle_token,
+                "displayProperties": { "bundleName": "Runtime Bundle" }
+              }]).to_string() },
+              "lines": [line("line1"), line("line2")]
+            }
         });
         let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
         assert!(output.operations.is_empty());
@@ -777,7 +844,7 @@ mod tests {
 
         let op = &output.operations[0];
         let merge = match op {
-            schema::CartOperation::LinesMerge(ref m) => m,
+            schema::CartOperation::Merge(ref m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.parent_variant_id, "gid://shopify/ProductVariant/999");
@@ -1036,7 +1103,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.cart_lines.len(), 2);
@@ -1128,7 +1195,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.parent_variant_id, "gid://shopify/ProductVariant/999");
@@ -1393,7 +1460,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         let pct = merge
@@ -1562,7 +1629,7 @@ mod tests {
             .operations
             .iter()
             .filter_map(|op| match op {
-                schema::CartOperation::LinesMerge(m) => m.title.as_deref(),
+                schema::CartOperation::Merge(m) => m.title.as_deref(),
                 _ => None,
             })
             .collect();
@@ -1644,7 +1711,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::LinesMerge(m) => m,
+            schema::CartOperation::Merge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(
@@ -1756,7 +1823,7 @@ mod tests {
             .operations
             .iter()
             .find_map(|operation| match operation {
-                schema::CartOperation::LinesMerge(m) => Some(m),
+                schema::CartOperation::Merge(m) => Some(m),
                 _ => None,
             })
             .expect("expected paid bundle lines to merge");
@@ -1789,7 +1856,7 @@ mod tests {
         let line_update = output
             .operations
             .iter()
-            .find(|operation| matches!(operation, schema::CartOperation::LineUpdate(_)));
+            .find(|operation| matches!(operation, schema::CartOperation::Update(_)));
         assert!(
             line_update.is_none(),
             "paid add-on discounting is handled by the Discount Function"
@@ -1934,7 +2001,7 @@ mod tests {
 
         let op = &output.operations[0];
         let expand = match op {
-            schema::CartOperation::LineExpand(ref e) => e,
+            schema::CartOperation::Expand(ref e) => e,
             _ => panic!("expected Expand operation"),
         };
         assert_eq!(expand.cart_line_id, "flex-line");
@@ -2118,7 +2185,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let expand = match &output.operations[0] {
-            schema::CartOperation::LineExpand(e) => e,
+            schema::CartOperation::Expand(e) => e,
             _ => panic!("expected EXPAND"),
         };
         assert!(expand.price.is_none(), "price should be absent at 0%");

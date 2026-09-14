@@ -1,10 +1,10 @@
-export interface ShopifyVariantIdentifier {
+interface ShopifyVariantIdentifier {
   numericId: string;
   isValidFormat: boolean;
   reason?: string;
 }
 
-export interface ShopifyStorefrontVariantLookupResult {
+interface ShopifyStorefrontVariantLookupResult {
   ok: boolean;
   id: string;
   status: number;

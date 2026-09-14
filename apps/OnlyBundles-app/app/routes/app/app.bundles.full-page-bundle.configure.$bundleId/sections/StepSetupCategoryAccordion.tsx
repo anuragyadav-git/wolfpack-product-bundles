@@ -1,45 +1,52 @@
-import { CommonStepCategoryAccordion } from "../../_shared/bundle-configure/CommonStepCategoryAccordion";
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import {
+  CommonStepCategoryAccordion,
+  type CommonStepCategoryAccordionAdapter,
+} from "../../_shared/bundle-configure/CommonStepCategoryAccordion";
+import { ConfigureVariantSelectorControls } from "../../_shared/bundle-configure/ConfigureVariantSelectorControls";
+import type { VariantSelectorMode } from "../../../../lib/bundle-config/variant-selector-config";
 
 export function FpbStepCategoryAccordion({
-  flow,
+  adapter,
   step,
   cat,
   catIndex,
 }: {
-  flow: ConfigureBundleFlowContext;
+  adapter: CommonStepCategoryAccordionAdapter;
   step: any;
   cat: any;
   catIndex: number;
 }) {
+  const categories = Array.isArray(step.StepCategory) ? step.StepCategory : [];
+  const selectorMode: VariantSelectorMode = cat.variantSelectorMode ?? "dropdown";
+  const categoryBase = `steps.${step.id}.categories.${cat.id}`;
+  const updateCategory = (patch: Record<string, unknown>) => {
+    adapter.stepsState.updateStepField(
+      step.id,
+      "StepCategory",
+      categories.map((category: Record<string, unknown>, index: number) =>
+        index === catIndex ? { ...category, ...patch } : category
+      )
+    );
+    adapter.markAsDirty();
+  };
+
   return (
     <CommonStepCategoryAccordion
-      adapter={{
-        categoryActiveTabs: flow.categoryActiveTabs,
-        categoryOpen: flow.categoryOpen,
-        draggedCatKey: flow.draggedCatKey,
-        dragOverCatKey: flow.dragOverCatKey,
-        handleCatDragEnd: flow.handleCatDragEnd,
-        handleCatDragStart: flow.handleCatDragStart,
-        handleCatDrop: flow.handleCatDrop,
-        hidePolarisModal: flow.hidePolarisModal,
-        markAsDirty: flow.markAsDirty,
-        openStepCategoryMultiLanguageModal:
-          flow.openStepCategoryMultiLanguageModal,
-        setCategoryActiveTabs: flow.setCategoryActiveTabs,
-        setCategoryOpen: flow.setCategoryOpen,
-        setDragOverCatKey: flow.setDragOverCatKey,
-        shopify: flow.shopify,
-        showPolarisModal: flow.showPolarisModal,
-        stepsState: flow.stepsState,
-        styles: flow.fullPageBundleStyles,
-        translationActionsDisabled: (flow.shopLocales?.length ?? 0) === 0,
-        validationErrors: flow.validationErrors,
-        clearValidationError: flow.clearValidationError,
-      }}
+      adapter={adapter}
       step={step}
       cat={cat}
       catIndex={catIndex}
+      categoryControls={
+        <ConfigureVariantSelectorControls
+          mode={selectorMode}
+          swatchTooltipEnabled={cat.swatchTooltipEnabled === true}
+          error={adapter.validationErrors?.[`${categoryBase}.variantSelectorMode`]}
+          onChange={updateCategory}
+          onClearError={() =>
+            adapter.clearValidationError?.(`${categoryBase}.variantSelectorMode`)
+          }
+        />
+      }
     />
   );
 }

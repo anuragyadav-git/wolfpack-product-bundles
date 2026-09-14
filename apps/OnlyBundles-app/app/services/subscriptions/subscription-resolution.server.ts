@@ -34,7 +34,7 @@ export interface ResolvedSubscriptionState {
   isOutageGrace: boolean;
 }
 
-export interface ResolveSubscriptionStateInput {
+interface ResolveSubscriptionStateInput {
   now?: Date;
   managed: ProviderVerification;
   cached?: ProviderVerification | null;

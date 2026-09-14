@@ -1,27 +1,64 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
-import { PpbRulesConfigurationCard } from "./PpbRulesConfigurationCard";
-import { PpbStepCategoriesCard } from "./PpbStepCategoriesCard";
-import { PpbStepConfigCard } from "./PpbStepConfigCard";
-import { PpbStepFlowCard } from "./PpbStepFlowCard";
-import { PpbStepSetupDetailsCard } from "./PpbStepSetupDetailsCard";
-import { getStepCategories } from "./PpbStepSetupShared";
-import { translateAdmin } from "~/i18n/config";
+import {
+  PpbRulesConfigurationCard,
+  type PpbRulesConfigurationCardProps,
+} from "./PpbRulesConfigurationCard";
+import {
+  PpbStepCategoriesCard,
+  type PpbStepCategoriesCardProps,
+} from "./PpbStepCategoriesCard";
+import {
+  PpbStepConfigCard,
+  type PpbStepConfigCardProps,
+} from "./PpbStepConfigCard";
+import {
+  PpbStepFlowCard,
+  type PpbStepFlowCardProps,
+} from "./PpbStepFlowCard";
+import {
+  PpbStepSetupDetailsCard,
+  type PpbStepSetupDetailsCardProps,
+} from "./PpbStepSetupDetailsCard";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
 
-export function PpbStepSetupSection() {
+export type PpbStepSetupSectionProps = Pick<
+  PpbConfigureFlow,
+  "activeSection" | "slideDir" | "slideKey"
+> & {
+  stepFlow: Omit<PpbStepFlowCardProps, "children">;
+  details: Omit<PpbStepSetupDetailsCardProps, "isFirstStep" | "step">;
+  categories: Omit<PpbStepCategoriesCardProps, "step">;
+  rules: Omit<PpbRulesConfigurationCardProps, "step">;
+  config: Omit<PpbStepConfigCardProps, "step">;
+};
+
+export function PpbStepSetupSection({
+  activeSection,
+  categories,
+  config,
+  details,
+  rules,
+  slideDir,
+  slideKey,
+  stepFlow,
+}: PpbStepSetupSectionProps) {
   const {
-    activeSection,
     activeTabIndex,
-    productPageBundleStyles,
-    slideDir,
-    slideKey,
+    handleAddNewStep,
+    navigateToStep,
     stepsState,
-  } = usePpbConfigureContext();
+  } = stepFlow;
 
   return (
     <>
       {activeSection === "step_setup" && (
         <div data-tour-target="ppb-product-selection">
-          <PpbStepFlowCard>
+          <PpbStepFlowCard
+            activeTabIndex={activeTabIndex}
+            handleAddNewStep={handleAddNewStep}
+            navigateToStep={navigateToStep}
+            stepsState={stepsState}
+          >
             {stepsState.steps.map(
               (step, index) =>
                 activeTabIndex === index && (
@@ -35,37 +72,10 @@ export function PpbStepSetupSection() {
                         : ""
                     }
                   >
-                    {step.StepProduct &&
-                      step.StepProduct.length > 0 &&
-                      getStepCategories(step).length === 0 && (
-                        <s-box paddingBlockEnd="small-200">
-                          <s-banner
-                            tone="warning"
-                            heading={translateAdmin(
-                              "common.warningGroup.heading"
-                            )}
-                            dismissible={false}
-                            hidden={false}
-                          >
-                            <p style={{ margin: 0, fontSize: 14 }}>
-                              <strong>
-                                {translateAdmin(
-                                  "adminExtracted.appBundlesProductPageBundleConfigure.ppbstepsetupsection.actionNeeded"
-                                )}
-                              </strong>{" "}
-                              {translateAdmin(
-                                "adminDynamic.legacyStepProducts",
-                                {
-                                  count: step.StepProduct.length,
-                                }
-                              )}
-                            </p>
-                          </s-banner>
-                        </s-box>
-                      )}
                     <PpbStepSetupDetailsCard
-                      step={step}
+                      {...details}
                       isFirstStep={index === 0}
+                      step={step}
                     />
                   </div>
                 )
@@ -92,9 +102,18 @@ export function PpbStepSetupSection() {
                     }
                     inert={index > 0 && step.enabled === false ? "" : undefined}
                   >
-                    <PpbStepCategoriesCard step={step} />
-                    <PpbRulesConfigurationCard step={step} />
-                    <PpbStepConfigCard step={step} />
+                    <PpbStepCategoriesCard
+                      {...categories}
+                      step={step}
+                    />
+                    <PpbRulesConfigurationCard
+                      {...rules}
+                      step={step}
+                    />
+                    <PpbStepConfigCard
+                      {...config}
+                      step={step}
+                    />
                   </div>
                 </div>
               )

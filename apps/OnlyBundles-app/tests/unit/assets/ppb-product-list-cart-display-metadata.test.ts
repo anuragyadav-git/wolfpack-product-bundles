@@ -120,7 +120,7 @@ describe('PPB Product List cart display metadata', () => {
       box: '1',
       bundleName: 'PPB Product List Fixture',
       items: '2 x 14k Dangling Obsidian Earrings, 1 x 14k Dangling Pendant Earrings, 1 x 18k Pedal Ring - 8 (8)',
-      retailPrice: '$2676.00',
+      retailPrice: '$2,676.00',
       offerAnalytics: {
         bundleId: 'bundle-1',
         offerPolicyId: 'policy-1',
@@ -137,7 +137,7 @@ describe('PPB Product List cart display metadata', () => {
     expect(ProductPageCartMethods.buildBundleDetailsDisplayProperties.call(context, items[0].properties)).toEqual({
       Box: '1',
       Items: '2 x 14k Dangling Obsidian Earrings, 1 x 14k Dangling Pendant Earrings, 1 x 18k Pedal Ring - 8 (8)',
-      'Retail Price': '$2676.00',
+      'Retail Price': '$2,676.00',
     });
 
     const cartContext = ProductPageCartMethods.buildProductPageCartFormData.call(context, items, {

@@ -48,7 +48,6 @@ function resolveAppPath(repositoryRoot, ...segments) {
 }
 
 module.exports = {
-  APP_WORKSPACE_PATH,
   findRepositoryRoot,
   normalizeRepositoryPath,
   resolveAppPath,

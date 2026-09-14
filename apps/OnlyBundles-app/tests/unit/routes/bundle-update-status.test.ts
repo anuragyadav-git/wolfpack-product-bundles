@@ -54,10 +54,6 @@ jest.mock("../../../app/lib/logger", () => ({
   },
 }));
 
-jest.mock("../../../app/services/theme-template.server", () => ({
-  ThemeTemplateService: { ensureTemplates: jest.fn() },
-}));
-
 const getDb = () => require("../../../app/db.server").default;
 
 const MOCK_SESSION = { shop: "test-shop.myshopify.com", accessToken: "tok" } as any;

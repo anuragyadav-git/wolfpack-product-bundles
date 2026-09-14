@@ -4,21 +4,28 @@ id: cart-transform-function
 title: Cart Transform Function
 type: architecture
 status: authoritative
-summary: Runtime-token-verified Shopify Cart Transform architecture and fail-closed bundle pricing contract.
-last_audited: 2026-09-01
+summary: Runtime-token-verified Shopify Cart Transform and Discount Function architecture, build ownership, and fail-closed pricing contract.
+last_audited: 2026-09-14
 owners:
   - engineering
 domains:
   - checkout
 systems:
   - bundle-cart-transform-rs
+  - bundle-discount-function
   - cart-transform-service
 source_paths:
   - extensions/bundle-cart-transform-rs/shopify.extension.toml
+  - extensions/bundle-cart-transform-rs/src/run.graphql
   - extensions/bundle-cart-transform-rs/src/merge.rs
+  - extensions/bundle-discount-function/shopify.extension.toml
+  - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.graphql
+  - extensions/bundle-discount-function/src/cart_lines_discounts_generate_run.rs
   - app/services/cart-transform-service.server.ts
   - app/services/cart-transform-runtime-token.server.ts
+  - app/lib/shopify-product-gid.ts
   - app/routes/api/api.cart-transform-runtime-token.tsx
+  - app/routes/api/api.cart-bundle-details.tsx
   - app/services/ppb-static-authorization.server.ts
 related_docs:
   - Shopify Integration/Cart Transform API.md
@@ -64,6 +71,27 @@ token, then applies bundle pricing through an automatic discount node with
 `recurringCycleLimit=1`.
 
 The v1 request body is mandatory, so every v1 caller must use `POST`.
+
+For ordinary FPB component lines, the signed v1 token and display metadata are
+stored in Shopify's app-reserved `$app.bundle_details` cart metafield before the
+subsequent `/cart/add` request invokes Cart Transform. The component lines keep
+only their compact `_wolfpackProductBundle:OfferId` grouping attributes. This
+preserves Shopify's native bundle line-item group without exposing the large
+signed token and display JSON as component properties in the merchant's order
+view. Subscription components, FPB add-on lines evaluated independently by the
+Discount Function, and PPB's static v2 line contract retain their required
+line-level authorization.
+
+`cartMetafieldsSet` uses `[CartMetafieldsSetInput!]!`. Updating a cart metafield
+does not invoke Shopify Functions by itself, so clients must complete the
+metafield write first and then perform the cart mutation that requires the
+authorization. A failed metadata write fails the bundle add rather than adding
+components that Cart Transform cannot verify.
+
+Shopify ProductVariant identifier normalization is owned by the dependency-neutral
+`app/lib/shopify-product-gid.ts` boundary. Cart Transform token validation and
+checkout-offer serialization import that owner directly; checkout offers do not
+depend on the token-signing service or its complete payload type.
 The Remix resource route also exports a `GET` loader that returns controlled
 `405 Method Not Allowed` JSON with `Allow: POST, OPTIONS`; without that loader,
 an accidental or stale GET exposes Remix's missing-loader stack instead of the
@@ -112,9 +140,9 @@ No target migration remains for the active extension.
 The release build uses Rust size optimization and Shopify CLI's compatible
 WASM optimizer. Keep the authorization payload deserialization shared between
 v1 and v2 and deserialize only fields consumed by this Function; unknown signed
-payload fields are intentionally ignored. The resulting Shopify-optimized
-artifact is 250,641 bytes after country authorization, below the repository's
-conservative 256,000-byte acceptance threshold. Country authorization uses one signed `countryRule` string
+payload fields are intentionally ignored. The current Shopify-optimized
+artifact is 284,120 bytes after cart-metafield authorization and passes
+`shopify app function build`. Country authorization uses one signed `countryRule` string
 (`include:CA,US`, `exclude:US`, or empty when disabled) instead of adding a
 nested Rust JSON deserializer. This is an internal signed-token ABI; the Admin
 and persisted offer policy remain directly typed.
@@ -130,23 +158,47 @@ replace reachable Rust formatting and deserialization failure paths with
 `unreachable` instructions. A valid two-line v2 PPB request then trapped after
 five instructions and Shopify blocked `/cart/add` because `blockOnFailure` is
 enabled. The same captured input succeeded after removing panic snipping,
-emitting one `linesMerge` in 1,128,695 instructions. Also do not replace
+emitting one merge operation in 1,128,695 instructions. Also do not replace
 Shopify CLI's final optimizer with a newer standalone Binaryen release; the
 Shopify Function compiler has rejected otherwise smaller incompatible modules.
 
+The Discount Function also builds to `wasm32-unknown-unknown`, but its Shopify
+extension command must resolve both Cargo and Rustc from rustup's stable
+toolchain. On macOS, Homebrew `cargo` and `rustc` can precede rustup in `PATH`;
+mixing Homebrew Cargo with rustup's installed WASM standard library fails with
+`can't find crate for core` even though `rustup target list --installed` shows
+the target. The extension therefore delegates to
+`scripts/build-discount-function.mjs`, which sets `RUSTC` from
+`rustup which --toolchain stable rustc` and invokes Cargo through `rustup run
+stable`. Keep shell expansion out of the extension TOML because Shopify CLI,
+not an interactive shell, owns that command runner. Do not simplify this back
+to bare `cargo build` unless the release environment proves it has one Rust
+owner.
+
 ---
 
-## Operation Names (2025-07+ API)
+## Target-Specific Operation Names
 
-As of API version `2025-07`, the operation names were renamed:
+The active `cart.transform.run` target's generated `CartOperation` input uses
+`expand`, `merge`, and `update`. The regenerated schema also contains the older
+generic `Operation` input with `lineExpand`, `linesMerge`, and `lineUpdate`, but
+that is not the return type for this target. Use the target-specific generated
+Rust types `ExpandOperation`, `MergeOperation`, and `UpdateOperation`.
 
-| Old name (pre-2025-07) | New name (2025-07+) |
-|---|---|
-| `expand` | `lineExpand` |
-| `merge` | `linesMerge` |
-| `update` | `lineUpdate` |
+Run the globally installed Shopify CLI from the repository root whenever the
+checked-in Function schema and compiler disagree:
 
-The codebase uses the new names. Do not use the old names when reading or modifying the function.
+```bash
+SHOPIFY_CLI_AGENT_INFO='n:codex|v:gpt-5|p:openai' \
+  shopify app function schema \
+  --path apps/OnlyBundles-app/extensions/bundle-cart-transform-rs
+```
+
+On 2026-09-14 the previously checked-in schema hid `Cart.metafield` and exposed
+only the generic operation names. Regenerating it against the extension's
+`2025-10` target restored the canonical cart-metafield field and target-specific
+operation types. Treat this generated schema as build input, not as an
+authoritative substitute for the active extension configuration.
 
 ---
 
@@ -175,7 +227,9 @@ storefront nests its normalized `offerAnalytics` object inside the existing
 `_bundle_display_properties` JSON envelope. MERGE serializes that object into
 one private `_wpb_offer_analytics` JSON property on the parent line, while
 unmerged component lines retain the nested object in
-`_bundle_display_properties`.
+`_bundle_display_properties`. Ordinary FPB component lines no longer carry that
+envelope; their equivalent display metadata is read from the matching entry in
+`$app.bundle_details`.
 
 On 2026-09-01, selecting five separate `_wpb_*` attributes raised the input
 query complexity from 30 to 35. Shopify rejected the Function build, which also
@@ -183,7 +237,13 @@ prevented the current dev-preview extension assets from being published. Every
 Cart Transform query change must therefore pass the Shopify CLI app build; a
 successful Cargo build alone does not validate Shopify's query budget.
 
-Parent bundle metafields are still written for EXPAND/display paths: `component_reference`, `component_quantities`, `price_adjustment`, and `component_pricing`. Component-variant `$app:component_parents` is no longer the configured MERGE source.
+Parent bundle metafields are still written for EXPAND/display paths:
+`component_reference`, `component_quantities`, `price_adjustment`, and
+`component_pricing`. Component-variant `$app:component_parents` is not queried
+or trusted by either Function. The Discount Function emits bundle-pricing
+candidates only from a valid signed runtime token whose group and component
+quantities match the current cart; a missing secret, token, or signature fails
+closed.
 
 MERGE output also preserves the verified `_wolfpack_bundle_runtime` token and the
 base `_wolfpackProductBundle:OfferId` on every parent line. The Checkout UI extension
@@ -198,7 +258,7 @@ FPB Add-Ons with Bundles mirror EB checkout behavior: selected add-ons are separ
 
 | Scenario | Storefront line contract | Cart Transform / Discount behavior | Summary sidebar behavior |
 |---|---|---|---|
-| Base bundle components only | Component lines carry `_wolfpackProductBundle:OfferId` and `_wolfpack_bundle_runtime`; no `_bundle_step_type=addon...` | Rust Cart Transform verifies runtime token and MERGEs components into the parent bundle variant. Bundle pricing applies to parent merge only. | Total and savings come from base component subtotal and bundle pricing rules. |
+| Base bundle components only | Component lines carry `_wolfpackProductBundle:OfferId`; the runtime token and display metadata are stored in the keyed `$app.bundle_details` cart metafield. | Rust Cart Transform verifies the cart-metafield runtime token and MERGEs components into the parent bundle variant. Bundle pricing applies to parent merge only. | Total and savings come from base component subtotal and bundle pricing rules. |
 | Add-on tier with `0%` discount | Selected add-on line carries `_bundle_step_type=addon` and is listed in runtime token `addons` without a discount. | Add-on line is excluded from parent MERGE and receives no native product discount. | Add-on original price remains in the subtotal and final total. |
 | Add-on tier with partial percentage discount | Selected add-on line carries `_bundle_step_type=addon:PERCENTAGE:n`, `_addon_product=true`, `_addonTierId`, and runtime token `addons[].discount={type:"PERCENTAGE",value:n}`. | Discount Function verifies the runtime token and emits native line discount message `Add On` for that add-on line. Parent MERGE excludes the add-on. | Original subtotal includes the add-on at full price; add-on savings are subtracted from the final total. |
 | Add-on tier with `100%` discount (free gift case) | Same as partial add-on, with `_bundle_step_type=addon:PERCENTAGE:100`. Do not emit legacy `_bundle_step_type=free_gift` for EB-style add-on tiers. | Discount Function emits a native 100% add-on line discount, so the selected gift line final price is `0` and checkout savings are visible. Parent MERGE excludes the add-on. | Original subtotal includes the gift at full price; add-on savings subtract the gift price so the final total equals the paid bundle items. |
@@ -284,7 +344,7 @@ approval for that exact operation.
 
 ### BXY rounding
 
-Shopify `linesMerge` can apply only one parent `percentageDecrease`, so mixed-price Buy X Get Y bundles use a percentage equivalent to the exact reward value. Component detail rows may need proportional allocation, but parent cart metadata must use whole-bundle cents derived from the rounded discount amount. Do not sum rounded per-component bundle cents into `_bundle_total_price_cents`; that can drift by one cent for mixed-price BXY groups. The authoritative parent attributes are:
+Shopify's merge operation can apply only one parent `percentageDecrease`, so mixed-price Buy X Get Y bundles use a percentage equivalent to the exact reward value. Component detail rows may need proportional allocation, but parent cart metadata must use whole-bundle cents derived from the rounded discount amount. Do not sum rounded per-component bundle cents into `_bundle_total_price_cents`; that can drift by one cent for mixed-price BXY groups. The authoritative parent attributes are:
 
 - `_bundle_total_retail_cents`
 - `_bundle_total_price_cents`

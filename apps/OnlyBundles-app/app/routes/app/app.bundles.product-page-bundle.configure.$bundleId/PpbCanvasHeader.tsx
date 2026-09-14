@@ -1,38 +1,87 @@
-import { AppEmbedBanner } from "../../../components/AppEmbedBanner";
 import { AdminWarningGroup } from "../../../components/AdminWarningGroup";
 import { AdminPageTitleBar } from "../../../components/AdminPageNavigation";
-import { getReadinessScoreColor } from "../../../components/bundle-configure/BundleReadinessOverlay";
 import { useTranslation } from "react-i18next";
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import { UnlistedBundleBanner } from "../../../components/UnlistedBundleBanner";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import {
+  buildPpbCanvasWarnings,
+  getPpbStandaloneUnlistedWarning,
+} from "./ppb-warning-presentation";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbCanvasHeader() {
+type PpbCanvasHeaderFlowProps = Pick<
+  PpbConfigureFlow,
+  | "appEmbedEnabled"
+  | "handleBackClick"
+  | "handlePreviewBundle"
+  | "isPreviewBundleLoading"
+  | "loadedBundleProduct"
+  | "openThemeEditorForAppEmbed"
+  | "openProductInAdmin"
+  | "operationAlert"
+  | "readinessScore"
+  | "shop"
+  | "themeEditorUrl"
+>;
+
+export type PpbCanvasHeaderProps = PpbCanvasHeaderFlowProps & {
+  bundle: Pick<PpbConfigureFlow["bundle"], "shopifyProductId">;
+  fetcher: Pick<PpbConfigureFlow["fetcher"], "state">;
+  parentProductStatusUi: Pick<
+    PpbConfigureFlow["parentProductStatusUi"],
+    "isLoading" | "showUnlistedBanner"
+  >;
+};
+
+export function PpbCanvasHeader({
+  appEmbedEnabled,
+  bundle,
+  fetcher,
+  handleBackClick,
+  handlePreviewBundle,
+  isPreviewBundleLoading,
+  loadedBundleProduct,
+  openThemeEditorForAppEmbed,
+  openProductInAdmin,
+  operationAlert,
+  parentProductStatusUi,
+  readinessScore,
+  shop,
+  themeEditorUrl,
+}: PpbCanvasHeaderProps) {
   const { t } = useTranslation();
-  const {
-    UnlistedBundleBanner,
-    appEmbedEnabled,
-    bundle,
-    fetcher,
-    handleBackClick,
-    handlePreviewBundle,
-    isPreviewBundleLoading,
-    loadedBundleProduct,
-    openThemeEditorForAppEmbed,
-    openProductInAdmin,
-    parentProductStatusUi,
-    productPageBundleStyles,
-    readinessScore,
-    setReadinessOpen,
-    shop,
-    themeEditorUrl,
-  } = usePpbConfigureContext();
   const bundleProductId =
-    loadedBundleProduct?.id ?? (bundle as any).shopifyProductId ?? null;
+    loadedBundleProduct?.id ?? bundle.shopifyProductId ?? null;
   const numericProductId = bundleProductId?.split("/").pop() || null;
   const hasUnlistedWarning =
     parentProductStatusUi.showUnlistedBanner && Boolean(numericProductId);
-  const hasMultiplePublishWarnings =
-    !appEmbedEnabled && !parentProductStatusUi.isLoading && hasUnlistedWarning;
+  const warnings = buildPpbCanvasWarnings({
+    appEmbedEnabled,
+    appEmbedWarning: {
+      id: "app-embed",
+      heading: t("common.appEmbed.guideTitle"),
+      message: t("common.appEmbed.body"),
+      ...(themeEditorUrl
+        ? {
+            actionLabel: t("common.actions.enableHere"),
+            onAction: openThemeEditorForAppEmbed,
+          }
+        : {}),
+    },
+    unlistedWarning: hasUnlistedWarning
+      ? {
+          id: "unlisted-bundle",
+          heading: t("common.unlistedBundle.title"),
+          message: t("common.unlistedBundle.body"),
+          actionLabel: t("common.actions.manage"),
+          onAction: () => openProductInAdmin(numericProductId!),
+        }
+      : null,
+    operationAlert,
+  });
+  const standaloneUnlistedWarning =
+    getPpbStandaloneUnlistedWarning(warnings);
 
   return (
     <>
@@ -46,14 +95,15 @@ export function PpbCanvasHeader() {
       <div className={productPageBundleStyles.canvasHeader}>
         <div className={productPageBundleStyles.canvasTitleGroup}>
           <div className={productPageBundleStyles.canvasTitleRow}>
-            <button
-              type="button"
-              className={productPageBundleStyles.canvasBackButton}
+            <s-button
+              variant="tertiary"
+              tone="neutral"
+              icon="arrow-left"
               onClick={handleBackClick}
-              aria-label={translateAdmin("adminAttributes.backToDashboard")}
-            >
-              ←
-            </button>
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.backToDashboard"
+              )}
+            />
             <h1 className={productPageBundleStyles.canvasTitle}>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.configurecanvasheader.configureBundleFlow"
@@ -62,26 +112,15 @@ export function PpbCanvasHeader() {
           </div>
         </div>
         <div className={productPageBundleStyles.canvasActions}>
-          <span
-            className={productPageBundleStyles.readinessButton}
-            style={{
-              backgroundColor: getReadinessScoreColor(readinessScore),
-              borderColor: getReadinessScoreColor(readinessScore),
-            }}
-          >
-            <s-press-button
-              variant="tertiary"
-              tone="neutral"
+          <span className={productPageBundleStyles.readinessButton}>
+            <s-button
+              variant="secondary"
               accessibilityLabel={`${readinessScore} Readiness Score`}
-              onClick={() => setReadinessOpen(true)}
+              commandFor="bundle-readiness-popover"
+              command="--show"
             >
-              <span className={productPageBundleStyles.readinessScore}>
-                {readinessScore}
-              </span>
-              <span className={productPageBundleStyles.readinessLabel}>
-                {translateAdmin("common.readiness.title")}
-              </span>
-            </s-press-button>
+              {readinessScore} {translateAdmin("common.readiness.title")}
+            </s-button>
           </span>
           <s-button
             variant="secondary"
@@ -101,51 +140,27 @@ export function PpbCanvasHeader() {
           </s-button>
         </div>
       </div>
-      {hasMultiplePublishWarnings ? (
-        <AdminWarningGroup
-          warnings={[
-            {
-              id: "app-embed",
-              heading: t("common.appEmbed.guideTitle"),
-              message: t("common.appEmbed.body"),
-              ...(themeEditorUrl
-                ? {
-                    actionLabel: t("common.actions.enableHere"),
-                    onAction: openThemeEditorForAppEmbed,
-                  }
-                : {}),
-            },
-            {
-              id: "unlisted-bundle",
-              heading: t("common.unlistedBundle.title"),
-              message: t("common.unlistedBundle.body"),
-              actionLabel: t("common.actions.manage"),
-              onAction: () => openProductInAdmin(numericProductId!),
-            },
-          ]}
-        />
-      ) : (
-        <>
-          <AppEmbedBanner
-            appEmbedEnabled={appEmbedEnabled}
-            themeEditorUrl={themeEditorUrl}
-            onEnableClick={openThemeEditorForAppEmbed}
+      {standaloneUnlistedWarning ? (
+        <div className={productPageBundleStyles.unlistedBannerGap}>
+          <UnlistedBundleBanner
+            shop={shop}
+            bundleProductId={bundleProductId}
+            loading={false}
+            onManage={standaloneUnlistedWarning.onAction}
           />
-          {(parentProductStatusUi.isLoading ||
-            parentProductStatusUi.showUnlistedBanner) && (
-            <div className={productPageBundleStyles.unlistedBannerGap}>
-              <UnlistedBundleBanner
-                shop={shop}
-                bundleProductId={bundleProductId}
-                loading={parentProductStatusUi.isLoading}
-                onManage={() => {
-                  if (numericProductId) openProductInAdmin(numericProductId);
-                }}
-              />
-            </div>
-          )}
-        </>
-      )}
+        </div>
+      ) : warnings.length > 0 ? (
+        <AdminWarningGroup warnings={warnings} />
+      ) : parentProductStatusUi.isLoading ? (
+        <div className={productPageBundleStyles.unlistedBannerGap}>
+          <UnlistedBundleBanner
+            shop={shop}
+            bundleProductId={bundleProductId}
+            loading
+            onManage={() => undefined}
+          />
+        </div>
+      ) : null}
     </>
   );
 }

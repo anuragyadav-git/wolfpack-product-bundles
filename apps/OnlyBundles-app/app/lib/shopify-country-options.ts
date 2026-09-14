@@ -25,9 +25,9 @@ export const SHOPIFY_COUNTRY_CODES = [
   'YT', 'ZA', 'ZM', 'ZW',
 ] as const;
 
-export type ShopifyCountryCode = (typeof SHOPIFY_COUNTRY_CODES)[number];
+type ShopifyCountryCode = (typeof SHOPIFY_COUNTRY_CODES)[number];
 
-export type ShopifyCountryOption = {
+type ShopifyCountryOption = {
   code: ShopifyCountryCode;
   label: string;
   searchValue: string;

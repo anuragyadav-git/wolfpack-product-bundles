@@ -3,13 +3,18 @@ import {
   resolveTemplateReadyStep,
   shouldProcessTemplateResponse,
 } from "../../../lib/template-ready-step";
-import { removeLegacyPpbEmbedTextOverrides } from "../../../lib/ppb-bundle-embed";
 import { i18n } from "../../../i18n/config";
 import {
   isPersistentAdminOperationError,
   showAdminTransientErrorToast,
 } from "../../../lib/admin-alert-feedback";
 import { getEntitlementAlertCopyKeys } from "../../../lib/subscriptions/alerts";
+import type { usePpbBaseConfigureState } from "./usePpbBaseConfigureState";
+import type { usePpbVisibilityState } from "./usePpbVisibilityState";
+import type { usePpbBundleSettingsState } from "./usePpbBundleSettingsState";
+import type { usePpbTemplateUiState } from "./usePpbTemplateUiState";
+import type { useSharedBundleHandlers } from "../../../hooks/useSharedBundleHandlers";
+import type { usePpbSaveHandlers } from "./usePpbSaveHandlers";
 
 export function usePpbFetcherEffects({
   base,
@@ -19,12 +24,61 @@ export function usePpbFetcherEffects({
   sharedHandlers,
   saveHandlers,
 }: {
-  base: any;
-  visibility: any;
-  settings: any;
-  templateState: any;
-  sharedHandlers: any;
-  saveHandlers: any;
+  base: Pick<ReturnType<typeof usePpbBaseConfigureState>,
+    | "allowQuantityChanges" | "appEmbedEnabled" | "cartRedirectToCheckout"
+    | "clearOperationAlert" | "clearEntitlementFailure" | "fetcher" | "lastProcessedFetcherDataRef"
+    | "markAsSaved" | "markSpecificLinkOfferSaved" | "openPageSelectionModal"
+    | "originalAllowQuantityChangesRef" | "originalCartRedirectToCheckoutRef"
+    | "originalSdkModeRef" | "originalShowProductPricesRef"
+    | "originalSubscriptionConfigRef" | "originalTextOverridesByLocaleRef"
+    | "originalTextOverridesRef" | "revalidator" | "sdkMode" | "setAvailablePages"
+    | "setIsLoadingPages" | "setOperationAlert" | "setEntitlementFailure" | "shopify" | "showProductPrices"
+    | "subscriptionConfig" | "textOverrides" | "textOverridesByLocale"
+  >;
+  visibility: Pick<ReturnType<typeof usePpbVisibilityState>,
+    | "autoSelectBrowsedProduct" | "bundleEmbedAddBrowsedProduct"
+    | "bundleEmbedCollectionsSelectedData" | "bundleEmbedDisplayOn" | "bundleEmbedEnabled"
+    | "bundleEmbedMultiLangText" | "bundleEmbedSelectedProducts"
+    | "bundleEmbedSpecificCollectionPages" | "bundleEmbedSpecificProductPages"
+    | "bundleEmbedSubTitle" | "bundleEmbedTitle" | "originalAutoSelectBrowsedProductRef"
+    | "originalBundleEmbedAddBrowsedProductRef" | "originalBundleEmbedCollectionsSelectedDataRef"
+    | "originalBundleEmbedDisplayOnRef" | "originalBundleEmbedEnabledRef"
+    | "originalBundleEmbedMultiLangTextRef" | "originalBundleEmbedSelectedProductsRef"
+    | "originalBundleEmbedSpecificCollectionPagesRef" | "originalBundleEmbedSpecificProductPagesRef"
+    | "originalBundleEmbedSubTitleRef" | "originalBundleEmbedTitleRef"
+    | "originalUpsellWidgetButtonTextRef" | "originalUpsellWidgetDescriptionRef"
+    | "originalUpsellWidgetDisplayModeRef" | "originalUpsellWidgetDisplayOnRef"
+    | "originalUpsellWidgetEnabledRef" | "originalUpsellWidgetImageUrlRef"
+    | "originalUpsellWidgetTitleRef" | "upsellWidgetButtonText" | "upsellWidgetDescription"
+    | "upsellWidgetDisplayMode" | "upsellWidgetDisplayOn" | "upsellWidgetEnabled"
+    | "upsellWidgetImageUrl" | "upsellWidgetTitle"
+  >;
+  settings: Pick<ReturnType<typeof usePpbBundleSettingsState>,
+    | "countdownEnabled" | "countdownExpiredMessage" | "countdownExpiryAction"
+    | "countdownLayout" | "countdownPosition" | "countdownTitle" | "defaultProductsData"
+    | "lowStockAlertEnabled" | "lowStockAlertMessage" | "lowStockAlertThreshold"
+    | "originalCountdownEnabledRef" | "originalCountdownExpiredMessageRef"
+    | "originalCountdownExpiryActionRef" | "originalCountdownLayoutRef"
+    | "originalCountdownPositionRef" | "originalCountdownTitleRef"
+    | "originalDefaultProductsDataRef" | "originalLowStockAlertEnabledRef"
+    | "originalLowStockAlertMessageRef" | "originalLowStockAlertThresholdRef"
+    | "originalStickyAddToCartActionRef" | "originalStickyAddToCartEnabledRef"
+    | "originalStickyAddToCartShowDesktopRef" | "originalStickyAddToCartShowMobileRef"
+    | "stickyAddToCartAction" | "stickyAddToCartEnabled" | "stickyAddToCartShowDesktop"
+    | "stickyAddToCartShowMobile"
+  >;
+  templateState: Pick<ReturnType<typeof usePpbTemplateUiState>,
+    | "lastTemplateRequestRef" | "lastTemplateResponseRef" | "pendingPlacementModalRef"
+    | "setBundleDesignPresetId" | "setBundleDesignTemplate"
+    | "setIsPreparingPlacementTemplates" | "setTemplateModalStep" | "setTemplateSaveError"
+    | "templateFetcher" | "templateSubmissionStartedRef" | "setIsSelectTemplateModalOpen"
+  >;
+  sharedHandlers: Pick<ReturnType<typeof useSharedBundleHandlers>,
+    "enhanceTemplateListWithUserSelection"
+  >;
+  saveHandlers: Pick<ReturnType<typeof usePpbSaveHandlers>,
+    "clearValidationErrors" | "setServerFieldErrors"
+  >;
 }) {
   const { fetcher } = base;
   const lastFetcherIntentRef = useRef<string | null>(null);
@@ -51,7 +105,6 @@ export function usePpbFetcherEffects({
       if (result.success) {
         saveHandlers.clearValidationErrors?.();
         if ("bundle" in result && result.bundle) {
-          base.originalLoadingGifRef.current = base.loadingGif;
           base.originalShowProductPricesRef.current = base.showProductPrices;
           base.originalCartRedirectToCheckoutRef.current =
             base.cartRedirectToCheckout;
@@ -60,23 +113,9 @@ export function usePpbFetcherEffects({
           base.originalSdkModeRef.current = base.sdkMode;
           base.originalSubscriptionConfigRef.current =
             base.subscriptionConfig;
-          const canonicalTextOverrides =
-            removeLegacyPpbEmbedTextOverrides(base.textOverrides);
-          const canonicalTextOverridesByLocale = Object.fromEntries(
-            Object.entries(base.textOverridesByLocale).map(
-              ([locale, values]: any) => [
-                locale,
-                removeLegacyPpbEmbedTextOverrides(
-                  values as Record<string, string>,
-                ),
-              ],
-            ),
-          );
-          base.setTextOverrides(canonicalTextOverrides);
-          base.setTextOverridesByLocale(canonicalTextOverridesByLocale);
-          base.originalTextOverridesRef.current = canonicalTextOverrides;
+          base.originalTextOverridesRef.current = base.textOverrides;
           base.originalTextOverridesByLocaleRef.current =
-            canonicalTextOverridesByLocale;
+            base.textOverridesByLocale;
           settings.originalDefaultProductsDataRef.current =
             settings.defaultProductsData;
           settings.originalLowStockAlertEnabledRef.current =
@@ -162,10 +201,12 @@ export function usePpbFetcherEffects({
           // Handled by individual callbacks.
         } else if ("synced" in result && result.synced) {
           base.clearOperationAlert();
+          base.clearEntitlementFailure?.();
           base.shopify.toast.show(i18n.t("common.success.bundleSynced"), { isError: false });
           base.revalidator.revalidate();
         } else {
           base.clearOperationAlert();
+          base.clearEntitlementFailure?.();
           base.shopify.toast.show(i18n.t("common.success.operationComplete"), { isError: false });
         }
       } else {
@@ -175,14 +216,14 @@ export function usePpbFetcherEffects({
         }
         const errorMessage =
           ("error" in result ? result.error : null) ?? "";
-        if (isPersistentAdminOperationError(requestIntent)) {
-          const alertCopy = getEntitlementAlertCopyKeys(
-            (result as any).entitlementFailure?.code,
-          );
+        const entitlementFailure = (result as any).entitlementFailure;
+        if (entitlementFailure) {
+          base.setEntitlementFailure(entitlementFailure);
+        } else if (isPersistentAdminOperationError(requestIntent)) {
           base.setOperationAlert({
             id: "bundle-save",
-            heading: i18n.t(alertCopy.heading),
-            message: i18n.t(alertCopy.message),
+            heading: i18n.t("common.alerts.bundleNotSaved"),
+            message: i18n.t("common.alerts.operationFailed"),
           });
         } else {
           showAdminTransientErrorToast(
@@ -246,6 +287,22 @@ export function usePpbFetcherEffects({
         );
       }
       templateState.setTemplateSaveError(null);
+      lastTemplateRequestRef.current = null;
+      templateSubmissionStartedRef.current = false;
+      return;
+    }
+    const entitlementFailure = (response as any).entitlementFailure;
+    if (entitlementFailure || response.error === "ENTITLEMENT_REQUIRED") {
+      templateState.setTemplateSaveError(null);
+      templateState.setIsSelectTemplateModalOpen(false);
+      base.setEntitlementFailure(
+        entitlementFailure || {
+          code: "ENTITLEMENT_REQUIRED",
+          entitlement: "bundle.template.premium",
+          action: "SELECT",
+          requiredPlan: "GROWTH",
+        }
+      );
       lastTemplateRequestRef.current = null;
       templateSubmissionStartedRef.current = false;
       return;

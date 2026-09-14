@@ -1,0 +1,2 @@
+ALTER TABLE "OrderAttribution"
+ADD COLUMN "bundleRevenue" INTEGER NOT NULL DEFAULT 0;

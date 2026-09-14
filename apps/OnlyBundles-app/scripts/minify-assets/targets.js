@@ -53,7 +53,6 @@ export function createTargets(rootDir) {
         source: join(rootDir, 'app/assets/widgets/product-page-css/templates/modal-slots.css'),
         target: join(rootDir, 'extensions/bundle-builder/assets/bundle-widget-product-page-modal.css'),
       },
-      join(rootDir, 'extensions/bundle-builder/assets/modal-discount-bar.css'),
     ],
   };
 }

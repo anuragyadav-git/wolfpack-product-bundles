@@ -1,16 +1,32 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { DefaultStepTimelineIcon } from "../_shared/bundle-configure/DefaultStepTimelineIcon";
 import { translateAdmin } from "~/i18n/config";
+import { AssetUpload } from "../../../components/shared/AssetUpload";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
 
-export function PpbStepConfigCard({ step }: { step: any }) {
-  const {
-    FilePicker,
-    markAsDirty,
-    productPageBundleStyles,
-    setShowIconPickerForStep,
-    showIconPickerForStep,
-    stepsState,
-  } = usePpbConfigureContext();
+type PpbStep = {
+  id: string;
+  isDefault?: boolean;
+  isFreeGift?: boolean | null;
+  [key: string]: unknown;
+};
+
+export type PpbStepConfigCardProps = Pick<
+  PpbConfigureFlow,
+  "markAsDirty" | "stepsState"
+> & { step: PpbStep };
+
+export function PpbStepConfigCard({
+  markAsDirty,
+  step,
+  stepsState,
+}: PpbStepConfigCardProps) {
+  const stepRecord: Record<string, unknown> = step;
+  const stepImage =
+    typeof stepRecord.stepImage === "string" ? stepRecord.stepImage : null;
+  const pageTitle =
+    typeof stepRecord.pageTitle === "string" ? stepRecord.pageTitle : "";
+  const uploadLabel = translateAdmin("adminAttributes.uploadImage");
 
   return (
     <div className={productPageBundleStyles.card}>
@@ -19,97 +35,75 @@ export function PpbStepConfigCard({ step }: { step: any }) {
           "adminExtracted.appBundlesFullPageBundleConfigure.sections.stepsetupconfigcard.stepConfig"
         )}
       </h3>
-      <div className={productPageBundleStyles.stepConfigRow}>
-        <div className={productPageBundleStyles.stepConfigIconBox}>
-          {(step as any).stepImage ? (
-            <>
-              <img
-                src={(step as any).stepImage}
-                alt={translateAdmin("adminAttributes.stepIcon")}
-                className={productPageBundleStyles.iconImg}
-              />
-              <button
-                type="button"
-                className={productPageBundleStyles.iconRemoveButton}
-                aria-label={translateAdmin("adminAttributes.removeStepIcon")}
-                onClick={() => {
-                  stepsState.updateStepField(step.id, "stepImage", null);
-                  setShowIconPickerForStep(null);
-                  markAsDirty();
-                }}
-              >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M6 6l8 8M14 6l-8 8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </>
-          ) : (
-            <div className={productPageBundleStyles.iconPlaceholder}>
-              <DefaultStepTimelineIcon
-                className={productPageBundleStyles.defaultTimelineIcon}
-                step={step}
-              />
-            </div>
-          )}
-        </div>
-        <div className={productPageBundleStyles.iconUploadButton}>
-          <s-button
-            inlineSize="fill"
-            icon="replace"
-            onClick={() =>
-              setShowIconPickerForStep((prev) =>
-                prev === step.id ? null : step.id
-              )
-            }
-          >
-            {translateAdmin(
-              "adminExtracted.appBundlesFullPageBundleConfigure.sections.freegiftaddonreferencestepcard.replace"
-            )}
-          </s-button>
-        </div>
-        <div className={productPageBundleStyles.fieldsColumn}>
-          <s-text-field
-            label={translateAdmin("adminAttributes.stepTitle")}
-            placeholder={translateAdmin(
-              "adminAttributes.egCustomizedTShirtBundleForYou"
-            )}
-            value={(step as any).pageTitle ?? ""}
-            onInput={(e) => {
-              stepsState.updateStepField(
-                step.id,
-                "pageTitle",
-                (e.target as HTMLInputElement).value
-              );
+      <s-grid
+        gridTemplateColumns="86px minmax(0, 1fr)"
+        gap="base"
+        alignItems="start"
+      >
+        <s-stack direction="block" gap="small">
+          <AssetUpload
+            value={stepImage}
+            onChange={(url: string | null) => {
+              stepsState.updateStepField(step.id, "stepImage", url);
               markAsDirty();
             }}
-            autocomplete="off"
+            label={uploadLabel}
+            labelAccessibilityVisibility="exclusive"
+            showValuePreview={false}
+            dropZoneContentMinBlockSize="54px"
+            dropZoneContent={
+              stepImage ? (
+                <s-image
+                  src={stepImage}
+                  alt={translateAdmin("adminAttributes.stepIcon")}
+                  aspectRatio="1/1"
+                  objectFit="contain"
+                />
+              ) : (
+                <s-box inlineSize="28px" blockSize="28px">
+                  <DefaultStepTimelineIcon
+                    className={productPageBundleStyles.defaultTimelineIcon}
+                    step={{
+                      isDefault: step.isDefault,
+                      isFreeGift: step.isFreeGift === true,
+                    }}
+                  />
+                </s-box>
+              )
+            }
           />
-        </div>
-      </div>
-      {showIconPickerForStep === step.id && (
-        <FilePicker
-          autoOpen
-          onClose={() => setShowIconPickerForStep(null)}
-          value={(step as any).stepImage ?? null}
-          onChange={(url: string | null) => {
-            stepsState.updateStepField(step.id, "stepImage", url);
-            setShowIconPickerForStep(null);
+          {stepImage ? (
+            <s-button
+              variant="tertiary"
+              tone="critical"
+              icon="delete"
+              accessibilityLabel={translateAdmin(
+                "adminAttributes.removeStepIcon"
+              )}
+              onClick={() => {
+                stepsState.updateStepField(step.id, "stepImage", null);
+                markAsDirty();
+              }}
+            />
+          ) : null}
+        </s-stack>
+        <s-text-field
+          label={translateAdmin("adminAttributes.stepTitle")}
+          placeholder={translateAdmin(
+            "adminAttributes.egCustomizedTShirtBundleForYou"
+          )}
+          value={pageTitle}
+          onInput={(e) => {
+            stepsState.updateStepField(
+              step.id,
+              "pageTitle",
+              (e.target as HTMLInputElement).value
+            );
             markAsDirty();
           }}
-          label=""
+          autocomplete="off"
         />
-      )}
+      </s-grid>
     </div>
   );
 }

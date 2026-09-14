@@ -1,5 +1,15 @@
 {
+  "canny": {
+    "changelog": "最新动态",
+    "unavailable": "最新动态和反馈暂时不可用。",
+    "loading": "正在加载功能请求",
+    "retry": "重试",
+    "retryHelp": "请重试，或在新标签页中打开反馈门户。",
+    "openPortal": "打开反馈门户",
+    "feedbackIntro": "提出改进建议、为创意投票并关注进展。请求和投票由店铺的所有成员共享。"
+  },
   "nav": {
+    "featureRequests": "功能请求",
     "dashboard": "控制面板",
     "designControlPanel": "设计控制面板",
     "settings": "设置",
@@ -88,6 +98,8 @@
       "deleteBundle": "删除包",
       "cloneSuccess": "成功克隆包",
       "deleteSuccess": "数据包已删除",
+      "renameBundle": "重命名捆绑包",
+      "renameSuccess": "捆绑包已成功重命名",
       "themeEditorUnavailable": "主题编辑器链接在此商店不可用。"
     },
     "deleteModal": {
@@ -95,6 +107,15 @@
       "delete": "删除",
       "cancel": "取消",
       "body": "此操作无法撤消。所有捆绑配置、步骤和折扣规则将被永久删除。"
+    },
+    "renameModal": {
+      "heading": "重命名捆绑包",
+      "nameLabel": "捆绑包名称",
+      "save": "保存",
+      "cancel": "取消",
+      "errorEmpty": "捆绑包名称不能为空。",
+      "errorTooLong": "捆绑包名称不能超过255个字符。",
+      "errorFailed": "无法重命名捆绑包。"
     },
     "resources": {
       "bundleInspiration": "捆绑的灵魂效果",
@@ -437,6 +458,11 @@
       "title": "订阅包",
       "description": "让购物者从兼容的购物车销售计划中选择由捆包产品共享的销售计划。",
       "imageAlt": "包的一次性和订阅购买选项"
+    },
+    "floatingPromoBadge": {
+      "title": "浮动促销徽章",
+      "description": "在全页捆绑包左下角显示可关闭的促销徽章。徽章使用您配置的文本和捆绑包主按钮颜色。",
+      "imageAlt": "店面左下角带有商家文本和关闭按钮的圆角促销徽章"
     }
   },
   "specificLinkOffer": {
@@ -609,7 +635,7 @@
       "body": "为了发现能力，将捆包产品的状态更改为在商店产品中活跃。"
     },
     "warningGroup": {
-      "heading": "需要采取的行动",
+      "heading": "部分项目需要您注意",
       "summary": "出版捆绑包所需的行动很少。",
       "modalTitle": "需要采取的行动"
     },
@@ -696,7 +722,22 @@
       "tryAgain": "再试一次",
       "contactSupport": "联系客服支持",
       "cancel": "取消",
-      "back": "返回上一页"
+      "back": "返回上一页",
+      "viewPlans": "查看方案",
+      "saveAsDraft": "保存为草稿",
+      "keepEditing": "继续编辑"
+    },
+    "entitlements": {
+      "publicLimitHeading": "已达到公开组合上限",
+      "publicLimitDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案可获得无限公开组合，或将此组合保存为草稿以保留您的更改。",
+      "premiumTemplateHeading": "Growth 方案专属模板",
+      "premiumTemplateDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案以使用此模板发布，或保存为草稿以保留您的更改。",
+      "advancedDesignHeading": "Growth 方案高级设计功能",
+      "advancedDesignDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案以使用自定义样式发布，或保存为草稿。",
+      "stepsLimitHeading": "已达到步骤上限",
+      "stepsLimitDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案可获得无限步骤，或保存为草稿。",
+      "growthRequiredHeading": "需要 Growth 方案",
+      "growthRequiredDescription": "Free 方案仅包含 1 个公开发布的组合和标准模板。升级至 Growth 方案以使用此功能发布，或将此组合保存为草稿。"
     },
     "error": {
       "heading": "订阅问题",
@@ -834,6 +875,23 @@
     }
   },
   "analyticsPage": {
+    "bundleMetrics": {
+      "keyStatistics": "关键统计数据",
+      "sales": "销售",
+      "totalOrderRevenue": "订单总收入",
+      "totalOrderRevenueDefinition": "包含至少一个捆绑包的订单总价值。",
+      "totalBundleRevenue": "捆绑包总收入",
+      "totalBundleRevenueDefinition": "已完成订单中捆绑商品的合计价值。",
+      "ordersWithBundles": "包含捆绑包的订单",
+      "ordersWithBundlesDefinition": "包含至少一个捆绑包的已完成订单。",
+      "averageOrderValue": "平均订单价值",
+      "averageOrderValueDefinition": "订单总收入除以包含捆绑包的订单数。",
+      "addToCartValue": "加入购物车价值",
+      "addToCartValueDefinition": "捆绑包总收入除以成功加入购物车的会话数。",
+      "totalBundlesPurchased": "购买的捆绑包总数",
+      "totalBundlesPurchasedDefinition": "每个订单中的唯一捆绑包；重复数量只计一次。",
+      "bundleRevenue": "捆绑包收入"
+    },
     "offers": {
       "title": "报价业绩",
       "description": "比较隐私安全的报价决定与捆绑接口、添加到购物车活动、已完成订单和收入。",
@@ -958,7 +1016,9 @@
         },
         "funnelhero": {
           "bundleFunnel": "捆绑通风",
-          "howShoppersMoveThroughYourBundles": "购物者如何通过您的捆包移动"
+          "howShoppersMoveThroughYourBundles": "购物者如何通过您的捆包移动",
+          "bundleViews": "Bundle 视图",
+          "conversion": "转换"
         },
         "liveactivityfeed": {
           "liveActivity": "在线活动",
@@ -1075,9 +1135,6 @@
         "configurecontextualsavebar": {
           "discard": "放弃..."
         },
-        "configurevalidationsummary": {
-          "fixTheFollowingFieldsBeforeSaving": "保存前修复以下字段："
-        },
         "defaultproductdiscounttipbanner": {
           "tipDiscountsAreBasedOnAllItemsInYourCartDonAposTForgetToIncludeT": "提示：折扣基于购物车中的所有商品。设置折扣时，请记得计入预选商品的数量或金额。"
         },
@@ -1110,7 +1167,7 @@
         "apply": "应用",
         "backfillSelectedWindow": "回填选中窗口",
         "matchesOrderLineItemsToBundlesAndImportsAvailableRevenueLandingP": "匹配订单行项目来捆绑和导入可用收入、着陆页面和UTM的详细信息。",
-        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "现有的归属记录被跳过，因此再次运行同一个窗口不会造成重复。",
+        "existingAttributionRecordsAreSkippedSoRunningTheSameWindowAgainD": "现有捆绑包记录会尽可能从 Shopify 刷新，并且不会创建重复记录。",
         "shopifyOrdersAndStorefrontTrackingAreNotModified": "店铺订单和前台跟踪不被修改。",
         "customUtmAttributes": "自定义 UTM 属性",
         "enterParameterNamesSeparatedByCommasOrNewLinesOnlyBundlesCapture": "输入用逗号或新行分隔的参数名称。Only Bundles 捕获器在未来访问时匹配的 URL 值，并将它们存储到结帐属性。",
@@ -1194,6 +1251,7 @@
           "syncBundle": "同步包"
         },
         "configuretemplatedialog": {
+          "upgradeToGrowthForMoreTemplates": "升级到 Growth 计划以获取更多有助于提高转化率的模板。",
           "customizeYourBundle": "自定义您的包",
           "chooseADesignThatSuitsYourNeedsAndFitsYourBrand": "选择适合您需要并符合您品牌的设计",
           "customizeColorsAmpLanguage": "自定义颜色 & 语言",
@@ -1269,21 +1327,9 @@
           "addAddOnsTier": "添加到层级"
         },
         "imagesgifspanel": {
-          "mediaAssets": "媒体资源",
-          "addVisualMediaToEnhanceTheBundleExperienceForShoppers": "添加视觉媒体以增强购物车体验。",
           "promoBanner": "促销广告",
           "wideBannerDisplayedAtTheTopOfTheFullPageBundle": "在全页面捆包顶部显示宽幅横幅。",
           "pageHeader": "页面标题",
-          "jpgPngWebpGifSvgAvif": "JPG, PNG, WebP, GIF, SVG, AVIF",
-          "recommendedSize": "推荐大小",
-          "1600400Px41Ratio": "1600×400 px · 4:1 比率",
-          "stepImages": "步骤图像",
-          "tabIconAndBannerImagePerStepShownInTheWidget": "每步标签图标和横幅图像 — 在小部件中显示",
-          "perStep": "每步",
-          "tabIcon": "标签页图标",
-          "circularIconInTheStepTabReplacesTheStepNumberWhenSetRecommended1": "步骤选项卡中的圆形图标在设置时替换步骤号。推荐：100 × 100 px 平方。",
-          "stepBannerImage": "步骤横幅图像",
-          "fullWidthImageAboveTheProductGridWhenThisStepIsActiveRecommended": "当此步骤处于活动状态时，产品网格上方的全宽图像。推荐： 1600× 400 px。",
           "floatingPromoBadge": "浮动促销徽章",
           "fixedBadgeAtBottomLeftOfThePageSessionDismissedWhenShopperClicks": "修复页面左下方的徽章 — 当购物者点击X时会话被除掉。",
           "storefront": "店面"
@@ -1470,6 +1516,8 @@
     "uploadFailed": "上传失败",
     "searchFiles": "搜索文件",
     "searchFiles2": "搜索文件…",
+    "noFilesMatchSearch": "没有与搜索条件匹配的文件。",
+    "noImageFilesFound": "未在您的商店中找到图片文件。",
     "uploadProcessing": "上传处理",
     "loadingFiles": "正在加载文件",
     "uploading": "上传中",
@@ -1574,8 +1622,6 @@
     "bundleCartSubtitle": "购物车字幕",
     "reviewYourBundle": "查看您的包",
     "addCustomCSSForThisBundle": "/* Add custom CSS for this bundle */",
-    "chooseTabIcon": "选择标签图标",
-    "chooseBannerImage": "选择横幅图像",
     "showFloatingPromoBadge": "显示浮动促销徽章",
     "eGSave20TodayOnly": "例如：仅今日节省20% ！",
     "enableMultiLanguage": "启用多语言",
@@ -1658,6 +1704,8 @@
     "clickToUploadImage": "点击上传图片或图标",
     "chooseGifFile": "选择 GIF 文件。",
     "chooseSupportedImageFile": "选择支持的图像文件。",
+    "fileMustBeUnder20Mb": "文件必须小于 20 MB。",
+    "fileMustBeSmallerThan50Kb": "请上传小于 50 KB 的文件。",
     "integrationLogo": "{{name}} 标志",
     "guidedTourProgress": "导览第 {{current}} 步，共 {{total}} 步",
     "guidedTourStep": "第 {{current}} 步，共 {{total}} 步",

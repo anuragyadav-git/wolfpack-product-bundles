@@ -1,4 +1,4 @@
-export function isProductPageStepRequiredForValidation(step: any = {}) {
+function isProductPageStepRequiredForValidation(step: any = {}) {
   if (!step || step.enabled === false || step.isFreeGift || step.isDefault) {
     return false;
   }

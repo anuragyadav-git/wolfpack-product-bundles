@@ -175,7 +175,7 @@ export function renderBundlePurchaseOptions(controller: PurchaseOptionsControlle
       const { totalPrice, unitPrices } = PricingCalculator.calculateBundleTotal(
         controller.selectedProducts ?? [],
         controller.stepProductData ?? [],
-        (controller.selectedBundle as any)?.steps ?? null,
+        (controller.selectedBundle as any)?.steps,
       );
       const presentation = buildStorefrontPlanPresentation(
         subscription,

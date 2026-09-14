@@ -88,7 +88,12 @@ function makeBundle(overrides: Record<string, unknown> = {}) {
     pricing: {
       enabled: true,
       method: "percentage_off",
-      rules: [{ conditionType: "quantity", conditionValue: 1, discountValue: 20 }],
+      rules: [{
+        id: "rule-1",
+        conditionType: "quantity",
+        conditionValue: 1,
+        discountValue: 20,
+      }],
     },
     personalizationData: null,
     ...overrides,
@@ -256,11 +261,16 @@ describe("cart transform runtime token route", () => {
     });
   });
 
-  it("returns a token for a product-page selection hydrated from a configured category product", async () => {
+  it("returns a token for a category-grouped product with canonical membership", async () => {
     mockDb.bundle.findFirst.mockResolvedValue(makeBundle({
       steps: [
         {
-          StepProduct: [],
+          StepProduct: [
+            {
+              productId: "gid://shopify/Product/5",
+              variants: [],
+            },
+          ],
           StepCategory: [
             {
               products: [

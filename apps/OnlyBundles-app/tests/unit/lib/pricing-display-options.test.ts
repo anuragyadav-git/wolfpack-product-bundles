@@ -18,17 +18,50 @@ function amountRule(id: string, amountCents: number, discountValue: number): Pri
 }
 
 describe("normalizePricingDisplayOptions", () => {
-  it("derives bundle quantity option rows from quantity discount rules", () => {
-    const result = normalizePricingDisplayOptions({
-      rules: [quantityRule("rule-3", 3, 15), quantityRule("rule-5", 5, 25), amountRule("amount-1", 10000, 500)],
+  it("uses direct display options and ignores a conflicting nested message copy", () => {
+    const input = {
+      rules: [quantityRule("rule-2", 2, 10)],
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: true,
+          defaultRuleId: "rule-2",
+          optionsByRuleId: {
+            "rule-2": { label: "Direct option", subtext: "Direct copy" },
+          },
+        },
+      },
       messages: {
         displayOptions: {
           bundleQuantityOptions: {
-            enabled: true,
-            defaultRuleId: "rule-5",
+            enabled: false,
             optionsByRuleId: {
-              "rule-3": { label: "Starter box", subtext: "Small savings" },
+              "rule-2": { label: "Stale option", subtext: "Stale copy" },
             },
+          },
+        },
+      },
+    };
+    const result = normalizePricingDisplayOptions(input);
+
+    expect(result.bundleQuantityOptions).toEqual(expect.objectContaining({
+      enabled: true,
+      defaultRuleId: "rule-2",
+      options: [expect.objectContaining({
+        label: "Direct option",
+        subtext: "Direct copy",
+      })],
+    }));
+  });
+
+  it("derives bundle quantity option rows from quantity discount rules", () => {
+    const result = normalizePricingDisplayOptions({
+      rules: [quantityRule("rule-3", 3, 15), quantityRule("rule-5", 5, 25), amountRule("amount-1", 10000, 500)],
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: true,
+          defaultRuleId: "rule-5",
+          optionsByRuleId: {
+            "rule-3": { label: "Starter box", subtext: "Small savings" },
           },
         },
       },
@@ -57,12 +90,10 @@ describe("normalizePricingDisplayOptions", () => {
   it("falls back to the first quantity rule when the saved default rule is missing", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-2", 2, 10), quantityRule("rule-4", 4, 20)],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: {
-            enabled: true,
-            defaultRuleId: "deleted-rule",
-          },
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: true,
+          defaultRuleId: "deleted-rule",
         },
       },
     });
@@ -76,14 +107,12 @@ describe("normalizePricingDisplayOptions", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-2", 2, 500)],
       method: DiscountMethod.FIXED_AMOUNT_OFF,
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: {
-            enabled: true,
-            defaultRuleId: "rule-2",
-            optionsByRuleId: {
-              "rule-2": { label: "Box of 2", subtext: "500% off" },
-            },
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: true,
+          defaultRuleId: "rule-2",
+          optionsByRuleId: {
+            "rule-2": { label: "Box of 2", subtext: "500% off" },
           },
         },
       },
@@ -100,13 +129,11 @@ describe("normalizePricingDisplayOptions", () => {
   it("preserves localized bundle quantity option labels for the language modal", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-2", 2, 10)],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: {
-            enabled: true,
-            optionsByLocaleByRuleId: {
-              fr: { "rule-2": { label: "Boite de 2", subtext: "10% de reduction" } },
-            },
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: true,
+          optionsByLocaleByRuleId: {
+            fr: { "rule-2": { label: "Boite de 2", subtext: "10% de reduction" } },
           },
         },
       },
@@ -120,10 +147,8 @@ describe("normalizePricingDisplayOptions", () => {
   it("marks quantity options blocked when configured steps cannot satisfy the threshold", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-5", 5, 20)],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: { enabled: true },
-        },
+      displayOptions: {
+        bundleQuantityOptions: { enabled: true },
       },
       steps: [
         { id: "step-1", enabled: true, conditionOperator: "equal_to", conditionValue: 2 },
@@ -140,10 +165,8 @@ describe("normalizePricingDisplayOptions", () => {
   it("ignores stale hidden maxQuantity values when step rules define capacity", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-4", 4, 15)],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: { enabled: true },
-        },
+      displayOptions: {
+        bundleQuantityOptions: { enabled: true },
       },
       steps: [
         { id: "step-1", maxQuantity: 0, conditionOperator: "equal_to", conditionValue: 2 },
@@ -159,10 +182,8 @@ describe("normalizePricingDisplayOptions", () => {
   it("leaves compatibility unchecked when a step rule has no upper bound", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-4", 4, 15)],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: { enabled: true },
-        },
+      displayOptions: {
+        bundleQuantityOptions: { enabled: true },
       },
       steps: [
         { id: "step-1", conditionOperator: "greater_than_or_equal_to", conditionValue: 2 },
@@ -178,14 +199,12 @@ describe("normalizePricingDisplayOptions", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-3", 3, 15), amountRule("amount-100", 10000, 500)],
       showProgressBar: true,
-      messages: {
-        displayOptions: {
-          progressBar: {
-            enabled: true,
-            type: "step_based",
-            progressText: "Add {{itemsNeeded}} more to unlock {{discountText}}",
-            successText: "{{discountText}} unlocked",
-          },
+      displayOptions: {
+        progressBar: {
+          enabled: true,
+          type: "step_based",
+          progressText: "Add {{itemsNeeded}} more to unlock {{discountText}}",
+          successText: "{{discountText}} unlocked",
         },
       },
     });
@@ -205,12 +224,10 @@ describe("normalizePricingDisplayOptions", () => {
   it("uses neutral progress bar templates when saved text is missing", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-3", 3, 15)],
-      messages: {
-        displayOptions: {
-          progressBar: {
-            enabled: true,
-            type: "simple",
-          },
+      displayOptions: {
+        progressBar: {
+          enabled: true,
+          type: "simple",
         },
       },
     });
@@ -223,12 +240,10 @@ describe("normalizePricingDisplayOptions", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-3", 3, 15)],
       showProgressBar: false,
-      messages: {
-        displayOptions: {
-          progressBar: {
-            enabled: true,
-            type: "step_based",
-          },
+      displayOptions: {
+        progressBar: {
+          enabled: true,
+          type: "step_based",
         },
       },
     });
@@ -240,7 +255,7 @@ describe("normalizePricingDisplayOptions", () => {
     const result = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-3", 3, 15)],
       showProgressBar: true,
-      messages: {},
+      displayOptions: {},
     });
 
     expect(result.progressBar.type).toBe("step_based");
@@ -354,60 +369,41 @@ describe("normalizePricingRuleMessages", () => {
 });
 
 describe("serializePricingDisplayOptions", () => {
-  it("preserves existing message settings while writing displayOptions metadata", () => {
+  it("returns the direct display-options contract without a messages envelope", () => {
     const normalized = normalizePricingDisplayOptions({
-      rules: [quantityRule("rule-3", 3, 15), quantityRule("rule-5", 5, 25)],
-      messages: {
-        showDiscountMessaging: true,
-        ruleMessages: {
-          "rule-3": {
-            discountText: "Add more",
-            successMessage: "Saved",
-          },
-        },
-        displayOptions: {
-          bundleQuantityOptions: {
-            enabled: true,
-            defaultRuleId: "rule-5",
-          },
-          progressBar: {
-            enabled: true,
-            type: "simple",
-            progressText: "Add {{conditionText}} to unlock {{discountText}}",
-            successText: "{{discountText}} unlocked",
-          },
-        },
+      rules: [quantityRule("rule-2", 2, 10)],
+      displayOptions: {
+        bundleQuantityOptions: { enabled: true, defaultRuleId: "rule-2" },
       },
     });
 
     expect(serializePricingDisplayOptions({
-      existingMessages: {
-        showDiscountMessaging: true,
-        ruleMessages: {
-          "rule-3": {
-            discountText: "Add more",
-            successMessage: "Saved",
-          },
-        },
-      },
       options: normalized,
     })).toEqual({
-      showDiscountMessaging: true,
-      ruleMessages: {
-        "rule-3": {
-          discountText: "Add more",
-          successMessage: "Saved",
+      bundleQuantityOptions: {
+        enabled: true,
+        defaultRuleId: "rule-2",
+        optionsByRuleId: {
+          "rule-2": { label: "Box of 2", subtext: "10% off" },
         },
+        optionsByLocaleByRuleId: {},
       },
+      progressBar: {
+        enabled: false,
+        type: "step_based",
+        progressText: "Add {{conditionText}} to unlock {{discountText}}",
+        successText: "{{discountText}} unlocked",
+      },
+    });
+  });
+
+  it("serializes multi-rule display options without copying message settings", () => {
+    const normalized = normalizePricingDisplayOptions({
+      rules: [quantityRule("rule-3", 3, 15), quantityRule("rule-5", 5, 25)],
       displayOptions: {
         bundleQuantityOptions: {
           enabled: true,
           defaultRuleId: "rule-5",
-          optionsByRuleId: {
-            "rule-3": { label: "Box of 3", subtext: "15% off" },
-            "rule-5": { label: "Box of 5", subtext: "25% off" },
-          },
-          optionsByLocaleByRuleId: {},
         },
         progressBar: {
           enabled: true,
@@ -417,6 +413,26 @@ describe("serializePricingDisplayOptions", () => {
         },
       },
     });
+
+    expect(serializePricingDisplayOptions({
+      options: normalized,
+    })).toEqual({
+      bundleQuantityOptions: {
+        enabled: true,
+        defaultRuleId: "rule-5",
+        optionsByRuleId: {
+          "rule-3": { label: "Box of 3", subtext: "15% off" },
+          "rule-5": { label: "Box of 5", subtext: "25% off" },
+        },
+        optionsByLocaleByRuleId: {},
+      },
+      progressBar: {
+        enabled: true,
+        type: "simple",
+        progressText: "Add {{conditionText}} to unlock {{discountText}}",
+        successText: "{{discountText}} unlocked",
+      },
+    });
   });
 });
 
@@ -424,14 +440,12 @@ describe("serializeBoxSelectionFromPricingDisplayOptions", () => {
   it("writes the direct box-selection contract from enabled quantity options", () => {
     const normalized = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-2", 2, 5)],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: {
-            enabled: true,
-            defaultRuleId: "rule-2",
-            optionsByRuleId: {
-              "rule-2": { label: "Box of 2", subtext: "5% off" },
-            },
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: true,
+          defaultRuleId: "rule-2",
+          optionsByRuleId: {
+            "rule-2": { label: "Box of 2", subtext: "5% off" },
           },
         },
       },
@@ -455,12 +469,10 @@ describe("serializeBoxSelectionFromPricingDisplayOptions", () => {
   it("clears the direct box-selection contract when quantity options are disabled", () => {
     const normalized = normalizePricingDisplayOptions({
       rules: [quantityRule("rule-2", 2, 5)],
-      messages: {
-        displayOptions: {
-          bundleQuantityOptions: {
-            enabled: false,
-            defaultRuleId: "rule-2",
-          },
+      displayOptions: {
+        bundleQuantityOptions: {
+          enabled: false,
+          defaultRuleId: "rule-2",
         },
       },
     });

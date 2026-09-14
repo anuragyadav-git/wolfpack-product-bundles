@@ -10,10 +10,10 @@ import {
   type CampaignResultRow,
   type CampaignResultSortDirection,
   type CampaignResultSortKey,
-} from "../../lib/analytics";
+} from "../../lib/analytics/campaign-results";
 import { translateAdmin } from "~/i18n/config";
 
-export interface TopCampaignsProps {
+interface TopCampaignsProps {
   rows: CampaignResultRow[];
   formatRevenue: (cents: number) => string;
 }
@@ -31,11 +31,6 @@ export function TopCampaigns({ rows, formatRevenue }: TopCampaignsProps) {
     () => filterAndSortCampaignResults(rows, query, sortKey, direction),
     [rows, query, sortKey, direction]
   );
-  const maxRev = filteredRows.reduce(
-    (max, row) => Math.max(max, row.revenueCents),
-    0
-  );
-
   useEffect(() => {
     const search = searchRef.current;
     if (!search) return;
@@ -223,8 +218,6 @@ export function TopCampaigns({ rows, formatRevenue }: TopCampaignsProps) {
             </span>
           </div>
           {filteredRows.slice(0, 5).map((r) => {
-            const pct =
-              maxRev > 0 ? Math.round((r.revenueCents / maxRev) * 100) : 0;
             return (
               <div
                 key={r.utmCampaign}
@@ -233,11 +226,6 @@ export function TopCampaigns({ rows, formatRevenue }: TopCampaignsProps) {
               >
                 <div className="wpb-truncate-cell">
                   <p className="wpb-row-title">{r.utmCampaign}</p>
-                  <progress
-                    className="wpb-campaign-meter"
-                    value={Math.max(2, pct)}
-                    max={100}
-                  />
                 </div>
                 <p className="wpb-muted-micro wpb-row-align-end">
                   {r.orders.toLocaleString()}

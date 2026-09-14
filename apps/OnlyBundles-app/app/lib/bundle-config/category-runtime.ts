@@ -256,8 +256,18 @@ function buildProductSourceMap(productSources: unknown[] = []): Map<string, Reco
 function compactProductReferences(
   value: unknown,
   productSourceByKey: Map<string, Record<string, unknown>> = new Map(),
+  restrictToProductSources = false,
 ): Record<string, unknown>[] {
   return asArray(value)
+    .filter((reference) => {
+      if (!restrictToProductSources) return true;
+      const key = productReferenceKey(reference);
+      const normalizedKey = normalizeReferenceKey(key);
+      return Boolean(
+        (key && productSourceByKey.has(key))
+        || (normalizedKey && productSourceByKey.has(normalizedKey)),
+      );
+    })
     .map((reference) => compactProductReference(reference, productSourceByKey))
     .filter((reference): reference is Record<string, unknown> => reference !== null);
 }
@@ -280,7 +290,7 @@ function compactCollectionReferences(value: unknown): Record<string, unknown>[] 
 export function formatStepCategoryForRuntime(
   category: Record<string, unknown>,
   index: number,
-  productSources: unknown[] = [],
+  productSources?: unknown[],
 ) {
   const categoryId = stringOrNull(category.id) ?? `category-${index + 1}`;
   const sortOrder = numberOrNull(category.sortOrder) ?? index;
@@ -293,7 +303,11 @@ export function formatStepCategoryForRuntime(
     title: stringOrEmpty(category.title) || stringOrEmpty(category.name),
     subTitle: stringOrEmpty(category.subTitle),
     sortOrder,
-    products: compactProductReferences(category.products, productSourceByKey),
+    products: compactProductReferences(
+      category.products,
+      productSourceByKey,
+      productSources !== undefined,
+    ),
     collections: compactCollectionReferences(category.collections),
     conditions: asArray(category.conditions),
     categoryBanner: stringOrEmpty(category.categoryBanner),

@@ -68,7 +68,7 @@ describe('PPB modal slot keyboard access', () => {
     expect(removeAction.getAttribute('aria-label')).toEqual(expect.stringMatching(/^Remove/));
     const identity = card.children.at(-1);
     expect(identity?.children[0]?.textContent).toBe('Obsidian Earrings');
-    expect(identity?.children[1]?.children[0]?.textContent).toBe('$ 829.00');
+    expect(identity?.children[1]?.children[0]?.textContent).toBe('$829.00');
   });
 
   it('exposes the filled-slot cross badge with the complete localized product-specific name', () => {

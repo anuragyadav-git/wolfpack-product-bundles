@@ -1,24 +1,47 @@
-import { usePpbConfigureContext } from "./PpbConfigureContext";
 import { translateAdmin } from "~/i18n/config";
+import productPageBundleStyles from "../../../styles/routes/product-page-bundle-configure.module.css";
+import type { PpbConfigureFlow } from "./usePpbConfigureFlow";
+
+type PpbStep = PpbConfigureFlow["stepsState"]["steps"][number];
+
+export type PpbStepSetupDetailsCardProps = Pick<
+  PpbConfigureFlow,
+  | "clearValidationError"
+  | "cloneStep"
+  | "deleteStep"
+  | "markAsDirty"
+  | "openStepMultiLanguageModal"
+  | "shopLocales"
+  | "stepsState"
+  | "validationErrors"
+> & {
+  step: PpbStep;
+  isFirstStep: boolean;
+};
 
 export function PpbStepSetupDetailsCard({
-  step,
+  clearValidationError,
+  cloneStep,
+  deleteStep,
   isFirstStep,
-}: {
-  step: any;
-  isFirstStep: boolean;
-}) {
-  const {
-    cloneStep,
-    deleteStep,
-    markAsDirty,
-    openStepMultiLanguageModal,
-    productPageBundleStyles,
-    shopLocales,
-    stepsState,
-    validationErrors = {},
-    clearValidationError,
-  } = usePpbConfigureContext();
+  markAsDirty,
+  openStepMultiLanguageModal,
+  shopLocales,
+  step,
+  stepsState,
+  validationErrors = {},
+}: PpbStepSetupDetailsCardProps) {
+  const translationsTooltipId = `ppb-step-${step.id}-translations-tooltip`;
+  const cloneTooltipId = `ppb-step-${step.id}-clone-tooltip`;
+  const deleteTooltipId = `ppb-step-${step.id}-delete-tooltip`;
+  const translationsLabel = translateAdmin(
+    "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+  );
+  const cloneLabel = translateAdmin("adminAttributes.cloneCurrentStep");
+  const deleteLabel =
+    stepsState.steps.length <= 1
+      ? "At least one step is required"
+      : "Delete current step";
 
   return (
     <div className={productPageBundleStyles.stepSetupDetails}>
@@ -44,49 +67,35 @@ export function PpbStepSetupDetailsCard({
           />
         </div>
         <div className={productPageBundleStyles.stepSetupActions}>
-          <span
-            title={translateAdmin(
-              "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
+          <s-tooltip id={translationsTooltipId}>{translationsLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="language-translate"
+            accessibilityLabel={translationsLabel}
+            interestFor={translationsTooltipId}
+            disabled={shopLocales.length === 0 || undefined}
+            onClick={() => openStepMultiLanguageModal(step.id)}
+          />
+          <s-tooltip id={cloneTooltipId}>{cloneLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="duplicate"
+            accessibilityLabel={cloneLabel}
+            interestFor={cloneTooltipId}
+            onClick={() => cloneStep(step.id)}
+          />
+          <s-tooltip id={deleteTooltipId}>{deleteLabel}</s-tooltip>
+          <s-button
+            variant="tertiary"
+            icon="delete"
+            tone="critical"
+            accessibilityLabel={translateAdmin(
+              "adminAttributes.deleteCurrentStep"
             )}
-          >
-            <s-button
-              variant="tertiary"
-              icon="language-translate"
-              accessibilityLabel={translateAdmin(
-                "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
-              )}
-              disabled={shopLocales.length === 0 || undefined}
-              onClick={() => openStepMultiLanguageModal(step.id)}
-            />
-          </span>
-          <span title={translateAdmin("adminAttributes.cloneCurrentStep")}>
-            <s-button
-              variant="tertiary"
-              icon="duplicate"
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.cloneCurrentStep"
-              )}
-              onClick={() => cloneStep(step.id)}
-            />
-          </span>
-          <span
-            title={
-              stepsState.steps.length <= 1
-                ? "At least one step is required"
-                : "Delete current step"
-            }
-          >
-            <s-button
-              variant="tertiary"
-              icon="delete"
-              tone="critical"
-              accessibilityLabel={translateAdmin(
-                "adminAttributes.deleteCurrentStep"
-              )}
-              disabled={stepsState.steps.length <= 1 || undefined}
-              onClick={() => deleteStep(step.id)}
-            />
-          </span>
+            interestFor={deleteTooltipId}
+            disabled={stepsState.steps.length <= 1 || undefined}
+            onClick={() => deleteStep(step.id)}
+          />
         </div>
       </div>
       <div
@@ -121,11 +130,6 @@ export function PpbStepSetupDetailsCard({
             }}
             autocomplete="off"
           />
-          {validationErrors[`steps.${step.id}.resources`] && (
-            <s-text id={`configure-steps-${step.id}-resources`} tone="critical">
-              {validationErrors[`steps.${step.id}.resources`]}
-            </s-text>
-          )}
         </s-stack>
       </div>
     </div>

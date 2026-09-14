@@ -1,10 +1,10 @@
-export const PRICING_TIER_BADGE_SHAPES = [
+const PRICING_TIER_BADGE_SHAPES = [
   "pill",
   "folded",
   "banner_rounded",
 ] as const;
 
-export const PRICING_TIER_BADGE_VISIBILITIES = ["always", "selected"] as const;
+const PRICING_TIER_BADGE_VISIBILITIES = ["always", "selected"] as const;
 
 export type PricingTierBadgeShape = typeof PRICING_TIER_BADGE_SHAPES[number];
 export type PricingTierBadgeVisibility = typeof PRICING_TIER_BADGE_VISIBILITIES[number];

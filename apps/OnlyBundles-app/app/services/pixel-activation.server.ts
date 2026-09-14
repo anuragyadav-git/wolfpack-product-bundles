@@ -7,19 +7,19 @@
  *  - api.activate-pixel route (manual re-activation for existing stores)
  */
 
-export interface PixelActivationResult {
+interface PixelActivationResult {
   success: boolean;
   pixelId?: string;
   deleted?: boolean;
   error?: string;
 }
 
-export interface PixelStatus {
+interface PixelStatus {
   active: boolean;
   pixelId: string | null;
 }
 
-export interface PixelDeactivationResult {
+interface PixelDeactivationResult {
   success: boolean;
   error?: string;
 }

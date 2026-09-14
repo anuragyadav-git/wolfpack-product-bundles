@@ -75,6 +75,54 @@ describe('discount tier transition state', () => {
       captureDiscountTierState(afterController),
     )).toBeNull();
   });
+
+  it('ignores retired controller, pricing, condition, and rule ID aliases', () => {
+    const legacyRule = {
+      ruleId: 'legacy-tier',
+      condition: { type: 'quantity', operator: 'gte', value: 1 },
+    };
+    const legacyBundle = {
+      id: 'legacy-bundle',
+      discountConfiguration: { enabled: true, rules: [legacyRule] },
+      steps: [{}],
+    };
+    const legacyController = {
+      bundleId: legacyBundle.id,
+      bundleData: legacyBundle,
+      selectedProducts: [{ 'variant-1': 1 }],
+      stepProductData: [[{ selectionId: 'variant-1', price: 1000 }]],
+    };
+
+    expect(captureDiscountTierState(legacyController)).toEqual({
+      bundleId: '',
+      tierId: null,
+      tierIndex: -1,
+      tierCount: 0,
+    });
+
+    expect(captureDiscountTierState({
+      ...legacyController,
+      selectedBundle: legacyBundle,
+    })).toEqual({
+      bundleId: 'legacy-bundle',
+      tierId: null,
+      tierIndex: -1,
+      tierCount: 0,
+    });
+
+    expect(captureDiscountTierState({
+      ...legacyController,
+      selectedBundle: {
+        ...legacyBundle,
+        pricing: { enabled: true, rules: [legacyRule] },
+      },
+    })).toEqual({
+      bundleId: 'legacy-bundle',
+      tierId: null,
+      tierIndex: -1,
+      tierCount: 0,
+    });
+  });
 });
 
 describe('mounted discount pill feedback', () => {

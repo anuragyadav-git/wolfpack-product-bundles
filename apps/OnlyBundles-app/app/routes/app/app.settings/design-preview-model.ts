@@ -1,9 +1,7 @@
-import type { CSSProperties } from "react";
 import { FPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/full-page/templates/registry";
 import { PPB_TEMPLATE_CONFIGS } from "../../../assets/widgets/product-page/templates/registry";
 import {
   mapTemplateSelection,
-  type BundleContractType,
   type TemplateKey,
   type TemplateSelection,
 } from "../../../lib/bundle-config/template-selection";
@@ -11,157 +9,21 @@ import { buildSettingsDesignRuntime, normalizeSlotIconFit } from "../../../lib/s
 import { generateCSSFromSettings } from "../../../lib/css-generators";
 import type { ShopBrandColors } from "../../../lib/shop-brand-colors";
 import type { SettingsField } from "../../../lib/admin-configuration-surfaces";
-
-export type DesignPreviewArea =
-  | "bundle-header"
-  | "navigation"
-  | "categories"
-  | "product-card"
-  | "product-slots"
-  | "cart-summary";
-export type DesignPreviewScenario =
-  | "default"
-  | "product-picker"
-  | "loading"
-  | "validation"
-  | "upsell";
-export type DesignPreviewContext =
-  | { kind: "area"; value: DesignPreviewArea }
-  | { kind: "scenario"; value: Exclude<DesignPreviewScenario, "default"> };
-export type DesignPreviewFamily = "full-page" | "product-page";
-export type DesignPreviewViewport = "desktop" | "mobile";
-export type DesignPreviewAvailableSize = { width: number; height: number };
-export type DesignPreviewContextKind =
-  | "full-page"
-  | "product-page-inpage"
-  | "product-page-modal";
-export type DesignPreviewContextFidelity = "storefront" | "representative";
-export type DesignPreviewNavigation =
-  | "timeline"
-  | "compact-timeline"
-  | "horizontal-timeline"
-  | "list-steps"
-  | "grid-steps"
-  | "none";
-export type DesignPreviewCategories = "accordion" | "pills" | "underline" | "tabs" | "none";
-export type DesignPreviewSummary = "rows" | "slot-grid" | "compact-slots" | "list-selected-drawer" | "pdp-footer" | "modal-footer";
-
-export interface DesignPreviewProductCardContract {
-  mode: "grid" | "compact" | "row";
-  columns: {
-    desktop: number;
-    mobile: number;
-  };
-}
-
-export interface DesignPreviewTemplateDescriptor {
-  key: TemplateKey;
-  bundleType: BundleContractType;
-  translationKey: string;
-  family: DesignPreviewFamily;
-  selection: TemplateSelection;
-  productCard: DesignPreviewProductCardContract;
-  navigation: DesignPreviewNavigation;
-  categories: DesignPreviewCategories;
-  summary: DesignPreviewSummary;
-  slotOrientation?: "horizontal" | "vertical";
-  supportedAreas: readonly DesignPreviewArea[];
-  supportedScenarios: readonly DesignPreviewScenario[];
-  sceneRegions: Record<DesignPreviewViewport, readonly string[]>;
-}
-
-export interface DesignPreviewFieldTarget {
-  target: DesignPreviewContext;
-  targets?: readonly DesignPreviewContext[];
-  elements: readonly string[];
-  templates?: readonly TemplateKey[];
-  targetOverrides?: Partial<Record<TemplateKey, DesignPreviewContext>>;
-}
-
-export interface DesignPreviewFixtureProduct {
-  id: string;
-  translationKey: string;
-  imageUrl: string;
-  selected: boolean;
-  quantity: number;
-  priceCents: number;
-}
-
-export interface DesignPreviewFixture {
-  steps: readonly { id: string; translationKey: string }[];
-  categories: readonly { id: string; translationKey: string }[];
-  products: readonly DesignPreviewFixtureProduct[];
-  discountTiers: readonly { minimum: number; percentage: number }[];
-  emptySlots: readonly { id: string; position: number }[];
-  validationMessage: string;
-  upsell: DesignPreviewFixtureProduct;
-}
-
-export interface DesignPreviewScene {
-  templateKey: TemplateKey;
-  context: DesignPreviewContext;
-  viewport: DesignPreviewViewport;
-  regions: readonly string[];
-}
-
-export type DesignPreviewTheme = CSSProperties & Record<`--preview-${string}`, string>;
-
-export const DESIGN_PREVIEW_VIEWPORTS: Readonly<
-  Record<DesignPreviewViewport, { width: number; height: number }>
-> = {
-  desktop: { width: 1280, height: 1136 },
-  mobile: { width: 390, height: 844 },
-};
-
-const DESIGN_PREVIEW_MOBILE_DEVICE_SIZE = { width: 428, height: 882 } as const;
-const DESIGN_PREVIEW_DESKTOP_DEVICE_SIZE = { width: 1320, height: 920 } as const;
-
-export function getDesignPreviewCanvasSize(viewport: DesignPreviewViewport) {
-  return viewport === "mobile"
-    ? DESIGN_PREVIEW_MOBILE_DEVICE_SIZE
-    : DESIGN_PREVIEW_DESKTOP_DEVICE_SIZE;
-}
-
-export function calculateDesignPreviewFitScale(
-  availableSize: DesignPreviewAvailableSize,
-  viewport: DesignPreviewViewport,
-) {
-  const logicalViewport = getDesignPreviewCanvasSize(viewport);
-  const ratios = [
-    Number.isFinite(availableSize.width) && availableSize.width > 0
-      ? availableSize.width / logicalViewport.width
-      : null,
-    Number.isFinite(availableSize.height) && availableSize.height > 0
-      ? availableSize.height / logicalViewport.height
-      : null,
-  ].filter((ratio): ratio is number => ratio !== null);
-
-  if (ratios.length === 0) return 1;
-
-  const fitScale = Math.min(...ratios);
-  return viewport === "desktop" ? fitScale : Math.min(1, fitScale);
-}
-
-export function getDesignPreviewFitPresentation(
-  availableSize: DesignPreviewAvailableSize,
-  viewport: DesignPreviewViewport,
-) {
-  const logicalCanvas = getDesignPreviewCanvasSize(viewport);
-  const scale = calculateDesignPreviewFitScale(availableSize, viewport);
-
-  return {
-    scale,
-    canvasWidth: logicalCanvas.width * scale,
-    canvasHeight: logicalCanvas.height * scale,
-  };
-}
-
-export function getDesignPreviewContextFidelity(
-  _templateKey: TemplateKey,
-  _context: DesignPreviewArea | DesignPreviewScenario,
-): DesignPreviewContextFidelity {
-  return "storefront";
-}
+import type {
+  DesignPreviewArea,
+  DesignPreviewContext,
+  DesignPreviewContextKind,
+  DesignPreviewFieldTarget,
+  DesignPreviewFixture,
+  DesignPreviewNavigation,
+  DesignPreviewProductCardContract,
+  DesignPreviewScenario,
+  DesignPreviewScene,
+  DesignPreviewSummary,
+  DesignPreviewTemplateDescriptor,
+  DesignPreviewTheme,
+  DesignPreviewViewport,
+} from "./design-preview-contract";
 
 type RuntimeTemplateConfig = {
   productCard?: {
@@ -213,8 +75,8 @@ const FULL_PAGE_AREAS = ["navigation", "categories", "product-card", "product-sl
 const PRODUCT_PAGE_AREAS = ["bundle-header", "navigation", "categories", "product-card", "product-slots", "cart-summary"] as const;
 const SLOT_AREAS = ["bundle-header", "product-slots", "cart-summary"] as const;
 const FULL_PAGE_SCENARIOS = ["default", "loading", "validation", "upsell"] as const;
-const PRODUCT_PAGE_SCENARIOS = ["default", "validation"] as const;
-const SLOT_SCENARIOS = ["default", "product-picker", "validation"] as const;
+const PRODUCT_PAGE_SCENARIOS = ["default", "loading", "validation"] as const;
+const SLOT_SCENARIOS = ["default", "product-picker", "loading", "validation"] as const;
 
 export function getDesignPreviewContextKind(
   templateKey: TemplateKey,
@@ -416,6 +278,10 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "stylePresets.colors.discountTierTextColor": cartTarget("discount feedback pill text"),
   "stylePresets.colors.discountCompletionBackgroundColor": cartTarget("discount completion pill"),
   "stylePresets.colors.discountCompletionTextColor": cartTarget("discount completion pill text"),
+  "stylePresets.tierBadge.shape": productTarget("tier badge shape"),
+  "stylePresets.tierBadge.visibility": productTarget("tier badge visibility"),
+  "stylePresets.tierBadge.textColor": productTarget("tier badge text"),
+  "stylePresets.tierBadge.backgroundColor": productTarget("tier badge background"),
   "Primary Font Size": sharedProductCartTarget("product titles", "primary prices", "step text"),
   "Primary Font Weight": sharedProductCartTarget("product titles", "primary prices"),
   "Secondary Font Size": sharedProductCartTarget("compare-at prices", "discount text"),
@@ -429,8 +295,8 @@ export const DESIGN_PREVIEW_FIELD_TARGETS: Readonly<Record<string, DesignPreview
   "Image Fit": productTarget("product images"),
   "stylePresets.images.slotIconUrl": areaTarget("product-slots", ["empty slot icon"], { templates: ALL_TEMPLATES }),
   "stylePresets.images.slotIconFit": areaTarget("product-slots", ["empty slot icon presentation"], { templates: ALL_TEMPLATES }),
-  "generalSettings.loadingGifUrl": scenarioTarget("loading", ["loading animation"], { templates: ALL_FPB_TEMPLATES }),
-  "generalSettings.loadingBgColor": scenarioTarget("loading", ["loading screen background"], { templates: ALL_FPB_TEMPLATES }),
+  "generalSettings.loadingGifUrl": scenarioTarget("loading", ["loading animation"], { templates: ALL_TEMPLATES }),
+  "generalSettings.loadingBgColor": scenarioTarget("loading", ["loading screen background"], { templates: ALL_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepCompletionColor": areaTarget("navigation", ["completed steps"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationCheckColor": areaTarget("navigation", ["completed step checks"], { templates: ALL_FPB_TEMPLATES }),
   "expert.navigationBanner.navigationBannerStepTextColor": areaTarget("navigation", ["step labels"], { templates: ALL_FPB_TEMPLATES }),

@@ -1,9 +1,9 @@
-export interface StepFilterConfig {
+interface StepFilterConfig {
   label: string;
   collectionHandle: string;
 }
 
-export interface FilterableProduct {
+interface FilterableProduct {
   id: string;
   parentProductId?: string;
   [key: string]: unknown;

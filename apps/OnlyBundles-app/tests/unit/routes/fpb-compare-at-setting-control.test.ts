@@ -25,46 +25,46 @@ describe("FPB compare-at price setting control", () => {
     return null;
   };
 
-  const createFlow = () => ({
-    activeTabIndex: 0,
-    bundle: {},
+  const createProps = () => ({
     countdownEnabled: false,
     countdownExpiryAction: "hide",
     countdownExpiredMessage: "",
     countdownLayout: "compact",
     countdownPosition: "above",
     countdownTitle: "",
-    DiscountMethod: { BUY_X_GET_Y: "BUY_X_GET_Y" },
+    clearValidationError: jest.fn(),
+    lowStockAlertEnabled: false,
+    lowStockAlertMessage: "Only {{stock}} left",
+    lowStockAlertThreshold: "5",
     markAsDirty: jest.fn(),
     openMultiLanguageModal: jest.fn(),
     offerDeliveryState: { endsAt: null },
-    pricingState: { discountType: "PERCENTAGE" },
     setCountdownEnabled: jest.fn(),
     setCountdownExpiryAction: jest.fn(),
     setCountdownExpiredMessage: jest.fn(),
     setCountdownLayout: jest.fn(),
     setCountdownPosition: jest.fn(),
     setCountdownTitle: jest.fn(),
-    setIndividualSellingPlanEnabled: jest.fn(),
+    setLowStockAlertEnabled: jest.fn(),
+    setLowStockAlertMessage: jest.fn(),
+    setLowStockAlertThreshold: jest.fn(),
     setShowTextOnAddButton: jest.fn(),
     setTextOverrides: jest.fn(),
-    SettingsRow: ({ title, children }: any) =>
-      createElement("section", null, title, children),
     setVariantSelectorEnabled: jest.fn(),
     showTextOnAddButton: false,
-    stepsState: { steps: [{}] },
+    shopLocales: [],
     textOverrides: {},
     variantSelectorEnabled: true,
   });
 
   it("does not expose a compare-at visibility control", () => {
-    const flow = createFlow();
-    const view = FpbSummaryTextSettings({ flow: flow as any });
+    const props = createProps();
+    const view = FpbSummaryTextSettings(props as any);
     const control = findCompareAtSwitch(view);
 
     expect(control).toBeNull();
     expect(
-      renderToStaticMarkup(createElement(FpbSummaryTextSettings, { flow: flow as any })),
+      renderToStaticMarkup(createElement(FpbSummaryTextSettings, props as any)),
     ).not.toContain("Show Compare At Price");
   });
 });

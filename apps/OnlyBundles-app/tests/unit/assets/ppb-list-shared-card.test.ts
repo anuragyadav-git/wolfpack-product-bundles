@@ -192,6 +192,7 @@ describe('PPB List shared product cards', () => {
       imageUrl: 'https://cdn.shopify.com/old.jpg',
     };
     const priceEl = { textContent: '$399.00' };
+    const variantEl = { textContent: '7' };
     const imageEl = { src: 'https://cdn.shopify.com/old.jpg' };
     const childWithProductId = { dataset: { productId: 'variant-old' } };
     const productCard = {
@@ -202,6 +203,7 @@ describe('PPB List shared product cards', () => {
       querySelectorAll: jest.fn(() => [childWithProductId]),
       querySelector: jest.fn((selector: string) => {
         if (selector === '.product-price') return priceEl;
+        if (selector === '.product-variant-row') return variantEl;
         if (selector === '.product-price-strike') return null;
         if (selector === '.bw-product-card__image, .product-image img') return imageEl;
         return null;
@@ -237,6 +239,7 @@ describe('PPB List shared product cards', () => {
     expect(productCard.dataset.currentSelectedVariantId).toBe('variant-new');
     expect(childWithProductId.dataset.productId).toBe('variant-new');
     expect(priceEl.textContent).toContain('$459.00');
+    expect(variantEl.textContent).toBe('8');
     expect(imageEl.src).toBe('https://cdn.shopify.com/new.jpg');
   });
 });

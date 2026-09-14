@@ -121,26 +121,6 @@
   }
 }
 
-.step-banner-image {
-  width: 100%;
-  margin-bottom: 16px;
-  border-radius: var(--bundle-promo-banner-radius, 8px);
-  overflow: hidden;
-}
-
-.step-banner-image img {
-  width: 100%;
-  display: block;
-  object-fit: cover;
-  max-height: 200px;
-}
-
-@container fpb-shell (min-width: 640px) {
-  .step-banner-image img {
-    max-height: 260px;
-  }
-}
-
 .bundle-header {
   text-align: center;
   margin: 10px auto 20px;

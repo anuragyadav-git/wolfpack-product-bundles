@@ -1,27 +1,34 @@
-import type { ConfigureBundleFlowContext } from "../useConfigureBundleFlow";
+import type { useBundlePricing } from "../../../../hooks/useBundlePricing";
 import { DisabledConfigurationRegion } from "../../_shared/bundle-configure/DisabledConfigurationRegion";
 import { translateAdmin } from "~/i18n/config";
+import { DiscountMethod } from "../../../../types/pricing";
+import { QuestionHelpTooltip } from "../SmallComponents";
 
 export function FpbBundleQuantityOptions({
-  flow,
+  eligible,
+  normalizedOptions,
+  pricingState,
+  styles,
+  translationsAvailable,
+  onOpenTranslations,
 }: {
-  flow: ConfigureBundleFlowContext;
+  eligible: boolean;
+  normalizedOptions: Array<{
+    ruleId: string;
+    label: string;
+    subtext: string;
+    isDefault: boolean;
+    compatibility: { status: string; reason?: string };
+  }>;
+  pricingState: ReturnType<typeof useBundlePricing>;
+  styles: Record<string, string>;
+  translationsAvailable: boolean;
+  onOpenTranslations: () => void;
 }) {
-  const {
-    bundleQuantityOptionsEligible,
-    DiscountMethod,
-    fullPageBundleStyles,
-    normalizedPricingDisplayOptions,
-    pricingState,
-    QuestionHelpTooltip,
-    setIsBundleQuantityMultiLangModalOpen,
-    shopLocales,
-  } = flow;
-
   return (
     <>
       {pricingState.discountType !== DiscountMethod.BUY_X_GET_Y && (
-        <div className={fullPageBundleStyles.displayOptionRow}>
+        <div className={styles.displayOptionRow}>
           <s-stack
             direction="inline"
             gap="small"
@@ -29,11 +36,11 @@ export function FpbBundleQuantityOptions({
             justifyContent="space-between"
           >
             <s-stack direction="inline" gap="small" alignItems="center">
-              <div className={fullPageBundleStyles.displayOptionText}>
-                <p className={fullPageBundleStyles.displayOptionTitle}>
+              <div className={styles.displayOptionText}>
+                <p className={styles.displayOptionTitle}>
                   {translateAdmin("tooltips.bundleQuantityOptions.title")}
                 </p>
-                <p className={fullPageBundleStyles.displayOptionDescription}>
+                <p className={styles.displayOptionDescription}>
                   {translateAdmin(
                     "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.configureThisSectionToEnableQuantityOptions"
                   )}
@@ -45,7 +52,7 @@ export function FpbBundleQuantityOptions({
                   pricingState.pricingDisplayOptions.bundleQuantityOptions
                     .enabled || undefined
                 }
-                disabled={!bundleQuantityOptionsEligible || undefined}
+                disabled={!eligible || undefined}
                 onChange={(e) =>
                   pricingState.setBundleQuantityOptionsEnabled(
                     (e.target as HTMLInputElement).checked
@@ -59,17 +66,17 @@ export function FpbBundleQuantityOptions({
               disabled={
                 !pricingState.pricingDisplayOptions.bundleQuantityOptions
                   .enabled ||
-                shopLocales.length === 0 ||
+                !translationsAvailable ||
                 undefined
               }
-              onClick={() => setIsBundleQuantityMultiLangModalOpen(true)}
+              onClick={onOpenTranslations}
             >
               {translateAdmin(
                 "adminExtracted.shared.bundleConfigure.bundlesubscriptionssection.multiLanguage"
               )}
             </s-button>
           </s-stack>
-          <p className={fullPageBundleStyles.optionNote}>
+          <p className={styles.optionNote}>
             <strong>
               {translateAdmin(
                 "adminExtracted.appBundlesFullPageBundleConfigure.sections.discountbundlequantityoptions.note"
@@ -82,13 +89,12 @@ export function FpbBundleQuantityOptions({
           <DisabledConfigurationRegion
             disabled={
               !pricingState.pricingDisplayOptions.bundleQuantityOptions
-                .enabled || !bundleQuantityOptionsEligible
+                .enabled || !eligible
             }
           >
-            <div className={fullPageBundleStyles.nestedDisplayOptions}>
+            <div className={styles.nestedDisplayOptions}>
               <s-stack direction="block" gap="small">
-                {normalizedPricingDisplayOptions.bundleQuantityOptions.options
-                  .length === 0 ? (
+                {normalizedOptions.length === 0 ? (
                   <p
                     style={{
                       margin: 0,
@@ -101,11 +107,11 @@ export function FpbBundleQuantityOptions({
                     )}
                   </p>
                 ) : (
-                  normalizedPricingDisplayOptions.bundleQuantityOptions.options.map(
-                    (option: any, index: number) => (
+                  normalizedOptions.map(
+                    (option, index) => (
                       <div
                         key={option.ruleId}
-                        className={fullPageBundleStyles.discountRuleCard}
+                        className={styles.discountRuleCard}
                       >
                         <s-stack direction="block" gap="small-100">
                           <s-stack
@@ -125,26 +131,19 @@ export function FpbBundleQuantityOptions({
                                 number: index + 1,
                               })}
                             </h5>
-                            <s-press-button
-                              variant="tertiary"
-                              tone="neutral"
-                              pressed={option.isDefault}
-                              accessibilityLabel={translateAdmin(
-                                "adminAttributes.makeThisRuleDefault"
+                            <s-switch
+                              label={translateAdmin(
+                                "adminDynamic.makeRuleDefault"
                               )}
-                              onClick={() =>
+                              checked={option.isDefault || undefined}
+                              onChange={(e: Event) => {
+                                const isChecked = (e.target as HTMLInputElement)
+                                  .checked;
                                 pricingState.setBundleQuantityDefaultRule(
-                                  option.ruleId
-                                )
-                              }
-                            >
-                              <s-text
-                                tone={option.isDefault ? "success" : "neutral"}
-                              >
-                                {option.isDefault ? "\u2605" : "\u2606"}{" "}
-                                {translateAdmin("adminDynamic.makeRuleDefault")}
-                              </s-text>
-                            </s-press-button>
+                                  isChecked ? option.ruleId : null
+                                );
+                              }}
+                            />
                           </s-stack>
                           {option.compatibility.status === "blocked" && (
                             <p

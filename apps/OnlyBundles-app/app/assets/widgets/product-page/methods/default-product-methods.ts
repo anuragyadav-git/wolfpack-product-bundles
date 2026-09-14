@@ -1,6 +1,4 @@
 
-import { BUNDLE_WIDGET } from '../../shared/constants.js';
-
 export const ProductPageDefaultProductMethods: Record<string, any> & ThisType<any> = {
   _normalizeRequiredQuantity(value: string) {
     const parsed = Number.parseFloat(value);
@@ -41,85 +39,112 @@ _getDirectDefaultProductsData() {
   return data;
 },
 
-  _normalizeDirectDefaultProduct(product: any) {
+  _normalizeDirectDefaultProductRequirement(product: any) {
+  const productId = this.extractId(product?.graphqlId || product?.productId || product?.id);
   const variant = Array.isArray(product.variants) ? product.variants[0] : null;
-  const variantId = this.extractId(variant?.selectionId);
-  if (!variantId) return null;
-
-  const imageUrl = product.images?.[0]?.originalSrc || product.imageUrl || BUNDLE_WIDGET.PLACEHOLDER_IMAGE;
-  const inventoryQuantity = typeof variant?.inventoryQuantity === 'number'
-    ? variant.inventoryQuantity
-    : null;
-  const price = Number.parseFloat(variant?.price || '0') * 100;
-  const requiredQuantity = this._normalizeRequiredQuantity(product.requiredQuantity);
-  const explicitlyUnavailable = variant?.availableForSale === false || variant?.available === false;
-  const available = !explicitlyUnavailable;
-  const quantityAvailable = inventoryQuantity;
+  const variantId = this.extractId(
+    variant?.variantGraphqlId || variant?.selectionId || variant?.variantId || variant?.id,
+  );
+  if (!productId || !variantId) return null;
 
   return {
-    id: variantId,
-    selectionId: variantId,
-    title: product.title || '',
-    handle: product.handle || '',
-    imageUrl,
-    price,
-    compareAtPrice: null,
+    productId,
     variantId,
-    available,
-    quantityAvailable,
-    currentlyNotInStock: false,
-    defaultRequiredQuantity: requiredQuantity,
-    variants: [{
-      id: variantId,
-      selectionId: variantId,
-      title: variant?.title || '',
-      price,
-      compareAtPrice: null,
-      available,
-      quantityAvailable,
-      currentlyNotInStock: false,
-    }],
-    images: imageUrl ? [{ src: imageUrl }] : [],
-    description: '',
+    defaultRequiredQuantity: this._normalizeRequiredQuantity(product.requiredQuantity),
   };
 },
 
-_getDirectDefaultProductItems() {
+_getDirectDefaultProductRequirements() {
   const data = this._getDirectDefaultProductsData();
   if (!data) return [];
   return data.products
-    .map((product: any)  => this._normalizeDirectDefaultProduct(product))
+    .map((product: any)  => this._normalizeDirectDefaultProductRequirement(product))
     .filter(Boolean);
 },
 
-_initDirectDefaultProducts() {
-  this.directDefaultProducts = this._getDirectDefaultProductItems();
-  if (this.directDefaultProducts.length === 0 || !this.selectedProducts[0]) return;
+_getDirectDefaultProductIds() {
+  return (this.directDefaultProductRequirements || []).map(
+    (requirement: any) => `gid://shopify/Product/${requirement.productId}`,
+  );
+},
 
-  this.directDefaultProducts.forEach((product: any)  => {
-    this.setSelectedQuantity(0, product.variantId, this._normalizeRequiredQuantity(product.defaultRequiredQuantity));
+_initDirectDefaultProducts() {
+  this.directDefaultProductRequirements = this._getDirectDefaultProductRequirements();
+  this.directDefaultProducts = [];
+  if (this.directDefaultProductRequirements.length === 0 || !this.selectedProducts[0]) return;
+
+  this.directDefaultProductRequirements.forEach((requirement: any)  => {
+    this.setSelectedQuantity(0, requirement.variantId, requirement.defaultRequiredQuantity);
   });
 },
 
 async _preloadDirectDefaultProducts() {
-  if (this.directDefaultProducts.length === 0 || !this.selectedBundle?.steps?.[0]) return;
+  if (this.directDefaultProductRequirements.length === 0 || !this.selectedBundle?.steps?.[0]) return;
   await this.loadStepProducts(0).catch(() => {});
 },
 
-_mergeDirectDefaultProductsIntoStep(stepIndex: number, products: string|any[]) {
-  if (stepIndex !== 0 || this.directDefaultProducts.length === 0) return products;
-  return products.concat(this.directDefaultProducts);
+_mergeDirectDefaultProductsIntoStep(stepIndex: number, products: any[]) {
+  if (Number(stepIndex) !== 0) return products;
+
+  const requirements = this.directDefaultProductRequirements || [];
+  if (requirements.length === 0) {
+    this.directDefaultProducts = [];
+    this._directDefaultHydrationFailed = false;
+    return products;
+  }
+
+  const hydratedDefaults = requirements.map((requirement: any) => {
+    const product = products.find((candidate: any) => {
+      const candidateProductId = this.extractId(candidate.parentProductId || candidate.id);
+      const containsVariant = candidate.variantId === requirement.variantId
+        || (candidate.variants || []).some(
+          (variant: any) => this.extractId(variant.id || variant.selectionId) === requirement.variantId,
+        );
+      return candidateProductId === requirement.productId && containsVariant;
+    });
+    if (!product) return null;
+
+    const variant = (product.variants || []).find(
+      (candidate: any) => this.extractId(candidate.id || candidate.selectionId) === requirement.variantId,
+    );
+    if (!variant) return null;
+
+    return {
+      ...product,
+      variantId: requirement.variantId,
+      selectionId: requirement.variantId,
+      price: variant.price,
+      currencyCode: variant.currencyCode ?? null,
+      compareAtPrice: variant.compareAtPrice ?? null,
+      compareAtCurrencyCode: variant.compareAtCurrencyCode ?? null,
+      available: variant.available === true,
+      quantityAvailable: typeof variant.quantityAvailable === 'number'
+        ? variant.quantityAvailable
+        : null,
+      currentlyNotInStock: variant.currentlyNotInStock === true,
+      imageUrl: variant.image?.src || product.imageUrl,
+      defaultRequiredQuantity: requirement.defaultRequiredQuantity,
+    };
+  }).filter(Boolean);
+
+  this._directDefaultHydrationFailed = hydratedDefaults.length !== requirements.length;
+  this.directDefaultProducts = this._directDefaultHydrationFailed ? [] : hydratedDefaults;
+  return this._directDefaultHydrationFailed ? [] : products;
 },
 
 _isDirectDefaultVariant(variantId: any) {
   const normalizedVariantId = this.extractId(variantId);
-  return this.directDefaultProducts.some((product: any)  => product.variantId === normalizedVariantId);
+  return (this.directDefaultProductRequirements || []).some(
+    (requirement: any) => requirement.variantId === normalizedVariantId,
+  );
 },
 
 _getDirectDefaultRequiredQuantity(variantId: any) {
   const normalizedVariantId = this.extractId(variantId);
-  const product = this.directDefaultProducts.find((item: any)  => item.variantId === normalizedVariantId);
-  return product ? this._normalizeRequiredQuantity(product.defaultRequiredQuantity) : null;
+  const requirement = (this.directDefaultProductRequirements || []).find(
+    (item: any) => item.variantId === normalizedVariantId,
+  );
+  return requirement ? requirement.defaultRequiredQuantity : null;
 },
 
 /**
