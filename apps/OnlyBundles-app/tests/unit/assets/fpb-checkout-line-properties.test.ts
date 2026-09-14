@@ -348,6 +348,7 @@ describe("FPB checkout cart-line properties", () => {
       "FBP-1_ABC",
       expect.objectContaining({ _bundle_display_properties: expect.any(String) }),
       "runtime-token",
+      1,
     );
     expect(callOrder).toEqual(["cart-metafield", "cart-add"]);
   });

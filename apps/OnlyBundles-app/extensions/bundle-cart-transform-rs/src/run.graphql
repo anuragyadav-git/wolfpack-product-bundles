@@ -2,11 +2,11 @@ query Input {
   presentmentCurrencyRate
   localization { country { isoCode } }
   shop {
-    ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value }
+    ppbPolicyRevisions: metafield(namespace: "$app", key: "ppb_policy_revisions") { value: jsonValue }
   }
   cartTransform {
     runtimeConfiguration: metafield(namespace: "$app", key: "runtime_configuration") {
-      value
+      value: jsonValue
     }
   }
   cart {
@@ -36,19 +36,11 @@ query Input {
             value
           }
 
-          component_quantities: metafield(namespace: "$app", key: "component_quantities") {
-            value
-          }
-
           # Price adjustment configuration for discounting
           price_adjustment: metafield(namespace: "$app", key: "price_adjustment") {
             value
           }
 
-          # Component pricing for expanded checkout display (cents-based)
-          component_pricing: metafield(namespace: "$app", key: "component_pricing") {
-            value
-          }
         }
       }
       cost {

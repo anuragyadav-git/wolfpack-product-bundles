@@ -1,3 +1,4 @@
+import { withBundleCartLock } from "../../../../lib/bundle-cart-lock.js";
 import { buildCartLineSourceProperties } from '../../shared/engine/cart-lines.js';
 import {
   buildOfferAnalyticsCartProperties,
@@ -126,15 +127,18 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         runtimeToken,
         sellingPlanId,
       });
+      const response = await withBundleCartLock(async () => {
       await this.syncBundleDetailsCartMetafield(
         cartContext.bundleDetailsKey,
         cartContext.sourceProperties,
         runtimeToken,
+        cartItems.length,
       );
 
-      const response = await fetch('/cart/add', {
+      return fetch('/cart/add', {
         method: 'POST',
         body: cartContext.formData
+      });
       });
       const responseText = await response.text();
 
@@ -422,7 +426,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
     return data.token;
   },
 
-  async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any) {
+  async syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any, pendingLineCount: number) {
       const displayProperties = this.buildBundleDetailsDisplayProperties(sourceProperties);
       if (!bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
         throw new Error('Missing bundle cart authorization');
@@ -441,6 +445,7 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
         bundleDetailsKey,
         displayProperties,
         runtimeToken,
+        pendingLineCount,
         fetchImpl: fetch,
       });
   },

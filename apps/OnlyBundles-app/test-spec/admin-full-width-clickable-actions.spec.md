@@ -5,7 +5,7 @@ title: Admin Full Width Clickable Actions
 type: test-spec
 status: active
 summary: Verifies that full-width Admin activation rows use Polaris clickable while compact commands remain Polaris buttons.
-last_audited: 2026-09-11
+last_audited: 2026-09-15
 owners:
   - engineering
 domains:
@@ -49,7 +49,7 @@ Keep row-sized Admin actions native and accessible without stretching a compact
 | 2 | Add an FPB tier rule | Existing tier index | The full-width `s-clickable` passes the tier index to the existing rule owner once | Delete remains a compact button |
 | 3 | Add an FPB add-on tier | Existing tier list | The full-width `s-clickable` appends one default tier and activates it | No CSS-stretched button |
 | 4 | Add a PPB add-on tier | Active gifting step | The full-width `s-clickable` updates only that step and marks the route dirty | Same interaction contract as before |
-| 5 | Select a bundle builder type | Product-page or full-page bundle card | The card-wide `s-clickable` invokes the selection owner exactly once | No nested button owns the same action |
+| 5 | Select a bundle builder type | Product-page or full-page bundle card | The card-wide `s-clickable` invokes the selection owner exactly once; unselected cards render no Select text, while selected cards render a native Polaris success badge | No select/selected action text column |
 | 6 | Open support chat from either Dashboard support card | Chat with Parth or Talk to a support expert | Each full-width `s-clickable` invokes the existing direct-chat owner once | Neither action contains a nested button |
 
 ## Acceptance Criteria

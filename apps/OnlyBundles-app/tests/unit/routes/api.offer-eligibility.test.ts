@@ -16,17 +16,19 @@ jest.mock('../../../app/db.server', () => ({
 import { loader } from '../../../app/routes/api/api.offer-eligibility[.]json';
 import { authenticate } from '../../../app/shopify.server';
 import { createSpecificLinkOfferToken } from '../../../app/lib/specific-link-offer-token.server';
+import { createBundlePreviewToken } from '../../../app/lib/bundle-preview-token.server';
 
 const getDb = () => require('../../../app/db.server').default;
 const findBundle = () => getDb().bundle.findFirst as jest.MockedFunction<any>;
 const createAnalytics = () => getDb().bundleAnalytics.create as jest.MockedFunction<any>;
 const mockAppProxy = authenticate.public.appProxy as jest.MockedFunction<any>;
 
-function request(bundleId = 'bundle-1', token?: string, country?: string) {
+function request(bundleId = 'bundle-1', token?: string, country?: string, previewToken?: string) {
   const url = new URL('https://test.myshopify.com/apps/product-bundles/api/offer-eligibility.json');
   url.searchParams.set('bundleId', bundleId);
   if (token) url.searchParams.set('wpb_offer', token);
   if (country) url.searchParams.set('country', country);
+  if (previewToken) url.searchParams.set('wpb_preview', previewToken);
   return new Request(url);
 }
 
@@ -200,5 +202,37 @@ describe('api.offer-eligibility', () => {
     const failed = await loader({ request: request(), params: {}, context: {} } as any);
     expect(failed.status).toBe(500);
     expect(failed.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+
+  it('returns an eligible: true, not_required decision when an authorized preview token is provided', async () => {
+    const previewToken = createBundlePreviewToken({
+      shop: 'test.myshopify.com',
+      bundleId: 'bundle-1',
+      apiSecret: 'test-secret',
+    });
+    findBundle().mockResolvedValue({
+      id: 'bundle-1',
+      shopId: 'test.myshopify.com',
+      offerPolicy: {
+        id: 'policy-1',
+        specificLinkRequired: true,
+        ruleVersion: 2,
+        conditions: [],
+      },
+    });
+
+    const response = await loader({
+      request: request('bundle-1', undefined, undefined, previewToken),
+      params: {},
+      context: {},
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('private, no-store');
+    const payload = await response.json();
+    expect(payload).toEqual({
+      eligible: true,
+      reasonCode: 'not_required',
+    });
   });
 });

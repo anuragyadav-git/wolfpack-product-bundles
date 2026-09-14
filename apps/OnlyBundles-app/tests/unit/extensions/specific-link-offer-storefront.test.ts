@@ -111,4 +111,27 @@ describe('specific-link offer storefront eligibility', () => {
     })).resolves.toBe(false);
     expect(fetchImpl).not.toHaveBeenCalled();
   });
+
+  it('bypasses offer eligibility when an authorized preview parameter is present on the page', async () => {
+    const fetchImpl = jest.fn();
+    const bundle = {
+      id: 'bundle-1',
+      offerDelivery: {
+        decisionRequired: true,
+        serverDecisionRequired: true,
+        specificLinkRequired: true,
+        countryTargetingEnabled: true,
+        countryTargetingMode: 'include',
+        countryCodes: ['CA'],
+      },
+    };
+
+    await expect(resolveSpecificLinkOfferStorefrontEligibility({
+      bundle,
+      locationSearch: '?wpb_preview=signed-preview-token',
+      countryCode: 'US',
+      fetchImpl,
+    })).resolves.toBe(true);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
 });

@@ -1,0 +1,22 @@
+api_version = "2026-07"
+
+[[extensions]]
+name = "t:name"
+handle = "scheduled-bundle-discount"
+type = "function"
+uid = "40f06ff6-7569-a0d9-aeb5-733a55c03c0699392753"
+description = "t:description"
+
+  [[extensions.targeting]]
+  target = "cart.lines.discounts.generate.run"
+  input_query = "src/cart_lines_discounts_generate_run.graphql"
+  export = "scheduled_cart_lines_discounts_generate_run"
+
+  [extensions.build]
+  command = "node ../../scripts/build-discount-function.mjs scheduled-bundle-discount"
+  path = "target/wasm32-unknown-unknown/release/scheduled-bundle-discount.wasm"
+  watch = [ "src/**/*.rs" ]
+
+[extensions.input.variables]
+namespace = "$app"
+key = "scheduled_offer"

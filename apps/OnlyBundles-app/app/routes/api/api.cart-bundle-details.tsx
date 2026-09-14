@@ -1,3 +1,4 @@
+import { syncCartBundleDetails } from "../../lib/cart-bundle-details";
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { AppLogger } from "../../lib/logger";
 import { authenticate } from "../../shopify.server";
@@ -6,40 +7,6 @@ import type { StorefrontApiContext } from "@shopify/shopify-app-remix/server";
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 
 type DisplayProperties = Record<string, string>;
-type CartBundleDetailsEntry = {
-  key: string;
-  displayProperties: DisplayProperties;
-  runtimeToken: string;
-};
-
-const GET_CART_BUNDLE_DETAILS_QUERY = `
-  query GetCartBundleDetails($cartId: ID!) {
-    cart(id: $cartId) {
-      id
-      metafields(identifiers: [{ key: "bundle_details" }]) {
-        key
-        type
-        value
-      }
-    }
-  }
-`;
-
-const SET_CART_BUNDLE_DETAILS_MUTATION = `
-  mutation SetCartBundleDetails($metafields: [CartMetafieldsSetInput!]!) {
-    cartMetafieldsSet(metafields: $metafields) {
-      metafields {
-        key
-        value
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-`;
-
 export function normalizeCartId(cartId: unknown, cartToken: unknown): string | null {
   if (typeof cartId === "string" && cartId.trim().startsWith("gid://shopify/Cart/")) {
     return cartId.trim();
@@ -90,34 +57,7 @@ export function sanitizeDisplayProperties(props: unknown): DisplayProperties {
 export function sanitizeRuntimeToken(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const token = value.trim();
-  return token.length > 0 && token.length <= 12_000 ? token : null;
-}
-
-export function mergeBundleDetailsValue(
-  existingValue: string | null,
-  bundleDetailsKey: string,
-  displayProperties: DisplayProperties,
-  runtimeToken: string,
-): CartBundleDetailsEntry[] {
-  let entries: CartBundleDetailsEntry[] = [];
-  if (existingValue) {
-    try {
-      const parsed = JSON.parse(existingValue);
-      if (Array.isArray(parsed)) {
-        entries = parsed.filter((entry): entry is CartBundleDetailsEntry => (
-          entry
-          && typeof entry === "object"
-          && typeof entry.key === "string"
-          && entry.key !== bundleDetailsKey
-        ));
-      }
-    } catch {
-      entries = [];
-    }
-  }
-
-  entries.push({ key: bundleDetailsKey, displayProperties, runtimeToken });
-  return entries;
+  return token.length > 0 && new TextEncoder().encode(token).byteLength <= 10_000 ? token : null;
 }
 
 async function postStorefrontGraphql(
@@ -154,36 +94,10 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   try {
-    const existingPayload = await postStorefrontGraphql(
-      context.storefront,
-      GET_CART_BUNDLE_DETAILS_QUERY,
-      { cartId },
-    );
-    const existingValue = existingPayload?.data?.cart?.metafields?.[0]?.value ?? null;
-    const mergedDetails = mergeBundleDetailsValue(
-      existingValue,
-      bundleDetailsKey,
-      displayProperties,
-      runtimeToken,
-    );
-
-    const setPayload = await postStorefrontGraphql(
-      context.storefront,
-      SET_CART_BUNDLE_DETAILS_MUTATION,
-      {
-        metafields: [{
-          ownerId: cartId,
-          key: "bundle_details",
-          type: "json",
-          value: JSON.stringify(mergedDetails),
-        }],
-      },
-    );
-    const userErrors = setPayload?.data?.cartMetafieldsSet?.userErrors ?? [];
-
-    if (userErrors.length > 0) {
-      throw new Error(userErrors.map((error: { message?: string }) => error.message).join(", "));
-    }
+    await syncCartBundleDetails(async (query, variables) => {
+      const payload = await postStorefrontGraphql(context.storefront!, query, variables);
+      return payload?.data;
+    }, cartId, { key: bundleDetailsKey, displayProperties, runtimeToken }, body?.pendingLineCount);
 
     return json({ ok: true }, { headers: NO_STORE_HEADERS });
   } catch (error: any) {
@@ -191,6 +105,9 @@ export async function action({ request }: ActionFunctionArgs) {
       throw error;
     }
 
+    if (error?.message === "BUNDLE_CART_LINE_LIMIT_EXCEEDED" || error?.message === "BUNDLE_CART_CAPACITY_EXCEEDED" || error?.message === "BUNDLE_CART_CONFLICT") {
+      return json({ ok: false, error: error.message }, { status: 409, headers: NO_STORE_HEADERS });
+    }
     AppLogger.error("Cart bundle_details sync failed", {
       component: "api.cart-bundle-details",
       operation: "action",

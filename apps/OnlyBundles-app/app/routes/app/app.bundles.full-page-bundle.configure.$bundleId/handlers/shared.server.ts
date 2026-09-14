@@ -80,6 +80,10 @@ function buildFullPageBundleMetafieldSteps(steps: any[] = []) {
       minQuantity: step.minQuantity,
       maxQuantity: step.maxQuantity ?? null,
       enabled: step.enabled !== false,
+      isDefault: step.isDefault === true,
+      isFreeGift: step.isFreeGift === true,
+      addonDisplayFree: step.addonDisplayFree === true,
+      addonTiers: step.addonTiers ?? [],
       conditionType: step.conditionType ?? null,
       conditionOperator: step.conditionOperator ?? null,
       conditionValue: step.conditionValue ?? null,
@@ -109,6 +113,10 @@ export function buildFullPageBundleMetafieldConfig(bundle: any) {
 
   return {
     id: bundle.id,
+    shopId: bundle.shopId,
+    offerPolicy: bundle.offerPolicy ?? null,
+    bundleSubscriptionConfig: bundle.bundleSubscriptionConfig ?? null,
+    personalizationData: bundle.personalizationData ?? null,
     name: bundle.name,
     description: bundle.description || "",
     status: bundle.status,

@@ -21,7 +21,7 @@ Allow authenticated merchants to preview draft Product Page Bundles without expo
 |---|---|---|---|---|
 | 1 | Public bundle | Active or unlisted bundle | Configuration returned with public cache headers | Existing storefront behavior |
 | 2 | Unsigned draft | Draft bundle without token | `404` | Public drafts remain hidden |
-| 3 | Authorized draft | Draft bundle with matching token | Configuration returned with `private, no-store` | Fifteen-minute authorization |
+| 3 | Authorized draft | Draft bundle with matching token | Configuration returned with `private, no-store` | One-hour authorization |
 | 4 | Invalid draft token | Draft bundle with mismatched token | `404` | Shop and bundle binding enforced |
 | 5 | Archived bundle | Archived bundle with valid token | `404` | Preview never revives archived state |
 
@@ -34,7 +34,7 @@ Allow authenticated merchants to preview draft Product Page Bundles without expo
 | 4 | Authorized draft selection | Signed API returned the explicitly requested draft PPB | Data manager selects the bundle | Server authorization remains the security boundary |
 
 ## Acceptance Criteria
-- [ ] PPB Admin preview opens with a short-lived signed token.
+- [ ] PPB Admin preview opens with a 1-hour signed token.
 - [ ] Product Page widget forwards the token to the signed app-proxy config request.
 - [ ] Valid draft preview initializes while unsigned and invalid draft requests remain `404`.
 - [ ] Authorized draft responses are never publicly cached.

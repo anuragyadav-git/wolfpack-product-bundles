@@ -42,7 +42,7 @@ test("every public launch route is pre-rendered with indexable metadata", async 
     assert.match(html, /<title>[^<]+\| Only Bundles<\/title>/i, route || "/");
     assert.match(html, /<meta[^>]+name="description"[^>]+content="[^"]+"/i, route || "/");
     assert.match(html, /<meta[^>]+name="robots"[^>]+content="index, follow"/i, route || "/");
-    assert.match(html, /<link[^>]+rel="canonical"[^>]+href="https:\/\/only-bundles-website\.onlybundlesapp\.workers\.dev\//i, route || "/");
+    assert.match(html, /<link[^>]+rel="canonical"[^>]+href="https:\/\/onlybundles\.com\//i, route || "/");
   }
 });
 
@@ -89,7 +89,7 @@ test("sitemap contains every public route including the approved legal pages", a
   const xml = await readFile(path.join(distRoot, "sitemap.xml"), "utf8");
   for (const route of publicRoutes) {
     const suffix = route ? `${route}/` : "";
-    assert.match(xml, new RegExp(`<loc>https://only-bundles-website\\.onlybundlesapp\\.workers\\.dev/${suffix}</loc>`));
+    assert.match(xml, new RegExp(`<loc>https://onlybundles\\.com/${suffix}</loc>`));
   }
 });
 
@@ -108,7 +108,7 @@ test("robots permits public crawling and declares the sitemap index", async () =
   const robots = await readFile(path.join(distRoot, "robots.txt"), "utf8");
   assert.match(robots, /^User-agent: \*$/m);
   assert.match(robots, /^Allow: \/$/m);
-  assert.match(robots, /^Sitemap: https:\/\/only-bundles-website\.onlybundlesapp\.workers\.dev\/sitemap-index\.xml$/m);
+  assert.match(robots, /^Sitemap: https:\/\/onlybundles\.com\/sitemap-index\.xml$/m);
 });
 
 test("404 explains the missing page and links home", async () => {

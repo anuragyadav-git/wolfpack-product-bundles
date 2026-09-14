@@ -1,9 +1,12 @@
+import { syncScheduledBundleDiscounts } from '../../../app/services/scheduled-bundle-discount.server';
 import { BundleType } from "../../../app/constants/bundle";
 import { updateBundleProductMetafields } from "../../../app/services/bundles/metafield-sync/operations/bundle-product.server";
 import {
   getFirstVariantId,
   batchGetFirstVariantsWithPrices,
 } from "../../../app/utils/variant-lookup.server";
+
+jest.mock('../../../app/services/scheduled-bundle-discount.server', () => ({ syncScheduledBundleDiscounts: jest.fn().mockResolvedValue({}) }));
 
 jest.mock("../../../app/lib/logger", () => ({
   AppLogger: {
@@ -25,22 +28,13 @@ const mockBatchGetFirstVariantsWithPrices = batchGetFirstVariantsWithPrices as j
 
 function makeAdmin() {
   return {
-    graphql: jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue({
-        data: {
-          shop: { id: "gid://shopify/Shop/1", policy: null },
-          metafieldsSet: {
-            metafields: [
-              {
-                key: "bundle_ui_config",
-                value: "{}",
-              },
-            ],
-            userErrors: [],
-          },
-        },
-      }),
-    }),
+    graphql: jest.fn().mockImplementation(async (_query: string, options?: any) => ({
+      json: async () => ({ data: {
+        productVariantsBulkUpdate: { productVariants: options?.variables?.variants ?? [], userErrors: [] },
+        shop: { id: "gid://shopify/Shop/1", policy: null },
+        metafieldsSet: { metafields: options?.variables?.metafields ?? [], userErrors: [] },
+      } }),
+    })),
   };
 }
 
@@ -150,6 +144,87 @@ describe("updateBundleProductMetafields", () => {
     expect(uiConfig).not.toHaveProperty("bundleId");
   });
 
+  it.each([
+    [BundleType.FULL_PAGE, { countryTargetingEnabled: true, countryTargetingMode: "include", countryCodes: ["ca", "US", "CA"] }, "include:CA,US"],
+    [BundleType.PRODUCT_PAGE, { countryTargetingEnabled: true, countryTargetingMode: "exclude", countryCodes: ["US"] }, "exclude:US"],
+    [BundleType.FULL_PAGE, { countryTargetingEnabled: false, countryCodes: ["US"] }, ""],
+  ])("publishes parent country policy for %s", async (bundleType, offerPolicy, countryRule) => {
+    const admin = makeAdmin();
+    await updateBundleProductMetafields(admin, "gid://shopify/Product/999", makeBundleConfig(bundleType as BundleType, { offerPolicy }));
+    const fields = getMetafieldsSetPayload(admin);
+    const pricing = JSON.parse(fields.find((field: any) => field.key === "price_adjustment").value);
+    expect(pricing.countryRule).toBe(countryRule);
+    expect(pricing.method).toBe("percentage_off");
+    expect(fields.find((field: any) => field.key === "component_pricing")).toBeDefined();
+  });
+
+  it.each([
+    { errors: [{ message: 'Access denied' }] },
+    { data: {} },
+    { data: { metafieldsSet: null } },
+    { data: { metafieldsSet: { userErrors: [], metafields: null } } },
+    { data: { metafieldsSet: { userErrors: [], metafields: [] } } },
+    { data: { metafieldsSet: { userErrors: [{ code: 'STALE_OBJECT', message: 'Policy changed concurrently' }], metafields: [] } } },
+  ])('rejects failed or incomplete metafield publication: %j', async (result) => {
+    const admin = makeAdmin();
+    const original = admin.graphql.getMockImplementation()!;
+    admin.graphql.mockImplementation(async (query: string, options: any) => query.includes('SetBundleVariantMetafields')
+      ? { json: async () => result } : original(query, options));
+    await expect(updateBundleProductMetafields(admin as any, 'gid://shopify/Product/999', makeBundleConfig(BundleType.FULL_PAGE))).rejects.toThrow();
+  });
+
+  it('accepts Shopify JSON formatting without accepting changed values', async () => {
+    const admin = makeAdmin();
+    const original = admin.graphql.getMockImplementation()!;
+    let corrupt = false;
+    admin.graphql.mockImplementation(async (query: string, options?: any) => {
+      if (!query.includes('SetBundleVariantMetafields')) return original(query, options);
+      return { json: async () => ({ data: { metafieldsSet: { userErrors: [], metafields: options.variables.metafields.map((field: any) => ({
+        ...field, value: JSON.stringify(corrupt && field.key === 'price_adjustment' ? {} : JSON.parse(field.value), null, 2),
+      })) } } }) };
+    });
+    await expect(updateBundleProductMetafields(admin as any, 'gid://shopify/Product/999', makeBundleConfig(BundleType.FULL_PAGE))).resolves.toBeDefined();
+    corrupt = true;
+    await expect(updateBundleProductMetafields(admin as any, 'gid://shopify/Product/999', makeBundleConfig(BundleType.FULL_PAGE))).rejects.toThrow('confirm every');
+  });
+
+  it.each([
+    { errors: [{ message: 'Denied' }] },
+    { data: {} },
+    { data: { productVariantsBulkUpdate: { userErrors: [{ message: 'Invalid variant' }], productVariants: [] } } },
+    { data: { productVariantsBulkUpdate: { userErrors: [], productVariants: [] } } },
+    { data: { productVariantsBulkUpdate: { userErrors: [], productVariants: [{ id: 'gid://shopify/ProductVariant/111', requiresComponents: false }] } } },
+  ])('stops before publication when the native parent requirement is unconfirmed: %j', async (result) => {
+    const admin = makeAdmin();
+    admin.graphql.mockResolvedValue({ json: async () => result });
+    await expect(updateBundleProductMetafields(admin as any, 'gid://shopify/Product/999', makeBundleConfig(BundleType.FULL_PAGE))).rejects.toThrow();
+    expect(getMetafieldsSetPayload(admin)).toBeUndefined();
+  });
+
+  it('verifies native scheduled ownership before publishing its policy', async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.FULL_PAGE, { offerPolicy: { scheduleMode: 'one_time', endsAt: '2030-01-01T00:00:00Z' } });
+    await updateBundleProductMetafields(admin as any, 'gid://shopify/Product/999', config);
+    expect(syncScheduledBundleDiscounts).toHaveBeenCalledWith(expect.objectContaining({ policy: expect.objectContaining({ bundleId: 'bundle-1', pricingMode: 'scheduled' }) }));
+    const fields = getMetafieldsSetPayload(admin);
+    const parent = JSON.parse(fields.find((f: any) => f.key === 'price_adjustment').value);
+    const published = JSON.parse(fields.find((f: any) => f.key === 'ppb_policy_revisions').value)['bundle-1'];
+    expect(parent).toMatchObject({ bundleId: 'bundle-1', revision: published.revision, shop: config.shopId });
+    expect(published.pricingMode).toBe('scheduled');
+    (syncScheduledBundleDiscounts as jest.Mock).mockRejectedValueOnce(new Error('Native capacity exhausted'));
+    const failed = makeAdmin();
+    await expect(updateBundleProductMetafields(failed as any, 'gid://shopify/Product/999', config)).rejects.toThrow('capacity');
+    expect(getMetafieldsSetPayload(failed)).toBeUndefined();
+  });
+
+  it('projects quantities into critical pricing while preserving the public quantity field', async () => {
+    const admin = makeAdmin();
+    await updateBundleProductMetafields(admin as any, 'gid://shopify/Product/999', makeBundleConfig(BundleType.FULL_PAGE));
+    const fields = getMetafieldsSetPayload(admin);
+    expect(JSON.parse(fields.find((f: any) => f.key === 'price_adjustment').value).componentQuantities)
+      .toEqual(JSON.parse(fields.find((f: any) => f.key === 'component_quantities').value));
+  });
+
   it("rejects a storefront snapshot without its canonical id", async () => {
     const admin = makeAdmin();
     const config = makeBundleConfig(BundleType.PRODUCT_PAGE, { id: "" });
@@ -158,7 +233,18 @@ describe("updateBundleProductMetafields", () => {
       admin,
       "gid://shopify/Product/999",
       config,
-    )).rejects.toThrow("canonical id");
+    )).rejects.toThrow();
+  });
+
+  it("rejects critical pricing above the Function limit before metafieldsSet", async () => {
+    const admin = makeAdmin();
+    const config = makeBundleConfig(BundleType.FULL_PAGE);
+    config.pricing.rules = Array.from({ length: 200 }, (_, index) => ({
+      id: `rule-${index}`, conditionType: "quantity", conditionValue: index + 1, discountValue: 10,
+    }));
+    await expect(updateBundleProductMetafields(admin, "gid://shopify/Product/999", config))
+      .rejects.toThrow("10000 bytes");
+    expect(getMetafieldsSetPayload(admin)).toBeUndefined();
   });
 
   it("ignores legacy step JSON products during storefront serialization", async () => {
@@ -524,7 +610,7 @@ describe("updateBundleProductMetafields", () => {
 
   it("resolves a repeated collection handle once across steps and categories", async () => {
     const admin = makeAdmin();
-    admin.graphql.mockImplementation(async (query: string) => {
+    admin.graphql.mockImplementation(async (query: string, options?: any) => {
       if (query.includes("BatchCollectionProductIds")) {
         return {
           json: async () => ({
@@ -543,8 +629,9 @@ describe("updateBundleProductMetafields", () => {
         json: async () => ({
           data: {
             shop: { id: "gid://shopify/Shop/1", policy: null },
+            productVariantsBulkUpdate: { productVariants: options?.variables?.variants ?? [], userErrors: [] },
             metafieldsSet: {
-              metafields: [{ key: "bundle_ui_config", value: "{}" }],
+              metafields: options?.variables?.metafields ?? [],
               userErrors: [],
             },
           },
@@ -927,7 +1014,8 @@ describe("updateBundleProductMetafields", () => {
 
     const metafields = getMetafieldsSetPayload(admin);
     const priceAdjustmentField = metafields.find((field: any) => field.key === "price_adjustment");
-    expect(JSON.parse(priceAdjustmentField.value)).toEqual({
+    expect(JSON.parse(priceAdjustmentField.value)).toMatchObject({
+      countryRule: "",
       method: "buy_x_get_y",
       value: 100,
       customerBuys: 2,
@@ -1070,13 +1158,13 @@ describe("updateBundleProductMetafields", () => {
     const admin: any = {
       graphql: jest.fn(async (query: string, _options?: any) => ({
         json: async () => {
-          if (query.includes("PpbPolicyRevisions")) {
+          if (query.includes("BundlePolicyRevisions")) {
             return { data: { shop: {
               id: "gid://shopify/Shop/1",
-              policy: { value: '{"bundle-1":"old"}' },
+              policy: { value: '{"bundle-1":"old"}', compareDigest: 'digest' },
             } } };
           }
-          return { data: { metafieldsSet: { metafields: [], userErrors: [] } } };
+          return { data: { productVariantsBulkUpdate: { productVariants: _options?.variables?.variants ?? [], userErrors: [] }, metafieldsSet: { metafields: _options?.variables?.metafields ?? [], userErrors: [] } } };
         },
       })),
     };
@@ -1093,6 +1181,6 @@ describe("updateBundleProductMetafields", () => {
     const revisionMap = JSON.parse(metafields.find((field: any) => field.key === "ppb_policy_revisions").value);
 
     expect(snapshot).toMatchObject({ schemaVersion: 3, runtimeAuthorization: { version: 2 } });
-    expect(revisionMap["bundle-1"]).toBe(snapshot.runtimeAuthorization.revision);
+    expect(revisionMap["bundle-1"]).toEqual({ revision: snapshot.runtimeAuthorization.revision, pricingMode: "standard" });
   });
 });

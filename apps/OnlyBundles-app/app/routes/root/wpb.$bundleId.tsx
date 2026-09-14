@@ -117,12 +117,13 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   const isPublic = bundle.status === BundleStatus.ACTIVE
     || bundle.status === BundleStatus.UNLISTED;
+  const hasValidPreviewToken = verifyBundlePreviewToken({
+    token: url.searchParams.get("wpb_preview"),
+    shop: shopDomain,
+    bundleId: bundle.id,
+  });
   const hasValidDraftPreview = bundle.status === BundleStatus.DRAFT
-    && verifyBundlePreviewToken({
-      token: url.searchParams.get("wpb_preview"),
-      shop: shopDomain,
-      bundleId: bundle.id,
-    });
+    && hasValidPreviewToken;
 
   if (!isPublic && !hasValidDraftPreview) {
     AppLogger.info("FPB proxy page hidden by status", {
@@ -140,7 +141,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     });
   }
 
-  const offerDecision = hasValidDraftPreview
+  const offerDecision = hasValidPreviewToken
     ? { eligible: true, reasonCode: "not_required" as const }
     : resolveSpecificLinkOfferEligibility({
       policy: bundle.offerPolicy,
@@ -176,7 +177,7 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     ? ` data-fpb-loading-gif="${escapeHtmlAttribute(loadingScreen.gifUrl)}"`
     : "";
   const marker = `<div data-wpb-full-page-bundle data-bundle-id="${escapeHtmlAttribute(bundle.id)}" data-bundle-type="full_page" data-bundle-config-source="app_proxy" data-shop="${escapeHtmlAttribute(shopDomain)}" data-country-code="{{ localization.country.iso_code }}" data-fpb-loading-background="${escapeHtmlAttribute(loadingScreen.backgroundColor)}"${loadingGifAttr}${templateTypeAttr}${designPresetAttr} data-bundle-config='${config}' hidden>${loadingScreenMarkup}</div>`;
-  const liquid = hasValidDraftPreview
+  const liquid = hasValidPreviewToken
     ? marker
     : buildOfferCountryLiquidGuard(marker, bundle.offerPolicy);
 

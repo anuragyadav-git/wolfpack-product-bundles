@@ -1,3 +1,4 @@
+import { withBundleCartLock } from "../../lib/bundle-cart-lock.js";
 'use strict';
 
 import { buildStorefrontApiPath } from '../../config/storefront-proxy-routes.js';
@@ -191,7 +192,7 @@ function getBundleDetailsCartToken() {
     .catch(function () { return null; });
 }
 
-function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any) {
+function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties: any, runtimeToken: any, pendingLineCount: number) {
   var displayProperties = buildBundleDetailsDisplayProperties(sourceProperties);
   if (!bundleDetailsKey || !runtimeToken || Object.keys(displayProperties).length === 0) {
     return Promise.reject(new Error('Missing bundle cart authorization'));
@@ -209,6 +210,7 @@ function syncBundleDetailsCartMetafield(bundleDetailsKey: any, sourceProperties:
           bundleDetailsKey: bundleDetailsKey,
           displayProperties: displayProperties,
           runtimeToken: runtimeToken,
+          pendingLineCount,
         }),
       });
     })
@@ -265,12 +267,13 @@ export function addBundleToCart(state: any, validateBundleFn: any, emitFn: any) 
     return Promise.resolve();
   }
 
-  return requestCartTransformRuntimeToken(state, cartResult)
+  return withBundleCartLock(() => requestCartTransformRuntimeToken(state, cartResult)
     .then(function (runtimeToken) {
       return syncBundleDetailsCartMetafield(
         cartResult.bundleDetailsKey,
         cartResult.sourceProperties,
         runtimeToken,
+        cartResult.items.length,
       ).then(function () { return runtimeToken; });
     })
     .then(function () {
@@ -279,6 +282,7 @@ export function addBundleToCart(state: any, validateBundleFn: any, emitFn: any) 
         body: buildProductPageCartFormData(cartResult.items),
       });
     })
+    )
     .then(function (response) {
       return response.text().then(function (text) {
         if (!response.ok) {

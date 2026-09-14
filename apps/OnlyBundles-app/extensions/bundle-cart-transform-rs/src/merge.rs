@@ -1,15 +1,16 @@
 use shopify_function::scalars::Decimal;
 
-use crate::helpers::{decimal_to_f64, is_addon_line, is_free_gift_line, parse_json_or_default};
+use crate::helpers::{
+    country_is_eligible, decimal_to_f64, is_addon_line, is_free_gift_line, parse_json_or_default,
+};
 use crate::pricing::{
     calculate_buy_x_get_y_discount_percentage, calculate_discount_percentage, rounded_percentage,
 };
-use crate::runtime_token::{
-    token_components_match, verify_ppb_bundle_token, verify_ppb_line_token, verify_runtime_token,
-};
+use crate::runtime_token::{token_components_match, verify_bundle_token, verify_ppb_line_token};
 use crate::schema;
 use crate::types::{
     CartBundleDetailsEntry, CartLineMessagingSettings, ComponentParent, PricingMethod,
+    RuntimeTokenPayload,
 };
 
 fn non_empty(value: &Option<String>) -> Option<String> {
@@ -18,23 +19,6 @@ fn non_empty(value: &Option<String>) -> Option<String> {
         .map(|value| value.trim())
         .filter(|value| !value.is_empty())
         .map(|value| value.to_string())
-}
-
-fn country_is_eligible(rule: &str, current_country: &str) -> bool {
-    if rule.is_empty() {
-        return true;
-    }
-    let Some((mode, countries)) = rule.split_once(':') else {
-        return false;
-    };
-    let matches = countries
-        .split(',')
-        .any(|country| country == current_country);
-    match mode {
-        "include" => matches,
-        "exclude" => !matches,
-        _ => false,
-    }
 }
 
 fn has_fixed_price_display_only_marker(
@@ -59,42 +43,19 @@ fn ppb_role(step_type: Option<&str>) -> &'static str {
     }
 }
 
-fn ppb_policy_revision_matches(value: Option<&str>, bundle_id: &str, revision: &str) -> bool {
-    let Some(value) = value else {
-        return false;
-    };
-    let is_safe_token = |token: &str| {
-        !token.is_empty()
-            && token
-                .bytes()
-                .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_')
-    };
-    if !is_safe_token(bundle_id) || !is_safe_token(revision) {
-        return false;
-    }
-    let mut expected = String::with_capacity(bundle_id.len() + revision.len() + 5);
-    expected.push('"');
-    expected.push_str(bundle_id);
-    expected.push_str("\":\"");
-    expected.push_str(revision);
-    expected.push('"');
-    value.contains(&expected)
-}
-
 fn validate_ppb_v2_group(
     lines: &[schema::run::input::cart::Lines],
     line_indices: &[usize],
-    token: &str,
+    bundle: &RuntimeTokenPayload,
     secret: &str,
-    policy_revisions: Option<&str>,
-    current_country: &str,
-) -> Option<(ComponentParent, String)> {
-    let bundle = verify_ppb_bundle_token(token, secret)?;
-    if !ppb_policy_revision_matches(policy_revisions, &bundle.bundle_id, &bundle.revision) {
-        return None;
-    }
-    if !country_is_eligible(&bundle.country_rule, current_country) {
-        return None;
+) -> Option<()> {
+    // Aggregate once so split lines share the signed quantity ceiling.
+    let mut authorizations = std::collections::HashMap::new();
+    for &idx in line_indices {
+        let line = &lines[idx];
+        let token = line.line_authorization()?.value()?.as_str();
+        let quantity = authorizations.entry(token).or_insert(0_i64);
+        *quantity = quantity.checked_add(i64::from(*line.quantity()))?;
     }
     let mut group_quantities = vec![0_i64; bundle.groups.len()];
     for &idx in line_indices {
@@ -103,6 +64,7 @@ fn validate_ppb_v2_group(
             .line_authorization()
             .and_then(|value| value.value())
             .map(|value| value.as_str())?;
+        let authorized_quantity = authorizations.get(authorization)?;
         let line_token = verify_ppb_line_token(authorization, secret)?;
         if line_token.shop != bundle.shop
             || line_token.bundle_id != bundle.bundle_id
@@ -127,17 +89,7 @@ fn validate_ppb_v2_group(
             return None;
         }
         let quantity = *line.quantity() as i64;
-        let authorized_quantity: i64 = line_indices
-            .iter()
-            .filter_map(|&line_index| {
-                let candidate = lines[line_index]
-                    .line_authorization()
-                    .and_then(|value| value.value())?;
-                (candidate.as_str() == authorization)
-                    .then_some(*lines[line_index].quantity() as i64)
-            })
-            .sum();
-        if authorized_quantity > line_token.max_quantity {
+        if *authorized_quantity > line_token.max_quantity {
             return None;
         }
         group_quantities[group_index] += quantity;
@@ -163,13 +115,7 @@ fn validate_ppb_v2_group(
             return None;
         }
     }
-    Some((
-        ComponentParent {
-            id: bundle.parent_variant_id,
-            price_adjustment: Some(bundle.price_adjustment),
-        },
-        token.to_string(),
-    ))
+    Some(())
 }
 
 /// Process all MERGE operations for one cart pass.
@@ -191,7 +137,7 @@ fn wolfpack_product_bundle_offer_group_id(value: &str) -> Option<String> {
     Some(base.to_string())
 }
 
-/// Groups cart lines by EB `_wolfpackProductBundle:OfferId` base (O(n) pass), then for each group builds one
+/// Groups cart lines by `_wolfpackProductBundle:OfferId` base (O(n) pass), then for each group builds one
 /// MERGE operation after verifying the signed runtime token.
 ///
 /// # Returns
@@ -211,7 +157,7 @@ pub fn process_merge_operations(
     let mut bundle_name_counts: Vec<(String, u32)> = Vec::new();
 
     // -------------------------------------------------------------------------
-    // Step 1: Group cart lines by EB `_wolfpackProductBundle:OfferId` base in a single O(n) pass.
+    // Step 1: Group cart lines by `_wolfpackProductBundle:OfferId` base in a single O(n) pass.
     // Using indices to avoid borrow conflicts with `lines` slice.
     // -------------------------------------------------------------------------
     let lines = input.cart().lines();
@@ -248,7 +194,7 @@ pub fn process_merge_operations(
     let ppb_policy_revisions = input
         .shop()
         .ppb_policy_revisions()
-        .map(|metafield| metafield.value().as_str());
+        .map(|metafield| metafield.value());
     let cart_bundle_details: Vec<CartBundleDetailsEntry> = parse_json_or_default(
         input
             .cart()
@@ -302,10 +248,16 @@ pub fn process_merge_operations(
             let token = cart_bundle_entry
                 .and_then(|entry| entry.runtime_token.as_deref())
                 .filter(|value| !value.trim().is_empty())?;
-            if let Some(payload) = verify_runtime_token(token, secret) {
-                if !country_is_eligible(&payload.country_rule, current_country) {
-                    return None;
-                }
+            let payload = verify_bundle_token(token, secret)?;
+            let mode = crate::published_policy::pricing_mode(
+                ppb_policy_revisions,
+                &payload.bundle_id,
+                &payload.revision,
+            )?;
+            if !country_is_eligible(&payload.country_rule, current_country) {
+                return None;
+            }
+            if payload.version == 1 {
                 let actual_components: Vec<(String, i64)> = merge_line_indices
                     .iter()
                     .filter_map(|&idx| match lines[idx].merchandise() {
@@ -318,34 +270,23 @@ pub fn process_merge_operations(
                 if !token_components_match(&payload, offer_group_id, &actual_components) {
                     return None;
                 }
-                return Some((
-                    ComponentParent {
-                        id: payload.parent_variant_id,
-                        price_adjustment: Some(payload.price_adjustment),
-                    },
-                    token.to_string(),
-                ));
+            } else {
+                validate_ppb_v2_group(lines, &merge_line_indices, &payload, secret)?;
             }
-
-            // PPB's static version-2 contract still requires a bundle token and
-            // per-line authorization because each selectable line has its own
-            // synchronized policy bounds.
-            validate_ppb_v2_group(
-                lines,
-                &merge_line_indices,
+            Some((
+                ComponentParent {
+                    id: payload.parent_variant_id,
+                    price_adjustment: Some(payload.price_adjustment),
+                },
                 token,
-                secret,
-                ppb_policy_revisions,
-                current_country,
-            )
+                mode,
+            ))
         });
-
-        let (parent, validated_runtime_token) = if let Some(parent) = runtime_parent.as_ref() {
-            (&parent.0, &parent.1)
-        } else {
+        let Some((parent, validated_runtime_token, mode)) = runtime_parent.as_ref() else {
             continue;
         };
         let parent_variant_id = parent.id.clone();
+        let scheduled = *mode == crate::published_policy::PricingMode::Scheduled;
 
         // -------------------------------------------------------------------------
         // Step 3: Compute paid/free-gift totals.
@@ -451,62 +392,9 @@ pub fn process_merge_operations(
         };
 
         // -------------------------------------------------------------------------
-        // Step 6: Build compact component details.
-        // Format: [title, qty, retailCents, bundleCents, discountPct, savingsCents]
+        // Step 6: Preserve the retail total used by checkout offer eligibility.
         // -------------------------------------------------------------------------
-        let mut component_details: Vec<serde_json::Value> = Vec::new();
-        let mut total_retail_cents: i64 = 0;
-        for (i, &idx) in merge_line_indices.iter().enumerate() {
-            let line = &lines[idx];
-            let qty = *line.quantity() as i64;
-            let retail_cents =
-                (decimal_to_f64(line.cost().amount_per_quantity().amount()) * 100.0).round() as i64;
-            let step_type = line.step_type().and_then(|a| a.value()).map(|s| s.as_str());
-            let is_free_gift = is_free_gift_line(step_type);
-            let paid_bundle_cents =
-                (retail_cents as f64 * (1.0 - paid_discount_percentage / 100.0)).round() as i64;
-            let line_bundle_cents_total = if is_free_gift {
-                0
-            } else {
-                (paid_bundle_cents * qty).max(0)
-            };
-            let bundle_cents = if qty > 0 {
-                (line_bundle_cents_total as f64 / qty as f64).round() as i64
-            } else {
-                0
-            };
-            let line_pct = if is_free_gift {
-                100.0
-            } else if retail_cents > 0 {
-                rounded_percentage((retail_cents - bundle_cents) as f64, retail_cents as f64)
-            } else {
-                0.0
-            };
-            total_retail_cents += retail_cents * qty;
-            let title = match lines[idx].merchandise() {
-                schema::run::input::cart::lines::Merchandise::ProductVariant(_) => {
-                    format!("Component {}", i + 1)
-                }
-                _ => format!("Component {}", i + 1),
-            };
-            component_details.push(serde_json::json!([
-                title,
-                qty,
-                retail_cents,
-                bundle_cents,
-                line_pct,
-                retail_cents - bundle_cents,
-                ""
-            ]));
-        }
-
-        let original_total_cents = total_retail_cents;
-        let exact_discount_cents =
-            ((total_discount_amount * 100.0).round() as i64).clamp(0, original_total_cents);
-        let discounted_total_cents = original_total_cents - exact_discount_cents;
-        let savings_cents = original_total_cents - discounted_total_cents;
-
-        let components_json = serde_json::to_string(&component_details).unwrap_or_default();
+        let original_total_cents = (original_total * 100.0).round() as i64;
 
         // -------------------------------------------------------------------------
         // Step 7: Build MERGE operation using schema-generated types.
@@ -522,6 +410,25 @@ pub fn process_merge_operations(
             })
             .collect();
 
+        let Some(secret) = runtime_token_secret else {
+            continue;
+        };
+        let output_token = if scheduled {
+            let Some(token) = crate::runtime_token::pricing_receipt_token(
+                validated_runtime_token,
+                secret,
+                offer_group_id,
+                1,
+                original_total,
+                discount_percentage,
+            ) else {
+                continue;
+            };
+            token
+        } else {
+            validated_runtime_token.to_string()
+        };
+
         let mut attributes = vec![
             schema::AttributeOutput {
                 key: "_is_bundle_parent".into(),
@@ -532,28 +439,8 @@ pub fn process_merge_operations(
                 value: bundle_name.clone(),
             },
             schema::AttributeOutput {
-                key: "_bundle_component_count".into(),
-                value: component_details.len().to_string(),
-            },
-            schema::AttributeOutput {
-                key: "_bundle_components".into(),
-                value: components_json,
-            },
-            schema::AttributeOutput {
                 key: "_bundle_total_retail_cents".into(),
                 value: original_total_cents.to_string(),
-            },
-            schema::AttributeOutput {
-                key: "_bundle_total_price_cents".into(),
-                value: discounted_total_cents.to_string(),
-            },
-            schema::AttributeOutput {
-                key: "_bundle_total_savings_cents".into(),
-                value: savings_cents.to_string(),
-            },
-            schema::AttributeOutput {
-                key: "_bundle_discount_percent".into(),
-                value: format!("{:.2}", discount_percentage),
             },
             schema::AttributeOutput {
                 key: "_wolfpackProductBundle:OfferId".into(),
@@ -561,7 +448,7 @@ pub fn process_merge_operations(
             },
             schema::AttributeOutput {
                 key: "_wolfpack_bundle_runtime".into(),
-                value: validated_runtime_token.clone(),
+                value: output_token,
             },
         ];
         if let Some(addon_offer_id) = bundle_addon_offer_id {
@@ -580,10 +467,6 @@ pub fn process_merge_operations(
             }
         }
 
-        attributes.push(schema::AttributeOutput {
-            key: "_Items".into(),
-            value: "".into(),
-        });
         if let Some(box_label) = non_empty(&source_display_properties.box_label) {
             attributes.push(schema::AttributeOutput {
                 key: "Box".into(),
@@ -591,6 +474,7 @@ pub fn process_merge_operations(
             });
         }
 
+        if scheduled {}
         if cart_line_messaging.is_enabled {
             let source_items = non_empty(&source_display_properties.items);
             let source_retail_price = non_empty(&source_display_properties.retail_price);
@@ -617,7 +501,7 @@ pub fn process_merge_operations(
                 }
             }
 
-            if cart_line_messaging.discount_display.is_enabled {
+            if cart_line_messaging.discount_display.is_enabled && !scheduled {
                 if let Some(value) = select_you_save_value(
                     &cart_line_messaging.discount_display.format,
                     source_you_save,
@@ -632,8 +516,8 @@ pub fn process_merge_operations(
             }
         }
 
-        // price is ALWAYS included (even at 0%) so Shopify uses component sum, not parent variant price.
-        let price = Some(schema::PriceAdjustment {
+        // Without an adjustment Shopify uses the component sum for MERGE.
+        let price = (!scheduled).then_some(schema::PriceAdjustment {
             percentage_decrease: Some(schema::PriceAdjustmentValue {
                 value: Decimal::from(discount_percentage),
             }),

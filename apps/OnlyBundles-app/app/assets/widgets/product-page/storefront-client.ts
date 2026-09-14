@@ -1,3 +1,4 @@
+import { syncCartBundleDetails } from "../../../lib/cart-bundle-details.js";
 const PRODUCT_BATCH_SIZE = 50;
 
 export function resolvePpbStorefrontEndpoint(shop: string, apiVersion: string) {
@@ -220,52 +221,15 @@ export async function setPpbBundleDetailsCartMetafield({
   bundleDetailsKey,
   displayProperties,
   runtimeToken,
+  pendingLineCount,
   fetchImpl = fetch,
 }: any) {
   const endpoint = resolvePpbStorefrontEndpoint(shop, apiVersion);
   const token = String(cartToken || '').trim();
   if (!token) return false;
   const cartId = token.startsWith('gid://shopify/Cart/') ? token : `gid://shopify/Cart/${token}`;
-  const existingData = await requestStorefront({
-    endpoint,
-    accessToken,
-    query: `query PpbBundleDetails($cartId: ID!) {
-      cart(id: $cartId) { metafields(identifiers: [{ key: "bundle_details" }]) { value } }
-    }`,
-    variables: { cartId },
-    fetchImpl,
-  });
-  let details: any[] = [];
-  try {
-    const parsed = JSON.parse(existingData?.cart?.metafields?.[0]?.value ?? '[]');
-    if (Array.isArray(parsed)) {
-      details = parsed.filter(entry => entry?.key !== bundleDetailsKey);
-    }
-  } catch {
-    details = [];
-  }
   if (!runtimeToken) throw new Error('Missing bundle cart authorization');
-  details.push({ key: bundleDetailsKey, displayProperties, runtimeToken });
-  const data = await requestStorefront({
-    endpoint,
-    accessToken,
-    query: `
-      mutation SetPpbBundleDetails($metafields: [CartMetafieldsSetInput!]!) {
-        cartMetafieldsSet(metafields: $metafields) {
-          metafields { key value }
-          userErrors { field message }
-        }
-      }
-    `,
-    variables: { metafields: [{
-      ownerId: cartId,
-      key: 'bundle_details',
-      type: 'json',
-      value: JSON.stringify(details),
-    }] },
-    fetchImpl,
-  });
-  const errors = data?.cartMetafieldsSet?.userErrors ?? [];
-  if (errors.length > 0) throw new Error(`Cart metafield update failed: ${errors[0].message}`);
+  await syncCartBundleDetails((query, variables) => requestStorefront({ endpoint, accessToken, query, variables, fetchImpl }),
+    cartId, { key: bundleDetailsKey, displayProperties, runtimeToken }, pendingLineCount);
   return true;
 }

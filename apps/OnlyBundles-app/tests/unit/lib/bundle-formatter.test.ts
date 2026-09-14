@@ -247,6 +247,7 @@ describe("formatBundleForWidget", () => {
         ruleVersion: 1,
         specificLinkRequired: false,
         startsAt: null,
+        scheduleMode: "one_time",
         endsAt: new Date("2030-01-02T03:04:05.000Z"),
       },
     }) as any);

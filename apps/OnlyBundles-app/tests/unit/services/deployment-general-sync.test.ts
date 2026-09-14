@@ -33,7 +33,10 @@ jest.mock("../../../app/lib/variant-existence.server", () => ({
 }));
 
 function makeDeps() {
-  const admin = { graphql: jest.fn() };
+  const admin = { graphql: jest.fn(async (_query: string, options?: any) => ({
+    json: async () => ({ data: { nodes: options?.variables?.ids.map((id: string) =>
+      id.endsWith("/999") ? null : { __typename: "ProductVariant", id }) } }),
+  })) };
   const persistedBundleRows = [
     {
       id: "bundle-1",
@@ -356,5 +359,73 @@ describe("deployment general sync", () => {
     expect(parseDeploymentGeneralSyncEnv({
       WPB_DEPLOYMENT_GENERAL_SYNC: "false",
     })).toEqual({ enabled: false });
+  });
+});
+
+
+describe("canonical variant remediation before publication", () => {
+  function fixture() {
+    const deps = makeDeps();
+    const row = {
+      id: "bundle-1", shopId: "alpha.myshopify.com", bundleType: "full_page",
+      personalizationData: null, bundleSubscriptionConfig: null,
+      steps: [{ id: "step-1", StepProduct: [{ id: "step-product-1", variants: [
+        { variantId: "gid://shopify/ProductVariant/101", quantity: 2 },
+        { variantId: "gid://shopify/ProductVariant/999", quantity: 3 },
+      ] }] }],
+    };
+    deps.prisma.bundle.findMany.mockResolvedValue([row]);
+    return { deps, row };
+  }
+
+  it("publishes only after the canonical saved composition is repaired", async () => {
+    const { deps, row } = fixture();
+    deps.updateStepProductVariants.mockImplementation(async ({ variants }) => {
+      row.steps[0].StepProduct[0].variants = variants;
+    });
+    deps.syncBundle.mockImplementation(async () => {
+      expect(row.steps[0].StepProduct[0].variants).toEqual([
+        { variantId: "gid://shopify/ProductVariant/101", quantity: 2 },
+      ]);
+      return { synced: true };
+    });
+    const result = await runDeploymentGeneralSync({ enabled: true }, deps);
+    expect(result.syncedBundles).toBe(1);
+    expect(result.failedBundles).toBe(0);
+    const admin = await deps.getAdmin("alpha.myshopify.com");
+    expect(admin.graphql).toHaveBeenCalledWith(expect.any(String), { variables: { ids: [
+      "gid://shopify/ProductVariant/101", "gid://shopify/ProductVariant/999",
+    ] } });
+  });
+
+  it.each([
+    { errors: [{ message: "Access denied" }], data: { nodes: [null, null] } },
+    { data: { nodes: [] } },
+    { data: { nodes: [{ __typename: "Product", id: "gid://shopify/Product/101" }, null] } },
+  ])("does not remove references or publish after an uncertain Admin response", async (payload) => {
+    const { deps } = fixture();
+    const admin = await deps.getAdmin("alpha.myshopify.com");
+    admin.graphql.mockResolvedValue({ json: async () => payload } as never);
+    const result = await runDeploymentGeneralSync({ enabled: true }, deps);
+    expect(deps.updateStepProductVariants).not.toHaveBeenCalled();
+    expect(deps.syncBundle).not.toHaveBeenCalled();
+    expect(result.syncedBundles).toBe(0);
+    expect(result.failedBundles).toBe(1);
+  });
+
+  it("does not publish or count success when persistence fails", async () => {
+    const { deps } = fixture();
+    deps.updateStepProductVariants.mockRejectedValue(new Error("Database unavailable"));
+    const result = await runDeploymentGeneralSync({ enabled: true }, deps);
+    expect(deps.syncBundle).not.toHaveBeenCalled();
+    expect(result.failedBundles).toBe(1);
+  });
+
+  it("retains an existing variant even when the storefront cannot see it", async () => {
+    const { deps, row } = fixture();
+    row.steps[0].StepProduct[0].variants = [{ variantId: "gid://shopify/ProductVariant/888", quantity: 2 }];
+    const result = await runDeploymentGeneralSync({ enabled: true }, deps);
+    expect(deps.updateStepProductVariants).not.toHaveBeenCalled();
+    expect(result.syncedBundles).toBe(1);
   });
 });

@@ -41,9 +41,9 @@ describe("Admin resource destinations", () => {
     container.remove();
   });
 
-  it("uses verified Shopify App Store destinations instead of the expired company domain", () => {
+  it("uses the Only Bundles website and preserves the Shopify installation destination", () => {
     expect(JSON.stringify(APP_BRAND.links)).not.toContain("wolfpackapps.com");
-    expect(APP_BRAND.links.company).toBe("https://apps.shopify.com/partners/wolfpack6");
+    expect(APP_BRAND.links.company).toBe("https://onlybundles.com");
     expect((APP_BRAND.links as Record<string, string>).listing).toBe(
       "https://apps.shopify.com/wolfpack-product-bundles-1",
     );
@@ -60,7 +60,7 @@ describe("Admin resource destinations", () => {
 
     expect(view).toContain("dashboard.resources.sdkDocumentation");
     expect(view).toContain(
-      'href="https://only-bundles-website.onlybundlesapp.workers.dev/developers/sdk/"',
+      'href="https://onlybundles.com/developers/sdk/"',
     );
     expect(view).toContain('target="_blank"');
     expect(view.match(/dashboard.resources.comingSoon/g)).toHaveLength(2);
