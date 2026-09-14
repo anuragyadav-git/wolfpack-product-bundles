@@ -19,6 +19,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "astro": "^7.2.10",
+    "cookie": "2.0.1",
     "typescript": "^5.9.3",
     "wrangler": "^4.128.0"
   }
