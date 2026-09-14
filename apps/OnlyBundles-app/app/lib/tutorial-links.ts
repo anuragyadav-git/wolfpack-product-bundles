@@ -1,5 +1,6 @@
-const TUTORIAL_WEBSITE_ORIGIN =
-  "https://only-bundles-website.onlybundlesapp.workers.dev";
+import { APP_BRAND } from "./app-brand";
+
+const TUTORIAL_WEBSITE_ORIGIN = APP_BRAND.links.company;
 
 export const TUTORIAL_LIBRARY_URL = `${TUTORIAL_WEBSITE_ORIGIN}/blogs/`;
 export const SDK_DOCUMENTATION_URL = `${TUTORIAL_WEBSITE_ORIGIN}/developers/sdk/`;

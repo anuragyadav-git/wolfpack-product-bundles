@@ -1,4 +1,4 @@
-export const SITE_ORIGIN = "https://only-bundles-website.onlybundlesapp.workers.dev";
+export const SITE_ORIGIN = "https://onlybundles.com";
 export const SHOPIFY_LISTING = "https://apps.shopify.com/wolfpack-product-bundles-1";
 
 export const featurePages = [
