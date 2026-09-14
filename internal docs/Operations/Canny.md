@@ -5,7 +5,7 @@ title: Canny Changelog and Feature Requests
 type: operations
 status: implementation
 summary: Canny-owned release notes and feedback with authenticated Shopify-store identity and isolated QA configuration.
-last_audited: 2026-09-12
+last_audited: 2026-09-14
 owners: [engineering]
 domains: [admin, releases]
 systems: [canny, shopify, remix]
@@ -152,12 +152,24 @@ Production hosting configuration/release and post-release bell verification are
 still manual gates. Local implementation and QA fixtures are not production
 deployment evidence.
 
-The production draft **Product updates and feature requests in Only Bundles**
-is saved at `https://wolfpack-apps.canny.io/admin/changelog/product-updates-and-feature-requests-in-only-bundles/edit`.
-It remains unpublished. The original **Full Page Template** draft was preserved.
+The production entry **Product updates and feature requests in Only Bundles** is
+published at `https://wolfpack-apps.canny.io/changelog/product-updates-and-feature-requests-in-only-bundles`.
+The original **Full Page Template** draft was preserved.
 Desktop repeated Dashboard/Feature requests navigation, Enter activation, and
 Escape dismissal from the app were verified. Canny owns keyboard behavior when
 focus moves into its cross-origin content.
+
+On 2026-09-14, **New bundle controls for urgency, targeting, scheduling, stock,
+and subscriptions** was published at
+`https://wolfpack-apps.canny.io/changelog/new-bundle-controls-for-urgency-targeting-scheduling-stock-and-subscriptions`.
+Before publication, direct Chrome verification in the Grand Headbands PROD app
+confirmed the merchant-facing locations and labels for Bundle Visibility offer
+scheduling/priority and country targeting, Bundle Settings countdown and
+low-stock controls, the shared Subscriptions section, and the top-level Offer
+operations CSV workflow. A cache-bypassed reload of the public entry confirmed
+that the full body rendered. The same PROD Dashboard did not render the
+configured `What's new` bell, so in-app changelog discovery remains a separate
+production configuration/deployment check rather than completed evidence.
 
 Impact: DashboardHeader and authenticated app navigation/config loader are the
 existing integration points. `authenticate` is a graph god node used but not
