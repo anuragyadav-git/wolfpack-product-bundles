@@ -20,6 +20,7 @@ import {
 import { loadAndApplyGlobalSettingsControls } from './settings-controls.js';
 import { setStorefrontProxyRoot } from '../config/storefront-proxy-routes.js';
 import { resolveAppEmbedOwnership } from './app-embed-marker.js';
+import { initCartPropertiesCleaner } from './cart-properties-cleanup.js';
 
 const ownership = resolveAppEmbedOwnership();
 const embed = ownership.status === 'owned' ? ownership.marker : null;
@@ -130,6 +131,7 @@ function hydrateGlobalSettingsControls(): void {
 
 if (embed) {
   (window as Window & { __WOLFPACK_BUNDLE_EMBED_ACTIVE__?: boolean }).__WOLFPACK_BUNDLE_EMBED_ACTIVE__ = true;
+  initCartPropertiesCleaner();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       hydrateMarker();
