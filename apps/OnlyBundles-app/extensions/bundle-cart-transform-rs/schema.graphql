@@ -275,7 +275,7 @@ input CartOperation @oneOf {
   [bundle](https://shopify.dev/docs/apps/build/product-merchandising/bundles)
   of components.
   """
-  expand: ExpandOperation
+  lineExpand: LineExpandOperation
 
   """
   An operation that merges multiple cart line items into a
@@ -283,7 +283,7 @@ input CartOperation @oneOf {
   [bundle](https://shopify.dev/docs/apps/build/product-merchandising/bundles)
   of components.
   """
-  merge: MergeOperation
+  linesMerge: LinesMergeOperation
 
   """
   An operation that allows you to override the price, title,
@@ -291,7 +291,7 @@ input CartOperation @oneOf {
   [Shopify Plus plan](https://help.shopify.com/manual/intro-to-shopify/pricing-plans/plans-features/shopify-plus-plan)
   can use apps with `update` operations.
   """
-  update: UpdateOperation
+  lineUpdate: LineUpdateOperation
 }
 
 """

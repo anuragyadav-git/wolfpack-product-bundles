@@ -29,7 +29,7 @@ fn input(mode: &str) -> Value {
 fn scheduled_merge_leaves_price_for_native_discount_and_attaches_signed_receipt() {
     let output =
         run_function_with_input(cart_transform_run, &input("scheduled").to_string()).unwrap();
-    let schema::CartOperation::Merge(merge) = &output.operations[0] else {
+    let schema::CartOperation::LinesMerge(merge) = &output.operations[0] else {
         panic!("expected merge")
     };
     assert!(merge.price.is_none());
@@ -52,7 +52,7 @@ fn scheduled_merge_leaves_price_for_native_discount_and_attaches_signed_receipt(
 fn standard_merge_retains_cart_transform_discount() {
     let output =
         run_function_with_input(cart_transform_run, &input("standard").to_string()).unwrap();
-    let schema::CartOperation::Merge(merge) = &output.operations[0] else {
+    let schema::CartOperation::LinesMerge(merge) = &output.operations[0] else {
         panic!("expected merge")
     };
     assert_eq!(
@@ -91,7 +91,7 @@ fn direct_scheduled_parent_expands_without_locked_in_savings() {
     line["merchandise"]["component_quantities"] = json!({"value": "[2]"});
     line["merchandise"]["price_adjustment"] = json!({"value": json!({"shop":"test.myshopify.com", "bundleId":"bundle", "revision":"r1", "countryRule":"", "componentQuantities":[2], "method":"percentage_off", "value":20}).to_string()});
     let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
-    let schema::CartOperation::Expand(expand) = &output.operations[0] else {
+    let schema::CartOperation::LineExpand(expand) = &output.operations[0] else {
         panic!("expected expand")
     };
     assert!(expand.price.is_none());
@@ -102,7 +102,7 @@ fn direct_scheduled_parent_expands_without_locked_in_savings() {
     let mut multiple = input.clone();
     multiple["cart"]["lines"][0]["quantity"] = json!(3);
     let multi_output = run_function_with_input(cart_transform_run, &multiple.to_string()).unwrap();
-    let schema::CartOperation::Expand(multi_expand) = &multi_output.operations[0] else {
+    let schema::CartOperation::LineExpand(multi_expand) = &multi_output.operations[0] else {
         panic!("expected expand")
     };
     assert_eq!(multi_expand.expanded_cart_items[0].quantity, 1);

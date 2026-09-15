@@ -132,7 +132,8 @@
     "estree-util-value-to-estree": "3.5.0",
     "@vanilla-extract/integration": "8.0.10",
     "rollup": "4.59.0",
-    "esbuild": "0.25.0"
+    "esbuild": "0.25.0",
+    "@emnapi/runtime": "1.11.3"
   },
   "overrides": {
     "@vanilla-extract/integration": "8.0.10",
@@ -145,6 +146,7 @@
     "valibot": "1.4.2",
     "estree-util-value-to-estree": "3.5.0",
     "rollup": "4.59.0",
-    "esbuild": "0.25.0"
+    "esbuild": "0.25.0",
+    "@emnapi/runtime": "1.11.3"
   }
 }

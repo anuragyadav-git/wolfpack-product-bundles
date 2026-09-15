@@ -12,6 +12,7 @@ COPY apps/OnlyBundles-app/package.json ./apps/OnlyBundles-app/package.json
 COPY apps/OnlyBundles-app/extensions/bundle-checkout-ui/package.json ./apps/OnlyBundles-app/extensions/bundle-checkout-ui/package.json
 COPY apps/OnlyBundles-app/extensions/bundle-discount-function/package.json ./apps/OnlyBundles-app/extensions/bundle-discount-function/package.json
 COPY apps/OnlyBundles-app/extensions/bundle-product-configuration/package.json ./apps/OnlyBundles-app/extensions/bundle-product-configuration/package.json
+COPY apps/OnlyBundles-app/extensions/scheduled-bundle-discount/package.json ./apps/OnlyBundles-app/extensions/scheduled-bundle-discount/package.json
 COPY apps/OnlyBundles-app/extensions/wolfpack-utm-pixel/package.json ./apps/OnlyBundles-app/extensions/wolfpack-utm-pixel/package.json
 COPY apps/OnlyBundles-website/package.json ./apps/OnlyBundles-website/package.json
 COPY apps/OnlyBundles-app/scripts/install-git-hooks.mjs ./apps/OnlyBundles-app/scripts/install-git-hooks.mjs
