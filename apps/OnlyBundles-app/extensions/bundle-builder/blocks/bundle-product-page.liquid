@@ -97,12 +97,21 @@
 
 {% assign ppb_runtime_field = shop.metafields[app_namespace]['ppb_storefront_runtime'] %}
 {% assign ppb_css_field = shop.metafields[app_namespace]['ppb_storefront_css'] %}
+{%- capture product_collections_json -%}
+[
+  {%- if product and product.collections -%}
+    {%- for c in product.collections -%}
+      {"id": {{ c.id | json }}, "handle": {{ c.handle | json }}}{%- unless forloop.last -%},{%- endunless -%}
+    {%- endfor -%}
+  {%- endif -%}
+]
+{%- endcapture -%}
 <script type="application/json" data-wpb-context="product-page">
   {
     "currentProductId": {{ product.id | json }},
     "currentProductGid": {{ product.admin_graphql_api_id | json }},
     "currentProductHandle": {{ product.handle | json }},
-    "currentProductCollections": {{ product.collections | json }},
+    "currentProductCollections": {{ product_collections_json | strip }},
     "shopCurrency": {{ shop.currency | json }},
     "shopMoneyFormat": {{ shop.money_format | json }},
     "currentCountryCode": {{ localization.country.iso_code | json }},
