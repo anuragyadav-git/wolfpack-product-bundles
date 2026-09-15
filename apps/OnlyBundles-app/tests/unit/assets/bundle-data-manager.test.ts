@@ -310,6 +310,38 @@ describe("BundleDataManager", () => {
     expect(selected).toBe(bundle);
   });
 
+  it("selects a product-page bundle when collection targeting matches serialized { id, handle } collection objects", () => {
+    const bundle = {
+      id: "bundle-1",
+      name: "Collection-targeted PPB",
+      status: "active",
+      bundleType: "product_page",
+      steps: [{ id: "step-1", name: "Step 1" }],
+      bundleUpsellConfig: {
+        widgetConfiguration: {
+          displayConfiguration: {
+            showOnAllBundleProducts: true,
+            selectedProducts: [],
+            showOnSpecificProductPages: [],
+            collectionsSelectedData: [{ id: "123456", handle: "summer-deals" }],
+            showOnSpecificCollectionPages: [],
+          },
+        },
+      },
+    };
+
+    const selected = BundleDataManager.selectBundle(
+      { "bundle-1": bundle },
+      {
+        currentProductId: "1111",
+        currentProductHandle: "current-product",
+        currentProductCollections: [{ id: 123456, handle: "summer-deals" }],
+      },
+    );
+
+    expect(selected).toBe(bundle);
+  });
+
   it("selects a product-page bundle on its container product even when upsell widget targets a different product", () => {
     const bundle = {
       id: "bundle-container-1",
