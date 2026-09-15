@@ -58,6 +58,20 @@ describe("storefront proxy routes", () => {
     })).toBe("/apps/product-bundles-sit");
   });
 
+  it("prioritizes FPB pathname ground truth over stale hosted proxy root", () => {
+    const previousWindow = (globalThis as any).window;
+    (globalThis as any).window = {
+      location: { pathname: "/apps/product-bundles/wpb/4" },
+      __WOLFPACK_STOREFRONT_PROXY_ROOT__: "/apps/product-bundles-sit",
+    };
+
+    try {
+      expect(resolveStorefrontProxyRoot()).toBe("/apps/product-bundles");
+    } finally {
+      (globalThis as any).window = previousWindow;
+    }
+  });
+
   it("fails closed on a browser page without a hosted proxy root", () => {
     const previousWindow = (globalThis as any).window;
     (globalThis as any).window = { location: { pathname: "/products/test" } };

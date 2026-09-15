@@ -75,6 +75,7 @@ async function syncFullPageBundleFromDb(
     bundle,
   });
 
+  await syncPpbStorefrontRuntime(admin, shopDomain);
   const bundleConfig = buildFullPageBundleMetafieldConfig(bundle);
   await updateBundleProductMetafields(admin, bundle.shopifyProductId, bundleConfig);
   stats.productMetafields = true;

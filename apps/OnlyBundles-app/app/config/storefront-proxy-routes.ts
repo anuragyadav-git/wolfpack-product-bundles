@@ -1,7 +1,7 @@
 export const STOREFRONT_PROXY_ROOT = "/apps/product-bundles";
 
-const STOREFRONT_PROXY_ROOT_PATTERN = /^\/(apps|a|community|tools)\/[A-Za-z0-9_-]{1,30}$/;
-const FPB_PROXY_PATH_PATTERN = /^\/(apps|a|community|tools)\/([A-Za-z0-9_-]{1,30})\/wpb(?:\/|$)/;
+export const STOREFRONT_PROXY_ROOT_PATTERN = /^\/(apps|a|community|tools)\/[A-Za-z0-9_-]{1,30}$/;
+export const FPB_PROXY_PATH_PATTERN = /^\/(apps|a|community|tools)\/([A-Za-z0-9_-]{1,30})\/wpb(?:\/|$)/;
 
 type StorefrontProxyRootInput = {
   configuredRoot?: string;
@@ -45,14 +45,19 @@ export function setStorefrontProxyRoot(value: string): string {
 export function resolveStorefrontProxyRoot(
   input: StorefrontProxyRootInput = {},
 ): string {
-  const configuredRoot = input.configuredRoot ?? readConfiguredProxyRoot();
-  if (configuredRoot) {
-    return normalizeStorefrontProxyRoot(configuredRoot);
+  if (input.configuredRoot) {
+    return normalizeStorefrontProxyRoot(input.configuredRoot);
   }
 
   const pathname = input.pathname ?? readBrowserPathname();
   const fpbPath = pathname?.match(FPB_PROXY_PATH_PATTERN);
   if (fpbPath) return `/${fpbPath[1]}/${fpbPath[2]}`;
+
+  const configuredRoot = readConfiguredProxyRoot();
+  if (configuredRoot) {
+    return normalizeStorefrontProxyRoot(configuredRoot);
+  }
+
   if (typeof window !== "undefined" && pathname) {
     throw new Error("Storefront proxy root is not configured");
   }
