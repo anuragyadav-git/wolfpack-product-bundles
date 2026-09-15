@@ -492,8 +492,21 @@ export const ProductPageCartMethods: Record<string, any> & ThisType<any> = {
       credentials: 'same-origin'
     });
     if (!response.ok) return null;
-    const cart = await response.json();
-    return cart?.token || null;
+    const cart = await response.json().catch(() => null);
+    let token = cart?.token || null;
+    if (token && !token.includes('?key=')) {
+      const updateRes = await fetch('/cart/update.js', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: cart?.note ?? '' })
+      }).catch(() => null);
+      if (updateRes && updateRes.ok) {
+        const updatedCart = await updateRes.json().catch(() => null);
+        if (updatedCart?.token) token = updatedCart.token;
+      }
+    }
+    return token;
   },
 
   resolveProductPageOfferId() {

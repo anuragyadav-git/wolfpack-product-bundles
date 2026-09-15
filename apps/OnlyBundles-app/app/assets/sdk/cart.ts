@@ -187,7 +187,24 @@ function getBundleDetailsCartToken() {
       return response.json().catch(function () { return null; });
     })
     .then(function (cart) {
-      return (cart && cart.token) || null;
+      var token = (cart && cart.token) || null;
+      if (token && token.indexOf('?key=') === -1) {
+        return fetch('/cart/update.js', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note: (cart && cart.note) || '' })
+        })
+          .then(function (updateRes) {
+            if (!updateRes || !updateRes.ok) return token;
+            return updateRes.json().catch(function () { return null; });
+          })
+          .then(function (updatedCart) {
+            return (updatedCart && updatedCart.token) || token;
+          })
+          .catch(function () { return token; });
+      }
+      return token;
     })
     .catch(function () { return null; });
 }
