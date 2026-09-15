@@ -523,7 +523,7 @@ pub fn process_merge_operations(
             }),
         });
 
-        let merge_op = schema::MergeOperation {
+        let merge_op = schema::LinesMergeOperation {
             cart_lines,
             parent_variant_id,
             title: Some(bundle_name),
@@ -532,7 +532,7 @@ pub fn process_merge_operations(
             image: None,
         };
 
-        operations.push(schema::CartOperation::Merge(merge_op));
+        operations.push(schema::CartOperation::LinesMerge(merge_op));
 
         for &idx in &addon_line_indices {
             processed_lines[idx] = true;

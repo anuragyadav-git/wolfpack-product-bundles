@@ -46,7 +46,7 @@ fn parent_country_policy_controls_expansion_without_display_data() {
             "{rule}, {country}"
         );
         if eligible {
-            let schema::CartOperation::Expand(operation) = &output.operations[0] else {
+            let schema::CartOperation::LineExpand(operation) = &output.operations[0] else {
                 panic!("expected expand")
             };
             assert_eq!(
@@ -84,7 +84,7 @@ fn invalid_optional_discount_does_not_erase_authorized_composition() {
         Some(json!({"countryRule": "include:CA", "method": "invalid", "value": "invalid"})),
     );
     assert_eq!(output.operations.len(), 1);
-    let schema::CartOperation::Expand(operation) = &output.operations[0] else {
+    let schema::CartOperation::LineExpand(operation) = &output.operations[0] else {
         panic!("expected expand")
     };
     assert!(operation.price.is_none());

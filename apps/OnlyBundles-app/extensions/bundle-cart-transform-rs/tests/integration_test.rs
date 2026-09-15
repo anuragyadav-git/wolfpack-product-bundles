@@ -9,7 +9,7 @@ mod tests {
     use std::collections::{BTreeMap, HashMap};
 
     fn native_merge_percentage(output: &schema::FunctionRunResult) -> f64 {
-        let schema::CartOperation::Merge(merge) = &output.operations[0] else {
+        let schema::CartOperation::LinesMerge(merge) = &output.operations[0] else {
             panic!("expected merge")
         };
         merge
@@ -51,7 +51,7 @@ mod tests {
 
     fn merge_attributes(output: &schema::FunctionRunResult) -> HashMap<String, String> {
         let merge = match &output.operations[0] {
-            schema::CartOperation::Merge(m) => m,
+            schema::CartOperation::LinesMerge(m) => m,
             _ => panic!("expected Merge operation"),
         };
 
@@ -66,7 +66,7 @@ mod tests {
 
     fn merge_discount_percentage(output: &schema::FunctionRunResult) -> Option<String> {
         let merge = match &output.operations[0] {
-            schema::CartOperation::Merge(m) => m,
+            schema::CartOperation::LinesMerge(m) => m,
             _ => panic!("expected Merge operation"),
         };
 
@@ -336,7 +336,7 @@ mod tests {
 
     fn expand_discount_percentage(output: &schema::FunctionRunResult) -> Option<String> {
         let expand = match &output.operations[0] {
-            schema::CartOperation::Expand(e) => e,
+            schema::CartOperation::LineExpand(e) => e,
             _ => panic!("expected Expand operation"),
         };
 
@@ -856,7 +856,7 @@ mod tests {
 
         let op = &output.operations[0];
         let merge = match op {
-            schema::CartOperation::Merge(ref m) => m,
+            schema::CartOperation::LinesMerge(ref m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.parent_variant_id, "gid://shopify/ProductVariant/999");
@@ -1115,7 +1115,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::Merge(m) => m,
+            schema::CartOperation::LinesMerge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.cart_lines.len(), 2);
@@ -1207,7 +1207,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::Merge(m) => m,
+            schema::CartOperation::LinesMerge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(merge.parent_variant_id, "gid://shopify/ProductVariant/999");
@@ -1469,7 +1469,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::Merge(m) => m,
+            schema::CartOperation::LinesMerge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         let pct = merge
@@ -1630,7 +1630,7 @@ mod tests {
             .operations
             .iter()
             .filter_map(|op| match op {
-                schema::CartOperation::Merge(m) => m.title.as_deref(),
+                schema::CartOperation::LinesMerge(m) => m.title.as_deref(),
                 _ => None,
             })
             .collect();
@@ -1712,7 +1712,7 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let merge = match &output.operations[0] {
-            schema::CartOperation::Merge(m) => m,
+            schema::CartOperation::LinesMerge(m) => m,
             _ => panic!("expected Merge operation"),
         };
         assert_eq!(
@@ -1824,7 +1824,7 @@ mod tests {
             .operations
             .iter()
             .find_map(|operation| match operation {
-                schema::CartOperation::Merge(m) => Some(m),
+                schema::CartOperation::LinesMerge(m) => Some(m),
                 _ => None,
             })
             .expect("expected paid bundle lines to merge");
@@ -1843,7 +1843,7 @@ mod tests {
             .map(|attr| (attr.key.clone(), attr.value.clone()))
             .collect();
         assert!(
-            matches!(&output.operations[0], schema::CartOperation::Merge(merge) if merge.cart_lines.len() == 2)
+            matches!(&output.operations[0], schema::CartOperation::LinesMerge(merge) if merge.cart_lines.len() == 2)
         );
         assert_eq!(
             attributes
@@ -1854,7 +1854,7 @@ mod tests {
         let line_update = output
             .operations
             .iter()
-            .find(|operation| matches!(operation, schema::CartOperation::Update(_)));
+            .find(|operation| matches!(operation, schema::CartOperation::LineUpdate(_)));
         assert!(
             line_update.is_none(),
             "paid add-on discounting is handled by the Discount Function"
@@ -1991,7 +1991,7 @@ mod tests {
 
         let op = &output.operations[0];
         let expand = match op {
-            schema::CartOperation::Expand(ref e) => e,
+            schema::CartOperation::LineExpand(ref e) => e,
             _ => panic!("expected Expand operation"),
         };
         assert_eq!(expand.cart_line_id, "flex-line");
@@ -2177,9 +2177,128 @@ mod tests {
         assert_eq!(output.operations.len(), 1);
 
         let expand = match &output.operations[0] {
-            schema::CartOperation::Expand(e) => e,
+            schema::CartOperation::LineExpand(e) => e,
             _ => panic!("expected EXPAND"),
         };
         assert!(expand.price.is_none(), "price should be absent at 0%");
+    }
+
+    #[test]
+    fn test_merge_operation_serializes_to_lines_merge() {
+        let runtime_secret = test_runtime_secret();
+        let payload = serde_json::json!({
+            "version": 1,
+            "revision": "ec0baf30e0c6b36d8621cd24",
+            "shop": "grand-headbands.myshopify.com",
+            "bundleId": "cmtbbglrn0002lw3jdh0tr7ss",
+            "bundleType": "full_page",
+            "offerGroupId": "FBP-cmtbbglrn0002lw3jdh0tr7ss_R3VN9W5HBTDX",
+            "parentVariantId": "gid://shopify/ProductVariant/54079457099971",
+            "bundleName": "Mixed 3-Pack",
+            "components": [
+                { "variantId": "gid://shopify/ProductVariant/23801212742", "quantity": 1 },
+                { "variantId": "gid://shopify/ProductVariant/23801212806", "quantity": 1 },
+                { "variantId": "gid://shopify/ProductVariant/162474459161", "quantity": 1 }
+            ],
+            "addons": [],
+            "countryRule": "",
+            "priceAdjustment": {
+                "method": "fixed_amount_off",
+                "value": 3900,
+                "conditions": { "type": "amount", "operator": "gte", "value": 500 },
+                "rules": [{ "method": "fixed_amount_off", "value": 3900, "conditions": { "type": "amount", "operator": "gte", "value": 500 } }]
+            }
+        });
+        let runtime_token = sign_runtime_token_for_test(&payload.to_string(), &runtime_secret);
+        let input = serde_json::json!({
+            "presentmentCurrencyRate": "1.0",
+            "localization": { "country": { "isoCode": "IN" } },
+            "shop": {
+                "ppbPolicyRevisions": {
+                    "value": {
+                        "cmtbbglrn0002lw3jdh0tr7ss": {
+                            "revision": "ec0baf30e0c6b36d8621cd24",
+                            "pricingMode": "standard"
+                        }
+                    }
+                }
+            },
+            "cartTransform": {
+                "runtimeConfiguration": {
+                    "value": {
+                        "runtimeTokenSecret": runtime_secret
+                    }
+                }
+            },
+            "cart": {
+                "bundleDetails": {
+                    "value": serde_json::json!([{
+                        "key": "FBP-cmtbbglrn0002lw3jdh0tr7ss_R3VN9W5HBTDX",
+                        "runtimeToken": runtime_token,
+                        "displayProperties": {
+                            "bundleName": "Mixed 3-Pack",
+                            "box": "1"
+                        }
+                    }]).to_string()
+                },
+                "lines": [
+                    {
+                        "id": "line1",
+                        "quantity": 1,
+                        "wolfpackProductBundleOfferId": { "value": "FBP-cmtbbglrn0002lw3jdh0tr7ss_R3VN9W5HBTDX_1" },
+                        "stepType": null,
+                        "lineAuthorization": null,
+                        "sellingPlanAllocation": null,
+                        "cost": { "amountPerQuantity": { "amount": "20.00" } },
+                        "merchandise": {
+                            "__typename": "ProductVariant",
+                            "id": "gid://shopify/ProductVariant/23801212742",
+                            "product": { "id": "gid://shopify/Product/1", "title": "Headband Yellow" },
+                            "component_reference": null,
+                            "price_adjustment": null
+                        }
+                    },
+                    {
+                        "id": "line2",
+                        "quantity": 1,
+                        "wolfpackProductBundleOfferId": { "value": "FBP-cmtbbglrn0002lw3jdh0tr7ss_R3VN9W5HBTDX_2" },
+                        "stepType": null,
+                        "lineAuthorization": null,
+                        "sellingPlanAllocation": null,
+                        "cost": { "amountPerQuantity": { "amount": "20.00" } },
+                        "merchandise": {
+                            "__typename": "ProductVariant",
+                            "id": "gid://shopify/ProductVariant/23801212806",
+                            "product": { "id": "gid://shopify/Product/1", "title": "Headband Grey" },
+                            "component_reference": null,
+                            "price_adjustment": null
+                        }
+                    },
+                    {
+                        "id": "line3",
+                        "quantity": 1,
+                        "wolfpackProductBundleOfferId": { "value": "FBP-cmtbbglrn0002lw3jdh0tr7ss_R3VN9W5HBTDX_3" },
+                        "stepType": null,
+                        "lineAuthorization": null,
+                        "sellingPlanAllocation": null,
+                        "cost": { "amountPerQuantity": { "amount": "20.00" } },
+                        "merchandise": {
+                            "__typename": "ProductVariant",
+                            "id": "gid://shopify/ProductVariant/162474459161",
+                            "product": { "id": "gid://shopify/Product/1", "title": "Headband Red" },
+                            "component_reference": null,
+                            "price_adjustment": null
+                        }
+                    }
+                ]
+            }
+        });
+
+        let output = run_function_with_input(cart_transform_run, &input.to_string()).unwrap();
+        assert_eq!(output.operations.len(), 1);
+        let schema::CartOperation::LinesMerge(merge) = &output.operations[0] else {
+            panic!("expected LinesMerge operation");
+        };
+        assert_eq!(merge.parent_variant_id, "gid://shopify/ProductVariant/54079457099971");
     }
 }
