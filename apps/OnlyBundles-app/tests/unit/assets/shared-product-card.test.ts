@@ -4,6 +4,7 @@ const { JSDOM } = require('jsdom');
 const {
   getProductImageUrls,
   createSharedProductCardElement,
+  formatProductCardPrice,
 } = require('../../../app/assets/widgets/shared/components/product-card.js');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const {
@@ -58,6 +59,49 @@ describe('shared product card data helpers', () => {
     expect(card.textContent).toContain(formatter.format(12.99));
     expect(card.textContent).toContain(formatter.format(15.99));
     expect(card.textContent).not.toContain('$');
+  });
+
+  it('converts base currency amount to presentment currency when isMultiCurrency is active and currencyCode is absent', () => {
+    const currencyInfo = {
+      calculation: { code: 'AUD' },
+      display: { code: 'INR', symbol: '₹', rate: 69.695988 },
+      isMultiCurrency: true,
+      locale: 'en-IN',
+    };
+
+    // 2000 cents AUD ($20 AUD) * 69.695988 = 139392 cents INR = ₹1,393.92
+    const formatted = formatProductCardPrice(2000, null, currencyInfo);
+    expect(formatted).toMatch(/₹\s*1,393\.92/);
+  });
+
+  it('does not double-convert when currencyCode matches presentment currency', () => {
+    const currencyInfo = {
+      calculation: { code: 'AUD' },
+      display: { code: 'INR', symbol: '₹', rate: 69.695988 },
+      isMultiCurrency: true,
+      locale: 'en-IN',
+    };
+
+    // 140000 cents INR (already in INR)
+    const formatted = formatProductCardPrice(140000, 'INR', currencyInfo);
+    expect(formatted).toMatch(/₹\s*1,400\.00/);
+  });
+
+  it('formats base currency amount directly when isMultiCurrency is false', () => {
+    const currencyInfo = {
+      calculation: { code: 'AUD' },
+      display: { code: 'AUD', symbol: '$', rate: 1 },
+      isMultiCurrency: false,
+      locale: 'en-AU',
+    };
+
+    const formatted = formatProductCardPrice(2000, null, currencyInfo);
+    expect(formatted).toBe('$20.00');
+  });
+
+  it('returns empty string for null or empty price values', () => {
+    expect(formatProductCardPrice(null, 'USD', { display: { code: 'USD' } })).toBe('');
+    expect(formatProductCardPrice('', 'USD', { display: { code: 'USD' } })).toBe('');
   });
 
   it.each(['USD', 'CAD', 'AUD', 'NZD', 'SGD'])(
