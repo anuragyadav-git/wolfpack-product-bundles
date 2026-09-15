@@ -193,7 +193,7 @@ pub fn process_expand_operations(
             });
         }
 
-        let expand_op = schema::ExpandOperation {
+        let expand_op = schema::LineExpandOperation {
             cart_line_id: line.id().to_string(),
             expanded_cart_items: vec![schema::ExpandedItem {
                 merchandise_id,
@@ -206,7 +206,7 @@ pub fn process_expand_operations(
             image: None,
         };
 
-        operations.push(schema::CartOperation::Expand(expand_op));
+        operations.push(schema::CartOperation::LineExpand(expand_op));
     }
 
     operations
