@@ -390,9 +390,25 @@ function normalizeSafeImageUrl(value: any, runtimeDocument: Document) {
 export function formatProductCardPrice(value: string|null|number, currencyCode: unknown, currencyInfo: any) {
   if (value == null || value === '') return '';
 
+  const rawAmount = Number(value);
+  if (!Number.isFinite(rawAmount)) return '';
+
+  const code = String(currencyCode || '').trim().toUpperCase();
+  const baseCode = String(currencyInfo?.calculation?.code || '').trim().toUpperCase();
+  const displayCode = String(currencyInfo?.display?.code || '').trim().toUpperCase();
+
+  const isBaseCurrency = !code || (Boolean(baseCode) && code === baseCode);
+  const shouldConvert = Boolean(currencyInfo?.isMultiCurrency) && isBaseCurrency;
+
+  const finalAmount = shouldConvert
+    ? CurrencyManager.convertMerchantAmountToPresentment(rawAmount, currencyInfo)
+    : rawAmount;
+
+  const targetCurrency = code || displayCode;
+
   return CurrencyManager.formatMoney(
-    Number(value),
-    String(currencyCode || currencyInfo?.display?.code || ''),
+    finalAmount,
+    targetCurrency,
     currencyInfo?.locale,
     'narrowSymbol',
   );

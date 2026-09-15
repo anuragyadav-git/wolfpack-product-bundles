@@ -42,6 +42,10 @@ jest.mock("../../../app/services/bundles/bundle-parent-product.server", () => ({
   }),
 }));
 
+jest.mock("../../../app/services/ppb-storefront-runtime.server", () => ({
+  syncPpbStorefrontRuntime: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock(
   "../../../app/routes/app/app.bundles.full-page-bundle.configure.$bundleId/handlers/shared.server",
   () => ({

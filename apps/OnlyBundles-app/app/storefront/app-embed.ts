@@ -18,7 +18,7 @@ import {
   suppressesAutomaticPpbEmbed,
 } from './page-builder-embed.js';
 import { loadAndApplyGlobalSettingsControls } from './settings-controls.js';
-import { setStorefrontProxyRoot } from '../config/storefront-proxy-routes.js';
+import { FPB_PROXY_PATH_PATTERN, setStorefrontProxyRoot } from '../config/storefront-proxy-routes.js';
 import { resolveAppEmbedOwnership } from './app-embed-marker.js';
 import { initCartPropertiesCleaner } from './cart-properties-cleanup.js';
 
@@ -30,7 +30,12 @@ if (ownership.status === 'conflict') {
     { proxyRoots: ownership.proxyRoots },
   );
 }
-if (embed?.dataset.storefrontProxyRoot) {
+const fpbPath = typeof window !== 'undefined' && window.location?.pathname
+  ? window.location.pathname.match(FPB_PROXY_PATH_PATTERN)
+  : null;
+if (fpbPath) {
+  setStorefrontProxyRoot(`/${fpbPath[1]}/${fpbPath[2]}`);
+} else if (embed?.dataset.storefrontProxyRoot) {
   setStorefrontProxyRoot(embed.dataset.storefrontProxyRoot);
 }
 if (embed) {
