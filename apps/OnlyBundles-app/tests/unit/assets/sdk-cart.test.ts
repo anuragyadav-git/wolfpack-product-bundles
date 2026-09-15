@@ -175,7 +175,7 @@ describe('addBundleToCart', () => {
         return { ok: true, json: async () => ({ token: 'signed-runtime-token' }) } as Response;
       }
       if (url === '/cart.js') {
-        return { ok: true, json: async () => ({ token: 'cart-token' }) } as Response;
+        return { ok: true, json: async () => ({ token: 'cart-token?key=secret' }) } as Response;
       }
       if (url.includes('cart-bundle-details')) {
         return { ok: true, json: async () => ({ ok: true }) } as Response;
@@ -200,6 +200,43 @@ describe('addBundleToCart', () => {
     expect(calls[3].init?.body).toBeInstanceOf(FormData);
     expect((calls[3].init?.body as FormData).has('items[0][properties][_wolfpack_bundle_runtime]')).toBe(false);
     expect((calls[3].init?.body as FormData).has('items[0][properties][_bundle_display_properties]')).toBe(false);
+    expect(emit).toHaveBeenCalledWith('wbp:cart-success', { bundleId: 'bundle_1' });
+  });
+
+  it('instantiates cold cart session via /cart/update.js before syncing cart-bundle-details', async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = [];
+    global.fetch = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      calls.push({ url, init });
+      if (url.includes('cart-transform-runtime-token')) {
+        return { ok: true, json: async () => ({ token: 'signed-runtime-token' }) } as Response;
+      }
+      if (url === '/cart.js') {
+        return { ok: true, json: async () => ({ token: 'cold-placeholder-token', note: '' }) } as Response;
+      }
+      if (url === '/cart/update.js') {
+        return { ok: true, json: async () => ({ token: 'persisted-token?key=abc', note: '' }) } as Response;
+      }
+      if (url.includes('cart-bundle-details')) {
+        return { ok: true, json: async () => ({ ok: true }) } as Response;
+      }
+      if (url === '/cart/add') {
+        return { ok: true, text: async () => '{}' } as Response;
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }) as jest.Mock;
+    const emit = jest.fn();
+
+    await addBundleToCart(makeState(), () => ({ valid: true, errors: {} }), emit);
+
+    expect(calls[0].url).toContain('cart-transform-runtime-token');
+    expect(calls[1].url).toBe('/cart.js');
+    expect(calls[2].url).toBe('/cart/update.js');
+    expect(calls[3].url).toContain('cart-bundle-details');
+    expect(JSON.parse(String(calls[3].init?.body))).toMatchObject({
+      cartToken: 'persisted-token?key=abc',
+    });
+    expect(calls[4].url).toBe('/cart/add');
     expect(emit).toHaveBeenCalledWith('wbp:cart-success', { bundleId: 'bundle_1' });
   });
 
