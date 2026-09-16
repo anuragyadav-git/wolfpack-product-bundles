@@ -3,44 +3,34 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
-import { PrismaClient } from "@prisma/client";
-import {
-  parseDeploymentGeneralSyncEnv,
-  resolveGeneralSyncEnvironment,
-  runDeploymentGeneralSync,
-} from "../app/services/deployment-general-sync.server";
-import { syncBundleStorefrontNow } from "../app/services/bundles/storefront-sync.server";
-import { ensureVariantBundleMetafieldDefinitions } from "../app/services/bundles/metafield-sync/operations/definitions.server";
-import { AddOnDiscountFunctionService } from "../app/services/addon-discount-function-service.server";
-import { syncPpbStorefrontRuntime } from "../app/services/ppb-storefront-runtime.server";
 
-// 1. Explicitly load .env.staging
+// 1. Explicitly load .env.staging BEFORE importing any application modules
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath = path.resolve(__dirname, "../.env.staging");
 dotenv.config({ path: envPath, override: true });
 
-// 2. Safeguards: verify SIT environment context
-const envConfig = resolveGeneralSyncEnvironment("sit", process.env);
-if (envConfig.isKeyMismatch) {
-  console.warn(
-    `[DEPLOYMENT_GENERAL_SYNC:SIT] Warning: SHOPIFY_API_KEY (${process.env.SHOPIFY_API_KEY}) does not match SIT client ID (${envConfig.expectedApiKey}).`,
-  );
-}
-
-const configuredProxyRoot = envConfig.proxyRoot;
-
-// 3. Dedicated Prisma client connected to the SIT DATABASE_URL
-const db = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-});
-
 async function main() {
-  // Dynamically import shopify.server after dotenv has configured environment variables
+  const {
+    parseDeploymentGeneralSyncEnv,
+    resolveGeneralSyncEnvironment,
+    runDeploymentGeneralSync,
+  } = await import("../app/services/deployment-general-sync.server");
+  const { syncBundleStorefrontNow } = await import("../app/services/bundles/storefront-sync.server");
+  const { ensureVariantBundleMetafieldDefinitions } = await import("../app/services/bundles/metafield-sync/operations/definitions.server");
+  const { AddOnDiscountFunctionService } = await import("../app/services/addon-discount-function-service.server");
+  const { syncPpbStorefrontRuntime } = await import("../app/services/ppb-storefront-runtime.server");
   const { unauthenticated } = await import("../app/shopify.server");
+  const { prisma: db } = await import("../app/db.server");
+
+  // 2. Safeguards: verify SIT environment context
+  const envConfig = resolveGeneralSyncEnvironment("sit", process.env);
+  if (envConfig.isKeyMismatch) {
+    console.warn(
+      `[DEPLOYMENT_GENERAL_SYNC:SIT] Warning: SHOPIFY_API_KEY (${process.env.SHOPIFY_API_KEY}) does not match SIT client ID (${envConfig.expectedApiKey}).`,
+    );
+  }
+
+  const configuredProxyRoot = envConfig.proxyRoot;
 
   const summary = await runDeploymentGeneralSync(
     parseDeploymentGeneralSyncEnv(process.env),
@@ -91,7 +81,4 @@ main()
   .catch((error) => {
     console.error(error);
     process.exitCode = 1;
-  })
-  .finally(async () => {
-    await db.$disconnect();
   });
