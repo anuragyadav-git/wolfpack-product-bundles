@@ -5,7 +5,7 @@ title: Deployment General Sync
 type: operations
 status: active
 summary: Post-deploy replay of the current persisted bundle storefront contract behind one true or false flag.
-last_audited: 2026-09-14
+last_audited: 2026-09-16
 owners:
   - engineering
 domains:
@@ -13,6 +13,8 @@ domains:
 systems:
   - deployment-general-sync
 source_paths:
+  - scripts/deployment-general-sync.prod.ts
+  - scripts/deployment-general-sync.sit.ts
   - scripts/deployment-general-sync.ts
   - app/services/deployment-general-sync.server.ts
   - app/services/bundles/storefront-sync.server.ts
@@ -27,12 +29,17 @@ tags:
 keywords:
   - WPB_DEPLOYMENT_GENERAL_SYNC
   - bundle sync
+  - deployment:general-sync:prod
+  - deployment:general-sync:sit
 ---
 
 # Deployment General Sync
 
-The deployment commands run `npm run deployment:general-sync` after Shopify
-deploy so current metafield definitions are installed before saved bundle values
+Deployment commands run environment-specific general sync after Shopify deploy:
+- Production: `npm run deployment:general-sync:prod` (loads `.env.prod`, connects to production database, enforces PROD proxy root `/apps/product-bundles` and validates PROD client ID `a383172f42c2ab283901a663d485a03d`).
+- SIT / Staging: `npm run deployment:general-sync:sit` (loads `.env.staging`, connects to SIT database, enforces SIT proxy root `/apps/product-bundles-sit` and validates SIT client ID `63077bb0483a6ce08a2d6139b14d170b`).
+
+The commands ensure current metafield definitions are installed before saved bundle values
 are replayed. The command is a no-op unless:
 
 ```bash
