@@ -106,6 +106,45 @@ function parseBoolean(value: string | undefined) {
   return value?.trim().toLowerCase() === "true";
 }
 
+export const PROD_GENERAL_SYNC_CONFIG = {
+  apiKey: "a383172f42c2ab283901a663d485a03d",
+  proxyRoot: "/apps/product-bundles",
+  envFile: ".env.prod",
+} as const;
+
+export const SIT_GENERAL_SYNC_CONFIG = {
+  apiKey: "63077bb0483a6ce08a2d6139b14d170b",
+  proxyRoot: "/apps/product-bundles-sit",
+  envFile: ".env.staging",
+} as const;
+
+export interface ResolvedGeneralSyncEnvironment {
+  targetEnv: "prod" | "sit";
+  expectedApiKey: string;
+  envFile: string;
+  proxyRoot: string;
+  isKeyMismatch: boolean;
+}
+
+export function resolveGeneralSyncEnvironment(
+  targetEnv: "prod" | "sit",
+  env: Record<string, string | undefined> = process.env,
+): ResolvedGeneralSyncEnvironment {
+  const config = targetEnv === "prod" ? PROD_GENERAL_SYNC_CONFIG : SIT_GENERAL_SYNC_CONFIG;
+  const currentApiKey = env.SHOPIFY_API_KEY?.trim();
+  const isKeyMismatch = Boolean(currentApiKey && currentApiKey !== config.apiKey);
+  const customProxyRoot = env.STOREFRONT_PROXY_ROOT?.trim();
+  const proxyRoot = customProxyRoot ? customProxyRoot : config.proxyRoot;
+
+  return {
+    targetEnv,
+    expectedApiKey: config.apiKey,
+    envFile: config.envFile,
+    proxyRoot,
+    isKeyMismatch,
+  };
+}
+
 export function parseDeploymentGeneralSyncEnv(
   env: Record<string, string | undefined> = process.env,
 ): DeploymentGeneralSyncOptions {

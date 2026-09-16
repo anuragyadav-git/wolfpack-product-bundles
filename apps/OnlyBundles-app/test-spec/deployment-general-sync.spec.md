@@ -39,9 +39,12 @@ Replay the normal persisted-bundle storefront sync after deployment so installed
 | 5 | Bundle sync failure | One replay throws | Failure is recorded and other bundles continue | Command exits non-zero from summary |
 | 6 | Unsupported bundle type | Unknown saved bundle type | Bundle failure is recorded | No Shopify sync call |
 | 7 | Single flag contract | Flag true or false | Parser returns only `enabled` | No auxiliary deployment sync variables |
+| 8 | Dedicated PROD environment sync | `scripts/deployment-general-sync.prod.ts` with `.env.prod` | Uses PROD database URL, `STOREFRONT_PROXY_ROOT=/apps/product-bundles`, and PROD API key | Isolated from staging/SIT state |
+| 9 | Dedicated SIT environment sync | `scripts/deployment-general-sync.sit.ts` with `.env.staging` | Uses SIT database URL, `STOREFRONT_PROXY_ROOT=/apps/product-bundles-sit`, and SIT API key | Isolated from production state |
 
 ## Acceptance Criteria
 - [ ] All listed test cases pass
-- [ ] Deployment scripts run the sync after Shopify deploy
-- [ ] `false` or an absent flag performs no scans or mutations
-- [ ] `WPB_DEPLOYMENT_GENERAL_SYNC` is the only deployment sync environment flag
+- [ ] `npm run deployment:general-sync:prod` strictly loads `.env.prod` and syncs with `/apps/product-bundles`
+- [ ] `npm run deployment:general-sync:sit` strictly loads `.env.staging` and syncs with `/apps/product-bundles-sit`
+- [ ] `false` or an absent `WPB_DEPLOYMENT_GENERAL_SYNC` flag performs no scans or mutations
+- [ ] Both scripts documented in `AGENTS.md` and internal docs
