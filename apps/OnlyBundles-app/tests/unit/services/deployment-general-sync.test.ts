@@ -1,6 +1,9 @@
 import {
   parseDeploymentGeneralSyncEnv,
+  PROD_GENERAL_SYNC_CONFIG,
+  resolveGeneralSyncEnvironment,
   runDeploymentGeneralSync,
+  SIT_GENERAL_SYNC_CONFIG,
 } from "../../../app/services/deployment-general-sync.server";
 
 jest.mock("../../../app/lib/variant-existence.server", () => ({
@@ -427,5 +430,62 @@ describe("canonical variant remediation before publication", () => {
     const result = await runDeploymentGeneralSync({ enabled: true }, deps);
     expect(deps.updateStepProductVariants).not.toHaveBeenCalled();
     expect(result.syncedBundles).toBe(1);
+  });
+
+  describe("resolveGeneralSyncEnvironment", () => {
+    it("resolves PROD environment defaults and verifies API key", () => {
+      const resolved = resolveGeneralSyncEnvironment("prod", {
+        SHOPIFY_API_KEY: PROD_GENERAL_SYNC_CONFIG.apiKey,
+      });
+
+      expect(resolved).toEqual({
+        targetEnv: "prod",
+        expectedApiKey: "a383172f42c2ab283901a663d485a03d",
+        envFile: ".env.prod",
+        proxyRoot: "/apps/product-bundles",
+        isKeyMismatch: false,
+      });
+    });
+
+    it("detects API key mismatch when running PROD with another API key", () => {
+      const resolved = resolveGeneralSyncEnvironment("prod", {
+        SHOPIFY_API_KEY: SIT_GENERAL_SYNC_CONFIG.apiKey,
+      });
+
+      expect(resolved.isKeyMismatch).toBe(true);
+      expect(resolved.proxyRoot).toBe("/apps/product-bundles");
+    });
+
+    it("resolves SIT environment defaults and verifies API key", () => {
+      const resolved = resolveGeneralSyncEnvironment("sit", {
+        SHOPIFY_API_KEY: SIT_GENERAL_SYNC_CONFIG.apiKey,
+      });
+
+      expect(resolved).toEqual({
+        targetEnv: "sit",
+        expectedApiKey: "63077bb0483a6ce08a2d6139b14d170b",
+        envFile: ".env.staging",
+        proxyRoot: "/apps/product-bundles-sit",
+        isKeyMismatch: false,
+      });
+    });
+
+    it("detects API key mismatch when running SIT with another API key", () => {
+      const resolved = resolveGeneralSyncEnvironment("sit", {
+        SHOPIFY_API_KEY: PROD_GENERAL_SYNC_CONFIG.apiKey,
+      });
+
+      expect(resolved.isKeyMismatch).toBe(true);
+      expect(resolved.proxyRoot).toBe("/apps/product-bundles-sit");
+    });
+
+    it("honors custom STOREFRONT_PROXY_ROOT override when provided", () => {
+      const resolved = resolveGeneralSyncEnvironment("prod", {
+        SHOPIFY_API_KEY: PROD_GENERAL_SYNC_CONFIG.apiKey,
+        STOREFRONT_PROXY_ROOT: "/apps/custom-proxy",
+      });
+
+      expect(resolved.proxyRoot).toBe("/apps/custom-proxy");
+    });
   });
 });

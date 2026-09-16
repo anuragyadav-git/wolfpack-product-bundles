@@ -5,7 +5,7 @@ title: Repository Agent Instructions
 type: instructions
 status: authoritative
 summary: Engineering constraints, verification requirements, and authorized release workflows for Only Bundles.
-last_audited: 2026-09-12
+last_audited: 2026-09-16
 owners: [engineering]
 domains: [development, operations]
 systems: [only-bundles, shopify, canny]
@@ -357,17 +357,30 @@ This rule does not authorize deployment. The Shopify Deploy Rule still applies.
 
 ## 🔄 Deployment General Sync Rule
 
-Deployment scripts run `npm run deployment:general-sync` after Shopify deploy.
-It is disabled by default and accepts one primary true/false flag:
+Deployment scripts run environment-specific general sync after Shopify deploy:
+- Production: `npm run deployment:general-sync:prod` (loads `.env.prod`, connects to production database, enforces PROD proxy root `/apps/product-bundles` and validates PROD client ID `a383172f42c2ab283901a663d485a03d`).
+- SIT / Staging: `npm run deployment:general-sync:sit` (loads `.env.staging`, connects to SIT database, enforces SIT proxy root `/apps/product-bundles-sit` and validates SIT client ID `63077bb0483a6ce08a2d6139b14d170b`).
+
+Coding agents can invoke these scripts directly from the workspace root whenever bundle sync is required:
+
+```bash
+# To run general sync against PROD:
+WPB_DEPLOYMENT_GENERAL_SYNC=true npm run deployment:general-sync:prod
+
+# To run general sync against SIT / Staging:
+WPB_DEPLOYMENT_GENERAL_SYNC=true npm run deployment:general-sync:sit
+```
+
+Both scripts are disabled by default and accept one primary true/false flag:
 
 ```bash
 WPB_DEPLOYMENT_GENERAL_SYNC=true
 ```
 
-When true, it reads installed shops and saved bundles from Prisma, ensures
+When true, the script reads installed shops and saved bundles from Prisma, ensures
 current metafield definitions, replays the normal save-time storefront sync,
-attempts registered metaobject value sync, and ensures FPB add-on discounts.
-Update `apps/OnlyBundles-app/scripts/deployment-general-sync.ts` and its service/tests **only when**
+and ensures FPB add-on discounts.
+Update `apps/OnlyBundles-app/scripts/deployment-general-sync.*.ts` and its service/tests **only when**
 the Prisma schema changes or the app's metafield/metaobject definitions or
 value-writing contracts change. Do not edit it for routine feature, UI, or
 deployment changes.
